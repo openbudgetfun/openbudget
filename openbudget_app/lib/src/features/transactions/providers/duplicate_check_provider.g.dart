@@ -8,20 +8,24 @@ part of 'duplicate_check_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Same account, same amount, date within ±3 days.
 
 @ProviderFor(duplicateCheck)
 final duplicateCheckProvider = DuplicateCheckFamily._();
 
+/// Same account, same amount, date within ±3 days.
+
 final class DuplicateCheckProvider
     extends
         $FunctionalProvider<
-          AsyncValue<List<Transaction>>,
-          List<Transaction>,
-          FutureOr<List<Transaction>>
+          AsyncValue<List<TransactionView>>,
+          List<TransactionView>,
+          FutureOr<List<TransactionView>>
         >
     with
-        $FutureModifier<List<Transaction>>,
-        $FutureProvider<List<Transaction>> {
+        $FutureModifier<List<TransactionView>>,
+        $FutureProvider<List<TransactionView>> {
+  /// Same account, same amount, date within ±3 days.
   DuplicateCheckProvider._({
     required DuplicateCheckFamily super.from,
     required (String, int, DateTime) super.argument,
@@ -45,12 +49,12 @@ final class DuplicateCheckProvider
 
   @$internal
   @override
-  $FutureProviderElement<List<Transaction>> $createElement(
+  $FutureProviderElement<List<TransactionView>> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<List<Transaction>> create(Ref ref) {
+  FutureOr<List<TransactionView>> create(Ref ref) {
     final argument = this.argument as (String, int, DateTime);
     return duplicateCheck(ref, argument.$1, argument.$2, argument.$3);
   }
@@ -66,12 +70,14 @@ final class DuplicateCheckProvider
   }
 }
 
-String _$duplicateCheckHash() => r'01d463d05a2ae78a8935a01a03f2ee658cc12064';
+String _$duplicateCheckHash() => r'ee4d9a5c94ed136d023a55f64bd980e0ff90c2a1';
+
+/// Same account, same amount, date within ±3 days.
 
 final class DuplicateCheckFamily extends $Family
     with
         $FunctionalFamilyOverride<
-          FutureOr<List<Transaction>>,
+          FutureOr<List<TransactionView>>,
           (String, int, DateTime)
         > {
   DuplicateCheckFamily._()
@@ -83,12 +89,14 @@ final class DuplicateCheckFamily extends $Family
         isAutoDispose: true,
       );
 
+  /// Same account, same amount, date within ±3 days.
+
   DuplicateCheckProvider call(
-    String budgetId,
-    int amountCents,
-    DateTime transactionDate,
+    String accountId,
+    int amountMinor,
+    DateTime date,
   ) => DuplicateCheckProvider._(
-    argument: (budgetId, amountCents, transactionDate),
+    argument: (accountId, amountMinor, date),
     from: this,
   );
 

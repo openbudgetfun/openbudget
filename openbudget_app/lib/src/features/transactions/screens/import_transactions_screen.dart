@@ -13,9 +13,9 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class ImportTransactionsScreen extends HookConsumerWidget {
-  const ImportTransactionsScreen({required this.budgetId, super.key});
+  const ImportTransactionsScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,7 +25,7 @@ class ImportTransactionsScreen extends HookConsumerWidget {
     final csvController = useTextEditingController();
     final parsedRows = useState<List<ImportRow>>([]);
     final isSubmitting = useState(false);
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final budgetAsync = ref.watch(budgetDetailProvider(entityId));
 
     final currencyCode = budgetAsync.hasValue
         ? normalizeCurrencyCode(budgetAsync.value!.currencyCode)
@@ -37,7 +37,7 @@ class ImportTransactionsScreen extends HookConsumerWidget {
           icon: const SkribbleIcon(data: OpenBudgetIcons.back),
           tooltip: l10n.transactionsBack,
           onPressed: () =>
-              context.goNamed(moreRoute, pathParameters: {'id': budgetId}),
+              context.goNamed(moreRoute, pathParameters: {'entityId': entityId}),
         ),
         title: Text(l10n.importTitle),
       ),
@@ -164,10 +164,10 @@ class ImportTransactionsScreen extends HookConsumerWidget {
                                         alignment: Alignment.centerRight,
                                         child: ObAmount(
                                           _formatAmount(
-                                            row.amountCents,
+                                            row.amountMinor,
                                             currencyCode,
                                           ),
-                                          tone: row.amountCents >= 0
+                                          tone: row.amountMinor >= 0
                                               ? ObTone.funded
                                               : ObTone.neutral,
                                           style: theme.textTheme.bodySmall,
@@ -251,7 +251,7 @@ class ImportTransactionsScreen extends HookConsumerWidget {
       final count = await ref
           .read(importTransactionsProvider.notifier)
           .importRows(
-            budgetId: budgetId,
+            entityId: entityId,
             currencyCode: normalizeCurrencyCode(currencyCode),
             rows: rows,
           );
@@ -261,7 +261,7 @@ class ImportTransactionsScreen extends HookConsumerWidget {
         message: l10n.importSuccess(count),
         variant: AppToastVariant.success,
       );
-      router.goNamed(planRoute, pathParameters: {'id': budgetId});
+      router.goNamed(planRoute, pathParameters: {'entityId': entityId});
     } on Exception catch (_) {
       isSubmitting.value = false;
       if (!context.mounted) return;
@@ -277,5 +277,5 @@ class ImportTransactionsScreen extends HookConsumerWidget {
       '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
   static String _formatAmount(int cents, String currencyCode) =>
-      formatCentsForCode(cents, currencyCode);
+      formatMinorForCode(cents, currencyCode);
 }

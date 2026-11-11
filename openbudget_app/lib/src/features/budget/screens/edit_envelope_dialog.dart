@@ -17,7 +17,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
   const EditEnvelopeDialog({
     required this.envelope,
     required this.categoryId,
-    required this.budgetId,
+    required this.entityId,
     required this.currencyCode,
     required this.year,
     required this.month,
@@ -26,7 +26,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
 
   final Envelope envelope;
   final String categoryId;
-  final String budgetId;
+  final String entityId;
   final String currencyCode;
   final int year;
   final int month;
@@ -37,8 +37,8 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     final theme = Theme.of(context);
     final nameController = useTextEditingController(text: envelope.name);
     final amountInput = useState(
-      budgetAmountInputFromCents(
-        cents: envelope.budgetedAmountCents,
+      budgetAmountInputFromMinor(
+        cents: envelope.budgetedAmountMinor,
         currencyCode: currencyCode,
       ),
     );
@@ -187,7 +187,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
           .deleteEnvelope(
             envelopeId: envelope.id?.toString() ?? '',
             categoryId: categoryId,
-            budgetId: budgetId,
+            entityId: entityId,
           );
       if (!context.mounted) return;
       showAppToast(
@@ -219,8 +219,8 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     final name = nameController.text.trim();
     if (name.isEmpty) return;
 
-    final amountCents =
-        parseBudgetAmountInputToCents(
+    final amountMinor =
+        parseBudgetAmountInputToMinor(
           input: amountInput,
           currencyCode: currencyCode,
         ) ??
@@ -235,19 +235,19 @@ class EditEnvelopeDialog extends HookConsumerWidget {
           .updateEnvelope(
             envelopeId: envelope.id?.toString() ?? '',
             categoryId: categoryId,
-            budgetId: budgetId,
+            entityId: entityId,
             name: name,
-            budgetedAmountCents: amountCents,
+            budgetedAmountMinor: amountMinor,
             note: note.isEmpty ? null : note,
           );
       await ref
           .read(monthlyAllocationActionsProvider.notifier)
           .upsertAllocation(
             envelopeId: envelope.id?.toString() ?? '',
-            budgetId: budgetId,
+            entityId: entityId,
             year: year,
             month: month,
-            allocatedCents: amountCents,
+            allocatedMinor: amountMinor,
           );
       if (!context.mounted) return;
       showAppToast(
@@ -278,7 +278,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
         context: context,
         builder: (_) => SetGoalDialog(
           envelopeId: envelope.id?.toString() ?? '',
-          budgetId: budgetId,
+          entityId: entityId,
           currencyCode: currencyCode,
           existingGoal: existingGoal,
           envelopeName: envelope.name,

@@ -24,7 +24,7 @@ import 'package:patrol/patrol.dart';
 import 'common/patrol_helpers.dart';
 import 'helpers/screenshot_capture.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000901';
+const _entityId = '00000000-0000-0000-0000-000000000901';
 const _categoryId = '00000000-0000-0000-0000-000000000902';
 const _categoryTwoId = '00000000-0000-0000-0000-000000000908';
 const _utilitiesEnvelopeId = '00000000-0000-0000-0000-000000000903';
@@ -33,7 +33,7 @@ const _groceriesEnvelopeId = '00000000-0000-0000-0000-000000000909';
 const _accountId = '00000000-0000-0000-0000-000000000906';
 
 BudgetSummary _makeSummary() {
-  final budgetUuid = UuidValue.fromString(_budgetId);
+  final budgetUuid = UuidValue.fromString(_entityId);
   final categoryUuid = UuidValue.fromString(_categoryId);
   final utilitiesEnvelopeUuid = UuidValue.fromString(_utilitiesEnvelopeId);
   final storageEnvelopeUuid = UuidValue.fromString(_storageEnvelopeId);
@@ -45,8 +45,8 @@ BudgetSummary _makeSummary() {
     id: utilitiesEnvelopeUuid,
     name: 'Utilities',
     categoryId: categoryUuid,
-    budgetedAmountCents: 6000,
-    spentAmountCents: 0,
+    budgetedAmountMinor: 6000,
+    spentAmountMinor: 0,
     currencyCode: 'USD',
     sortOrder: 0,
     note: 'Auto-pay every month',
@@ -55,8 +55,8 @@ BudgetSummary _makeSummary() {
     id: storageEnvelopeUuid,
     name: 'Self storage',
     categoryId: categoryUuid,
-    budgetedAmountCents: 0,
-    spentAmountCents: 0,
+    budgetedAmountMinor: 0,
+    spentAmountMinor: 0,
     currencyCode: 'USD',
     sortOrder: 1,
   );
@@ -73,41 +73,41 @@ BudgetSummary _makeSummary() {
         category: Category(
           id: categoryUuid,
           name: 'Bills',
-          budgetId: budgetUuid,
+          entityId: budgetUuid,
           sortOrder: 0,
         ),
         envelopes: [utilitiesEnvelope, storageEnvelope],
         monthlyEnvelopes: [
           MonthlyEnvelopeData(
             envelope: utilitiesEnvelope,
-            allocatedCents: 6000,
-            spentCents: 0,
-            availableCents: 6000,
-            carryoverCents: 0,
+            allocatedMinor: 6000,
+            spentMinor: 0,
+            availableMinor: 6000,
+            carryoverMinor: 0,
           ),
           MonthlyEnvelopeData(
             envelope: storageEnvelope,
-            allocatedCents: 0,
-            spentCents: 0,
-            availableCents: 0,
-            carryoverCents: 0,
+            allocatedMinor: 0,
+            spentMinor: 0,
+            availableMinor: 0,
+            carryoverMinor: 0,
           ),
         ],
-        totalBudgetedCents: 6000,
-        totalSpentCents: 0,
-        totalAvailableCents: 6000,
+        totalBudgetedMinor: 6000,
+        totalSpentMinor: 0,
+        totalAvailableMinor: 6000,
       ),
     ],
-    totalIncomeCents: 20000,
-    totalBudgetedCents: 6000,
-    readyToAssignCents: 14000,
+    totalIncomeMinor: 20000,
+    totalBudgetedMinor: 6000,
+    readyToAssignMinor: 14000,
     year: 2026,
     month: 2,
   );
 }
 
 BudgetSummary _makeOverspentSummary() {
-  final budgetUuid = UuidValue.fromString(_budgetId);
+  final budgetUuid = UuidValue.fromString(_entityId);
   final categoryUuid = UuidValue.fromString(_categoryId);
   final utilitiesEnvelopeUuid = UuidValue.fromString(_utilitiesEnvelopeId);
   final storageEnvelopeUuid = UuidValue.fromString(_storageEnvelopeId);
@@ -119,8 +119,8 @@ BudgetSummary _makeOverspentSummary() {
     id: utilitiesEnvelopeUuid,
     name: 'Utilities',
     categoryId: categoryUuid,
-    budgetedAmountCents: 0,
-    spentAmountCents: 6000,
+    budgetedAmountMinor: 0,
+    spentAmountMinor: 6000,
     currencyCode: 'USD',
     sortOrder: 0,
     note: 'Auto-pay every month',
@@ -129,8 +129,8 @@ BudgetSummary _makeOverspentSummary() {
     id: storageEnvelopeUuid,
     name: 'Self storage',
     categoryId: categoryUuid,
-    budgetedAmountCents: 0,
-    spentAmountCents: 0,
+    budgetedAmountMinor: 0,
+    spentAmountMinor: 0,
     currencyCode: 'USD',
     sortOrder: 1,
   );
@@ -147,41 +147,41 @@ BudgetSummary _makeOverspentSummary() {
         category: Category(
           id: categoryUuid,
           name: 'Bills',
-          budgetId: budgetUuid,
+          entityId: budgetUuid,
           sortOrder: 0,
         ),
         envelopes: [utilitiesEnvelope, storageEnvelope],
         monthlyEnvelopes: [
           MonthlyEnvelopeData(
             envelope: utilitiesEnvelope,
-            allocatedCents: 0,
-            spentCents: 6000,
-            availableCents: -6000,
-            carryoverCents: 0,
+            allocatedMinor: 0,
+            spentMinor: 6000,
+            availableMinor: -6000,
+            carryoverMinor: 0,
           ),
           MonthlyEnvelopeData(
             envelope: storageEnvelope,
-            allocatedCents: 0,
-            spentCents: 0,
-            availableCents: 0,
-            carryoverCents: 0,
+            allocatedMinor: 0,
+            spentMinor: 0,
+            availableMinor: 0,
+            carryoverMinor: 0,
           ),
         ],
-        totalBudgetedCents: 0,
-        totalSpentCents: 6000,
-        totalAvailableCents: -6000,
+        totalBudgetedMinor: 0,
+        totalSpentMinor: 6000,
+        totalAvailableMinor: -6000,
       ),
     ],
-    totalIncomeCents: 20000,
-    totalBudgetedCents: 0,
-    readyToAssignCents: 20000,
+    totalIncomeMinor: 20000,
+    totalBudgetedMinor: 0,
+    readyToAssignMinor: 20000,
     year: 2026,
     month: 2,
   );
 }
 
 BudgetSummary _makeReorderSummary() {
-  final budgetUuid = UuidValue.fromString(_budgetId);
+  final budgetUuid = UuidValue.fromString(_entityId);
   final billsCategoryUuid = UuidValue.fromString(_categoryId);
   final groceriesCategoryUuid = UuidValue.fromString(_categoryTwoId);
   final utilitiesEnvelopeUuid = UuidValue.fromString(_utilitiesEnvelopeId);
@@ -194,8 +194,8 @@ BudgetSummary _makeReorderSummary() {
     id: utilitiesEnvelopeUuid,
     name: 'Utilities',
     categoryId: billsCategoryUuid,
-    budgetedAmountCents: 6000,
-    spentAmountCents: 0,
+    budgetedAmountMinor: 6000,
+    spentAmountMinor: 0,
     currencyCode: 'USD',
     sortOrder: 0,
   );
@@ -203,8 +203,8 @@ BudgetSummary _makeReorderSummary() {
     id: groceriesEnvelopeUuid,
     name: 'Food',
     categoryId: groceriesCategoryUuid,
-    budgetedAmountCents: 3000,
-    spentAmountCents: 0,
+    budgetedAmountMinor: 3000,
+    spentAmountMinor: 0,
     currencyCode: 'USD',
     sortOrder: 0,
   );
@@ -221,48 +221,48 @@ BudgetSummary _makeReorderSummary() {
         category: Category(
           id: billsCategoryUuid,
           name: 'Housing',
-          budgetId: budgetUuid,
+          entityId: budgetUuid,
           sortOrder: 0,
         ),
         envelopes: [utilitiesEnvelope],
         monthlyEnvelopes: [
           MonthlyEnvelopeData(
             envelope: utilitiesEnvelope,
-            allocatedCents: 6000,
-            spentCents: 0,
-            availableCents: 6000,
-            carryoverCents: 0,
+            allocatedMinor: 6000,
+            spentMinor: 0,
+            availableMinor: 6000,
+            carryoverMinor: 0,
           ),
         ],
-        totalBudgetedCents: 6000,
-        totalSpentCents: 0,
-        totalAvailableCents: 6000,
+        totalBudgetedMinor: 6000,
+        totalSpentMinor: 0,
+        totalAvailableMinor: 6000,
       ),
       CategoryWithEnvelopes(
         category: Category(
           id: groceriesCategoryUuid,
           name: 'Groceries Group',
-          budgetId: budgetUuid,
+          entityId: budgetUuid,
           sortOrder: 1,
         ),
         envelopes: [groceriesEnvelope],
         monthlyEnvelopes: [
           MonthlyEnvelopeData(
             envelope: groceriesEnvelope,
-            allocatedCents: 3000,
-            spentCents: 0,
-            availableCents: 3000,
-            carryoverCents: 0,
+            allocatedMinor: 3000,
+            spentMinor: 0,
+            availableMinor: 3000,
+            carryoverMinor: 0,
           ),
         ],
-        totalBudgetedCents: 3000,
-        totalSpentCents: 0,
-        totalAvailableCents: 3000,
+        totalBudgetedMinor: 3000,
+        totalSpentMinor: 0,
+        totalAvailableMinor: 3000,
       ),
     ],
-    totalIncomeCents: 20000,
-    totalBudgetedCents: 9000,
-    readyToAssignCents: 11000,
+    totalIncomeMinor: 20000,
+    totalBudgetedMinor: 9000,
+    readyToAssignMinor: 11000,
     year: 2026,
     month: 2,
   );
@@ -272,9 +272,9 @@ List<Transaction> _makeMonthlyTransactions() => [
   Transaction(
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000907'),
     description: 'Landlord',
-    amountCents: -10000,
+    amountMinor: -10000,
     currencyCode: 'USD',
-    budgetId: UuidValue.fromString(_budgetId),
+    entityId: UuidValue.fromString(_entityId),
     accountId: UuidValue.fromString(_accountId),
     envelopeId: UuidValue.fromString(_utilitiesEnvelopeId),
     transactionDate: DateTime(2026, 2, 22),
@@ -292,11 +292,11 @@ class _FakeCategoryActions extends CategoryActions {
 
   @override
   Future<void> reorderCategories({
-    required String budgetId,
+    required String entityId,
     required List<String> categoryIds,
   }) async {
     reorderedCategoryIds = List.of(categoryIds);
-    reorderedBudgetId = budgetId;
+    reorderedBudgetId = entityId;
   }
 }
 
@@ -310,10 +310,10 @@ class _FakeTransactionActions extends TransactionActions {
   @override
   Future<int> bulkToggleCleared({
     required List<String> transactionIds,
-    required String budgetId,
+    required String entityId,
   }) async {
     clearedTransactionIds = List.of(transactionIds);
-    clearedBudgetId = budgetId;
+    clearedBudgetId = entityId;
     return transactionIds.length;
   }
 }
@@ -326,7 +326,7 @@ void main() {
     final transactionActions = _FakeTransactionActions();
     final container = ProviderContainer(
       overrides: [
-        ageOfMoneyProvider.overrideWith((ref, budgetId) async => null),
+        ageOfMoneyProvider.overrideWith((ref, entityId) async => null),
         transactionActionsProvider.overrideWith(() => transactionActions),
         budgetMonthlySummaryProvider.overrideWith(
           (ref, _) async => _makeSummary(),
@@ -342,7 +342,7 @@ void main() {
     addTearDown(container.dispose);
 
     final router = GoRouter(
-      initialLocation: '/budgets/$_budgetId/plan',
+      initialLocation: '/budgets/$_entityId/plan',
       routes: [
         GoRoute(
           name: homeRoute,
@@ -353,19 +353,19 @@ void main() {
           name: planRoute,
           path: '/budgets/:id/plan',
           builder: (context, state) =>
-              BudgetDetailScreen(budgetId: state.pathParameters['id']!),
+              BudgetDetailScreen(entityId: state.pathParameters['entityId']!),
           routes: [
             GoRoute(
               name: recentMovesRoute,
               path: 'recent-moves',
               builder: (context, state) =>
-                  RecentMovesScreen(budgetId: state.pathParameters['id']!),
+                  RecentMovesScreen(entityId: state.pathParameters['entityId']!),
               routes: [
                 GoRoute(
                   name: envelopeMovesRoute,
                   path: ':envelopeId',
                   builder: (context, state) => EnvelopeMovesScreen(
-                    budgetId: state.pathParameters['id']!,
+                    entityId: state.pathParameters['entityId']!,
                     envelopeId: state.pathParameters['envelopeId']!,
                   ),
                 ),
@@ -375,7 +375,7 @@ void main() {
               name: categoryDetailRoute,
               path: 'category/:categoryId/envelope/:envelopeId',
               builder: (context, state) => CategoryDetailScreen(
-                budgetId: state.pathParameters['id']!,
+                entityId: state.pathParameters['entityId']!,
                 categoryId: state.pathParameters['categoryId']!,
                 envelopeId: state.pathParameters['envelopeId']!,
               ),
@@ -402,17 +402,17 @@ void main() {
     container
         .read(recentMovesProvider.notifier)
         .recordAssigned(
-          budgetId: _budgetId,
+          entityId: _entityId,
           envelopeId: _utilitiesEnvelopeId,
-          amountCents: 6000,
+          amountMinor: 6000,
         );
     container
         .read(recentMovesProvider.notifier)
         .recordMove(
-          budgetId: _budgetId,
+          entityId: _entityId,
           fromEnvelopeId: _storageEnvelopeId,
           toEnvelopeId: _utilitiesEnvelopeId,
-          amountCents: 3000,
+          amountMinor: 3000,
         );
     await tester.pumpAndSettle();
     await captureIntegrationScreenshot(tester, 'plan-screen');
@@ -431,7 +431,7 @@ void main() {
     expect(find.text('1 Selected'), findsOneWidget);
     await tester.tap(find.text('Approve'));
     await tester.pumpAndSettle();
-    expect(transactionActions.clearedBudgetId, _budgetId);
+    expect(transactionActions.clearedBudgetId, _entityId);
     expect(transactionActions.clearedTransactionIds, [
       _makeMonthlyTransactions().single.id.toString(),
     ]);
@@ -476,10 +476,10 @@ void main() {
     container
         .read(recentMovesProvider.notifier)
         .recordMove(
-          budgetId: _budgetId,
+          entityId: _entityId,
           fromEnvelopeId: _storageEnvelopeId,
           toEnvelopeId: _utilitiesEnvelopeId,
-          amountCents: 3000,
+          amountMinor: 3000,
         );
     await tester.pumpAndSettle();
 
@@ -587,7 +587,7 @@ void main() {
     final tester = $.tester;
     final container = ProviderContainer(
       overrides: [
-        ageOfMoneyProvider.overrideWith((ref, budgetId) async => null),
+        ageOfMoneyProvider.overrideWith((ref, entityId) async => null),
         budgetMonthlySummaryProvider.overrideWith(
           (ref, _) async => _makeOverspentSummary(),
         ),
@@ -600,13 +600,13 @@ void main() {
     addTearDown(container.dispose);
 
     final router = GoRouter(
-      initialLocation: '/budgets/$_budgetId/plan',
+      initialLocation: '/budgets/$_entityId/plan',
       routes: [
         GoRoute(
           name: planRoute,
           path: '/budgets/:id/plan',
           builder: (context, state) =>
-              BudgetDetailScreen(budgetId: state.pathParameters['id']!),
+              BudgetDetailScreen(entityId: state.pathParameters['entityId']!),
         ),
       ],
     );
@@ -646,7 +646,7 @@ void main() {
 
     final container = ProviderContainer(
       overrides: [
-        ageOfMoneyProvider.overrideWith((ref, budgetId) async => null),
+        ageOfMoneyProvider.overrideWith((ref, entityId) async => null),
         budgetMonthlySummaryProvider.overrideWith(
           (ref, _) async => _makeSummary(),
         ),
@@ -661,19 +661,19 @@ void main() {
     addTearDown(container.dispose);
 
     final router = GoRouter(
-      initialLocation: '/budgets/$_budgetId/plan',
+      initialLocation: '/budgets/$_entityId/plan',
       routes: [
         GoRoute(
           name: planRoute,
           path: '/budgets/:id/plan',
           builder: (context, state) =>
-              BudgetDetailScreen(budgetId: state.pathParameters['id']!),
+              BudgetDetailScreen(entityId: state.pathParameters['entityId']!),
           routes: [
             GoRoute(
               name: recentMovesRoute,
               path: 'recent-moves',
               builder: (context, state) =>
-                  RecentMovesScreen(budgetId: state.pathParameters['id']!),
+                  RecentMovesScreen(entityId: state.pathParameters['entityId']!),
             ),
           ],
         ),
@@ -696,17 +696,17 @@ void main() {
     container
         .read(recentMovesProvider.notifier)
         .recordAssigned(
-          budgetId: _budgetId,
+          entityId: _entityId,
           envelopeId: _utilitiesEnvelopeId,
-          amountCents: 6000,
+          amountMinor: 6000,
         );
     container
         .read(recentMovesProvider.notifier)
         .recordMove(
-          budgetId: _budgetId,
+          entityId: _entityId,
           fromEnvelopeId: _storageEnvelopeId,
           toEnvelopeId: _utilitiesEnvelopeId,
-          amountCents: 3000,
+          amountMinor: 3000,
         );
     await tester.pumpAndSettle();
 
@@ -743,7 +743,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         categoryActionsProvider.overrideWith(() => categoryActions),
-        ageOfMoneyProvider.overrideWith((ref, budgetId) async => null),
+        ageOfMoneyProvider.overrideWith((ref, entityId) async => null),
         budgetMonthlySummaryProvider.overrideWith(
           (ref, _) async => _makeReorderSummary(),
         ),
@@ -756,13 +756,13 @@ void main() {
     addTearDown(container.dispose);
 
     final router = GoRouter(
-      initialLocation: '/budgets/$_budgetId/plan',
+      initialLocation: '/budgets/$_entityId/plan',
       routes: [
         GoRoute(
           name: planRoute,
           path: '/budgets/:id/plan',
           builder: (context, state) =>
-              BudgetDetailScreen(budgetId: state.pathParameters['id']!),
+              BudgetDetailScreen(entityId: state.pathParameters['entityId']!),
         ),
       ],
     );
@@ -813,7 +813,7 @@ void main() {
     await tester.tap(find.widgetWithText(TextButton, 'Done'));
     await tester.pumpAndSettle();
 
-    expect(categoryActions.reorderedBudgetId, _budgetId);
+    expect(categoryActions.reorderedBudgetId, _entityId);
     expect(
       categoryActions.reorderedCategoryIds,
       _makeReorderSummary().categories.reversed

@@ -19,7 +19,7 @@ import 'package:patrol/patrol.dart';
 
 import 'helpers/screenshot_capture.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000601',
 );
@@ -75,9 +75,9 @@ NetWorthData _makeNetWorthData() {
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000602'),
     name: 'Daily',
     accountType: 'checking',
-    balanceCents: 5222000,
+    balanceMinor: 5222000,
     currencyCode: 'USD',
-    budgetId: _budgetUuid,
+    entityId: _budgetUuid,
     onBudget: true,
     sortOrder: 0,
     isClosed: false,
@@ -86,9 +86,9 @@ NetWorthData _makeNetWorthData() {
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000603'),
     name: 'Credit Card',
     accountType: 'creditCard',
-    balanceCents: -125,
+    balanceMinor: -125,
     currencyCode: 'USD',
-    budgetId: _budgetUuid,
+    entityId: _budgetUuid,
     onBudget: true,
     sortOrder: 1,
     isClosed: false,
@@ -114,19 +114,19 @@ NetWorthData _makeNetWorthData() {
 
 Widget _buildApp({ThemeMode themeMode = ThemeMode.light}) {
   final router = GoRouter(
-    initialLocation: '/budgets/$_budgetId/reflect',
+    initialLocation: '/budgets/$_entityId/reflect',
     routes: [
       GoRoute(
         name: reportsRoute,
         path: '/budgets/:id/reflect',
         builder: (context, state) =>
-            ReportsScreen(budgetId: state.pathParameters['id']!),
+            ReportsScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: spendingByPayeeRoute,
         path: '/budgets/:id/reflect/payees',
         builder: (context, state) => SpendingByPayeeScreen(
-          budgetId: state.pathParameters['id']!,
+          entityId: state.pathParameters['entityId']!,
           initialYear: 2026,
           initialMonth: 2,
         ),
@@ -135,7 +135,7 @@ Widget _buildApp({ThemeMode themeMode = ThemeMode.light}) {
         name: netWorthRoute,
         path: '/budgets/:id/reflect/net-worth',
         builder: (context, state) =>
-            NetWorthScreen(budgetId: state.pathParameters['id']!),
+            NetWorthScreen(entityId: state.pathParameters['entityId']!),
       ),
     ],
   );
@@ -143,7 +143,7 @@ Widget _buildApp({ThemeMode themeMode = ThemeMode.light}) {
   return ProviderScope(
     overrides: [
       displayCurrencyConverterProvider.overrideWith(
-        (ref, budgetId) async => const DisplayCurrencyConverter(
+        (ref, entityId) async => const DisplayCurrencyConverter(
           displayCurrency: CurrencyCode.usd,
           baseCurrencyCode: null,
           ratesByCode: {},
@@ -153,9 +153,9 @@ Widget _buildApp({ThemeMode themeMode = ThemeMode.light}) {
         (ref, args) async => _makeReportForMonth(args.$2, args.$3),
       ),
       netWorthProvider.overrideWith(
-        (ref, budgetId) async => _makeNetWorthData(),
+        (ref, entityId) async => _makeNetWorthData(),
       ),
-      ageOfMoneyProvider.overrideWith((ref, budgetId) async => 2),
+      ageOfMoneyProvider.overrideWith((ref, entityId) async => 2),
     ],
     child: MaterialApp.router(
       theme: OpenBudgetTheme.light,

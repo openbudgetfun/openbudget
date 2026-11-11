@@ -24,17 +24,17 @@ final _bookkeepingEntityKinds = <String>{
 /// tile. In envelope mode the tile offers to enable books behind a
 /// one-way-switch confirmation; once enabled it opens the Books screen.
 class BooksEntryTile extends HookConsumerWidget {
-  const BooksEntryTile({required this.budgetId, super.key});
+  const BooksEntryTile({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final profileAsync = ref.watch(taxProfileProvider(budgetId));
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final profileAsync = ref.watch(taxProfileProvider(entityId));
+    final budgetAsync = ref.watch(budgetDetailProvider(entityId));
     final isEnabling = useState(false);
 
     final entityKind = profileAsync.value?.entityKind;
@@ -86,7 +86,7 @@ class BooksEntryTile extends HookConsumerWidget {
 
   Future<void> _openBooks(BuildContext context) => context.pushNamed(
     booksRoute,
-    pathParameters: {'id': budgetId},
+    pathParameters: {'entityId': entityId},
   );
 
   Future<bool> _confirmEnable(BuildContext context, String budgetName) async {
@@ -125,7 +125,7 @@ class BooksEntryTile extends HookConsumerWidget {
       await ref
           .read(ledgerActionsProvider.notifier)
           .enableLedger(
-            budgetId: budgetId,
+            entityId: entityId,
           );
       if (!context.mounted) return;
       showAppToast(

@@ -69,7 +69,7 @@ void main() {
       );
 
       expect(report.yearLabel, '2026/27');
-      expect(fake.reportCalls, [(budgetId: testBudgetId, startYear: 2026)]);
+      expect(fake.reportCalls, [(entityId: testBudgetId, startYear: 2026)]);
     });
 
     test('keeps separate reports for separate years', () async {
@@ -153,7 +153,7 @@ void main() {
       final saved = await container
           .read(taxActionsProvider.notifier)
           .saveProfile(
-            budgetId: testBudgetId,
+            entityId: testBudgetId,
             jurisdiction: profile.jurisdiction.countryCode,
             entityKind: profile.entityKind.name,
             profileJson: testProfileJson(profile),
@@ -178,23 +178,23 @@ void main() {
       final actions = container.read(taxActionsProvider.notifier);
 
       await actions.setEnvelopeTaxCategory(
-        budgetId: testBudgetId,
+        entityId: testBudgetId,
         envelopeId: testEnvelopeId,
         code: 'gb.se.office_costs',
       );
       await actions.setTransactionTax(
-        budgetId: testBudgetId,
+        entityId: testBudgetId,
         transactionId: testTransactionId,
         code: 'gb.se.office_costs',
         businessUsePercent: 60,
-        salesTaxCents: 250,
+        salesTaxMinor: 250,
       );
 
       expect(fake.envelopeUpdates, [
         (envelopeId: testEnvelopeId, code: 'gb.se.office_costs'),
       ]);
       expect(fake.transactionUpdates.single.businessUsePercent, 60);
-      expect(fake.transactionUpdates.single.salesTaxCents, 250);
+      expect(fake.transactionUpdates.single.salesTaxMinor, 250);
     });
 
     test('records a failed save as an error state and rethrows', () async {
@@ -206,7 +206,7 @@ void main() {
         container
             .read(taxActionsProvider.notifier)
             .saveProfile(
-              budgetId: testBudgetId,
+              entityId: testBudgetId,
               jurisdiction: 'GB',
               entityKind: 'individual',
               profileJson: testProfileJson(

@@ -11,11 +11,11 @@ final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
 );
 
-EnvelopeGoal _makeGoal({int monthlyFundingCents = 120000}) => EnvelopeGoal(
+EnvelopeGoal _makeGoal({int monthlyFundingMinor = 120000}) => EnvelopeGoal(
   envelopeId: UuidValue.fromString(_envelopeId),
   goalType: 'monthly_funding',
-  targetAmountCents: monthlyFundingCents,
-  monthlyFundingCents: monthlyFundingCents,
+  targetAmountMinor: monthlyFundingMinor,
+  monthlyFundingMinor: monthlyFundingMinor,
 );
 
 Widget _buildSubject({
@@ -29,7 +29,7 @@ Widget _buildSubject({
     home: Scaffold(
       body: SetGoalDialog(
         envelopeId: _envelopeId,
-        budgetId: _budgetUuid.toString(),
+        entityId: _budgetUuid.toString(),
         currencyCode: currencyCode,
         existingGoal: goal,
       ),
@@ -54,7 +54,7 @@ void main() {
     await tester.pumpWidget(
       _buildSubject(
         currencyCode: 'JPY',
-        goal: _makeGoal(monthlyFundingCents: 1200),
+        goal: _makeGoal(monthlyFundingMinor: 1200),
       ),
     );
     await tester.pumpAndSettle();

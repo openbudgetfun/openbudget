@@ -10,19 +10,19 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 class EditCategoryDialog extends HookConsumerWidget {
   const EditCategoryDialog({
     required this.categoryId,
-    required this.budgetId,
+    required this.entityId,
     required this.currentName,
     required this.envelopeCount,
-    required this.totalAllocatedCents,
+    required this.totalAllocatedMinor,
     required this.currencyCode,
     super.key,
   });
 
   final String categoryId;
-  final String budgetId;
+  final String entityId;
   final String currentName;
   final int envelopeCount;
-  final int totalAllocatedCents;
+  final int totalAllocatedMinor;
   final String currencyCode;
 
   @override
@@ -91,7 +91,7 @@ class EditCategoryDialog extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
     final envelopeSummary = l10n.budgetEnvelopeCount(envelopeCount);
-    final allocated = formatCentsForCode(totalAllocatedCents, currencyCode);
+    final allocated = formatMinorForCode(totalAllocatedMinor, currencyCode);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -125,7 +125,7 @@ class EditCategoryDialog extends HookConsumerWidget {
     try {
       await ref
           .read(categoryActionsProvider.notifier)
-          .deleteCategory(categoryId: categoryId, budgetId: budgetId);
+          .deleteCategory(categoryId: categoryId, entityId: entityId);
       if (!context.mounted) return;
       showAppToast(
         context,
@@ -160,7 +160,7 @@ class EditCategoryDialog extends HookConsumerWidget {
           .read(categoryActionsProvider.notifier)
           .updateCategory(
             categoryId: categoryId,
-            budgetId: budgetId,
+            entityId: entityId,
             name: name,
           );
       if (!context.mounted) return;

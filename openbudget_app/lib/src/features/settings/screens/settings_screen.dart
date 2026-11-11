@@ -7,8 +7,8 @@ import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/settings/providers/budget_export_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/entity_export_provider.dart';
 import 'package:openbudget_app/src/features/whats_new/providers/whats_new_providers.dart';
 import 'package:openbudget_app/src/features/whats_new/screens/whats_new_sheet.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
@@ -18,15 +18,15 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class SettingsScreen extends HookConsumerWidget {
-  const SettingsScreen({required this.budgetId, super.key});
+  const SettingsScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final budgetAsync = ref.watch(entityDetailProvider(entityId));
     final authState = ref.watch(authProvider);
     final themeMode = ref.watch(themeModeProvider);
     final appVersion = ref.watch(appVersionProvider).value;
@@ -37,7 +37,7 @@ class SettingsScreen extends HookConsumerWidget {
         actions: [
           TextButton(
             onPressed: () =>
-                context.goNamed(moreRoute, pathParameters: {'id': budgetId}),
+                context.goNamed(moreRoute, pathParameters: {'entityId': entityId}),
             child: Text(
               l10n.dialogDone,
               style: theme.textTheme.titleMedium,
@@ -72,8 +72,8 @@ class SettingsScreen extends HookConsumerWidget {
             children: [
               _SettingsOverviewCard(
                 budgetName: budget.name,
-                currencyCode: budget.currencyCode,
-                displayCurrencyCode: budget.displayCurrencyCode,
+                currencyCode: budget.baseCurrencyCode,
+                displayCurrencyCode: null,
                 ownerLabel: accountIdentity,
                 lastUpdatedLabel: lastUpdatedLabel,
               ),
@@ -111,7 +111,7 @@ class SettingsScreen extends HookConsumerWidget {
                       subtitle: l10n.settingsAccountsOverviewHint,
                       onTap: () => context.goNamed(
                         accountListRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'entityId': entityId},
                       ),
                     ),
                     const Divider(height: 1),
@@ -121,7 +121,7 @@ class SettingsScreen extends HookConsumerWidget {
                       subtitle: l10n.settingsAddAccountHint,
                       onTap: () => context.goNamed(
                         addAccountRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'entityId': entityId},
                       ),
                     ),
                     const Divider(height: 1),
@@ -130,7 +130,7 @@ class SettingsScreen extends HookConsumerWidget {
                       label: l10n.recurringListTitle,
                       onTap: () => context.goNamed(
                         recurringListRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'entityId': entityId},
                       ),
                     ),
                     const Divider(height: 1),
@@ -139,7 +139,7 @@ class SettingsScreen extends HookConsumerWidget {
                       label: l10n.morePayees,
                       onTap: () => context.goNamed(
                         payeeListRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'entityId': entityId},
                       ),
                     ),
                     const Divider(height: 1),
@@ -148,7 +148,7 @@ class SettingsScreen extends HookConsumerWidget {
                       label: l10n.transactionRulesTitle,
                       onTap: () => context.goNamed(
                         transactionRulesRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'entityId': entityId},
                       ),
                     ),
                   ],
@@ -167,7 +167,7 @@ class SettingsScreen extends HookConsumerWidget {
                       label: l10n.settingsPlanSettings,
                       onTap: () => context.goNamed(
                         planSettingsRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'entityId': entityId},
                       ),
                     ),
                     const Divider(height: 1),
@@ -177,14 +177,14 @@ class SettingsScreen extends HookConsumerWidget {
                       subtitle: l10n.assistantProviderSettingsHint,
                       onTap: () => context.pushNamed(
                         assistantProviderRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'entityId': entityId},
                       ),
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
                       icon: OpenBudgetIcons.addCircle,
                       label: l10n.settingsNewPlan,
-                      onTap: () => context.goNamed(createBudgetRoute),
+                      onTap: () => context.goNamed(createEntityRoute),
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
@@ -221,7 +221,7 @@ class SettingsScreen extends HookConsumerWidget {
                       label: l10n.settingsDisplayOptions,
                       onTap: () => context.goNamed(
                         displayOptionsRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'entityId': entityId},
                       ),
                     ),
                     const Divider(height: 1),
@@ -230,7 +230,7 @@ class SettingsScreen extends HookConsumerWidget {
                       label: l10n.settingsAppIcon,
                       onTap: () => context.goNamed(
                         appIconRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'entityId': entityId},
                       ),
                     ),
                     const Divider(height: 1),
@@ -251,7 +251,7 @@ class SettingsScreen extends HookConsumerWidget {
                       subtitle: l10n.settingsManageBankConnectionsHint,
                       onTap: () => context.goNamed(
                         addAccountRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'entityId': entityId},
                       ),
                     ),
                   ],
@@ -277,7 +277,7 @@ class SettingsScreen extends HookConsumerWidget {
                       label: l10n.moreImport,
                       onTap: () => context.goNamed(
                         importTransactionsRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'entityId': entityId},
                       ),
                     ),
                   ],
@@ -299,7 +299,7 @@ class SettingsScreen extends HookConsumerWidget {
                       subtitle: l10n.settingsAccountSettingsHint,
                       onTap: () => context.goNamed(
                         accountSettingsRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'entityId': entityId},
                       ),
                     ),
                     const Divider(height: 1),
@@ -384,7 +384,7 @@ class SettingsScreen extends HookConsumerWidget {
 
   String _resolveAccountIdentity({
     required AuthState authState,
-    required Budget budget,
+    required Entity budget,
   }) => switch (authState) {
     Authenticated(:final userId) => userId,
     _ => budget.ownerId.toString(),
@@ -473,8 +473,8 @@ class SettingsScreen extends HookConsumerWidget {
 
     try {
       final json = await ref
-          .read(budgetExportProvider.notifier)
-          .exportBudget(budgetId);
+          .read(entityExportProvider.notifier)
+          .exportEntity(entityId);
       await Clipboard.setData(ClipboardData(text: json));
       if (context.mounted) {
         showAppToast(
@@ -544,7 +544,7 @@ class SettingsScreen extends HookConsumerWidget {
     );
 
     if (confirmed != true || !context.mounted) return;
-    context.goNamed(createBudgetRoute);
+    context.goNamed(createEntityRoute);
   }
 
   void _showComingSoon(BuildContext context, String featureName) {

@@ -11,7 +11,7 @@ void main() {
         'USD',
       );
 
-      expect(rows.map((row) => row.amountCents).toList(), [1234, 120005]);
+      expect(rows.map((row) => row.amountMinor).toList(), [1234, 120005]);
     });
 
     test('keeps negative amounts from bank exports', () {
@@ -21,7 +21,7 @@ void main() {
         'USD',
       );
 
-      expect(rows.single.amountCents, -4550);
+      expect(rows.single.amountMinor, -4550);
     });
 
     test('skips over-precise and malformed amounts instead of rounding', () {
@@ -35,7 +35,7 @@ void main() {
       );
 
       expect(rows.map((row) => row.description).toList(), ['Exact']);
-      expect(rows.single.amountCents, 1234);
+      expect(rows.single.amountMinor, 1234);
     });
 
     test('uses the currency decimals when refusing precision', () {
@@ -46,7 +46,7 @@ void main() {
         'JPY',
       );
 
-      expect(rows.single.amountCents, 1200);
+      expect(rows.single.amountMinor, 1200);
     });
 
     test('parses cryptocurrency precision', () {
@@ -56,7 +56,7 @@ void main() {
         'BTC',
       );
 
-      expect(rows.single.amountCents, 42);
+      expect(rows.single.amountMinor, 42);
     });
   });
 }

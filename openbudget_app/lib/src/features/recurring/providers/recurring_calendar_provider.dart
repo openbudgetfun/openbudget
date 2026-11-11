@@ -1,3 +1,4 @@
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:equatable/equatable.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -25,11 +26,11 @@ class ScheduledOccurrence extends Equatable {
 @riverpod
 Future<Map<int, List<ScheduledOccurrence>>> recurringCalendar(
   Ref ref,
-  String budgetId,
+  String entityId,
   int year,
   int month,
 ) async {
-  final recurrings = await ref.watch(recurringListProvider(budgetId).future);
+  final recurrings = await ref.watch(recurringListProvider(entityId).future);
   final active = recurrings.where((r) => r.isActive).toList();
 
   final now = DateTime.now();
@@ -64,7 +65,7 @@ List<DateTime> _generateOccurrences(
   DateTime end,
 ) {
   final results = <DateTime>[];
-  final next = recurring.nextOccurrence;
+  final next = recurring.nextDate;
   final endDate = recurring.endDate;
 
   // Start from the nextOccurrence and work forwards/backwards to fill the
@@ -98,21 +99,20 @@ List<DateTime> _generateOccurrences(
   return results;
 }
 
-DateTime _addFrequency(DateTime date, String frequency) => switch (frequency) {
-  'daily' => date.add(const Duration(days: 1)),
-  'weekly' => date.add(const Duration(days: 7)),
-  'biweekly' => date.add(const Duration(days: 14)),
-  'monthly' => DateTime(date.year, date.month + 1, date.day),
-  'yearly' => DateTime(date.year + 1, date.month, date.day),
-  _ => date.add(const Duration(days: 30)),
-};
-
-DateTime _subtractFrequency(DateTime date, String frequency) =>
+DateTime _addFrequency(DateTime date, RecurrenceFrequency frequency) =>
     switch (frequency) {
-      'daily' => date.subtract(const Duration(days: 1)),
-      'weekly' => date.subtract(const Duration(days: 7)),
-      'biweekly' => date.subtract(const Duration(days: 14)),
-      'monthly' => DateTime(date.year, date.month - 1, date.day),
-      'yearly' => DateTime(date.year - 1, date.month, date.day),
-      _ => date.subtract(const Duration(days: 30)),
+      RecurrenceFrequency.daily => date.add(const Duration(days: 1)),
+      RecurrenceFrequency.weekly => date.add(const Duration(days: 7)),
+      RecurrenceFrequency.biweekly => date.add(const Duration(days: 14)),
+      RecurrenceFrequency.monthly => DateTime(date.year, date.month + 1, date.day),
+      RecurrenceFrequency.yearly => DateTime(date.year + 1, date.month, date.day),
+    };
+
+DateTime _subtractFrequency(DateTime date, RecurrenceFrequency frequency) =>
+    switch (frequency) {
+      RecurrenceFrequency.daily => date.subtract(const Duration(days: 1)),
+      RecurrenceFrequency.weekly => date.subtract(const Duration(days: 7)),
+      RecurrenceFrequency.biweekly => date.subtract(const Duration(days: 14)),
+      RecurrenceFrequency.monthly => DateTime(date.year, date.month - 1, date.day),
+      RecurrenceFrequency.yearly => DateTime(date.year - 1, date.month, date.day),
     };

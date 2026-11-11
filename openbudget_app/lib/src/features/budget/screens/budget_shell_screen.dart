@@ -14,16 +14,16 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 class BudgetShellScreen extends HookConsumerWidget {
   const BudgetShellScreen({
     required this.navigationShell,
-    required this.budgetId,
+    required this.entityId,
     super.key,
   });
 
   final StatefulNavigationShell navigationShell;
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(budgetRealtimeProvider(budgetId));
+    ref.watch(budgetRealtimeProvider(entityId));
     useWhatsNewAutoPrompt(context, ref);
 
     final l10n = AppLocalizations.of(context);
@@ -96,24 +96,24 @@ class BudgetShellScreen extends HookConsumerWidget {
       final action = await showModalBottomSheet<AddTransactionAction>(
         context: context,
         showDragHandle: false,
-        builder: (_) => AddTransactionSheet(budgetId: budgetId),
+        builder: (_) => AddTransactionSheet(entityId: entityId),
       );
       if (!context.mounted || action == null) return;
       switch (action) {
         case AddTransactionAction.income:
           await context.pushNamed(
             addIncomeRoute,
-            pathParameters: {'id': budgetId},
+            pathParameters: {'entityId': entityId},
           );
         case AddTransactionAction.expense:
           await context.pushNamed(
             addExpenseRoute,
-            pathParameters: {'id': budgetId},
+            pathParameters: {'entityId': entityId},
           );
         case AddTransactionAction.transfer:
           await context.pushNamed(
             createTransferRoute,
-            pathParameters: {'id': budgetId},
+            pathParameters: {'entityId': entityId},
           );
       }
       return;
@@ -206,17 +206,17 @@ class BudgetShellScreen extends HookConsumerWidget {
       case _MoreQuickAction.settings:
         await context.pushNamed(
           settingsRoute,
-          pathParameters: {'id': budgetId},
+          pathParameters: {'entityId': entityId},
         );
       case _MoreQuickAction.recurring:
         await context.pushNamed(
           recurringListRoute,
-          pathParameters: {'id': budgetId},
+          pathParameters: {'entityId': entityId},
         );
       case _MoreQuickAction.payees:
         await context.pushNamed(
           payeeListRoute,
-          pathParameters: {'id': budgetId},
+          pathParameters: {'entityId': entityId},
         );
     }
   }

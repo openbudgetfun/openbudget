@@ -7,7 +7,7 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  const budgetId = 'test-budget-1';
+  const entityId = 'test-budget-1';
 
   Widget buildSubject() => MaterialApp(
     theme: OpenBudgetTheme.light,
@@ -16,7 +16,7 @@ void main() {
     home: const Scaffold(
       // Render the sheet directly as a child instead of via
       // showModalBottomSheet to avoid layout overflow in tests.
-      body: AddTransactionSheet(budgetId: budgetId),
+      body: AddTransactionSheet(entityId: entityId),
     ),
   );
 
@@ -35,24 +35,24 @@ void main() {
                         context: context,
                         isScrollControlled: true,
                         builder: (_) =>
-                            const AddTransactionSheet(budgetId: budgetId),
+                            const AddTransactionSheet(entityId: entityId),
                       );
                   if (!context.mounted || action == null) return;
                   switch (action) {
                     case AddTransactionAction.income:
                       context.goNamed(
                         addIncomeRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'id': entityId},
                       );
                     case AddTransactionAction.expense:
                       context.goNamed(
                         addExpenseRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'id': entityId},
                       );
                     case AddTransactionAction.transfer:
                       context.goNamed(
                         createTransferRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'id': entityId},
                       );
                   }
                 },

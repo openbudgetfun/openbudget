@@ -67,7 +67,7 @@ final class BudgetTemplateListProvider
 }
 
 String _$budgetTemplateListHash() =>
-    r'9ab7d8cfa7604942ef1bf031d82a9b6254b67a4a';
+    r'8b5f12c22919a24d84b541cd5d692050ce74c535';
 
 final class BudgetTemplateListFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<BudgetTemplate>>, String> {
@@ -80,11 +80,98 @@ final class BudgetTemplateListFamily extends $Family
         isAutoDispose: true,
       );
 
-  BudgetTemplateListProvider call(String budgetId) =>
-      BudgetTemplateListProvider._(argument: budgetId, from: this);
+  BudgetTemplateListProvider call(String entityId) =>
+      BudgetTemplateListProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'budgetTemplateListProvider';
+}
+
+/// One template's envelope lines, with this month's allocations.
+
+@ProviderFor(budgetTemplateLines)
+final budgetTemplateLinesProvider = BudgetTemplateLinesFamily._();
+
+/// One template's envelope lines, with this month's allocations.
+
+final class BudgetTemplateLinesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<BudgetTemplateLine>>,
+          List<BudgetTemplateLine>,
+          FutureOr<List<BudgetTemplateLine>>
+        >
+    with
+        $FutureModifier<List<BudgetTemplateLine>>,
+        $FutureProvider<List<BudgetTemplateLine>> {
+  /// One template's envelope lines, with this month's allocations.
+  BudgetTemplateLinesProvider._({
+    required BudgetTemplateLinesFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'budgetTemplateLinesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$budgetTemplateLinesHash();
+
+  @override
+  String toString() {
+    return r'budgetTemplateLinesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<BudgetTemplateLine>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<BudgetTemplateLine>> create(Ref ref) {
+    final argument = this.argument as String;
+    return budgetTemplateLines(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is BudgetTemplateLinesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$budgetTemplateLinesHash() =>
+    r'03b5f78548f14a402775afe26aa018d2fcf7d001';
+
+/// One template's envelope lines, with this month's allocations.
+
+final class BudgetTemplateLinesFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<BudgetTemplateLine>>, String> {
+  BudgetTemplateLinesFamily._()
+    : super(
+        retry: null,
+        name: r'budgetTemplateLinesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// One template's envelope lines, with this month's allocations.
+
+  BudgetTemplateLinesProvider call(String templateId) =>
+      BudgetTemplateLinesProvider._(argument: templateId, from: this);
+
+  @override
+  String toString() => r'budgetTemplateLinesProvider';
 }
 
 @ProviderFor(BudgetTemplateActions)
@@ -120,7 +207,7 @@ final class BudgetTemplateActionsProvider
 }
 
 String _$budgetTemplateActionsHash() =>
-    r'f499f908e5aa8be80360e07566bc9c33e239d738';
+    r'cffeb02412037f1e9b2b3e55a65820e7aeb104db';
 
 abstract class _$BudgetTemplateActions extends $Notifier<void> {
   void build();

@@ -45,21 +45,21 @@ String transferCurrency(
 }
 
 @visibleForTesting
-int? parseTransferAmountCents(String amountText, String currencyCode) =>
+int? parseTransferAmountMinor(String amountText, String currencyCode) =>
     parseMoneyInput(
       amountText,
       decimals: currencyDecimalsForCode(currencyCode),
     );
 
 class CreateTransferScreen extends HookConsumerWidget {
-  const CreateTransferScreen({required this.budgetId, super.key});
+  const CreateTransferScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final accountsAsync = ref.watch(accountListProvider(budgetId));
+    final accountsAsync = ref.watch(accountListProvider(entityId));
 
     final descController = useTextEditingController(
       text: l10n.transferDefaultDescription,
@@ -89,7 +89,7 @@ class CreateTransferScreen extends HookConsumerWidget {
             accounts,
             fromAccountId: fromAccountId.value,
           );
-          final zeroAmountHint = formatCentsForCode(0, selectedCurrency);
+          final zeroAmountHint = formatMinorForCode(0, selectedCurrency);
           final amountDecimals = currencyDecimalsForCode(selectedCurrency);
           final amountError = moneyInputError(
             amountController.text,
@@ -283,25 +283,25 @@ class CreateTransferScreen extends HookConsumerWidget {
     }
 
     final currencyCode = normalizeCurrencyCode(fromAccount.currencyCode);
-    final amountCents = parseTransferAmountCents(
+    final amountMinor = parseTransferAmountMinor(
       amountController.text,
       currencyCode,
     );
-    if (amountCents == null || amountCents <= 0) return;
+    if (amountMinor == null || amountMinor <= 0) return;
     isSubmitting.value = true;
 
     try {
       final client = ref.read(serverpodClientProvider);
       await client.transaction.transfer(
         descController.text.trim(),
-        amountCents,
+        amountMinor,
         currencyCode,
-        UuidValue.fromString(budgetId),
+        UuidValue.fromString(entityId),
         UuidValue.fromString(fromAccountId.value!),
         UuidValue.fromString(toAccountId.value!),
         selectedDate.value,
       );
-      ref.invalidate(accountListProvider(budgetId));
+      ref.invalidate(accountListProvider(entityId));
       if (!context.mounted) return;
       showAppToast(
         context,

@@ -21,7 +21,7 @@ const _otherBudgetId = '00000000-0000-0000-0000-0000000000a411';
 
 Widget _buildApp(
   FakeTaxRepository repository, {
-  Future<TaxProfileRecord?> Function(Ref ref, String budgetId)? profileBuilder,
+  Future<TaxProfileRecord?> Function(Ref ref, String entityId)? profileBuilder,
 }) {
   final router = GoRouter(
     initialLocation: '/budgets/$testBudgetId/tax/profile',
@@ -30,7 +30,7 @@ Widget _buildApp(
         name: taxProfileRoute,
         path: '/budgets/:id/tax/profile',
         builder: (context, state) =>
-            TaxProfileScreen(budgetId: state.pathParameters['id']!),
+            TaxProfileScreen(entityId: state.pathParameters['entityId']!),
       ),
     ],
   );
@@ -94,7 +94,7 @@ void main() {
       await tester.pumpWidget(
         _buildApp(
           FakeTaxRepository(),
-          profileBuilder: (ref, budgetId) => completer.future,
+          profileBuilder: (ref, entityId) => completer.future,
         ),
       );
       await tester.pump();

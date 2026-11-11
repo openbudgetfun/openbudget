@@ -21,7 +21,7 @@ enum RecurringViewFilter { all, expenses, income, due }
 
 /// Scheduled bills and income, written on a stack of paper slips.
 class RecurringListScreen extends HookConsumerWidget {
-  const RecurringListScreen({required this.budgetId, super.key});
+  const RecurringListScreen({required this.entityId, super.key});
 
   /// Opens the add-recurring dialog.
   static const Key addButtonKey = ValueKey('recurring.add');
@@ -29,13 +29,13 @@ class RecurringListScreen extends HookConsumerWidget {
   /// Opens the schedule calendar.
   static const Key calendarButtonKey = ValueKey('recurring.calendar');
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final recurringAsync = ref.watch(recurringListProvider(budgetId));
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final recurringAsync = ref.watch(recurringListProvider(entityId));
+    final budgetAsync = ref.watch(budgetDetailProvider(entityId));
     final viewFilter = useState(RecurringViewFilter.all);
     final budgetCurrency =
         budgetAsync.whenOrNull(
@@ -53,7 +53,7 @@ class RecurringListScreen extends HookConsumerWidget {
             tooltip: l10n.scheduledCalendarTitle,
             onPressed: () => context.pushNamed(
               recurringCalendarRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
           ),
           IconButton(
@@ -105,22 +105,22 @@ class RecurringListScreen extends HookConsumerWidget {
             final today = DateTime(now.year, now.month, now.day);
             return !dueDate.isAfter(today);
           }).length;
-          final expenseTotals = aggregateCentsByCurrency(
-            activeItems.where((item) => item.amountCents < 0),
+          final expenseTotals = aggregateMinorByCurrency(
+            activeItems.where((item) => item.amountMinor < 0),
             currencyCodeOf: (item) => item.currencyCode,
-            amountCentsOf: (item) => item.amountCents.abs(),
+            amountMinorOf: (item) => item.amountMinor.abs(),
           );
-          final incomeTotals = aggregateCentsByCurrency(
-            activeItems.where((item) => item.amountCents > 0),
+          final incomeTotals = aggregateMinorByCurrency(
+            activeItems.where((item) => item.amountMinor > 0),
             currencyCodeOf: (item) => item.currencyCode,
-            amountCentsOf: (item) => item.amountCents,
+            amountMinorOf: (item) => item.amountMinor,
           );
           final filteredItems = items
               .where(
                 (item) => switch (viewFilter.value) {
                   RecurringViewFilter.all => true,
-                  RecurringViewFilter.expenses => item.amountCents < 0,
-                  RecurringViewFilter.income => item.amountCents > 0,
+                  RecurringViewFilter.expenses => item.amountMinor < 0,
+                  RecurringViewFilter.income => item.amountMinor > 0,
                   RecurringViewFilter.due =>
                     item.isActive && !item.nextOccurrence.isAfter(now),
                 },
@@ -129,7 +129,7 @@ class RecurringListScreen extends HookConsumerWidget {
 
           return RefreshIndicator(
             onRefresh: () async =>
-                ref.invalidate(recurringListProvider(budgetId)),
+                ref.invalidate(recurringListProvider(entityId)),
             child: ListView(
               padding: const EdgeInsets.fromLTRB(
                 SpacingTokens.md,
@@ -142,13 +142,13 @@ class RecurringListScreen extends HookConsumerWidget {
                   totalItems: items.length,
                   dueCount: dueCount,
                   totalExpenses: expenseTotals.isEmpty
-                      ? formatCentsForCode(0, budgetCurrency)
+                      ? formatMinorForCode(0, budgetCurrency)
                       : formatCurrencyBreakdown(
                           expenseTotals,
                           includeCurrencyCode: expenseTotals.length > 1,
                         ),
                   totalIncome: incomeTotals.isEmpty
-                      ? formatCentsForCode(0, budgetCurrency)
+                      ? formatMinorForCode(0, budgetCurrency)
                       : formatCurrencyBreakdown(
                           incomeTotals,
                           includeCurrencyCode: incomeTotals.length > 1,
@@ -216,7 +216,7 @@ class RecurringListScreen extends HookConsumerWidget {
       showDialog<void>(
         context: context,
         builder: (_) =>
-            _AddRecurringDialog(budgetId: budgetId, currencyCode: currencyCode),
+            _AddRecurringDialog(entityId: entityId, currencyCode: currencyCode),
       ),
     );
   }
@@ -226,7 +226,7 @@ class RecurringListScreen extends HookConsumerWidget {
       showDialog<void>(
         context: context,
         builder: (_) =>
-            _EditRecurringDialog(recurring: recurring, budgetId: budgetId),
+            _EditRecurringDialog(recurring: recurring, entityId: entityId),
       ),
     );
   }
@@ -264,7 +264,7 @@ class RecurringListScreen extends HookConsumerWidget {
           .read(recurringActionsProvider.notifier)
           .deleteRecurring(
             recurringId: recurring.id?.toString() ?? '',
-            budgetId: budgetId,
+            entityId: entityId,
           );
       if (context.mounted) {
         showAppToast(
@@ -296,7 +296,7 @@ class RecurringListScreen extends HookConsumerWidget {
           .read(recurringActionsProvider.notifier)
           .skipOccurrence(
             recurringId: recurring.id?.toString() ?? '',
-            budgetId: budgetId,
+            entityId: entityId,
           );
       if (context.mounted) {
         showAppToast(
@@ -324,7 +324,7 @@ class RecurringListScreen extends HookConsumerWidget {
         .read(recurringActionsProvider.notifier)
         .updateRecurring(
           recurringId: recurring.id?.toString() ?? '',
-          budgetId: budgetId,
+          entityId: entityId,
           isActive: !recurring.isActive,
         );
   }
@@ -525,7 +525,7 @@ class _RecurringTile extends HookWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
     final currency = normalizeCurrencyCode(recurring.currencyCode);
-    final isIncome = recurring.amountCents > 0;
+    final isIncome = recurring.amountMinor > 0;
     final frequencyLabel = switch (recurring.frequency) {
       'daily' => l10n.recurringFreqDaily,
       'weekly' => l10n.recurringFreqWeekly,
@@ -627,8 +627,8 @@ class _RecurringTile extends HookWidget {
                 const SizedBox(width: SpacingTokens.sm),
                 ObAmount(
                   isIncome
-                      ? '+${formatCentsForCode(recurring.amountCents, currency)}'
-                      : formatCentsForCode(recurring.amountCents, currency),
+                      ? '+${formatMinorForCode(recurring.amountMinor, currency)}'
+                      : formatMinorForCode(recurring.amountMinor, currency),
                   tone: isIncome ? ObTone.funded : ObTone.overspent,
                   style: theme.textTheme.titleSmall,
                 ),
@@ -690,11 +690,11 @@ class _RecurringTile extends HookWidget {
 
 class _AddRecurringDialog extends HookConsumerWidget {
   const _AddRecurringDialog({
-    required this.budgetId,
+    required this.entityId,
     required this.currencyCode,
   });
 
-  final String budgetId;
+  final String entityId;
   final String currencyCode;
 
   @override
@@ -861,13 +861,13 @@ class _AddRecurringDialog extends HookConsumerWidget {
     final description = descController.text.trim();
     if (description.isEmpty) return;
 
-    final amountCents = parseMoneyInput(
+    final amountMinor = parseMoneyInput(
       amountController.text,
       decimals: currencyDecimalsForCode(currencyCode),
     );
-    if (amountCents == null || amountCents <= 0) return;
+    if (amountMinor == null || amountMinor <= 0) return;
 
-    final signedCents = isExpense.value ? -amountCents : amountCents;
+    final signedMinor = isExpense.value ? -amountMinor : amountMinor;
 
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
@@ -876,9 +876,9 @@ class _AddRecurringDialog extends HookConsumerWidget {
           .read(recurringActionsProvider.notifier)
           .createRecurring(
             description: description,
-            amountCents: signedCents,
+            amountMinor: signedMinor,
             currencyCode: normalizeCurrencyCode(currencyCode),
-            budgetId: budgetId,
+            entityId: entityId,
             frequency: frequency.value,
             nextOccurrence: nextDate.value,
           );
@@ -902,10 +902,10 @@ class _AddRecurringDialog extends HookConsumerWidget {
 }
 
 class _EditRecurringDialog extends HookConsumerWidget {
-  const _EditRecurringDialog({required this.recurring, required this.budgetId});
+  const _EditRecurringDialog({required this.recurring, required this.entityId});
 
   final RecurringTransaction recurring;
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -915,9 +915,9 @@ class _EditRecurringDialog extends HookConsumerWidget {
     );
     final currency = normalizeCurrencyCode(recurring.currencyCode);
     final currencyDecimals = currencyDecimalsForCode(currency);
-    final amountCents = recurring.amountCents.abs();
+    final amountMinor = recurring.amountMinor.abs();
     final amountController = useTextEditingController(
-      text: formatMinorUnits(amountCents, currencyDecimals),
+      text: formatMinorUnits(amountMinor, currencyDecimals),
     );
     final frequency = useState(recurring.frequency);
     final nextDate = useState(recurring.nextOccurrence);
@@ -1044,14 +1044,14 @@ class _EditRecurringDialog extends HookConsumerWidget {
     final description = descController.text.trim();
     if (description.isEmpty) return;
 
-    final amountCents = parseMoneyInput(
+    final amountMinor = parseMoneyInput(
       amountController.text,
       decimals: currencyDecimalsForCode(currency),
     );
-    if (amountCents == null || amountCents <= 0) return;
+    if (amountMinor == null || amountMinor <= 0) return;
 
-    final isExpense = recurring.amountCents < 0;
-    final signedCents = isExpense ? -amountCents : amountCents;
+    final isExpense = recurring.amountMinor < 0;
+    final signedMinor = isExpense ? -amountMinor : amountMinor;
 
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
@@ -1060,9 +1060,9 @@ class _EditRecurringDialog extends HookConsumerWidget {
           .read(recurringActionsProvider.notifier)
           .updateRecurring(
             recurringId: recurring.id?.toString() ?? '',
-            budgetId: budgetId,
+            entityId: entityId,
             description: description,
-            amountCents: signedCents,
+            amountMinor: signedMinor,
             frequency: frequency.value,
             nextOccurrence: nextDate.value,
           );

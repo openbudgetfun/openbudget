@@ -8,9 +8,14 @@ part of 'spending_report_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// One month's spending and income in base minor units, read from the
+/// server's month view. Activity per envelope is grouped by its category.
 
 @ProviderFor(spendingReport)
 final spendingReportProvider = SpendingReportFamily._();
+
+/// One month's spending and income in base minor units, read from the
+/// server's month view. Activity per envelope is grouped by its category.
 
 final class SpendingReportProvider
     extends
@@ -20,9 +25,11 @@ final class SpendingReportProvider
           FutureOr<SpendingReport>
         >
     with $FutureModifier<SpendingReport>, $FutureProvider<SpendingReport> {
+  /// One month's spending and income in base minor units, read from the
+  /// server's month view. Activity per envelope is grouped by its category.
   SpendingReportProvider._({
     required SpendingReportFamily super.from,
-    required (String, int, int) super.argument,
+    required (String, int) super.argument,
   }) : super(
          retry: null,
          name: r'spendingReportProvider',
@@ -49,8 +56,8 @@ final class SpendingReportProvider
 
   @override
   FutureOr<SpendingReport> create(Ref ref) {
-    final argument = this.argument as (String, int, int);
-    return spendingReport(ref, argument.$1, argument.$2, argument.$3);
+    final argument = this.argument as (String, int);
+    return spendingReport(ref, argument.$1, argument.$2);
   }
 
   @override
@@ -64,14 +71,13 @@ final class SpendingReportProvider
   }
 }
 
-String _$spendingReportHash() => r'a75cce4504e58212965a8a732deba6832ada787d';
+String _$spendingReportHash() => r'6a9a7e4943a60c1143b10b866d59cde4317b5c3c';
+
+/// One month's spending and income in base minor units, read from the
+/// server's month view. Activity per envelope is grouped by its category.
 
 final class SpendingReportFamily extends $Family
-    with
-        $FunctionalFamilyOverride<
-          FutureOr<SpendingReport>,
-          (String, int, int)
-        > {
+    with $FunctionalFamilyOverride<FutureOr<SpendingReport>, (String, int)> {
   SpendingReportFamily._()
     : super(
         retry: null,
@@ -81,15 +87,22 @@ final class SpendingReportFamily extends $Family
         isAutoDispose: true,
       );
 
-  SpendingReportProvider call(String budgetId, int year, int month) =>
-      SpendingReportProvider._(argument: (budgetId, year, month), from: this);
+  /// One month's spending and income in base minor units, read from the
+  /// server's month view. Activity per envelope is grouped by its category.
+
+  SpendingReportProvider call(String entityId, int endMonth) =>
+      SpendingReportProvider._(argument: (entityId, endMonth), from: this);
 
   @override
   String toString() => r'spendingReportProvider';
 }
 
+/// The last [monthCount] months combined, for the preset ranges.
+
 @ProviderFor(spendingReportPreset)
 final spendingReportPresetProvider = SpendingReportPresetFamily._();
+
+/// The last [monthCount] months combined, for the preset ranges.
 
 final class SpendingReportPresetProvider
     extends
@@ -99,9 +112,10 @@ final class SpendingReportPresetProvider
           FutureOr<SpendingReport>
         >
     with $FutureModifier<SpendingReport>, $FutureProvider<SpendingReport> {
+  /// The last [monthCount] months combined, for the preset ranges.
   SpendingReportPresetProvider._({
     required SpendingReportPresetFamily super.from,
-    required (String, int, int, int) super.argument,
+    required (String, int, int) super.argument,
   }) : super(
          retry: null,
          name: r'spendingReportPresetProvider',
@@ -128,14 +142,8 @@ final class SpendingReportPresetProvider
 
   @override
   FutureOr<SpendingReport> create(Ref ref) {
-    final argument = this.argument as (String, int, int, int);
-    return spendingReportPreset(
-      ref,
-      argument.$1,
-      argument.$2,
-      argument.$3,
-      argument.$4,
-    );
+    final argument = this.argument as (String, int, int);
+    return spendingReportPreset(ref, argument.$1, argument.$2, argument.$3);
   }
 
   @override
@@ -150,13 +158,15 @@ final class SpendingReportPresetProvider
 }
 
 String _$spendingReportPresetHash() =>
-    r'd7cd98c878c1f58785c173ff0137f87fb380bec7';
+    r'e9887f2b16f3ba9875b54a5f125188a694c1ac99';
+
+/// The last [monthCount] months combined, for the preset ranges.
 
 final class SpendingReportPresetFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<SpendingReport>,
-          (String, int, int, int)
+          (String, int, int)
         > {
   SpendingReportPresetFamily._()
     : super(
@@ -167,13 +177,14 @@ final class SpendingReportPresetFamily extends $Family
         isAutoDispose: true,
       );
 
+  /// The last [monthCount] months combined, for the preset ranges.
+
   SpendingReportPresetProvider call(
-    String budgetId,
-    int endYear,
+    String entityId,
     int endMonth,
     int monthCount,
   ) => SpendingReportPresetProvider._(
-    argument: (budgetId, endYear, endMonth, monthCount),
+    argument: (entityId, endMonth, monthCount),
     from: this,
   );
 

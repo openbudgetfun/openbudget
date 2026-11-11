@@ -991,7 +991,7 @@
   "deleteAccountUnavailableButton": "Delete Account (Unavailable)",
   "transactionCategoryLabel": "Category",
   "transactionAccountLabel": "Account",
-  "transactionDateLabel": "Date",
+  "transactionDateLabel": "{year}-{month}-{day}",
   "addAccountConnectWallet": "Connect Solana Wallet",
   "addAccountUnlinkedTitle": "Add Unlinked Account",
   "addAccountSelectAccountType": "Select Account Type",
@@ -1263,7 +1263,7 @@
   "@accountDetailLoanInMonth": {
     "placeholders": {
       "month": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -1745,7 +1745,7 @@
   "@taxYearLabel": {
     "placeholders": {
       "year": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -2410,6 +2410,244 @@
   "@journalPostedAtLabel": {
     "placeholders": {
       "date": {
+        "type": "String"
+      }
+    }
+  },
+  "createEntityTitle": "Create your books",
+  "createEntityKindLabel": "What are these books for?",
+  "entityKindPersonal": "Personal",
+  "entityKindSoleTrader": "Sole trader",
+  "entityKindCompany": "Company",
+  "createEntityCountry": "Country",
+  "createEntityTimeZone": "Time zone",
+  "createEntityFiscalYearEnd": "Financial year ends",
+  "createEntityFiscalYearValue": "Day {day} of month {month}",
+  "@createEntityFiscalYearValue": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+  "entityDeleteNameField": "Type the entity's name to confirm",
+  "homeBudgetNetWorthShort": "Net worth {amount}",
+  "@homeBudgetNetWorthShort": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeBudgetUncategorised": "{count} uncategorised",
+  "@homeBudgetUncategorised": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeBudgetDueRecurring": "{count} recurring due",
+  "@homeBudgetDueRecurring": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeBudgetPendingProposals": "{count} proposals",
+  "@homeBudgetPendingProposals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "netWorthAssetsLabel": "Assets {amount}",
+  "@netWorthAssetsLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "netWorthLiabilitiesLabel": "Liabilities {amount}",
+  "@netWorthLiabilitiesLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "netWorthMissingCurrencies": "Not included: no rate for {currencies}",
+  "@netWorthMissingCurrencies": {
+    "placeholders": {
+      "currencies": {
+        "type": "String"
+      }
+    }
+  },
+  "entityCountInNetWorth": "Count in my net worth",
+  "entityCountInNetWorthHint": "Include this entity's accounts in your combined net worth.",
+  "settingsReportingCurrency": "Reporting currency",
+  "addAccountCurrencyQuestion": "What currency is this account in?",
+  "addAccountSelectCurrencyPlaceholder": "Pick a currency",
+  "addAccountOnBudgetQuestion": "Budget this account together with the plan",
+  "addAccountOnBudgetHint": "On-budget accounts feed Ready to Assign.",
+  "addAccountTrackByQuestion": "How should this account be tracked?",
+  "addAccountTrackByTransactions": "By transactions",
+  "addAccountTrackByValue": "By value",
+  "addAccountOpeningToday": "Opening balance is from today",
+  "addAccountTypeProperty": "Property",
+  "addAccountTypeVehicle": "Vehicle",
+  "addAccountTypeOtherAsset": "Other asset",
+  "accountGroupAssets": "Assets",
+  "accountGroupLiabilities": "Liabilities",
+  "accountBaseEquivalent": "≈ {amount} in base currency",
+  "@accountBaseEquivalent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsConnectionsTitle": "Bank connections",
+  "accountsConnectionPending": "Syncing…",
+  "accountsConnectionSynced": "Up to date",
+  "accountsConnectionFailed": "Sync failed",
+  "accountsConnectionRemove": "Remove",
+  "accountsConnectionRemoveTitle": "Remove this connection?",
+  "accountsConnectionRemoveMessage": "The bank link is removed. Accounts keep their history.",
+  "transactionTransferPeer": "to {accountName}",
+  "@transactionTransferPeer": {
+    "placeholders": {
+      "accountName": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionBaseAmount": "{amount} in base currency",
+  "@transactionBaseAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@transactionDateLabel": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "accountDetailReconcile": "Reconcile",
+  "accountDetailReportedBalance": "Bank says {amount}",
+  "accountDetailClearedLabel": "Cleared {amount}",
+  "@accountDetailClearedLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailUnclearedLabel": "Uncleared {amount}",
+  "@accountDetailUnclearedLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailValuationsTitle": "Value history",
+  "accountDetailUpdateValue": "Update value",
+  "accountDetailValuedOn": "Valued {date}",
+  "@accountDetailValuedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailHoldingsTitle": "Holdings",
+  "accountHoldingsValueLabel": "Value {amount}",
+  "@accountHoldingsValueLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountHoldingsCostLabel": "Cost {amount}",
+  "@accountHoldingsCostLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountHoldingsPnlLabel": "P&L {amount}",
+  "@accountHoldingsPnlLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountHoldingsQuantityLabel": "Quantity {quantity}",
+  "@accountHoldingsQuantityLabel": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
+  "accountReconcileTitle": "Reconcile {accountName}",
+  "@accountReconcileTitle": {
+    "placeholders": {
+      "accountName": {
+        "type": "String"
+      }
+    }
+  },
+  "accountReconcileStatementField": "Statement balance",
+  "accountReconcileDifference": "Difference {amount}",
+  "@accountReconcileDifference": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountReconcileCreateAdjustment": "Post the difference as an adjustment",
+  "accountReconcileSubmit": "Reconcile",
+  "accountReconcileSuccess": "{count} transactions reconciled",
+  "@accountReconcileSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountReconcileNoDifference": "Already balanced — nothing to do",
+  "accountValuationValueField": "Value",
+  "accountValuationDateField": "Date",
+  "accountValuationSaved": "Value saved",
+  "accountDetailTransactionsTitle": "Transactions",
+  "transactionLoadMore": "Load more",
+  "accountReconcileFailed": "Reconcile failed — check the statement balance",
+  "@accountDetailReportedBalance": {
+    "placeholders": {
+      "amount": {
         "type": "String"
       }
     }

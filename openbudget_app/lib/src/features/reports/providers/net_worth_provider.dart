@@ -1,112 +1,79 @@
-import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'net_worth_provider.g.dart';
 
-/// Computes net worth from all active accounts in a budget.
+/// Combined net worth in the user's reporting currency, straight from
+/// `report.netWorth`. No conversion happens in the app: incomplete
+/// currencies are listed, never guessed.
 @riverpod
-Future<NetWorthData> netWorth(Ref ref, String budgetId) async {
-  final accounts = await ref.watch(accountListProvider(budgetId).future);
-  final activeAccounts = accounts.where((account) => !account.isClosed);
+Future<NetWorthView> netWorth(Ref ref) async {
+  final client = ref.read(serverpodClientProvider);
+  return client.report.netWorth();
+}
 
-  final byCurrency = <String, _CurrencyAccumulator>{};
-
-  for (final account in activeAccounts) {
-    final currency = normalizeCurrencyCode(account.currencyCode);
-    final bucket = byCurrency.putIfAbsent(currency, _CurrencyAccumulator.new);
-
-    if (account.accountType == 'creditCard') {
-      bucket.totalLiabilities += account.balanceCents;
-      bucket.liabilityAccounts.add(account);
-    } else {
-      bucket.totalAssets += account.balanceCents;
-      bucket.assetAccounts.add(account);
-    }
-  }
-
-  final breakdown =
-      byCurrency.entries
-          .map(
-            (entry) => CurrencyNetWorthData(
-              currency: entry.key,
-              totalAssets: entry.value.totalAssets,
-              totalLiabilities: entry.value.totalLiabilities,
-              assetAccounts: List<Account>.unmodifiable(
-                entry.value.assetAccounts,
-              ),
-              liabilityAccounts: List<Account>.unmodifiable(
-                entry.value.liabilityAccounts,
-              ),
-            ),
-          )
-          .toList()
-        ..sort((a, b) => a.currency.compareTo(b.currency));
-
-  final primaryTotals = breakdown.length == 1 ? breakdown.first : null;
-
-  final totalAssets = primaryTotals?.totalAssets ?? 0;
-  final totalLiabilities = primaryTotals?.totalLiabilities ?? 0;
-
-  return NetWorthData(
-    totalAssets: totalAssets,
-    totalLiabilities: totalLiabilities,
-    netWorth: primaryTotals?.netWorth ?? 0,
-    assetAccounts: List<Account>.unmodifiable(
-      breakdown.expand((entry) => entry.assetAccounts),
-    ),
-    liabilityAccounts: List<Account>.unmodifiable(
-      breakdown.expand((entry) => entry.liabilityAccounts),
-    ),
-    currencyCode: breakdown.isNotEmpty ? breakdown.first.currency : '',
-    currencyBreakdown: List<CurrencyNetWorthData>.unmodifiable(breakdown),
+/// Net worth scoped to the included entities only, for the chip filter on
+/// the breakdown tab. A changed id set re-queries.
+@riverpod
+Future<NetWorthView> netWorthForEntities(
+  Ref ref,
+  Set<String> entityIds,
+) async {
+  final client = ref.read(serverpodClientProvider);
+  return client.report.netWorth(
+    entityIds: entityIds.map(UuidValue.fromString).toList(),
   );
 }
 
-class CurrencyNetWorthData {
-  const CurrencyNetWorthData({
-    required this.currency,
-    required this.totalAssets,
-    required this.totalLiabilities,
-    required this.assetAccounts,
-    required this.liabilityAccounts,
-  });
+/// Which granularity backs each history range toggle.
+enum NetWorthRange {
+  /// Three months of daily points.
+  threeMonths(NetWorthGranularity.day),
 
-  final String currency;
-  final int totalAssets;
-  final int totalLiabilities;
-  final List<Account> assetAccounts;
-  final List<Account> liabilityAccounts;
+  /// One year of weekly points.
+  oneYear(NetWorthGranularity.week),
 
-  int get netWorth => totalAssets + totalLiabilities;
+  /// Everything, monthly.
+  all(NetWorthGranularity.month);
+
+  const NetWorthRange(this.granularity);
+
+  final NetWorthGranularity granularity;
 }
 
-class NetWorthData {
-  const NetWorthData({
-    required this.totalAssets,
-    required this.totalLiabilities,
-    required this.netWorth,
-    required this.assetAccounts,
-    required this.liabilityAccounts,
-    required this.currencyCode,
-    required this.currencyBreakdown,
-  });
-
-  final int totalAssets;
-  final int totalLiabilities;
-  final int netWorth;
-  final List<Account> assetAccounts;
-  final List<Account> liabilityAccounts;
-  final String currencyCode;
-  final List<CurrencyNetWorthData> currencyBreakdown;
-
-  bool get hasMultipleCurrencies => currencyBreakdown.length > 1;
+/// The history range for the chart, in calendar days per range.
+extension NetWorthRangeDates on NetWorthRange {
+  ({DateTime from, DateTime to}) dates({DateTime? now}) {
+    final today = now ?? DateTime.now();
+    final todayDate = DateTime.utc(today.year, today.month, today.day);
+    return switch (this) {
+      NetWorthRange.threeMonths => (
+        from: todayDate.subtract(const Duration(days: 92)),
+        to: todayDate,
+      ),
+      NetWorthRange.oneYear => (
+        from: todayDate.subtract(const Duration(days: 366)),
+        to: todayDate,
+      ),
+      NetWorthRange.all => (
+        from: DateTime.utc(1900, 1, 1),
+        to: todayDate,
+      ),
+    };
+  }
 }
 
-class _CurrencyAccumulator {
-  int totalAssets = 0;
-  int totalLiabilities = 0;
-  final assetAccounts = <Account>[];
-  final liabilityAccounts = <Account>[];
+/// Net worth history for one range toggle, from `report.netWorthHistory`.
+///
+/// `all` asks for a bounded window starting at the earliest possible point
+/// the server accepts; the server limits and clamps ranges itself.
+@riverpod
+Future<NetWorthHistoryView> netWorthHistory(
+  Ref ref,
+  NetWorthRange range,
+) async {
+  final client = ref.read(serverpodClientProvider);
+  final (:from, :to) = range.dates();
+  return client.report.netWorthHistory(from, to, range.granularity);
 }

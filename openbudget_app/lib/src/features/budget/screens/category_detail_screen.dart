@@ -19,13 +19,13 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 class CategoryDetailScreen extends HookConsumerWidget {
   const CategoryDetailScreen({
-    required this.budgetId,
+    required this.entityId,
     required this.categoryId,
     required this.envelopeId,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final String categoryId;
   final String envelopeId;
 
@@ -34,8 +34,8 @@ class CategoryDetailScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
-    final goalsAsync = ref.watch(budgetGoalsProvider(budgetId));
+    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(entityId));
+    final goalsAsync = ref.watch(budgetGoalsProvider(entityId));
     final hideAmounts = ref.watch(hideAmountsProvider);
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
     final isSnoozed = useState(false);
@@ -106,13 +106,13 @@ class CategoryDetailScreen extends HookConsumerWidget {
           final goal = goalsAsync.whenOrNull(
             data: (goals) => goals[envelopeId],
           );
-          final carryover = monthlyData?.carryoverCents ?? 0;
+          final carryover = monthlyData?.carryoverMinor ?? 0;
           final assigned =
-              monthlyData?.allocatedCents ??
-              selectedEnvelope.budgetedAmountCents;
+              monthlyData?.allocatedMinor ??
+              selectedEnvelope.budgetedAmountMinor;
           final spent =
-              monthlyData?.spentCents ?? selectedEnvelope.spentAmountCents;
-          final available = monthlyData?.availableCents ?? (assigned - spent);
+              monthlyData?.spentMinor ?? selectedEnvelope.spentAmountMinor;
+          final available = monthlyData?.availableMinor ?? (assigned - spent);
           final availableTone = available > 0
               ? ObTone.funded
               : available < 0
@@ -138,28 +138,28 @@ class CategoryDetailScreen extends HookConsumerWidget {
                       label: l10n.envelopeFromLastMonth,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCentsForCode(carryover, currencyCode),
+                          : formatMinorForCode(carryover, currencyCode),
                     ),
                     const Divider(height: 1),
                     _DetailRow(
                       label: l10n.envelopeAssigned,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCentsForCode(assigned, currencyCode),
+                          : formatMinorForCode(assigned, currencyCode),
                     ),
                     const Divider(height: 1),
                     _DetailRow(
                       label: l10n.envelopeActivityTitle,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCentsForCode(-spent, currencyCode),
+                          : formatMinorForCode(-spent, currencyCode),
                     ),
                     const Divider(height: 1),
                     _DetailRow(
                       label: l10n.envelopeAvailable,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCentsForCode(available, currencyCode),
+                          : formatMinorForCode(available, currencyCode),
                       tone: availableTone,
                       emphasize: true,
                     ),
@@ -193,8 +193,8 @@ class CategoryDetailScreen extends HookConsumerWidget {
               else ...[
                 _GoalCard(
                   goal: goal,
-                  budgetedCents: assigned,
-                  availableCents: available,
+                  budgetedMinor: assigned,
+                  availableMinor: available,
                   currencyCode: currencyCode,
                   hideAmounts: hideAmounts,
                   hideProgressBars: hideProgressBars,
@@ -261,7 +261,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
               const SizedBox(height: SpacingTokens.md),
               _Card(
                 child: EnvelopeTaxCategoryRow(
-                  budgetId: budgetId,
+                  entityId: entityId,
                   envelope: selectedEnvelope,
                 ),
               ),
@@ -284,7 +284,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
                       .toggleHidden(
                         envelopeId: envelopeId,
                         categoryId: categoryId,
-                        budgetId: budgetId,
+                        entityId: entityId,
                         isHidden: !(selectedEnvelope.isHidden ?? false),
                       );
                 },
@@ -321,7 +321,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
       showDialog<void>(
         context: context,
         builder: (_) => QuickBudgetDialog(
-          budgetId: budgetId,
+          entityId: entityId,
           envelopeId: envelope.id?.toString() ?? '',
           envelopeName: envelope.name,
           currencyCode: currencyCode,
@@ -343,7 +343,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
         context: context,
         builder: (_) => SetGoalDialog(
           envelopeId: envelope.id?.toString() ?? '',
-          budgetId: budgetId,
+          entityId: entityId,
           currencyCode: currencyCode,
           existingGoal: existingGoal,
           envelopeName: envelope.name,
@@ -365,7 +365,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
         builder: (_) => EditEnvelopeDialog(
           envelope: envelope,
           categoryId: categoryId,
-          budgetId: budgetId,
+          entityId: entityId,
           currencyCode: currencyCode,
           year: year,
           month: month,
@@ -396,7 +396,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
                     .deleteEnvelope(
                       envelopeId: envelopeId,
                       categoryId: categoryId,
-                      budgetId: budgetId,
+                      entityId: entityId,
                     );
                 if (context.mounted) {
                   context.pop();
@@ -418,8 +418,8 @@ class CategoryDetailScreen extends HookConsumerWidget {
 class _GoalCard extends HookWidget {
   const _GoalCard({
     required this.goal,
-    required this.budgetedCents,
-    required this.availableCents,
+    required this.budgetedMinor,
+    required this.availableMinor,
     required this.currencyCode,
     required this.hideAmounts,
     required this.hideProgressBars,
@@ -428,8 +428,8 @@ class _GoalCard extends HookWidget {
   });
 
   final EnvelopeGoal goal;
-  final int budgetedCents;
-  final int availableCents;
+  final int budgetedMinor;
+  final int availableMinor;
   final String currencyCode;
   final bool hideAmounts;
   final bool hideProgressBars;
@@ -443,17 +443,17 @@ class _GoalCard extends HookWidget {
     final palette = theme.ob;
     final progress = computeFundingProgress(
       goal: goal,
-      budgetedCents: budgetedCents,
-      availableCents: availableCents,
+      budgetedMinor: budgetedMinor,
+      availableMinor: availableMinor,
     );
-    final underfunded = computeUnderfundedCents(
+    final underfunded = computeUnderfundedMinor(
       goal: goal,
-      budgetedCents: budgetedCents,
-      availableCents: availableCents,
+      budgetedMinor: budgetedMinor,
+      availableMinor: availableMinor,
     );
     final amountToAssignThisMonth = switch (goal.goalType) {
-      'monthly_funding' => goal.monthlyFundingCents ?? goal.targetAmountCents,
-      _ => budgetedCents + underfunded,
+      'monthly_funding' => goal.monthlyFundingMinor ?? goal.targetAmountMinor,
+      _ => budgetedMinor + underfunded,
     };
 
     final isComplete = underfunded <= 0;
@@ -492,7 +492,7 @@ class _GoalCard extends HookWidget {
                     : l10n.categoryDetailAssignMore(
                         hideAmounts
                             ? hiddenAmountPlaceholder
-                            : formatCentsForCode(underfunded, currencyCode),
+                            : formatMinorForCode(underfunded, currencyCode),
                       ),
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge?.copyWith(
@@ -518,19 +518,19 @@ class _GoalCard extends HookWidget {
               label: l10n.categoryDetailAmountToAssignThisMonth,
               value: hideAmounts
                   ? hiddenAmountPlaceholder
-                  : formatCentsForCode(amountToAssignThisMonth, currencyCode),
+                  : formatMinorForCode(amountToAssignThisMonth, currencyCode),
             ),
             _DetailRow(
               label: l10n.categoryDetailAssignedSoFar,
               value: hideAmounts
                   ? hiddenAmountPlaceholder
-                  : formatCentsForCode(budgetedCents, currencyCode),
+                  : formatMinorForCode(budgetedMinor, currencyCode),
             ),
             _DetailRow(
               label: l10n.categoryDetailToGo,
               value: hideAmounts
                   ? hiddenAmountPlaceholder
-                  : formatCentsForCode(underfunded, currencyCode),
+                  : formatMinorForCode(underfunded, currencyCode),
               tone: isComplete ? ObTone.funded : ObTone.underfunded,
             ),
             const SizedBox(height: SpacingTokens.md),

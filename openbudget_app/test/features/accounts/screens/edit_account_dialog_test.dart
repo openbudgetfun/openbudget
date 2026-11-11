@@ -11,16 +11,16 @@ import 'package:openbudget_app/src/features/accounts/providers/account_list_prov
 import 'package:openbudget_app/src/features/accounts/screens/edit_account_dialog.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000010';
-final _budgetUuid = UuidValue.fromString(_budgetId);
+const _entityId = '00000000-0000-0000-0000-000000000010';
+final _budgetUuid = UuidValue.fromString(_entityId);
 
 Account _makeAccount({bool isClosed = false}) => Account(
   id: UuidValue.fromString('00000000-0000-0000-0000-000000000111'),
   name: 'Daily',
   accountType: 'checking',
-  balanceCents: 5000000,
+  balanceMinor: 5000000,
   currencyCode: 'USD',
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   onBudget: true,
   sortOrder: 0,
   isClosed: isClosed,
@@ -38,7 +38,7 @@ class _FakeAccountActions extends AccountActions {
   @override
   Future<Account> deleteAccount({
     required String accountId,
-    required String budgetId,
+    required String entityId,
   }) async {
     onDelete?.call();
     if (throwOnDelete) {
@@ -50,10 +50,10 @@ class _FakeAccountActions extends AccountActions {
   @override
   Future<Account> updateAccount({
     required String accountId,
-    required String budgetId,
+    required String entityId,
     String? name,
     String? accountType,
-    int? balanceCents,
+    int? balanceMinor,
     bool? onBudget,
     int? sortOrder,
     bool? isClosed,
@@ -61,7 +61,7 @@ class _FakeAccountActions extends AccountActions {
 }
 
 class _RecordingAccountActions extends AccountActions {
-  int? updatedBalanceCents;
+  int? updatedBalanceMinor;
 
   @override
   FutureOr<void> build() {}
@@ -69,15 +69,15 @@ class _RecordingAccountActions extends AccountActions {
   @override
   Future<Account> updateAccount({
     required String accountId,
-    required String budgetId,
+    required String entityId,
     String? name,
     String? accountType,
-    int? balanceCents,
+    int? balanceMinor,
     bool? onBudget,
     int? sortOrder,
     bool? isClosed,
   }) async {
-    updatedBalanceCents = balanceCents;
+    updatedBalanceMinor = balanceMinor;
     return _makeAccount(isClosed: isClosed ?? false);
   }
 }
@@ -101,7 +101,7 @@ Widget _buildSubject({
     ),
     if (accountListOverride != null)
       accountListProvider(
-        _budgetId,
+        _entityId,
       ).overrideWith((ref) async => accountListOverride),
   ],
   child: MaterialApp(
@@ -116,7 +116,7 @@ Widget _buildSubject({
               context: context,
               builder: (_) => EditAccountDialog(
                 account: account,
-                budgetId: _budgetId,
+                entityId: _entityId,
                 onDeleted: onDeleted,
               ),
             ),
@@ -283,7 +283,7 @@ void main() {
       await tester.tap(find.widgetWithText(TextButton, 'Save'));
       await tester.pumpAndSettle();
 
-      expect(actions.updatedBalanceCents, 1234);
+      expect(actions.updatedBalanceMinor, 1234);
     });
 
     testWidgets('refuses an over-precise amount instead of rounding it', (
@@ -304,7 +304,7 @@ void main() {
         find.widgetWithText(TextButton, 'Save'),
       );
       expect(saveButton.onPressed, isNull);
-      expect(actions.updatedBalanceCents, isNull);
+      expect(actions.updatedBalanceMinor, isNull);
     });
 
     testWidgets('refuses a negative balance', (tester) async {
@@ -323,7 +323,7 @@ void main() {
         find.widgetWithText(TextButton, 'Save'),
       );
       expect(saveButton.onPressed, isNull);
-      expect(actions.updatedBalanceCents, isNull);
+      expect(actions.updatedBalanceMinor, isNull);
     });
 
     testWidgets('shows the stored balance exactly', (tester) async {

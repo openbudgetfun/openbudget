@@ -17,7 +17,7 @@ import '../tax_test_data.dart';
 
 Widget _buildApp(
   FakeTaxRepository repository, {
-  Future<TaxProfileRecord?> Function(Ref ref, String budgetId)? profileBuilder,
+  Future<TaxProfileRecord?> Function(Ref ref, String entityId)? profileBuilder,
 }) {
   final router = GoRouter(
     initialLocation: '/budgets/$testBudgetId/tax',
@@ -26,7 +26,7 @@ Widget _buildApp(
         name: taxOverviewRoute,
         path: '/budgets/:id/tax',
         builder: (context, state) =>
-            TaxOverviewScreen(budgetId: state.pathParameters['id']!),
+            TaxOverviewScreen(entityId: state.pathParameters['entityId']!),
         routes: [
           GoRoute(
             name: taxProfileRoute,
@@ -68,7 +68,7 @@ void main() {
       await tester.pumpWidget(
         _buildApp(
           FakeTaxRepository(),
-          profileBuilder: (ref, budgetId) => completer.future,
+          profileBuilder: (ref, entityId) => completer.future,
         ),
       );
       await tester.pump();

@@ -12,16 +12,16 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// Every active account, written down as one net worth statement.
 class NetWorthScreen extends HookConsumerWidget {
-  const NetWorthScreen({required this.budgetId, super.key});
+  const NetWorthScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final dataAsync = ref.watch(netWorthProvider(budgetId));
+    final dataAsync = ref.watch(netWorthProvider(entityId));
     final converter = ref
-        .watch(displayCurrencyConverterProvider(budgetId))
+        .watch(displayCurrencyConverterProvider(entityId))
         .asData
         ?.value;
 
@@ -104,7 +104,7 @@ class _NetWorthStatement extends HookWidget {
             for (final breakdown in data.currencyBreakdown)
               breakdown.currency: breakdown.netWorth,
           })
-        : formatCentsForCode(primaryNetWorth, primaryCurrency);
+        : formatMinorForCode(primaryNetWorth, primaryCurrency);
     final hasAccounts =
         data.assetAccounts.isNotEmpty || data.liabilityAccounts.isNotEmpty;
 
@@ -151,7 +151,7 @@ class _NetWorthStatement extends HookWidget {
                   Expanded(
                     child: ReportFigure(
                       label: l10n.netWorthAssets,
-                      amount: formatCentsForCode(
+                      amount: formatMinorForCode(
                         primaryAssets,
                         primaryCurrency,
                       ),
@@ -161,7 +161,7 @@ class _NetWorthStatement extends HookWidget {
                   Expanded(
                     child: ReportFigure(
                       label: l10n.netWorthLiabilities,
-                      amount: formatCentsForCode(
+                      amount: formatMinorForCode(
                         primaryLiabilities,
                         primaryCurrency,
                       ),
@@ -307,7 +307,7 @@ class _CurrencySummaryRow extends HookWidget {
               ),
               const Spacer(),
               ObAmount(
-                formatCentsForCode(total, currency.currency),
+                formatMinorForCode(total, currency.currency),
                 tone: tone,
                 style: theme.textTheme.titleSmall,
               ),
@@ -319,7 +319,7 @@ class _CurrencySummaryRow extends HookWidget {
               Expanded(
                 child: ReportFigure(
                   label: l10n.netWorthAssets,
-                  amount: formatCentsForCode(
+                  amount: formatMinorForCode(
                     currency.totalAssets,
                     currency.currency,
                   ),
@@ -329,7 +329,7 @@ class _CurrencySummaryRow extends HookWidget {
               Expanded(
                 child: ReportFigure(
                   label: l10n.netWorthLiabilities,
-                  amount: formatCentsForCode(
+                  amount: formatMinorForCode(
                     currency.totalLiabilities,
                     currency.currency,
                   ),
@@ -355,7 +355,7 @@ class _AccountTile extends HookWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final tone = account.balanceCents >= 0 ? ObTone.funded : ObTone.overspent;
+    final tone = account.balanceMinor >= 0 ? ObTone.funded : ObTone.overspent;
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(
@@ -387,7 +387,7 @@ class _AccountTile extends HookWidget {
         style: theme.textTheme.bodySmall?.copyWith(color: palette.mutedInk),
       ),
       trailing: ObAmount(
-        formatCentsForCode(account.balanceCents, account.currencyCode),
+        formatMinorForCode(account.balanceMinor, account.currencyCode),
         tone: tone,
         style: theme.textTheme.bodyLarge,
       ),

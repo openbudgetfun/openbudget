@@ -25,7 +25,7 @@ class CreditCardSection extends HookWidget {
 
     final totalPayment = payments.fold<int>(
       0,
-      (sum, p) => sum + p.paymentCents,
+      (sum, p) => sum + p.paymentMinor,
     );
 
     return ObCard(
@@ -51,7 +51,7 @@ class CreditCardSection extends HookWidget {
                 ),
               ),
               ObAmount(
-                formatCentsForCode(totalPayment, currencyCode),
+                formatMinorForCode(totalPayment, currencyCode),
                 tone: ObTone.review,
                 style: theme.textTheme.titleSmall,
               ),
@@ -81,13 +81,13 @@ class CreditCardSection extends HookWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       ObAmount(
-                        formatCentsForCode(payment.paymentCents, currencyCode),
+                        formatMinorForCode(payment.paymentMinor, currencyCode),
                         tone: ObTone.review,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
                         '${l10n.creditCardSpentThisMonth}: '
-                        '${formatCentsForCode(payment.spentCents, currencyCode)}',
+                        '${formatMinorForCode(payment.spentMinor, currencyCode)}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: palette.mutedInk,
                         ),

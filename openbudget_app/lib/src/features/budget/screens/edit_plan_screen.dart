@@ -20,14 +20,14 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class EditPlanScreen extends HookConsumerWidget {
-  const EditPlanScreen({required this.budgetId, super.key});
+  const EditPlanScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
-    final goalsAsync = ref.watch(budgetGoalsProvider(budgetId));
+    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(entityId));
+    final goalsAsync = ref.watch(budgetGoalsProvider(entityId));
 
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
@@ -35,12 +35,12 @@ class EditPlanScreen extends HookConsumerWidget {
     return summaryAsync.when(
       loading: () => Scaffold(
         backgroundColor: palette.canvas,
-        appBar: _EditPlanAppBar(budgetId: budgetId),
+        appBar: _EditPlanAppBar(entityId: entityId),
         body: Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
       ),
       error: (_, _) => Scaffold(
         backgroundColor: palette.canvas,
-        appBar: _EditPlanAppBar(budgetId: budgetId),
+        appBar: _EditPlanAppBar(entityId: entityId),
         body: Padding(
           padding: const EdgeInsets.all(SpacingTokens.md),
           child: ObStatePanel.problem(
@@ -54,7 +54,7 @@ class EditPlanScreen extends HookConsumerWidget {
         final currencyCode = summary.budget.currencyCode;
 
         return _EditPlanContent(
-          budgetId: budgetId,
+          entityId: entityId,
           summary: summary,
           goalsMap: goalsMap,
           currencyCode: currencyCode,
@@ -66,13 +66,13 @@ class EditPlanScreen extends HookConsumerWidget {
 
 class _EditPlanContent extends HookConsumerWidget {
   const _EditPlanContent({
-    required this.budgetId,
+    required this.entityId,
     required this.summary,
     required this.goalsMap,
     required this.currencyCode,
   });
 
-  final String budgetId;
+  final String entityId;
   final BudgetSummary summary;
   final Map<String, EnvelopeGoal> goalsMap;
   final String currencyCode;
@@ -90,14 +90,14 @@ class _EditPlanContent extends HookConsumerWidget {
       return null;
     }, [summary.categories]);
 
-    final monthlyTargetsCents = _computeMonthlyTargets(
+    final monthlyTargetsMinor = _computeMonthlyTargets(
       categories: orderedCategories.value,
       goalsMap: goalsMap,
     );
-    final monthlyIncomeCents = summary.totalIncomeCents;
-    final monthlyTargetsProgress = monthlyIncomeCents <= 0
+    final monthlyIncomeMinor = summary.totalIncomeMinor;
+    final monthlyTargetsProgress = monthlyIncomeMinor <= 0
         ? 0.0
-        : (monthlyTargetsCents / monthlyIncomeCents).clamp(0.0, 1.0);
+        : (monthlyTargetsMinor / monthlyIncomeMinor).clamp(0.0, 1.0);
 
     Future<void> saveCategoryOrder() async {
       if (!isReordering.value || isSavingReorder.value) return;
@@ -111,7 +111,7 @@ class _EditPlanContent extends HookConsumerWidget {
         if (categoryIds.isNotEmpty) {
           await ref
               .read(categoryActionsProvider.notifier)
-              .reorderCategories(budgetId: budgetId, categoryIds: categoryIds);
+              .reorderCategories(entityId: entityId, categoryIds: categoryIds);
         }
         isReordering.value = false;
       } on Exception catch (_) {
@@ -130,7 +130,7 @@ class _EditPlanContent extends HookConsumerWidget {
 
     return Scaffold(
       backgroundColor: palette.canvas,
-      appBar: _EditPlanAppBar(budgetId: budgetId),
+      appBar: _EditPlanAppBar(entityId: entityId),
       body: ListView(
         padding: const EdgeInsets.all(SpacingTokens.md),
         children: [
@@ -140,7 +140,7 @@ class _EditPlanContent extends HookConsumerWidget {
             child: Column(
               children: [
                 ObAmount(
-                  formatCentsForCode(monthlyTargetsCents, currencyCode),
+                  formatMinorForCode(monthlyTargetsMinor, currencyCode),
                   style: theme.textTheme.displaySmall,
                 ),
                 const SizedBox(height: SpacingTokens.xs),
@@ -161,14 +161,14 @@ class _EditPlanContent extends HookConsumerWidget {
               children: [
                 _TargetRow(
                   label: l10n.editPlanMonthlyTargets,
-                  amount: formatCentsForCode(monthlyTargetsCents, currencyCode),
+                  amount: formatMinorForCode(monthlyTargetsMinor, currencyCode),
                   fraction: monthlyTargetsProgress,
                   tone: ObTone.funded,
                 ),
                 const Divider(height: SpacingTokens.lg),
                 _TargetRow(
                   label: l10n.editPlanMonthlyIncome,
-                  amount: formatCentsForCode(monthlyIncomeCents, currencyCode),
+                  amount: formatMinorForCode(monthlyIncomeMinor, currencyCode),
                   fraction: 1,
                   tone: ObTone.neutral,
                   trailing: SkribbleIcon(
@@ -346,15 +346,15 @@ class _EditPlanContent extends HookConsumerWidget {
         if (envelopeId == null) continue;
         final goal = goalsMap[envelopeId];
         if (goal == null) continue;
-        total += _goalTargetCents(goal);
+        total += _goalTargetMinor(goal);
       }
     }
     return total;
   }
 
-  int _goalTargetCents(EnvelopeGoal goal) => switch (goal.goalType) {
-    'monthly_funding' => goal.monthlyFundingCents ?? goal.targetAmountCents,
-    _ => goal.targetAmountCents,
+  int _goalTargetMinor(EnvelopeGoal goal) => switch (goal.goalType) {
+    'monthly_funding' => goal.monthlyFundingMinor ?? goal.targetAmountMinor,
+    _ => goal.targetAmountMinor,
   };
 
   Future<void> _showSetGoalDialog({
@@ -367,7 +367,7 @@ class _EditPlanContent extends HookConsumerWidget {
     await showDialog<void>(
       context: context,
       builder: (_) => SetGoalDialog(
-        budgetId: budgetId,
+        entityId: entityId,
         envelopeId: envelopeId,
         existingGoal: existingGoal,
         envelopeName: envelope.name,
@@ -381,7 +381,7 @@ class _EditPlanContent extends HookConsumerWidget {
       showDialog<void>(
         context: context,
         builder: (_) =>
-            AddCategoryDialog(budgetId: budgetId, nextSortOrder: nextSortOrder),
+            AddCategoryDialog(entityId: entityId, nextSortOrder: nextSortOrder),
       ),
     );
   }
@@ -402,7 +402,7 @@ class _EditPlanContent extends HookConsumerWidget {
         ).withAlpha(210),
         builder: (_) => AddEnvelopeDialog(
           categoryId: categoryId,
-          budgetId: budgetId,
+          entityId: entityId,
           currencyCode: currencyCode,
           year: year,
           month: month,
@@ -567,7 +567,7 @@ class _EditPlanContent extends HookConsumerWidget {
           .read(categoryActionsProvider.notifier)
           .toggleHidden(
             categoryId: categoryId,
-            budgetId: budgetId,
+            entityId: entityId,
             isHidden: true,
           );
 
@@ -579,7 +579,7 @@ class _EditPlanContent extends HookConsumerWidget {
             .toggleHidden(
               envelopeId: envelopeId,
               categoryId: categoryId,
-              budgetId: budgetId,
+              entityId: entityId,
               isHidden: true,
             );
       }
@@ -610,8 +610,8 @@ class _EditPlanContent extends HookConsumerWidget {
     final envelopeSummary = envelopeCount == 1
         ? l10n.editPlanEnvelopeCount(1)
         : l10n.editPlanEnvelopeCount(envelopeCount);
-    final allocated = formatCentsForCode(
-      categoryWithEnvelopes.totalBudgetedCents,
+    final allocated = formatMinorForCode(
+      categoryWithEnvelopes.totalBudgetedMinor,
       currencyCode,
     );
     final shouldDelete = await showDialog<bool>(
@@ -644,7 +644,7 @@ class _EditPlanContent extends HookConsumerWidget {
     try {
       await ref
           .read(categoryActionsProvider.notifier)
-          .deleteCategory(categoryId: categoryId, budgetId: budgetId);
+          .deleteCategory(categoryId: categoryId, entityId: entityId);
     } on Exception catch (_) {
       if (!context.mounted) return;
       showAppToast(
@@ -775,12 +775,12 @@ class _EditPlanCategoryCard extends HookWidget {
             final envelope = entry.value;
             final envelopeId = envelope.id?.toString() ?? '';
             final goal = envelopeId.isEmpty ? null : goalsMap[envelopeId];
-            final targetCents = goal == null
+            final targetMinor = goal == null
                 ? null
                 : switch (goal.goalType) {
                     'monthly_funding' =>
-                      goal.monthlyFundingCents ?? goal.targetAmountCents,
-                    _ => goal.targetAmountCents,
+                      goal.monthlyFundingMinor ?? goal.targetAmountMinor,
+                    _ => goal.targetAmountMinor,
                   };
 
             yield InkWell(
@@ -807,7 +807,7 @@ class _EditPlanCategoryCard extends HookWidget {
                         ),
                       ),
                     ),
-                    if (!reordering && targetCents == null)
+                    if (!reordering && targetMinor == null)
                       TextButton.icon(
                         onPressed: () => onOpenTarget(envelope, goal),
                         icon: SkribbleIcon(
@@ -817,9 +817,9 @@ class _EditPlanCategoryCard extends HookWidget {
                         ),
                         label: Text(l10n.editPlanAddTarget),
                       ),
-                    if (!reordering && targetCents != null)
+                    if (!reordering && targetMinor != null)
                       ObAmount(
-                        formatCentsForCode(targetCents, currencyCode),
+                        formatMinorForCode(targetMinor, currencyCode),
                         style: theme.textTheme.titleMedium,
                       ),
                   ],
@@ -886,9 +886,9 @@ class _TargetRow extends HookWidget {
 }
 
 class _EditPlanAppBar extends HookWidget implements PreferredSizeWidget {
-  const _EditPlanAppBar({required this.budgetId});
+  const _EditPlanAppBar({required this.entityId});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context) {
@@ -901,7 +901,7 @@ class _EditPlanAppBar extends HookWidget implements PreferredSizeWidget {
       leadingWidth: 108,
       leading: TextButton.icon(
         onPressed: () =>
-            context.goNamed(planRoute, pathParameters: {'id': budgetId}),
+            context.goNamed(planRoute, pathParameters: {'entityId': entityId}),
         style: TextButton.styleFrom(foregroundColor: palette.ink),
         icon: SkribbleIcon(
           data: OpenBudgetIcons.back,
@@ -918,7 +918,7 @@ class _EditPlanAppBar extends HookWidget implements PreferredSizeWidget {
       actions: [
         TextButton(
           onPressed: () =>
-              context.goNamed(planRoute, pathParameters: {'id': budgetId}),
+              context.goNamed(planRoute, pathParameters: {'entityId': entityId}),
           child: Text(l10n.dialogNext),
         ),
         const SizedBox(width: SpacingTokens.xs),

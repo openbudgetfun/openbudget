@@ -11,7 +11,7 @@ import 'package:openbudget_app/src/features/transaction_rules/screens/rule_list_
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
 );
@@ -28,7 +28,7 @@ Budget _makeBudget() =>
     Budget(name: 'Test Budget', currencyCode: 'USD', ownerId: _ownerUuid);
 
 Payee _makePayee({String name = 'Test Payee', UuidValue? id}) =>
-    Payee(id: id ?? _payeeUuid, name: name, budgetId: _budgetUuid);
+    Payee(id: id ?? _payeeUuid, name: name, entityId: _budgetUuid);
 
 TransactionRule _makeRule({
   UuidValue? id,
@@ -37,7 +37,7 @@ TransactionRule _makeRule({
   bool enabled = true,
 }) => TransactionRule(
   id: id,
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   payeeId: payeeId ?? _payeeUuid,
   targetEnvelopeId: targetEnvelopeId ?? _envelopeUuid,
   enabled: enabled,
@@ -46,8 +46,8 @@ TransactionRule _makeRule({
 Envelope _makeEnvelope({String name = 'Groceries', UuidValue? id}) => Envelope(
   id: id ?? _envelopeUuid,
   name: name,
-  budgetedAmountCents: 0,
-  spentAmountCents: 0,
+  budgetedAmountMinor: 0,
+  spentAmountMinor: 0,
   currencyCode: 'USD',
   categoryId: _categoryUuid,
   sortOrder: 0,
@@ -56,7 +56,7 @@ Envelope _makeEnvelope({String name = 'Groceries', UuidValue? id}) => Envelope(
 Category _makeCategory({String name = 'Food'}) => Category(
   id: _categoryUuid,
   name: name,
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   sortOrder: 0,
   isHidden: false,
 );
@@ -64,9 +64,9 @@ Category _makeCategory({String name = 'Food'}) => Category(
 BudgetSummary _makeEmptySummary() => BudgetSummary(
   budget: _makeBudget(),
   categories: const [],
-  totalIncomeCents: 0,
-  totalBudgetedCents: 0,
-  readyToAssignCents: 0,
+  totalIncomeMinor: 0,
+  totalBudgetedMinor: 0,
+  readyToAssignMinor: 0,
   year: 2026,
   month: 2,
 );
@@ -85,14 +85,14 @@ BudgetSummary _makeSummaryWithEnvelope({
         category: category,
         envelopes: [envelope],
         monthlyEnvelopes: const [],
-        totalBudgetedCents: 0,
-        totalSpentCents: 0,
-        totalAvailableCents: 0,
+        totalBudgetedMinor: 0,
+        totalSpentMinor: 0,
+        totalAvailableMinor: 0,
       ),
     ],
-    totalIncomeCents: 0,
-    totalBudgetedCents: 0,
-    readyToAssignCents: 0,
+    totalIncomeMinor: 0,
+    totalBudgetedMinor: 0,
+    readyToAssignMinor: 0,
     year: 2026,
     month: 2,
   );
@@ -107,7 +107,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
+            home: const RuleListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -121,19 +121,19 @@ void main() {
         ProviderScope(
           overrides: [
             ruleListProvider.overrideWith(
-              (ref, budgetId) =>
+              (ref, entityId) =>
                   throw Exception('Could not load transaction rules'),
             ),
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
+            payeeListProvider.overrideWith((ref, entityId) async => <Payee>[]),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
+              (ref, entityId) async => _makeEmptySummary(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
+            home: const RuleListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -147,18 +147,18 @@ void main() {
         ProviderScope(
           overrides: [
             ruleListProvider.overrideWith(
-              (ref, budgetId) async => <TransactionRule>[],
+              (ref, entityId) async => <TransactionRule>[],
             ),
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
+            payeeListProvider.overrideWith((ref, entityId) async => <Payee>[]),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
+              (ref, entityId) async => _makeEmptySummary(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
+            home: const RuleListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -185,18 +185,18 @@ void main() {
         ProviderScope(
           overrides: [
             ruleListProvider.overrideWith(
-              (ref, budgetId) async => <TransactionRule>[],
+              (ref, entityId) async => <TransactionRule>[],
             ),
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
+            payeeListProvider.overrideWith((ref, entityId) async => <Payee>[]),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
+              (ref, entityId) async => _makeEmptySummary(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
+            home: const RuleListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -212,18 +212,18 @@ void main() {
         ProviderScope(
           overrides: [
             ruleListProvider.overrideWith(
-              (ref, budgetId) async => <TransactionRule>[],
+              (ref, entityId) async => <TransactionRule>[],
             ),
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
+            payeeListProvider.overrideWith((ref, entityId) async => <Payee>[]),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
+              (ref, entityId) async => _makeEmptySummary(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
+            home: const RuleListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -247,17 +247,17 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            ruleListProvider.overrideWith((ref, budgetId) async => [rule]),
-            payeeListProvider.overrideWith((ref, budgetId) async => [payee]),
+            ruleListProvider.overrideWith((ref, entityId) async => [rule]),
+            payeeListProvider.overrideWith((ref, entityId) async => [payee]),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
+              (ref, entityId) async => _makeEmptySummary(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
+            home: const RuleListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -277,17 +277,17 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            ruleListProvider.overrideWith((ref, budgetId) async => [rule]),
-            payeeListProvider.overrideWith((ref, budgetId) async => [payee]),
+            ruleListProvider.overrideWith((ref, entityId) async => [rule]),
+            payeeListProvider.overrideWith((ref, entityId) async => [payee]),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeSummaryWithEnvelope(),
+              (ref, entityId) async => _makeSummaryWithEnvelope(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
+            home: const RuleListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -301,18 +301,18 @@ void main() {
         ProviderScope(
           overrides: [
             ruleListProvider.overrideWith(
-              (ref, budgetId) async => <TransactionRule>[],
+              (ref, entityId) async => <TransactionRule>[],
             ),
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
+            payeeListProvider.overrideWith((ref, entityId) async => <Payee>[]),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
+              (ref, entityId) async => _makeEmptySummary(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
+            home: const RuleListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -326,18 +326,18 @@ void main() {
         ProviderScope(
           overrides: [
             ruleListProvider.overrideWith(
-              (ref, budgetId) async => <TransactionRule>[],
+              (ref, entityId) async => <TransactionRule>[],
             ),
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
+            payeeListProvider.overrideWith((ref, entityId) async => <Payee>[]),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
+              (ref, entityId) async => _makeEmptySummary(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
+            home: const RuleListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -376,19 +376,19 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            ruleListProvider.overrideWith((ref, budgetId) async => rules),
+            ruleListProvider.overrideWith((ref, entityId) async => rules),
             payeeListProvider.overrideWith(
-              (ref, budgetId) async => [payee1, payee2],
+              (ref, entityId) async => [payee1, payee2],
             ),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
+              (ref, entityId) async => _makeEmptySummary(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
+            home: const RuleListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -408,17 +408,17 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            ruleListProvider.overrideWith((ref, budgetId) async => [rule]),
-            payeeListProvider.overrideWith((ref, budgetId) async => [payee]),
+            ruleListProvider.overrideWith((ref, entityId) async => [rule]),
+            payeeListProvider.overrideWith((ref, entityId) async => [payee]),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
+              (ref, entityId) async => _makeEmptySummary(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
+            home: const RuleListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -444,17 +444,17 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            ruleListProvider.overrideWith((ref, budgetId) async => rules),
-            payeeListProvider.overrideWith((ref, budgetId) async => [payee]),
+            ruleListProvider.overrideWith((ref, entityId) async => rules),
+            payeeListProvider.overrideWith((ref, entityId) async => [payee]),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
+              (ref, entityId) async => _makeEmptySummary(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
+            home: const RuleListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -489,19 +489,19 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            ruleListProvider.overrideWith((ref, budgetId) async => rules),
+            ruleListProvider.overrideWith((ref, entityId) async => rules),
             payeeListProvider.overrideWith(
-              (ref, budgetId) async => [payeeEnabled, payeeDisabled],
+              (ref, entityId) async => [payeeEnabled, payeeDisabled],
             ),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
+              (ref, entityId) async => _makeEmptySummary(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
+            home: const RuleListScreen(entityId: _entityId),
           ),
         ),
       );

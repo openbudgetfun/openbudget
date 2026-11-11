@@ -13,7 +13,7 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 import '../../whats_new/whats_new_test_helpers.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _ownerUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000401',
 );
@@ -32,7 +32,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           budgetDetailProvider.overrideWith(
-            (ref, budgetId) async => _makeBudget(),
+            (ref, entityId) async => _makeBudget(),
           ),
           uiPreferencesStoreProvider.overrideWithValue(
             InMemoryUiPreferencesStore(),
@@ -46,7 +46,7 @@ void main() {
       addTearDown(container.dispose);
 
       await tester.pumpApp(
-        const SettingsScreen(budgetId: _budgetId),
+        const SettingsScreen(entityId: _entityId),
         container: container,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -75,7 +75,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           budgetDetailProvider.overrideWith(
-            (ref, budgetId) async => _makeBudget(),
+            (ref, entityId) async => _makeBudget(),
           ),
           uiPreferencesStoreProvider.overrideWithValue(
             InMemoryUiPreferencesStore(),
@@ -92,7 +92,7 @@ void main() {
       addTearDown(container.dispose);
 
       await tester.pumpApp(
-        const SettingsScreen(budgetId: _budgetId),
+        const SettingsScreen(entityId: _entityId),
         container: container,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

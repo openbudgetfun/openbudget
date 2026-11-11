@@ -11,13 +11,13 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 /// asks the server for tax data it does not show.
 class EnvelopeTaxCategoryRow extends HookWidget {
   const EnvelopeTaxCategoryRow({
-    required this.budgetId,
+    required this.entityId,
     required this.envelope,
     this.onChanged,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final Envelope envelope;
   final VoidCallback? onChanged;
 
@@ -54,7 +54,7 @@ class EnvelopeTaxCategoryRow extends HookWidget {
       onTap: () async {
         final selection = await showEnvelopeTaxCategorySheet(
           context,
-          budgetId: budgetId,
+          entityId: entityId,
           envelopeId: envelope.id?.toString() ?? '',
           subject: envelope.name,
           currentCode: selectedCode.value,
@@ -70,14 +70,14 @@ class EnvelopeTaxCategoryRow extends HookWidget {
 /// The tax treatment control on a transaction's edit screen.
 class TransactionTaxCategoryRow extends HookWidget {
   const TransactionTaxCategoryRow({
-    required this.budgetId,
+    required this.entityId,
     required this.transaction,
     required this.currencyCode,
     this.onChanged,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final Transaction transaction;
   final String currencyCode;
   final VoidCallback? onChanged;
@@ -113,13 +113,13 @@ class TransactionTaxCategoryRow extends HookWidget {
       onTap: () async {
         final selection = await showTransactionTaxCategorySheet(
           context,
-          budgetId: budgetId,
+          entityId: entityId,
           transactionId: transaction.id?.toString() ?? '',
           subject: transaction.description,
           currencyCode: currencyCode,
           currentCode: selectedCode.value,
           businessUsePercent: transaction.businessUsePercent,
-          salesTaxCents: transaction.salesTaxCents,
+          salesTaxMinor: transaction.salesTaxMinor,
         );
         if (selection == null) return;
         selectedCode.value = selection.code;

@@ -27,8 +27,8 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:patrol/patrol.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000711';
-final _budgetUuid = UuidValue.fromString(_budgetId);
+const _entityId = '00000000-0000-0000-0000-000000000711';
+final _budgetUuid = UuidValue.fromString(_entityId);
 final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000712');
 
 Budget _makeBudget({String? displayCurrencyCode}) => Budget(
@@ -44,9 +44,9 @@ List<Account> _makeAccounts() => [
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000713'),
     name: 'USD Checking',
     accountType: 'checking',
-    balanceCents: 10000,
+    balanceMinor: 10000,
     currencyCode: 'USD',
-    budgetId: _budgetUuid,
+    entityId: _budgetUuid,
     onBudget: true,
     sortOrder: 0,
     isClosed: false,
@@ -55,9 +55,9 @@ List<Account> _makeAccounts() => [
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000714'),
     name: 'EUR Savings',
     accountType: 'savings',
-    balanceCents: 10000,
+    balanceMinor: 10000,
     currencyCode: 'EUR',
-    budgetId: _budgetUuid,
+    entityId: _budgetUuid,
     onBudget: true,
     sortOrder: 1,
     isClosed: false,
@@ -67,9 +67,9 @@ List<Account> _makeAccounts() => [
 BudgetSummary _makeSummary(Budget budget) => BudgetSummary(
   budget: budget,
   categories: const [],
-  totalIncomeCents: 10000,
-  totalBudgetedCents: 0,
-  readyToAssignCents: 10000,
+  totalIncomeMinor: 10000,
+  totalBudgetedMinor: 0,
+  readyToAssignMinor: 10000,
   year: 2026,
   month: 2,
 );
@@ -118,7 +118,7 @@ void main() {
     $,
   ) async {
     final tester = $.tester;
-    final displayCurrencyOverride = <String, String?>{_budgetId: null};
+    final displayCurrencyOverride = <String, String?>{_entityId: null};
 
     final container = ProviderContainer(
       overrides: [
@@ -129,11 +129,11 @@ void main() {
         updateDisplayCurrencyProvider.overrideWith(
           (ref) =>
               ({
-                required budgetId,
+                required entityId,
                 required clearDisplayCurrencyCode,
                 displayCurrencyCode,
               }) async {
-                displayCurrencyOverride[budgetId] = clearDisplayCurrencyCode
+                displayCurrencyOverride[entityId] = clearDisplayCurrencyCode
                     ? null
                     : displayCurrencyCode;
               },
@@ -143,7 +143,7 @@ void main() {
     addTearDown(container.dispose);
 
     final router = GoRouter(
-      initialLocation: '/budgets/$_budgetId/more/settings/display',
+      initialLocation: '/budgets/$_entityId/more/settings/display',
       routes: [
         GoRoute(
           name: settingsRoute,
@@ -154,7 +154,7 @@ void main() {
               name: displayOptionsRoute,
               path: 'display',
               builder: (context, state) =>
-                  DisplayOptionsScreen(budgetId: state.pathParameters['id']!),
+                  DisplayOptionsScreen(entityId: state.pathParameters['entityId']!),
             ),
           ],
         ),
@@ -179,8 +179,8 @@ void main() {
     await tester.tap(find.text('British Pound (GBP)'));
     await tester.pumpAndSettle();
 
-    expect(displayCurrencyOverride[_budgetId], 'GBP');
-    container.invalidate(budgetDetailProvider(_budgetId));
+    expect(displayCurrencyOverride[_entityId], 'GBP');
+    container.invalidate(budgetDetailProvider(_entityId));
     await tester.pumpAndSettle();
     expect(find.text('British Pound (GBP)'), findsOneWidget);
     await _captureScreenshot(tester, 'display_options_gbp_selected');
@@ -204,19 +204,19 @@ void main() {
           name: accountListRoute,
           path: '/budgets/:id/accounts',
           builder: (context, state) =>
-              AccountListScreen(budgetId: state.pathParameters['id']!),
+              AccountListScreen(entityId: state.pathParameters['entityId']!),
         ),
         GoRoute(
           name: reportsRoute,
           path: '/budgets/:id/reflect',
           builder: (context, state) =>
-              ReportsScreen(budgetId: state.pathParameters['id']!),
+              ReportsScreen(entityId: state.pathParameters['entityId']!),
         ),
         GoRoute(
           name: netWorthRoute,
           path: '/budgets/:id/reflect/net-worth',
           builder: (context, state) =>
-              NetWorthScreen(budgetId: state.pathParameters['id']!),
+              NetWorthScreen(entityId: state.pathParameters['entityId']!),
         ),
       ],
     );
@@ -226,18 +226,18 @@ void main() {
         overrides: [
           budgetListProvider.overrideWith((ref) async => [budget]),
           budgetSummaryProvider.overrideWith(
-            (ref, budgetId) async => _makeSummary(budget),
+            (ref, entityId) async => _makeSummary(budget),
           ),
-          accountListProvider.overrideWith((ref, budgetId) async => accounts),
+          accountListProvider.overrideWith((ref, entityId) async => accounts),
           spendingReportProvider.overrideWith(
             (ref, args) async => _makeReport(),
           ),
           netWorthProvider.overrideWith(
-            (ref, budgetId) async => _makeNetWorthData(accounts),
+            (ref, entityId) async => _makeNetWorthData(accounts),
           ),
-          ageOfMoneyProvider.overrideWith((ref, budgetId) async => 2),
+          ageOfMoneyProvider.overrideWith((ref, entityId) async => 2),
           displayCurrencyConverterProvider.overrideWith(
-            (ref, budgetId) async => const DisplayCurrencyConverter(
+            (ref, entityId) async => const DisplayCurrencyConverter(
               displayCurrency: CurrencyCode.gbp,
               baseCurrencyCode: 'USD',
               ratesByCode: {'USD': 1.0, 'EUR': 0.8, 'GBP': 0.7},
@@ -258,19 +258,19 @@ void main() {
     expect(find.textContaining('\u00A370.00 to assign'), findsOneWidget);
     await _captureScreenshot(tester, 'home_summary_converted_gbp');
 
-    router.go('/budgets/$_budgetId/accounts');
+    router.go('/budgets/$_entityId/accounts');
     await tester.pumpAndSettle();
     expect(find.text('Accounts'), findsOneWidget);
     expect(find.textContaining('\u00A3157.50'), findsWidgets);
     await _captureScreenshot(tester, 'accounts_summary_converted_gbp');
 
-    router.go('/budgets/$_budgetId/reflect');
+    router.go('/budgets/$_entityId/reflect');
     await tester.pumpAndSettle();
     expect(find.text('Reflect'), findsOneWidget);
     expect(find.textContaining('\u00A31,554.00'), findsWidgets);
     await _captureScreenshot(tester, 'reports_summary_converted_gbp');
 
-    router.go('/budgets/$_budgetId/reflect/net-worth');
+    router.go('/budgets/$_entityId/reflect/net-worth');
     await tester.pumpAndSettle();
     expect(find.text('Net Worth'), findsWidgets);
     expect(find.textContaining('\u00A3157.50'), findsWidgets);

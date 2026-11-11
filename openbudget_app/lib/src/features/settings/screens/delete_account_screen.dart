@@ -4,9 +4,9 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class DeleteAccountScreen extends HookWidget {
-  const DeleteAccountScreen({required this.budgetId, super.key});
+  const DeleteAccountScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context) {

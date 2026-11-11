@@ -73,7 +73,7 @@ final class LedgerAccountsProvider
   }
 }
 
-String _$ledgerAccountsHash() => r'd4016bbf6dc27ea1439d923c0bef4a78d302def2';
+String _$ledgerAccountsHash() => r'0e6ff4ba5811c995eafc55c9b74be15aa8c2f0ca';
 
 /// The budget's chart of accounts, archived accounts included so the
 /// Accounts tab can mark them.
@@ -92,8 +92,8 @@ final class LedgerAccountsFamily extends $Family
   /// The budget's chart of accounts, archived accounts included so the
   /// Accounts tab can mark them.
 
-  LedgerAccountsProvider call(String budgetId) =>
-      LedgerAccountsProvider._(argument: budgetId, from: this);
+  LedgerAccountsProvider call(String entityId) =>
+      LedgerAccountsProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'ledgerAccountsProvider';
@@ -159,7 +159,7 @@ final class LedgerJournalsProvider
   }
 }
 
-String _$ledgerJournalsHash() => r'c7900a6f97413b825b723bacda18a39ccbd391c8';
+String _$ledgerJournalsHash() => r'bb5f19178a59a3100f653548682bd2524bec5f28';
 
 /// The budget's journals, newest first.
 
@@ -176,8 +176,8 @@ final class LedgerJournalsFamily extends $Family
 
   /// The budget's journals, newest first.
 
-  LedgerJournalsProvider call(String budgetId) =>
-      LedgerJournalsProvider._(argument: budgetId, from: this);
+  LedgerJournalsProvider call(String entityId) =>
+      LedgerJournalsProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'ledgerJournalsProvider';
@@ -332,7 +332,7 @@ final class LedgerLockDateProvider
   }
 }
 
-String _$ledgerLockDateHash() => r'2edd1e70c17e2ab616b8735bd7379555d8f180b7';
+String _$ledgerLockDateHash() => r'0bd78be081e737f4bc1b74644ee7df40c04d40b8';
 
 /// The budget's stored period lock date, or null when none is set.
 
@@ -349,8 +349,8 @@ final class LedgerLockDateFamily extends $Family
 
   /// The budget's stored period lock date, or null when none is set.
 
-  LedgerLockDateProvider call(String budgetId) =>
-      LedgerLockDateProvider._(argument: budgetId, from: this);
+  LedgerLockDateProvider call(String entityId) =>
+      LedgerLockDateProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'ledgerLockDateProvider';
@@ -417,7 +417,7 @@ final class LedgerTrialBalanceProvider
 }
 
 String _$ledgerTrialBalanceHash() =>
-    r'a636436799c60a1c5ab1d41d72233b6a8fb0ce82';
+    r'cc452235e3bb2abae47fa2614533350a95b618aa';
 
 /// The trial balance through the inclusive calendar date [asOf].
 
@@ -438,8 +438,8 @@ final class LedgerTrialBalanceFamily extends $Family
 
   /// The trial balance through the inclusive calendar date [asOf].
 
-  LedgerTrialBalanceProvider call(String budgetId, DateTime asOf) =>
-      LedgerTrialBalanceProvider._(argument: (budgetId, asOf), from: this);
+  LedgerTrialBalanceProvider call(String entityId, DateTime asOf) =>
+      LedgerTrialBalanceProvider._(argument: (entityId, asOf), from: this);
 
   @override
   String toString() => r'ledgerTrialBalanceProvider';

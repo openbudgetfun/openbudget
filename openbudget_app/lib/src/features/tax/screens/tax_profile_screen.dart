@@ -18,14 +18,14 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// Asks the questions that change how a budget's figures are taxed.
 class TaxProfileScreen extends HookConsumerWidget {
-  const TaxProfileScreen({required this.budgetId, super.key});
+  const TaxProfileScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final profileAsync = ref.watch(taxProfileProvider(budgetId));
+    final profileAsync = ref.watch(taxProfileProvider(entityId));
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.taxProfileTitle)),
@@ -41,7 +41,7 @@ class TaxProfileScreen extends HookConsumerWidget {
               message: taxErrorMessage(error, l10n.taxProfileLoadError),
               action: ObStateAction(
                 label: l10n.taxCategoryLoadRetry,
-                onPressed: () => ref.invalidate(taxProfileProvider(budgetId)),
+                onPressed: () => ref.invalidate(taxProfileProvider(entityId)),
               ),
             ),
           ),
@@ -50,7 +50,7 @@ class TaxProfileScreen extends HookConsumerWidget {
           key: ValueKey(
             record?.updatedAt.microsecondsSinceEpoch ?? record?.id?.toString(),
           ),
-          budgetId: budgetId,
+          entityId: entityId,
           existing: record == null
               ? null
               : parseTaxProfileJson(record.profileJson),
@@ -63,13 +63,13 @@ class TaxProfileScreen extends HookConsumerWidget {
 
 class _TaxProfileForm extends HookConsumerWidget {
   const _TaxProfileForm({
-    required this.budgetId,
+    required this.entityId,
     required this.existing,
     required this.existingLinkedBudgetId,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final TaxProfile? existing;
   final String? existingLinkedBudgetId;
 
@@ -80,7 +80,7 @@ class _TaxProfileForm extends HookConsumerWidget {
     final palette = theme.ob;
     final budgetsAsync = ref.watch(budgetListProvider);
     final budgets = budgetsAsync.value ?? const <Budget>[];
-    final currentBudget = _budgetWithId(budgets, budgetId);
+    final currentBudget = _budgetWithId(budgets, entityId);
 
     final profile = existing;
     final gb = profile is GbTaxProfile ? profile : null;
@@ -198,7 +198,7 @@ class _TaxProfileForm extends HookConsumerWidget {
         .whereType<Budget>()
         .where(
           (budget) =>
-              budget.id?.toString() != budgetId &&
+              budget.id?.toString() != entityId &&
               budget.id?.toString() != null,
         )
         .toList();
@@ -331,7 +331,7 @@ class _TaxProfileForm extends HookConsumerWidget {
         }
       }
       if (entityKind.value != TaxEntityKind.individual &&
-          linkedBudgetId.value == budgetId) {
+          linkedBudgetId.value == entityId) {
         formError.value = l10n.taxLinkedBudgetError;
         return;
       }
@@ -343,7 +343,7 @@ class _TaxProfileForm extends HookConsumerWidget {
         await ref
             .read(taxActionsProvider.notifier)
             .saveProfile(
-              budgetId: budgetId,
+              entityId: entityId,
               jurisdiction: profile.jurisdiction.countryCode,
               entityKind: profile.entityKind.name,
               profileJson: jsonEncode(profile.toJson()),
@@ -369,7 +369,7 @@ class _TaxProfileForm extends HookConsumerWidget {
 
     String? linkedBudgetError() {
       if (entityKind.value == TaxEntityKind.individual) return null;
-      if (linkedBudgetId.value == budgetId) {
+      if (linkedBudgetId.value == entityId) {
         return l10n.taxLinkedBudgetError;
       }
       return null;

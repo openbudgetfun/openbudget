@@ -12,7 +12,7 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 class AddEnvelopeDialog extends HookConsumerWidget {
   const AddEnvelopeDialog({
     required this.categoryId,
-    required this.budgetId,
+    required this.entityId,
     required this.currencyCode,
     required this.year,
     required this.month,
@@ -20,7 +20,7 @@ class AddEnvelopeDialog extends HookConsumerWidget {
   });
 
   final String categoryId;
-  final String budgetId;
+  final String entityId;
   final String currencyCode;
   final int year;
   final int month;
@@ -117,8 +117,8 @@ class AddEnvelopeDialog extends HookConsumerWidget {
     final name = nameController.text.trim();
     if (name.isEmpty) return;
 
-    final amountCents =
-        parseBudgetAmountInputToCents(
+    final amountMinor =
+        parseBudgetAmountInputToMinor(
           input: amountInput,
           currencyCode: currencyCode,
         ) ??
@@ -132,18 +132,18 @@ class AddEnvelopeDialog extends HookConsumerWidget {
           .createEnvelope(
             name: name,
             categoryId: categoryId,
-            budgetedAmountCents: amountCents,
+            budgetedAmountMinor: amountMinor,
             currencyCode: normalizeCurrencyCode(currencyCode),
-            budgetId: budgetId,
+            entityId: entityId,
           );
       await ref
           .read(monthlyAllocationActionsProvider.notifier)
           .upsertAllocation(
             envelopeId: envelope.id?.toString() ?? '',
-            budgetId: budgetId,
+            entityId: entityId,
             year: year,
             month: month,
-            allocatedCents: amountCents,
+            allocatedMinor: amountMinor,
           );
       if (!context.mounted) return;
       showAppToast(

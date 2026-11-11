@@ -1,40 +1,40 @@
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_repository.dart';
+import 'package:openbudget_app/src/features/transactions/providers/transaction_pages_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'tax_actions_provider.g.dart';
 
-/// Writes tax profiles and categorisation, then refreshes what they change.
+/// Writes tax profiles and per-line categorisation, then refreshes what
+/// they change. Line tax goes through `tax.setLineTax`, which posts a
+/// transaction revision, so the plan and books follow.
 @Riverpod(keepAlive: true)
 class TaxActions extends _$TaxActions {
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
   Future<TaxProfileRecord> saveProfile({
-    required String budgetId,
+    required String entityId,
     required String jurisdiction,
     required String entityKind,
     required String profileJson,
-    String? linkedBudgetId,
   }) async {
     state = const AsyncValue.loading();
     try {
       final record = await ref
           .read(taxRepositoryProvider)
           .saveProfile(
-            budgetId: budgetId,
+            entityId: entityId,
             jurisdiction: jurisdiction,
             entityKind: entityKind,
             profileJson: profileJson,
-            linkedBudgetId: linkedBudgetId,
           );
       if (ref.mounted) {
         ref
-          ..invalidate(taxProfileProvider(budgetId))
-          ..invalidate(taxCategoriesProvider(budgetId))
+          ..invalidate(taxProfileProvider(entityId))
+          ..invalidate(taxCategoriesProvider(entityId))
           ..invalidate(taxReportProvider);
         state = const AsyncValue.data(null);
       }
@@ -48,7 +48,7 @@ class TaxActions extends _$TaxActions {
   }
 
   Future<Envelope> setEnvelopeTaxCategory({
-    required String budgetId,
+    required String entityId,
     required String envelopeId,
     String? code,
   }) async {
@@ -59,8 +59,7 @@ class TaxActions extends _$TaxActions {
           .setEnvelopeTaxCategory(envelopeId: envelopeId, code: code);
       if (ref.mounted) {
         ref
-          ..invalidate(budgetSummaryProvider(budgetId))
-          ..invalidate(budgetMonthlySummaryProvider(budgetId))
+          ..invalidate(budgetMonthProvider)
           ..invalidate(taxReportProvider);
         state = const AsyncValue.data(null);
       }
@@ -73,31 +72,30 @@ class TaxActions extends _$TaxActions {
     }
   }
 
-  Future<Transaction> setTransactionTax({
-    required String budgetId,
-    required String transactionId,
+  Future<TransactionView> setLineTax({
+    required String entityId,
+    required String transactionLineId,
     String? code,
     int? businessUsePercent,
-    int? salesTaxCents,
+    int? salesTaxMinor,
   }) async {
     state = const AsyncValue.loading();
     try {
-      final transaction = await ref
+      final view = await ref
           .read(taxRepositoryProvider)
-          .setTransactionTax(
-            transactionId: transactionId,
+          .setLineTax(
+            transactionLineId: transactionLineId,
             code: code,
             businessUsePercent: businessUsePercent,
-            salesTaxCents: salesTaxCents,
+            salesTaxMinor: salesTaxMinor,
           );
       if (ref.mounted) {
         ref
-          ..invalidate(transactionListProvider(budgetId))
-          ..invalidate(budgetSummaryProvider(budgetId))
+          ..invalidate(transactionPagesProvider(entityId))
           ..invalidate(taxReportProvider);
         state = const AsyncValue.data(null);
       }
-      return transaction;
+      return view;
     } on Exception catch (error, stackTrace) {
       if (ref.mounted) {
         state = AsyncValue.error(error, stackTrace);

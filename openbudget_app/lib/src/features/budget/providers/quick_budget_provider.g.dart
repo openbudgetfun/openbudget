@@ -8,12 +8,12 @@ part of 'quick_budget_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Computes quick-budget suggestions for an envelope based on historical data.
+/// Suggestions for one envelope from the previous three months' views.
 
 @ProviderFor(quickBudgetSuggestion)
 final quickBudgetSuggestionProvider = QuickBudgetSuggestionFamily._();
 
-/// Computes quick-budget suggestions for an envelope based on historical data.
+/// Suggestions for one envelope from the previous three months' views.
 
 final class QuickBudgetSuggestionProvider
     extends
@@ -25,10 +25,10 @@ final class QuickBudgetSuggestionProvider
     with
         $FutureModifier<QuickBudgetSuggestion>,
         $FutureProvider<QuickBudgetSuggestion> {
-  /// Computes quick-budget suggestions for an envelope based on historical data.
+  /// Suggestions for one envelope from the previous three months' views.
   QuickBudgetSuggestionProvider._({
     required QuickBudgetSuggestionFamily super.from,
-    required (String, String, int, int) super.argument,
+    required (String, String, int) super.argument,
   }) : super(
          retry: null,
          name: r'quickBudgetSuggestionProvider',
@@ -55,14 +55,8 @@ final class QuickBudgetSuggestionProvider
 
   @override
   FutureOr<QuickBudgetSuggestion> create(Ref ref) {
-    final argument = this.argument as (String, String, int, int);
-    return quickBudgetSuggestion(
-      ref,
-      argument.$1,
-      argument.$2,
-      argument.$3,
-      argument.$4,
-    );
+    final argument = this.argument as (String, String, int);
+    return quickBudgetSuggestion(ref, argument.$1, argument.$2, argument.$3);
   }
 
   @override
@@ -77,15 +71,15 @@ final class QuickBudgetSuggestionProvider
 }
 
 String _$quickBudgetSuggestionHash() =>
-    r'81627e09189f9ba65496fb1ef0c3113a35f954f8';
+    r'c440fc0380609acb4bfcbcc7aeaef37da41a3148';
 
-/// Computes quick-budget suggestions for an envelope based on historical data.
+/// Suggestions for one envelope from the previous three months' views.
 
 final class QuickBudgetSuggestionFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<QuickBudgetSuggestion>,
-          (String, String, int, int)
+          (String, String, int)
         > {
   QuickBudgetSuggestionFamily._()
     : super(
@@ -96,15 +90,14 @@ final class QuickBudgetSuggestionFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Computes quick-budget suggestions for an envelope based on historical data.
+  /// Suggestions for one envelope from the previous three months' views.
 
   QuickBudgetSuggestionProvider call(
-    String budgetId,
+    String entityId,
     String envelopeId,
-    int year,
     int month,
   ) => QuickBudgetSuggestionProvider._(
-    argument: (budgetId, envelopeId, year, month),
+    argument: (entityId, envelopeId, month),
     from: this,
   );
 

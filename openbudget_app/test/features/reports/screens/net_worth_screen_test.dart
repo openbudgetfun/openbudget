@@ -8,14 +8,14 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  const budgetId = 'test-budget-1';
+  const entityId = 'test-budget-1';
   final budgetUuid = UuidValue.fromString(
     '00000000-0000-0000-0000-000000000001',
   );
 
   Account makeAccount({
     required String name,
-    required int balanceCents,
+    required int balanceMinor,
     required String currencyCode,
     String type = 'checking',
   }) => Account(
@@ -26,9 +26,9 @@ void main() {
     ),
     name: name,
     accountType: type,
-    balanceCents: balanceCents,
+    balanceMinor: balanceMinor,
     currencyCode: currencyCode,
-    budgetId: budgetUuid,
+    entityId: budgetUuid,
     onBudget: true,
     sortOrder: 0,
     isClosed: false,
@@ -40,14 +40,14 @@ void main() {
       theme: OpenBudgetTheme.light,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const NetWorthScreen(budgetId: budgetId),
+      home: const NetWorthScreen(entityId: entityId),
     ),
   );
 
   testWidgets('renders single-currency net worth summary', (tester) async {
     final usdAccount = makeAccount(
       name: 'USD Checking',
-      balanceCents: 120000,
+      balanceMinor: 120000,
       currencyCode: 'USD',
     );
     final data = NetWorthData(
@@ -80,12 +80,12 @@ void main() {
   testWidgets('renders multi-currency net worth summary', (tester) async {
     final usdAccount = makeAccount(
       name: 'USD Checking',
-      balanceCents: 100000,
+      balanceMinor: 100000,
       currencyCode: 'USD',
     );
     final eurAccount = makeAccount(
       name: 'EUR Savings',
-      balanceCents: 200000,
+      balanceMinor: 200000,
       currencyCode: 'EUR',
     );
 

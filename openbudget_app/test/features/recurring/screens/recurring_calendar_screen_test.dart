@@ -9,7 +9,7 @@ import 'package:openbudget_app/src/features/recurring/screens/recurring_calendar
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000101',
 );
@@ -17,13 +17,13 @@ final _budgetUuid = UuidValue.fromString(
 RecurringTransaction _makeRecurring({
   required String description,
   required DateTime nextOccurrence,
-  int amountCents = -1499,
+  int amountMinor = -1499,
 }) => RecurringTransaction(
   id: UuidValue.fromString('00000000-0000-0000-0000-000000000102'),
   description: description,
-  amountCents: amountCents,
+  amountMinor: amountMinor,
   currencyCode: 'USD',
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   frequency: 'monthly',
   nextOccurrence: nextOccurrence,
   isActive: true,
@@ -33,12 +33,12 @@ ScheduledOccurrence _occurrence({
   required String description,
   required DateTime date,
   required bool isDue,
-  int amountCents = -1499,
+  int amountMinor = -1499,
 }) => ScheduledOccurrence(
   recurring: _makeRecurring(
     description: description,
     nextOccurrence: date,
-    amountCents: amountCents,
+    amountMinor: amountMinor,
   ),
   date: date,
   isDue: isDue,
@@ -52,7 +52,7 @@ Widget _subject(Map<int, List<ScheduledOccurrence>> dayMap) => ProviderScope(
     theme: OpenBudgetTheme.light,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
-    home: const RecurringCalendarScreen(budgetId: _budgetId),
+    home: const RecurringCalendarScreen(entityId: _entityId),
   ),
 );
 
@@ -80,7 +80,7 @@ void main() {
               description: 'Rent',
               date: dueDate,
               isDue: true,
-              amountCents: -150000,
+              amountMinor: -150000,
             ),
           ],
         }),
@@ -101,7 +101,7 @@ void main() {
               description: 'Rent',
               date: dueDate,
               isDue: true,
-              amountCents: -150000,
+              amountMinor: -150000,
             ),
           ],
         }),

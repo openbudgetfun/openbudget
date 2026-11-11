@@ -48,7 +48,7 @@ final class AssistantProposalActionsProvider
 }
 
 String _$assistantProposalActionsHash() =>
-    r'c98005b9070ecb2c8bc75a3aa563a9338c05aa1d';
+    r'872178e7e845bccaaf4317ed41ef076b23b8d925';
 
 /// Applies and dismisses proposals, then refreshes everything that shows
 /// them.

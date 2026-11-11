@@ -19,7 +19,7 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 class EnvelopeActivitySheet extends HookConsumerWidget {
   const EnvelopeActivitySheet({
     required this.envelope,
-    required this.budgetId,
+    required this.entityId,
     required this.currencyCode,
     required this.categories,
     required this.categoryId,
@@ -31,7 +31,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
   });
 
   final Envelope envelope;
-  final String budgetId;
+  final String entityId;
   final String currencyCode;
   final List<CategoryWithEnvelopes> categories;
   final String categoryId;
@@ -45,22 +45,22 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final selectedMonth = ref.watch(selectedMonthProvider(budgetId));
+    final selectedMonth = ref.watch(selectedMonthProvider(entityId));
     final hideAmounts = ref.watch(hideAmountsProvider);
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
     final transactionsAsync = ref.watch(
       monthlyTransactionsProvider(
-        budgetId,
+        entityId,
         selectedMonth.year,
         selectedMonth.month,
       ),
     );
 
-    final carryover = monthlyData?.carryoverCents ?? 0;
+    final carryover = monthlyData?.carryoverMinor ?? 0;
     final budgeted =
-        monthlyData?.allocatedCents ?? envelope.budgetedAmountCents;
-    final spent = monthlyData?.spentCents ?? envelope.spentAmountCents;
-    final available = monthlyData?.availableCents ?? (budgeted - spent);
+        monthlyData?.allocatedMinor ?? envelope.budgetedAmountMinor;
+    final spent = monthlyData?.spentMinor ?? envelope.spentAmountMinor;
+    final available = monthlyData?.availableMinor ?? (budgeted - spent);
     final availableTone = available > 0
         ? ObTone.funded
         : available < 0
@@ -103,16 +103,16 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                         ObEnvelopeGauge(
                           fraction: _fundingFraction(
                             goal: goal,
-                            budgetedCents: budgeted,
-                            spentCents: spent,
-                            availableCents: available,
+                            budgetedMinor: budgeted,
+                            spentMinor: spent,
+                            availableMinor: available,
                           ),
                           semanticLabel: l10n.budgetEnvelopeProgress(
                             (_fundingFraction(
                                       goal: goal,
-                                      budgetedCents: budgeted,
-                                      spentCents: spent,
-                                      availableCents: available,
+                                      budgetedMinor: budgeted,
+                                      spentMinor: spent,
+                                      availableMinor: available,
                                     ) *
                                     100)
                                 .round(),
@@ -143,7 +143,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                             ObAmount(
                               hideAmounts
                                   ? hiddenAmountPlaceholder
-                                  : formatCentsForCode(available, currencyCode),
+                                  : formatMinorForCode(available, currencyCode),
                               tone: availableTone,
                               style: theme.textTheme.titleLarge,
                             ),
@@ -165,8 +165,8 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                       const SizedBox(height: SpacingTokens.md),
                       _GoalSummary(
                         goal: goal!,
-                        budgetedCents: budgeted,
-                        availableCents: available,
+                        budgetedMinor: budgeted,
+                        availableMinor: available,
                         currencyCode: currencyCode,
                         hideAmounts: hideAmounts,
                         hideProgressBars: hideProgressBars,
@@ -272,7 +272,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                   itemCount: transactions.length,
                   itemBuilder: (context, index) {
                     final tx = transactions[index];
-                    final isIncome = tx.amountCents > 0;
+                    final isIncome = tx.amountMinor > 0;
                     final tone = isIncome ? ObTone.funded : ObTone.overspent;
 
                     return Padding(
@@ -312,8 +312,8 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                           ObAmount(
                             hideAmounts
                                 ? hiddenAmountPlaceholder
-                                : formatCentsForCode(
-                                    tx.amountCents,
+                                : formatMinorForCode(
+                                    tx.amountMinor,
                                     currencyCode,
                                   ),
                             tone: tone,
@@ -334,19 +334,19 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
 
   double _fundingFraction({
     required EnvelopeGoal? goal,
-    required int budgetedCents,
-    required int spentCents,
-    required int availableCents,
+    required int budgetedMinor,
+    required int spentMinor,
+    required int availableMinor,
   }) {
     if (goal != null) {
       return computeFundingProgress(
         goal: goal,
-        budgetedCents: budgetedCents,
-        availableCents: availableCents,
+        budgetedMinor: budgetedMinor,
+        availableMinor: availableMinor,
       );
     }
-    if (budgetedCents <= 0) return 0;
-    return spentCents / budgetedCents;
+    if (budgetedMinor <= 0) return 0;
+    return spentMinor / budgetedMinor;
   }
 
   void _showMoveMoney(BuildContext context) {
@@ -354,7 +354,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
       showDialog<void>(
         context: context,
         builder: (_) => MoveMoneyDialog(
-          budgetId: budgetId,
+          entityId: entityId,
           year: year,
           month: month,
           categories: categories,
@@ -369,7 +369,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
         context: context,
         builder: (_) => SetGoalDialog(
           envelopeId: envelope.id?.toString() ?? '',
-          budgetId: budgetId,
+          entityId: entityId,
           currencyCode: currencyCode,
           existingGoal: goal,
           envelopeName: envelope.name,
@@ -385,7 +385,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
         builder: (_) => EditEnvelopeDialog(
           envelope: envelope,
           categoryId: categoryId,
-          budgetId: budgetId,
+          entityId: entityId,
           currencyCode: currencyCode,
           year: year,
           month: month,
@@ -423,7 +423,7 @@ class _BalanceGrid extends HookWidget {
 
     String amount(int cents) => hideAmounts
         ? hiddenAmountPlaceholder
-        : formatCentsForCode(cents, currencyCode);
+        : formatMinorForCode(cents, currencyCode);
 
     return ObCard(
       tone: ObTone.neutral,
@@ -504,16 +504,16 @@ class _BalanceGridCell extends HookWidget {
 class _GoalSummary extends HookWidget {
   const _GoalSummary({
     required this.goal,
-    required this.budgetedCents,
-    required this.availableCents,
+    required this.budgetedMinor,
+    required this.availableMinor,
     required this.currencyCode,
     required this.hideAmounts,
     required this.hideProgressBars,
   });
 
   final EnvelopeGoal goal;
-  final int budgetedCents;
-  final int availableCents;
+  final int budgetedMinor;
+  final int availableMinor;
   final String currencyCode;
   final bool hideAmounts;
   final bool hideProgressBars;
@@ -525,13 +525,13 @@ class _GoalSummary extends HookWidget {
     final palette = theme.ob;
     final progress = computeFundingProgress(
       goal: goal,
-      budgetedCents: budgetedCents,
-      availableCents: availableCents,
+      budgetedMinor: budgetedMinor,
+      availableMinor: availableMinor,
     );
-    final underfunded = computeUnderfundedCents(
+    final underfunded = computeUnderfundedMinor(
       goal: goal,
-      budgetedCents: budgetedCents,
-      availableCents: availableCents,
+      budgetedMinor: budgetedMinor,
+      availableMinor: availableMinor,
     );
 
     final goalTone = progress >= 1.0
@@ -542,13 +542,13 @@ class _GoalSummary extends HookWidget {
 
     final formattedAmount = hideAmounts
         ? hiddenAmountPlaceholder
-        : formatCentsForCode(goal.targetAmountCents, currencyCode);
+        : formatMinorForCode(goal.targetAmountMinor, currencyCode);
     final goalLabel = switch (goal.goalType) {
       'monthly_funding' => l10n.budgetGoalMonthly(
         hideAmounts
             ? hiddenAmountPlaceholder
-            : formatCentsForCode(
-                goal.monthlyFundingCents ?? goal.targetAmountCents,
+            : formatMinorForCode(
+                goal.monthlyFundingMinor ?? goal.targetAmountMinor,
                 currencyCode,
               ),
       ),
@@ -588,7 +588,7 @@ class _GoalSummary extends HookWidget {
                 l10n.envelopeUnderfunded(
                   hideAmounts
                       ? hiddenAmountPlaceholder
-                      : formatCentsForCode(underfunded, currencyCode),
+                      : formatMinorForCode(underfunded, currencyCode),
                 ),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: palette.overspent,

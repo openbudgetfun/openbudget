@@ -13,28 +13,28 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 class BudgetHeader extends HookConsumerWidget {
   const BudgetHeader({
-    required this.readyToAssignCents,
+    required this.readyToAssignMinor,
     required this.currencyCode,
-    required this.budgetId,
+    required this.entityId,
     required this.year,
     required this.month,
-    this.totalOverspentCents = 0,
-    this.totalIncomeCents = 0,
-    this.totalBudgetedCents = 0,
-    this.totalActivityCents = 0,
+    this.totalOverspentMinor = 0,
+    this.totalIncomeMinor = 0,
+    this.totalBudgetedMinor = 0,
+    this.totalActivityMinor = 0,
     this.onCopyLastMonth,
     super.key,
   });
 
-  final int readyToAssignCents;
+  final int readyToAssignMinor;
   final String currencyCode;
-  final String budgetId;
+  final String entityId;
   final int year;
   final int month;
-  final int totalOverspentCents;
-  final int totalIncomeCents;
-  final int totalBudgetedCents;
-  final int totalActivityCents;
+  final int totalOverspentMinor;
+  final int totalIncomeMinor;
+  final int totalBudgetedMinor;
+  final int totalActivityMinor;
   final VoidCallback? onCopyLastMonth;
 
   @override
@@ -42,11 +42,11 @@ class BudgetHeader extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final ageOfMoneyAsync = ref.watch(ageOfMoneyProvider(budgetId));
+    final ageOfMoneyAsync = ref.watch(ageOfMoneyProvider(entityId));
     final hideAmounts = ref.watch(hideAmountsProvider);
     final now = DateTime.now();
     final isCurrentMonth = year == now.year && month == now.month;
-    final isOverspent = readyToAssignCents < 0;
+    final isOverspent = readyToAssignMinor < 0;
     final materialLocalizations = MaterialLocalizations.of(context);
 
     return ObCard(
@@ -77,7 +77,7 @@ class BudgetHeader extends HookConsumerWidget {
                   ),
                   tooltip: materialLocalizations.previousMonthTooltip,
                   onPressed: () => ref
-                      .read(selectedMonthProvider(budgetId).notifier)
+                      .read(selectedMonthProvider(entityId).notifier)
                       .goToPreviousMonth(),
                   constraints: const BoxConstraints(
                     minWidth: 48,
@@ -89,7 +89,7 @@ class BudgetHeader extends HookConsumerWidget {
                     onTap: isCurrentMonth
                         ? null
                         : () => ref
-                              .read(selectedMonthProvider(budgetId).notifier)
+                              .read(selectedMonthProvider(entityId).notifier)
                               .setMonth(now.year, now.month),
                     onLongPress: () => _showMonthPicker(context, ref, l10n),
                     child: Padding(
@@ -135,7 +135,7 @@ class BudgetHeader extends HookConsumerWidget {
                   ),
                   tooltip: materialLocalizations.nextMonthTooltip,
                   onPressed: () => ref
-                      .read(selectedMonthProvider(budgetId).notifier)
+                      .read(selectedMonthProvider(entityId).notifier)
                       .goToNextMonth(),
                   constraints: const BoxConstraints(
                     minWidth: 48,
@@ -166,7 +166,7 @@ class BudgetHeader extends HookConsumerWidget {
                 ObAmount(
                   hideAmounts
                       ? hiddenAmountPlaceholder
-                      : formatCentsForCode(readyToAssignCents, currencyCode),
+                      : formatMinorForCode(readyToAssignMinor, currencyCode),
                   highlighted: !isOverspent,
                   tone: isOverspent ? ObTone.overspent : ObTone.neutral,
                   style: theme.textTheme.headlineMedium,
@@ -174,9 +174,9 @@ class BudgetHeader extends HookConsumerWidget {
               ],
             ),
           ),
-          if (totalIncomeCents != 0 ||
-              totalBudgetedCents != 0 ||
-              totalActivityCents != 0) ...[
+          if (totalIncomeMinor != 0 ||
+              totalBudgetedMinor != 0 ||
+              totalActivityMinor != 0) ...[
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: SpacingTokens.md,
@@ -189,7 +189,7 @@ class BudgetHeader extends HookConsumerWidget {
                       label: l10n.budgetTotalIncome,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCentsForCode(totalIncomeCents, currencyCode),
+                          : formatMinorForCode(totalIncomeMinor, currencyCode),
                       tone: ObTone.funded,
                     ),
                   ),
@@ -198,8 +198,8 @@ class BudgetHeader extends HookConsumerWidget {
                       label: l10n.budgetTotalBudgeted,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCentsForCode(
-                              totalBudgetedCents,
+                          : formatMinorForCode(
+                              totalBudgetedMinor,
                               currencyCode,
                             ),
                     ),
@@ -209,11 +209,11 @@ class BudgetHeader extends HookConsumerWidget {
                       label: l10n.budgetTotalActivity,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCentsForCode(
-                              -totalActivityCents,
+                          : formatMinorForCode(
+                              -totalActivityMinor,
                               currencyCode,
                             ),
-                      tone: totalActivityCents > 0
+                      tone: totalActivityMinor > 0
                           ? ObTone.overspent
                           : ObTone.funded,
                     ),
@@ -222,7 +222,7 @@ class BudgetHeader extends HookConsumerWidget {
               ),
             ),
           ],
-          if (totalOverspentCents > 0)
+          if (totalOverspentMinor > 0)
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 SpacingTokens.md,
@@ -253,8 +253,8 @@ class BudgetHeader extends HookConsumerWidget {
                         l10n.budgetOverspentWarning(
                           hideAmounts
                               ? hiddenAmountPlaceholder
-                              : formatCentsForCode(
-                                  totalOverspentCents,
+                              : formatMinorForCode(
+                                  totalOverspentMinor,
                                   currencyCode,
                                 ),
                         ),
@@ -279,7 +279,7 @@ class BudgetHeader extends HookConsumerWidget {
               spacing: SpacingTokens.sm,
               runSpacing: SpacingTokens.xs,
               children: [
-                if (readyToAssignCents > 0)
+                if (readyToAssignMinor > 0)
                   FilledButton.icon(
                     onPressed: () => _showAutoAssignDialog(context),
                     icon: SkribbleIcon(
@@ -355,7 +355,7 @@ class BudgetHeader extends HookConsumerWidget {
       showDialog<void>(
         context: context,
         builder: (_) =>
-            AutoAssignDialog(budgetId: budgetId, currencyCode: currencyCode),
+            AutoAssignDialog(entityId: entityId, currencyCode: currencyCode),
       ),
     );
   }
@@ -377,7 +377,7 @@ class BudgetHeader extends HookConsumerWidget {
           l10n: l10n,
           onSelect: (selectedYear, selectedMonth) {
             ref
-                .read(selectedMonthProvider(budgetId).notifier)
+                .read(selectedMonthProvider(entityId).notifier)
                 .setMonth(selectedYear, selectedMonth);
             Navigator.of(ctx).pop();
           },

@@ -9,7 +9,7 @@ import 'package:openbudget_app/src/features/settings/screens/currency_settings_s
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000321');
 
 Budget _makeBudget({String name = "Sam's Plan", String currencyCode = 'USD'}) =>
@@ -24,14 +24,14 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith(
-              (ref, budgetId) async => _makeBudget(),
+              (ref, entityId) async => _makeBudget(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const CurrencySettingsScreen(budgetId: _budgetId),
+            home: const CurrencySettingsScreen(entityId: _entityId),
           ),
         ),
       );
@@ -49,14 +49,14 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith(
-              (ref, budgetId) async => _makeBudget(),
+              (ref, entityId) async => _makeBudget(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const CurrencySettingsScreen(budgetId: _budgetId),
+            home: const CurrencySettingsScreen(entityId: _entityId),
           ),
         ),
       );

@@ -17,9 +17,9 @@ import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AddIncomeScreen extends HookConsumerWidget {
-  const AddIncomeScreen({required this.budgetId, super.key});
+  const AddIncomeScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,8 +31,8 @@ class AddIncomeScreen extends HookConsumerWidget {
     final selectedDate = useState(DateTime.now());
     final selectedPayeeId = useState<String?>(null);
     final duplicateCount = useState(0);
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
-    final payeesAsync = ref.watch(payeeListProvider(budgetId));
+    final budgetAsync = ref.watch(budgetDetailProvider(entityId));
+    final payeesAsync = ref.watch(payeeListProvider(entityId));
     final theme = Theme.of(context);
     final palette = theme.ob;
     final budgetCurrency =
@@ -46,19 +46,19 @@ class AddIncomeScreen extends HookConsumerWidget {
     Future<void> checkDuplicates() async {
       final budget = budgetAsync.value;
       if (budget == null) return;
-      final amountCents = parseMoneyInput(
+      final amountMinor = parseMoneyInput(
         amountController.text,
         decimals: currencyDecimalsForCode(budgetCurrency),
       );
-      if (amountCents == null || amountCents <= 0) {
+      if (amountMinor == null || amountMinor <= 0) {
         duplicateCount.value = 0;
         return;
       }
       try {
         final duplicates = await ref.read(
           duplicateCheckProvider(
-            budgetId,
-            amountCents,
+            entityId,
+            amountMinor,
             selectedDate.value,
           ).future,
         );
@@ -84,15 +84,15 @@ class AddIncomeScreen extends HookConsumerWidget {
 
     final amountDecimals = currencyDecimalsForCode(budgetCurrency);
     final amountText = amountController.text.trim();
-    final amountCents = parseMoneyInput(amountText, decimals: amountDecimals);
+    final amountMinor = parseMoneyInput(amountText, decimals: amountDecimals);
     final amountError = moneyInputError(
       amountText,
       decimals: amountDecimals,
       message: l10n.amountInvalidFormat(amountDecimals),
     );
-    final formattedAmount = amountCents == null || amountCents == 0
-        ? formatCentsForCode(0, budgetCurrency)
-        : formatCentsForCode(amountCents, budgetCurrency);
+    final formattedAmount = amountMinor == null || amountMinor == 0
+        ? formatMinorForCode(0, budgetCurrency)
+        : formatMinorForCode(amountMinor, budgetCurrency);
 
     return Scaffold(
       appBar: AppBar(
@@ -101,7 +101,7 @@ class AddIncomeScreen extends HookConsumerWidget {
           alignment: Alignment.centerLeft,
           child: TextButton(
             onPressed: () =>
-                context.goNamed(planRoute, pathParameters: {'id': budgetId}),
+                context.goNamed(planRoute, pathParameters: {'entityId': entityId}),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -139,7 +139,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                               tone: ObTone.overspent,
                               onTap: () => context.goNamed(
                                 addExpenseRoute,
-                                pathParameters: {'id': budgetId},
+                                pathParameters: {'entityId': entityId},
                               ),
                             ),
                           ),
@@ -182,7 +182,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                             filled: false,
                             isDense: true,
                             contentPadding: EdgeInsets.zero,
-                            hintText: formatCentsForCode(0, budgetCurrency),
+                            hintText: formatMinorForCode(0, budgetCurrency),
                             hintStyle:
                                 ObTextStyles.amount(
                                   theme.textTheme.displaySmall,
@@ -341,13 +341,13 @@ class AddIncomeScreen extends HookConsumerWidget {
                           final amountText = amountController.text.trim();
                           final budget = budgetAsync.value;
                           if (budget == null) return;
-                          final amountCents = parseMoneyInput(
+                          final amountMinor = parseMoneyInput(
                             amountText,
                             decimals: currencyDecimalsForCode(budgetCurrency),
                           );
                           if (description.isEmpty ||
-                              amountCents == null ||
-                              amountCents <= 0) {
+                              amountMinor == null ||
+                              amountMinor <= 0) {
                             return;
                           }
 
@@ -359,9 +359,9 @@ class AddIncomeScreen extends HookConsumerWidget {
                                 .read(transactionActionsProvider.notifier)
                                 .addIncome(
                                   description: description,
-                                  amountCents: amountCents,
+                                  amountMinor: amountMinor,
                                   currencyCode: budgetCurrency,
-                                  budgetId: budgetId,
+                                  entityId: entityId,
                                   date: selectedDate.value,
                                   memo: memoText.isEmpty ? null : memoText,
                                 );
@@ -373,7 +373,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                             );
                             router.goNamed(
                               planRoute,
-                              pathParameters: {'id': budgetId},
+                              pathParameters: {'entityId': entityId},
                             );
                           } on Exception catch (_) {
                             isSubmitting.value = false;

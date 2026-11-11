@@ -1,56 +1,56 @@
-import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/month_figures_provider.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'category_trends_provider.g.dart';
 
-/// Fetches spending‐by‐category for each of the last [months] months and
-/// pivots the data so each category has a time series of spending amounts.
+/// Spending per category for each of the last [months] months, pivoted so
+/// each category carries a time series. One `monthFigures` fetch feeds the
+/// whole table.
 @riverpod
 Future<CategoryTrendsData> categoryTrends(
   Ref ref,
-  String budgetId, {
+  String entityId, {
   int months = 6,
 }) async {
-  final now = DateTime.now();
-  final monthHeaders = <MonthLabel>[];
+  final endMonth = MonthKey.fromDate(DateTime.now());
+  final views = await ref.watch(
+    monthFiguresProvider(entityId, endMonth, months).future,
+  );
+
+  final monthHeaders = views.map((view) => view.month).toList();
   final categoryMap = <String, List<int>>{};
 
-  for (var i = months - 1; i >= 0; i--) {
-    var year = now.year;
-    var month = now.month - i;
-    while (month <= 0) {
-      month += 12;
-      year--;
+  for (final view in views) {
+    final categoryNameById = <String, String>{
+      for (final category in view.categories)
+        category.id?.toString() ?? '': category.name,
+    };
+    final spentByCategory = <String, int>{};
+    for (final envelope in view.envelopes) {
+      if (envelope.activityMinor >= 0) continue;
+      final name =
+          categoryNameById[envelope.envelope.categoryId.toString()] ?? '';
+      spentByCategory[name] =
+          (spentByCategory[name] ?? 0) + envelope.activityMinor.abs();
     }
 
-    monthHeaders.add(MonthLabel(year: year, month: month));
-
-    final report = await ref.watch(
-      spendingReportProvider(budgetId, year, month).future,
-    );
-
-    // Ensure every category has an entry for this month index.
-    final monthIndex = monthHeaders.length - 1;
-    for (final existing in categoryMap.keys) {
-      if (categoryMap[existing]!.length <= monthIndex) {
-        categoryMap[existing]!.add(0);
-      }
+    for (final entry in spentByCategory.entries) {
+      final series = categoryMap.putIfAbsent(
+        entry.key,
+        () => List.filled(monthHeaders.length - 1, 0),
+      );
+      series.add(entry.value);
     }
-
-    for (final entry in report.categorySpending.entries) {
-      categoryMap.putIfAbsent(entry.key, () => List.filled(monthIndex, 0));
-      categoryMap[entry.key]!.add(entry.value);
-    }
-
-    // Back-fill any newly added categories for this month.
+    // Every earlier-known category gets a zero for this month.
     for (final entry in categoryMap.entries) {
-      while (entry.value.length <= monthIndex) {
+      if (!spentByCategory.containsKey(entry.key)) entry.value.add(0);
+      while (entry.value.length < monthHeaders.length) {
         entry.value.add(0);
       }
     }
   }
 
-  // Sort categories by total descending.
   final sortedEntries = categoryMap.entries.toList()
     ..sort((a, b) {
       final totalA = a.value.fold<int>(0, (s, v) => s + v);
@@ -62,21 +62,16 @@ Future<CategoryTrendsData> categoryTrends(
       .map(
         (e) => CategoryTrendLine(
           categoryName: e.key,
-          monthlyCents: e.value,
-          totalCents: e.value.fold<int>(0, (s, v) => s + v),
+          monthlyMinor: e.value,
+          totalMinor: e.value.fold<int>(0, (s, v) => s + v),
         ),
       )
       .toList();
 
-  // Resolve the currency from the first report that has data.
-  final firstReport = await ref.watch(
-    spendingReportProvider(budgetId, now.year, now.month).future,
-  );
-
   return CategoryTrendsData(
     months: monthHeaders,
     categories: categories,
-    currencyCode: firstReport.currencyCode,
+    currencyCode: views.first.currencyCode,
   );
 }
 
@@ -87,26 +82,20 @@ class CategoryTrendsData {
     required this.currencyCode,
   });
 
-  final List<MonthLabel> months;
+  /// yyyymm month headers, oldest first.
+  final List<int> months;
   final List<CategoryTrendLine> categories;
   final String currencyCode;
-}
-
-class MonthLabel {
-  const MonthLabel({required this.year, required this.month});
-
-  final int year;
-  final int month;
 }
 
 class CategoryTrendLine {
   const CategoryTrendLine({
     required this.categoryName,
-    required this.monthlyCents,
-    required this.totalCents,
+    required this.monthlyMinor,
+    required this.totalMinor,
   });
 
   final String categoryName;
-  final List<int> monthlyCents;
-  final int totalCents;
+  final List<int> monthlyMinor;
+  final int totalMinor;
 }

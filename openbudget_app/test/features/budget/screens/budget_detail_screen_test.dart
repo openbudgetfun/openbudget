@@ -11,7 +11,7 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  const budgetId = 'test-budget-1';
+  const entityId = 'test-budget-1';
 
   Budget makeBudget() => Budget(
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
@@ -22,16 +22,16 @@ void main() {
   );
 
   BudgetSummary makeSummary({
-    int readyToAssignCents = 50000,
-    int totalIncomeCents = 100000,
-    int totalBudgetedCents = 50000,
+    int readyToAssignMinor = 50000,
+    int totalIncomeMinor = 100000,
+    int totalBudgetedMinor = 50000,
     List<CategoryWithEnvelopes> categories = const [],
   }) => BudgetSummary(
     budget: makeBudget(),
     categories: categories,
-    totalIncomeCents: totalIncomeCents,
-    totalBudgetedCents: totalBudgetedCents,
-    readyToAssignCents: readyToAssignCents,
+    totalIncomeMinor: totalIncomeMinor,
+    totalBudgetedMinor: totalBudgetedMinor,
+    readyToAssignMinor: readyToAssignMinor,
     year: 2026,
     month: 2,
   );
@@ -53,7 +53,7 @@ void main() {
       theme: OpenBudgetTheme.light,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const BudgetDetailScreen(budgetId: budgetId),
+      home: const BudgetDetailScreen(entityId: entityId),
     ),
   );
 
@@ -65,7 +65,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const BudgetDetailScreen(budgetId: budgetId),
+            home: const BudgetDetailScreen(entityId: entityId),
           ),
         ),
       );
@@ -134,7 +134,7 @@ void main() {
 
     testWidgets('shows empty state when no categories', (tester) async {
       await tester.pumpWidget(
-        buildSubject(summary: makeSummary(readyToAssignCents: 0)),
+        buildSubject(summary: makeSummary(readyToAssignMinor: 0)),
       );
       await tester.pumpAndSettle();
 
@@ -168,9 +168,9 @@ void main() {
       await tester.pumpWidget(
         buildSubject(
           summary: makeSummary(
-            readyToAssignCents: 0,
-            totalIncomeCents: 0,
-            totalBudgetedCents: 0,
+            readyToAssignMinor: 0,
+            totalIncomeMinor: 0,
+            totalBudgetedMinor: 0,
           ),
         ),
       );
@@ -187,9 +187,9 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             summary: makeSummary(
-              readyToAssignCents: 5000000,
-              totalIncomeCents: 5000000,
-              totalBudgetedCents: 0,
+              readyToAssignMinor: 5000000,
+              totalIncomeMinor: 5000000,
+              totalBudgetedMinor: 0,
             ),
           ),
         );

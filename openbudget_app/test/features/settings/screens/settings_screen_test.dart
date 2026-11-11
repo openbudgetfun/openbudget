@@ -9,7 +9,7 @@ import 'package:openbudget_app/src/features/settings/screens/settings_screen.dar
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000001');
 
 Budget _makeBudget({String name = 'My Budget', String currencyCode = 'USD'}) =>
@@ -19,7 +19,7 @@ Widget _materialShell() => MaterialApp(
   theme: OpenBudgetTheme.light,
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
-  home: const SettingsScreen(budgetId: _budgetId),
+  home: const SettingsScreen(entityId: _entityId),
 );
 
 void main() {
@@ -38,7 +38,7 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith(
-              (ref, budgetId) => throw Exception('Could not load settings'),
+              (ref, entityId) => throw Exception('Could not load settings'),
             ),
           ],
           child: _materialShell(),
@@ -54,7 +54,7 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith(
-              (ref, budgetId) async => _makeBudget(name: 'Family Plan'),
+              (ref, entityId) async => _makeBudget(name: 'Family Plan'),
             ),
           ],
           child: _materialShell(),
@@ -88,7 +88,7 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith(
-              (ref, budgetId) async => _makeBudget(),
+              (ref, entityId) async => _makeBudget(),
             ),
           ],
           child: _materialShell(),

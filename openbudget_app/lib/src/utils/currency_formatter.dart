@@ -1,43 +1,43 @@
 import 'package:openbudget_core/openbudget_core.dart';
 
-/// Formats [cents] using the symbol and precision of [currency].
-String formatCents(int cents, CurrencyCode currency) {
-  final isNegative = cents < 0;
-  final absCents = cents.abs();
+/// Formats [minor] using the symbol and precision of [currency].
+String formatMinor(int minor, CurrencyCode currency) {
+  final isNegative = minor < 0;
+  final absMinor = minor.abs();
   final decimals = currency.decimals;
 
   if (decimals == 0) {
-    final formatted = _addThousandsSeparator(absCents.toString());
+    final formatted = _addThousandsSeparator(absMinor.toString());
     return '${isNegative ? '-' : ''}${currency.symbol}$formatted';
   }
 
-  return '${isNegative ? '-' : ''}${currency.symbol}${_formatUnits(absCents, decimals)}';
+  return '${isNegative ? '-' : ''}${currency.symbol}${_formatUnits(absMinor, decimals)}';
 }
 
-/// Formats [cents] for [code], falling back to the raw code and a plain amount
+/// Formats [minor] for [code], falling back to the raw code and a plain amount
 /// for codes OpenBudget does not support.
 ///
 /// An unsupported code is never rendered with another currency's symbol:
-/// `formatCentsForCode(1250, 'XYZ')` returns `XYZ 12.50`.
-String formatCentsForCode(int cents, String code) {
+/// `formatMinorForCode(1250, 'XYZ')` returns `XYZ 12.50`.
+String formatMinorForCode(int minor, String code) {
   final currency = CurrencyCode.tryParse(code);
-  if (currency != null) return formatCents(cents, currency);
+  if (currency != null) return formatMinor(minor, currency);
 
   final normalized = code.trim().toUpperCase();
-  final amount = formatPlainCents(cents);
+  final amount = formatPlainMinor(minor);
   return normalized.isEmpty ? amount : '$normalized $amount';
 }
 
-/// Formats [cents] as a plain two-decimal number with thousands separators.
-String formatPlainCents(int cents) {
-  final isNegative = cents < 0;
-  final absCents = cents.abs();
-  return '${isNegative ? '-' : ''}${_formatUnits(absCents, 2)}';
+/// Formats [minor] as a plain two-decimal number with thousands separators.
+String formatPlainMinor(int minor) {
+  final isNegative = minor < 0;
+  final absMinor = minor.abs();
+  return '${isNegative ? '-' : ''}${_formatUnits(absMinor, 2)}';
 }
 
 /// The number of minor-unit decimals for [code].
 ///
-/// Unsupported codes use two decimals, matching [formatCentsForCode], because
+/// Unsupported codes use two decimals, matching [formatMinorForCode], because
 /// their real precision is unknown to the app.
 int currencyDecimalsForCode(String code) =>
     CurrencyCode.tryParse(code)?.decimals ?? 2;
@@ -48,9 +48,9 @@ String currencySymbolForCode(String code) {
   return currency?.symbol ?? code.trim().toUpperCase();
 }
 
-String _formatUnits(int absCents, int decimals) {
-  final wholePart = absCents ~/ _pow10(decimals);
-  final fractionalPart = (absCents % _pow10(decimals)).toString().padLeft(
+String _formatUnits(int absMinor, int decimals) {
+  final wholePart = absMinor ~/ _pow10(decimals);
+  final fractionalPart = (absMinor % _pow10(decimals)).toString().padLeft(
     decimals,
     '0',
   );

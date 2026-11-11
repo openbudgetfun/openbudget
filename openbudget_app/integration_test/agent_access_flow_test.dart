@@ -57,7 +57,7 @@ void main() {
             name: settingsRoute,
             path: settingsPath,
             builder: (context, state) =>
-                SettingsScreen(budgetId: state.pathParameters['id']!),
+                SettingsScreen(entityId: state.pathParameters['entityId']!),
           ),
         ],
       );

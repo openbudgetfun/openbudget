@@ -1,36 +1,34 @@
 import 'package:equatable/equatable.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/month_figures_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'multi_month_comparison_provider.g.dart';
 
 class MonthColumn extends Equatable {
   const MonthColumn({
-    required this.year,
     required this.month,
-    required this.totalBudgetedCents,
-    required this.totalSpentCents,
-    required this.totalAvailableCents,
-    required this.totalIncomeCents,
+    required this.totalAllocatedMinor,
+    required this.totalActivityMinor,
+    required this.totalAvailableMinor,
+    required this.totalIncomeMinor,
   });
 
-  final int year;
+  /// The yyyymm month.
   final int month;
-  final int totalBudgetedCents;
-  final int totalSpentCents;
-  final int totalAvailableCents;
-  final int totalIncomeCents;
+  final int totalAllocatedMinor;
+  final int totalActivityMinor;
+  final int totalAvailableMinor;
+  final int totalIncomeMinor;
 
   @override
   List<Object?> get props => [
-    year,
     month,
-    totalBudgetedCents,
-    totalSpentCents,
-    totalAvailableCents,
-    totalIncomeCents,
+    totalAllocatedMinor,
+    totalActivityMinor,
+    totalAvailableMinor,
+    totalIncomeMinor,
   ];
 }
 
@@ -39,9 +37,9 @@ class EnvelopeComparison extends Equatable {
 
   final Envelope envelope;
 
-  /// Keyed by "year-month" string, each entry holds
-  /// [budgeted, spent, available].
-  final Map<String, List<int>> monthData;
+  /// Keyed by yyyymm int, each entry holds
+  /// [allocatedMinor, activityMinor, availableMinor].
+  final Map<int, List<int>> monthData;
 
   @override
   List<Object?> get props => [envelope, monthData];
@@ -57,9 +55,9 @@ class CategoryComparison extends Equatable {
   final Category category;
   final List<EnvelopeComparison> envelopes;
 
-  /// Keyed by "year-month" string, each entry holds
-  /// [budgeted, spent, available].
-  final Map<String, List<int>> monthTotals;
+  /// Keyed by yyyymm int, each entry holds
+  /// [allocatedMinor, activityMinor, availableMinor].
+  final Map<int, List<int>> monthTotals;
 
   @override
   List<Object?> get props => [category, envelopes, monthTotals];
@@ -67,127 +65,68 @@ class CategoryComparison extends Equatable {
 
 class MultiMonthComparison extends Equatable {
   const MultiMonthComparison({
-    required this.budget,
+    required this.currencyCode,
     required this.months,
     required this.categories,
   });
 
-  final Budget budget;
+  final String currencyCode;
   final List<MonthColumn> months;
   final List<CategoryComparison> categories;
 
   @override
-  List<Object?> get props => [budget, months, categories];
+  List<Object?> get props => [currencyCode, months, categories];
 }
 
-/// Fetches budget data for [monthCount] consecutive months ending at the
-/// current month and returns a comparison structure.
+/// Compares the last [monthCount] months from the server's month views,
+/// fetched once for the whole screen.
 @riverpod
 Future<MultiMonthComparison> multiMonthComparison(
   Ref ref,
-  String budgetId, {
+  String entityId, {
   int monthCount = 3,
 }) async {
-  final budget = await ref.watch(budgetDetailProvider(budgetId).future);
-  final categories = await ref.watch(categoryListProvider(budgetId).future);
+  final views = await ref.watch(
+    monthFiguresProvider(entityId, MonthKey.fromDate(DateTime.now()), monthCount)
+        .future,
+  );
 
-  final now = DateTime.now();
-  final monthKeys = <String>[];
-  final monthColumns = <MonthColumn>[];
-
-  // Generate month ranges (most recent N months).
-  final monthRanges = <(int, int)>[];
-  for (var i = monthCount - 1; i >= 0; i--) {
-    var y = now.year;
-    var m = now.month - i;
-    while (m <= 0) {
-      m += 12;
-      y--;
-    }
-    monthRanges.add((y, m));
-  }
-
-  // Fetch allocations and transactions for each month.
-  final allAllocations = <String, List<MonthlyAllocation>>{};
-  final allTransactions = <String, List<Transaction>>{};
-
-  for (final (year, month) in monthRanges) {
-    final key = '$year-$month';
-    monthKeys.add(key);
-
-    final allocations = await ref.watch(
-      monthlyAllocationsProvider(budgetId, year, month).future,
-    );
-    final transactions = await ref.watch(
-      monthlyTransactionsProvider(budgetId, year, month).future,
-    );
-
-    allAllocations[key] = allocations;
-    allTransactions[key] = transactions;
-  }
-
-  // Build per-month allocation and spending maps.
-  final monthAllocationMaps = <String, Map<String, MonthlyAllocation>>{};
-  final monthSpentMaps = <String, Map<String, int>>{};
-  final monthIncomeMaps = <String, int>{};
-
-  for (final key in monthKeys) {
-    final aMap = <String, MonthlyAllocation>{};
-    for (final a in allAllocations[key]!) {
-      aMap[a.envelopeId.toString()] = a;
-    }
-    monthAllocationMaps[key] = aMap;
-
-    final sMap = <String, int>{};
-    var income = 0;
-    for (final t in allTransactions[key]!) {
-      if (t.amountCents > 0) {
-        income += t.amountCents;
-      } else if (t.envelopeId != null) {
-        final ek = t.envelopeId.toString();
-        sMap[ek] = (sMap[ek] ?? 0) + t.amountCents.abs();
-      }
-    }
-    monthSpentMaps[key] = sMap;
-    monthIncomeMaps[key] = income;
-  }
-
-  // Build category comparison data.
+  final monthKeys = views.map((view) => view.month).toList();
   final categoryComparisons = <CategoryComparison>[];
 
-  for (final category in categories) {
-    final categoryId = category.id?.toString() ?? '';
-    final envelopes = await ref.watch(envelopeListProvider(categoryId).future);
-
+  for (final category in views.first.categories) {
     final envelopeComparisons = <EnvelopeComparison>[];
-    final catMonthTotals = <String, List<int>>{};
+    final catMonthTotals = <int, List<int>>{
+      for (final key in monthKeys) key: [0, 0, 0],
+    };
 
-    for (final key in monthKeys) {
-      catMonthTotals[key] = [0, 0, 0]; // [budgeted, spent, available]
-    }
+    for (final view in views) {
+      final monthEnvelopes = view.envelopes
+          .where(
+            (e) => e.envelope.categoryId == category.id,
+          )
+          .toList();
 
-    for (final envelope in envelopes) {
-      final ek = envelope.id?.toString() ?? '';
-      final envMonthData = <String, List<int>>{};
+      for (final envelopeMonth in monthEnvelopes) {
+        final allocated = envelopeMonth.allocatedMinor;
+        final activity = envelopeMonth.activityMinor;
+        final available = envelopeMonth.availableMinor;
 
-      for (final key in monthKeys) {
-        final allocation = monthAllocationMaps[key]![ek];
-        final allocated = allocation?.allocatedCents ?? 0;
-        final carryover = allocation?.carryoverCents ?? 0;
-        final spent = monthSpentMaps[key]![ek] ?? 0;
-        final available = allocated + carryover - spent;
-
-        envMonthData[key] = [allocated, spent, available];
-        catMonthTotals[key] = [
-          catMonthTotals[key]![0] + allocated,
-          catMonthTotals[key]![1] + spent,
-          catMonthTotals[key]![2] + available,
+        envelopeComparisons.add(
+          EnvelopeComparison(
+            envelope: envelopeMonth.envelope,
+            monthData: {
+              view.month: [allocated, activity, available],
+            },
+          ),
+        );
+        final totals = catMonthTotals[view.month]!;
+        catMonthTotals[view.month] = [
+          totals[0] + allocated,
+          totals[1] + activity,
+          totals[2] + available,
         ];
       }
-
-      envelopeComparisons.add(
-        EnvelopeComparison(envelope: envelope, monthData: envMonthData),
-      );
     }
 
     categoryComparisons.add(
@@ -199,36 +138,20 @@ Future<MultiMonthComparison> multiMonthComparison(
     );
   }
 
-  // Build month column summaries.
-  for (final (year, month) in monthRanges) {
-    final key = '$year-$month';
-    var totalBudgeted = 0;
-    var totalSpent = 0;
-    var totalAvailable = 0;
-
-    for (final cat in categoryComparisons) {
-      final totals = cat.monthTotals[key];
-      if (totals != null) {
-        totalBudgeted += totals[0];
-        totalSpent += totals[1];
-        totalAvailable += totals[2];
-      }
-    }
-
-    monthColumns.add(
-      MonthColumn(
-        year: year,
-        month: month,
-        totalBudgetedCents: totalBudgeted,
-        totalSpentCents: totalSpent,
-        totalAvailableCents: totalAvailable,
-        totalIncomeCents: monthIncomeMaps[key] ?? 0,
-      ),
-    );
-  }
+  final monthColumns = views
+      .map(
+        (view) => MonthColumn(
+          month: view.month,
+          totalAllocatedMinor: view.summary.allocatedMinor,
+          totalActivityMinor: view.summary.activityMinor,
+          totalAvailableMinor: view.summary.availableMinor,
+          totalIncomeMinor: view.summary.incomeMinor,
+        ),
+      )
+      .toList();
 
   return MultiMonthComparison(
-    budget: budget,
+    currencyCode: views.first.currencyCode,
     months: monthColumns,
     categories: categoryComparisons,
   );

@@ -13,7 +13,7 @@ import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 
 import '../support/fakes.dart';
 
-const _budgetId = 'agent-access-entry-budget';
+const _entityId = 'agent-access-entry-budget';
 final _ownerId = UuidValue.fromString('00000000-0000-0000-0000-000000000b09');
 
 void main() {
@@ -33,7 +33,7 @@ void main() {
     addTearDown(container.dispose);
 
     final router = GoRouter(
-      initialLocation: '/budgets/$_budgetId/more/settings',
+      initialLocation: '/budgets/$_entityId/more/settings',
       routes: [
         GoRoute(
           name: agentAccessRoute,
@@ -44,7 +44,7 @@ void main() {
           name: settingsRoute,
           path: settingsPath,
           builder: (context, state) =>
-              SettingsScreen(budgetId: state.pathParameters['id']!),
+              SettingsScreen(entityId: state.pathParameters['entityId']!),
         ),
       ],
     );

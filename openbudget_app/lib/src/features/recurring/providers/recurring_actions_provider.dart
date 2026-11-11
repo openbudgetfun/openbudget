@@ -1,6 +1,7 @@
 import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'recurring_actions_provider.g.dart';
@@ -10,37 +11,36 @@ class RecurringActions extends _$RecurringActions {
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
+  /// Amounts are in the account's currency; posting is the server's job
+  /// through the hourly recurring job, so there is no client auto-post.
   Future<RecurringTransaction> createRecurring({
+    required String accountId,
     required String description,
-    required int amountCents,
-    required String currencyCode,
-    required String budgetId,
-    required String frequency,
+    required int amountMinor,
+    required RecurrenceFrequency frequency,
     required DateTime nextOccurrence,
     String? envelopeId,
-    String? accountId,
     String? payeeId,
+    String? memo,
     DateTime? endDate,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
       final recurring = await client.recurringTransaction.create(
+        UuidValue.fromString(accountId),
         description,
-        amountCents,
-        currencyCode,
-        UuidValue.fromString(budgetId),
+        amountMinor,
         frequency,
         nextOccurrence,
         envelopeId: envelopeId != null
             ? UuidValue.fromString(envelopeId)
             : null,
-        accountId: accountId != null ? UuidValue.fromString(accountId) : null,
         payeeId: payeeId != null ? UuidValue.fromString(payeeId) : null,
+        memo: memo,
         endDate: endDate,
       );
       if (ref.mounted) {
-        ref.invalidate(recurringListProvider(budgetId));
         state = const AsyncValue.data(null);
       }
       return recurring;
@@ -54,12 +54,19 @@ class RecurringActions extends _$RecurringActions {
 
   Future<RecurringTransaction> updateRecurring({
     required String recurringId,
-    required String budgetId,
+    required String entityId,
+    String? accountId,
     String? description,
-    int? amountCents,
-    String? frequency,
+    int? amountMinor,
+    RecurrenceFrequency? frequency,
     DateTime? nextOccurrence,
+    String? envelopeId,
+    bool clearEnvelope = false,
+    String? payeeId,
+    bool clearPayee = false,
+    String? memo,
     DateTime? endDate,
+    bool clearEndDate = false,
     bool? isActive,
   }) async {
     state = const AsyncValue.loading();
@@ -67,15 +74,22 @@ class RecurringActions extends _$RecurringActions {
     try {
       final recurring = await client.recurringTransaction.update(
         UuidValue.fromString(recurringId),
+        accountId: accountId == null ? null : UuidValue.fromString(accountId),
         description: description,
-        amountCents: amountCents,
+        amountMinor: amountMinor,
         frequency: frequency,
-        nextOccurrence: nextOccurrence,
+        nextDate: nextOccurrence,
+        envelopeId: envelopeId == null ? null : UuidValue.fromString(envelopeId),
+        clearEnvelope: clearEnvelope,
+        payeeId: payeeId == null ? null : UuidValue.fromString(payeeId),
+        clearPayee: clearPayee,
+        memo: memo,
         endDate: endDate,
+        clearEndDate: clearEndDate,
         isActive: isActive,
       );
       if (ref.mounted) {
-        ref.invalidate(recurringListProvider(budgetId));
+        ref.invalidate(recurringListProvider(entityId));
         state = const AsyncValue.data(null);
       }
       return recurring;
@@ -89,7 +103,7 @@ class RecurringActions extends _$RecurringActions {
 
   Future<RecurringTransaction> skipOccurrence({
     required String recurringId,
-    required String budgetId,
+    required String entityId,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
@@ -98,7 +112,7 @@ class RecurringActions extends _$RecurringActions {
         UuidValue.fromString(recurringId),
       );
       if (ref.mounted) {
-        ref.invalidate(recurringListProvider(budgetId));
+        ref.invalidate(recurringListProvider(entityId));
         state = const AsyncValue.data(null);
       }
       return recurring;
@@ -112,7 +126,7 @@ class RecurringActions extends _$RecurringActions {
 
   Future<void> deleteRecurring({
     required String recurringId,
-    required String budgetId,
+    required String entityId,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
@@ -121,7 +135,7 @@ class RecurringActions extends _$RecurringActions {
         UuidValue.fromString(recurringId),
       );
       if (ref.mounted) {
-        ref.invalidate(recurringListProvider(budgetId));
+        ref.invalidate(recurringListProvider(entityId));
         state = const AsyncValue.data(null);
       }
     } on Exception catch (e, st) {
@@ -131,4 +145,11 @@ class RecurringActions extends _$RecurringActions {
       rethrow;
     }
   }
+}
+
+/// How many recurring transactions are due in [entityId] right now.
+@riverpod
+Future<int> recurringDueCount(Ref ref, String entityId) async {
+  final client = ref.read(serverpodClientProvider);
+  return client.recurringTransaction.countDue(UuidValue.fromString(entityId));
 }

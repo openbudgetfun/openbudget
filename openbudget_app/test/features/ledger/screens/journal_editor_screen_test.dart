@@ -44,13 +44,13 @@ GoRouter _router({String? journalId}) => GoRouter(
       name: journalNewRoute,
       path: journalNewPath,
       builder: (context, state) =>
-          JournalEditorScreen(budgetId: state.pathParameters['id']!),
+          JournalEditorScreen(entityId: state.pathParameters['entityId']!),
     ),
     GoRoute(
       name: journalEditRoute,
       path: journalEditPath,
       builder: (context, state) => JournalEditorScreen(
-        budgetId: state.pathParameters['id']!,
+        entityId: state.pathParameters['entityId']!,
         journalId: state.pathParameters['journalId'],
       ),
     ),

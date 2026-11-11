@@ -40,10 +40,10 @@ class EnvelopeRow extends HookConsumerWidget {
     final palette = Theme.of(context).ob;
     final theme = Theme.of(context);
     final budgeted =
-        monthlyData?.allocatedCents ?? envelope.budgetedAmountCents;
-    final spent = monthlyData?.spentCents ?? envelope.spentAmountCents;
-    final available = monthlyData?.availableCents ?? (budgeted - spent);
-    final carryover = monthlyData?.carryoverCents ?? 0;
+        monthlyData?.allocatedMinor ?? envelope.budgetedAmountMinor;
+    final spent = monthlyData?.spentMinor ?? envelope.spentAmountMinor;
+    final available = monthlyData?.availableMinor ?? (budgeted - spent);
+    final carryover = monthlyData?.carryoverMinor ?? 0;
     final balanceStyle = ref.watch(balanceStyleProvider);
     final isOverspent = available < 0;
     final amountTone = isOverspent
@@ -57,9 +57,9 @@ class EnvelopeRow extends HookConsumerWidget {
 
     final fraction = _fractionFor(
       goal: goal,
-      budgetedCents: budgeted,
-      spentCents: spent,
-      availableCents: available,
+      budgetedMinor: budgeted,
+      spentMinor: spent,
+      availableMinor: available,
     );
     final progressPercent = (fraction * 100).round();
     final underfunded = goal == null
@@ -131,7 +131,7 @@ class EnvelopeRow extends HookConsumerWidget {
                               message: l10n.envelopeCarryover(
                                 hideAmounts
                                     ? hiddenAmountPlaceholder
-                                    : formatCentsForCode(
+                                    : formatMinorForCode(
                                         carryover,
                                         currencyCode,
                                       ),
@@ -190,7 +190,7 @@ class EnvelopeRow extends HookConsumerWidget {
                                   l10n.envelopeUnderfunded(
                                     hideAmounts
                                         ? hiddenAmountPlaceholder
-                                        : formatCentsForCode(
+                                        : formatMinorForCode(
                                             underfunded,
                                             currencyCode,
                                           ),
@@ -237,7 +237,7 @@ class EnvelopeRow extends HookConsumerWidget {
                         ObAmount(
                           hideAmounts
                               ? hiddenAmountPlaceholder
-                              : formatCentsForCode(available, currencyCode),
+                              : formatMinorForCode(available, currencyCode),
                           tone: amountTone,
                           style: theme.textTheme.titleSmall,
                         ),
@@ -274,28 +274,28 @@ class EnvelopeRow extends HookConsumerWidget {
 
   double _fractionFor({
     required EnvelopeGoal? goal,
-    required int budgetedCents,
-    required int spentCents,
-    required int availableCents,
+    required int budgetedMinor,
+    required int spentMinor,
+    required int availableMinor,
   }) {
     if (goal != null) {
       return computeFundingProgress(
         goal: goal,
-        budgetedCents: budgetedCents,
-        availableCents: availableCents,
+        budgetedMinor: budgetedMinor,
+        availableMinor: availableMinor,
       );
     }
-    if (budgetedCents <= 0) return 0;
-    return spentCents / budgetedCents;
+    if (budgetedMinor <= 0) return 0;
+    return spentMinor / budgetedMinor;
   }
 
   int _underfundedFor(
     EnvelopeGoal goal,
-    int budgetedCents,
-    int availableCents,
-  ) => computeUnderfundedCents(
+    int budgetedMinor,
+    int availableMinor,
+  ) => computeUnderfundedMinor(
     goal: goal,
-    budgetedCents: budgetedCents,
-    availableCents: availableCents,
+    budgetedMinor: budgetedMinor,
+    availableMinor: availableMinor,
   );
 }

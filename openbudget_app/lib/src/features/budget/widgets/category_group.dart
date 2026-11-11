@@ -70,7 +70,7 @@ class CategoryGroup extends HookConsumerWidget {
       return null;
     }, [envelopes]);
 
-    final totalAvailable = categoryWithEnvelopes.totalAvailableCents;
+    final totalAvailable = categoryWithEnvelopes.totalAvailableMinor;
     final availableTone = totalAvailable < 0
         ? ObTone.overspent
         : totalAvailable > 0
@@ -146,7 +146,7 @@ class CategoryGroup extends HookConsumerWidget {
                           ObAmount(
                             hideAmounts
                                 ? hiddenAmountPlaceholder
-                                : formatCentsForCode(
+                                : formatMinorForCode(
                                     totalAvailable,
                                     currencyCode,
                                   ),

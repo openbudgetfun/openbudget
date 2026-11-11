@@ -73,7 +73,7 @@ void main() {
         r'You could move $50.',
       );
       expect(api.chatRequests.single.conversationId, isNull);
-      expect(api.chatRequests.single.budgetId, testBudgetId);
+      expect(api.chatRequests.single.entityId, testBudgetId);
     });
 
     test('opens an existing conversation in time order', () async {
@@ -127,7 +127,7 @@ void main() {
     test('maps a stream failure and retries the last question', () async {
       var failing = true;
       final api = FakeAssistantApi(
-        chatStream: (budgetId, conversationId, message) => failing
+        chatStream: (entityId, conversationId, message) => failing
             ? Stream.error(
                 const AssistantFailure.validation(
                   message: 'Message must not be empty.',
@@ -226,7 +226,7 @@ void main() {
       await pumpEventQueue();
       await container
           .read(assistantProposalActionsProvider.notifier)
-          .apply(budgetId: testBudgetId, proposalId: testProposalId);
+          .apply(entityId: testBudgetId, proposalId: testProposalId);
 
       expect(api.applyCalls, [testProposalId]);
       final item = container
@@ -260,7 +260,7 @@ void main() {
       await pumpEventQueue();
       await container
           .read(assistantProposalActionsProvider.notifier)
-          .dismiss(budgetId: testBudgetId, proposalId: testProposalId);
+          .dismiss(entityId: testBudgetId, proposalId: testProposalId);
 
       expect(api.dismissCalls, [testProposalId]);
       final item = container

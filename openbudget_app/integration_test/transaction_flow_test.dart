@@ -16,7 +16,7 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
 );
@@ -33,9 +33,9 @@ Budget _makeBudget() => Budget(
 BudgetSummary _makeSummary() => BudgetSummary(
   budget: _makeBudget(),
   categories: const [],
-  totalIncomeCents: 0,
-  totalBudgetedCents: 0,
-  readyToAssignCents: 0,
+  totalIncomeMinor: 0,
+  totalBudgetedMinor: 0,
+  readyToAssignMinor: 0,
   year: 2026,
   month: 9,
 );
@@ -43,16 +43,16 @@ BudgetSummary _makeSummary() => BudgetSummary(
 Transaction _makeTransaction({
   required String id,
   required String description,
-  required int amountCents,
+  required int amountMinor,
   DateTime? transactionDate,
   bool cleared = false,
   bool reconciled = false,
 }) => Transaction(
   id: UuidValue.fromString(id),
   description: description,
-  amountCents: amountCents,
+  amountMinor: amountMinor,
   currencyCode: 'USD',
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   accountId: UuidValue.fromString('00000000-0000-0000-0000-000000000111'),
   transactionDate: transactionDate ?? DateTime(2026, 9, 4),
   cleared: cleared,
@@ -67,9 +67,9 @@ Account _makeAccount({
   id: UuidValue.fromString(id),
   name: name,
   accountType: 'checking',
-  balanceCents: 0,
+  balanceMinor: 0,
   currencyCode: currencyCode,
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   onBudget: true,
   sortOrder: 0,
   isClosed: false,
@@ -77,7 +77,7 @@ Account _makeAccount({
 
 Widget _buildApp({String? initialLocation}) {
   final router = GoRouter(
-    initialLocation: initialLocation ?? '/budgets/$_budgetId/plan',
+    initialLocation: initialLocation ?? '/budgets/$_entityId/plan',
     routes: [
       GoRoute(
         name: planRoute,
@@ -90,7 +90,7 @@ Widget _buildApp({String? initialLocation}) {
                 context: context,
                 isScrollControlled: true,
                 builder: (_) =>
-                    AddTransactionSheet(budgetId: state.pathParameters['id']!),
+                    AddTransactionSheet(entityId: state.pathParameters['entityId']!),
               ),
               child: const Text('Open Add Sheet'),
             ),
@@ -101,13 +101,13 @@ Widget _buildApp({String? initialLocation}) {
         name: addIncomeRoute,
         path: addIncomePath,
         builder: (context, state) =>
-            AddIncomeScreen(budgetId: state.pathParameters['id']!),
+            AddIncomeScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: addExpenseRoute,
         path: addExpensePath,
         builder: (context, state) =>
-            AddExpenseScreen(budgetId: state.pathParameters['id']!),
+            AddExpenseScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: createTransferRoute,
@@ -138,7 +138,7 @@ Widget _buildTransferFlowApp({
   String? initialLocation,
 }) {
   final router = GoRouter(
-    initialLocation: initialLocation ?? '/budgets/$_budgetId/plan',
+    initialLocation: initialLocation ?? '/budgets/$_entityId/plan',
     routes: [
       GoRoute(
         name: planRoute,
@@ -151,7 +151,7 @@ Widget _buildTransferFlowApp({
                 context: context,
                 isScrollControlled: true,
                 builder: (_) =>
-                    AddTransactionSheet(budgetId: state.pathParameters['id']!),
+                    AddTransactionSheet(entityId: state.pathParameters['entityId']!),
               ),
               child: const Text('Open Add Sheet'),
             ),
@@ -162,19 +162,19 @@ Widget _buildTransferFlowApp({
         name: addIncomeRoute,
         path: addIncomePath,
         builder: (context, state) =>
-            AddIncomeScreen(budgetId: state.pathParameters['id']!),
+            AddIncomeScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: addExpenseRoute,
         path: addExpensePath,
         builder: (context, state) =>
-            AddExpenseScreen(budgetId: state.pathParameters['id']!),
+            AddExpenseScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: createTransferRoute,
         path: createTransferPath,
         builder: (context, state) =>
-            CreateTransferScreen(budgetId: state.pathParameters['id']!),
+            CreateTransferScreen(entityId: state.pathParameters['entityId']!),
       ),
     ],
   );
@@ -197,7 +197,7 @@ Widget _buildTransferFlowApp({
 
 Widget _buildTransactionListApp({required List<Transaction> transactions}) {
   final router = GoRouter(
-    initialLocation: '/budgets/$_budgetId/transactions',
+    initialLocation: '/budgets/$_entityId/transactions',
     routes: [
       GoRoute(
         name: planRoute,
@@ -209,19 +209,19 @@ Widget _buildTransactionListApp({required List<Transaction> transactions}) {
         name: transactionListRoute,
         path: transactionListPath,
         builder: (context, state) =>
-            TransactionListScreen(budgetId: state.pathParameters['id']!),
+            TransactionListScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: addIncomeRoute,
         path: addIncomePath,
         builder: (context, state) =>
-            AddIncomeScreen(budgetId: state.pathParameters['id']!),
+            AddIncomeScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: addExpenseRoute,
         path: addExpensePath,
         builder: (context, state) =>
-            AddExpenseScreen(budgetId: state.pathParameters['id']!),
+            AddExpenseScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: createTransferRoute,
@@ -253,7 +253,7 @@ void main() {
   patrolWidgetTest('add expense route renders add expense screen', ($) async {
     final tester = $.tester;
     await tester.pumpWidget(
-      _buildApp(initialLocation: '/budgets/$_budgetId/expenses/add'),
+      _buildApp(initialLocation: '/budgets/$_entityId/expenses/add'),
     );
     await tester.pumpAndSettle();
 
@@ -263,7 +263,7 @@ void main() {
   patrolWidgetTest('add income route renders add income screen', ($) async {
     final tester = $.tester;
     await tester.pumpWidget(
-      _buildApp(initialLocation: '/budgets/$_budgetId/income/add'),
+      _buildApp(initialLocation: '/budgets/$_entityId/income/add'),
     );
     await tester.pumpAndSettle();
 
@@ -275,7 +275,7 @@ void main() {
   ) async {
     final tester = $.tester;
     await tester.pumpWidget(
-      _buildApp(initialLocation: '/budgets/$_budgetId/expenses/add'),
+      _buildApp(initialLocation: '/budgets/$_entityId/expenses/add'),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(InkWell, 'Add Income'));
@@ -289,7 +289,7 @@ void main() {
   ) async {
     final tester = $.tester;
     await tester.pumpWidget(
-      _buildApp(initialLocation: '/budgets/$_budgetId/income/add'),
+      _buildApp(initialLocation: '/budgets/$_entityId/income/add'),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(InkWell, 'Add Expense'));
@@ -301,7 +301,7 @@ void main() {
   patrolWidgetTest('transfer route renders transfer scaffold', ($) async {
     final tester = $.tester;
     await tester.pumpWidget(
-      _buildApp(initialLocation: '/budgets/$_budgetId/transfer'),
+      _buildApp(initialLocation: '/budgets/$_entityId/transfer'),
     );
     await tester.pumpAndSettle();
 
@@ -331,7 +331,7 @@ void main() {
               currencyCode: 'EUR',
             ),
           ],
-          initialLocation: '/budgets/$_budgetId/transfer',
+          initialLocation: '/budgets/$_entityId/transfer',
         ),
       );
       await tester.pumpAndSettle();
@@ -365,7 +365,7 @@ void main() {
   patrolWidgetTest('cancel from add expense returns to plan route', ($) async {
     final tester = $.tester;
     await tester.pumpWidget(
-      _buildApp(initialLocation: '/budgets/$_budgetId/expenses/add'),
+      _buildApp(initialLocation: '/budgets/$_entityId/expenses/add'),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
@@ -377,7 +377,7 @@ void main() {
   patrolWidgetTest('cancel from add income returns to plan route', ($) async {
     final tester = $.tester;
     await tester.pumpWidget(
-      _buildApp(initialLocation: '/budgets/$_budgetId/income/add'),
+      _buildApp(initialLocation: '/budgets/$_entityId/income/add'),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
@@ -396,12 +396,12 @@ void main() {
           _makeTransaction(
             id: '00000000-0000-0000-0000-000000000301',
             description: 'Grocery Store',
-            amountCents: -5000,
+            amountMinor: -5000,
           ),
           _makeTransaction(
             id: '00000000-0000-0000-0000-000000000302',
             description: 'Rent',
-            amountCents: -280000,
+            amountMinor: -280000,
             cleared: true,
           ),
         ],
@@ -429,7 +429,7 @@ void main() {
           _makeTransaction(
             id: '00000000-0000-0000-0000-000000000401',
             description: 'Grocery Store',
-            amountCents: -5000,
+            amountMinor: -5000,
           ),
         ],
       ),
@@ -452,7 +452,7 @@ void main() {
           _makeTransaction(
             id: '00000000-0000-0000-0000-000000000501',
             description: 'Grocery Store',
-            amountCents: -5000,
+            amountMinor: -5000,
           ),
         ],
       ),

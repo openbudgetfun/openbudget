@@ -33,10 +33,10 @@ Budget testBudget({
 
 TaxProfileRecord businessTaxProfile({
   String entityKind = 'soleTrader',
-  String budgetId = testBudgetId,
+  String entityId = testBudgetId,
 }) => TaxProfileRecord(
   id: UuidValue.fromString('00000000-0000-0000-0000-0000000000b003'),
-  budgetId: UuidValue.fromString(budgetId),
+  entityId: UuidValue.fromString(entityId),
   jurisdiction: 'GB',
   entityKind: entityKind,
   profileJson: '{"entityKind":"$entityKind"}',
@@ -52,7 +52,7 @@ LedgerAccount ledgerAccount({
   bool archived = false,
 }) => LedgerAccount(
   id: UuidValue.fromString(id),
-  budgetId: UuidValue.fromString(testBudgetId),
+  entityId: UuidValue.fromString(testBudgetId),
   code: code,
   name: name,
   type: type,
@@ -96,7 +96,7 @@ Journal journal({
   String? reversalOfJournalId,
 }) => Journal(
   id: UuidValue.fromString(id),
-  budgetId: UuidValue.fromString(testBudgetId),
+  entityId: UuidValue.fromString(testBudgetId),
   date: date ?? DateTime.utc(2026, 5, 14),
   reference: reference,
   narration: narration,
@@ -203,7 +203,7 @@ TrialBalanceView trialBalanceView({
   String currencyCode = 'GBP',
   DateTime? asOf,
 }) => TrialBalanceView(
-  budgetId: UuidValue.fromString(testBudgetId),
+  entityId: UuidValue.fromString(testBudgetId),
   currencyCode: currencyCode,
   asOf: asOf ?? DateTime.utc(2026, 11, 5),
   rows:
@@ -224,7 +224,7 @@ TrialBalanceView trialBalanceView({
 
 LedgerPeriodLock testLock({DateTime? lockDate}) => LedgerPeriodLock(
   id: UuidValue.fromString('00000000-0000-0000-0000-0000000000c010'),
-  budgetId: UuidValue.fromString(testBudgetId),
+  entityId: UuidValue.fromString(testBudgetId),
   lockDate: lockDate ?? DateTime.utc(2026, 10, 31),
   setBy: UuidValue.fromString(testOwnerId),
 );
@@ -273,7 +273,7 @@ class FakeLedgerRepository implements LedgerRepository {
   final List<String> archivedAccounts = [];
   final List<
     ({
-      String budgetId,
+      String entityId,
       DateTime date,
       List<JournalLineInput> lines,
       String? journalId,
@@ -286,9 +286,9 @@ class FakeLedgerRepository implements LedgerRepository {
   final List<String> deletedJournals = [];
   final List<String> postedJournals = [];
   final List<({String journalId, DateTime date})> reversedJournals = [];
-  final List<({String budgetId, DateTime lockDate})> lockDates = [];
-  final List<({String budgetId, DateTime asOf})> trialBalanceCalls = [];
-  final List<({String budgetId, bool includeArchived})> accountCalls = [];
+  final List<({String entityId, DateTime lockDate})> lockDates = [];
+  final List<({String entityId, DateTime asOf})> trialBalanceCalls = [];
+  final List<({String entityId, bool includeArchived})> accountCalls = [];
   final List<String> lineCalls = [];
   final List<String> lockLookups = [];
 
@@ -301,7 +301,7 @@ class FakeLedgerRepository implements LedgerRepository {
   }) {
     final stored = Journal(
       id: UuidValue.fromString(journalId),
-      budgetId: UuidValue.fromString(testBudgetId),
+      entityId: UuidValue.fromString(testBudgetId),
       date: DateTime.utc(2026, 5, 14),
       reference: reference,
       narration: narration,
@@ -313,25 +313,25 @@ class FakeLedgerRepository implements LedgerRepository {
   }
 
   @override
-  Future<Budget> enableLedger(String budgetId) async {
+  Future<Budget> enableLedger(String entityId) async {
     if (enableError != null) throw enableError!;
-    enabledBudgets.add(budgetId);
+    enabledBudgets.add(entityId);
     return testBudget(accountingMode: 'ledger');
   }
 
   @override
   Future<List<LedgerAccount>> listAccounts(
-    String budgetId, {
+    String entityId, {
     required bool includeArchived,
   }) async {
     if (accountsError != null) throw accountsError!;
-    accountCalls.add((budgetId: budgetId, includeArchived: includeArchived));
+    accountCalls.add((entityId: entityId, includeArchived: includeArchived));
     return accounts ?? testChartOfAccounts();
   }
 
   @override
   Future<LedgerAccount> createAccount({
-    required String budgetId,
+    required String entityId,
     required String code,
     required String name,
     required String type,
@@ -348,7 +348,7 @@ class FakeLedgerRepository implements LedgerRepository {
 
   @override
   Future<Journal> saveDraftJournal({
-    required String budgetId,
+    required String entityId,
     required DateTime date,
     required List<JournalLineInput> lines,
     required String reference,
@@ -358,7 +358,7 @@ class FakeLedgerRepository implements LedgerRepository {
   }) async {
     if (saveError != null) throw saveError!;
     savedDrafts.add((
-      budgetId: budgetId,
+      entityId: entityId,
       date: date,
       lines: lines,
       journalId: journalId,
@@ -419,7 +419,7 @@ class FakeLedgerRepository implements LedgerRepository {
       id: UuidValue.fromString(
         '00000000-0000-0000-0000-0000000000e$_nextJournalNumber',
       ),
-      budgetId: UuidValue.fromString(testBudgetId),
+      entityId: UuidValue.fromString(testBudgetId),
       date: date,
       reference: 'JB-2026-000$_nextJournalNumber',
       status: 'posted',
@@ -433,7 +433,7 @@ class FakeLedgerRepository implements LedgerRepository {
 
   @override
   Future<List<Journal>> listJournals(
-    String budgetId, {
+    String entityId, {
     DateTime? fromDate,
     DateTime? toDate,
   }) async {
@@ -453,14 +453,14 @@ class FakeLedgerRepository implements LedgerRepository {
 
   @override
   Future<LedgerPeriodLock> setLockDate(
-    String budgetId,
+    String entityId,
     DateTime lockDate,
   ) async {
     if (lockError != null) throw lockError!;
-    lockDates.add((budgetId: budgetId, lockDate: lockDate));
+    lockDates.add((entityId: entityId, lockDate: lockDate));
     lock = LedgerPeriodLock(
       id: UuidValue.fromString('00000000-0000-0000-0000-0000000000c010'),
-      budgetId: UuidValue.fromString(budgetId),
+      entityId: UuidValue.fromString(entityId),
       lockDate: lockDate,
       setBy: UuidValue.fromString(testOwnerId),
     );
@@ -468,15 +468,15 @@ class FakeLedgerRepository implements LedgerRepository {
   }
 
   @override
-  Future<LedgerPeriodLock?> getLockDate(String budgetId) async {
-    lockLookups.add(budgetId);
+  Future<LedgerPeriodLock?> getLockDate(String entityId) async {
+    lockLookups.add(entityId);
     return lock;
   }
 
   @override
-  Future<TrialBalanceView> trialBalance(String budgetId, DateTime asOf) async {
+  Future<TrialBalanceView> trialBalance(String entityId, DateTime asOf) async {
     if (trialBalanceError != null) throw trialBalanceError!;
-    trialBalanceCalls.add((budgetId: budgetId, asOf: asOf));
+    trialBalanceCalls.add((entityId: entityId, asOf: asOf));
     return trialBalanceResult ?? trialBalanceView(asOf: asOf);
   }
 }

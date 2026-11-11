@@ -10,7 +10,7 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  final budgetId = UuidValue.fromString('00000000-0000-0000-0000-000000000101');
+  final entityId = UuidValue.fromString('00000000-0000-0000-0000-000000000101');
   final categoryId = UuidValue.fromString(
     '00000000-0000-0000-0000-000000000102',
   );
@@ -26,8 +26,8 @@ void main() {
       id: envelopeOneId,
       name: 'Groceries',
       categoryId: categoryId,
-      budgetedAmountCents: 0,
-      spentAmountCents: 0,
+      budgetedAmountMinor: 0,
+      spentAmountMinor: 0,
       currencyCode: 'USD',
       sortOrder: 0,
     );
@@ -35,8 +35,8 @@ void main() {
       id: envelopeTwoId,
       name: 'Dining Out',
       categoryId: categoryId,
-      budgetedAmountCents: 0,
-      spentAmountCents: 0,
+      budgetedAmountMinor: 0,
+      spentAmountMinor: 0,
       currencyCode: 'USD',
       sortOrder: 1,
     );
@@ -45,29 +45,29 @@ void main() {
       category: Category(
         id: categoryId,
         name: 'Needs',
-        budgetId: budgetId,
+        entityId: entityId,
         sortOrder: 0,
       ),
       envelopes: [groceries, dining],
       monthlyEnvelopes: [
         MonthlyEnvelopeData(
           envelope: groceries,
-          allocatedCents: 0,
-          spentCents: 0,
-          availableCents: 0,
-          carryoverCents: 0,
+          allocatedMinor: 0,
+          spentMinor: 0,
+          availableMinor: 0,
+          carryoverMinor: 0,
         ),
         MonthlyEnvelopeData(
           envelope: dining,
-          allocatedCents: 0,
-          spentCents: 0,
-          availableCents: 0,
-          carryoverCents: 0,
+          allocatedMinor: 0,
+          spentMinor: 0,
+          availableMinor: 0,
+          carryoverMinor: 0,
         ),
       ],
-      totalBudgetedCents: 0,
-      totalSpentCents: 0,
-      totalAvailableCents: 0,
+      totalBudgetedMinor: 0,
+      totalSpentMinor: 0,
+      totalAvailableMinor: 0,
     );
   }
 

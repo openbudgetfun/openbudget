@@ -21,8 +21,8 @@ void main() {
     });
 
     test('same currency conversion is passthrough', () {
-      final result = converter.convertCents(
-        amountCents: 12345,
+      final result = converter.convertMinor(
+        amountMinor: 12345,
         sourceCurrency: CurrencyCode.eur,
       );
 
@@ -30,14 +30,14 @@ void main() {
     });
 
     test('converts between USD, EUR, and GBP using provider rates', () {
-      final usdToEur = converter.convertCents(
-        amountCents: 10000,
+      final usdToEur = converter.convertMinor(
+        amountMinor: 10000,
         sourceCurrency: CurrencyCode.usd,
       );
       expect(usdToEur, 8000);
 
-      final gbpToEur = converter.convertCents(
-        amountCents: 10000,
+      final gbpToEur = converter.convertMinor(
+        amountMinor: 10000,
         sourceCurrency: CurrencyCode.gbp,
       );
       // 100.00 GBP -> (100 / 0.7) * 0.8 = 114.2857 EUR
@@ -45,8 +45,8 @@ void main() {
     });
 
     test('respects JPY and BTC precision rules', () {
-      final jpyToEur = converter.convertCents(
-        amountCents: 12345,
+      final jpyToEur = converter.convertMinor(
+        amountMinor: 12345,
         sourceCurrency: CurrencyCode.jpy,
       );
       // 12,345 JPY -> (12,345 / 150) * 0.8 = 65.84 EUR
@@ -57,8 +57,8 @@ void main() {
         baseCurrencyCode: 'USD',
         ratesByCode: {'USD': 1.0, 'BTC': 0.00002},
       );
-      final usdToBtc = btcDisplay.convertCents(
-        amountCents: 123,
+      final usdToBtc = btcDisplay.convertMinor(
+        amountMinor: 123,
         sourceCurrency: CurrencyCode.usd,
       );
       // 1.23 USD -> 0.00002460 BTC -> 2460 sats
@@ -72,14 +72,14 @@ void main() {
         ratesByCode: {'USD': 1.0},
       );
 
-      final converted = missingRateConverter.convertCents(
-        amountCents: 10000,
+      final converted = missingRateConverter.convertMinor(
+        amountMinor: 10000,
         sourceCurrency: CurrencyCode.gbp,
       );
       expect(converted, isNull);
       expect(
         missingRateConverter.formatAmount(
-          amountCents: 10000,
+          amountMinor: 10000,
           currencyCode: 'GBP',
         ),
         '\u00A3100.00',
@@ -90,7 +90,7 @@ void main() {
       'formats unsupported codes with their raw code instead of dollars',
       () {
         expect(
-          converter.formatAmount(amountCents: 1250, currencyCode: 'XYZ'),
+          converter.formatAmount(amountMinor: 1250, currencyCode: 'XYZ'),
           'XYZ 12.50',
         );
       },

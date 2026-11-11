@@ -10,7 +10,7 @@ import 'package:openbudget_app/src/features/budget/screens/envelope_activity_she
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
 );
@@ -22,16 +22,16 @@ final _envelopeUuid = UuidValue.fromString(
 );
 Envelope _makeEnvelope({
   String name = 'Groceries',
-  int budgetedAmountCents = 50000,
-  int spentAmountCents = 12000,
+  int budgetedAmountMinor = 50000,
+  int spentAmountMinor = 12000,
   String? note,
   UuidValue? id,
 }) => Envelope(
   id: id ?? _envelopeUuid,
   name: name,
   categoryId: _categoryUuid,
-  budgetedAmountCents: budgetedAmountCents,
-  spentAmountCents: spentAmountCents,
+  budgetedAmountMinor: budgetedAmountMinor,
+  spentAmountMinor: spentAmountMinor,
   currencyCode: 'USD',
   sortOrder: 0,
   note: note,
@@ -39,31 +39,31 @@ Envelope _makeEnvelope({
 
 MonthlyEnvelopeData _makeMonthlyData({
   Envelope? envelope,
-  int allocatedCents = 50000,
-  int spentCents = 12000,
-  int availableCents = 38000,
-  int carryoverCents = 5000,
+  int allocatedMinor = 50000,
+  int spentMinor = 12000,
+  int availableMinor = 38000,
+  int carryoverMinor = 5000,
 }) => MonthlyEnvelopeData(
   envelope: envelope ?? _makeEnvelope(),
-  allocatedCents: allocatedCents,
-  spentCents: spentCents,
-  availableCents: availableCents,
-  carryoverCents: carryoverCents,
+  allocatedMinor: allocatedMinor,
+  spentMinor: spentMinor,
+  availableMinor: availableMinor,
+  carryoverMinor: carryoverMinor,
 );
 
 EnvelopeGoal _makeGoal({
   String goalType = 'target_balance',
-  int targetAmountCents = 100000,
+  int targetAmountMinor = 100000,
 }) => EnvelopeGoal(
   envelopeId: _envelopeUuid,
   goalType: goalType,
-  targetAmountCents: targetAmountCents,
+  targetAmountMinor: targetAmountMinor,
 );
 
 Category _makeCategory({String name = 'Food'}) => Category(
   id: _categoryUuid,
   name: name,
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   sortOrder: 0,
   isHidden: false,
 );
@@ -73,22 +73,22 @@ List<CategoryWithEnvelopes> _makeCategories() => [
     category: _makeCategory(),
     envelopes: [_makeEnvelope()],
     monthlyEnvelopes: [_makeMonthlyData()],
-    totalBudgetedCents: 50000,
-    totalSpentCents: 12000,
-    totalAvailableCents: 38000,
+    totalBudgetedMinor: 50000,
+    totalSpentMinor: 12000,
+    totalAvailableMinor: 38000,
   ),
 ];
 
 Transaction _makeTransaction({
   String description = 'Whole Foods',
-  int amountCents = -3500,
+  int amountMinor = -3500,
   UuidValue? envelopeId,
   DateTime? transactionDate,
 }) => Transaction(
   description: description,
-  amountCents: amountCents,
+  amountMinor: amountMinor,
   currencyCode: 'USD',
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   envelopeId: envelopeId ?? _envelopeUuid,
   transactionDate: transactionDate ?? DateTime(2026, 2, 15),
 );
@@ -114,7 +114,7 @@ void main() {
         home: Scaffold(
           body: EnvelopeActivitySheet(
             envelope: env,
-            budgetId: _budgetId,
+            entityId: _entityId,
             currencyCode: 'USD',
             categories: _makeCategories(),
             categoryId: _categoryUuid.toString(),
@@ -212,7 +212,7 @@ void main() {
     testWidgets('renders transactions when available', (tester) async {
       final transactions = [
         _makeTransaction(),
-        _makeTransaction(description: 'Salary', amountCents: 150000),
+        _makeTransaction(description: 'Salary', amountMinor: 150000),
       ];
 
       await tester.pumpWidget(buildSubject(transactions: transactions));

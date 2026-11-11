@@ -11,7 +11,7 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  const budgetId = 'test-budget-1';
+  const entityId = 'test-budget-1';
 
   final ownerId = UuidValue.fromString('00000000-0000-0000-0000-000000000099');
 
@@ -26,7 +26,7 @@ void main() {
   Transaction makeTx({
     required String id,
     required String description,
-    required int amountCents,
+    required int amountMinor,
     String currencyCode = 'USD',
     DateTime? date,
     bool cleared = false,
@@ -40,9 +40,9 @@ void main() {
   }) => Transaction(
     id: UuidValue.fromString(id),
     description: description,
-    amountCents: amountCents,
+    amountMinor: amountMinor,
     currencyCode: currencyCode,
-    budgetId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
+    entityId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
     transactionDate: date ?? DateTime(2026, 2, 15),
     cleared: cleared,
     reconciled: reconciled,
@@ -59,26 +59,26 @@ void main() {
     makeTx(
       id: '00000000-0000-0000-0000-000000000010',
       description: 'Grocery Store',
-      amountCents: -5000,
+      amountMinor: -5000,
       date: DateTime(2026, 2, 15),
     ),
     makeTx(
       id: '00000000-0000-0000-0000-000000000011',
       description: 'Monthly Salary',
-      amountCents: 300000,
+      amountMinor: 300000,
       date: DateTime(2026, 2, 15),
     ),
     makeTx(
       id: '00000000-0000-0000-0000-000000000012',
       description: 'Coffee Shop',
-      amountCents: -450,
+      amountMinor: -450,
       date: DateTime(2026, 2, 14),
       cleared: true,
     ),
     makeTx(
       id: '00000000-0000-0000-0000-000000000013',
       description: 'Gas Station',
-      amountCents: -3500,
+      amountMinor: -3500,
       date: DateTime(2026, 2, 14),
       flagColor: 'red',
       memo: 'Fill up for road trip',
@@ -102,9 +102,9 @@ void main() {
             BudgetSummary(
               budget: makeBudget(),
               categories: const [],
-              totalIncomeCents: 0,
-              totalBudgetedCents: 0,
-              readyToAssignCents: 0,
+              totalIncomeMinor: 0,
+              totalBudgetedMinor: 0,
+              readyToAssignMinor: 0,
               year: 2026,
               month: 2,
             ),
@@ -118,7 +118,7 @@ void main() {
       theme: OpenBudgetTheme.light,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const TransactionListScreen(budgetId: budgetId),
+      home: const TransactionListScreen(entityId: entityId),
     ),
   );
 
@@ -130,7 +130,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const TransactionListScreen(budgetId: budgetId),
+            home: const TransactionListScreen(entityId: entityId),
           ),
         ),
       );
@@ -163,13 +163,13 @@ void main() {
         makeTx(
           id: '00000000-0000-0000-0000-000000000021',
           description: 'USD Expense',
-          amountCents: -5000,
+          amountMinor: -5000,
           date: DateTime(2026, 2, 15),
         ),
         makeTx(
           id: '00000000-0000-0000-0000-000000000022',
           description: 'EUR Income',
-          amountCents: 123456,
+          amountMinor: 123456,
           currencyCode: 'EUR',
           date: DateTime(2026, 2, 15),
         ),
@@ -239,7 +239,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const TransactionListScreen(budgetId: budgetId),
+            home: const TransactionListScreen(entityId: entityId),
           ),
         ),
       );

@@ -24,12 +24,12 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 /// in each line's own currency.
 class JournalDetailScreen extends HookConsumerWidget {
   const JournalDetailScreen({
-    required this.budgetId,
+    required this.entityId,
     required this.journalId,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final String journalId;
 
   @override
@@ -37,9 +37,9 @@ class JournalDetailScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final journalsAsync = ref.watch(ledgerJournalsProvider(budgetId));
+    final journalsAsync = ref.watch(ledgerJournalsProvider(entityId));
     final linesAsync = ref.watch(ledgerJournalLinesProvider(journalId));
-    final accountsAsync = ref.watch(ledgerAccountsProvider(budgetId));
+    final accountsAsync = ref.watch(ledgerAccountsProvider(entityId));
     final accounts = accountsAsync.value ?? const <LedgerAccount>[];
     final isWorking = useState(false);
 
@@ -64,7 +64,7 @@ class JournalDetailScreen extends HookConsumerWidget {
               action: ObStateAction(
                 label: l10n.ledgerRetry,
                 onPressed: () =>
-                    ref.invalidate(ledgerJournalsProvider(budgetId)),
+                    ref.invalidate(ledgerJournalsProvider(entityId)),
               ),
             ),
           ),
@@ -216,7 +216,7 @@ class JournalDetailScreen extends HookConsumerWidget {
                             onPressed: () => context.pushNamed(
                               journalEditRoute,
                               pathParameters: {
-                                'id': budgetId,
+                                'id': entityId,
                                 'journalId': journalId,
                               },
                             ),
@@ -284,7 +284,7 @@ class JournalDetailScreen extends HookConsumerWidget {
     try {
       await ref
           .read(ledgerActionsProvider.notifier)
-          .deleteDraftJournal(budgetId: budgetId, journalId: journalId);
+          .deleteDraftJournal(entityId: entityId, journalId: journalId);
       if (!context.mounted) return;
       showAppToast(
         context,
@@ -373,7 +373,7 @@ class JournalDetailScreen extends HookConsumerWidget {
       await ref
           .read(ledgerActionsProvider.notifier)
           .reverseJournal(
-            budgetId: budgetId,
+            entityId: entityId,
             journalId: journalId,
             date: reversalDate,
           );
@@ -503,10 +503,10 @@ class _LinesCard extends HookWidget {
               name: accountParts(line.ledgerAccountId).$2,
               debit: line.debitMinor == 0
                   ? ''
-                  : formatCentsForCode(line.debitMinor, line.currencyCode),
+                  : formatMinorForCode(line.debitMinor, line.currencyCode),
               credit: line.creditMinor == 0
                   ? ''
-                  : formatCentsForCode(line.creditMinor, line.currencyCode),
+                  : formatMinorForCode(line.creditMinor, line.currencyCode),
             ),
           ],
           const Divider(height: 1),
@@ -515,8 +515,8 @@ class _LinesCard extends HookWidget {
               key: Key('journal-detail-totals-$index'),
               code: '',
               name: l10n.ledgerTotalsLabel,
-              debit: formatCentsForCode(totalsByCurrency[code]!.debit, code),
-              credit: formatCentsForCode(totalsByCurrency[code]!.credit, code),
+              debit: formatMinorForCode(totalsByCurrency[code]!.debit, code),
+              credit: formatMinorForCode(totalsByCurrency[code]!.credit, code),
               isTotals: true,
             ),
         ],

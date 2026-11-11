@@ -15,7 +15,7 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class _RecordingExpenseActions extends TransactionActions {
-  int? expenseAmountCents;
+  int? expenseAmountMinor;
   String? expenseCurrencyCode;
 
   @override
@@ -24,22 +24,22 @@ class _RecordingExpenseActions extends TransactionActions {
   @override
   Future<Transaction> addExpense({
     required String description,
-    required int amountCents,
+    required int amountMinor,
     required String currencyCode,
-    required String budgetId,
+    required String entityId,
     required DateTime date,
     String? envelopeId,
     String? categoryId,
     String? payeeId,
     String? memo,
   }) async {
-    expenseAmountCents = amountCents;
+    expenseAmountMinor = amountMinor;
     expenseCurrencyCode = currencyCode;
     return Transaction(
       description: description,
-      amountCents: amountCents,
+      amountMinor: amountMinor,
       currencyCode: currencyCode,
-      budgetId: UuidValue.fromString(
+      entityId: UuidValue.fromString(
         '00000000-0000-0000-0000-000000000001',
       ),
       transactionDate: date,
@@ -48,7 +48,7 @@ class _RecordingExpenseActions extends TransactionActions {
 }
 
 void main() {
-  const budgetId = 'test-budget-1';
+  const entityId = 'test-budget-1';
   final budgetUuid = UuidValue.fromString(
     '00000000-0000-0000-0000-000000000001',
   );
@@ -77,12 +77,12 @@ void main() {
     Payee(
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000010'),
       name: 'Grocery Store',
-      budgetId: budgetUuid,
+      entityId: budgetUuid,
     ),
     Payee(
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000011'),
       name: 'Coffee Shop',
-      budgetId: budgetUuid,
+      entityId: budgetUuid,
     ),
   ];
 
@@ -96,7 +96,7 @@ void main() {
                 category: Category(
                   id: categoryUuid,
                   name: 'Essentials',
-                  budgetId: budgetUuid,
+                  entityId: budgetUuid,
                   sortOrder: 0,
                 ),
                 envelopes: [
@@ -104,8 +104,8 @@ void main() {
                     id: envelopeUuid1,
                     name: 'Groceries',
                     categoryId: categoryUuid,
-                    budgetedAmountCents: 50000,
-                    spentAmountCents: 20000,
+                    budgetedAmountMinor: 50000,
+                    spentAmountMinor: 20000,
                     currencyCode: 'USD',
                     sortOrder: 0,
                   ),
@@ -113,21 +113,21 @@ void main() {
                     id: envelopeUuid2,
                     name: 'Dining Out',
                     categoryId: categoryUuid,
-                    budgetedAmountCents: 20000,
-                    spentAmountCents: 5000,
+                    budgetedAmountMinor: 20000,
+                    spentAmountMinor: 5000,
                     currencyCode: 'USD',
                     sortOrder: 1,
                   ),
                 ],
                 monthlyEnvelopes: const [],
-                totalBudgetedCents: 70000,
-                totalSpentCents: 25000,
-                totalAvailableCents: 45000,
+                totalBudgetedMinor: 70000,
+                totalSpentMinor: 25000,
+                totalAvailableMinor: 45000,
               ),
             ],
-        totalIncomeCents: 100000,
-        totalBudgetedCents: 70000,
-        readyToAssignCents: 30000,
+        totalIncomeMinor: 100000,
+        totalBudgetedMinor: 70000,
+        readyToAssignMinor: 30000,
         year: 2026,
         month: 2,
       );
@@ -164,7 +164,7 @@ void main() {
       theme: OpenBudgetTheme.light,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const AddExpenseScreen(budgetId: budgetId),
+      home: const AddExpenseScreen(entityId: entityId),
     ),
   );
 
@@ -177,7 +177,7 @@ void main() {
     TransactionActions? actions,
   }) {
     final router = GoRouter(
-      initialLocation: '/budgets/$budgetId/expenses/add',
+      initialLocation: '/budgets/$entityId/expenses/add',
       routes: [
         GoRoute(
           name: planRoute,
@@ -189,7 +189,7 @@ void main() {
           name: addExpenseRoute,
           path: addExpensePath,
           builder: (context, state) =>
-              AddExpenseScreen(budgetId: state.pathParameters['id']!),
+              AddExpenseScreen(entityId: state.pathParameters['entityId']!),
         ),
         GoRoute(
           name: addIncomeRoute,
@@ -240,7 +240,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AddExpenseScreen(budgetId: budgetId),
+            home: const AddExpenseScreen(entityId: entityId),
           ),
         ),
       );
@@ -455,7 +455,7 @@ void main() {
       await tester.tap(find.text('Save Transaction'));
       await tester.pumpAndSettle();
 
-      expect(actions.expenseAmountCents, 1234);
+      expect(actions.expenseAmountMinor, 1234);
       expect(actions.expenseCurrencyCode, 'USD');
     });
 
@@ -486,7 +486,7 @@ void main() {
       await tester.tap(find.text('Save Transaction'));
       await tester.pumpAndSettle();
 
-      expect(actions.expenseAmountCents, isNull);
+      expect(actions.expenseAmountMinor, isNull);
     });
 
     testWidgets('refuses a negative expense amount', (tester) async {
@@ -514,7 +514,7 @@ void main() {
       await tester.tap(find.text('Save Transaction'));
       await tester.pumpAndSettle();
 
-      expect(actions.expenseAmountCents, isNull);
+      expect(actions.expenseAmountMinor, isNull);
     });
 
     testWidgets('shows negative amount hint in budget currency', (

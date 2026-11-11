@@ -8,12 +8,12 @@ import 'package:openbudget_app/src/features/budget/screens/category_detail_scree
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000100';
+const _entityId = '00000000-0000-0000-0000-000000000100';
 const _categoryId = '00000000-0000-0000-0000-000000000101';
 const _envelopeId = '00000000-0000-0000-0000-000000000102';
 
 BudgetSummary _makeSummary() {
-  final budgetUuid = UuidValue.fromString(_budgetId);
+  final budgetUuid = UuidValue.fromString(_entityId);
   final categoryUuid = UuidValue.fromString(_categoryId);
   final envelopeUuid = UuidValue.fromString(_envelopeId);
   final ownerUuid = UuidValue.fromString(
@@ -24,8 +24,8 @@ BudgetSummary _makeSummary() {
     id: envelopeUuid,
     name: 'Utilities',
     categoryId: categoryUuid,
-    budgetedAmountCents: 6000,
-    spentAmountCents: 0,
+    budgetedAmountMinor: 6000,
+    spentAmountMinor: 0,
     currencyCode: 'USD',
     sortOrder: 0,
     note: 'Auto-pay every month',
@@ -43,27 +43,27 @@ BudgetSummary _makeSummary() {
         category: Category(
           id: categoryUuid,
           name: 'Bills',
-          budgetId: budgetUuid,
+          entityId: budgetUuid,
           sortOrder: 0,
         ),
         envelopes: [envelope],
         monthlyEnvelopes: [
           MonthlyEnvelopeData(
             envelope: envelope,
-            allocatedCents: 6000,
-            spentCents: 0,
-            availableCents: 6000,
-            carryoverCents: 0,
+            allocatedMinor: 6000,
+            spentMinor: 0,
+            availableMinor: 6000,
+            carryoverMinor: 0,
           ),
         ],
-        totalBudgetedCents: 6000,
-        totalSpentCents: 0,
-        totalAvailableCents: 6000,
+        totalBudgetedMinor: 6000,
+        totalSpentMinor: 0,
+        totalAvailableMinor: 6000,
       ),
     ],
-    totalIncomeCents: 20000,
-    totalBudgetedCents: 6000,
-    readyToAssignCents: 14000,
+    totalIncomeMinor: 20000,
+    totalBudgetedMinor: 6000,
+    readyToAssignMinor: 14000,
     year: 2026,
     month: 2,
   );
@@ -74,8 +74,8 @@ void main() {
     final goal = EnvelopeGoal(
       envelopeId: UuidValue.fromString(_envelopeId),
       goalType: 'monthly_funding',
-      targetAmountCents: 6000,
-      monthlyFundingCents: 6000,
+      targetAmountMinor: 6000,
+      monthlyFundingMinor: 6000,
     );
 
     await tester.pumpWidget(
@@ -93,7 +93,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const CategoryDetailScreen(
-            budgetId: _budgetId,
+            entityId: _entityId,
             categoryId: _categoryId,
             envelopeId: _envelopeId,
           ),

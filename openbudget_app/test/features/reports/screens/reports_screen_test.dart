@@ -15,7 +15,7 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000901',
 );
@@ -43,9 +43,9 @@ NetWorthData _makeNetWorthData() {
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000902'),
     name: 'Checking',
     accountType: 'checking',
-    balanceCents: 5222000,
+    balanceMinor: 5222000,
     currencyCode: 'USD',
-    budgetId: _budgetUuid,
+    entityId: _budgetUuid,
     onBudget: true,
     sortOrder: 0,
     isClosed: false,
@@ -54,9 +54,9 @@ NetWorthData _makeNetWorthData() {
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000903'),
     name: 'Credit Card',
     accountType: 'creditCard',
-    balanceCents: -125,
+    balanceMinor: -125,
     currencyCode: 'USD',
-    budgetId: _budgetUuid,
+    entityId: _budgetUuid,
     onBudget: true,
     sortOrder: 1,
     isClosed: false,
@@ -83,9 +83,9 @@ NetWorthData _makeNetWorthData() {
 Widget _buildSubject({
   required Future<SpendingReport> Function(Ref ref, (String, int, int) args)
   spendingBuilder,
-  Future<NetWorthData> Function(Ref ref, String budgetId)? netWorthBuilder,
-  Future<int?> Function(Ref ref, String budgetId)? ageBuilder,
-  Future<DisplayCurrencyConverter> Function(Ref ref, String budgetId)?
+  Future<NetWorthData> Function(Ref ref, String entityId)? netWorthBuilder,
+  Future<int?> Function(Ref ref, String entityId)? ageBuilder,
+  Future<DisplayCurrencyConverter> Function(Ref ref, String entityId)?
   converterBuilder,
 }) => ProviderScope(
   overrides: [
@@ -101,7 +101,7 @@ Widget _buildSubject({
     theme: OpenBudgetTheme.light,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
-    home: const ReportsScreen(budgetId: _budgetId),
+    home: const ReportsScreen(entityId: _entityId),
   ),
 );
 
@@ -214,7 +214,7 @@ void main() {
               transactionCount: 8,
               categorySpending: const {'Rent': 120000},
             ),
-            converterBuilder: (ref, budgetId) async =>
+            converterBuilder: (ref, entityId) async =>
                 const DisplayCurrencyConverter(
                   displayCurrency: CurrencyCode.gbp,
                   baseCurrencyCode: 'USD',
@@ -240,7 +240,7 @@ void main() {
             transactionCount: 8,
             categorySpending: const {'Rent': 120000},
           ),
-          converterBuilder: (ref, budgetId) async =>
+          converterBuilder: (ref, entityId) async =>
               const DisplayCurrencyConverter(
                 displayCurrency: CurrencyCode.gbp,
                 baseCurrencyCode: 'USD',

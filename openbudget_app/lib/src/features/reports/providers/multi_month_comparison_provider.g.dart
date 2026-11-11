@@ -8,14 +8,14 @@ part of 'multi_month_comparison_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Fetches budget data for [monthCount] consecutive months ending at the
-/// current month and returns a comparison structure.
+/// Compares the last [monthCount] months from the server's month views,
+/// fetched once for the whole screen.
 
 @ProviderFor(multiMonthComparison)
 final multiMonthComparisonProvider = MultiMonthComparisonFamily._();
 
-/// Fetches budget data for [monthCount] consecutive months ending at the
-/// current month and returns a comparison structure.
+/// Compares the last [monthCount] months from the server's month views,
+/// fetched once for the whole screen.
 
 final class MultiMonthComparisonProvider
     extends
@@ -27,8 +27,8 @@ final class MultiMonthComparisonProvider
     with
         $FutureModifier<MultiMonthComparison>,
         $FutureProvider<MultiMonthComparison> {
-  /// Fetches budget data for [monthCount] consecutive months ending at the
-  /// current month and returns a comparison structure.
+  /// Compares the last [monthCount] months from the server's month views,
+  /// fetched once for the whole screen.
   MultiMonthComparisonProvider._({
     required MultiMonthComparisonFamily super.from,
     required (String, {int monthCount}) super.argument,
@@ -78,10 +78,10 @@ final class MultiMonthComparisonProvider
 }
 
 String _$multiMonthComparisonHash() =>
-    r'179d987ca68a2ed999aafdf16a218c9284c53d90';
+    r'613384c3d6d6840264e8d7d0824db3b7a746d245';
 
-/// Fetches budget data for [monthCount] consecutive months ending at the
-/// current month and returns a comparison structure.
+/// Compares the last [monthCount] months from the server's month views,
+/// fetched once for the whole screen.
 
 final class MultiMonthComparisonFamily extends $Family
     with
@@ -98,12 +98,12 @@ final class MultiMonthComparisonFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Fetches budget data for [monthCount] consecutive months ending at the
-  /// current month and returns a comparison structure.
+  /// Compares the last [monthCount] months from the server's month views,
+  /// fetched once for the whole screen.
 
-  MultiMonthComparisonProvider call(String budgetId, {int monthCount = 3}) =>
+  MultiMonthComparisonProvider call(String entityId, {int monthCount = 3}) =>
       MultiMonthComparisonProvider._(
-        argument: (budgetId, monthCount: monthCount),
+        argument: (entityId, monthCount: monthCount),
         from: this,
       );
 

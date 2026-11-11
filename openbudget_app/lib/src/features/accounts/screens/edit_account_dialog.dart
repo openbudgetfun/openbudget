@@ -5,9 +5,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
-import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
-import 'package:openbudget_app/src/utils/currency_formatter.dart';
-import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -16,13 +13,13 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 class EditAccountDialog extends HookConsumerWidget {
   const EditAccountDialog({
     required this.account,
-    required this.budgetId,
+    required this.entityId,
     this.onDeleted,
     super.key,
   });
 
   final Account account;
-  final String budgetId;
+  final String entityId;
   final VoidCallback? onDeleted;
 
   @override
@@ -32,51 +29,41 @@ class EditAccountDialog extends HookConsumerWidget {
     final palette = theme.ob;
 
     final nameController = useTextEditingController(text: account.name);
-    final notesController = useTextEditingController();
+    final notesController = useTextEditingController(
+      text: account.note ?? '',
+    );
     final onBudget = useState(account.onBudget);
     final isSubmitting = useState(false);
-    final currencyCode = account.currencyCode;
-    final currencyDecimals = currencyDecimalsForCode(currencyCode);
 
-    final accountTypes = [
-      'checking',
-      'savings',
-      'creditCard',
-      'cash',
-      'investment',
-      'cryptoWallet',
-      'other',
-    ];
-    final selectedType = useState(account.accountType);
-    final balanceIsPositive = useState(account.balanceCents >= 0);
-    final balanceController = useTextEditingController(
-      text: formatMinorUnits(account.balanceCents.abs(), currencyDecimals),
-    );
+    // A kind change stays within the same liability class and balance
+    // source, so a loan never becomes a wallet and vice versa.
+    final selectableKinds = AccountKind.values
+        .where(
+          (kind) =>
+              kind.isLiability == account.kind.isLiability &&
+              kind.allowedBalanceSources.contains(account.balanceSource),
+        )
+        .toList();
+    final selectedKind = useState<AccountKind>(account.kind);
 
     useListenable(nameController);
-    useListenable(balanceController);
 
-    String typeLabel(String type) => switch (type) {
-      'checking' => l10n.accountTypeChecking,
-      'savings' => l10n.accountTypeSavings,
-      'creditCard' => l10n.accountTypeCreditCard,
-      'cash' => l10n.accountTypeCash,
-      'investment' => l10n.accountTypeInvestment,
-      'cryptoWallet' => l10n.accountTypeCryptoWallet,
-      _ => l10n.accountTypeOther,
+    String kindLabel(AccountKind kind) => switch (kind) {
+      AccountKind.checking => l10n.accountTypeChecking,
+      AccountKind.savings => l10n.accountTypeSavings,
+      AccountKind.creditCard => l10n.accountTypeCreditCard,
+      AccountKind.cash => l10n.accountTypeCash,
+      AccountKind.investment => l10n.accountTypeInvestment,
+      AccountKind.crypto => l10n.accountTypeCryptoWallet,
+      AccountKind.loan => l10n.addAccountTypePersonalLoan,
+      AccountKind.mortgage => l10n.addAccountTypeMortgage,
+      AccountKind.property => l10n.addAccountTypeProperty,
+      AccountKind.vehicle => l10n.addAccountTypeVehicle,
+      AccountKind.otherAsset => l10n.addAccountTypeOtherAsset,
+      AccountKind.otherLiability => l10n.addAccountTypeOtherDebt,
     };
 
-    final balanceMinor = parseMoneyInput(
-      balanceController.text,
-      decimals: currencyDecimals,
-    );
-    final balanceError = moneyInputError(
-      balanceController.text,
-      decimals: currencyDecimals,
-      message: l10n.amountInvalidFormat(currencyDecimals),
-    );
-    final canSave =
-        nameController.text.trim().isNotEmpty && balanceMinor != null;
+    final canSave = nameController.text.trim().isNotEmpty;
 
     return Dialog.fullscreen(
       child: Scaffold(
@@ -100,11 +87,6 @@ class EditAccountDialog extends HookConsumerWidget {
                       final name = nameController.text.trim();
                       if (name.isEmpty) return;
 
-                      var balanceCents = balanceMinor;
-                      if (!balanceIsPositive.value && balanceCents > 0) {
-                        balanceCents = -balanceCents;
-                      }
-
                       isSubmitting.value = true;
                       final navigator = Navigator.of(context);
 
@@ -113,11 +95,13 @@ class EditAccountDialog extends HookConsumerWidget {
                             .read(accountActionsProvider.notifier)
                             .updateAccount(
                               accountId: account.id?.toString() ?? '',
-                              budgetId: budgetId,
+                              entityId: entityId,
                               name: name,
-                              accountType: selectedType.value,
-                              balanceCents: balanceCents,
+                              kind: selectedKind.value,
                               onBudget: onBudget.value,
+                              note: notesController.text.trim().isEmpty
+                                  ? null
+                                  : notesController.text.trim(),
                             );
                         if (!context.mounted) return;
                         showAppToast(
@@ -173,99 +157,19 @@ class EditAccountDialog extends HookConsumerWidget {
             ),
             const SizedBox(height: SpacingTokens.md),
             _SectionLabel(text: l10n.accountTypeLabel),
-            DropdownButtonFormField<String>(
-              initialValue: selectedType.value,
-              items: accountTypes
+            DropdownButtonFormField<AccountKind>(
+              initialValue: selectedKind.value,
+              items: selectableKinds
                   .map(
-                    (type) => DropdownMenuItem(
-                      value: type,
-                      child: Text(typeLabel(type)),
+                    (kind) => DropdownMenuItem(
+                      value: kind,
+                      child: Text(kindLabel(kind)),
                     ),
                   )
                   .toList(),
               onChanged: (value) {
-                if (value != null) selectedType.value = value;
+                if (value != null) selectedKind.value = value;
               },
-            ),
-            const SizedBox(height: SpacingTokens.md),
-            _SectionLabel(text: l10n.accountDetailBalance),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: SpacingTokens.sm,
-                vertical: SpacingTokens.xs,
-              ),
-              decoration: ObRoughDecoration(
-                color: palette.surface,
-                outline: palette.quietPen,
-                seed: 31,
-              ),
-              child: Row(
-                children: [
-                  Tooltip(
-                    message: l10n.accountsToggleBalanceSign,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                      onTap: () =>
-                          balanceIsPositive.value = !balanceIsPositive.value,
-                      child: Container(
-                        width: 48,
-                        height: 48,
-                        alignment: Alignment.center,
-                        decoration: ObRoughDecoration(
-                          color: palette.wash(
-                            balanceIsPositive.value
-                                ? ObTone.funded
-                                : ObTone.overspent,
-                          ),
-                          outline: palette.quietPen,
-                          radius: RadiusTokens.sm,
-                          seed: 33,
-                        ),
-                        child: SkribbleIcon(
-                          data: balanceIsPositive.value
-                              ? OpenBudgetIcons.add
-                              : OpenBudgetIcons.remove,
-                          color: palette.hue(
-                            balanceIsPositive.value
-                                ? ObTone.funded
-                                : ObTone.overspent,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: SpacingTokens.sm),
-                  Text(
-                    currencySymbolForCode(currencyCode),
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: palette.ink,
-                    ),
-                  ),
-                  const SizedBox(width: SpacingTokens.xs),
-                  Expanded(
-                    child: TextField(
-                      controller: balanceController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      textAlign: TextAlign.end,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        isDense: true,
-                        errorText: balanceError,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: SpacingTokens.xs),
-            Text(
-              l10n.accountEditAdjustmentHint,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: palette.mutedInk,
-              ),
             ),
             const SizedBox(height: SpacingTokens.md),
             _SectionLabel(text: l10n.accountEditBankConnection),
@@ -289,7 +193,7 @@ class EditAccountDialog extends HookConsumerWidget {
               ),
             ),
             const SizedBox(height: SpacingTokens.md),
-            if (!account.isClosed)
+            if (account.closedAt == null)
               OutlinedButton(
                 onPressed: isSubmitting.value
                     ? null
@@ -303,7 +207,7 @@ class EditAccountDialog extends HookConsumerWidget {
                 ),
                 child: Text(l10n.accountCloseButton),
               ),
-            if (account.isClosed) ...[
+            if (account.closedAt != null) ...[
               FilledButton.tonal(
                 onPressed: isSubmitting.value
                     ? null
@@ -359,10 +263,9 @@ class EditAccountDialog extends HookConsumerWidget {
     try {
       await ref
           .read(accountActionsProvider.notifier)
-          .updateAccount(
+          .closeAccount(
             accountId: account.id?.toString() ?? '',
-            budgetId: budgetId,
-            isClosed: true,
+            entityId: entityId,
           );
       if (!context.mounted) return;
       showAppToast(
@@ -388,10 +291,9 @@ class EditAccountDialog extends HookConsumerWidget {
     try {
       await ref
           .read(accountActionsProvider.notifier)
-          .updateAccount(
+          .reopenAccount(
             accountId: account.id?.toString() ?? '',
-            budgetId: budgetId,
-            isClosed: false,
+            entityId: entityId,
           );
       if (!context.mounted) return;
       showAppToast(
@@ -442,7 +344,6 @@ class EditAccountDialog extends HookConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     final navigator = Navigator.of(context);
-    var deleted = account;
     final accountId = account.id?.toString();
     if (accountId == null) {
       showAppToast(
@@ -454,99 +355,27 @@ class EditAccountDialog extends HookConsumerWidget {
     }
 
     try {
-      deleted = await ref
+      await ref
           .read(accountActionsProvider.notifier)
-          .deleteAccount(accountId: accountId, budgetId: budgetId);
-    } on Object catch (_) {
-      // If the server deleted the row but the client failed to decode/handle the
-      // delete response, treat this as success by verifying the account no longer
-      // exists in the latest list.
-      var deletedOnServer = false;
-      const retryDelays = <Duration>[
-        Duration.zero,
-        Duration(milliseconds: 120),
-        Duration(milliseconds: 280),
-      ];
-      for (final delay in retryDelays) {
-        if (delay > Duration.zero) {
-          await Future<void>.delayed(delay);
-        }
-        try {
-          ref.invalidate(accountListProvider(budgetId));
-          final accounts = await ref.read(accountListProvider(budgetId).future);
-          deletedOnServer = !accounts.any(
-            (item) => item.id?.toString() == accountId,
-          );
-          if (deletedOnServer) {
-            break;
-          }
-        } on Object {
-          deletedOnServer = false;
-        }
-      }
-
-      if (deletedOnServer) {
-        deleted = account;
-      } else {
-        if (context.mounted) {
-          showAppToast(
-            context,
-            message: l10n.accountDeleteError,
-            variant: AppToastVariant.error,
-          );
-        }
-        return;
-      }
-    }
-
-    if (!context.mounted) return;
-
-    showAppToast(
-      context,
-      message: l10n.accountDeleteSuccess,
-      variant: AppToastVariant.success,
-      actionLabel: l10n.undoAction,
-      onAction: () => _undoDelete(context, ref, deleted, l10n),
-    );
-
-    navigator.pop();
-    if (onDeleted != null) {
-      try {
-        onDeleted!.call();
-      } on Object {
-        // Ignore navigation callback errors. The delete already succeeded.
+          .deleteAccount(accountId: accountId, entityId: entityId);
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.accountDeleteSuccess,
+        variant: AppToastVariant.success,
+      );
+      navigator.pop();
+    } on Exception catch (_) {
+      if (context.mounted) {
+        showAppToast(
+          context,
+          message: l10n.accountDeleteError,
+          variant: AppToastVariant.error,
+        );
       }
     }
   }
 
-  void _undoDelete(
-    BuildContext context,
-    WidgetRef ref,
-    Account deleted,
-    AppLocalizations l10n,
-  ) {
-    unawaited(
-      ref
-          .read(accountActionsProvider.notifier)
-          .undoDeleteAccount(deletedAccount: deleted, budgetId: budgetId)
-          .then((_) {
-            if (!context.mounted) return;
-            showAppToast(
-              context,
-              message: l10n.undoDeleteSuccess,
-              variant: AppToastVariant.success,
-            );
-          })
-          .catchError((_) {
-            if (!context.mounted) return;
-            showAppToast(
-              context,
-              message: l10n.undoDeleteError,
-              variant: AppToastVariant.error,
-            );
-          }),
-    );
-  }
 }
 
 class _SectionLabel extends HookWidget {

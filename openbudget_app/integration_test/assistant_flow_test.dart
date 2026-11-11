@@ -38,7 +38,7 @@ void main() {
   patrolWidgetTest('More -> Assistant -> ask -> apply a proposal', ($) async {
     final tester = $.tester;
     final api = FakeAssistantApi();
-    const budgetId = TestData.assistantBudgetId;
+    const entityId = TestData.assistantBudgetId;
 
     final container = ProviderContainer(
       overrides: [
@@ -53,25 +53,25 @@ void main() {
     addTearDown(container.dispose);
 
     final router = GoRouter(
-      initialLocation: '/budgets/$budgetId/more',
+      initialLocation: '/budgets/$entityId/more',
       routes: [
         GoRoute(
           name: moreRoute,
           path: morePath,
           builder: (context, state) =>
-              MoreScreen(budgetId: state.pathParameters['id']!),
+              MoreScreen(entityId: state.pathParameters['entityId']!),
         ),
         GoRoute(
           name: assistantRoute,
           path: assistantPath,
           builder: (context, state) =>
-              AssistantScreen(budgetId: state.pathParameters['id']!),
+              AssistantScreen(entityId: state.pathParameters['entityId']!),
           routes: [
             GoRoute(
               name: assistantProposalsRoute,
               path: 'proposals',
               builder: (context, state) => AssistantProposalsScreen(
-                budgetId: state.pathParameters['id']!,
+                entityId: state.pathParameters['entityId']!,
               ),
             ),
           ],

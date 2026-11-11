@@ -11,7 +11,7 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
 );
@@ -20,7 +20,7 @@ Account _makeAccount({
   UuidValue? id,
   String name = 'Checking',
   String accountType = 'checking',
-  int balanceCents = 100000,
+  int balanceMinor = 100000,
   String currencyCode = 'USD',
   bool onBudget = true,
   bool isClosed = false,
@@ -29,9 +29,9 @@ Account _makeAccount({
   id: id,
   name: name,
   accountType: accountType,
-  balanceCents: balanceCents,
+  balanceMinor: balanceMinor,
   currencyCode: currencyCode,
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   onBudget: onBudget,
   sortOrder: sortOrder,
   isClosed: isClosed,
@@ -39,13 +39,13 @@ Account _makeAccount({
 
 Widget _buildRoutedSubject({required List<Account> accounts}) {
   final router = GoRouter(
-    initialLocation: '/budgets/$_budgetId/accounts',
+    initialLocation: '/budgets/$_entityId/accounts',
     routes: [
       GoRoute(
         name: accountListRoute,
         path: accountListPath,
         builder: (context, state) =>
-            AccountListScreen(budgetId: state.pathParameters['id']!),
+            AccountListScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: addAccountRoute,
@@ -85,7 +85,7 @@ Widget _buildRoutedSubject({required List<Account> accounts}) {
 
   return ProviderScope(
     overrides: [
-      accountListProvider.overrideWith((ref, budgetId) async => accounts),
+      accountListProvider.overrideWith((ref, entityId) async => accounts),
     ],
     child: MaterialApp.router(
       theme: OpenBudgetTheme.light,
@@ -107,7 +107,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(budgetId: _budgetId),
+            home: const AccountListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -122,14 +122,14 @@ void main() {
         ProviderScope(
           overrides: [
             accountListProvider.overrideWith(
-              (ref, budgetId) => throw Exception('Network error'),
+              (ref, entityId) => throw Exception('Network error'),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(budgetId: _budgetId),
+            home: const AccountListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -145,14 +145,14 @@ void main() {
         ProviderScope(
           overrides: [
             accountListProvider.overrideWith(
-              (ref, budgetId) async => <Account>[],
+              (ref, entityId) async => <Account>[],
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(budgetId: _budgetId),
+            home: const AccountListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -174,14 +174,14 @@ void main() {
         ProviderScope(
           overrides: [
             accountListProvider.overrideWith(
-              (ref, budgetId) async => <Account>[],
+              (ref, entityId) async => <Account>[],
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(budgetId: _budgetId),
+            home: const AccountListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -200,24 +200,24 @@ void main() {
 
     testWidgets('renders on-budget accounts section', (tester) async {
       final accounts = [
-        _makeAccount(name: 'Main Checking', balanceCents: 250000),
+        _makeAccount(name: 'Main Checking', balanceMinor: 250000),
         _makeAccount(
           name: 'Emergency Fund',
           accountType: 'savings',
-          balanceCents: 500000,
+          balanceMinor: 500000,
         ),
       ];
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            accountListProvider.overrideWith((ref, entityId) async => accounts),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(budgetId: _budgetId),
+            home: const AccountListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -233,7 +233,7 @@ void main() {
         _makeAccount(
           name: 'Brokerage',
           accountType: 'investment',
-          balanceCents: 1500000,
+          balanceMinor: 1500000,
           onBudget: false,
         ),
       ];
@@ -241,13 +241,13 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            accountListProvider.overrideWith((ref, entityId) async => accounts),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(budgetId: _budgetId),
+            home: const AccountListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -263,13 +263,13 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            accountListProvider.overrideWith((ref, entityId) async => accounts),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(budgetId: _budgetId),
+            home: const AccountListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -284,24 +284,24 @@ void main() {
       tester,
     ) async {
       final accounts = [
-        _makeAccount(name: 'Bank', balanceCents: 500000),
+        _makeAccount(name: 'Bank', balanceMinor: 500000),
         _makeAccount(
           name: 'Credit Card',
           accountType: 'creditCard',
-          balanceCents: -150000,
+          balanceMinor: -150000,
         ),
       ];
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            accountListProvider.overrideWith((ref, entityId) async => accounts),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(budgetId: _budgetId),
+            home: const AccountListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -319,7 +319,7 @@ void main() {
         _makeAccount(
           name: 'My Credit Card',
           accountType: 'creditCard',
-          balanceCents: -50000,
+          balanceMinor: -50000,
           sortOrder: 2,
         ),
       ];
@@ -327,13 +327,13 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            accountListProvider.overrideWith((ref, entityId) async => accounts),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(budgetId: _budgetId),
+            home: const AccountListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -362,13 +362,13 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            accountListProvider.overrideWith((ref, entityId) async => accounts),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(budgetId: _budgetId),
+            home: const AccountListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -395,7 +395,7 @@ void main() {
         _makeAccount(name: 'USD Checking'),
         _makeAccount(
           name: 'EUR Checking',
-          balanceCents: 200000,
+          balanceMinor: 200000,
           currencyCode: 'EUR',
           sortOrder: 1,
         ),
@@ -404,13 +404,13 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            accountListProvider.overrideWith((ref, entityId) async => accounts),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(budgetId: _budgetId),
+            home: const AccountListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -447,14 +447,14 @@ void main() {
         ProviderScope(
           overrides: [
             accountListProvider.overrideWith(
-              (ref, budgetId) async => [_makeAccount()],
+              (ref, entityId) async => [_makeAccount()],
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(budgetId: _budgetId),
+            home: const AccountListScreen(entityId: _entityId),
           ),
         ),
       );

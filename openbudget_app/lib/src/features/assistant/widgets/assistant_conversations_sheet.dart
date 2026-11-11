@@ -12,17 +12,17 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// The conversations in one budget, opened as a sheet over the chat.
 class AssistantConversationsSheet extends HookConsumerWidget {
-  const AssistantConversationsSheet({required this.budgetId, super.key});
+  const AssistantConversationsSheet({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final conversations = ref.watch(assistantConversationsProvider(budgetId));
-    final current = ref.watch(assistantChatProvider(budgetId)).conversationId;
+    final conversations = ref.watch(assistantConversationsProvider(entityId));
+    final current = ref.watch(assistantChatProvider(entityId)).conversationId;
 
     return SafeArea(
       child: SizedBox(
@@ -48,7 +48,7 @@ class AssistantConversationsSheet extends HookConsumerWidget {
                   ObTextButton(
                     onPressed: () {
                       ref
-                          .read(assistantChatProvider(budgetId).notifier)
+                          .read(assistantChatProvider(entityId).notifier)
                           .startNewConversation();
                       Navigator.of(context).pop();
                     },
@@ -69,7 +69,7 @@ class AssistantConversationsSheet extends HookConsumerWidget {
                     action: ObStateAction(
                       label: l10n.assistantRetry,
                       onPressed: () => ref.invalidate(
-                        assistantConversationsProvider(budgetId),
+                        assistantConversationsProvider(entityId),
                       ),
                     ),
                   ),
@@ -136,7 +136,7 @@ class AssistantConversationsSheet extends HookConsumerWidget {
                         ),
                         onTap: () {
                           final chat = ref.read(
-                            assistantChatProvider(budgetId).notifier,
+                            assistantChatProvider(entityId).notifier,
                           );
                           Navigator.of(context).pop();
                           unawaited(chat.openConversation(conversation));
@@ -185,10 +185,10 @@ class AssistantConversationsSheet extends HookConsumerWidget {
       await ref.read(assistantApiProvider).deleteConversation(id);
       if (!context.mounted) return;
 
-      ref.invalidate(assistantConversationsProvider(budgetId));
-      if (ref.read(assistantChatProvider(budgetId)).conversationId == id) {
+      ref.invalidate(assistantConversationsProvider(entityId));
+      if (ref.read(assistantChatProvider(entityId)).conversationId == id) {
         ref
-            .read(assistantChatProvider(budgetId).notifier)
+            .read(assistantChatProvider(entityId).notifier)
             .startNewConversation();
       }
       showAppToast(

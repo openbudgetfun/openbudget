@@ -13,11 +13,11 @@ import 'package:patrol/patrol.dart';
 
 import 'common/patrol_helpers.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000A01';
+const _entityId = '00000000-0000-0000-0000-000000000A01';
 const _categoryId = '00000000-0000-0000-0000-000000000A02';
 
 BudgetSummary _makeSummary() {
-  final budgetUuid = UuidValue.fromString(_budgetId);
+  final budgetUuid = UuidValue.fromString(_entityId);
   final categoryUuid = UuidValue.fromString(_categoryId);
   final ownerUuid = UuidValue.fromString(
     '00000000-0000-0000-0000-000000000A03',
@@ -27,8 +27,8 @@ BudgetSummary _makeSummary() {
     id: UuidValue.fromString(id),
     name: name,
     categoryId: categoryUuid,
-    budgetedAmountCents: 0,
-    spentAmountCents: 0,
+    budgetedAmountMinor: 0,
+    spentAmountMinor: 0,
     currencyCode: 'USD',
     sortOrder: sortOrder,
   );
@@ -52,10 +52,10 @@ BudgetSummary _makeSummary() {
 
   MonthlyEnvelopeData monthly(Envelope e) => MonthlyEnvelopeData(
     envelope: e,
-    allocatedCents: 0,
-    spentCents: 0,
-    availableCents: 0,
-    carryoverCents: 0,
+    allocatedMinor: 0,
+    spentMinor: 0,
+    availableMinor: 0,
+    carryoverMinor: 0,
   );
 
   return BudgetSummary(
@@ -70,7 +70,7 @@ BudgetSummary _makeSummary() {
         category: Category(
           id: categoryUuid,
           name: 'Needs',
-          budgetId: budgetUuid,
+          entityId: budgetUuid,
           sortOrder: 0,
         ),
         envelopes: [groceries, transportation, pets, vetVisits],
@@ -80,14 +80,14 @@ BudgetSummary _makeSummary() {
           monthly(pets),
           monthly(vetVisits),
         ],
-        totalBudgetedCents: 0,
-        totalSpentCents: 0,
-        totalAvailableCents: 0,
+        totalBudgetedMinor: 0,
+        totalSpentMinor: 0,
+        totalAvailableMinor: 0,
       ),
     ],
-    totalIncomeCents: 800000,
-    totalBudgetedCents: 0,
-    readyToAssignCents: 800000,
+    totalIncomeMinor: 800000,
+    totalBudgetedMinor: 0,
+    readyToAssignMinor: 800000,
     year: 2026,
     month: 2,
   );
@@ -110,7 +110,7 @@ void main() {
       addTearDown(container.dispose);
 
       final router = GoRouter(
-        initialLocation: '/budgets/$_budgetId/plan/edit',
+        initialLocation: '/budgets/$_entityId/plan/edit',
         routes: [
           GoRoute(
             name: planRoute,
@@ -122,7 +122,7 @@ void main() {
             name: editPlanRoute,
             path: '/budgets/:id/plan/edit',
             builder: (context, state) =>
-                EditPlanScreen(budgetId: state.pathParameters['id']!),
+                EditPlanScreen(entityId: state.pathParameters['entityId']!),
           ),
         ],
       );

@@ -2365,7 +2365,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionAccountLabel => 'Account';
 
   @override
-  String get transactionDateLabel => 'Date';
+  String transactionDateLabel(int year, int month, int day) {
+    return '$year-$month-$day';
+  }
 
   @override
   String get addAccountConnectWallet => 'Connect Solana Wallet';
@@ -3059,7 +3061,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String accountDetailLoanInMonth(String month) {
+  String accountDetailLoanInMonth(int month) {
     return 'In $month';
   }
 
@@ -3583,7 +3585,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'OpenBudget doesn\'t have the tax rates for this year yet. Try another year.';
 
   @override
-  String taxYearLabel(String year) {
+  String taxYearLabel(int year) {
     return 'Tax year $year';
   }
 
@@ -5145,4 +5147,258 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get journalLinesLoadError =>
       'We couldn\'t load this journal\'s lines. Try again.';
+
+  @override
+  String get createEntityTitle => 'Create your books';
+
+  @override
+  String get createEntityKindLabel => 'What are these books for?';
+
+  @override
+  String get entityKindPersonal => 'Personal';
+
+  @override
+  String get entityKindSoleTrader => 'Sole trader';
+
+  @override
+  String get entityKindCompany => 'Company';
+
+  @override
+  String get createEntityCountry => 'Country';
+
+  @override
+  String get createEntityTimeZone => 'Time zone';
+
+  @override
+  String get createEntityFiscalYearEnd => 'Financial year ends';
+
+  @override
+  String createEntityFiscalYearValue(int day, int month) {
+    return 'Day $day of month $month';
+  }
+
+  @override
+  String get entityDeleteNameField => 'Type the entity\'s name to confirm';
+
+  @override
+  String homeBudgetNetWorthShort(String amount) {
+    return 'Net worth $amount';
+  }
+
+  @override
+  String homeBudgetUncategorised(int count) {
+    return '$count uncategorised';
+  }
+
+  @override
+  String homeBudgetDueRecurring(int count) {
+    return '$count recurring due';
+  }
+
+  @override
+  String homeBudgetPendingProposals(int count) {
+    return '$count proposals';
+  }
+
+  @override
+  String netWorthAssetsLabel(String amount) {
+    return 'Assets $amount';
+  }
+
+  @override
+  String netWorthLiabilitiesLabel(String amount) {
+    return 'Liabilities $amount';
+  }
+
+  @override
+  String netWorthMissingCurrencies(String currencies) {
+    return 'Not included: no rate for $currencies';
+  }
+
+  @override
+  String get entityCountInNetWorth => 'Count in my net worth';
+
+  @override
+  String get entityCountInNetWorthHint =>
+      'Include this entity\'s accounts in your combined net worth.';
+
+  @override
+  String get settingsReportingCurrency => 'Reporting currency';
+
+  @override
+  String get addAccountCurrencyQuestion => 'What currency is this account in?';
+
+  @override
+  String get addAccountSelectCurrencyPlaceholder => 'Pick a currency';
+
+  @override
+  String get addAccountOnBudgetQuestion =>
+      'Budget this account together with the plan';
+
+  @override
+  String get addAccountOnBudgetHint =>
+      'On-budget accounts feed Ready to Assign.';
+
+  @override
+  String get addAccountTrackByQuestion => 'How should this account be tracked?';
+
+  @override
+  String get addAccountTrackByTransactions => 'By transactions';
+
+  @override
+  String get addAccountTrackByValue => 'By value';
+
+  @override
+  String get addAccountOpeningToday => 'Opening balance is from today';
+
+  @override
+  String get addAccountTypeProperty => 'Property';
+
+  @override
+  String get addAccountTypeVehicle => 'Vehicle';
+
+  @override
+  String get addAccountTypeOtherAsset => 'Other asset';
+
+  @override
+  String get accountGroupAssets => 'Assets';
+
+  @override
+  String get accountGroupLiabilities => 'Liabilities';
+
+  @override
+  String accountBaseEquivalent(String amount) {
+    return '≈ $amount in base currency';
+  }
+
+  @override
+  String get accountsConnectionsTitle => 'Bank connections';
+
+  @override
+  String get accountsConnectionPending => 'Syncing…';
+
+  @override
+  String get accountsConnectionSynced => 'Up to date';
+
+  @override
+  String get accountsConnectionFailed => 'Sync failed';
+
+  @override
+  String get accountsConnectionRemove => 'Remove';
+
+  @override
+  String get accountsConnectionRemoveTitle => 'Remove this connection?';
+
+  @override
+  String get accountsConnectionRemoveMessage =>
+      'The bank link is removed. Accounts keep their history.';
+
+  @override
+  String transactionTransferPeer(String accountName) {
+    return 'to $accountName';
+  }
+
+  @override
+  String transactionBaseAmount(String amount) {
+    return '$amount in base currency';
+  }
+
+  @override
+  String get accountDetailReconcile => 'Reconcile';
+
+  @override
+  String accountDetailReportedBalance(String amount) {
+    return 'Bank says $amount';
+  }
+
+  @override
+  String accountDetailClearedLabel(String amount) {
+    return 'Cleared $amount';
+  }
+
+  @override
+  String accountDetailUnclearedLabel(String amount) {
+    return 'Uncleared $amount';
+  }
+
+  @override
+  String get accountDetailValuationsTitle => 'Value history';
+
+  @override
+  String get accountDetailUpdateValue => 'Update value';
+
+  @override
+  String accountDetailValuedOn(String date) {
+    return 'Valued $date';
+  }
+
+  @override
+  String get accountDetailHoldingsTitle => 'Holdings';
+
+  @override
+  String accountHoldingsValueLabel(String amount) {
+    return 'Value $amount';
+  }
+
+  @override
+  String accountHoldingsCostLabel(String amount) {
+    return 'Cost $amount';
+  }
+
+  @override
+  String accountHoldingsPnlLabel(String amount) {
+    return 'P&L $amount';
+  }
+
+  @override
+  String accountHoldingsQuantityLabel(String quantity) {
+    return 'Quantity $quantity';
+  }
+
+  @override
+  String accountReconcileTitle(String accountName) {
+    return 'Reconcile $accountName';
+  }
+
+  @override
+  String get accountReconcileStatementField => 'Statement balance';
+
+  @override
+  String accountReconcileDifference(String amount) {
+    return 'Difference $amount';
+  }
+
+  @override
+  String get accountReconcileCreateAdjustment =>
+      'Post the difference as an adjustment';
+
+  @override
+  String get accountReconcileSubmit => 'Reconcile';
+
+  @override
+  String accountReconcileSuccess(int count) {
+    return '$count transactions reconciled';
+  }
+
+  @override
+  String get accountReconcileNoDifference => 'Already balanced — nothing to do';
+
+  @override
+  String get accountValuationValueField => 'Value';
+
+  @override
+  String get accountValuationDateField => 'Date';
+
+  @override
+  String get accountValuationSaved => 'Value saved';
+
+  @override
+  String get accountDetailTransactionsTitle => 'Transactions';
+
+  @override
+  String get transactionLoadMore => 'Load more';
+
+  @override
+  String get accountReconcileFailed =>
+      'Reconcile failed — check the statement balance';
 }

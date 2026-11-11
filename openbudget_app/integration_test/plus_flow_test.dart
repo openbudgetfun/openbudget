@@ -17,7 +17,7 @@ import 'package:patrol/patrol.dart';
 import 'common/fake_plus_backend.dart';
 import 'common/patrol_helpers.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _ownerId = UuidValue.fromString('00000000-0000-0000-0000-000000000903');
 
 Budget _makeBudget() => Budget(
@@ -58,7 +58,7 @@ void main() {
       addTearDown(container.dispose);
 
       final router = GoRouter(
-        initialLocation: '/budgets/$_budgetId/more/settings',
+        initialLocation: '/budgets/$_entityId/more/settings',
         routes: [
           GoRoute(
             name: moreRoute,
@@ -74,7 +74,7 @@ void main() {
             name: settingsRoute,
             path: settingsPath,
             builder: (context, state) =>
-                SettingsScreen(budgetId: state.pathParameters['id']!),
+                SettingsScreen(entityId: state.pathParameters['entityId']!),
           ),
         ],
       );

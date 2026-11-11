@@ -3,27 +3,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
-import 'package:openbudget_app/src/widgets/app_toast.dart';
-import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class DisplayOptionsScreen extends HookConsumerWidget {
-  const DisplayOptionsScreen({required this.budgetId, super.key});
-
-  static const List<CurrencyCode> _supportedDisplayCurrencies = [
-    CurrencyCode.usd,
-    CurrencyCode.eur,
-    CurrencyCode.gbp,
-    CurrencyCode.jpy,
-    CurrencyCode.btc,
-  ];
+  const DisplayOptionsScreen({required this.entityId, super.key});
 
   static const _sectionHeaderPadding = EdgeInsets.fromLTRB(
     SpacingTokens.xs,
@@ -32,7 +18,7 @@ class DisplayOptionsScreen extends HookConsumerWidget {
     SpacingTokens.sm,
   );
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -47,7 +33,6 @@ class DisplayOptionsScreen extends HookConsumerWidget {
     final currentBalanceStyle = ref.watch(balanceStyleProvider);
     final hideAmounts = ref.watch(hideAmountsProvider);
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
 
     return Scaffold(
       appBar: AppBar(
@@ -55,7 +40,7 @@ class DisplayOptionsScreen extends HookConsumerWidget {
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           onPressed: () => context.goNamed(
             settingsRoute,
-            pathParameters: {'id': budgetId},
+            pathParameters: {'entityId': entityId},
           ),
           icon: const SkribbleIcon(data: OpenBudgetIcons.back),
         ),
@@ -64,7 +49,7 @@ class DisplayOptionsScreen extends HookConsumerWidget {
           TextButton(
             onPressed: () => context.goNamed(
               settingsRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
             child: Text(l10n.dialogDone),
           ),
@@ -128,34 +113,6 @@ class DisplayOptionsScreen extends HookConsumerWidget {
             ),
           ),
           ObSectionHeader(
-            title: l10n.settingsDisplayCurrency,
-            padding: _sectionHeaderPadding,
-          ),
-          Card(
-            clipBehavior: Clip.antiAlias,
-            child: budgetAsync.when(
-              loading: () => ListTile(
-                title: Text(l10n.settingsDisplayCurrency),
-                trailing: Semantics(
-                  label: l10n.settingsLoading,
-                  child: WiredLoadingIndicator(
-                    size: 20,
-                    color: palette.ink,
-                  ),
-                ),
-              ),
-              error: (_, _) => ListTile(
-                title: Text(l10n.settingsDisplayCurrency),
-                subtitle: Text(l10n.settingsLoadError),
-              ),
-              data: (budget) => _ValuePickerTile(
-                title: l10n.settingsDisplayCurrency,
-                value: _displayCurrencyLabel(l10n, budget),
-                onTap: () => _selectDisplayCurrency(context, ref, budget),
-              ),
-            ),
-          ),
-          ObSectionHeader(
             title: l10n.settingsPrivacySection,
             padding: _sectionHeaderPadding,
           ),
@@ -195,89 +152,7 @@ class DisplayOptionsScreen extends HookConsumerWidget {
     );
   }
 
-  String _displayCurrencyLabel(AppLocalizations l10n, Budget budget) {
-    final overrideCode = budget.displayCurrencyCode;
-    if (overrideCode == null || overrideCode.isEmpty) {
-      return l10n.settingsDisplayCurrencyMatchDefault;
-    }
 
-    final currency = CurrencyCode.tryParse(overrideCode);
-    // A legacy override with an unsupported code is shown as written.
-    return currency == null
-        ? normalizeCurrencyCode(overrideCode)
-        : '${currency.displayName} (${currency.code})';
-  }
-
-  Future<void> _selectDisplayCurrency(
-    BuildContext context,
-    WidgetRef ref,
-    Budget budget,
-  ) async {
-    const defaultSelection = '';
-    final l10n = AppLocalizations.of(context);
-    final selected = await showModalBottomSheet<String>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            ListTile(
-              title: Text(l10n.settingsDisplayCurrencyMatchDefault),
-              selected: budget.displayCurrencyCode == null,
-              trailing: budget.displayCurrencyCode == null
-                  ? const SkribbleIcon(data: OpenBudgetIcons.check)
-                  : null,
-              onTap: () => Navigator.of(context).pop(defaultSelection),
-            ),
-            const Divider(height: 1),
-            for (final currency in _supportedDisplayCurrencies) ...[
-              ListTile(
-                title: Text('${currency.displayName} (${currency.code})'),
-                selected: budget.displayCurrencyCode == currency.code,
-                trailing: budget.displayCurrencyCode == currency.code
-                    ? const SkribbleIcon(data: OpenBudgetIcons.check)
-                    : null,
-                onTap: () => Navigator.of(context).pop(currency.code),
-              ),
-              if (currency != _supportedDisplayCurrencies.last)
-                const Divider(height: 1),
-            ],
-          ],
-        ),
-      ),
-    );
-
-    if (selected == null) return;
-    final isDefaultSelection = selected == defaultSelection;
-    if (isDefaultSelection && budget.displayCurrencyCode == null) return;
-    if (!isDefaultSelection && budget.displayCurrencyCode == selected) return;
-
-    try {
-      final update = ref.read(updateDisplayCurrencyProvider);
-      await update(
-        budgetId: budgetId,
-        displayCurrencyCode: isDefaultSelection ? null : selected,
-        clearDisplayCurrencyCode: isDefaultSelection,
-      );
-      if (!context.mounted) return;
-
-      showAppToast(
-        context,
-        message: isDefaultSelection
-            ? l10n.settingsDisplayCurrencyDefaultUpdated
-            : l10n.settingsDisplayCurrencyUpdated(selected),
-        variant: AppToastVariant.success,
-      );
-    } on Exception {
-      if (!context.mounted) return;
-      showAppToast(
-        context,
-        message: l10n.settingsDisplayCurrencyUpdateError,
-        variant: AppToastVariant.error,
-      );
-    }
-  }
 }
 
 class _BalanceStyleTile extends HookWidget {
@@ -340,39 +215,6 @@ class _BalanceStylePreview extends HookWidget {
           tone: ObTone.funded,
         ),
       ],
-    );
-  }
-}
-
-class _ValuePickerTile extends HookWidget {
-  const _ValuePickerTile({
-    required this.title,
-    required this.value,
-    required this.onTap,
-  });
-
-  final String title;
-  final String value;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final palette = theme.ob;
-    return ListTile(
-      onTap: onTap,
-      title: Text(title),
-      subtitle: Text(
-        value,
-        style: theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      trailing: SkribbleIcon(
-        data: OpenBudgetIcons.chevronRight,
-        size: 20,
-        color: palette.mutedInk,
-      ),
     );
   }
 }

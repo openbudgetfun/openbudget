@@ -9,22 +9,22 @@ import 'package:openbudget_app/src/features/budget/screens/recent_moves_screen.d
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000111';
+const _entityId = '00000000-0000-0000-0000-000000000111';
 const _categoryId = '00000000-0000-0000-0000-000000000222';
 const _envelopeGroceriesId = '00000000-0000-0000-0000-000000000333';
 const _envelopeClothingId = '00000000-0000-0000-0000-000000000444';
 
 BudgetSummary _makeSummary() {
   final ownerId = UuidValue.fromString('00000000-0000-0000-0000-000000000555');
-  final budgetId = UuidValue.fromString(_budgetId);
+  final entityId = UuidValue.fromString(_entityId);
   final categoryUuid = UuidValue.fromString(_categoryId);
 
   final groceries = Envelope(
     id: UuidValue.fromString(_envelopeGroceriesId),
     name: 'Groceries',
     categoryId: categoryUuid,
-    budgetedAmountCents: 120000,
-    spentAmountCents: 40000,
+    budgetedAmountMinor: 120000,
+    spentAmountMinor: 40000,
     currencyCode: 'USD',
     sortOrder: 0,
   );
@@ -32,15 +32,15 @@ BudgetSummary _makeSummary() {
     id: UuidValue.fromString(_envelopeClothingId),
     name: 'Clothing',
     categoryId: categoryUuid,
-    budgetedAmountCents: 40000,
-    spentAmountCents: 10000,
+    budgetedAmountMinor: 40000,
+    spentAmountMinor: 10000,
     currencyCode: 'USD',
     sortOrder: 1,
   );
 
   return BudgetSummary(
     budget: Budget(
-      id: budgetId,
+      id: entityId,
       name: 'Family Plan',
       currencyCode: 'USD',
       ownerId: ownerId,
@@ -50,34 +50,34 @@ BudgetSummary _makeSummary() {
         category: Category(
           id: categoryUuid,
           name: 'Needs',
-          budgetId: budgetId,
+          entityId: entityId,
           sortOrder: 0,
         ),
         envelopes: [groceries, clothing],
         monthlyEnvelopes: [
           MonthlyEnvelopeData(
             envelope: groceries,
-            allocatedCents: 120000,
-            spentCents: 40000,
-            availableCents: 80000,
-            carryoverCents: 0,
+            allocatedMinor: 120000,
+            spentMinor: 40000,
+            availableMinor: 80000,
+            carryoverMinor: 0,
           ),
           MonthlyEnvelopeData(
             envelope: clothing,
-            allocatedCents: 40000,
-            spentCents: 10000,
-            availableCents: 30000,
-            carryoverCents: 0,
+            allocatedMinor: 40000,
+            spentMinor: 10000,
+            availableMinor: 30000,
+            carryoverMinor: 0,
           ),
         ],
-        totalBudgetedCents: 160000,
-        totalSpentCents: 50000,
-        totalAvailableCents: 110000,
+        totalBudgetedMinor: 160000,
+        totalSpentMinor: 50000,
+        totalAvailableMinor: 110000,
       ),
     ],
-    totalIncomeCents: 250000,
-    totalBudgetedCents: 160000,
-    readyToAssignCents: 90000,
+    totalIncomeMinor: 250000,
+    totalBudgetedMinor: 160000,
+    readyToAssignMinor: 90000,
     year: 2026,
     month: 2,
   );
@@ -105,7 +105,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecentMovesScreen(budgetId: _budgetId),
+            home: const RecentMovesScreen(entityId: _entityId),
           ),
         ),
       );
@@ -114,17 +114,17 @@ void main() {
       container
           .read(recentMovesProvider.notifier)
           .recordAssigned(
-            budgetId: _budgetId,
+            entityId: _entityId,
             envelopeId: _envelopeGroceriesId,
-            amountCents: 20000,
+            amountMinor: 20000,
           );
       container
           .read(recentMovesProvider.notifier)
           .recordMove(
-            budgetId: _budgetId,
+            entityId: _entityId,
             fromEnvelopeId: _envelopeGroceriesId,
             toEnvelopeId: _envelopeClothingId,
-            amountCents: 3000,
+            amountMinor: 3000,
           );
       await tester.pumpAndSettle();
       await _dismissCoachmarkIfVisible(tester);
@@ -162,17 +162,17 @@ void main() {
       container
           .read(recentMovesProvider.notifier)
           .recordAssigned(
-            budgetId: _budgetId,
+            entityId: _entityId,
             envelopeId: _envelopeGroceriesId,
-            amountCents: 20000,
+            amountMinor: 20000,
           );
       container
           .read(recentMovesProvider.notifier)
           .recordMove(
-            budgetId: _budgetId,
+            entityId: _entityId,
             fromEnvelopeId: _envelopeGroceriesId,
             toEnvelopeId: _envelopeClothingId,
-            amountCents: 3000,
+            amountMinor: 3000,
           );
 
       await tester.pumpWidget(
@@ -183,7 +183,7 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: const EnvelopeMovesScreen(
-              budgetId: _budgetId,
+              entityId: _entityId,
               envelopeId: _envelopeGroceriesId,
             ),
           ),

@@ -6,9 +6,9 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 enum AddTransactionAction { income, expense, transfer }
 
 class AddTransactionSheet extends HookWidget {
-  const AddTransactionSheet({required this.budgetId, super.key});
+  const AddTransactionSheet({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context) {

@@ -8,7 +8,7 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// A month of scheduled money, pressed into a hand-ruled grid.
 class RecurringCalendarScreen extends HookConsumerWidget {
-  const RecurringCalendarScreen({required this.budgetId, super.key});
+  const RecurringCalendarScreen({required this.entityId, super.key});
 
   /// Moves the calendar back one month.
   static const Key previousMonthKey = ValueKey('recurringCalendar.previous');
@@ -16,7 +16,7 @@ class RecurringCalendarScreen extends HookConsumerWidget {
   /// Moves the calendar forward one month.
   static const Key nextMonthKey = ValueKey('recurringCalendar.next');
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,7 +31,7 @@ class RecurringCalendarScreen extends HookConsumerWidget {
 
     final calendarAsync = ref.watch(
       recurringCalendarProvider(
-        budgetId,
+        entityId,
         selectedYear.value,
         selectedMonth.value,
       ),
@@ -407,7 +407,7 @@ class _DayDetail extends HookWidget {
       itemBuilder: (context, index) {
         final occurrence = occurrences[index];
         final recurring = occurrence.recurring;
-        final isIncome = recurring.amountCents > 0;
+        final isIncome = recurring.amountMinor > 0;
         final tone = isIncome ? ObTone.funded : ObTone.overspent;
         final frequencyLabel = switch (recurring.frequency) {
           'daily' => l10n.recurringFreqDaily,
@@ -492,9 +492,9 @@ class _DayDetail extends HookWidget {
               ),
               trailing: ObAmount(
                 isIncome
-                    ? '+${formatCentsForCode(recurring.amountCents, recurring.currencyCode)}'
-                    : formatCentsForCode(
-                        recurring.amountCents,
+                    ? '+${formatMinorForCode(recurring.amountMinor, recurring.currencyCode)}'
+                    : formatMinorForCode(
+                        recurring.amountMinor,
                         recurring.currencyCode,
                       ),
                 tone: tone,

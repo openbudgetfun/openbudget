@@ -18,7 +18,7 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _ownerUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000501',
 );
@@ -84,7 +84,7 @@ GoRouter _buildRouter() => GoRouter(
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) => BudgetShellScreen(
         navigationShell: navigationShell,
-        budgetId: _budgetId,
+        entityId: _entityId,
       ),
       branches: [
         StatefulShellBranch(
@@ -121,7 +121,7 @@ GoRouter _buildRouter() => GoRouter(
                 GoRoute(
                   name: settingsRoute,
                   path: 'settings',
-                  builder: (_, _) => const SettingsScreen(budgetId: _budgetId),
+                  builder: (_, _) => const SettingsScreen(entityId: _entityId),
                 ),
               ],
             ),
@@ -138,8 +138,8 @@ ProviderContainer _buildContainer({
 }) {
   final container = ProviderContainer(
     overrides: [
-      budgetRealtimeProvider.overrideWith((ref, budgetId) {}),
-      budgetDetailProvider.overrideWith((ref, budgetId) async => _makeBudget()),
+      budgetRealtimeProvider.overrideWith((ref, entityId) {}),
+      budgetDetailProvider.overrideWith((ref, entityId) async => _makeBudget()),
       uiPreferencesStoreProvider.overrideWithValue(store),
       appVersionProvider.overrideWith((ref) async => '2.4.0'),
       whatsNewAssetBundleProvider.overrideWithValue(bundle),

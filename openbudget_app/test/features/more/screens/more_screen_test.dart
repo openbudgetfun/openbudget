@@ -29,7 +29,7 @@ Widget buildSubject({
       theme: OpenBudgetTheme.light,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const MoreScreen(budgetId: 'test-budget-1'),
+      home: const MoreScreen(entityId: 'test-budget-1'),
     ),
   );
 }

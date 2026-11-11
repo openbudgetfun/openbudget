@@ -4051,8 +4051,8 @@ abstract class AppLocalizations {
   /// No description provided for @transactionDateLabel.
   ///
   /// In en, this message translates to:
-  /// **'Date'**
-  String get transactionDateLabel;
+  /// **'{year}-{month}-{day}'**
+  String transactionDateLabel(int year, int month, int day);
 
   /// No description provided for @addAccountConnectWallet.
   ///
@@ -5324,7 +5324,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'In {month}'**
-  String accountDetailLoanInMonth(String month);
+  String accountDetailLoanInMonth(int month);
 
   /// No description provided for @accountDetailWalletSyncSummary.
   ///
@@ -6070,7 +6070,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Tax year {year}'**
-  String taxYearLabel(String year);
+  String taxYearLabel(int year);
 
   /// No description provided for @taxPreviousYear.
   ///
@@ -8849,6 +8849,414 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We couldn\'t load this journal\'s lines. Try again.'**
   String get journalLinesLoadError;
+
+  /// No description provided for @createEntityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your books'**
+  String get createEntityTitle;
+
+  /// No description provided for @createEntityKindLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What are these books for?'**
+  String get createEntityKindLabel;
+
+  /// No description provided for @entityKindPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get entityKindPersonal;
+
+  /// No description provided for @entityKindSoleTrader.
+  ///
+  /// In en, this message translates to:
+  /// **'Sole trader'**
+  String get entityKindSoleTrader;
+
+  /// No description provided for @entityKindCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get entityKindCompany;
+
+  /// No description provided for @createEntityCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get createEntityCountry;
+
+  /// No description provided for @createEntityTimeZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Time zone'**
+  String get createEntityTimeZone;
+
+  /// No description provided for @createEntityFiscalYearEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial year ends'**
+  String get createEntityFiscalYearEnd;
+
+  /// No description provided for @createEntityFiscalYearValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day} of month {month}'**
+  String createEntityFiscalYearValue(int day, int month);
+
+  /// No description provided for @entityDeleteNameField.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the entity\'s name to confirm'**
+  String get entityDeleteNameField;
+
+  /// No description provided for @homeBudgetNetWorthShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Net worth {amount}'**
+  String homeBudgetNetWorthShort(String amount);
+
+  /// No description provided for @homeBudgetUncategorised.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} uncategorised'**
+  String homeBudgetUncategorised(int count);
+
+  /// No description provided for @homeBudgetDueRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recurring due'**
+  String homeBudgetDueRecurring(int count);
+
+  /// No description provided for @homeBudgetPendingProposals.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} proposals'**
+  String homeBudgetPendingProposals(int count);
+
+  /// No description provided for @netWorthAssetsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets {amount}'**
+  String netWorthAssetsLabel(String amount);
+
+  /// No description provided for @netWorthLiabilitiesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Liabilities {amount}'**
+  String netWorthLiabilitiesLabel(String amount);
+
+  /// No description provided for @netWorthMissingCurrencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Not included: no rate for {currencies}'**
+  String netWorthMissingCurrencies(String currencies);
+
+  /// No description provided for @entityCountInNetWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Count in my net worth'**
+  String get entityCountInNetWorth;
+
+  /// No description provided for @entityCountInNetWorthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Include this entity\'s accounts in your combined net worth.'**
+  String get entityCountInNetWorthHint;
+
+  /// No description provided for @settingsReportingCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Reporting currency'**
+  String get settingsReportingCurrency;
+
+  /// No description provided for @addAccountCurrencyQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What currency is this account in?'**
+  String get addAccountCurrencyQuestion;
+
+  /// No description provided for @addAccountSelectCurrencyPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a currency'**
+  String get addAccountSelectCurrencyPlaceholder;
+
+  /// No description provided for @addAccountOnBudgetQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget this account together with the plan'**
+  String get addAccountOnBudgetQuestion;
+
+  /// No description provided for @addAccountOnBudgetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'On-budget accounts feed Ready to Assign.'**
+  String get addAccountOnBudgetHint;
+
+  /// No description provided for @addAccountTrackByQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How should this account be tracked?'**
+  String get addAccountTrackByQuestion;
+
+  /// No description provided for @addAccountTrackByTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'By transactions'**
+  String get addAccountTrackByTransactions;
+
+  /// No description provided for @addAccountTrackByValue.
+  ///
+  /// In en, this message translates to:
+  /// **'By value'**
+  String get addAccountTrackByValue;
+
+  /// No description provided for @addAccountOpeningToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening balance is from today'**
+  String get addAccountOpeningToday;
+
+  /// No description provided for @addAccountTypeProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Property'**
+  String get addAccountTypeProperty;
+
+  /// No description provided for @addAccountTypeVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get addAccountTypeVehicle;
+
+  /// No description provided for @addAccountTypeOtherAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Other asset'**
+  String get addAccountTypeOtherAsset;
+
+  /// No description provided for @accountGroupAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get accountGroupAssets;
+
+  /// No description provided for @accountGroupLiabilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Liabilities'**
+  String get accountGroupLiabilities;
+
+  /// No description provided for @accountBaseEquivalent.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {amount} in base currency'**
+  String accountBaseEquivalent(String amount);
+
+  /// No description provided for @accountsConnectionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank connections'**
+  String get accountsConnectionsTitle;
+
+  /// No description provided for @accountsConnectionPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get accountsConnectionPending;
+
+  /// No description provided for @accountsConnectionSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get accountsConnectionSynced;
+
+  /// No description provided for @accountsConnectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed'**
+  String get accountsConnectionFailed;
+
+  /// No description provided for @accountsConnectionRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get accountsConnectionRemove;
+
+  /// No description provided for @accountsConnectionRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this connection?'**
+  String get accountsConnectionRemoveTitle;
+
+  /// No description provided for @accountsConnectionRemoveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The bank link is removed. Accounts keep their history.'**
+  String get accountsConnectionRemoveMessage;
+
+  /// No description provided for @transactionTransferPeer.
+  ///
+  /// In en, this message translates to:
+  /// **'to {accountName}'**
+  String transactionTransferPeer(String accountName);
+
+  /// No description provided for @transactionBaseAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} in base currency'**
+  String transactionBaseAmount(String amount);
+
+  /// No description provided for @accountDetailReconcile.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile'**
+  String get accountDetailReconcile;
+
+  /// No description provided for @accountDetailReportedBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank says {amount}'**
+  String accountDetailReportedBalance(String amount);
+
+  /// No description provided for @accountDetailClearedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared {amount}'**
+  String accountDetailClearedLabel(String amount);
+
+  /// No description provided for @accountDetailUnclearedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncleared {amount}'**
+  String accountDetailUnclearedLabel(String amount);
+
+  /// No description provided for @accountDetailValuationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Value history'**
+  String get accountDetailValuationsTitle;
+
+  /// No description provided for @accountDetailUpdateValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Update value'**
+  String get accountDetailUpdateValue;
+
+  /// No description provided for @accountDetailValuedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Valued {date}'**
+  String accountDetailValuedOn(String date);
+
+  /// No description provided for @accountDetailHoldingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Holdings'**
+  String get accountDetailHoldingsTitle;
+
+  /// No description provided for @accountHoldingsValueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Value {amount}'**
+  String accountHoldingsValueLabel(String amount);
+
+  /// No description provided for @accountHoldingsCostLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost {amount}'**
+  String accountHoldingsCostLabel(String amount);
+
+  /// No description provided for @accountHoldingsPnlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'P&L {amount}'**
+  String accountHoldingsPnlLabel(String amount);
+
+  /// No description provided for @accountHoldingsQuantityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity {quantity}'**
+  String accountHoldingsQuantityLabel(String quantity);
+
+  /// No description provided for @accountReconcileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile {accountName}'**
+  String accountReconcileTitle(String accountName);
+
+  /// No description provided for @accountReconcileStatementField.
+  ///
+  /// In en, this message translates to:
+  /// **'Statement balance'**
+  String get accountReconcileStatementField;
+
+  /// No description provided for @accountReconcileDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Difference {amount}'**
+  String accountReconcileDifference(String amount);
+
+  /// No description provided for @accountReconcileCreateAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'Post the difference as an adjustment'**
+  String get accountReconcileCreateAdjustment;
+
+  /// No description provided for @accountReconcileSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile'**
+  String get accountReconcileSubmit;
+
+  /// No description provided for @accountReconcileSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} transactions reconciled'**
+  String accountReconcileSuccess(int count);
+
+  /// No description provided for @accountReconcileNoDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Already balanced — nothing to do'**
+  String get accountReconcileNoDifference;
+
+  /// No description provided for @accountValuationValueField.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get accountValuationValueField;
+
+  /// No description provided for @accountValuationDateField.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get accountValuationDateField;
+
+  /// No description provided for @accountValuationSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Value saved'**
+  String get accountValuationSaved;
+
+  /// No description provided for @accountDetailTransactionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get accountDetailTransactionsTitle;
+
+  /// No description provided for @transactionLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get transactionLoadMore;
+
+  /// No description provided for @accountReconcileFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile failed — check the statement balance'**
+  String get accountReconcileFailed;
 }
 
 class _AppLocalizationsDelegate

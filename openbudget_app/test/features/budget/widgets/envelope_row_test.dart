@@ -20,16 +20,16 @@ void main() {
 
   Envelope makeEnvelope({
     String name = 'Groceries',
-    int budgetedAmountCents = 50000,
-    int spentAmountCents = 20000,
+    int budgetedAmountMinor = 50000,
+    int spentAmountMinor = 20000,
     String? note,
     bool? isHidden,
   }) => Envelope(
     id: testEnvelopeId,
     name: name,
     categoryId: testCategoryId,
-    budgetedAmountCents: budgetedAmountCents,
-    spentAmountCents: spentAmountCents,
+    budgetedAmountMinor: budgetedAmountMinor,
+    spentAmountMinor: spentAmountMinor,
     currencyCode: 'USD',
     sortOrder: 0,
     note: note,
@@ -38,14 +38,14 @@ void main() {
 
   EnvelopeGoal makeGoal({
     String goalType = 'target_balance',
-    int targetAmountCents = 100000,
-    int? monthlyFundingCents,
+    int targetAmountMinor = 100000,
+    int? monthlyFundingMinor,
     DateTime? targetDate,
   }) => EnvelopeGoal(
     envelopeId: testEnvelopeId,
     goalType: goalType,
-    targetAmountCents: targetAmountCents,
-    monthlyFundingCents: monthlyFundingCents,
+    targetAmountMinor: targetAmountMinor,
+    monthlyFundingMinor: monthlyFundingMinor,
     targetDate: targetDate,
   );
 
@@ -132,8 +132,8 @@ void main() {
     ) async {
       // Envelope with goal target of $1000, but only $300 available
       final envelope = makeEnvelope(
-        budgetedAmountCents: 30000,
-        spentAmountCents: 0,
+        budgetedAmountMinor: 30000,
+        spentAmountMinor: 0,
       );
       final goal = makeGoal();
 
@@ -157,8 +157,8 @@ void main() {
     ) async {
       // Envelope with goal target of $1000, and $1000 available
       final envelope = makeEnvelope(
-        budgetedAmountCents: 100000,
-        spentAmountCents: 0,
+        budgetedAmountMinor: 100000,
+        spentAmountMinor: 0,
       );
       final goal = makeGoal();
 
@@ -170,7 +170,7 @@ void main() {
     });
 
     testWidgets('renders spending progress bar without goal', (tester) async {
-      final envelope = makeEnvelope(spentAmountCents: 25000);
+      final envelope = makeEnvelope(spentAmountMinor: 25000);
 
       await tester.pumpWidget(buildSubject(envelope: envelope));
       await tester.pump();
@@ -183,10 +183,10 @@ void main() {
       final envelope = makeEnvelope();
       final monthlyData = MonthlyEnvelopeData(
         envelope: envelope,
-        allocatedCents: 50000,
-        spentCents: 20000,
-        availableCents: 30000,
-        carryoverCents: 5000,
+        allocatedMinor: 50000,
+        spentMinor: 20000,
+        availableMinor: 30000,
+        carryoverMinor: 5000,
       );
 
       await tester.pumpWidget(
@@ -208,13 +208,13 @@ void main() {
     ) async {
       // Monthly funding goal: $200/month, but only $50 budgeted
       final envelope = makeEnvelope(
-        budgetedAmountCents: 5000,
-        spentAmountCents: 0,
+        budgetedAmountMinor: 5000,
+        spentAmountMinor: 0,
       );
       final goal = makeGoal(
         goalType: 'monthly_funding',
-        targetAmountCents: 20000,
-        monthlyFundingCents: 20000,
+        targetAmountMinor: 20000,
+        monthlyFundingMinor: 20000,
       );
 
       await tester.pumpWidget(buildSubject(envelope: envelope, goal: goal));
@@ -237,7 +237,7 @@ void main() {
     });
 
     testWidgets('hides progress bars when toggle is enabled', (tester) async {
-      final envelope = makeEnvelope(spentAmountCents: 25000);
+      final envelope = makeEnvelope(spentAmountMinor: 25000);
 
       await tester.pumpWidget(
         buildSubject(envelope: envelope, hideProgressBars: true),

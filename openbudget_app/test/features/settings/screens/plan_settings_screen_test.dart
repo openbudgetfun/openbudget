@@ -9,7 +9,7 @@ import 'package:openbudget_app/src/features/settings/screens/plan_settings_scree
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000001');
 
 Budget _makeBudget({
@@ -24,14 +24,14 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith(
-              (ref, budgetId) async => _makeBudget(name: "Sam's Plan"),
+              (ref, entityId) async => _makeBudget(name: "Sam's Plan"),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const PlanSettingsScreen(budgetId: _budgetId),
+            home: const PlanSettingsScreen(entityId: _entityId),
           ),
         ),
       );

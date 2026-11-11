@@ -18,8 +18,8 @@ import 'package:patrol/patrol.dart';
 import 'common/patrol_helpers.dart';
 import 'common/test_data.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000901';
-final _budgetUuid = UuidValue.fromString(_budgetId);
+const _entityId = '00000000-0000-0000-0000-000000000901';
+final _budgetUuid = UuidValue.fromString(_entityId);
 final _ownerUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000902',
 );
@@ -41,7 +41,7 @@ Budget _makeBudget() => Budget(
 LedgerAccount _account(String id, String code, String name, String type) =>
     LedgerAccount(
       id: UuidValue.fromString(id),
-      budgetId: _budgetUuid,
+      entityId: _budgetUuid,
       code: code,
       name: name,
       type: type,
@@ -67,20 +67,20 @@ class FakeBooksRepository implements LedgerRepository {
   int nextJournalNumber = 1;
 
   @override
-  Future<Budget> enableLedger(String budgetId) async {
+  Future<Budget> enableLedger(String entityId) async {
     _accountingMode = 'ledger';
     return _makeBudget();
   }
 
   @override
   Future<List<LedgerAccount>> listAccounts(
-    String budgetId, {
+    String entityId, {
     required bool includeArchived,
   }) async => accounts;
 
   @override
   Future<LedgerAccount> createAccount({
-    required String budgetId,
+    required String entityId,
     required String code,
     required String name,
     required String type,
@@ -95,7 +95,7 @@ class FakeBooksRepository implements LedgerRepository {
 
   @override
   Future<Journal> saveDraftJournal({
-    required String budgetId,
+    required String entityId,
     required DateTime date,
     required List<JournalLineInput> lines,
     required String reference,
@@ -120,7 +120,7 @@ class FakeBooksRepository implements LedgerRepository {
       id: UuidValue.fromString(
         '00000000-0000-0000-0000-0000000009${nextJournalNumber.toString().padLeft(2, '0')}',
       ),
-      budgetId: _budgetUuid,
+      entityId: _budgetUuid,
       date: date,
       reference: reference,
       narration: narration,
@@ -156,7 +156,7 @@ class FakeBooksRepository implements LedgerRepository {
       id: UuidValue.fromString(
         '00000000-0000-0000-0000-0000000009${nextJournalNumber.toString().padLeft(2, '0')}',
       ),
-      budgetId: _budgetUuid,
+      entityId: _budgetUuid,
       date: date,
       reference: 'JB-2026-000${nextJournalNumber + 1}',
       status: 'posted',
@@ -185,7 +185,7 @@ class FakeBooksRepository implements LedgerRepository {
 
   @override
   Future<List<Journal>> listJournals(
-    String budgetId, {
+    String entityId, {
     DateTime? fromDate,
     DateTime? toDate,
   }) async => journals;
@@ -215,20 +215,20 @@ class FakeBooksRepository implements LedgerRepository {
 
   @override
   Future<LedgerPeriodLock> setLockDate(
-    String budgetId,
+    String entityId,
     DateTime lockDate,
   ) async => lock = LedgerPeriodLock(
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000904'),
-    budgetId: _budgetUuid,
+    entityId: _budgetUuid,
     lockDate: lockDate,
     setBy: _ownerUuid,
   );
 
   @override
-  Future<LedgerPeriodLock?> getLockDate(String budgetId) async => lock;
+  Future<LedgerPeriodLock?> getLockDate(String entityId) async => lock;
 
   @override
-  Future<TrialBalanceView> trialBalance(String budgetId, DateTime asOf) async {
+  Future<TrialBalanceView> trialBalance(String entityId, DateTime asOf) async {
     final debitByAccount = <String, int>{};
     final creditByAccount = <String, int>{};
     var totalDebit = 0;
@@ -269,7 +269,7 @@ class FakeBooksRepository implements LedgerRepository {
         ),
     ];
     return TrialBalanceView(
-      budgetId: _budgetUuid,
+      entityId: _budgetUuid,
       currencyCode: 'GBP',
       asOf: asOf,
       rows: rows,
@@ -282,10 +282,10 @@ class FakeBooksRepository implements LedgerRepository {
 /// The tax fake only answers the profile lookup that gates the Books entry.
 class FakeCompanyTaxRepository implements TaxRepository {
   @override
-  Future<TaxProfileRecord?> getProfile(String budgetId) async =>
+  Future<TaxProfileRecord?> getProfile(String entityId) async =>
       TaxProfileRecord(
         id: UuidValue.fromString('00000000-0000-0000-0000-000000000903'),
-        budgetId: _budgetUuid,
+        entityId: _budgetUuid,
         jurisdiction: 'GB',
         entityKind: 'company',
         profileJson: '{"entityKind":"company"}',
@@ -295,7 +295,7 @@ class FakeCompanyTaxRepository implements TaxRepository {
 
   @override
   Future<TaxProfileRecord> saveProfile({
-    required String budgetId,
+    required String entityId,
     required String jurisdiction,
     required String entityKind,
     required String profileJson,
@@ -303,7 +303,7 @@ class FakeCompanyTaxRepository implements TaxRepository {
   }) => throw UnimplementedError();
 
   @override
-  Future<List<TaxCategoryView>> listCategories(String budgetId) =>
+  Future<List<TaxCategoryView>> listCategories(String entityId) =>
       throw UnimplementedError();
 
   @override
@@ -317,41 +317,41 @@ class FakeCompanyTaxRepository implements TaxRepository {
     required String transactionId,
     String? code,
     int? businessUsePercent,
-    int? salesTaxCents,
+    int? salesTaxMinor,
   }) => throw UnimplementedError();
 
   @override
-  Future<TaxReportView> getReport(String budgetId, int startYear) =>
+  Future<TaxReportView> getReport(String entityId, int startYear) =>
       throw UnimplementedError();
 }
 
 Widget _buildApp(FakeBooksRepository books) {
   final router = GoRouter(
-    initialLocation: morePath.replaceFirst(':id', _budgetId),
+    initialLocation: morePath.replaceFirst(':id', _entityId),
     routes: [
       GoRoute(
         name: moreRoute,
         path: morePath,
         builder: (context, state) =>
-            MoreScreen(budgetId: state.pathParameters['id']!),
+            MoreScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: booksRoute,
         path: booksPath,
         builder: (context, state) =>
-            BooksScreen(budgetId: state.pathParameters['id']!),
+            BooksScreen(entityId: state.pathParameters['entityId']!),
         routes: [
           GoRoute(
             name: journalNewRoute,
             path: 'journals/new',
             builder: (context, state) =>
-                JournalEditorScreen(budgetId: state.pathParameters['id']!),
+                JournalEditorScreen(entityId: state.pathParameters['entityId']!),
           ),
           GoRoute(
             name: journalEditRoute,
             path: 'journals/:journalId/edit',
             builder: (context, state) => JournalEditorScreen(
-              budgetId: state.pathParameters['id']!,
+              entityId: state.pathParameters['entityId']!,
               journalId: state.pathParameters['journalId'],
             ),
           ),
@@ -359,7 +359,7 @@ Widget _buildApp(FakeBooksRepository books) {
             name: journalDetailRoute,
             path: 'journals/:journalId',
             builder: (context, state) => JournalDetailScreen(
-              budgetId: state.pathParameters['id']!,
+              entityId: state.pathParameters['entityId']!,
               journalId: state.pathParameters['journalId']!,
             ),
           ),

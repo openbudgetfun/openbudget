@@ -46,7 +46,7 @@ Future<void> _pumpDetail(
         name: journalDetailRoute,
         path: journalDetailPath,
         builder: (context, state) => JournalDetailScreen(
-          budgetId: state.pathParameters['id']!,
+          entityId: state.pathParameters['entityId']!,
           journalId: state.pathParameters['journalId']!,
         ),
       ),

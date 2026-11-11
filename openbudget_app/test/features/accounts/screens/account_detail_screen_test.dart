@@ -17,7 +17,7 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 const _accountId = '00000000-0000-0000-0000-000000000111';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
@@ -39,16 +39,16 @@ Budget _makeBudget() => Budget(
 Account _makeAccount({
   String name = 'Daily',
   String accountType = 'checking',
-  int balanceCents = 5202000,
+  int balanceMinor = 5202000,
   bool onBudget = true,
   bool isClosed = false,
 }) => Account(
   id: _accountUuid,
   name: name,
   accountType: accountType,
-  balanceCents: balanceCents,
+  balanceMinor: balanceMinor,
   currencyCode: 'USD',
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   onBudget: onBudget,
   sortOrder: 0,
   isClosed: isClosed,
@@ -57,7 +57,7 @@ Account _makeAccount({
 Transaction _makeTransaction({
   required String id,
   required String description,
-  required int amountCents,
+  required int amountMinor,
   DateTime? transactionDate,
   String? memo,
   bool cleared = false,
@@ -65,9 +65,9 @@ Transaction _makeTransaction({
 }) => Transaction(
   id: UuidValue.fromString(id),
   description: description,
-  amountCents: amountCents,
+  amountMinor: amountMinor,
   currencyCode: 'USD',
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   accountId: _accountUuid,
   transactionDate: transactionDate ?? DateTime(2026, 9, 3),
   memo: memo,
@@ -78,15 +78,15 @@ Transaction _makeTransaction({
 BudgetSummary _makeSummary() => BudgetSummary(
   budget: _makeBudget(),
   categories: const [],
-  totalIncomeCents: 0,
-  totalBudgetedCents: 0,
-  readyToAssignCents: 0,
+  totalIncomeMinor: 0,
+  totalBudgetedMinor: 0,
+  readyToAssignMinor: 0,
   year: 2026,
   month: 9,
 );
 
 class _RecordingAccountTransactionActions extends AccountTransactionActions {
-  int? statementBalanceCents;
+  int? statementBalanceMinor;
 
   @override
   FutureOr<void> build() {}
@@ -94,10 +94,10 @@ class _RecordingAccountTransactionActions extends AccountTransactionActions {
   @override
   Future<List<int>> reconcileWithBalance({
     required String accountId,
-    required String budgetId,
-    required int statementBalanceCents,
+    required String entityId,
+    required int statementBalanceMinor,
   }) async {
-    this.statementBalanceCents = statementBalanceCents;
+    this.statementBalanceMinor = statementBalanceMinor;
     return [1, 0];
   }
 }
@@ -108,7 +108,7 @@ Widget _buildSubject({
   AccountTransactionActions? actions,
 }) {
   final router = GoRouter(
-    initialLocation: '/budgets/$_budgetId/accounts/$_accountId',
+    initialLocation: '/budgets/$_entityId/accounts/$_accountId',
     routes: [
       GoRoute(
         name: accountListRoute,
@@ -120,7 +120,7 @@ Widget _buildSubject({
         name: accountDetailRoute,
         path: accountDetailPath,
         builder: (context, state) => AccountDetailScreen(
-          budgetId: state.pathParameters['id']!,
+          entityId: state.pathParameters['entityId']!,
           accountId: state.pathParameters['accountId']!,
         ),
       ),
@@ -132,7 +132,7 @@ Widget _buildSubject({
       if (actions != null)
         accountTransactionActionsProvider.overrideWith(() => actions),
       accountListProvider.overrideWith(
-        (ref, budgetId) async => [account ?? _makeAccount()],
+        (ref, entityId) async => [account ?? _makeAccount()],
       ),
       accountTransactionsProvider.overrideWith(
         (ref, args) async =>
@@ -141,21 +141,21 @@ Widget _buildSubject({
               _makeTransaction(
                 id: '00000000-0000-0000-0000-000000000211',
                 description: 'Rent',
-                amountCents: -280000,
+                amountMinor: -280000,
                 memo: 'September rent',
               ),
               _makeTransaction(
                 id: '00000000-0000-0000-0000-000000000212',
                 description: 'Payroll',
-                amountCents: 300000,
+                amountMinor: 300000,
                 transactionDate: DateTime(2026, 9, 2),
                 reconciled: true,
               ),
             ],
       ),
-      payeeListProvider.overrideWith((ref, budgetId) async => const []),
+      payeeListProvider.overrideWith((ref, entityId) async => const []),
       budgetSummaryProvider.overrideWith(
-        (ref, budgetId) async => _makeSummary(),
+        (ref, entityId) async => _makeSummary(),
       ),
     ],
     child: MaterialApp.router(
@@ -174,7 +174,7 @@ Widget _buildWalletSubject({
   List<SolanaWalletTaxYearSummary>? taxYearSummaries,
 }) {
   final router = GoRouter(
-    initialLocation: '/budgets/$_budgetId/accounts/$_accountId',
+    initialLocation: '/budgets/$_entityId/accounts/$_accountId',
     routes: [
       GoRoute(
         name: accountListRoute,
@@ -186,7 +186,7 @@ Widget _buildWalletSubject({
         name: accountDetailRoute,
         path: accountDetailPath,
         builder: (context, state) => AccountDetailScreen(
-          budgetId: state.pathParameters['id']!,
+          entityId: state.pathParameters['entityId']!,
           accountId: state.pathParameters['accountId']!,
         ),
       ),
@@ -198,7 +198,7 @@ Widget _buildWalletSubject({
       SolanaWallet(
         id: _walletUuid,
         accountId: _accountUuid,
-        budgetId: _budgetUuid,
+        entityId: _budgetUuid,
         address: '8f5PsYfTEvtwFw8szw8RKtAHY8fE6hzJHjxbM6j6YV1z',
         cluster: 'mainnet',
         syncStatus: 'success',
@@ -211,7 +211,7 @@ Widget _buildWalletSubject({
         SolanaWalletHolding(
           id: UuidValue.fromString('00000000-0000-0000-0000-000000000ac1'),
           walletId: _walletUuid,
-          budgetId: _budgetUuid,
+          entityId: _budgetUuid,
           assetId: 'So11111111111111111111111111111111111111112',
           symbol: 'SOL',
           decimals: 9,
@@ -229,7 +229,7 @@ Widget _buildWalletSubject({
         SolanaWalletHolding(
           id: UuidValue.fromString('00000000-0000-0000-0000-000000000ac2'),
           walletId: _walletUuid,
-          budgetId: _budgetUuid,
+          entityId: _budgetUuid,
           assetId: 'DustToken1111111111111111111111111111111111',
           symbol: 'DUST',
           decimals: 6,
@@ -247,7 +247,7 @@ Widget _buildWalletSubject({
         SolanaWalletTransaction(
           id: UuidValue.fromString('00000000-0000-0000-0000-000000000ad1'),
           walletId: _walletUuid,
-          budgetId: _budgetUuid,
+          entityId: _budgetUuid,
           signature: 'sig-jup-1',
           slot: 100,
           occurredAt: DateTime(2026, 9, 4, 13),
@@ -260,7 +260,7 @@ Widget _buildWalletSubject({
         SolanaWalletTransaction(
           id: UuidValue.fromString('00000000-0000-0000-0000-000000000ad2'),
           walletId: _walletUuid,
-          budgetId: _budgetUuid,
+          entityId: _budgetUuid,
           signature: 'sig-transfer-1',
           slot: 101,
           occurredAt: DateTime(2026, 9, 5, 9, 15),
@@ -294,19 +294,19 @@ Widget _buildWalletSubject({
   return ProviderScope(
     overrides: [
       accountListProvider.overrideWith(
-        (ref, budgetId) async => [
+        (ref, entityId) async => [
           _makeAccount(
             name: 'Main Wallet',
             accountType: 'cryptoWallet',
             onBudget: false,
-            balanceCents: 28000,
+            balanceMinor: 28000,
           ),
         ],
       ),
       accountTransactionsProvider.overrideWith((ref, args) async => const []),
-      payeeListProvider.overrideWith((ref, budgetId) async => const []),
+      payeeListProvider.overrideWith((ref, entityId) async => const []),
       budgetSummaryProvider.overrideWith(
-        (ref, budgetId) async => _makeSummary(),
+        (ref, entityId) async => _makeSummary(),
       ),
       accountSolanaWalletProvider.overrideWith((ref, args) async => testWallet),
       solanaWalletHoldingsProvider.overrideWith(
@@ -393,12 +393,12 @@ void main() {
             _makeTransaction(
               id: '00000000-0000-0000-0000-000000000211',
               description: 'Rent',
-              amountCents: -280000,
+              amountMinor: -280000,
             ),
             _makeTransaction(
               id: '00000000-0000-0000-0000-000000000212',
               description: 'Gym',
-              amountCents: -8000,
+              amountMinor: -8000,
               cleared: true,
             ),
           ],
@@ -457,19 +457,19 @@ void main() {
           account: _makeAccount(
             name: 'Loan',
             accountType: 'other',
-            balanceCents: -125,
+            balanceMinor: -125,
             onBudget: false,
           ),
           transactions: [
             _makeTransaction(
               id: '00000000-0000-0000-0000-000000000311',
               description: 'Payment from Daily',
-              amountCents: 50000,
+              amountMinor: 50000,
             ),
             _makeTransaction(
               id: '00000000-0000-0000-0000-000000000312',
               description: 'Initial Balance',
-              amountCents: -50000,
+              amountMinor: -50000,
               transactionDate: DateTime(2026, 9),
             ),
           ],
@@ -664,7 +664,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Reconcile'));
       await tester.pumpAndSettle();
 
-      expect(actions.statementBalanceCents, 1234);
+      expect(actions.statementBalanceMinor, 1234);
     });
 
     testWidgets('reconcile refuses an over-precise balance', (tester) async {
@@ -685,7 +685,7 @@ void main() {
         find.widgetWithText(FilledButton, 'Reconcile'),
       );
       expect(saveButton.onPressed, isNull);
-      expect(actions.statementBalanceCents, isNull);
+      expect(actions.statementBalanceMinor, isNull);
     });
 
     testWidgets('reconcile accepts a negative statement balance', (
@@ -701,7 +701,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Reconcile'));
       await tester.pumpAndSettle();
 
-      expect(actions.statementBalanceCents, -1234);
+      expect(actions.statementBalanceMinor, -1234);
     });
 
     Future<void> openLoanTargetDialog(WidgetTester tester) async {
@@ -717,7 +717,7 @@ void main() {
           account: _makeAccount(
             name: 'Car Loan',
             accountType: 'other',
-            balanceCents: -500000,
+            balanceMinor: -500000,
             onBudget: false,
           ),
         ),
@@ -739,7 +739,7 @@ void main() {
           account: _makeAccount(
             name: 'Car Loan',
             accountType: 'other',
-            balanceCents: -500000,
+            balanceMinor: -500000,
             onBudget: false,
           ),
         ),
@@ -767,7 +767,7 @@ void main() {
           account: _makeAccount(
             name: 'Car Loan',
             accountType: 'other',
-            balanceCents: -500000,
+            balanceMinor: -500000,
             onBudget: false,
           ),
         ),

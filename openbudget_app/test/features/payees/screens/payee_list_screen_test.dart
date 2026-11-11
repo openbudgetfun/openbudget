@@ -9,13 +9,13 @@ import 'package:openbudget_app/src/features/payees/screens/payee_list_screen.dar
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
 );
 
 Payee _makePayee({String name = 'Grocery Store', UuidValue? id}) =>
-    Payee(id: id, name: name, budgetId: _budgetUuid);
+    Payee(id: id, name: name, entityId: _budgetUuid);
 
 void main() {
   group('PayeeListScreen', () {
@@ -26,7 +26,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const PayeeListScreen(budgetId: _budgetId),
+            home: const PayeeListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -40,14 +40,14 @@ void main() {
         ProviderScope(
           overrides: [
             payeeListProvider.overrideWith(
-              (ref, budgetId) => throw Exception('Could not load payees'),
+              (ref, entityId) => throw Exception('Could not load payees'),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const PayeeListScreen(budgetId: _budgetId),
+            home: const PayeeListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -67,13 +67,13 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
+            payeeListProvider.overrideWith((ref, entityId) async => <Payee>[]),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const PayeeListScreen(budgetId: _budgetId),
+            home: const PayeeListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -100,13 +100,13 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
+            payeeListProvider.overrideWith((ref, entityId) async => <Payee>[]),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const PayeeListScreen(budgetId: _budgetId),
+            home: const PayeeListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -139,13 +139,13 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            payeeListProvider.overrideWith((ref, budgetId) async => payees),
+            payeeListProvider.overrideWith((ref, entityId) async => payees),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const PayeeListScreen(budgetId: _budgetId),
+            home: const PayeeListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -167,13 +167,13 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            payeeListProvider.overrideWith((ref, budgetId) async => payees),
+            payeeListProvider.overrideWith((ref, entityId) async => payees),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const PayeeListScreen(budgetId: _budgetId),
+            home: const PayeeListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -192,13 +192,13 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
+            payeeListProvider.overrideWith((ref, entityId) async => <Payee>[]),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const PayeeListScreen(budgetId: _budgetId),
+            home: const PayeeListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -211,13 +211,13 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
+            payeeListProvider.overrideWith((ref, entityId) async => <Payee>[]),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const PayeeListScreen(budgetId: _budgetId),
+            home: const PayeeListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -247,13 +247,13 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            payeeListProvider.overrideWith((ref, budgetId) async => payees),
+            payeeListProvider.overrideWith((ref, entityId) async => payees),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const PayeeListScreen(budgetId: _budgetId),
+            home: const PayeeListScreen(entityId: _entityId),
           ),
         ),
       );

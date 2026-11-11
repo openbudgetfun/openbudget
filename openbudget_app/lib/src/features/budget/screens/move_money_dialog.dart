@@ -12,14 +12,14 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 class MoveMoneyDialog extends HookConsumerWidget {
   const MoveMoneyDialog({
-    required this.budgetId,
+    required this.entityId,
     required this.year,
     required this.month,
     required this.categories,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final int year;
   final int month;
   final List<CategoryWithEnvelopes> categories;
@@ -31,7 +31,7 @@ class MoveMoneyDialog extends HookConsumerWidget {
     final fromEnvelopeId = useState<String?>(null);
     final toEnvelopeId = useState<String?>(null);
     final isSubmitting = useState(false);
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final budgetAsync = ref.watch(budgetDetailProvider(entityId));
     final currency =
         budgetAsync.whenOrNull(
           data: (budget) => normalizeCurrencyCode(budget.currencyCode),
@@ -156,13 +156,13 @@ class MoveMoneyDialog extends HookConsumerWidget {
       return;
     }
 
-    final amountCents =
-        parseBudgetAmountInputToCents(
+    final amountMinor =
+        parseBudgetAmountInputToMinor(
           input: amountInput,
           currencyCode: currency,
         ) ??
         0;
-    if (amountCents <= 0) return;
+    if (amountMinor <= 0) return;
     isSubmitting.value = true;
 
     try {
@@ -171,10 +171,10 @@ class MoveMoneyDialog extends HookConsumerWidget {
           .moveMoney(
             fromEnvelopeId: fromEnvelopeId.value!,
             toEnvelopeId: toEnvelopeId.value!,
-            budgetId: budgetId,
+            entityId: entityId,
             year: year,
             month: month,
-            amountCents: amountCents,
+            amountMinor: amountMinor,
           );
       if (!context.mounted) return;
       showAppToast(

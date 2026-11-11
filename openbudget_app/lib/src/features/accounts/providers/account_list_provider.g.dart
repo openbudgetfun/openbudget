@@ -64,7 +64,7 @@ final class AccountListProvider
   }
 }
 
-String _$accountListHash() => r'441872a31d0fc55157a891065adb3a5b00924431';
+String _$accountListHash() => r'b473867d3f60aa88ab7e10868d59311cd9f14424';
 
 final class AccountListFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<Account>>, String> {
@@ -77,8 +77,8 @@ final class AccountListFamily extends $Family
         isAutoDispose: true,
       );
 
-  AccountListProvider call(String budgetId) =>
-      AccountListProvider._(argument: budgetId, from: this);
+  AccountListProvider call(String entityId) =>
+      AccountListProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'accountListProvider';

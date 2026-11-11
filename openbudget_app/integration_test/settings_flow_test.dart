@@ -20,7 +20,7 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000311');
 
 Budget _makeBudget({
@@ -43,7 +43,7 @@ void main() {
       addTearDown(container.dispose);
 
       final router = GoRouter(
-        initialLocation: '/budgets/$_budgetId/more/settings',
+        initialLocation: '/budgets/$_entityId/more/settings',
         routes: [
           GoRoute(
             name: moreRoute,
@@ -54,19 +54,19 @@ void main() {
             name: settingsRoute,
             path: settingsPath,
             builder: (context, state) =>
-                SettingsScreen(budgetId: state.pathParameters['id']!),
+                SettingsScreen(entityId: state.pathParameters['entityId']!),
             routes: [
               GoRoute(
                 name: planSettingsRoute,
                 path: 'plan',
                 builder: (context, state) =>
-                    PlanSettingsScreen(budgetId: state.pathParameters['id']!),
+                    PlanSettingsScreen(entityId: state.pathParameters['entityId']!),
                 routes: [
                   GoRoute(
                     name: currencySettingsRoute,
                     path: 'currency',
                     builder: (context, state) => CurrencySettingsScreen(
-                      budgetId: state.pathParameters['id']!,
+                      entityId: state.pathParameters['entityId']!,
                     ),
                   ),
                 ],
@@ -75,20 +75,20 @@ void main() {
                 name: appIconRoute,
                 path: 'app-icon',
                 builder: (context, state) =>
-                    AppIconScreen(budgetId: state.pathParameters['id']!),
+                    AppIconScreen(entityId: state.pathParameters['entityId']!),
               ),
               GoRoute(
                 name: accountSettingsRoute,
                 path: 'account-settings',
                 builder: (context, state) => AccountSettingsScreen(
-                  budgetId: state.pathParameters['id']!,
+                  entityId: state.pathParameters['entityId']!,
                 ),
                 routes: [
                   GoRoute(
                     name: deleteAccountRoute,
                     path: 'delete',
                     builder: (context, state) => DeleteAccountScreen(
-                      budgetId: state.pathParameters['id']!,
+                      entityId: state.pathParameters['entityId']!,
                     ),
                   ),
                 ],
@@ -97,7 +97,7 @@ void main() {
                 name: displayOptionsRoute,
                 path: 'display',
                 builder: (context, state) =>
-                    DisplayOptionsScreen(budgetId: state.pathParameters['id']!),
+                    DisplayOptionsScreen(entityId: state.pathParameters['entityId']!),
               ),
             ],
           ),

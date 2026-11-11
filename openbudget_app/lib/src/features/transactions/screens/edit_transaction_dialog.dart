@@ -16,13 +16,13 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 class EditTransactionDialog extends HookConsumerWidget {
   const EditTransactionDialog({
     required this.transaction,
-    required this.budgetId,
+    required this.entityId,
     required this.currencyCode,
     super.key,
   });
 
   final Transaction transaction;
-  final String budgetId;
+  final String entityId;
   final String currencyCode;
 
   @override
@@ -34,7 +34,7 @@ class EditTransactionDialog extends HookConsumerWidget {
     );
     final currencyDecimals = currencyDecimalsForCode(currencyCode);
     final amountController = useTextEditingController(
-      text: formatMinorUnits(transaction.amountCents.abs(), currencyDecimals),
+      text: formatMinorUnits(transaction.amountMinor.abs(), currencyDecimals),
     );
     final memoController = useTextEditingController(
       text: transaction.memo ?? '',
@@ -45,10 +45,10 @@ class EditTransactionDialog extends HookConsumerWidget {
       transaction.envelopeId?.toString(),
     );
     final isSubmitting = useState(false);
-    final isIncome = transaction.amountCents > 0;
+    final isIncome = transaction.amountMinor > 0;
 
     useValueListenable(amountController);
-    final amountCents = parseMoneyInput(
+    final amountMinor = parseMoneyInput(
       amountController.text,
       decimals: currencyDecimals,
     );
@@ -58,8 +58,8 @@ class EditTransactionDialog extends HookConsumerWidget {
       message: l10n.amountInvalidFormat(currencyDecimals),
     );
 
-    final payeesAsync = ref.watch(payeeListProvider(budgetId));
-    final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
+    final payeesAsync = ref.watch(payeeListProvider(entityId));
+    final summaryAsync = ref.watch(budgetSummaryProvider(entityId));
 
     // Build payee dropdown items.
     final payeeItems = <DropdownMenuItem<String>>[
@@ -199,7 +199,7 @@ class EditTransactionDialog extends HookConsumerWidget {
             ),
             const SizedBox(height: SpacingTokens.sm),
             TransactionTaxCategoryRow(
-              budgetId: budgetId,
+              entityId: entityId,
               transaction: transaction,
               currencyCode: currencyCode,
             ),
@@ -217,12 +217,12 @@ class EditTransactionDialog extends HookConsumerWidget {
           onPressed: () async {
             final description = descriptionController.text.trim();
             if (description.isEmpty ||
-                amountCents == null ||
-                amountCents <= 0) {
+                amountMinor == null ||
+                amountMinor <= 0) {
               return;
             }
 
-            final signedAmount = isIncome ? amountCents : -amountCents;
+            final signedAmount = isIncome ? amountMinor : -amountMinor;
             final memo = memoController.text.trim();
 
             isSubmitting.value = true;
@@ -232,9 +232,9 @@ class EditTransactionDialog extends HookConsumerWidget {
                   .read(transactionActionsProvider.notifier)
                   .updateTransaction(
                     transactionId: transaction.id?.toString() ?? '',
-                    budgetId: budgetId,
+                    entityId: entityId,
                     description: description,
-                    amountCents: signedAmount,
+                    amountMinor: signedAmount,
                     transactionDate: selectedDate.value,
                     payeeId: selectedPayeeId.value,
                     envelopeId: selectedEnvelopeId.value,

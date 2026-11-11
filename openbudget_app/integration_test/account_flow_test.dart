@@ -25,7 +25,7 @@ import 'package:patrol/patrol.dart';
 import 'common/patrol_helpers.dart';
 import 'helpers/screenshot_capture.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
 );
@@ -62,7 +62,7 @@ const _addAccountUnlinkedIntroText =
 
 Account _makeAccount({
   required String name,
-  required int balanceCents,
+  required int balanceMinor,
   required String currencyCode,
   UuidValue? id,
   String accountType = 'checking',
@@ -72,9 +72,9 @@ Account _makeAccount({
   id: id,
   name: name,
   accountType: accountType,
-  balanceCents: balanceCents,
+  balanceMinor: balanceMinor,
   currencyCode: currencyCode,
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   onBudget: onBudget,
   sortOrder: 0,
   isClosed: isClosed,
@@ -91,9 +91,9 @@ Budget _makeBudget({String currencyCode = 'USD'}) => Budget(
 BudgetSummary _makeSummary({String currencyCode = 'USD'}) => BudgetSummary(
   budget: _makeBudget(currencyCode: currencyCode),
   categories: const [],
-  totalIncomeCents: 0,
-  totalBudgetedCents: 0,
-  readyToAssignCents: 0,
+  totalIncomeMinor: 0,
+  totalBudgetedMinor: 0,
+  readyToAssignMinor: 0,
   year: 2026,
   month: 9,
 );
@@ -102,16 +102,16 @@ Transaction _makeTransaction({
   required String id,
   required UuidValue accountId,
   required String description,
-  required int amountCents,
+  required int amountMinor,
   bool cleared = false,
   bool reconciled = false,
   DateTime? transactionDate,
 }) => Transaction(
   id: UuidValue.fromString(id),
   description: description,
-  amountCents: amountCents,
+  amountMinor: amountMinor,
   currencyCode: 'USD',
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   accountId: accountId,
   transactionDate: transactionDate ?? DateTime(2026, 9, 3),
   cleared: cleared,
@@ -126,9 +126,9 @@ class _FakeAccountActions extends AccountActions {
   Future<Account> createAccount({
     required String name,
     required String accountType,
-    required int balanceCents,
+    required int balanceMinor,
     required String currencyCode,
-    required String budgetId,
+    required String entityId,
     required bool onBudget,
     required int sortOrder,
     String? walletAddress,
@@ -137,9 +137,9 @@ class _FakeAccountActions extends AccountActions {
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000777'),
     name: name,
     accountType: accountType,
-    balanceCents: balanceCents,
+    balanceMinor: balanceMinor,
     currencyCode: currencyCode,
-    budgetId: _budgetUuid,
+    entityId: _budgetUuid,
     onBudget: onBudget,
     sortOrder: sortOrder,
     isClosed: false,
@@ -152,7 +152,7 @@ class _UnavailablePlaidAccountLink extends PlaidAccountLink {
 
   @override
   Future<List<Account>> importSandboxAccounts({
-    required String budgetId,
+    required String entityId,
     String? plaidInstitutionId,
   }) async => throw Exception('Bank linking is unavailable in this fixture.');
 }
@@ -163,25 +163,25 @@ Widget _buildApp({
   String budgetCurrencyCode = 'USD',
 }) {
   final router = GoRouter(
-    initialLocation: '/budgets/$_budgetId/accounts',
+    initialLocation: '/budgets/$_entityId/accounts',
     routes: [
       GoRoute(
         name: accountListRoute,
         path: '/budgets/:id/accounts',
         builder: (context, state) =>
-            AccountListScreen(budgetId: state.pathParameters['id']!),
+            AccountListScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: addAccountRoute,
         path: '/budgets/:id/accounts/add',
         builder: (context, state) =>
-            AddAccountScreen(budgetId: state.pathParameters['id']!),
+            AddAccountScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: accountDetailRoute,
         path: '/budgets/:id/accounts/:accountId',
         builder: (context, state) => AccountDetailScreen(
-          budgetId: state.pathParameters['id']!,
+          entityId: state.pathParameters['entityId']!,
           accountId: state.pathParameters['accountId']!,
         ),
       ),
@@ -194,18 +194,18 @@ Widget _buildApp({
       accountActionsProvider.overrideWith(_FakeAccountActions.new),
       plaidAccountLinkProvider.overrideWith(_UnavailablePlaidAccountLink.new),
       myReusableAccountsProvider.overrideWith(
-        (ref, budgetId) async => const [],
+        (ref, entityId) async => const [],
       ),
-      accountListProvider.overrideWith((ref, budgetId) async => accounts),
+      accountListProvider.overrideWith((ref, entityId) async => accounts),
       accountTransactionsProvider.overrideWith(
         (ref, args) async => accountTransactions,
       ),
-      payeeListProvider.overrideWith((ref, budgetId) async => const []),
+      payeeListProvider.overrideWith((ref, entityId) async => const []),
       budgetSummaryProvider.overrideWith(
-        (ref, budgetId) async => _makeSummary(currencyCode: budgetCurrencyCode),
+        (ref, entityId) async => _makeSummary(currencyCode: budgetCurrencyCode),
       ),
       budgetDetailProvider.overrideWith(
-        (ref, budgetId) async => _makeBudget(currencyCode: budgetCurrencyCode),
+        (ref, entityId) async => _makeBudget(currencyCode: budgetCurrencyCode),
       ),
       institutionCatalogProvider.overrideWith(
         (ref, locationCode) async => _testInstitutions,
@@ -230,12 +230,12 @@ void main() {
         accounts: [
           _makeAccount(
             name: 'Daily USD',
-            balanceCents: 250000,
+            balanceMinor: 250000,
             currencyCode: 'USD',
           ),
           _makeAccount(
             name: 'Savings EUR',
-            balanceCents: 100000,
+            balanceMinor: 100000,
             currencyCode: 'EUR',
           ),
         ],
@@ -778,7 +778,7 @@ void main() {
           _makeAccount(
             id: accountId,
             name: 'Daily USD',
-            balanceCents: 250000,
+            balanceMinor: 250000,
             currencyCode: 'USD',
           ),
         ],
@@ -786,9 +786,9 @@ void main() {
           Transaction(
             id: UuidValue.fromString('00000000-0000-0000-0000-000000000211'),
             description: 'Rent',
-            amountCents: -280000,
+            amountMinor: -280000,
             currencyCode: 'USD',
-            budgetId: _budgetUuid,
+            entityId: _budgetUuid,
             accountId: accountId,
             transactionDate: DateTime(2026, 9, 3),
           ),
@@ -819,7 +819,7 @@ void main() {
             _makeAccount(
               id: accountId,
               name: 'Daily USD',
-              balanceCents: 250000,
+              balanceMinor: 250000,
               currencyCode: 'USD',
             ),
           ],
@@ -828,13 +828,13 @@ void main() {
               id: '00000000-0000-0000-0000-000000000211',
               accountId: accountId,
               description: 'Self storage',
-              amountCents: -3000,
+              amountMinor: -3000,
             ),
             _makeTransaction(
               id: '00000000-0000-0000-0000-000000000212',
               accountId: accountId,
               description: 'Starting Balance',
-              amountCents: 5000000,
+              amountMinor: 5000000,
               reconciled: true,
               transactionDate: DateTime(2026, 9, 2),
             ),
@@ -874,7 +874,7 @@ void main() {
           _makeAccount(
             id: accountId,
             name: 'Daily USD',
-            balanceCents: 250000,
+            balanceMinor: 250000,
             currencyCode: 'USD',
           ),
         ],
@@ -883,7 +883,7 @@ void main() {
             id: '00000000-0000-0000-0000-000000000512',
             accountId: accountId,
             description: 'Gym',
-            amountCents: -15000,
+            amountMinor: -15000,
           ),
         ],
       ),
@@ -916,7 +916,7 @@ void main() {
             _makeAccount(
               id: accountId,
               name: 'Loan',
-              balanceCents: -50000,
+              balanceMinor: -50000,
               currencyCode: 'USD',
               onBudget: false,
               isClosed: true,
@@ -953,7 +953,7 @@ void main() {
           _makeAccount(
             id: accountId,
             name: 'Daily USD',
-            balanceCents: 250000,
+            balanceMinor: 250000,
             currencyCode: 'USD',
           ),
         ],
@@ -962,7 +962,7 @@ void main() {
             id: '00000000-0000-0000-0000-000000000311',
             accountId: accountId,
             description: 'Rent',
-            amountCents: -280000,
+            amountMinor: -280000,
             cleared: true,
           ),
         ],
@@ -1002,7 +1002,7 @@ void main() {
           _makeAccount(
             id: accountId,
             name: 'Daily USD',
-            balanceCents: 5222000,
+            balanceMinor: 5222000,
             currencyCode: 'USD',
           ),
         ],
@@ -1011,14 +1011,14 @@ void main() {
             id: '00000000-0000-0000-0000-000000000611',
             accountId: accountId,
             description: 'Landlord',
-            amountCents: -10000,
+            amountMinor: -10000,
             cleared: true,
           ),
           _makeTransaction(
             id: '00000000-0000-0000-0000-000000000612',
             accountId: accountId,
             description: 'Supermarket',
-            amountCents: -50000,
+            amountMinor: -50000,
             cleared: true,
           ),
         ],
@@ -1073,7 +1073,7 @@ void main() {
             id: accountId,
             name: 'Loan',
             accountType: 'other',
-            balanceCents: -125,
+            balanceMinor: -125,
             currencyCode: 'USD',
             onBudget: false,
           ),
@@ -1083,14 +1083,14 @@ void main() {
             id: '00000000-0000-0000-0000-000000000411',
             accountId: accountId,
             description: 'Payment from Daily',
-            amountCents: 50000,
+            amountMinor: 50000,
             transactionDate: DateTime(2026, 9, 4),
           ),
           _makeTransaction(
             id: '00000000-0000-0000-0000-000000000412',
             accountId: accountId,
             description: 'Initial Balance',
-            amountCents: -50000,
+            amountMinor: -50000,
             transactionDate: DateTime(2026, 9, 3),
           ),
         ],

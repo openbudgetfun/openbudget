@@ -22,7 +22,7 @@ Budget testBudget({
 );
 
 TaxProfileRecord taxProfileRecord({
-  String budgetId = testBudgetId,
+  String entityId = testBudgetId,
   TaxProfile? profile,
   String? linkedBudgetId,
   DateTime? updatedAt,
@@ -31,7 +31,7 @@ TaxProfileRecord taxProfileRecord({
       profile ?? const GbTaxProfile(entityKind: TaxEntityKind.individual);
   return TaxProfileRecord(
     id: UuidValue.fromString('00000000-0000-0000-0000-0000000000a405'),
-    budgetId: UuidValue.fromString(budgetId),
+    entityId: UuidValue.fromString(entityId),
     jurisdiction: resolved.jurisdiction.countryCode,
     entityKind: resolved.entityKind.name,
     profileJson: jsonEncode(resolved.toJson()),
@@ -195,10 +195,10 @@ class FakeTaxRepository implements TaxRepository {
   Exception? envelopeError;
   Exception? transactionError;
 
-  final List<({String budgetId, int startYear})> reportCalls = [];
+  final List<({String entityId, int startYear})> reportCalls = [];
   final List<
     ({
-      String budgetId,
+      String entityId,
       String jurisdiction,
       String entityKind,
       String profileJson,
@@ -212,20 +212,20 @@ class FakeTaxRepository implements TaxRepository {
       String transactionId,
       String? code,
       int? businessUsePercent,
-      int? salesTaxCents,
+      int? salesTaxMinor,
     })
   >
   transactionUpdates = [];
 
   @override
-  Future<TaxProfileRecord?> getProfile(String budgetId) async {
+  Future<TaxProfileRecord?> getProfile(String entityId) async {
     if (profileError != null) throw profileError!;
     return profile;
   }
 
   @override
   Future<TaxProfileRecord> saveProfile({
-    required String budgetId,
+    required String entityId,
     required String jurisdiction,
     required String entityKind,
     required String profileJson,
@@ -233,7 +233,7 @@ class FakeTaxRepository implements TaxRepository {
   }) async {
     if (saveError != null) throw saveError!;
     savedProfiles.add((
-      budgetId: budgetId,
+      entityId: entityId,
       jurisdiction: jurisdiction,
       entityKind: entityKind,
       profileJson: profileJson,
@@ -241,7 +241,7 @@ class FakeTaxRepository implements TaxRepository {
     ));
     final record = TaxProfileRecord(
       id: UuidValue.fromString('00000000-0000-0000-0000-0000000000a499'),
-      budgetId: UuidValue.fromString(budgetId),
+      entityId: UuidValue.fromString(entityId),
       jurisdiction: jurisdiction,
       entityKind: entityKind,
       profileJson: profileJson,
@@ -256,7 +256,7 @@ class FakeTaxRepository implements TaxRepository {
   }
 
   @override
-  Future<List<TaxCategoryView>> listCategories(String budgetId) async {
+  Future<List<TaxCategoryView>> listCategories(String entityId) async {
     if (categoriesError != null) throw categoriesError!;
     return categories ?? testCategories();
   }
@@ -274,8 +274,8 @@ class FakeTaxRepository implements TaxRepository {
       categoryId: UuidValue.fromString(
         '00000000-0000-0000-0000-0000000000a406',
       ),
-      budgetedAmountCents: 0,
-      spentAmountCents: 0,
+      budgetedAmountMinor: 0,
+      spentAmountMinor: 0,
       currencyCode: 'GBP',
       sortOrder: 0,
       taxCategoryCode: code,
@@ -287,31 +287,31 @@ class FakeTaxRepository implements TaxRepository {
     required String transactionId,
     String? code,
     int? businessUsePercent,
-    int? salesTaxCents,
+    int? salesTaxMinor,
   }) async {
     if (transactionError != null) throw transactionError!;
     transactionUpdates.add((
       transactionId: transactionId,
       code: code,
       businessUsePercent: businessUsePercent,
-      salesTaxCents: salesTaxCents,
+      salesTaxMinor: salesTaxMinor,
     ));
     return Transaction(
       id: UuidValue.fromString(transactionId),
       description: 'Train ticket',
-      amountCents: -4250,
+      amountMinor: -4250,
       currencyCode: 'GBP',
-      budgetId: UuidValue.fromString(testBudgetId),
+      entityId: UuidValue.fromString(testBudgetId),
       transactionDate: DateTime.utc(2026, 5),
       taxCategoryCode: code,
       businessUsePercent: businessUsePercent,
-      salesTaxCents: salesTaxCents,
+      salesTaxMinor: salesTaxMinor,
     );
   }
 
   @override
-  Future<TaxReportView> getReport(String budgetId, int startYear) async {
-    reportCalls.add((budgetId: budgetId, startYear: startYear));
+  Future<TaxReportView> getReport(String entityId, int startYear) async {
+    reportCalls.add((entityId: entityId, startYear: startYear));
     if (reportError != null) throw reportError!;
     return reports[startYear] ??
         defaultReport ??

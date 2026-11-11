@@ -56,12 +56,12 @@ class JournalEditorLine {
 /// functional currency: every line converts at a rate of exactly one.
 class JournalEditorScreen extends HookConsumerWidget {
   const JournalEditorScreen({
-    required this.budgetId,
+    required this.entityId,
     this.journalId,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final String? journalId;
 
   @override
@@ -70,14 +70,14 @@ class JournalEditorScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
     final editingId = journalId;
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
-    final accountsAsync = ref.watch(ledgerAccountsProvider(budgetId));
+    final budgetAsync = ref.watch(budgetDetailProvider(entityId));
+    final accountsAsync = ref.watch(ledgerAccountsProvider(entityId));
     final storedLinesAsync = editingId == null
         ? null
         : ref.watch(ledgerJournalLinesProvider(editingId));
     final storedJournalAsync = editingId == null
         ? null
-        : ref.watch(ledgerJournalsProvider(budgetId));
+        : ref.watch(ledgerJournalsProvider(entityId));
     final currency =
         budgetAsync.whenOrNull(
           data: (budget) => normalizeCurrencyCode(budget.currencyCode),
@@ -456,7 +456,7 @@ class JournalEditorScreen extends HookConsumerWidget {
     final actions = ref.read(ledgerActionsProvider.notifier);
     try {
       final draft = await actions.saveDraftJournal(
-        budgetId: budgetId,
+        entityId: entityId,
         date: date,
         lines: lineInputs,
         journalId: journalId,
@@ -467,7 +467,7 @@ class JournalEditorScreen extends HookConsumerWidget {
       );
       if (post) {
         await actions.postJournal(
-          budgetId: budgetId,
+          entityId: entityId,
           journalId: draft.id!.toString(),
         );
         if (!context.mounted) return;
@@ -671,7 +671,7 @@ class _TotalsCard extends HookWidget {
               ObToneChip(
                 key: const Key('journal-unbalanced-chip'),
                 label: l10n.journalUnbalancedLabel(
-                  formatCentsForCode(difference.abs(), currency),
+                  formatMinorForCode(difference.abs(), currency),
                 ),
                 tone: ObTone.overspent,
                 icon: const SkribbleIcon(

@@ -68,7 +68,7 @@ void main() {
   });
 
   group('buildCategorySpendingByEnvelope', () {
-    final budgetId = UuidValue.fromString(
+    final entityId = UuidValue.fromString(
       '00000000-0000-0000-0000-000000000701',
     );
     final utilitiesEnvelopeId = UuidValue.fromString(
@@ -86,33 +86,33 @@ void main() {
         transactions: [
           Transaction(
             description: 'Utilities bill',
-            amountCents: -6000,
+            amountMinor: -6000,
             currencyCode: 'USD',
             envelopeId: utilitiesEnvelopeId,
-            budgetId: budgetId,
+            entityId: entityId,
             transactionDate: DateTime(2026, 2, 22),
           ),
           Transaction(
             description: 'Groceries',
-            amountCents: -2500,
+            amountMinor: -2500,
             currencyCode: 'USD',
             envelopeId: groceriesEnvelopeId,
-            budgetId: budgetId,
+            entityId: entityId,
             transactionDate: DateTime(2026, 2, 22),
           ),
           Transaction(
             description: 'Payroll',
-            amountCents: 50000,
+            amountMinor: 50000,
             currencyCode: 'USD',
             envelopeId: incomeEnvelopeId,
-            budgetId: budgetId,
+            entityId: entityId,
             transactionDate: DateTime(2026, 2, 22),
           ),
           Transaction(
             description: 'Ignored unassigned inflow',
-            amountCents: 10000,
+            amountMinor: 10000,
             currencyCode: 'USD',
-            budgetId: budgetId,
+            entityId: entityId,
             transactionDate: DateTime(2026, 2, 22),
           ),
         ],

@@ -18,7 +18,7 @@ GoRouter _router() => GoRouter(
       name: booksRoute,
       path: '/budgets/:id/books',
       builder: (context, state) =>
-          BooksScreen(budgetId: state.pathParameters['id']!),
+          BooksScreen(entityId: state.pathParameters['entityId']!),
       routes: [
         GoRoute(
           name: journalNewRoute,

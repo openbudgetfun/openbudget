@@ -15,18 +15,18 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 enum _RecentMovesTab { all, moved, assigned }
 
 class RecentMovesScreen extends HookConsumerWidget {
-  const RecentMovesScreen({required this.budgetId, super.key});
+  const RecentMovesScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final selectedTab = useState(_RecentMovesTab.all);
-    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
-    final allEvents = ref.watch(recentMovesForBudgetProvider(budgetId));
-    final introSeen = ref.watch(recentMovesIntroSeenProvider(budgetId));
+    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(entityId));
+    final allEvents = ref.watch(recentMovesForBudgetProvider(entityId));
+    final introSeen = ref.watch(recentMovesIntroSeenProvider(entityId));
     final hideAmounts = ref.watch(hideAmountsProvider);
 
     useEffect(() {
@@ -35,7 +35,7 @@ class RecentMovesScreen extends HookConsumerWidget {
       unawaited(
         Future.microtask(() async {
           if (!context.mounted) return;
-          ref.read(recentMovesIntroSeenSetProvider.notifier).markSeen(budgetId);
+          ref.read(recentMovesIntroSeenSetProvider.notifier).markSeen(entityId);
           await showDialog<void>(
             context: context,
             builder: (_) => const _RecentMovesIntroDialog(),
@@ -115,7 +115,7 @@ class RecentMovesScreen extends HookConsumerWidget {
                         onEnvelopeTap: (envelopeId) => context.pushNamed(
                           envelopeMovesRoute,
                           pathParameters: {
-                            'id': budgetId,
+                            'id': entityId,
                             'envelopeId': envelopeId,
                           },
                         ),
@@ -229,20 +229,20 @@ class _RecentMovesIntroDialog extends HookWidget {
 
 class EnvelopeMovesScreen extends HookConsumerWidget {
   const EnvelopeMovesScreen({
-    required this.budgetId,
+    required this.entityId,
     required this.envelopeId,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final String envelopeId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
-    final allEvents = ref.watch(recentMovesForBudgetProvider(budgetId));
+    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(entityId));
+    final allEvents = ref.watch(recentMovesForBudgetProvider(entityId));
     final hideAmounts = ref.watch(hideAmountsProvider);
 
     final palette = theme.ob;
@@ -638,7 +638,7 @@ class _RecentMoveRow extends HookWidget {
     final palette = theme.ob;
     final amountText = hideAmounts
         ? hiddenAmountPlaceholder
-        : formatCentsForCode(event.amountCents, currencyCode);
+        : formatMinorForCode(event.amountMinor, currencyCode);
 
     final toName =
         envelopeNames[event.toEnvelopeId] ?? l10n.recentMovesUnnamedEnvelope;
@@ -731,15 +731,15 @@ class _EnvelopeMoveRow extends HookWidget {
         envelopeNames[event.toEnvelopeId] ?? l10n.recentMovesUnnamedEnvelope;
 
     final signedAmount = switch (event.type) {
-      RecentMoveType.assigned => event.amountCents,
+      RecentMoveType.assigned => event.amountMinor,
       RecentMoveType.moved =>
         event.toEnvelopeId == envelopeId
-            ? event.amountCents
-            : -event.amountCents,
+            ? event.amountMinor
+            : -event.amountMinor,
     };
     final amountText = hideAmounts
         ? hiddenAmountPlaceholder
-        : formatCentsForCode(signedAmount, currencyCode);
+        : formatMinorForCode(signedAmount, currencyCode);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(

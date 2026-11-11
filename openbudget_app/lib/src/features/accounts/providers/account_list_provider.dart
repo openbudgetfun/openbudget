@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'account_list_provider.g.dart';
 
 @riverpod
-Future<List<Account>> accountList(Ref ref, String budgetId) async {
+Future<List<Account>> accountList(Ref ref, String entityId) async {
   final client = ref.read(serverpodClientProvider);
-  return client.account.list(UuidValue.fromString(budgetId));
+  return client.account.list(UuidValue.fromString(entityId));
 }

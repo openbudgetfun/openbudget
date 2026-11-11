@@ -45,7 +45,7 @@ AgentConversation testConversation({
 }) => AgentConversation(
   id: testConversationUuid,
   userId: testUserUuid,
-  budgetId: testBudgetUuid,
+  entityId: testBudgetUuid,
   title: title,
   updatedAt: updatedAt ?? DateTime(2026, 1, 2),
 );
@@ -74,7 +74,7 @@ AgentProposal testProposal({
 }) => AgentProposal(
   id: testProposalUuid,
   userId: testUserUuid,
-  budgetId: testBudgetUuid,
+  entityId: testBudgetUuid,
   conversationId: testConversationUuid,
   kind: kind,
   payloadJson: '{}',
@@ -119,7 +119,7 @@ class FakeAssistantApi implements AssistantApi {
 
   /// Replaces the default event list, for tests that hold the stream open.
   final Stream<AgentEvent> Function(
-    String budgetId,
+    String entityId,
     String? conversationId,
     String message,
   )?
@@ -136,7 +136,7 @@ class FakeAssistantApi implements AssistantApi {
   final Exception? proposalActionError;
   final Exception? deleteError;
 
-  final List<({String budgetId, String? conversationId, String message})>
+  final List<({String entityId, String? conversationId, String message})>
   chatRequests = [];
   final List<({String baseUrl, String model, String apiKey})> saveRequests = [];
   final List<String> applyCalls = [];
@@ -146,12 +146,12 @@ class FakeAssistantApi implements AssistantApi {
 
   @override
   Stream<AgentEvent> chat({
-    required String budgetId,
+    required String entityId,
     required String message,
     String? conversationId,
   }) {
     chatRequests.add((
-      budgetId: budgetId,
+      entityId: entityId,
       conversationId: conversationId,
       message: message,
     ));
@@ -159,13 +159,13 @@ class FakeAssistantApi implements AssistantApi {
       return Stream.error(error);
     }
     if (chatStream case final stream?) {
-      return stream(budgetId, conversationId, message);
+      return stream(entityId, conversationId, message);
     }
     return Stream.fromIterable(chatEvents);
   }
 
   @override
-  Future<List<AgentConversation>> listConversations(String budgetId) async {
+  Future<List<AgentConversation>> listConversations(String entityId) async {
     if (conversationsError case final error?) throw error;
     return List.of(conversations);
   }
@@ -228,7 +228,7 @@ class FakeAssistantApi implements AssistantApi {
 
   @override
   Future<List<AgentProposal>> listProposals(
-    String budgetId, {
+    String entityId, {
     bool pendingOnly = true,
   }) async {
     if (proposalsError case final error?) throw error;

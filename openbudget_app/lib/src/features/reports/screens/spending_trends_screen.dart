@@ -12,16 +12,16 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// Income and spending month by month, as a drawn ledger.
 class SpendingTrendsScreen extends HookConsumerWidget {
-  const SpendingTrendsScreen({required this.budgetId, super.key});
+  const SpendingTrendsScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final trendsAsync = ref.watch(spendingTrendsProvider(budgetId));
+    final trendsAsync = ref.watch(spendingTrendsProvider(entityId));
     final converter = ref
-        .watch(displayCurrencyConverterProvider(budgetId))
+        .watch(displayCurrencyConverterProvider(entityId))
         .asData
         ?.value;
 
@@ -72,10 +72,10 @@ class SpendingTrendsScreen extends HookConsumerWidget {
                         label: l10n.spendingTrendsAvgIncome,
                         amount:
                             converter?.formatAmount(
-                              amountCents: data.averageIncome,
+                              amountMinor: data.averageIncome,
                               currencyCode: sourceCurrency,
                             ) ??
-                            formatCentsForCode(
+                            formatMinorForCode(
                               data.averageIncome,
                               sourceCurrency,
                             ),
@@ -87,10 +87,10 @@ class SpendingTrendsScreen extends HookConsumerWidget {
                         label: l10n.spendingTrendsAvgExpenses,
                         amount:
                             converter?.formatAmount(
-                              amountCents: data.averageExpenses,
+                              amountMinor: data.averageExpenses,
                               currencyCode: sourceCurrency,
                             ) ??
-                            formatCentsForCode(
+                            formatMinorForCode(
                               data.averageExpenses,
                               sourceCurrency,
                             ),
@@ -159,10 +159,10 @@ class _MonthlyChart extends HookWidget {
     final series = reportSeriesColors(theme);
     String format(int cents) =>
         converter?.formatAmount(
-          amountCents: cents,
+          amountMinor: cents,
           currencyCode: sourceCurrency,
         ) ??
-        formatCentsForCode(cents, sourceCurrency);
+        formatMinorForCode(cents, sourceCurrency);
     final columns = [
       for (final month in months)
         ReportChartColumn(
@@ -246,10 +246,10 @@ class _MonthSummaryTile extends HookWidget {
     final netTone = month.netIncome >= 0 ? ObTone.funded : ObTone.overspent;
     String format(int cents) =>
         converter?.formatAmount(
-          amountCents: cents,
+          amountMinor: cents,
           currencyCode: sourceCurrency,
         ) ??
-        formatCentsForCode(cents, sourceCurrency);
+        formatMinorForCode(cents, sourceCurrency);
 
     return ObCard(
       padding: const EdgeInsets.all(SpacingTokens.md),

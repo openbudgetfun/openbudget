@@ -8,12 +8,21 @@ part of 'envelope_actions_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Envelope writes: create, edit, hide, reorder and delete. Deleting an
+/// envelope with history asks which envelope to move it to; allocations and
+/// goals are plan data, edited through `budget.*` elsewhere.
 
 @ProviderFor(EnvelopeActions)
 final envelopeActionsProvider = EnvelopeActionsProvider._();
 
+/// Envelope writes: create, edit, hide, reorder and delete. Deleting an
+/// envelope with history asks which envelope to move it to; allocations and
+/// goals are plan data, edited through `budget.*` elsewhere.
 final class EnvelopeActionsProvider
     extends $NotifierProvider<EnvelopeActions, AsyncValue<void>> {
+  /// Envelope writes: create, edit, hide, reorder and delete. Deleting an
+  /// envelope with history asks which envelope to move it to; allocations and
+  /// goals are plan data, edited through `budget.*` elsewhere.
   EnvelopeActionsProvider._()
     : super(
         from: null,
@@ -41,7 +50,11 @@ final class EnvelopeActionsProvider
   }
 }
 
-String _$envelopeActionsHash() => r'c1bd3b4f3c4657ae75a03a152bc0c0a3ac2c020f';
+String _$envelopeActionsHash() => r'7650d020e5a0244fb051af283b7fcbbb34cf9879';
+
+/// Envelope writes: create, edit, hide, reorder and delete. Deleting an
+/// envelope with history asks which envelope to move it to; allocations and
+/// goals are plan data, edited through `budget.*` elsewhere.
 
 abstract class _$EnvelopeActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

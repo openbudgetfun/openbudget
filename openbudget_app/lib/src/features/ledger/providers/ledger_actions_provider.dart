@@ -1,4 +1,5 @@
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_providers.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_repository.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -12,21 +13,21 @@ class LedgerActions extends _$LedgerActions {
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
-  /// Turns double-entry books on for [budgetId]. One-way: there is no
+  /// Turns double-entry books on for [entityId]. One-way: there is no
   /// endpoint that switches a budget back to envelopes.
-  Future<Budget> enableLedger({required String budgetId}) async {
+  Future<Entity> enableLedger({required String entityId}) async {
     state = const AsyncValue.loading();
     try {
-      final budget = await ref
+      final entity = await ref
           .read(ledgerRepositoryProvider)
-          .enableLedger(budgetId);
+          .enableLedger(entityId);
       if (ref.mounted) {
         ref
-          ..invalidate(budgetDetailProvider(budgetId))
-          ..invalidate(ledgerAccountsProvider(budgetId));
+          ..invalidate(entityDetailProvider(entityId))
+          ..invalidate(ledgerAccountsProvider(entityId));
         state = const AsyncValue.data(null);
       }
-      return budget;
+      return entity;
     } on Exception catch (error, stackTrace) {
       if (ref.mounted) {
         state = AsyncValue.error(error, stackTrace);
@@ -38,7 +39,7 @@ class LedgerActions extends _$LedgerActions {
   /// Saves a draft journal: creates one, or replaces the lines of the
   /// existing draft named by [journalId].
   Future<Journal> saveDraftJournal({
-    required String budgetId,
+    required String entityId,
     required DateTime date,
     required List<JournalLineInput> lines,
     required String reference,
@@ -50,17 +51,17 @@ class LedgerActions extends _$LedgerActions {
       final journal = await ref
           .read(ledgerRepositoryProvider)
           .saveDraftJournal(
-            budgetId: budgetId,
+            entityId: entityId,
             date: date,
             lines: lines,
             journalId: journalId,
             reference: reference,
             narration: narration,
-            source: 'manual',
+            source: JournalSource.manual,
           );
       if (ref.mounted) {
         ref
-          ..invalidate(ledgerJournalsProvider(budgetId))
+          ..invalidate(ledgerJournalsProvider(entityId))
           ..invalidate(ledgerTrialBalanceProvider);
         final savedId = journal.id?.toString();
         if (savedId != null) {
@@ -79,14 +80,14 @@ class LedgerActions extends _$LedgerActions {
 
   /// Deletes a draft journal. Posted journals cannot be deleted.
   Future<void> deleteDraftJournal({
-    required String budgetId,
+    required String entityId,
     required String journalId,
   }) async {
     state = const AsyncValue.loading();
     try {
       await ref.read(ledgerRepositoryProvider).deleteDraftJournal(journalId);
       if (ref.mounted) {
-        ref.invalidate(ledgerJournalsProvider(budgetId));
+        ref.invalidate(ledgerJournalsProvider(entityId));
         state = const AsyncValue.data(null);
       }
     } on Exception catch (error, stackTrace) {
@@ -99,7 +100,7 @@ class LedgerActions extends _$LedgerActions {
 
   /// Posts a draft journal, making it immutable.
   Future<Journal> postJournal({
-    required String budgetId,
+    required String entityId,
     required String journalId,
   }) async {
     state = const AsyncValue.loading();
@@ -109,7 +110,7 @@ class LedgerActions extends _$LedgerActions {
           .postJournal(journalId);
       if (ref.mounted) {
         ref
-          ..invalidate(ledgerJournalsProvider(budgetId))
+          ..invalidate(ledgerJournalsProvider(entityId))
           ..invalidate(ledgerTrialBalanceProvider)
           ..invalidate(ledgerJournalLinesProvider(journalId));
         state = const AsyncValue.data(null);
@@ -125,7 +126,7 @@ class LedgerActions extends _$LedgerActions {
 
   /// Reverses a posted journal on [date] with a mirror journal.
   Future<Journal> reverseJournal({
-    required String budgetId,
+    required String entityId,
     required String journalId,
     required DateTime date,
   }) async {
@@ -136,7 +137,7 @@ class LedgerActions extends _$LedgerActions {
           .reverseJournal(journalId: journalId, date: date);
       if (ref.mounted) {
         ref
-          ..invalidate(ledgerJournalsProvider(budgetId))
+          ..invalidate(ledgerJournalsProvider(entityId))
           ..invalidate(ledgerTrialBalanceProvider)
           ..invalidate(ledgerJournalLinesProvider(journalId));
         state = const AsyncValue.data(null);
@@ -152,19 +153,19 @@ class LedgerActions extends _$LedgerActions {
 
   /// Sets or moves the budget's period lock date.
   Future<LedgerPeriodLock> setLockDate({
-    required String budgetId,
+    required String entityId,
     required DateTime lockDate,
   }) async {
     state = const AsyncValue.loading();
     try {
       final lock = await ref
           .read(ledgerRepositoryProvider)
-          .setLockDate(budgetId, lockDate);
+          .setLockDate(entityId, lockDate);
       if (ref.mounted) {
         ref
-          ..invalidate(ledgerJournalsProvider(budgetId))
+          ..invalidate(ledgerJournalsProvider(entityId))
           ..invalidate(ledgerTrialBalanceProvider)
-          ..invalidate(ledgerLockDateProvider(budgetId));
+          ..invalidate(ledgerLockDateProvider(entityId));
         state = const AsyncValue.data(null);
       }
       return lock;

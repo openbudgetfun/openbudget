@@ -8,7 +8,7 @@ import 'package:openbudget_client/openbudget_client.dart';
 
 void main() {
   const screenBudgetId = '00000000-0000-0000-0000-000000000001';
-  final budgetId = UuidValue.fromString('00000000-0000-0000-0000-000000000001');
+  final entityId = UuidValue.fromString('00000000-0000-0000-0000-000000000001');
 
   Account makeAccount({
     required String id,
@@ -18,9 +18,9 @@ void main() {
     id: UuidValue.fromString(id),
     name: name,
     accountType: 'checking',
-    balanceCents: 0,
+    balanceMinor: 0,
     currencyCode: currencyCode,
-    budgetId: budgetId,
+    entityId: entityId,
     onBudget: true,
     sortOrder: 0,
     isClosed: false,
@@ -46,12 +46,12 @@ void main() {
 
   Widget buildSubject({required List<Account> accounts}) => ProviderScope(
     overrides: [
-      accountListProvider.overrideWith((ref, budgetId) async => accounts),
+      accountListProvider.overrideWith((ref, entityId) async => accounts),
     ],
     child: const MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: CreateTransferScreen(budgetId: screenBudgetId),
+      home: CreateTransferScreen(entityId: screenBudgetId),
     ),
   );
 
@@ -101,18 +101,18 @@ void main() {
     expect(currency, 'EUR');
   });
 
-  test('parseTransferAmountCents parses exact minor units by currency', () {
-    expect(parseTransferAmountCents('12.34', 'USD'), 1234);
-    expect(parseTransferAmountCents('12.34', 'EUR'), 1234);
-    expect(parseTransferAmountCents('0.00000042', 'BTC'), 42);
-    expect(parseTransferAmountCents('1200', 'JPY'), 1200);
+  test('parseTransferAmountMinor parses exact minor units by currency', () {
+    expect(parseTransferAmountMinor('12.34', 'USD'), 1234);
+    expect(parseTransferAmountMinor('12.34', 'EUR'), 1234);
+    expect(parseTransferAmountMinor('0.00000042', 'BTC'), 42);
+    expect(parseTransferAmountMinor('1200', 'JPY'), 1200);
   });
 
-  test('parseTransferAmountCents refuses over-precise and negative input', () {
-    expect(parseTransferAmountCents('12.345', 'USD'), isNull);
-    expect(parseTransferAmountCents('12.34', 'JPY'), isNull);
-    expect(parseTransferAmountCents('-12.34', 'USD'), isNull);
-    expect(parseTransferAmountCents('', 'USD'), isNull);
+  test('parseTransferAmountMinor refuses over-precise and negative input', () {
+    expect(parseTransferAmountMinor('12.345', 'USD'), isNull);
+    expect(parseTransferAmountMinor('12.34', 'JPY'), isNull);
+    expect(parseTransferAmountMinor('-12.34', 'USD'), isNull);
+    expect(parseTransferAmountMinor('', 'USD'), isNull);
   });
 
   testWidgets('amount field refuses malformed and negative input', (

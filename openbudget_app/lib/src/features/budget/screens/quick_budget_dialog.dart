@@ -10,7 +10,7 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 class QuickBudgetDialog extends HookConsumerWidget {
   const QuickBudgetDialog({
-    required this.budgetId,
+    required this.entityId,
     required this.envelopeId,
     required this.envelopeName,
     required this.currencyCode,
@@ -19,7 +19,7 @@ class QuickBudgetDialog extends HookConsumerWidget {
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final String envelopeId;
   final String envelopeName;
   final String currencyCode;
@@ -31,7 +31,7 @@ class QuickBudgetDialog extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final suggestion = ref.watch(
-      quickBudgetSuggestionProvider(budgetId, envelopeId, year, month),
+      quickBudgetSuggestionProvider(entityId, envelopeId, year, month),
     );
 
     return AlertDialog(
@@ -56,22 +56,22 @@ class QuickBudgetDialog extends HookConsumerWidget {
             const SizedBox(height: SpacingTokens.md),
             _QuickBudgetOption(
               label: l10n.quickBudgetLastMonth,
-              amount: formatCentsForCode(data.budgetedLastMonth, currencyCode),
+              amount: formatMinorForCode(data.budgetedLastMonth, currencyCode),
               onTap: () => _apply(context, ref, data.budgetedLastMonth),
             ),
             _QuickBudgetOption(
               label: l10n.quickBudgetSpentLastMonth,
-              amount: formatCentsForCode(data.spentLastMonth, currencyCode),
+              amount: formatMinorForCode(data.spentLastMonth, currencyCode),
               onTap: () => _apply(context, ref, data.spentLastMonth),
             ),
             _QuickBudgetOption(
               label: l10n.quickBudgetAverageBudgeted,
-              amount: formatCentsForCode(data.averageBudgeted, currencyCode),
+              amount: formatMinorForCode(data.averageBudgeted, currencyCode),
               onTap: () => _apply(context, ref, data.averageBudgeted),
             ),
             _QuickBudgetOption(
               label: l10n.quickBudgetAverageSpent,
-              amount: formatCentsForCode(data.averageSpent, currencyCode),
+              amount: formatMinorForCode(data.averageSpent, currencyCode),
               onTap: () => _apply(context, ref, data.averageSpent),
             ),
           ],
@@ -94,10 +94,10 @@ class QuickBudgetDialog extends HookConsumerWidget {
           .read(monthlyAllocationActionsProvider.notifier)
           .upsertAllocation(
             envelopeId: envelopeId,
-            budgetId: budgetId,
+            entityId: entityId,
             year: year,
             month: month,
-            allocatedCents: cents,
+            allocatedMinor: cents,
           );
       if (!context.mounted) return;
       showAppToast(

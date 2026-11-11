@@ -12,7 +12,7 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class _RecordingIncomeActions extends TransactionActions {
-  int? incomeAmountCents;
+  int? incomeAmountMinor;
   String? incomeCurrencyCode;
 
   @override
@@ -21,19 +21,19 @@ class _RecordingIncomeActions extends TransactionActions {
   @override
   Future<Transaction> addIncome({
     required String description,
-    required int amountCents,
+    required int amountMinor,
     required String currencyCode,
-    required String budgetId,
+    required String entityId,
     required DateTime date,
     String? memo,
   }) async {
-    incomeAmountCents = amountCents;
+    incomeAmountMinor = amountMinor;
     incomeCurrencyCode = currencyCode;
     return Transaction(
       description: description,
-      amountCents: amountCents,
+      amountMinor: amountMinor,
       currencyCode: currencyCode,
-      budgetId: UuidValue.fromString(
+      entityId: UuidValue.fromString(
         '00000000-0000-0000-0000-000000000001',
       ),
       transactionDate: date,
@@ -42,7 +42,7 @@ class _RecordingIncomeActions extends TransactionActions {
 }
 
 void main() {
-  const budgetId = 'test-budget-1';
+  const entityId = 'test-budget-1';
 
   Budget makeBudget({String currencyCode = 'USD'}) => Budget(
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
@@ -56,12 +56,12 @@ void main() {
     Payee(
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000010'),
       name: 'Employer Inc',
-      budgetId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
+      entityId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
     ),
     Payee(
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000011'),
       name: 'Freelance Client',
-      budgetId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
+      entityId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
     ),
   ];
 
@@ -82,7 +82,7 @@ void main() {
       theme: OpenBudgetTheme.light,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const AddIncomeScreen(budgetId: budgetId),
+      home: const AddIncomeScreen(entityId: entityId),
     ),
   );
 
@@ -92,7 +92,7 @@ void main() {
     TransactionActions? actions,
   }) {
     final router = GoRouter(
-      initialLocation: '/budgets/$budgetId/income/add',
+      initialLocation: '/budgets/$entityId/income/add',
       routes: [
         GoRoute(
           name: planRoute,
@@ -104,7 +104,7 @@ void main() {
           name: addIncomeRoute,
           path: addIncomePath,
           builder: (context, state) =>
-              AddIncomeScreen(budgetId: state.pathParameters['id']!),
+              AddIncomeScreen(entityId: state.pathParameters['entityId']!),
         ),
         GoRoute(
           name: addExpenseRoute,
@@ -143,7 +143,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AddIncomeScreen(budgetId: budgetId),
+            home: const AddIncomeScreen(entityId: entityId),
           ),
         ),
       );
@@ -349,7 +349,7 @@ void main() {
       await tester.tap(find.text('Save Transaction'));
       await tester.pumpAndSettle();
 
-      expect(actions.incomeAmountCents, 1234);
+      expect(actions.incomeAmountMinor, 1234);
       expect(actions.incomeCurrencyCode, 'USD');
     });
 
@@ -380,7 +380,7 @@ void main() {
       await tester.tap(find.text('Save Transaction'));
       await tester.pumpAndSettle();
 
-      expect(actions.incomeAmountCents, isNull);
+      expect(actions.incomeAmountMinor, isNull);
     });
 
     testWidgets('refuses a negative income amount', (tester) async {
@@ -408,7 +408,7 @@ void main() {
       await tester.tap(find.text('Save Transaction'));
       await tester.pumpAndSettle();
 
-      expect(actions.incomeAmountCents, isNull);
+      expect(actions.incomeAmountMinor, isNull);
     });
 
     testWidgets('shows amount hint in budget currency', (tester) async {

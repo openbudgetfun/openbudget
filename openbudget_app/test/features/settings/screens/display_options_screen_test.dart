@@ -29,14 +29,14 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith(
-              (ref, budgetId) async => makeBudget(),
+              (ref, entityId) async => makeBudget(),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const DisplayOptionsScreen(budgetId: 'test-budget-id'),
+            home: const DisplayOptionsScreen(entityId: 'test-budget-id'),
           ),
         ),
       );
@@ -64,7 +64,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           budgetDetailProvider.overrideWith(
-            (ref, budgetId) async => makeBudget(),
+            (ref, entityId) async => makeBudget(),
           ),
         ],
       );
@@ -77,7 +77,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const DisplayOptionsScreen(budgetId: 'test-budget-id'),
+            home: const DisplayOptionsScreen(entityId: 'test-budget-id'),
           ),
         ),
       );
@@ -130,16 +130,16 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith(
-              (ref, budgetId) async => makeBudget(),
+              (ref, entityId) async => makeBudget(),
             ),
             updateDisplayCurrencyProvider.overrideWith(
               (ref) =>
                   ({
-                    required budgetId,
+                    required entityId,
                     required clearDisplayCurrencyCode,
                     displayCurrencyCode,
                   }) async {
-                    capturedBudgetId = budgetId;
+                    capturedBudgetId = entityId;
                     capturedDisplayCurrencyCode = displayCurrencyCode;
                     capturedClearFlag = clearDisplayCurrencyCode;
                   },
@@ -149,7 +149,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const DisplayOptionsScreen(budgetId: 'test-budget-id'),
+            home: const DisplayOptionsScreen(entityId: 'test-budget-id'),
           ),
         ),
       );
@@ -176,12 +176,12 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith(
-              (ref, budgetId) async => makeBudget(displayCurrencyCode: 'GBP'),
+              (ref, entityId) async => makeBudget(displayCurrencyCode: 'GBP'),
             ),
             updateDisplayCurrencyProvider.overrideWith(
               (ref) =>
                   ({
-                    required budgetId,
+                    required entityId,
                     required clearDisplayCurrencyCode,
                     displayCurrencyCode,
                   }) async {
@@ -194,7 +194,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const DisplayOptionsScreen(budgetId: 'test-budget-id'),
+            home: const DisplayOptionsScreen(entityId: 'test-budget-id'),
           ),
         ),
       );

@@ -6,8 +6,8 @@ part 'rule_list_provider.g.dart';
 
 /// Fetches all transaction rules for a budget.
 @riverpod
-Future<List<TransactionRule>> ruleList(Ref ref, String budgetId) async {
+Future<List<TransactionRule>> ruleList(Ref ref, String entityId) async {
   final client = ref.read(serverpodClientProvider);
-  final budgetUuid = UuidValue.fromString(budgetId);
+  final budgetUuid = UuidValue.fromString(entityId);
   return client.transactionRule.list(budgetUuid);
 }

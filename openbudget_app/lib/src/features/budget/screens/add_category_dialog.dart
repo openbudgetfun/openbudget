@@ -8,12 +8,12 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AddCategoryDialog extends HookConsumerWidget {
   const AddCategoryDialog({
-    required this.budgetId,
+    required this.entityId,
     required this.nextSortOrder,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final int nextSortOrder;
 
   @override
@@ -81,7 +81,7 @@ class AddCategoryDialog extends HookConsumerWidget {
           .read(categoryActionsProvider.notifier)
           .createCategory(
             name: name,
-            budgetId: budgetId,
+            entityId: entityId,
             sortOrder: nextSortOrder,
           );
       if (!context.mounted) return;

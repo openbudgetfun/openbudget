@@ -5,23 +5,23 @@ import 'package:openbudget_app/src/features/reports/providers/net_worth_provider
 import 'package:openbudget_client/openbudget_client.dart';
 
 void main() {
-  const budgetId = 'test-budget-1';
+  const entityId = 'test-budget-1';
   final budgetUuid = UuidValue.fromString(
     '00000000-0000-0000-0000-000000000001',
   );
 
   Account makeAccount({
     required String name,
-    required int balanceCents,
+    required int balanceMinor,
     required String currencyCode,
     String accountType = 'checking',
     bool isClosed = false,
   }) => Account(
     name: name,
     accountType: accountType,
-    balanceCents: balanceCents,
+    balanceMinor: balanceMinor,
     currencyCode: currencyCode,
-    budgetId: budgetUuid,
+    entityId: budgetUuid,
     onBudget: true,
     sortOrder: 0,
     isClosed: isClosed,
@@ -34,17 +34,17 @@ void main() {
           (ref, id) async => [
             makeAccount(
               name: 'USD Checking',
-              balanceCents: 150000,
+              balanceMinor: 150000,
               currencyCode: 'USD',
             ),
             makeAccount(
               name: 'EUR Savings',
-              balanceCents: 120000,
+              balanceMinor: 120000,
               currencyCode: 'EUR',
             ),
             makeAccount(
               name: 'EUR Card',
-              balanceCents: -30000,
+              balanceMinor: -30000,
               currencyCode: 'EUR',
               accountType: 'creditCard',
             ),
@@ -54,7 +54,7 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    final data = await container.read(netWorthProvider(budgetId).future);
+    final data = await container.read(netWorthProvider(entityId).future);
 
     expect(data.hasMultipleCurrencies, isTrue);
     expect(data.currencyBreakdown.length, 2);
@@ -83,12 +83,12 @@ void main() {
           (ref, id) async => [
             makeAccount(
               name: 'Main Checking',
-              balanceCents: 150000,
+              balanceMinor: 150000,
               currencyCode: 'USD',
             ),
             makeAccount(
               name: 'Credit Card',
-              balanceCents: -25000,
+              balanceMinor: -25000,
               currencyCode: 'USD',
               accountType: 'creditCard',
             ),
@@ -98,7 +98,7 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    final data = await container.read(netWorthProvider(budgetId).future);
+    final data = await container.read(netWorthProvider(entityId).future);
 
     expect(data.hasMultipleCurrencies, isFalse);
     expect(data.currencyBreakdown.length, 1);

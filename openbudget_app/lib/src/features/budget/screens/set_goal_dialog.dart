@@ -18,7 +18,7 @@ enum _RepeatUnit { month, year }
 class SetGoalDialog extends HookConsumerWidget {
   const SetGoalDialog({
     required this.envelopeId,
-    required this.budgetId,
+    required this.entityId,
     required this.currencyCode,
     this.existingGoal,
     this.envelopeName = '',
@@ -26,7 +26,7 @@ class SetGoalDialog extends HookConsumerWidget {
   });
 
   final String envelopeId;
-  final String budgetId;
+  final String entityId;
   final String currencyCode;
   final EnvelopeGoal? existingGoal;
   final String envelopeName;
@@ -39,10 +39,10 @@ class SetGoalDialog extends HookConsumerWidget {
     final dueDay = useState<int?>(null);
     final amountInput = useState(
       existingGoal != null
-          ? budgetAmountInputFromCents(
+          ? budgetAmountInputFromMinor(
               cents:
-                  existingGoal!.monthlyFundingCents ??
-                  existingGoal!.targetAmountCents,
+                  existingGoal!.monthlyFundingMinor ??
+                  existingGoal!.targetAmountMinor,
               currencyCode: currencyCode,
             )
           : '',
@@ -57,16 +57,16 @@ class SetGoalDialog extends HookConsumerWidget {
     final repeatEvery = useState(1);
     final repeatUnit = useState(_RepeatUnit.month);
     final isSubmitting = useState(false);
-    final amountCents =
-        parseBudgetAmountInputToCents(
+    final amountMinor =
+        parseBudgetAmountInputToMinor(
           input: amountInput.value,
           currencyCode: currencyCode,
         ) ??
         0;
-    final canSave = amountCents > 0;
+    final canSave = amountMinor > 0;
     final monthlyContribution = _monthlyContributionFor(
       cadence.value,
-      amountCents,
+      amountMinor,
       repeatEvery.value,
       repeatUnit.value,
     );
@@ -251,7 +251,7 @@ class SetGoalDialog extends HookConsumerWidget {
                         ),
                         subtitle: Text(
                           l10n.setGoalSetAsideAnother(
-                            _formatCents(monthlyContribution, currencyCode),
+                            _formatMinor(monthlyContribution, currencyCode),
                           ),
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w500),
@@ -276,7 +276,7 @@ class SetGoalDialog extends HookConsumerWidget {
                         ),
                         subtitle: Text(
                           l10n.setGoalSetAsideAnother(
-                            _formatCents(amountCents, currencyCode),
+                            _formatMinor(amountMinor, currencyCode),
                           ),
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w500),
@@ -440,7 +440,7 @@ class SetGoalDialog extends HookConsumerWidget {
                           context,
                           ref,
                           cadence: cadence.value,
-                          amountCents: amountCents,
+                          amountMinor: amountMinor,
                           dueDate: dueDate.value,
                           repeats: repeats.value,
                           repeatEvery: repeatEvery.value,
@@ -468,7 +468,7 @@ class SetGoalDialog extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref, {
     required _GoalCadence cadence,
-    required int amountCents,
+    required int amountMinor,
     required DateTime dueDate,
     required bool repeats,
     required int repeatEvery,
@@ -476,13 +476,13 @@ class SetGoalDialog extends HookConsumerWidget {
     required ValueNotifier<bool> isSubmitting,
   }) async {
     final l10n = AppLocalizations.of(context);
-    if (amountCents <= 0) return;
+    if (amountMinor <= 0) return;
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
 
     final payload = _buildGoalPayload(
       cadence: cadence,
-      amountCents: amountCents,
+      amountMinor: amountMinor,
       dueDate: dueDate,
       repeats: repeats,
       repeatEvery: repeatEvery,
@@ -495,10 +495,10 @@ class SetGoalDialog extends HookConsumerWidget {
           .upsertGoal(
             envelopeId: envelopeId,
             goalType: payload.goalType,
-            targetAmountCents: payload.targetAmountCents,
-            budgetId: budgetId,
+            targetAmountMinor: payload.targetAmountMinor,
+            entityId: entityId,
             targetDate: payload.targetDate,
-            monthlyFundingCents: payload.monthlyFundingCents,
+            monthlyFundingMinor: payload.monthlyFundingMinor,
           );
       if (!context.mounted) return;
       showAppToast(
@@ -532,7 +532,7 @@ class SetGoalDialog extends HookConsumerWidget {
           .deleteGoal(
             goalId: existingGoal!.id?.toString() ?? '',
             envelopeId: envelopeId,
-            budgetId: budgetId,
+            entityId: entityId,
           );
       if (!context.mounted) return;
       showAppToast(
@@ -552,7 +552,7 @@ class SetGoalDialog extends HookConsumerWidget {
     }
   }
 
-  String _formatCents(int cents, String currencyCode) =>
+  String _formatMinor(int cents, String currencyCode) =>
       formatMinorUnits(cents, currencyDecimalsForCode(currencyCode));
 
   _GoalCadence _initialCadence(EnvelopeGoal? goal) {
@@ -565,22 +565,22 @@ class SetGoalDialog extends HookConsumerWidget {
 
   int _monthlyContributionFor(
     _GoalCadence cadence,
-    int amountCents,
+    int amountMinor,
     int repeatEvery,
     _RepeatUnit repeatUnit,
   ) => switch (cadence) {
-    _GoalCadence.weekly => ((amountCents * 52) / 12).round(),
-    _GoalCadence.monthly => amountCents,
-    _GoalCadence.yearly => (amountCents / 12).round(),
+    _GoalCadence.weekly => ((amountMinor * 52) / 12).round(),
+    _GoalCadence.monthly => amountMinor,
+    _GoalCadence.yearly => (amountMinor / 12).round(),
     _GoalCadence.custom => switch (repeatUnit) {
-      _RepeatUnit.month => (amountCents / repeatEvery).round(),
-      _RepeatUnit.year => (amountCents / (repeatEvery * 12)).round(),
+      _RepeatUnit.month => (amountMinor / repeatEvery).round(),
+      _RepeatUnit.year => (amountMinor / (repeatEvery * 12)).round(),
     },
   };
 
   _GoalPayload _buildGoalPayload({
     required _GoalCadence cadence,
-    required int amountCents,
+    required int amountMinor,
     required DateTime dueDate,
     required bool repeats,
     required int repeatEvery,
@@ -589,21 +589,21 @@ class SetGoalDialog extends HookConsumerWidget {
     if (cadence == _GoalCadence.custom && !repeats) {
       return _GoalPayload(
         goalType: 'target_by_date',
-        targetAmountCents: amountCents,
+        targetAmountMinor: amountMinor,
         targetDate: dueDate,
       );
     }
 
     final monthlyFunding = _monthlyContributionFor(
       cadence,
-      amountCents,
+      amountMinor,
       repeatEvery,
       repeatUnit,
     );
     return _GoalPayload(
       goalType: 'monthly_funding',
-      targetAmountCents: amountCents,
-      monthlyFundingCents: monthlyFunding,
+      targetAmountMinor: amountMinor,
+      monthlyFundingMinor: monthlyFunding,
       targetDate: cadence == _GoalCadence.custom ? dueDate : null,
     );
   }
@@ -612,15 +612,15 @@ class SetGoalDialog extends HookConsumerWidget {
 class _GoalPayload {
   const _GoalPayload({
     required this.goalType,
-    required this.targetAmountCents,
+    required this.targetAmountMinor,
     this.targetDate,
-    this.monthlyFundingCents,
+    this.monthlyFundingMinor,
   });
 
   final String goalType;
-  final int targetAmountCents;
+  final int targetAmountMinor;
   final DateTime? targetDate;
-  final int? monthlyFundingCents;
+  final int? monthlyFundingMinor;
 }
 
 class _GoalCard extends HookWidget {

@@ -8,7 +8,7 @@ import 'package:openbudget_app/src/features/budget/screens/budget_shell_screen.d
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  const budgetId = 'test-budget-1';
+  const entityId = 'test-budget-1';
 
   Widget buildSubject() {
     // Use non-parameterized paths to satisfy GoRouter constraints in tests.
@@ -18,7 +18,7 @@ void main() {
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) => BudgetShellScreen(
             navigationShell: navigationShell,
-            budgetId: budgetId,
+            entityId: entityId,
           ),
           branches: [
             StatefulShellBranch(
@@ -63,7 +63,7 @@ void main() {
     );
 
     return ProviderScope(
-      overrides: [budgetRealtimeProvider.overrideWith((ref, budgetId) {})],
+      overrides: [budgetRealtimeProvider.overrideWith((ref, entityId) {})],
       child: MaterialApp.router(
         theme: OpenBudgetTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,

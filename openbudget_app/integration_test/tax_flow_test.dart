@@ -16,8 +16,8 @@ import 'package:patrol/patrol.dart';
 import 'common/patrol_helpers.dart';
 import 'common/test_data.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000701';
-final _budgetUuid = UuidValue.fromString(_budgetId);
+const _entityId = '00000000-0000-0000-0000-000000000701';
+final _budgetUuid = UuidValue.fromString(_entityId);
 final _ownerUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000702',
 );
@@ -76,7 +76,7 @@ class _FakeTaxRepository implements TaxRepository {
   TaxProfileRecord? profile;
   final List<
     ({
-      String budgetId,
+      String entityId,
       String jurisdiction,
       String entityKind,
       String profileJson,
@@ -86,18 +86,18 @@ class _FakeTaxRepository implements TaxRepository {
   savedProfiles = [];
 
   @override
-  Future<TaxProfileRecord?> getProfile(String budgetId) async => profile;
+  Future<TaxProfileRecord?> getProfile(String entityId) async => profile;
 
   @override
   Future<TaxProfileRecord> saveProfile({
-    required String budgetId,
+    required String entityId,
     required String jurisdiction,
     required String entityKind,
     required String profileJson,
     String? linkedBudgetId,
   }) async {
     savedProfiles.add((
-      budgetId: budgetId,
+      entityId: entityId,
       jurisdiction: jurisdiction,
       entityKind: entityKind,
       profileJson: profileJson,
@@ -105,7 +105,7 @@ class _FakeTaxRepository implements TaxRepository {
     ));
     final record = TaxProfileRecord(
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000703'),
-      budgetId: _budgetUuid,
+      entityId: _budgetUuid,
       jurisdiction: jurisdiction,
       entityKind: entityKind,
       profileJson: profileJson,
@@ -117,7 +117,7 @@ class _FakeTaxRepository implements TaxRepository {
   }
 
   @override
-  Future<List<TaxCategoryView>> listCategories(String budgetId) async => [];
+  Future<List<TaxCategoryView>> listCategories(String entityId) async => [];
 
   @override
   Future<Envelope> setEnvelopeTaxCategory({
@@ -130,37 +130,37 @@ class _FakeTaxRepository implements TaxRepository {
     required String transactionId,
     String? code,
     int? businessUsePercent,
-    int? salesTaxCents,
+    int? salesTaxMinor,
   }) => throw UnimplementedError();
 
   @override
-  Future<TaxReportView> getReport(String budgetId, int startYear) async =>
+  Future<TaxReportView> getReport(String entityId, int startYear) async =>
       _makeReport(startYear);
 }
 
 Widget _buildApp(_FakeTaxRepository repository) {
   final router = GoRouter(
-    initialLocation: morePath.replaceFirst(':id', _budgetId),
+    initialLocation: morePath.replaceFirst(':id', _entityId),
     routes: [
       GoRoute(
         name: moreRoute,
         path: morePath,
         builder: (context, state) => MoreScreen(
-          budgetId: state.pathParameters['id']!,
+          entityId: state.pathParameters['entityId']!,
         ),
       ),
       GoRoute(
         name: taxOverviewRoute,
         path: taxOverviewPath,
         builder: (context, state) => TaxOverviewScreen(
-          budgetId: state.pathParameters['id']!,
+          entityId: state.pathParameters['entityId']!,
         ),
         routes: [
           GoRoute(
             name: taxProfileRoute,
             path: 'profile',
             builder: (context, state) => TaxProfileScreen(
-              budgetId: state.pathParameters['id']!,
+              entityId: state.pathParameters['entityId']!,
             ),
           ),
         ],

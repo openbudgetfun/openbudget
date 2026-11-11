@@ -9,11 +9,11 @@ import 'package:openbudget_app/src/features/transactions/screens/edit_transactio
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000001';
-final _budgetUuid = UuidValue.fromString(_budgetId);
+const _entityId = '00000000-0000-0000-0000-000000000001';
+final _budgetUuid = UuidValue.fromString(_entityId);
 
 class _RecordingTransactionActions extends TransactionActions {
-  int? updatedAmountCents;
+  int? updatedAmountMinor;
 
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
@@ -21,31 +21,31 @@ class _RecordingTransactionActions extends TransactionActions {
   @override
   Future<Transaction> updateTransaction({
     required String transactionId,
-    required String budgetId,
+    required String entityId,
     String? description,
-    int? amountCents,
+    int? amountMinor,
     String? envelopeId,
     String? payeeId,
     DateTime? transactionDate,
     String? memo,
   }) async {
-    updatedAmountCents = amountCents;
+    updatedAmountMinor = amountMinor;
     return Transaction(
       description: description ?? '',
-      amountCents: amountCents ?? 0,
+      amountMinor: amountMinor ?? 0,
       currencyCode: 'USD',
-      budgetId: _budgetUuid,
+      entityId: _budgetUuid,
       transactionDate: transactionDate ?? DateTime(2026),
     );
   }
 }
 
-Transaction _makeTransaction({int amountCents = -1234}) => Transaction(
+Transaction _makeTransaction({int amountMinor = -1234}) => Transaction(
   id: UuidValue.fromString('00000000-0000-0000-0000-000000000010'),
   description: 'Coffee',
-  amountCents: amountCents,
+  amountMinor: amountMinor,
   currencyCode: 'USD',
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   transactionDate: DateTime(2026, 2),
 );
 
@@ -55,9 +55,9 @@ Widget _buildSubject({
 }) => ProviderScope(
   overrides: [
     transactionActionsProvider.overrideWith(() => actions),
-    payeeListProvider.overrideWith((ref, budgetId) async => const <Payee>[]),
+    payeeListProvider.overrideWith((ref, entityId) async => const <Payee>[]),
     budgetSummaryProvider.overrideWith(
-      (ref, budgetId) async => BudgetSummary(
+      (ref, entityId) async => BudgetSummary(
         budget: Budget(
           id: _budgetUuid,
           name: 'Budget',
@@ -68,9 +68,9 @@ Widget _buildSubject({
           createdAt: DateTime(2026),
         ),
         categories: const [],
-        totalIncomeCents: 0,
-        totalBudgetedCents: 0,
-        readyToAssignCents: 0,
+        totalIncomeMinor: 0,
+        totalBudgetedMinor: 0,
+        readyToAssignMinor: 0,
         year: 2026,
         month: 2,
       ),
@@ -83,7 +83,7 @@ Widget _buildSubject({
     home: Scaffold(
       body: EditTransactionDialog(
         transaction: transaction,
-        budgetId: _budgetId,
+        entityId: _entityId,
         currencyCode: 'USD',
       ),
     ),
@@ -121,7 +121,7 @@ void main() {
     await tester.pumpAndSettle();
     await _save(tester);
 
-    expect(actions.updatedAmountCents, -1234);
+    expect(actions.updatedAmountMinor, -1234);
   });
 
   testWidgets('refuses an over-precise amount instead of rounding it', (
@@ -143,7 +143,7 @@ void main() {
 
     await _save(tester);
 
-    expect(actions.updatedAmountCents, isNull);
+    expect(actions.updatedAmountMinor, isNull);
   });
 
   testWidgets('refuses a negative amount', (tester) async {
@@ -163,6 +163,6 @@ void main() {
 
     await _save(tester);
 
-    expect(actions.updatedAmountCents, isNull);
+    expect(actions.updatedAmountMinor, isNull);
   });
 }

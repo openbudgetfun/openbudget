@@ -263,7 +263,7 @@ class _BudgetAmountSheet extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final input = useState(initialInput);
-    final cents = parseBudgetAmountInputToCents(
+    final cents = parseBudgetAmountInputToMinor(
       input: input.value,
       currencyCode: currencyCode,
     );
@@ -306,7 +306,7 @@ class _BudgetAmountSheet extends HookWidget {
               ),
               const SizedBox(height: SpacingTokens.xs),
               ObAmount(
-                formatCentsForCode(cents ?? 0, currencyCode),
+                formatMinorForCode(cents ?? 0, currencyCode),
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: SpacingTokens.xs),
@@ -325,7 +325,7 @@ class _BudgetAmountSheet extends HookWidget {
   }
 }
 
-int? parseBudgetAmountInputToCents({
+int? parseBudgetAmountInputToMinor({
   required String input,
   required String currencyCode,
 }) {
@@ -343,7 +343,7 @@ String formatBudgetAmountInputForField({
   required String currencyCode,
 }) {
   if (input.isEmpty) return '';
-  final cents = parseBudgetAmountInputToCents(
+  final cents = parseBudgetAmountInputToMinor(
     input: input,
     currencyCode: currencyCode,
   );
@@ -351,7 +351,7 @@ String formatBudgetAmountInputForField({
   return formatMinorUnits(cents, currencyDecimalsForCode(currencyCode));
 }
 
-String budgetAmountInputFromCents({
+String budgetAmountInputFromMinor({
   required int cents,
   required String currencyCode,
 }) {

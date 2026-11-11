@@ -70,7 +70,7 @@ final class TaxProfileProvider
   }
 }
 
-String _$taxProfileHash() => r'51ffc104dc6fe18faed25afa869c1c43563a7f83';
+String _$taxProfileHash() => r'9359b8ead6e1656c0d08bba93758be94d7c80b80';
 
 /// The budget's tax profile, or null when none has been set.
 
@@ -87,8 +87,8 @@ final class TaxProfileFamily extends $Family
 
   /// The budget's tax profile, or null when none has been set.
 
-  TaxProfileProvider call(String budgetId) =>
-      TaxProfileProvider._(argument: budgetId, from: this);
+  TaxProfileProvider call(String entityId) =>
+      TaxProfileProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'taxProfileProvider';
@@ -154,7 +154,7 @@ final class TaxReportProvider
   }
 }
 
-String _$taxReportHash() => r'b3d2410406130f5bbf1057b56f9d5a461a46cc8a';
+String _$taxReportHash() => r'c3856b10d662aaf504489247c44cb25a8607d69e';
 
 /// The tax report for the tax year starting in [startYear].
 
@@ -171,8 +171,8 @@ final class TaxReportFamily extends $Family
 
   /// The tax report for the tax year starting in [startYear].
 
-  TaxReportProvider call(String budgetId, int startYear) =>
-      TaxReportProvider._(argument: (budgetId, startYear), from: this);
+  TaxReportProvider call(String entityId, int startYear) =>
+      TaxReportProvider._(argument: (entityId, startYear), from: this);
 
   @override
   String toString() => r'taxReportProvider';
@@ -240,7 +240,7 @@ final class TaxCategoriesProvider
   }
 }
 
-String _$taxCategoriesHash() => r'4918fd691ddead20b5a723292104fc2a10274413';
+String _$taxCategoriesHash() => r'323e560b73f97067940be6e291b8abc42095fd16';
 
 /// The categories available to the budget's entity kind.
 
@@ -257,8 +257,8 @@ final class TaxCategoriesFamily extends $Family
 
   /// The categories available to the budget's entity kind.
 
-  TaxCategoriesProvider call(String budgetId) =>
-      TaxCategoriesProvider._(argument: budgetId, from: this);
+  TaxCategoriesProvider call(String entityId) =>
+      TaxCategoriesProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'taxCategoriesProvider';

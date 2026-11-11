@@ -7,7 +7,7 @@ import 'package:openbudget_app/src/features/budget/providers/budget_realtime_pro
 import 'package:openbudget_app/src/features/budget/screens/budget_shell_screen.dart';
 import 'package:patrol/patrol.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 
 Widget _buildApp() {
   final router = GoRouter(
@@ -16,7 +16,7 @@ Widget _buildApp() {
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => BudgetShellScreen(
           navigationShell: navigationShell,
-          budgetId: _budgetId,
+          entityId: _entityId,
         ),
         branches: [
           StatefulShellBranch(
@@ -61,7 +61,7 @@ Widget _buildApp() {
   );
 
   return ProviderScope(
-    overrides: [budgetRealtimeProvider.overrideWith((ref, budgetId) {})],
+    overrides: [budgetRealtimeProvider.overrideWith((ref, entityId) {})],
     child: MaterialApp.router(
       theme: ThemeData.light(useMaterial3: true),
       localizationsDelegates: AppLocalizations.localizationsDelegates,

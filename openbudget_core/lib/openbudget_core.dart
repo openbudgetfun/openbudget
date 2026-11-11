@@ -30,3 +30,4 @@ export 'src/tax/tax_rule_pack.dart';
 export 'src/tax/tax_rules.dart';
 export 'src/tax/us/us_tax_rules.dart';
 export 'src/time/civil_date.dart';
+export 'src/time/default_time_zone.dart';

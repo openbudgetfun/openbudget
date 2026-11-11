@@ -17,7 +17,7 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000201',
 );
@@ -42,15 +42,15 @@ BudgetSummary _makeSummary() {
   final category = Category(
     id: _categoryUuid,
     name: 'Bills',
-    budgetId: _budgetUuid,
+    entityId: _budgetUuid,
     sortOrder: 0,
     isHidden: false,
   );
   final envelope = Envelope(
     id: _envelopeUuid,
     name: 'Rent',
-    budgetedAmountCents: 0,
-    spentAmountCents: 0,
+    budgetedAmountMinor: 0,
+    spentAmountMinor: 0,
     currencyCode: 'USD',
     categoryId: _categoryUuid,
     sortOrder: 0,
@@ -63,14 +63,14 @@ BudgetSummary _makeSummary() {
         category: category,
         envelopes: [envelope],
         monthlyEnvelopes: const [],
-        totalBudgetedCents: 0,
-        totalSpentCents: 0,
-        totalAvailableCents: 0,
+        totalBudgetedMinor: 0,
+        totalSpentMinor: 0,
+        totalAvailableMinor: 0,
       ),
     ],
-    totalIncomeCents: 0,
-    totalBudgetedCents: 0,
-    readyToAssignCents: 0,
+    totalIncomeMinor: 0,
+    totalBudgetedMinor: 0,
+    readyToAssignMinor: 0,
     year: 2026,
     month: 9,
   );
@@ -78,19 +78,19 @@ BudgetSummary _makeSummary() {
 
 Widget _buildApp() {
   final router = GoRouter(
-    initialLocation: '/budgets/$_budgetId/more',
+    initialLocation: '/budgets/$_entityId/more',
     routes: [
       GoRoute(
         name: moreRoute,
         path: morePath,
         builder: (context, state) =>
-            MoreScreen(budgetId: state.pathParameters['id']!),
+            MoreScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: recurringListRoute,
         path: recurringListPath,
         builder: (context, state) =>
-            RecurringListScreen(budgetId: state.pathParameters['id']!),
+            RecurringListScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: recurringCalendarRoute,
@@ -101,7 +101,7 @@ Widget _buildApp() {
         name: transactionRulesRoute,
         path: transactionRulesPath,
         builder: (context, state) =>
-            RuleListScreen(budgetId: state.pathParameters['id']!),
+            RuleListScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: payeeListRoute,
@@ -125,9 +125,9 @@ Widget _buildApp() {
     RecurringTransaction(
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000206'),
       description: 'Rent',
-      amountCents: -250000,
+      amountMinor: -250000,
       currencyCode: 'USD',
-      budgetId: _budgetUuid,
+      entityId: _budgetUuid,
       frequency: 'monthly',
       nextOccurrence: DateTime(2026, 9),
       isActive: true,
@@ -137,7 +137,7 @@ Widget _buildApp() {
   final rules = [
     TransactionRule(
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000207'),
-      budgetId: _budgetUuid,
+      entityId: _budgetUuid,
       payeeId: _payeeUuid,
       targetEnvelopeId: _envelopeUuid,
       enabled: true,
@@ -151,7 +151,7 @@ Widget _buildApp() {
       budgetSummaryProvider.overrideWith((ref, id) async => _makeSummary()),
       payeeListProvider.overrideWith(
         (ref, id) async => [
-          Payee(id: _payeeUuid, name: 'Landlord', budgetId: _budgetUuid),
+          Payee(id: _payeeUuid, name: 'Landlord', entityId: _budgetUuid),
         ],
       ),
       recurringListProvider.overrideWith((ref, id) async => recurring),

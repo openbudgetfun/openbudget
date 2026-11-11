@@ -61,7 +61,7 @@ final class AssistantChatProvider
   }
 }
 
-String _$assistantChatHash() => r'80e729a063dc4784cfcec544d1fac4ecbc1416d6';
+String _$assistantChatHash() => r'190e62aa3287a29e42b96193befd6d4e266fe93f';
 
 /// Runs one assistant conversation in a budget.
 
@@ -85,8 +85,8 @@ final class AssistantChatFamily extends $Family
 
   /// Runs one assistant conversation in a budget.
 
-  AssistantChatProvider call(String budgetId) =>
-      AssistantChatProvider._(argument: budgetId, from: this);
+  AssistantChatProvider call(String entityId) =>
+      AssistantChatProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'assistantChatProvider';
@@ -96,9 +96,9 @@ final class AssistantChatFamily extends $Family
 
 abstract class _$AssistantChat extends $Notifier<AssistantChatState> {
   late final _$args = ref.$arg as String;
-  String get budgetId => _$args;
+  String get entityId => _$args;
 
-  AssistantChatState build(String budgetId);
+  AssistantChatState build(String entityId);
   @$mustCallSuper
   @override
   WhenComplete runBuild() {

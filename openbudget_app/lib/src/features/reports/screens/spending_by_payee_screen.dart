@@ -12,7 +12,7 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 /// A month or a range of months, split across the envelopes it was spent in.
 class SpendingByPayeeScreen extends HookConsumerWidget {
   const SpendingByPayeeScreen({
-    required this.budgetId,
+    required this.entityId,
     this.initialUsePreset = false,
     this.initialYear,
     this.initialMonth,
@@ -27,7 +27,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
   /// Moves the statement forward one month.
   static const Key nextMonthKey = ValueKey('spendingByPayee.nextMonth');
 
-  final String budgetId;
+  final String entityId;
   final bool initialUsePreset;
   final int? initialYear;
   final int? initialMonth;
@@ -44,14 +44,14 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
     final presetMonths = useState(3);
     final usePreset = useState(initialUsePreset);
     final converter = ref
-        .watch(displayCurrencyConverterProvider(budgetId))
+        .watch(displayCurrencyConverterProvider(entityId))
         .asData
         ?.value;
 
     final reportAsync = usePreset.value
         ? ref.watch(
             spendingReportPresetProvider(
-              budgetId,
+              entityId,
               selectedYear.value,
               selectedMonth.value,
               presetMonths.value,
@@ -59,7 +59,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
           )
         : ref.watch(
             spendingReportProvider(
-              budgetId,
+              entityId,
               selectedYear.value,
               selectedMonth.value,
             ),
@@ -88,10 +88,10 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
           final series = reportSeriesColors(theme);
           String format(int cents) =>
               converter?.formatAmount(
-                amountCents: cents,
+                amountMinor: cents,
                 currencyCode: sourceCurrency,
               ) ??
-              formatCentsForCode(cents, sourceCurrency);
+              formatMinorForCode(cents, sourceCurrency);
           final topEntries = sortedEntries.take(series.length).toList();
           final listedTotal = topEntries.fold<int>(
             0,
@@ -265,8 +265,8 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                       for (final (index, entry) in sortedEntries.indexed) ...[
                         _CategoryRow(
                           categoryName: entry.key,
-                          amountCents: entry.value,
-                          totalCents: totalSpent,
+                          amountMinor: entry.value,
+                          totalMinor: totalSpent,
                           sourceCurrency: sourceCurrency,
                           converter: converter,
                           color: series[index % series.length],
@@ -298,10 +298,10 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                     const SizedBox(width: SpacingTokens.sm),
                     ObAmount(
                       converter?.formatAmount(
-                            amountCents: report.totalIncome,
+                            amountMinor: report.totalIncome,
                             currencyCode: sourceCurrency,
                           ) ??
-                          formatCentsForCode(
+                          formatMinorForCode(
                             report.totalIncome,
                             sourceCurrency,
                           ),
@@ -386,8 +386,8 @@ class _MonthSelector extends HookWidget {
 class _CategoryRow extends HookWidget {
   const _CategoryRow({
     required this.categoryName,
-    required this.amountCents,
-    required this.totalCents,
+    required this.amountMinor,
+    required this.totalMinor,
     required this.sourceCurrency,
     required this.converter,
     required this.color,
@@ -395,8 +395,8 @@ class _CategoryRow extends HookWidget {
   });
 
   final String categoryName;
-  final int amountCents;
-  final int totalCents;
+  final int amountMinor;
+  final int totalMinor;
   final String sourceCurrency;
   final DisplayCurrencyConverter? converter;
   final Color color;
@@ -406,7 +406,7 @@ class _CategoryRow extends HookWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final percentage = totalCents > 0 ? (amountCents / totalCents) * 100 : 0.0;
+    final percentage = totalMinor > 0 ? (amountMinor / totalMinor) * 100 : 0.0;
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(
@@ -432,10 +432,10 @@ class _CategoryRow extends HookWidget {
       ),
       trailing: ObAmount(
         converter?.formatAmount(
-              amountCents: amountCents,
+              amountMinor: amountMinor,
               currencyCode: sourceCurrency,
             ) ??
-            formatCentsForCode(amountCents, sourceCurrency),
+            formatMinorForCode(amountMinor, sourceCurrency),
         style: theme.textTheme.titleSmall,
       ),
     );

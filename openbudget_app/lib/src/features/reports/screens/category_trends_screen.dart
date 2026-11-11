@@ -11,16 +11,16 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// One line per category, one drawn bar per month.
 class CategoryTrendsScreen extends HookConsumerWidget {
-  const CategoryTrendsScreen({required this.budgetId, super.key});
+  const CategoryTrendsScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final trendsAsync = ref.watch(categoryTrendsProvider(budgetId));
+    final trendsAsync = ref.watch(categoryTrendsProvider(entityId));
     final converter = ref
-        .watch(displayCurrencyConverterProvider(budgetId))
+        .watch(displayCurrencyConverterProvider(entityId))
         .asData
         ?.value;
 
@@ -108,16 +108,16 @@ class _CategoryTrendCard extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final maxCents = category.monthlyCents.fold<int>(
+    final maxMinor = category.monthlyMinor.fold<int>(
       0,
       (max, v) => v > max ? v : max,
     );
     String format(int cents) =>
         converter?.formatAmount(
-          amountCents: cents,
+          amountMinor: cents,
           currencyCode: sourceCurrency,
         ) ??
-        formatCentsForCode(cents, sourceCurrency);
+        formatMinorForCode(cents, sourceCurrency);
 
     return Semantics(
       container: true,
@@ -128,7 +128,7 @@ class _CategoryTrendCard extends HookWidget {
           for (final (index, month) in months.indexed)
             (
               reportMonthLabel(l10n, month.month, month.year),
-              format(category.monthlyCents[index]),
+              format(category.monthlyMinor[index]),
             ),
         ],
       ),
@@ -149,7 +149,7 @@ class _CategoryTrendCard extends HookWidget {
                   ),
                   const SizedBox(width: SpacingTokens.sm),
                   ObAmount(
-                    format(category.totalCents),
+                    format(category.totalMinor),
                     style: theme.textTheme.titleSmall,
                   ),
                 ],
@@ -170,8 +170,8 @@ class _CategoryTrendCard extends HookWidget {
                     ),
                     Expanded(
                       child: ReportTrackBar(
-                        fraction: maxCents > 0
-                            ? category.monthlyCents[index] / maxCents
+                        fraction: maxMinor > 0
+                            ? category.monthlyMinor[index] / maxMinor
                             : 0,
                         tone: ObTone.brand,
                         height: 12,
@@ -182,7 +182,7 @@ class _CategoryTrendCard extends HookWidget {
                     SizedBox(
                       width: 88,
                       child: ObAmount(
-                        format(category.monthlyCents[index]),
+                        format(category.monthlyMinor[index]),
                         style: theme.textTheme.bodySmall,
                         textAlign: TextAlign.end,
                       ),

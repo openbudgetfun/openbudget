@@ -29,15 +29,15 @@ enum TransactionSort { dateDesc, dateAsc, amountDesc, amountAsc, description }
 const transactionListEmptyKey = Key('transaction-list-empty');
 
 class TransactionListScreen extends HookConsumerWidget {
-  const TransactionListScreen({required this.budgetId, super.key});
+  const TransactionListScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
-    final transactionsAsync = ref.watch(transactionListProvider(budgetId));
+    final transactionsAsync = ref.watch(transactionListProvider(entityId));
     final theme = Theme.of(context);
 
     final searchController = useTextEditingController();
@@ -99,7 +99,7 @@ class TransactionListScreen extends HookConsumerWidget {
                 tooltip: l10n.transactionsBack,
                 onPressed: () => context.goNamed(
                   planRoute,
-                  pathParameters: {'id': budgetId},
+                  pathParameters: {'entityId': entityId},
                 ),
               ),
               title: Text(l10n.transactionListTitle),
@@ -151,16 +151,16 @@ class TransactionListScreen extends HookConsumerWidget {
               action: ObStateAction(
                 label: l10n.homeRetry,
                 onPressed: () =>
-                    ref.invalidate(transactionListProvider(budgetId)),
+                    ref.invalidate(transactionListProvider(entityId)),
               ),
             ),
           ),
         ),
         data: (transactions) {
           // Build payee, envelope, and account name lookup maps.
-          final payeeAsync = ref.watch(payeeListProvider(budgetId));
-          final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
-          final accountsAsync = ref.watch(accountListProvider(budgetId));
+          final payeeAsync = ref.watch(payeeListProvider(entityId));
+          final summaryAsync = ref.watch(budgetSummaryProvider(entityId));
+          final accountsAsync = ref.watch(accountListProvider(entityId));
           final payeeMap = <String, String>{};
           if (payeeAsync.hasValue) {
             for (final payee in payeeAsync.value!) {
@@ -202,11 +202,11 @@ class TransactionListScreen extends HookConsumerWidget {
                 TransactionSort.dateAsc => a.transactionDate.compareTo(
                   b.transactionDate,
                 ),
-                TransactionSort.amountDesc => b.amountCents.abs().compareTo(
-                  a.amountCents.abs(),
+                TransactionSort.amountDesc => b.amountMinor.abs().compareTo(
+                  a.amountMinor.abs(),
                 ),
-                TransactionSort.amountAsc => a.amountCents.abs().compareTo(
-                  b.amountCents.abs(),
+                TransactionSort.amountAsc => a.amountMinor.abs().compareTo(
+                  b.amountMinor.abs(),
                 ),
                 TransactionSort.description =>
                   a.description.toLowerCase().compareTo(
@@ -218,11 +218,11 @@ class TransactionListScreen extends HookConsumerWidget {
           final query = searchQuery.value.toLowerCase();
           final filtered = sorted.where((tx) {
             if (filter.value == TransactionFilter.income &&
-                tx.amountCents <= 0) {
+                tx.amountMinor <= 0) {
               return false;
             }
             if (filter.value == TransactionFilter.expense &&
-                tx.amountCents >= 0) {
+                tx.amountMinor >= 0) {
               return false;
             }
             if (flagFilter.value != null && tx.flagColor != flagFilter.value) {
@@ -401,11 +401,11 @@ class TransactionListScreen extends HookConsumerWidget {
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: () async =>
-                        ref.invalidate(transactionListProvider(budgetId)),
+                        ref.invalidate(transactionListProvider(entityId)),
                     child: _GroupedTransactionList(
                       transactions: filtered,
                       childParentIds: childParentIds,
-                      budgetId: budgetId,
+                      entityId: entityId,
                       payeeMap: payeeMap,
                       envelopeMap: envelopeMap,
                       accountMap: accountMap,
@@ -434,21 +434,21 @@ class TransactionListScreen extends HookConsumerWidget {
             context: context,
             isScrollControlled: true,
             showDragHandle: false,
-            builder: (_) => AddTransactionSheet(budgetId: budgetId),
+            builder: (_) => AddTransactionSheet(entityId: entityId),
           );
           if (!context.mounted || action == null) return;
           switch (action) {
             case AddTransactionAction.income:
-              context.goNamed(addIncomeRoute, pathParameters: {'id': budgetId});
+              context.goNamed(addIncomeRoute, pathParameters: {'entityId': entityId});
             case AddTransactionAction.expense:
               context.goNamed(
                 addExpenseRoute,
-                pathParameters: {'id': budgetId},
+                pathParameters: {'entityId': entityId},
               );
             case AddTransactionAction.transfer:
               await context.pushNamed(
                 createTransferRoute,
-                pathParameters: {'id': budgetId},
+                pathParameters: {'entityId': entityId},
               );
           }
         },
@@ -546,7 +546,7 @@ class TransactionListScreen extends HookConsumerWidget {
     ValueNotifier<Set<String>> selectedIds,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final summaryAsync = ref.read(budgetSummaryProvider(budgetId));
+    final summaryAsync = ref.read(budgetSummaryProvider(entityId));
     if (!summaryAsync.hasValue) return;
 
     final summary = summaryAsync.value!;
@@ -603,7 +603,7 @@ class TransactionListScreen extends HookConsumerWidget {
           .bulkAssignEnvelope(
             transactionIds: ids.toList(),
             envelopeId: selectedEnvelope,
-            budgetId: budgetId,
+            entityId: entityId,
           );
       selectionMode.value = false;
       selectedIds.value = {};
@@ -718,7 +718,7 @@ class TransactionListScreen extends HookConsumerWidget {
           .read(transactionActionsProvider.notifier)
           .bulkSetFlag(
             transactionIds: ids.toList(),
-            budgetId: budgetId,
+            entityId: entityId,
             flagColor: flagColor,
           );
       selectionMode.value = false;
@@ -778,7 +778,7 @@ class TransactionListScreen extends HookConsumerWidget {
       try {
         final count = await ref
             .read(transactionActionsProvider.notifier)
-            .bulkToggleCleared(transactionIds: clearedIds, budgetId: budgetId);
+            .bulkToggleCleared(transactionIds: clearedIds, entityId: entityId);
         selectionMode.value = false;
         selectedIds.value = {};
         if (context.mounted) {
@@ -803,7 +803,7 @@ class TransactionListScreen extends HookConsumerWidget {
     try {
       final count = await ref
           .read(transactionActionsProvider.notifier)
-          .bulkToggleCleared(transactionIds: unclearedIds, budgetId: budgetId);
+          .bulkToggleCleared(transactionIds: unclearedIds, entityId: entityId);
       selectionMode.value = false;
       selectedIds.value = {};
       if (context.mounted) {
@@ -860,7 +860,7 @@ class TransactionListScreen extends HookConsumerWidget {
     try {
       final count = await ref
           .read(transactionActionsProvider.notifier)
-          .bulkDelete(transactionIds: ids.toList(), budgetId: budgetId);
+          .bulkDelete(transactionIds: ids.toList(), entityId: entityId);
       selectionMode.value = false;
       selectedIds.value = {};
       if (context.mounted) {
@@ -893,7 +893,7 @@ class TransactionListScreen extends HookConsumerWidget {
     for (final tx in topLevel) {
       final date = _formatDateIso(tx.transactionDate);
       final desc = _escapeCsv(tx.description);
-      final amount = formatCentsForCode(tx.amountCents, tx.currencyCode);
+      final amount = formatMinorForCode(tx.amountMinor, tx.currencyCode);
       final memo = _escapeCsv(tx.memo ?? '');
       final status = tx.reconciled
           ? 'Reconciled'
@@ -1259,7 +1259,7 @@ ObTone? _flagToneFromString(String? flagColor) => switch (flagColor) {
 class _TransactionTile extends HookConsumerWidget {
   const _TransactionTile({
     required this.transaction,
-    required this.budgetId,
+    required this.entityId,
     this.isSplit = false,
     this.payeeName,
     this.envelopeName,
@@ -1270,7 +1270,7 @@ class _TransactionTile extends HookConsumerWidget {
   });
 
   final Transaction transaction;
-  final String budgetId;
+  final String entityId;
   final bool isSplit;
   final String? payeeName;
   final String? envelopeName;
@@ -1284,7 +1284,7 @@ class _TransactionTile extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final isIncome = transaction.amountCents > 0;
+    final isIncome = transaction.amountMinor > 0;
     final tone = isIncome ? ObTone.funded : ObTone.neutral;
 
     final statusIcon = transaction.reconciled
@@ -1455,8 +1455,8 @@ class _TransactionTile extends HookConsumerWidget {
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 132),
                 child: ObAmount(
-                  formatCentsForCode(
-                    transaction.amountCents,
+                  formatMinorForCode(
+                    transaction.amountMinor,
                     transaction.currencyCode,
                   ),
                   tone: tone,
@@ -1554,7 +1554,7 @@ class _TransactionTile extends HookConsumerWidget {
           .read(transactionActionsProvider.notifier)
           .toggleCleared(
             transactionId: transaction.id?.toString() ?? '',
-            budgetId: budgetId,
+            entityId: entityId,
           );
     } on Exception catch (_) {
       if (context.mounted) {
@@ -1607,7 +1607,7 @@ class _TransactionTile extends HookConsumerWidget {
           .read(transactionActionsProvider.notifier)
           .deleteTransaction(
             transactionId: transaction.id?.toString() ?? '',
-            budgetId: budgetId,
+            entityId: entityId,
           );
       if (context.mounted) {
         showAppToast(
@@ -1640,7 +1640,7 @@ class _TransactionTile extends HookConsumerWidget {
           .read(transactionActionsProvider.notifier)
           .undoDeleteTransaction(
             deletedTransaction: deleted,
-            budgetId: budgetId,
+            entityId: entityId,
           );
       if (context.mounted) {
         showAppToast(
@@ -1730,7 +1730,7 @@ class _TransactionTile extends HookConsumerWidget {
           .read(transactionActionsProvider.notifier)
           .setFlag(
             transactionId: transaction.id?.toString() ?? '',
-            budgetId: budgetId,
+            entityId: entityId,
             flagColor: flagColor,
           );
     } on Exception catch (_) {
@@ -1750,7 +1750,7 @@ class _TransactionTile extends HookConsumerWidget {
         context: context,
         builder: (_) => EditTransactionDialog(
           transaction: transaction,
-          budgetId: budgetId,
+          entityId: entityId,
           currencyCode: transaction.currencyCode,
         ),
       ),
@@ -1791,7 +1791,7 @@ class _GroupedTransactionList extends HookWidget {
   const _GroupedTransactionList({
     required this.transactions,
     required this.childParentIds,
-    required this.budgetId,
+    required this.entityId,
     this.payeeMap = const {},
     this.envelopeMap = const {},
     this.accountMap = const {},
@@ -1802,7 +1802,7 @@ class _GroupedTransactionList extends HookWidget {
 
   final List<Transaction> transactions;
   final Set<String> childParentIds;
-  final String budgetId;
+  final String entityId;
   final Map<String, String> payeeMap;
   final Map<String, String> envelopeMap;
   final Map<String, String> accountMap;
@@ -1854,7 +1854,7 @@ class _GroupedTransactionList extends HookWidget {
             : null;
         return _TransactionTile(
           transaction: tx,
-          budgetId: budgetId,
+          entityId: entityId,
           isSplit: isSplit,
           payeeName: payeeName,
           envelopeName: envelopeName,

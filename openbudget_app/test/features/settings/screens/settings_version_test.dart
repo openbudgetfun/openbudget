@@ -9,14 +9,14 @@ import 'package:openbudget_app/src/features/whats_new/providers/whats_new_provid
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 
 void main() {
   testWidgets('settings shows the installed app version', (tester) async {
     final container = ProviderContainer(
       overrides: [
         budgetDetailProvider.overrideWith(
-          (ref, budgetId) async => Budget(
+          (ref, entityId) async => Budget(
             name: 'My Budget',
             currencyCode: 'USD',
             ownerId: UuidValue.fromString(
@@ -33,7 +33,7 @@ void main() {
     addTearDown(container.dispose);
 
     await tester.pumpApp(
-      const SettingsScreen(budgetId: _budgetId),
+      const SettingsScreen(entityId: _entityId),
       container: container,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

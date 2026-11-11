@@ -1,122 +1,146 @@
+import 'package:openbudget_app/src/features/accounts/providers/account_detail_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'account_actions_provider.g.dart';
 
+/// Create, edit, close and delete actions for accounts, plus valuations for
+/// track-by-value accounts. Opening balances and dates become an opening
+/// transaction or a first valuation on the server.
 @riverpod
 class AccountActions extends _$AccountActions {
   @override
   FutureOr<void> build() {}
 
   Future<Account> createAccount({
+    required String entityId,
     required String name,
-    required String accountType,
-    required int balanceCents,
+    required AccountKind kind,
     required String currencyCode,
-    required String budgetId,
-    required bool onBudget,
-    required int sortOrder,
-    String? walletAddress,
+    AccountBalanceSource? balanceSource,
+    bool? onBudget,
+    int? openingBalanceMinor,
+    DateTime? openingDate,
     String? institutionId,
+    String? note,
   }) async {
     final client = ref.read(serverpodClientProvider);
     try {
-      final budgetUuid = UuidValue.fromString(budgetId);
-      final account = await client.account.create(
+      return await client.account.create(
+        UuidValue.fromString(entityId),
         name,
-        accountType,
-        balanceCents,
+        kind,
         currencyCode,
-        budgetUuid,
+        balanceSource: balanceSource,
         onBudget: onBudget,
-        sortOrder: sortOrder,
+        openingBalanceMinor: openingBalanceMinor,
+        openingDate: openingDate,
         institutionId: institutionId == null
             ? null
             : UuidValue.fromString(institutionId),
+        note: note,
       );
-
-      final normalizedWallet = walletAddress?.trim();
-      if (normalizedWallet != null && normalizedWallet.isNotEmpty) {
-        // Wallet linking is handled by dedicated wallet flows.
-      }
-
-      return account;
     } finally {
-      // Always refresh account lists, even when the response fails to decode.
-      ref.invalidate(accountListProvider(budgetId));
+      ref.invalidate(accountListProvider(entityId));
     }
-  }
-
-  Future<Account> addMineToBudget({
-    required String sourceAccountId,
-    required String budgetId,
-  }) async {
-    final client = ref.read(serverpodClientProvider);
-    final added = await client.account.addMineToBudget(
-      UuidValue.fromString(sourceAccountId),
-      UuidValue.fromString(budgetId),
-    );
-    ref.invalidate(accountListProvider(budgetId));
-    return added;
   }
 
   Future<Account> updateAccount({
     required String accountId,
-    required String budgetId,
+    required String entityId,
     String? name,
-    String? accountType,
-    int? balanceCents,
+    AccountKind? kind,
     bool? onBudget,
+    String? institutionId,
+    bool clearInstitution = false,
+    String? note,
     int? sortOrder,
-    bool? isClosed,
   }) async {
     final client = ref.read(serverpodClientProvider);
     final account = await client.account.update(
       UuidValue.fromString(accountId),
       name: name,
-      accountType: accountType,
-      balanceCents: balanceCents,
+      kind: kind,
       onBudget: onBudget,
+      institutionId: institutionId == null
+          ? null
+          : UuidValue.fromString(institutionId),
+      clearInstitution: clearInstitution,
+      note: note,
       sortOrder: sortOrder,
-      isClosed: isClosed,
     );
-    ref.invalidate(accountListProvider(budgetId));
+    ref.invalidate(accountListProvider(entityId));
     return account;
   }
 
-  Future<Account> deleteAccount({
+  Future<Account> closeAccount({
     required String accountId,
-    required String budgetId,
+    required String entityId,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    final account = await client.account.close(UuidValue.fromString(accountId));
+    ref.invalidate(accountListProvider(entityId));
+    return account;
+  }
+
+  Future<Account> reopenAccount({
+    required String accountId,
+    required String entityId,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    final account = await client.account.reopen(
+      UuidValue.fromString(accountId),
+    );
+    ref.invalidate(accountListProvider(entityId));
+    return account;
+  }
+
+  Future<void> deleteAccount({
+    required String accountId,
+    required String entityId,
   }) async {
     final client = ref.read(serverpodClientProvider);
     try {
-      final deleted = await client.account.delete(
-        UuidValue.fromString(accountId),
-      );
-      return deleted;
+      await client.account.delete(UuidValue.fromString(accountId));
     } finally {
-      // Always refresh account lists, even when the response fails to decode.
-      ref.invalidate(accountListProvider(budgetId));
+      ref.invalidate(accountListProvider(entityId));
     }
   }
 
-  Future<Account> undoDeleteAccount({
-    required Account deletedAccount,
-    required String budgetId,
+  /// Records or replaces the valuation for the latest date of a
+  /// track-by-value account.
+  Future<AccountValuation> setValuation({
+    required String accountId,
+    required String entityId,
+    required DateTime valuationDate,
+    required int valueMinor,
+    String? note,
   }) async {
     final client = ref.read(serverpodClientProvider);
-    final restored = await client.account.create(
-      deletedAccount.name,
-      deletedAccount.accountType,
-      deletedAccount.balanceCents,
-      deletedAccount.currencyCode,
-      UuidValue.fromString(budgetId),
-      onBudget: deletedAccount.onBudget,
-      sortOrder: deletedAccount.sortOrder,
+    final valuation = await client.account.setValuation(
+      UuidValue.fromString(accountId),
+      valuationDate,
+      valueMinor,
+      note: note,
     );
-    ref.invalidate(accountListProvider(budgetId));
-    return restored;
+    ref
+      ..invalidate(accountListProvider(entityId))
+      ..invalidate(accountValuationsProvider(accountId));
+    return valuation;
+  }
+
+  Future<void> deleteValuation({
+    required String valuationId,
+    required String accountId,
+    required String entityId,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    await client.account.deleteValuation(UuidValue.fromString(valuationId));
+    ref
+      ..invalidate(accountListProvider(entityId))
+      ..invalidate(accountValuationsProvider(accountId));
   }
 }

@@ -10,21 +10,21 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// Months side by side, written as one wide hand-ruled table.
 class MultiMonthComparisonScreen extends HookConsumerWidget {
-  const MultiMonthComparisonScreen({required this.budgetId, super.key});
+  const MultiMonthComparisonScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final monthCount = useState(3);
     final converter = ref
-        .watch(displayCurrencyConverterProvider(budgetId))
+        .watch(displayCurrencyConverterProvider(entityId))
         .asData
         ?.value;
 
     final comparisonAsync = ref.watch(
-      multiMonthComparisonProvider(budgetId, monthCount: monthCount.value),
+      multiMonthComparisonProvider(entityId, monthCount: monthCount.value),
     );
 
     return Scaffold(
@@ -108,10 +108,10 @@ class _ComparisonTable extends HookWidget {
     final monthKeys = months.map((m) => '${m.year}-${m.month}').toList();
     String format(int cents) =>
         converter?.formatAmount(
-          amountCents: cents,
+          amountMinor: cents,
           currencyCode: sourceCurrency,
         ) ??
-        formatCentsForCode(cents, sourceCurrency);
+        formatMinorForCode(cents, sourceCurrency);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(SpacingTokens.md),
@@ -184,7 +184,7 @@ class _ComparisonTable extends HookWidget {
                         SizedBox(
                           width: _monthColumnWidth,
                           child: ObAmount(
-                            format(month.totalSpentCents),
+                            format(month.totalSpentMinor),
                             style: theme.textTheme.bodyMedium,
                             textAlign: TextAlign.end,
                           ),

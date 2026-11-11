@@ -14,7 +14,7 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 final _ownerId = UuidValue.fromString('00000000-0000-0000-0000-000000000001');
-const _budgetIdStr = '00000000-0000-0000-0000-000000000010';
+const _entityIdStr = '00000000-0000-0000-0000-000000000010';
 
 Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
   (widget) => widget is SkribbleIcon && widget.data == data,
@@ -33,8 +33,8 @@ Budget _makeBudget({
 
 Account _makeAccount({
   String name = 'Checking',
-  int balanceCents = 100000,
-  String budgetIdStr = _budgetIdStr,
+  int balanceMinor = 100000,
+  String entityIdStr = _entityIdStr,
   String currencyCode = 'USD',
   bool isClosed = false,
   bool onBudget = true,
@@ -42,9 +42,9 @@ Account _makeAccount({
 }) => Account(
   name: name,
   accountType: accountType,
-  balanceCents: balanceCents,
+  balanceMinor: balanceMinor,
   currencyCode: currencyCode,
-  budgetId: UuidValue.fromString(budgetIdStr),
+  entityId: UuidValue.fromString(entityIdStr),
   onBudget: onBudget,
   sortOrder: 0,
   isClosed: isClosed,
@@ -53,9 +53,9 @@ Account _makeAccount({
 BudgetSummary _emptySummary(Budget budget) => BudgetSummary(
   budget: budget,
   categories: const [],
-  totalIncomeCents: 0,
-  totalBudgetedCents: 0,
-  readyToAssignCents: 0,
+  totalIncomeMinor: 0,
+  totalBudgetedMinor: 0,
+  readyToAssignMinor: 0,
   year: 2026,
   month: 2,
 );
@@ -143,7 +143,7 @@ void main() {
 
     testWidgets('renders budget card with name and currency', (tester) async {
       final budget = _makeBudget(
-        id: _budgetIdStr,
+        id: _entityIdStr,
         name: 'Family Budget',
         currencyCode: 'EUR',
       );
@@ -152,9 +152,9 @@ void main() {
         ProviderScope(
           overrides: [
             budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => []),
+            accountListProvider.overrideWith((ref, entityId) async => []),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budget),
+              (ref, entityId) async => _emptySummary(budget),
             ),
           ],
           child: MaterialApp(
@@ -172,15 +172,15 @@ void main() {
     });
 
     testWidgets('shows FAB when budgets exist', (tester) async {
-      final budget = _makeBudget(id: _budgetIdStr);
+      final budget = _makeBudget(id: _entityIdStr);
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => []),
+            accountListProvider.overrideWith((ref, entityId) async => []),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budget),
+              (ref, entityId) async => _emptySummary(budget),
             ),
           ],
           child: MaterialApp(
@@ -199,19 +199,19 @@ void main() {
     testWidgets('renders account count and total balance on budget card', (
       tester,
     ) async {
-      final budget = _makeBudget(id: _budgetIdStr);
+      final budget = _makeBudget(id: _entityIdStr);
       final accounts = [
-        _makeAccount(balanceCents: 250000),
-        _makeAccount(name: 'Savings', balanceCents: 500000),
+        _makeAccount(balanceMinor: 250000),
+        _makeAccount(name: 'Savings', balanceMinor: 500000),
       ];
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            accountListProvider.overrideWith((ref, entityId) async => accounts),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budget),
+              (ref, entityId) async => _emptySummary(budget),
             ),
           ],
           child: MaterialApp(
@@ -231,20 +231,20 @@ void main() {
     testWidgets('renders ready-to-assign amount on budget card', (
       tester,
     ) async {
-      final budget = _makeBudget(id: _budgetIdStr);
+      final budget = _makeBudget(id: _entityIdStr);
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => []),
+            accountListProvider.overrideWith((ref, entityId) async => []),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => BudgetSummary(
+              (ref, entityId) async => BudgetSummary(
                 budget: budget,
                 categories: const [],
-                totalIncomeCents: 300000,
-                totalBudgetedCents: 100000,
-                readyToAssignCents: 200000,
+                totalIncomeMinor: 300000,
+                totalBudgetedMinor: 100000,
+                readyToAssignMinor: 200000,
                 year: 2026,
                 month: 2,
               ),
@@ -266,11 +266,11 @@ void main() {
     testWidgets('renders overspent count when envelopes are overspent', (
       tester,
     ) async {
-      final budget = _makeBudget(id: _budgetIdStr);
+      final budget = _makeBudget(id: _entityIdStr);
       final envelope = Envelope(
         name: 'Groceries',
-        budgetedAmountCents: 50000,
-        spentAmountCents: 70000,
+        budgetedAmountMinor: 50000,
+        spentAmountMinor: 70000,
         currencyCode: 'USD',
         categoryId: UuidValue.fromString(
           '00000000-0000-0000-0000-000000000020',
@@ -279,7 +279,7 @@ void main() {
       );
       final category = Category(
         name: 'Essentials',
-        budgetId: UuidValue.fromString(_budgetIdStr),
+        entityId: UuidValue.fromString(_entityIdStr),
         sortOrder: 0,
         isHidden: false,
       );
@@ -288,9 +288,9 @@ void main() {
         ProviderScope(
           overrides: [
             budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => []),
+            accountListProvider.overrideWith((ref, entityId) async => []),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => BudgetSummary(
+              (ref, entityId) async => BudgetSummary(
                 budget: budget,
                 categories: [
                   CategoryWithEnvelopes(
@@ -299,20 +299,20 @@ void main() {
                     monthlyEnvelopes: [
                       MonthlyEnvelopeData(
                         envelope: envelope,
-                        allocatedCents: 50000,
-                        spentCents: 70000,
-                        availableCents: -20000,
-                        carryoverCents: 0,
+                        allocatedMinor: 50000,
+                        spentMinor: 70000,
+                        availableMinor: -20000,
+                        carryoverMinor: 0,
                       ),
                     ],
-                    totalBudgetedCents: 50000,
-                    totalSpentCents: 70000,
-                    totalAvailableCents: -20000,
+                    totalBudgetedMinor: 50000,
+                    totalSpentMinor: 70000,
+                    totalAvailableMinor: -20000,
                   ),
                 ],
-                totalIncomeCents: 100000,
-                totalBudgetedCents: 50000,
-                readyToAssignCents: 50000,
+                totalIncomeMinor: 100000,
+                totalBudgetedMinor: 50000,
+                readyToAssignMinor: 50000,
                 year: 2026,
                 month: 2,
               ),
@@ -333,19 +333,19 @@ void main() {
     });
 
     testWidgets('renders net worth summary with total balance', (tester) async {
-      final budget = _makeBudget(id: _budgetIdStr);
+      final budget = _makeBudget(id: _entityIdStr);
       final accounts = [
-        _makeAccount(balanceCents: 250000),
-        _makeAccount(name: 'Savings', balanceCents: 750000),
+        _makeAccount(balanceMinor: 250000),
+        _makeAccount(name: 'Savings', balanceMinor: 750000),
       ];
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            accountListProvider.overrideWith((ref, entityId) async => accounts),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budget),
+              (ref, entityId) async => _emptySummary(budget),
             ),
           ],
           child: MaterialApp(
@@ -363,7 +363,7 @@ void main() {
     });
 
     testWidgets('renders multi-currency net worth summary', (tester) async {
-      final budget = _makeBudget(id: _budgetIdStr);
+      final budget = _makeBudget(id: _entityIdStr);
       final accounts = [
         _makeAccount(name: 'USD Checking'),
         _makeAccount(name: 'EUR Savings', currencyCode: 'EUR'),
@@ -373,9 +373,9 @@ void main() {
         ProviderScope(
           overrides: [
             budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            accountListProvider.overrideWith((ref, entityId) async => accounts),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budget),
+              (ref, entityId) async => _emptySummary(budget),
             ),
           ],
           child: MaterialApp(
@@ -395,12 +395,12 @@ void main() {
     testWidgets('renders multi-currency balances on budget card', (
       tester,
     ) async {
-      final budget = _makeBudget(id: _budgetIdStr);
+      final budget = _makeBudget(id: _entityIdStr);
       final accounts = [
-        _makeAccount(name: 'USD Checking', balanceCents: 50000),
+        _makeAccount(name: 'USD Checking', balanceMinor: 50000),
         _makeAccount(
           name: 'EUR Savings',
-          balanceCents: 50000,
+          balanceMinor: 50000,
           currencyCode: 'EUR',
         ),
       ];
@@ -409,9 +409,9 @@ void main() {
         ProviderScope(
           overrides: [
             budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            accountListProvider.overrideWith((ref, entityId) async => accounts),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budget),
+              (ref, entityId) async => _emptySummary(budget),
             ),
           ],
           child: MaterialApp(
@@ -429,9 +429,9 @@ void main() {
     });
 
     testWidgets('excludes closed accounts from net worth', (tester) async {
-      final budget = _makeBudget(id: _budgetIdStr);
+      final budget = _makeBudget(id: _entityIdStr);
       final accounts = [
-        _makeAccount(name: 'Active', balanceCents: 500000),
+        _makeAccount(name: 'Active', balanceMinor: 500000),
         _makeAccount(name: 'Closed', isClosed: true),
       ];
 
@@ -439,9 +439,9 @@ void main() {
         ProviderScope(
           overrides: [
             budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            accountListProvider.overrideWith((ref, entityId) async => accounts),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budget),
+              (ref, entityId) async => _emptySummary(budget),
             ),
           ],
           child: MaterialApp(
@@ -514,9 +514,9 @@ void main() {
         ProviderScope(
           overrides: [
             budgetListProvider.overrideWith((ref) async => budgets),
-            accountListProvider.overrideWith((ref, budgetId) async => []),
+            accountListProvider.overrideWith((ref, entityId) async => []),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budgets.first),
+              (ref, entityId) async => _emptySummary(budgets.first),
             ),
           ],
           child: MaterialApp(
@@ -539,12 +539,12 @@ void main() {
       'converts budget summary amounts when display override is active',
       (tester) async {
         final budget = _makeBudget(
-          id: _budgetIdStr,
+          id: _entityIdStr,
         ).copyWith(displayCurrencyCode: 'GBP');
         final accounts = [
           _makeAccount(
             name: 'EUR Savings',
-            balanceCents: 10000,
+            balanceMinor: 10000,
             currencyCode: 'EUR',
           ),
         ];
@@ -559,21 +559,21 @@ void main() {
             overrides: [
               budgetListProvider.overrideWith((ref) async => [budget]),
               accountListProvider.overrideWith(
-                (ref, budgetId) async => accounts,
+                (ref, entityId) async => accounts,
               ),
               budgetSummaryProvider.overrideWith(
-                (ref, budgetId) async => BudgetSummary(
+                (ref, entityId) async => BudgetSummary(
                   budget: budget,
                   categories: const [],
-                  totalIncomeCents: 10000,
-                  totalBudgetedCents: 0,
-                  readyToAssignCents: 10000,
+                  totalIncomeMinor: 10000,
+                  totalBudgetedMinor: 0,
+                  readyToAssignMinor: 10000,
                   year: 2026,
                   month: 2,
                 ),
               ),
               displayCurrencyConverterProvider.overrideWith(
-                (ref, budgetId) async => converter,
+                (ref, entityId) async => converter,
               ),
             ],
             child: MaterialApp(
@@ -595,12 +595,12 @@ void main() {
       tester,
     ) async {
       final budget = _makeBudget(
-        id: _budgetIdStr,
+        id: _entityIdStr,
       ).copyWith(displayCurrencyCode: 'GBP');
       final accounts = [
         _makeAccount(
           name: 'EUR Savings',
-          balanceCents: 10000,
+          balanceMinor: 10000,
           currencyCode: 'EUR',
         ),
       ];
@@ -614,20 +614,20 @@ void main() {
         ProviderScope(
           overrides: [
             budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            accountListProvider.overrideWith((ref, entityId) async => accounts),
             budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => BudgetSummary(
+              (ref, entityId) async => BudgetSummary(
                 budget: budget,
                 categories: const [],
-                totalIncomeCents: 10000,
-                totalBudgetedCents: 0,
-                readyToAssignCents: 10000,
+                totalIncomeMinor: 10000,
+                totalBudgetedMinor: 0,
+                readyToAssignMinor: 10000,
                 year: 2026,
                 month: 2,
               ),
             ),
             displayCurrencyConverterProvider.overrideWith(
-              (ref, budgetId) async => converter,
+              (ref, entityId) async => converter,
             ),
           ],
           child: MaterialApp(

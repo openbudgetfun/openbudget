@@ -16,9 +16,9 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// The Reflect tab: three hand-drawn statements about the month.
 class ReportsScreen extends HookConsumerWidget {
-  const ReportsScreen({required this.budgetId, super.key});
+  const ReportsScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,12 +30,12 @@ class ReportsScreen extends HookConsumerWidget {
     final selectedMonth = useState(now.month);
 
     final reportAsync = ref.watch(
-      spendingReportProvider(budgetId, selectedYear.value, selectedMonth.value),
+      spendingReportProvider(entityId, selectedYear.value, selectedMonth.value),
     );
-    final netWorthAsync = ref.watch(netWorthProvider(budgetId));
-    final ageOfMoneyAsync = ref.watch(ageOfMoneyProvider(budgetId));
+    final netWorthAsync = ref.watch(netWorthProvider(entityId));
+    final ageOfMoneyAsync = ref.watch(ageOfMoneyProvider(entityId));
     final converter = ref
-        .watch(displayCurrencyConverterProvider(budgetId))
+        .watch(displayCurrencyConverterProvider(entityId))
         .asData
         ?.value;
     final monthLabel = reportMonthLabel(
@@ -60,7 +60,7 @@ class ReportsScreen extends HookConsumerWidget {
             icon: OpenBudgetIcons.pieChart,
             onTap: () => context.pushNamed(
               spendingByPayeeRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
             child: reportAsync.when(
               loading: () => ObLoadingPanel(label: l10n.reportsLoading),
@@ -78,7 +78,7 @@ class ReportsScreen extends HookConsumerWidget {
             icon: OpenBudgetIcons.scale,
             onTap: () => context.pushNamed(
               netWorthRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
             child: netWorthAsync.when(
               loading: () => ObLoadingPanel(label: l10n.reportsLoading),
@@ -93,7 +93,7 @@ class ReportsScreen extends HookConsumerWidget {
             icon: OpenBudgetIcons.ageOfMoney,
             onTap: () => context.pushNamed(
               spendingTrendsRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
             child: ageOfMoneyAsync.when(
               loading: () => ObLoadingPanel(label: l10n.reportsLoading),
@@ -105,7 +105,7 @@ class ReportsScreen extends HookConsumerWidget {
           ObOutlinedButton(
             onPressed: () => context.pushNamed(
               multiMonthComparisonRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -219,10 +219,10 @@ class _SpendingBreakdownPreview extends HookWidget {
 
     String format(int cents) =>
         converter?.formatAmount(
-          amountCents: cents,
+          amountMinor: cents,
           currencyCode: sourceCurrency,
         ) ??
-        formatCentsForCode(cents, sourceCurrency);
+        formatMinorForCode(cents, sourceCurrency);
 
     final segments = [
       for (final (index, entry) in categories.indexed)
@@ -336,14 +336,14 @@ class _NetWorthPreview extends HookWidget {
         ? convertedNetWorth
         : (primary?.netWorth ?? 0);
     final series = reportSeriesColors(theme);
-    final assetsLabel = formatCentsForCode(assets, currency);
-    final liabilitiesLabel = formatCentsForCode(liabilities, currency);
+    final assetsLabel = formatMinorForCode(assets, currency);
+    final liabilitiesLabel = formatMinorForCode(liabilities, currency);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ObAmount(
-          formatCentsForCode(netWorth, currency),
+          formatMinorForCode(netWorth, currency),
           tone: netWorth >= 0 ? ObTone.funded : ObTone.overspent,
           style: theme.textTheme.headlineMedium,
         ),

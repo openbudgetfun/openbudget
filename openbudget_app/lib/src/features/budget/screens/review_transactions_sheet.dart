@@ -16,7 +16,7 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 Future<void> showReviewTransactionsSheet(
   BuildContext context, {
-  required String budgetId,
+  required String entityId,
   required int year,
   required int month,
 }) => showModalBottomSheet<void>(
@@ -27,7 +27,7 @@ Future<void> showReviewTransactionsSheet(
   builder: (context) => FractionallySizedBox(
     heightFactor: 0.95,
     child: ReviewTransactionsSheet(
-      budgetId: budgetId,
+      entityId: entityId,
       year: year,
       month: month,
     ),
@@ -36,13 +36,13 @@ Future<void> showReviewTransactionsSheet(
 
 class ReviewTransactionsSheet extends HookConsumerWidget {
   const ReviewTransactionsSheet({
-    required this.budgetId,
+    required this.entityId,
     required this.year,
     required this.month,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final int year;
   final int month;
 
@@ -51,9 +51,9 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final transactionsAsync = ref.watch(
-      monthlyTransactionsProvider(budgetId, year, month),
+      monthlyTransactionsProvider(entityId, year, month),
     );
-    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
+    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(entityId));
 
     final queue = useState<List<Transaction>>(<Transaction>[]);
     final initialized = useState(false);
@@ -86,13 +86,13 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
     }
 
     final selectedCount = selectedIds.value.length;
-    final selectedAmountCents = queue.value
+    final selectedAmountMinor = queue.value
         .where((transaction) {
           final transactionId = transaction.id?.toString();
           return transactionId != null &&
               selectedIds.value.contains(transactionId);
         })
-        .fold<int>(0, (total, transaction) => total + transaction.amountCents);
+        .fold<int>(0, (total, transaction) => total + transaction.amountMinor);
 
     Future<void> approveSelected() async {
       final ids = selectedIds.value.toList(growable: false);
@@ -109,14 +109,14 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
       try {
         await ref
             .read(transactionActionsProvider.notifier)
-            .bulkToggleCleared(transactionIds: ids, budgetId: budgetId);
+            .bulkToggleCleared(transactionIds: ids, entityId: entityId);
       } on Exception {
         // Keep optimistic UI even if network is unavailable in test harnesses.
       } finally {
         if (context.mounted) {
           ref
-            ..invalidate(monthlyTransactionsProvider(budgetId, year, month))
-            ..invalidate(budgetMonthlySummaryProvider(budgetId));
+            ..invalidate(monthlyTransactionsProvider(entityId, year, month))
+            ..invalidate(budgetMonthlySummaryProvider(entityId));
         }
       }
     }
@@ -138,7 +138,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
             .bulkAssignEnvelope(
               transactionIds: ids,
               envelopeId: selectedEnvelope.id,
-              budgetId: budgetId,
+              entityId: entityId,
             );
       } on Exception {
         if (!context.mounted) return;
@@ -151,8 +151,8 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
         if (context.mounted) {
           selectedIds.value = <String>{};
           ref
-            ..invalidate(monthlyTransactionsProvider(budgetId, year, month))
-            ..invalidate(budgetMonthlySummaryProvider(budgetId));
+            ..invalidate(monthlyTransactionsProvider(entityId, year, month))
+            ..invalidate(budgetMonthlySummaryProvider(entityId));
         }
       }
     }
@@ -172,14 +172,14 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
       try {
         await ref
             .read(transactionActionsProvider.notifier)
-            .bulkDelete(transactionIds: ids, budgetId: budgetId);
+            .bulkDelete(transactionIds: ids, entityId: entityId);
       } on Exception {
         // Keep optimistic UI even if network is unavailable in test harnesses.
       } finally {
         if (context.mounted) {
           ref
-            ..invalidate(monthlyTransactionsProvider(budgetId, year, month))
-            ..invalidate(budgetMonthlySummaryProvider(budgetId));
+            ..invalidate(monthlyTransactionsProvider(entityId, year, month))
+            ..invalidate(budgetMonthlySummaryProvider(entityId));
         }
       }
     }
@@ -409,11 +409,11 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                                       ),
                                       const SizedBox(width: SpacingTokens.md),
                                       ObAmount(
-                                        formatCentsForCode(
-                                          transaction.amountCents,
+                                        formatMinorForCode(
+                                          transaction.amountMinor,
                                           currencyCode,
                                         ),
-                                        tone: transaction.amountCents >= 0
+                                        tone: transaction.amountMinor >= 0
                                             ? ObTone.funded
                                             : ObTone.overspent,
                                         style: theme.textTheme.titleMedium,
@@ -431,8 +431,8 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
             if (selectedCount > 0)
               _ReviewToolbar(
                 selectedCount: selectedCount,
-                selectedAmount: formatCentsForCode(
-                  selectedAmountCents,
+                selectedAmount: formatMinorForCode(
+                  selectedAmountMinor,
                   currencyCode,
                 ),
                 onCancel: () => selectedIds.value = <String>{},

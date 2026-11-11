@@ -16,7 +16,7 @@ Widget _buildHost(
   bool transaction = false,
   String? currentCode,
   int? businessUsePercent,
-  int? salesTaxCents,
+  int? salesTaxMinor,
 }) => ProviderScope(
   overrides: [taxRepositoryProvider.overrideWithValue(repository)],
   child: MaterialApp(
@@ -31,20 +31,20 @@ Widget _buildHost(
               unawaited(
                 showTransactionTaxCategorySheet(
                   context,
-                  budgetId: testBudgetId,
+                  entityId: testBudgetId,
                   transactionId: testTransactionId,
                   subject: 'Train ticket',
                   currencyCode: 'GBP',
                   currentCode: currentCode,
                   businessUsePercent: businessUsePercent,
-                  salesTaxCents: salesTaxCents,
+                  salesTaxMinor: salesTaxMinor,
                 ),
               );
             } else {
               unawaited(
                 showEnvelopeTaxCategorySheet(
                   context,
-                  budgetId: testBudgetId,
+                  entityId: testBudgetId,
                   envelopeId: testEnvelopeId,
                   subject: 'Rent',
                   currentCode: currentCode,
@@ -182,7 +182,7 @@ void main() {
           repository,
           transaction: true,
           businessUsePercent: 40,
-          salesTaxCents: 250,
+          salesTaxMinor: 250,
         ),
       );
       await _open(tester);
@@ -212,7 +212,7 @@ void main() {
 
       expect(repository.transactionUpdates.single.code, 'gb.se.office_costs');
       expect(repository.transactionUpdates.single.businessUsePercent, 40);
-      expect(repository.transactionUpdates.single.salesTaxCents, 250);
+      expect(repository.transactionUpdates.single.salesTaxMinor, 250);
     });
 
     testWidgets('rejects a malformed sales tax amount', (tester) async {
@@ -260,6 +260,6 @@ class _LoadingCategoriesRepository extends FakeTaxRepository {
   final Completer<List<TaxCategoryView>> completer;
 
   @override
-  Future<List<TaxCategoryView>> listCategories(String budgetId) =>
+  Future<List<TaxCategoryView>> listCategories(String entityId) =>
       completer.future;
 }

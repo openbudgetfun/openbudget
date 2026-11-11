@@ -11,7 +11,7 @@ import 'package:openbudget_app/src/features/recurring/screens/recurring_list_scr
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
+const _entityId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
 );
@@ -27,7 +27,7 @@ Budget _makeBudget() => Budget(
 
 RecurringTransaction _makeRecurring({
   String description = 'Netflix Subscription',
-  int amountCents = -1499,
+  int amountMinor = -1499,
   String currencyCode = 'USD',
   String frequency = 'monthly',
   DateTime? nextOccurrence,
@@ -36,16 +36,16 @@ RecurringTransaction _makeRecurring({
 }) => RecurringTransaction(
   id: id,
   description: description,
-  amountCents: amountCents,
+  amountMinor: amountMinor,
   currencyCode: currencyCode,
-  budgetId: _budgetUuid,
+  entityId: _budgetUuid,
   frequency: frequency,
   nextOccurrence: nextOccurrence ?? DateTime(2099, 12, 31),
   isActive: isActive,
 );
 
 class _RecordingRecurringActions extends RecurringActions {
-  int? createdAmountCents;
+  int? createdAmountMinor;
 
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
@@ -53,9 +53,9 @@ class _RecordingRecurringActions extends RecurringActions {
   @override
   Future<RecurringTransaction> createRecurring({
     required String description,
-    required int amountCents,
+    required int amountMinor,
     required String currencyCode,
-    required String budgetId,
+    required String entityId,
     required String frequency,
     required DateTime nextOccurrence,
     String? envelopeId,
@@ -63,10 +63,10 @@ class _RecordingRecurringActions extends RecurringActions {
     String? payeeId,
     DateTime? endDate,
   }) async {
-    createdAmountCents = amountCents;
+    createdAmountMinor = amountMinor;
     return _makeRecurring(
       description: description,
-      amountCents: amountCents,
+      amountMinor: amountMinor,
       currencyCode: currencyCode,
       frequency: frequency,
       nextOccurrence: nextOccurrence,
@@ -85,7 +85,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+            home: const RecurringListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -100,7 +100,7 @@ void main() {
           overrides: [
             budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
             recurringListProvider.overrideWith(
-              (ref, budgetId) =>
+              (ref, entityId) =>
                   throw Exception('Could not load recurring transactions'),
             ),
           ],
@@ -108,7 +108,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+            home: const RecurringListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -127,14 +127,14 @@ void main() {
           overrides: [
             budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
             recurringListProvider.overrideWith(
-              (ref, budgetId) async => <RecurringTransaction>[],
+              (ref, entityId) async => <RecurringTransaction>[],
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+            home: const RecurringListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -169,7 +169,7 @@ void main() {
         ),
         _makeRecurring(
           description: 'Rent',
-          amountCents: -150000,
+          amountMinor: -150000,
           id: UuidValue.fromString('00000000-0000-0000-0000-000000000022'),
         ),
       ];
@@ -178,13 +178,13 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith((ref, budgetId) async => items),
+            recurringListProvider.overrideWith((ref, entityId) async => items),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+            home: const RecurringListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -207,13 +207,13 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith((ref, budgetId) async => items),
+            recurringListProvider.overrideWith((ref, entityId) async => items),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+            home: const RecurringListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -237,13 +237,13 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith((ref, budgetId) async => items),
+            recurringListProvider.overrideWith((ref, entityId) async => items),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+            home: const RecurringListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -260,14 +260,14 @@ void main() {
           overrides: [
             budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
             recurringListProvider.overrideWith(
-              (ref, budgetId) async => <RecurringTransaction>[],
+              (ref, entityId) async => <RecurringTransaction>[],
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+            home: const RecurringListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -282,14 +282,14 @@ void main() {
           overrides: [
             budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
             recurringListProvider.overrideWith(
-              (ref, budgetId) async => <RecurringTransaction>[],
+              (ref, entityId) async => <RecurringTransaction>[],
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+            home: const RecurringListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -312,14 +312,14 @@ void main() {
           overrides: [
             budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
             recurringListProvider.overrideWith(
-              (ref, budgetId) async => <RecurringTransaction>[],
+              (ref, entityId) async => <RecurringTransaction>[],
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+            home: const RecurringListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -354,13 +354,13 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith((ref, budgetId) async => items),
+            recurringListProvider.overrideWith((ref, entityId) async => items),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+            home: const RecurringListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -373,13 +373,13 @@ void main() {
       final items = [
         _makeRecurring(
           description: 'Rent',
-          amountCents: -150000,
+          amountMinor: -150000,
           nextOccurrence: DateTime(2020),
           id: UuidValue.fromString('00000000-0000-0000-0000-000000000061'),
         ),
         _makeRecurring(
           description: 'Salary',
-          amountCents: 500000,
+          amountMinor: 500000,
           nextOccurrence: DateTime(2099),
           id: UuidValue.fromString('00000000-0000-0000-0000-000000000062'),
         ),
@@ -389,13 +389,13 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith((ref, budgetId) async => items),
+            recurringListProvider.overrideWith((ref, entityId) async => items),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+            home: const RecurringListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -410,18 +410,18 @@ void main() {
       final items = [
         _makeRecurring(
           description: 'Rent',
-          amountCents: -280000,
+          amountMinor: -280000,
           id: UuidValue.fromString('00000000-0000-0000-0000-000000000081'),
         ),
         _makeRecurring(
           description: 'Insurance',
-          amountCents: -50000,
+          amountMinor: -50000,
           currencyCode: 'EUR',
           id: UuidValue.fromString('00000000-0000-0000-0000-000000000082'),
         ),
         _makeRecurring(
           description: 'Salary',
-          amountCents: 800000,
+          amountMinor: 800000,
           currencyCode: 'EUR',
           id: UuidValue.fromString('00000000-0000-0000-0000-000000000083'),
         ),
@@ -431,13 +431,13 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith((ref, budgetId) async => items),
+            recurringListProvider.overrideWith((ref, entityId) async => items),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+            home: const RecurringListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -451,12 +451,12 @@ void main() {
       final items = [
         _makeRecurring(
           description: 'Rent',
-          amountCents: -150000,
+          amountMinor: -150000,
           id: UuidValue.fromString('00000000-0000-0000-0000-000000000071'),
         ),
         _makeRecurring(
           description: 'Salary',
-          amountCents: 500000,
+          amountMinor: 500000,
           id: UuidValue.fromString('00000000-0000-0000-0000-000000000072'),
         ),
       ];
@@ -465,13 +465,13 @@ void main() {
         ProviderScope(
           overrides: [
             budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith((ref, budgetId) async => items),
+            recurringListProvider.overrideWith((ref, entityId) async => items),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+            home: const RecurringListScreen(entityId: _entityId),
           ),
         ),
       );
@@ -490,7 +490,7 @@ void main() {
       overrides: [
         budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
         recurringListProvider.overrideWith(
-          (ref, budgetId) async => <RecurringTransaction>[],
+          (ref, entityId) async => <RecurringTransaction>[],
         ),
         recurringActionsProvider.overrideWith(() => actions),
       ],
@@ -498,7 +498,7 @@ void main() {
         theme: OpenBudgetTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const RecurringListScreen(budgetId: _budgetId),
+        home: const RecurringListScreen(entityId: _entityId),
       ),
     );
 
@@ -519,7 +519,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Save'));
       await tester.pumpAndSettle();
 
-      expect(actions.createdAmountCents, -1234);
+      expect(actions.createdAmountMinor, -1234);
     });
 
     testWidgets('refuses an over-precise amount instead of rounding it', (
@@ -541,7 +541,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Save'));
       await tester.pumpAndSettle();
 
-      expect(actions.createdAmountCents, isNull);
+      expect(actions.createdAmountMinor, isNull);
     });
 
     testWidgets('refuses a negative recurring amount', (tester) async {
@@ -561,7 +561,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Save'));
       await tester.pumpAndSettle();
 
-      expect(actions.createdAmountCents, isNull);
+      expect(actions.createdAmountMinor, isNull);
     });
   });
 }

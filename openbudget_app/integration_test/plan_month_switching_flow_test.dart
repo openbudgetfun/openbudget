@@ -16,27 +16,27 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:patrol/patrol.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000971';
+const _entityId = '00000000-0000-0000-0000-000000000971';
 const _categoryId = '00000000-0000-0000-0000-000000000972';
 const _envelopeId = '00000000-0000-0000-0000-000000000973';
 
 BudgetSummary _makeSummaryForMonth(BudgetMonth month) {
-  final budgetUuid = UuidValue.fromString(_budgetId);
+  final budgetUuid = UuidValue.fromString(_entityId);
   final ownerUuid = UuidValue.fromString(
     '00000000-0000-0000-0000-000000000974',
   );
   final categoryUuid = UuidValue.fromString(_categoryId);
   final envelopeUuid = UuidValue.fromString(_envelopeId);
-  final readyToAssignCents = month.month * 10000;
-  const totalBudgetedCents = 5000;
-  final totalIncomeCents = readyToAssignCents + totalBudgetedCents;
+  final readyToAssignMinor = month.month * 10000;
+  const totalBudgetedMinor = 5000;
+  final totalIncomeMinor = readyToAssignMinor + totalBudgetedMinor;
 
   final envelope = Envelope(
     id: envelopeUuid,
     name: 'Utilities',
     categoryId: categoryUuid,
-    budgetedAmountCents: totalBudgetedCents,
-    spentAmountCents: 0,
+    budgetedAmountMinor: totalBudgetedMinor,
+    spentAmountMinor: 0,
     currencyCode: 'USD',
     sortOrder: 0,
   );
@@ -53,27 +53,27 @@ BudgetSummary _makeSummaryForMonth(BudgetMonth month) {
         category: Category(
           id: categoryUuid,
           name: 'Bills',
-          budgetId: budgetUuid,
+          entityId: budgetUuid,
           sortOrder: 0,
         ),
         envelopes: [envelope],
         monthlyEnvelopes: [
           MonthlyEnvelopeData(
             envelope: envelope,
-            allocatedCents: totalBudgetedCents,
-            spentCents: 0,
-            availableCents: totalBudgetedCents,
-            carryoverCents: 0,
+            allocatedMinor: totalBudgetedMinor,
+            spentMinor: 0,
+            availableMinor: totalBudgetedMinor,
+            carryoverMinor: 0,
           ),
         ],
-        totalBudgetedCents: totalBudgetedCents,
-        totalSpentCents: 0,
-        totalAvailableCents: totalBudgetedCents,
+        totalBudgetedMinor: totalBudgetedMinor,
+        totalSpentMinor: 0,
+        totalAvailableMinor: totalBudgetedMinor,
       ),
     ],
-    totalIncomeCents: totalIncomeCents,
-    totalBudgetedCents: totalBudgetedCents,
-    readyToAssignCents: readyToAssignCents,
+    totalIncomeMinor: totalIncomeMinor,
+    totalBudgetedMinor: totalBudgetedMinor,
+    readyToAssignMinor: readyToAssignMinor,
     year: month.year,
     month: month.month,
   );
@@ -84,10 +84,10 @@ void main() {
     final tester = $.tester;
     final container = ProviderContainer(
       overrides: [
-        ageOfMoneyProvider.overrideWith((ref, budgetId) async => null),
+        ageOfMoneyProvider.overrideWith((ref, entityId) async => null),
         monthlyTransactionsProvider.overrideWith((ref, _) async => const []),
-        budgetMonthlySummaryProvider.overrideWith((ref, budgetId) async {
-          final month = ref.watch(selectedMonthProvider(budgetId));
+        budgetMonthlySummaryProvider.overrideWith((ref, entityId) async {
+          final month = ref.watch(selectedMonthProvider(entityId));
           return _makeSummaryForMonth(month);
         }),
         budgetGoalsProvider.overrideWith((ref, _) async => {}),
@@ -98,12 +98,12 @@ void main() {
     addTearDown(container.dispose);
 
     final router = GoRouter(
-      initialLocation: '/budgets/$_budgetId/plan',
+      initialLocation: '/budgets/$_entityId/plan',
       routes: [
         GoRoute(
           path: '/budgets/:id/plan',
           builder: (context, state) =>
-              BudgetDetailScreen(budgetId: state.pathParameters['id']!),
+              BudgetDetailScreen(entityId: state.pathParameters['entityId']!),
         ),
       ],
     );
@@ -121,8 +121,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final initialMonth = container.read(selectedMonthProvider(_budgetId));
-    final initialReadyText = formatCents(
+    final initialMonth = container.read(selectedMonthProvider(_entityId));
+    final initialReadyText = formatMinor(
       initialMonth.month * 10000,
       CurrencyCode.usd,
     );
@@ -131,13 +131,13 @@ void main() {
     await tester.tap(find.byKey(const Key('budget-month-previous')));
     await tester.pumpAndSettle();
 
-    final previousMonth = container.read(selectedMonthProvider(_budgetId));
+    final previousMonth = container.read(selectedMonthProvider(_entityId));
     final expectedPreviousMonth = initialMonth.month == 1
         ? BudgetMonth(year: initialMonth.year - 1, month: 12)
         : BudgetMonth(year: initialMonth.year, month: initialMonth.month - 1);
     expect(previousMonth, expectedPreviousMonth);
 
-    final previousReadyText = formatCents(
+    final previousReadyText = formatMinor(
       previousMonth.month * 10000,
       CurrencyCode.usd,
     );
@@ -146,7 +146,7 @@ void main() {
     await tester.tap(find.byKey(const Key('budget-month-next')));
     await tester.pumpAndSettle();
 
-    final restoredMonth = container.read(selectedMonthProvider(_budgetId));
+    final restoredMonth = container.read(selectedMonthProvider(_entityId));
     expect(restoredMonth, initialMonth);
     expect(find.text(initialReadyText), findsWidgets);
   });

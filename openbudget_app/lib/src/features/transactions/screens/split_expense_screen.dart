@@ -15,9 +15,9 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class SplitExpenseScreen extends HookConsumerWidget {
-  const SplitExpenseScreen({required this.budgetId, super.key});
+  const SplitExpenseScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,8 +25,8 @@ class SplitExpenseScreen extends HookConsumerWidget {
     final descriptionController = useTextEditingController();
     final totalAmountController = useTextEditingController();
     final isSubmitting = useState(false);
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
-    final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
+    final budgetAsync = ref.watch(budgetDetailProvider(entityId));
+    final summaryAsync = ref.watch(budgetSummaryProvider(entityId));
     final theme = Theme.of(context);
     final palette = theme.ob;
     final budgetCurrency =
@@ -57,7 +57,7 @@ class SplitExpenseScreen extends HookConsumerWidget {
 
     // Compute remaining amount
     final currencyDecimals = currencyDecimalsForCode(budgetCurrency);
-    final previewTotalCents =
+    final previewTotalMinor =
         parseMoneyInput(
           totalAmountController.text,
           decimals: currencyDecimals,
@@ -68,7 +68,7 @@ class SplitExpenseScreen extends HookConsumerWidget {
       decimals: currencyDecimals,
       message: l10n.amountInvalidFormat(currencyDecimals),
     );
-    final previewSplitTotalCents = splitControllers.value.fold<int>(
+    final previewSplitTotalMinor = splitControllers.value.fold<int>(
       0,
       (sum, split) =>
           sum +
@@ -78,8 +78,8 @@ class SplitExpenseScreen extends HookConsumerWidget {
               ) ??
               0),
     );
-    final remainingCents = previewTotalCents - previewSplitTotalCents;
-    final isBalanced = remainingCents == 0;
+    final remainingMinor = previewTotalMinor - previewSplitTotalMinor;
+    final isBalanced = remainingMinor == 0;
     final remainingTone = isBalanced ? ObTone.funded : ObTone.underfunded;
 
     return Scaffold(
@@ -88,7 +88,7 @@ class SplitExpenseScreen extends HookConsumerWidget {
           icon: const SkribbleIcon(data: OpenBudgetIcons.back),
           tooltip: l10n.transactionsBack,
           onPressed: () =>
-              context.goNamed(planRoute, pathParameters: {'id': budgetId}),
+              context.goNamed(planRoute, pathParameters: {'entityId': entityId}),
         ),
         title: Text(l10n.splitTransactionTitle),
       ),
@@ -173,7 +173,7 @@ class SplitExpenseScreen extends HookConsumerWidget {
                           ),
                         ),
                         ObAmount(
-                          formatCentsForCode(remainingCents, budgetCurrency),
+                          formatMinorForCode(remainingMinor, budgetCurrency),
                           tone: remainingTone,
                           style: theme.textTheme.bodyMedium,
                         ),
@@ -239,11 +239,11 @@ class SplitExpenseScreen extends HookConsumerWidget {
                             final currencyDecimals = currencyDecimalsForCode(
                               currency,
                             );
-                            final totalCents = parseMoneyInput(
+                            final totalMinor = parseMoneyInput(
                               totalAmountController.text,
                               decimals: currencyDecimals,
                             );
-                            if (totalCents == null || totalCents <= 0) return;
+                            if (totalMinor == null || totalMinor <= 0) return;
 
                             // Validate splits
                             final splits = splitControllers.value;
@@ -258,18 +258,18 @@ class SplitExpenseScreen extends HookConsumerWidget {
 
                             final splitItems = <SplitItem>[];
                             for (final split in splits) {
-                              final splitCents = parseMoneyInput(
+                              final splitMinor = parseMoneyInput(
                                 split.amountController.text,
                                 decimals: currencyDecimals,
                               );
-                              if (splitCents == null || splitCents <= 0) return;
+                              if (splitMinor == null || splitMinor <= 0) return;
 
                               final envId = split.selectedEnvelopeId;
                               final memo = split.memoController.text.trim();
 
                               splitItems.add(
                                 SplitItem(
-                                  amountCents: splitCents,
+                                  amountMinor: splitMinor,
                                   envelopeId: envId != null && envId.isNotEmpty
                                       // UuidValue.fromString is experimental.
                                       ? UuidValue.fromString(envId)
@@ -282,9 +282,9 @@ class SplitExpenseScreen extends HookConsumerWidget {
                             // Validate amounts match
                             final splitSum = splitItems.fold<int>(
                               0,
-                              (sum, s) => sum + s.amountCents,
+                              (sum, s) => sum + s.amountMinor,
                             );
-                            if (splitSum != totalCents) {
+                            if (splitSum != totalMinor) {
                               showAppToast(
                                 context,
                                 message: l10n.splitMismatchError,
@@ -303,9 +303,9 @@ class SplitExpenseScreen extends HookConsumerWidget {
                                   )
                                   .createSplit(
                                     description: description,
-                                    totalAmountCents: -totalCents.abs(),
+                                    totalAmountMinor: -totalMinor.abs(),
                                     currencyCode: currency,
-                                    budgetId: budgetId,
+                                    entityId: entityId,
                                     date: DateTime.now(),
                                     splits: splitItems,
                                   );
@@ -317,7 +317,7 @@ class SplitExpenseScreen extends HookConsumerWidget {
                               );
                               router.goNamed(
                                 planRoute,
-                                pathParameters: {'id': budgetId},
+                                pathParameters: {'entityId': entityId},
                               );
                             } on Exception catch (_) {
                               isSubmitting.value = false;

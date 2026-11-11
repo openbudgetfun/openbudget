@@ -1,113 +1,73 @@
-import 'package:flutter/foundation.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
-import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/month_figures_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'spending_report_provider.g.dart';
 
+/// One month's spending and income in base minor units, read from the
+/// server's month view. Activity per envelope is grouped by its category.
 @riverpod
 Future<SpendingReport> spendingReport(
   Ref ref,
-  String budgetId,
-  int year,
-  int month,
+  String entityId,
+  int endMonth,
 ) async {
-  final client = ref.read(serverpodClientProvider);
-  final transactions = await client.transaction.listByMonth(
-    UuidValue.fromString(budgetId),
-    year,
-    month,
+  final views = await ref.watch(
+    monthFiguresProvider(entityId, endMonth, 1).future,
   );
-
-  final summary = await ref.watch(budgetSummaryProvider(budgetId).future);
-
-  var totalIncome = 0;
-  var totalExpenses = 0;
-  final categorySpending = <String, int>{};
-  final envelopeCategoryById = <String, String>{};
-
-  for (final categorySummary in summary.categories) {
-    final categoryName = categorySummary.category.name;
-    for (final envelopeSummary in categorySummary.envelopes) {
-      final envelopeId = envelopeSummary.id?.toString();
-      if (envelopeId != null) {
-        envelopeCategoryById[envelopeId] = categoryName;
-      }
-    }
-  }
-
-  for (final tx in transactions) {
-    if (tx.amountCents > 0) {
-      totalIncome += tx.amountCents;
-    } else {
-      totalExpenses += tx.amountCents.abs();
-    }
-  }
-  categorySpending.addAll(
-    buildCategorySpendingByEnvelope(
-      transactions: transactions,
-      envelopeCategoryById: envelopeCategoryById,
-    ),
-  );
-
-  return SpendingReport(
-    totalIncome: totalIncome,
-    totalExpenses: totalExpenses,
-    netIncome: totalIncome - totalExpenses,
-    transactionCount: transactions.length,
-    categorySpending: categorySpending,
-    currencyCode: summary.budget.currencyCode,
-  );
+  return _reportFor(views, views.first.currencyCode);
 }
 
+/// The last [monthCount] months combined, for the preset ranges.
 @riverpod
 Future<SpendingReport> spendingReportPreset(
   Ref ref,
-  String budgetId,
-  int endYear,
+  String entityId,
   int endMonth,
   int monthCount,
 ) async {
-  final normalizedMonthCount = monthCount < 1 ? 1 : monthCount;
-  final monthRange = _buildMonthRange(
-    endYear: endYear,
-    endMonth: endMonth,
-    monthCount: normalizedMonthCount,
+  final views = await ref.watch(
+    monthFiguresProvider(entityId, endMonth, monthCount).future,
   );
-  final reports = await Future.wait(
-    monthRange.map(
-      (month) => ref.watch(
-        spendingReportProvider(budgetId, month.year, month.month).future,
-      ),
-    ),
-  );
-
-  return SpendingReport.combine(reports);
+  return _reportFor(views, views.first.currencyCode);
 }
 
-List<_YearMonth> _buildMonthRange({
-  required int endYear,
-  required int endMonth,
-  required int monthCount,
-}) {
-  final months = <_YearMonth>[];
-  var year = endYear;
-  var month = endMonth;
+SpendingReport _reportFor(List<BudgetMonthView> views, String currencyCode) {
+  final monthReports = views.map(_reportForView).toList();
+  return SpendingReport.combine(monthReports);
+}
 
-  for (var index = 0; index < monthCount; index++) {
-    months.add(_YearMonth(year: year, month: month));
-    if (month == 1) {
-      year -= 1;
-      month = 12;
-    } else {
-      month -= 1;
-    }
+SpendingReport _reportForView(BudgetMonthView view) {
+  final categorySpending = <String, int>{};
+  final categoryNameById = <String, String>{
+    for (final category in view.categories)
+      category.id?.toString() ?? '': category.name,
+  };
+
+  for (final envelope in view.envelopes) {
+    if (envelope.activityMinor >= 0) continue;
+    final categoryName =
+        categoryNameById[envelope.envelope.categoryId.toString()] ?? '';
+    categorySpending[categoryName] =
+        (categorySpending[categoryName] ?? 0) + envelope.activityMinor.abs();
   }
 
-  return months;
+  return SpendingReport(
+    totalIncome: view.summary.incomeMinor,
+    totalExpenses: view.summary.activityMinor < 0
+        ? view.summary.activityMinor.abs()
+        : 0,
+    netIncome: view.summary.incomeMinor + view.summary.activityMinor,
+    transactionCount: 0,
+    categorySpending: categorySpending,
+    currencyCode: view.currencyCode,
+    month: view.month,
+  );
 }
 
+/// One month (or a range of months combined) of spending, in base minor
+/// units. All figures come from the server's month view; none are summed
+/// from raw transactions in the app.
 class SpendingReport {
   const SpendingReport({
     required this.totalIncome,
@@ -116,13 +76,15 @@ class SpendingReport {
     required this.transactionCount,
     required this.categorySpending,
     required this.currencyCode,
+    this.month,
   });
 
   factory SpendingReport.combine(Iterable<SpendingReport> reports) {
     var totalIncome = 0;
     var totalExpenses = 0;
     var transactionCount = 0;
-    var currencyCode = 'USD';
+    String? currencyCode;
+    int? month;
     final categorySpending = <String, int>{};
 
     for (final report in reports) {
@@ -130,6 +92,7 @@ class SpendingReport {
       totalExpenses += report.totalExpenses;
       transactionCount += report.transactionCount;
       currencyCode = report.currencyCode;
+      month = report.month ?? month;
 
       for (final entry in report.categorySpending.entries) {
         categorySpending[entry.key] =
@@ -143,7 +106,8 @@ class SpendingReport {
       netIncome: totalIncome - totalExpenses,
       transactionCount: transactionCount,
       categorySpending: categorySpending,
-      currencyCode: currencyCode,
+      currencyCode: currencyCode ?? 'USD',
+      month: month,
     );
   }
 
@@ -153,35 +117,12 @@ class SpendingReport {
   final int transactionCount;
   final Map<String, int> categorySpending;
   final String currencyCode;
-}
 
-class _YearMonth {
-  const _YearMonth({required this.year, required this.month});
+  /// The yyyymm month this report covers; null when combined.
+  final int? month;
 
-  final int year;
-  final int month;
-}
-
-@visibleForTesting
-Map<String, int> buildCategorySpendingByEnvelope({
-  required Iterable<Transaction> transactions,
-  required Map<String, String> envelopeCategoryById,
-}) {
-  final categorySpending = <String, int>{};
-
-  for (final tx in transactions) {
-    if (tx.amountCents >= 0 || tx.envelopeId == null) {
-      continue;
-    }
-
-    final categoryName = envelopeCategoryById[tx.envelopeId.toString()];
-    if (categoryName == null) {
-      continue;
-    }
-
-    categorySpending[categoryName] =
-        (categorySpending[categoryName] ?? 0) + tx.amountCents.abs();
-  }
-
-  return categorySpending;
+  /// The (year, month) pair screens use for their titles.
+  ({int year, int month})? get yearMonth => month == null
+      ? null
+      : (year: month! ~/ 100, month: month! % 100);
 }

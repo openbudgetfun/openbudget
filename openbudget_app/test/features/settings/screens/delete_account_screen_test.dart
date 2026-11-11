@@ -9,7 +9,7 @@ void main() {
     theme: OpenBudgetTheme.light,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
-    home: const DeleteAccountScreen(budgetId: 'test-budget-id'),
+    home: const DeleteAccountScreen(entityId: 'test-budget-id'),
   );
 
   group('DeleteAccountScreen', () {

@@ -19,8 +19,8 @@ abstract final class TestData {
   static const expenseDescription = 'Grocery Store';
   static const incomeDescription = 'Monthly Salary';
   static const transferDescription = 'To Savings';
-  static const expenseAmountCents = 5499;
-  static const incomeAmountCents = 350000;
+  static const expenseAmountMinor = 5499;
+  static const incomeAmountMinor = 350000;
 
   // Tax
   static const taxProfileTitle = 'Tax profile';

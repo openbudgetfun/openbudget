@@ -11,11 +11,11 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000001';
-final _budgetUuid = UuidValue.fromString(_budgetId);
+const _entityId = '00000000-0000-0000-0000-000000000001';
+final _budgetUuid = UuidValue.fromString(_entityId);
 
 class _RecordingSplitActions extends SplitTransactionActions {
-  int? totalAmountCents;
+  int? totalAmountMinor;
   List<SplitItem>? splits;
 
   @override
@@ -24,20 +24,20 @@ class _RecordingSplitActions extends SplitTransactionActions {
   @override
   Future<List<Transaction>> createSplit({
     required String description,
-    required int totalAmountCents,
+    required int totalAmountMinor,
     required String currencyCode,
-    required String budgetId,
+    required String entityId,
     required DateTime date,
     required List<SplitItem> splits,
   }) async {
-    this.totalAmountCents = totalAmountCents;
+    this.totalAmountMinor = totalAmountMinor;
     this.splits = splits;
     return [
       Transaction(
         description: description,
-        amountCents: totalAmountCents,
+        amountMinor: totalAmountMinor,
         currencyCode: currencyCode,
-        budgetId: _budgetUuid,
+        entityId: _budgetUuid,
         transactionDate: date,
         cleared: false,
         reconciled: false,
@@ -57,16 +57,16 @@ Budget _makeBudget() => Budget(
 BudgetSummary _makeSummary() => BudgetSummary(
   budget: _makeBudget(),
   categories: const [],
-  totalIncomeCents: 0,
-  totalBudgetedCents: 0,
-  readyToAssignCents: 0,
+  totalIncomeMinor: 0,
+  totalBudgetedMinor: 0,
+  readyToAssignMinor: 0,
   year: 2026,
   month: 2,
 );
 
 Widget _buildSubject({required SplitTransactionActions actions}) {
   final router = GoRouter(
-    initialLocation: '/budgets/$_budgetId/split',
+    initialLocation: '/budgets/$_entityId/split',
     routes: [
       GoRoute(
         name: planRoute,
@@ -77,7 +77,7 @@ Widget _buildSubject({required SplitTransactionActions actions}) {
       GoRoute(
         path: '/budgets/:id/split',
         builder: (context, state) =>
-            SplitExpenseScreen(budgetId: state.pathParameters['id']!),
+            SplitExpenseScreen(entityId: state.pathParameters['entityId']!),
       ),
     ],
   );
@@ -129,9 +129,9 @@ void main() {
     await _enterAmounts(tester, total: '12.34', first: '6.17', second: '6.17');
     await _tapSave(tester);
 
-    expect(actions.totalAmountCents, -1234);
+    expect(actions.totalAmountMinor, -1234);
     expect(
-      actions.splits?.map((split) => split.amountCents).toList(),
+      actions.splits?.map((split) => split.amountMinor).toList(),
       [617, 617],
     );
   });
@@ -157,7 +157,7 @@ void main() {
 
     await _tapSave(tester);
 
-    expect(actions.totalAmountCents, isNull);
+    expect(actions.totalAmountMinor, isNull);
   });
 
   testWidgets('refuses an over-precise split line', (tester) async {
@@ -179,7 +179,7 @@ void main() {
 
     await _tapSave(tester);
 
-    expect(actions.totalAmountCents, isNull);
+    expect(actions.totalAmountMinor, isNull);
   });
 
   testWidgets('refuses negative split amounts', (tester) async {
@@ -201,6 +201,6 @@ void main() {
 
     await _tapSave(tester);
 
-    expect(actions.totalAmountCents, isNull);
+    expect(actions.totalAmountMinor, isNull);
   });
 }

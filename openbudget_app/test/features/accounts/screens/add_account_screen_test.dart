@@ -13,7 +13,7 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class _RecordingCreateAccountActions extends AccountActions {
-  int? createdBalanceCents;
+  int? createdBalanceMinor;
 
   @override
   Future<void> build() async {}
@@ -22,22 +22,22 @@ class _RecordingCreateAccountActions extends AccountActions {
   Future<Account> createAccount({
     required String name,
     required String accountType,
-    required int balanceCents,
+    required int balanceMinor,
     required String currencyCode,
-    required String budgetId,
+    required String entityId,
     required bool onBudget,
     required int sortOrder,
     String? walletAddress,
     String? institutionId,
   }) async {
-    createdBalanceCents = balanceCents;
+    createdBalanceMinor = balanceMinor;
     return Account(
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000777'),
       name: name,
       accountType: accountType,
-      balanceCents: balanceCents,
+      balanceMinor: balanceMinor,
       currencyCode: currencyCode,
-      budgetId: UuidValue.fromString(budgetId),
+      entityId: UuidValue.fromString(entityId),
       onBudget: onBudget,
       sortOrder: sortOrder,
       isClosed: false,
@@ -53,9 +53,9 @@ class _ThrowingCreateAccountActions extends AccountActions {
   Future<Account> createAccount({
     required String name,
     required String accountType,
-    required int balanceCents,
+    required int balanceMinor,
     required String currencyCode,
-    required String budgetId,
+    required String entityId,
     required bool onBudget,
     required int sortOrder,
     String? walletAddress,
@@ -66,7 +66,7 @@ class _ThrowingCreateAccountActions extends AccountActions {
 }
 
 void main() {
-  const budgetId = 'test-budget-1';
+  const entityId = 'test-budget-1';
   const unlinkedTypeTileKey = Key('add-account-unlinked-type-tile');
   const checkingTypeOptionKey = ValueKey('add-account-type-option-checking');
   final testInstitutions = <Institution>[
@@ -85,13 +85,13 @@ void main() {
 
   Widget buildSubject({String currencyCode = 'USD'}) {
     final router = GoRouter(
-      initialLocation: '/budgets/$budgetId/accounts/add',
+      initialLocation: '/budgets/$entityId/accounts/add',
       routes: [
         GoRoute(
           name: addAccountRoute,
           path: '/budgets/:id/accounts/add',
           builder: (context, state) =>
-              AddAccountScreen(budgetId: state.pathParameters['id']!),
+              AddAccountScreen(entityId: state.pathParameters['entityId']!),
         ),
         GoRoute(
           name: accountListRoute,
@@ -313,9 +313,9 @@ void main() {
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000201'),
       name: 'Existing',
       accountType: 'checking',
-      balanceCents: 1000,
+      balanceMinor: 1000,
       currencyCode: 'USD',
-      budgetId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
+      entityId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
       onBudget: true,
       sortOrder: 0,
       isClosed: false,
@@ -324,22 +324,22 @@ void main() {
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000202'),
       name: 'New',
       accountType: 'checking',
-      balanceCents: 5000,
+      balanceMinor: 5000,
       currencyCode: 'USD',
-      budgetId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
+      entityId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
       onBudget: true,
       sortOrder: 1,
       isClosed: false,
     );
 
     final router = GoRouter(
-      initialLocation: '/budgets/$budgetId/accounts/add',
+      initialLocation: '/budgets/$entityId/accounts/add',
       routes: [
         GoRoute(
           name: addAccountRoute,
           path: '/budgets/:id/accounts/add',
           builder: (context, state) =>
-              AddAccountScreen(budgetId: state.pathParameters['id']!),
+              AddAccountScreen(entityId: state.pathParameters['entityId']!),
         ),
         GoRoute(
           name: accountListRoute,
@@ -359,7 +359,7 @@ void main() {
           accountActionsProvider.overrideWith(
             _ThrowingCreateAccountActions.new,
           ),
-          accountListProvider(budgetId).overrideWith((ref) async {
+          accountListProvider(entityId).overrideWith((ref) async {
             accountListReads++;
             return accountListReads == 1 ? [before] : [before, after];
           }),
@@ -403,13 +403,13 @@ void main() {
   group('unlinked account balance entry', () {
     Widget buildSubjectWith(AccountActions actions) {
       final router = GoRouter(
-        initialLocation: '/budgets/$budgetId/accounts/add',
+        initialLocation: '/budgets/$entityId/accounts/add',
         routes: [
           GoRoute(
             name: addAccountRoute,
             path: '/budgets/:id/accounts/add',
             builder: (context, state) =>
-                AddAccountScreen(budgetId: state.pathParameters['id']!),
+                AddAccountScreen(entityId: state.pathParameters['entityId']!),
           ),
           GoRoute(
             name: accountListRoute,
@@ -426,7 +426,7 @@ void main() {
             (ref, locationCode) async => testInstitutions,
           ),
           accountActionsProvider.overrideWith(() => actions),
-          accountListProvider(budgetId).overrideWith((ref) async => const []),
+          accountListProvider(entityId).overrideWith((ref) async => const []),
         ],
         child: MaterialApp.router(
           theme: OpenBudgetTheme.light,
@@ -464,7 +464,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Next'));
       await tester.pumpAndSettle();
 
-      expect(actions.createdBalanceCents, 1234);
+      expect(actions.createdBalanceMinor, 1234);
     });
 
     testWidgets('refuses an over-precise balance instead of rounding it', (
@@ -483,7 +483,7 @@ void main() {
         find.widgetWithText(FilledButton, 'Next'),
       );
       expect(nextButton.onPressed, isNull);
-      expect(actions.createdBalanceCents, isNull);
+      expect(actions.createdBalanceMinor, isNull);
     });
 
     testWidgets('accepts a negative balance', (tester) async {
@@ -499,7 +499,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Next'));
       await tester.pumpAndSettle();
 
-      expect(actions.createdBalanceCents, -1234);
+      expect(actions.createdBalanceMinor, -1234);
     });
   });
 }

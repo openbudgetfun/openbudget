@@ -5,23 +5,23 @@ import 'package:openbudget_core/openbudget_core.dart';
 
 void main() {
   group('currency_code_utils', () {
-    test('aggregateCentsByCurrency sums values per currency', () {
+    test('aggregateMinorByCurrency sums values per currency', () {
       final rows = [('USD', 100), ('EUR', 200), ('USD', -40)];
-      final totals = aggregateCentsByCurrency(
+      final totals = aggregateMinorByCurrency(
         rows,
         currencyCodeOf: (row) => row.$1,
-        amountCentsOf: (row) => row.$2,
+        amountMinorOf: (row) => row.$2,
       );
 
       expect(totals, {'USD': 60, 'EUR': 200});
     });
 
-    test('aggregateCentsByCurrency keeps unknown codes separate from USD', () {
+    test('aggregateMinorByCurrency keeps unknown codes separate from USD', () {
       final rows = [('USD', 100), ('XYZ', 250), ('xyz', 50), (' usd ', 25)];
-      final totals = aggregateCentsByCurrency(
+      final totals = aggregateMinorByCurrency(
         rows,
         currencyCodeOf: (row) => row.$1,
-        amountCentsOf: (row) => row.$2,
+        amountMinorOf: (row) => row.$2,
       );
 
       expect(totals, {'USD': 125, 'XYZ': 300});
@@ -42,17 +42,17 @@ void main() {
     });
   });
 
-  group('formatCentsForCode', () {
+  group('formatMinorForCode', () {
     test('uses the known currency symbol and precision', () {
-      expect(formatCentsForCode(1250, 'USD'), r'$12.50');
-      expect(formatCentsForCode(12345, 'JPY'), '¥12,345');
-      expect(formatCentsForCode(1250, ' eur '), '€12.50');
+      expect(formatMinorForCode(1250, 'USD'), r'$12.50');
+      expect(formatMinorForCode(12345, 'JPY'), '¥12,345');
+      expect(formatMinorForCode(1250, ' eur '), '€12.50');
     });
 
     test('falls back to the raw code and a plain two-decimal amount', () {
-      expect(formatCentsForCode(1250, 'XYZ'), 'XYZ 12.50');
-      expect(formatCentsForCode(-125000, 'xyz'), 'XYZ -1,250.00');
-      expect(formatCentsForCode(0, ''), '0.00');
+      expect(formatMinorForCode(1250, 'XYZ'), 'XYZ 12.50');
+      expect(formatMinorForCode(-125000, 'xyz'), 'XYZ -1,250.00');
+      expect(formatMinorForCode(0, ''), '0.00');
     });
   });
 }

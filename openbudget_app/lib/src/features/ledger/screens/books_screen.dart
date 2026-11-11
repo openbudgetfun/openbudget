@@ -20,9 +20,9 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 /// A budget's double-entry books: journals, chart of accounts and trial
 /// balance.
 class BooksScreen extends HookConsumerWidget {
-  const BooksScreen({required this.budgetId, super.key});
+  const BooksScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,7 +30,7 @@ class BooksScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
     final tabController = useTabController(initialLength: 3);
-    final lockAsync = ref.watch(ledgerLockDateProvider(budgetId));
+    final lockAsync = ref.watch(ledgerLockDateProvider(entityId));
     final storedLockDate = lockAsync.value?.lockDate;
 
     return Scaffold(
@@ -50,7 +50,7 @@ class BooksScreen extends HookConsumerWidget {
         tooltip: l10n.booksNewJournalTooltip,
         onPressed: () => context.pushNamed(
           journalNewRoute,
-          pathParameters: {'id': budgetId},
+          pathParameters: {'entityId': entityId},
         ),
         child: const SkribbleIcon(data: OpenBudgetIcons.add),
       ),
@@ -110,9 +110,9 @@ class BooksScreen extends HookConsumerWidget {
             child: TabBarView(
               controller: tabController,
               children: [
-                _JournalsTab(budgetId: budgetId),
-                _AccountsTab(budgetId: budgetId),
-                _TrialBalanceTab(budgetId: budgetId),
+                _JournalsTab(entityId: entityId),
+                _AccountsTab(entityId: entityId),
+                _TrialBalanceTab(entityId: entityId),
               ],
             ),
           ),
@@ -194,7 +194,7 @@ class BooksScreen extends HookConsumerWidget {
     try {
       final lock = await ref
           .read(ledgerActionsProvider.notifier)
-          .setLockDate(budgetId: budgetId, lockDate: ledgerCalendarDate(date));
+          .setLockDate(entityId: entityId, lockDate: ledgerCalendarDate(date));
       if (!context.mounted) return;
       showAppToast(
         context,
@@ -216,14 +216,14 @@ class BooksScreen extends HookConsumerWidget {
 
 /// The posted and draft journals, newest first.
 class _JournalsTab extends HookConsumerWidget {
-  const _JournalsTab({required this.budgetId});
+  const _JournalsTab({required this.entityId});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final journalsAsync = ref.watch(ledgerJournalsProvider(budgetId));
+    final journalsAsync = ref.watch(ledgerJournalsProvider(entityId));
 
     return journalsAsync.when(
       loading: () => Center(
@@ -237,7 +237,7 @@ class _JournalsTab extends HookConsumerWidget {
             message: ledgerErrorMessage(error, l10n.booksJournalsLoadError),
             action: ObStateAction(
               label: l10n.ledgerRetry,
-              onPressed: () => ref.invalidate(ledgerJournalsProvider(budgetId)),
+              onPressed: () => ref.invalidate(ledgerJournalsProvider(entityId)),
             ),
           ),
         ),
@@ -251,14 +251,14 @@ class _JournalsTab extends HookConsumerWidget {
                   label: l10n.booksJournalEmptyAction,
                   onPressed: () => context.pushNamed(
                     journalNewRoute,
-                    pathParameters: {'id': budgetId},
+                    pathParameters: {'entityId': entityId},
                   ),
                 ),
               ),
             )
           : RefreshIndicator(
               onRefresh: () async =>
-                  ref.invalidate(ledgerJournalsProvider(budgetId)),
+                  ref.invalidate(ledgerJournalsProvider(entityId)),
               child: ListView.builder(
                 key: const Key('books-journals-list'),
                 padding: const EdgeInsets.fromLTRB(
@@ -275,7 +275,7 @@ class _JournalsTab extends HookConsumerWidget {
                     onTap: () => context.pushNamed(
                       journalDetailRoute,
                       pathParameters: {
-                        'id': budgetId,
+                        'id': entityId,
                         'journalId': journal.id!.toString(),
                       },
                     ),
@@ -333,14 +333,14 @@ class _JournalCard extends HookWidget {
 
 /// The chart of accounts grouped by account type.
 class _AccountsTab extends HookConsumerWidget {
-  const _AccountsTab({required this.budgetId});
+  const _AccountsTab({required this.entityId});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final accountsAsync = ref.watch(ledgerAccountsProvider(budgetId));
+    final accountsAsync = ref.watch(ledgerAccountsProvider(entityId));
 
     return accountsAsync.when(
       loading: () => Center(
@@ -354,7 +354,7 @@ class _AccountsTab extends HookConsumerWidget {
             message: ledgerErrorMessage(error, l10n.booksAccountsLoadError),
             action: ObStateAction(
               label: l10n.ledgerRetry,
-              onPressed: () => ref.invalidate(ledgerAccountsProvider(budgetId)),
+              onPressed: () => ref.invalidate(ledgerAccountsProvider(entityId)),
             ),
           ),
         ),
@@ -378,7 +378,7 @@ class _AccountsTab extends HookConsumerWidget {
 
         return RefreshIndicator(
           onRefresh: () async =>
-              ref.invalidate(ledgerAccountsProvider(budgetId)),
+              ref.invalidate(ledgerAccountsProvider(entityId)),
           child: ListView(
             key: const Key('books-accounts-list'),
             padding: const EdgeInsets.fromLTRB(
@@ -463,9 +463,9 @@ class _AccountRow extends HookWidget {
 
 /// The trial balance through a chosen as-of date.
 class _TrialBalanceTab extends HookConsumerWidget {
-  const _TrialBalanceTab({required this.budgetId});
+  const _TrialBalanceTab({required this.entityId});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -474,7 +474,7 @@ class _TrialBalanceTab extends HookConsumerWidget {
     final palette = theme.ob;
     final asOf = useState(ledgerCalendarDate(DateTime.now()));
     final reportAsync = ref.watch(
-      ledgerTrialBalanceProvider(budgetId, asOf.value),
+      ledgerTrialBalanceProvider(entityId, asOf.value),
     );
 
     return reportAsync.when(
@@ -490,7 +490,7 @@ class _TrialBalanceTab extends HookConsumerWidget {
             action: ObStateAction(
               label: l10n.ledgerRetry,
               onPressed: () => ref.invalidate(
-                ledgerTrialBalanceProvider(budgetId, asOf.value),
+                ledgerTrialBalanceProvider(entityId, asOf.value),
               ),
             ),
           ),
@@ -501,7 +501,7 @@ class _TrialBalanceTab extends HookConsumerWidget {
 
         return RefreshIndicator(
           onRefresh: () async => ref.invalidate(
-            ledgerTrialBalanceProvider(budgetId, asOf.value),
+            ledgerTrialBalanceProvider(entityId, asOf.value),
           ),
           child: ListView(
             key: const Key('books-trial-list'),
@@ -557,7 +557,7 @@ class _TrialBalanceTab extends HookConsumerWidget {
                     : ObToneChip(
                         key: const Key('trial-unbalanced-chip'),
                         label: l10n.ledgerTrialBalanceUnbalanced(
-                          formatCentsForCode(
+                          formatMinorForCode(
                             (report.totalDebitMinor - report.totalCreditMinor)
                                 .abs(),
                             report.currencyCode,
@@ -607,13 +607,13 @@ class _TrialBalanceTab extends HookConsumerWidget {
                           name: row.accountName,
                           debit: row.debitMinor == 0
                               ? ''
-                              : formatCentsForCode(
+                              : formatMinorForCode(
                                   row.debitMinor,
                                   report.currencyCode,
                                 ),
                           credit: row.creditMinor == 0
                               ? ''
-                              : formatCentsForCode(
+                              : formatMinorForCode(
                                   row.creditMinor,
                                   report.currencyCode,
                                 ),
@@ -623,11 +623,11 @@ class _TrialBalanceTab extends HookConsumerWidget {
                       LedgerAmountRow(
                         code: '',
                         name: l10n.ledgerTotalsLabel,
-                        debit: formatCentsForCode(
+                        debit: formatMinorForCode(
                           report.totalDebitMinor,
                           report.currencyCode,
                         ),
-                        credit: formatCentsForCode(
+                        credit: formatMinorForCode(
                           report.totalCreditMinor,
                           report.currencyCode,
                         ),

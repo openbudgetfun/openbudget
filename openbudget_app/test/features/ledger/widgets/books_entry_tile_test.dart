@@ -39,7 +39,7 @@ Future<void> _pumpTile(
         path: '/more',
         builder: (_, _) => const Scaffold(
           body: BooksEntryTile(
-            budgetId: testBudgetId,
+            entityId: testBudgetId,
           ),
         ),
       ),
