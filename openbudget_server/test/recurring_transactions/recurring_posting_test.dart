@@ -5,6 +5,7 @@ import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:openbudget_server/src/generated/transactions/transaction.dart'
     as model;
 import 'package:openbudget_server/src/recurring_transactions/recurring_transaction_endpoint.dart';
+import 'package:openbudget_server/src/recurring_transactions/recurring_transaction_service.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:test/test.dart';
 
@@ -254,6 +255,47 @@ void main() {
       expect(reloaded.nextDate, today(book).add(const Duration(days: 1)));
       expect(await endpoint.postDue(book.session, book.entity.id!), 0);
       expect(await book.cachedBalanceMinor(account), -4000);
+    });
+
+    test('when a long backlog is due then one run stops at the documented '
+        'cap and the next run finishes', () async {
+      final book = await newBook();
+      final account = await book.addAccount();
+      final start = today(
+        book,
+      ).subtract(const Duration(days: 100));
+      final created = await createDue(
+        book,
+        onAccount: account,
+        frequency: RecurrenceFrequency.daily,
+        nextDate: start,
+      );
+
+      expect(
+        await endpoint.postDue(book.session, book.entity.id!),
+        RecurringTransactionService.maxOccurrencesPerRun,
+      );
+      expect(
+        await model.Transaction.db.count(
+          book.session,
+          where: (t) => t.recurringTransactionId.equals(created.id),
+        ),
+        RecurringTransactionService.maxOccurrencesPerRun,
+      );
+      expect(
+        (await endpoint.get(book.session, created.id!)).nextDate,
+        today(book),
+      );
+
+      expect(await endpoint.postDue(book.session, book.entity.id!), 1);
+      expect(
+        await model.Transaction.db.count(
+          book.session,
+          where: (t) => t.recurringTransactionId.equals(created.id),
+        ),
+        RecurringTransactionService.maxOccurrencesPerRun + 1,
+      );
+      expect(await endpoint.countDue(book.session, book.entity.id!), 0);
     });
 
     test('when counting due then a catching-up schedule counts once', () async {
