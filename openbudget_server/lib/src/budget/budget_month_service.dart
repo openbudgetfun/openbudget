@@ -10,6 +10,9 @@ import 'package:serverpod/serverpod.dart';
 /// The read path never loads transactions or per-envelope history. One
 /// repeatable-read transaction supplies a single snapshot, so a concurrent
 /// write cannot make the returned summary disagree with its envelope rows.
+/// A plan write commits first and then calls [month], so a write response is
+/// the latest coherent snapshot rather than three aggregates read inside the
+/// write transaction.
 ///
 /// Every amount in the result is in the entity's base-currency minor units.
 abstract final class BudgetMonthService {
@@ -94,7 +97,7 @@ GROUP BY 1, 2''';
 
   /// Runs after the activity aggregate and before the other two.
   ///
-  /// A snapshots test uses it to commit a competing write while the read is
+  /// A concurrency test uses it to commit a competing write while the read is
   /// open and then proves the returned view still comes from one snapshot.
   @visibleForTesting
   static Future<void> Function()? debugAfterActivityQuery;
@@ -120,20 +123,6 @@ GROUP BY 1, 2''';
         isolationLevel: IsolationLevel.repeatableRead,
       ),
     );
-  }
-
-  /// Builds a view inside a caller's write transaction.
-  ///
-  /// The caller holds the entity and envelope locks, so the three aggregates
-  /// cannot interleave with another plan write before this returns.
-  static Future<BudgetMonthView> inTransaction(
-    Session session, {
-    required Entity entity,
-    required int month,
-    required Transaction transaction,
-  }) {
-    BudgetValidation.requireMonth(month);
-    return _build(session, transaction, entity, month);
   }
 
   static Future<BudgetMonthView> _build(

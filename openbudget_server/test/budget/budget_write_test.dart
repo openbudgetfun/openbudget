@@ -2,6 +2,7 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:openbudget_core/openbudget_core.dart';
+import 'package:openbudget_server/src/budget/budget_month_service.dart';
 import 'package:openbudget_server/src/budget/budget_service.dart';
 import 'package:openbudget_server/src/entities/entity_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
@@ -57,6 +58,7 @@ void main() {
   tearDown(() {
     TransactionWriter.resetForTests();
     EntityRealtimeNotifier.resetForTests();
+    BudgetMonthService.debugAfterActivityQuery = null;
     BudgetService.debugBeforeCommit = null;
   });
 
@@ -706,6 +708,70 @@ void main() {
       expect(await allocationRows(202610), 2);
       expect(events, hasLength(20));
       await fixture.expectInvariant(after);
+    },
+  );
+
+  test(
+    'given a competing split posted after the first aggregate when a plan '
+    'write returns its view then the view is one coherent snapshot',
+    () async {
+      final first = fixture.envelopes[0];
+      final second = fixture.envelopes[1];
+      await fixture.income(5000, date: DateTime.utc(2026, 10, 1));
+      await fixture.allocate(202610, {first: 500, second: 1000});
+      final seeded = await TransactionWriter.create(
+        fixture.session,
+        TransactionInput(
+          accountId: fixture.account.id!,
+          date: DateTime.utc(2026, 10, 15),
+          amountMinor: -500,
+          description: 'Seed for split',
+          lines: const [],
+        ),
+      );
+      final writer = server.authenticatedSession(fixture.book.userId);
+      addTearDown(writer.close);
+
+      var splitPosted = false;
+      BudgetMonthService.debugAfterActivityQuery = () async {
+        if (splitPosted) return;
+        splitPosted = true;
+        await TransactionWriter.updateLines(
+          writer,
+          seeded.transaction.id!,
+          [
+            TransactionLineInput(amountMinor: -300, envelopeId: second.id),
+            TransactionLineInput(amountMinor: -200),
+          ],
+        );
+      };
+
+      final view = await BudgetService.setAllocations(
+        fixture.session,
+        entityId: fixture.entityId,
+        month: 202610,
+        allocations: [
+          AllocationInput(envelopeId: first.id!, allocatedMinor: 1000),
+        ],
+      );
+
+      expect(splitPosted, isTrue);
+      expect(view.envelopes[0].allocatedMinor, 1000);
+      final activity = view.envelopes[1].activityMinor;
+      final uncategorised = view.summary.uncategorizedMinor;
+      expect(
+        (activity == 0 && uncategorised == -500) ||
+            (activity == -300 && uncategorised == -200),
+        isTrue,
+        reason:
+            'the write response mixed facts from before and after the split: '
+            'envelope activity $activity, uncategorised $uncategorised',
+      );
+
+      final later = await fixture.month(202610);
+      expect(later.envelopes[1].activityMinor, -300);
+      expect(later.summary.uncategorizedMinor, -200);
+      await fixture.expectInvariant(later);
     },
   );
 }

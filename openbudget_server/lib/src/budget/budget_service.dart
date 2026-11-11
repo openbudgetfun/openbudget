@@ -11,9 +11,14 @@ import 'package:serverpod/serverpod.dart';
 /// Every write locks the entity row first, then the envelopes it names in
 /// UUID order, then allocation rows. Envelope deletion and reassignment use
 /// the same order, so a plan write and a catalogue change cannot form a lock
-/// cycle. Transactions, balances and account rows are never touched here.
+/// cycle. Transactions, balances and account rows are never written here.
+///
+/// A method that returns a view commits its own write first and then reads
+/// the view through [BudgetMonthService.month]. The response is therefore one
+/// coherent snapshot, and a concurrent write that commits before that read
+/// may appear in it.
 abstract final class BudgetService {
-  /// Runs inside a write transaction after every mutation, before the view.
+  /// Runs inside a write transaction after every mutation, before it commits.
   ///
   /// A rollback test uses it to fail deliberately and prove that neither rows
   /// nor change events survive the aborted transaction.
@@ -101,17 +106,14 @@ abstract final class BudgetService {
       }
 
       await _debugBeforeCommit();
-      final view = await BudgetMonthService.inTransaction(
-        session,
-        entity: entity,
-        month: month,
-        transaction: transaction,
-      );
-      return (entityId: _requireId(entity), month: month, view: view);
+      return (entityId: _requireId(entity), month: month);
     });
 
-    await _notify(session, outcome.entityId, month: outcome.month);
-    return outcome.view;
+    return _committedView(
+      session,
+      entityId: outcome.entityId,
+      month: outcome.month,
+    );
   }
 
   /// Moves a positive amount between two envelopes or between an envelope and
@@ -217,17 +219,14 @@ abstract final class BudgetService {
       }
 
       await _debugBeforeCommit();
-      final view = await BudgetMonthService.inTransaction(
-        session,
-        entity: entity,
-        month: month,
-        transaction: transaction,
-      );
-      return (entityId: _requireId(entity), month: month, view: view);
+      return (entityId: _requireId(entity), month: month);
     });
 
-    await _notify(session, outcome.entityId, month: outcome.month);
-    return outcome.view;
+    return _committedView(
+      session,
+      entityId: outcome.entityId,
+      month: outcome.month,
+    );
   }
 
   /// Replaces [toMonth]'s entire allocation set with [fromMonth]'s.
@@ -257,13 +256,7 @@ abstract final class BudgetService {
         transaction: transaction,
       );
       if (fromMonth == toMonth) {
-        final view = await BudgetMonthService.inTransaction(
-          session,
-          entity: entity,
-          month: toMonth,
-          transaction: transaction,
-        );
-        return (entityId: _requireId(entity), month: toMonth, view: view);
+        return (entityId: _requireId(entity), month: toMonth);
       }
 
       for (final row in source) {
@@ -317,17 +310,14 @@ abstract final class BudgetService {
       }
 
       await _debugBeforeCommit();
-      final view = await BudgetMonthService.inTransaction(
-        session,
-        entity: entity,
-        month: toMonth,
-        transaction: transaction,
-      );
-      return (entityId: _requireId(entity), month: toMonth, view: view);
+      return (entityId: _requireId(entity), month: toMonth);
     });
 
-    await _notify(session, outcome.entityId, month: outcome.month);
-    return outcome.view;
+    return _committedView(
+      session,
+      entityId: outcome.entityId,
+      month: outcome.month,
+    );
   }
 
   /// Saves the exact sparse allocation set of [month] under [name].
@@ -546,17 +536,14 @@ abstract final class BudgetService {
       }
 
       await _debugBeforeCommit();
-      final view = await BudgetMonthService.inTransaction(
-        session,
-        entity: entity,
-        month: month,
-        transaction: transaction,
-      );
-      return (entityId: _requireId(entity), month: month, view: view);
+      return (entityId: _requireId(entity), month: month);
     });
 
-    await _notify(session, outcome.entityId, month: outcome.month);
-    return outcome.view;
+    return _committedView(
+      session,
+      entityId: outcome.entityId,
+      month: outcome.month,
+    );
   }
 
   /// Deletes one template and its lines, checking ownership first.
@@ -602,6 +589,26 @@ abstract final class BudgetService {
     });
 
     await _notify(session, entityId);
+  }
+
+  /// Publishes the committed change, then reads the latest coherent view.
+  ///
+  /// The read cannot run inside the write transaction. That transaction is
+  /// READ COMMITTED and serializes only the plan rows it locks, so a posting
+  /// on another envelope could commit between the view's three aggregates.
+  /// Reading after commit gives the response one repeatable-read snapshot
+  /// instead; it may include a later committed write.
+  static Future<BudgetMonthView> _committedView(
+    Session session, {
+    required UuidValue entityId,
+    required int month,
+  }) async {
+    await _notify(session, entityId, month: month);
+    return BudgetMonthService.month(
+      session,
+      entityId: entityId,
+      month: month,
+    );
   }
 
   static Future<Entity> _lockWritableEntity(
