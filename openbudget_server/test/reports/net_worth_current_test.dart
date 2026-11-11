@@ -315,7 +315,8 @@ void main() {
       final first = fixture.entity;
       final second = await fixture.addEntity(name: 'Included');
       final excluded = await fixture.addEntity(
-        name: 'Excluded by flag',
+        name: 'Excluded company',
+        kind: EntityKind.company,
         includeInNetWorth: false,
       );
       final archived = await fixture.addEntity(
