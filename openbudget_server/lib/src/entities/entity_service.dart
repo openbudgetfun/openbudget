@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/common/currency_validation.dart';
 import 'package:openbudget_server/src/entities/entity_access.dart';
 import 'package:openbudget_server/src/entities/entity_clock.dart';
 import 'package:openbudget_server/src/entities/entity_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/generated/transactions/transaction.dart'
+    as model;
 import 'package:openbudget_server/src/settings/user_settings_service.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -221,5 +225,174 @@ abstract final class EntityService {
       await Entity.db.deleteRow(session, entity, transaction: tx);
     });
     await EntityRealtimeNotifier.notify(session, entityId, ChangeScope.entity);
+  }
+
+  /// Exports every record of an owned entity as one portable JSON document.
+  ///
+  /// Amounts are minor units in the row's own currency: transactions carry
+  /// the account currency plus the stored base amount, allocations are in
+  /// base currency. Lines travel with their transaction so the document can
+  /// be re-imported through the ordinary write path.
+  static Future<String> exportData(Session session, UuidValue entityId) async {
+    final entity = await EntityAccess.requireOwned(session, entityId);
+
+    final accounts = await Account.db.find(
+      session,
+      where: (a) => a.entityId.equals(entityId),
+      orderBy: (a) => a.sortOrder,
+    );
+    final categories = await Category.db.find(
+      session,
+      where: (c) => c.entityId.equals(entityId),
+      orderBy: (c) => c.sortOrder,
+    );
+    final envelopes = await Envelope.db.find(
+      session,
+      where: (e) => e.entityId.equals(entityId),
+      orderBy: (e) => e.categoryId,
+    );
+    final transactions = await model.Transaction.db.find(
+      session,
+      where: (t) => t.entityId.equals(entityId),
+      orderBy: (t) => t.date,
+    );
+    final transactionIds = transactions
+        .where((t) => t.id != null)
+        .map((t) => t.id!)
+        .toSet();
+    final lines = transactionIds.isEmpty
+        ? <TransactionLine>[]
+        : await TransactionLine.db.find(
+            session,
+            where: (l) => l.transactionId.inSet(transactionIds),
+            orderByList: (l) => [l.transactionId, l.sortOrder],
+          );
+    final linesByTransaction = <UuidValue, List<TransactionLine>>{};
+    for (final line in lines) {
+      linesByTransaction.putIfAbsent(line.transactionId, () => []).add(line);
+    }
+    final payees = await Payee.db.find(
+      session,
+      where: (p) => p.entityId.equals(entityId),
+      orderBy: (p) => p.name,
+    );
+    final recurring = await RecurringTransaction.db.find(
+      session,
+      where: (r) => r.entityId.equals(entityId),
+      orderBy: (r) => r.nextDate,
+    );
+    final allocations = await MonthlyAllocation.db.find(
+      session,
+      where: (a) => a.entityId.equals(entityId),
+      orderByList: (a) => [a.month, a.envelopeId],
+    );
+
+    final export = <String, dynamic>{
+      'exportVersion': 2,
+      'exportedAt': DateTime.now().toUtc().toIso8601String(),
+      'entity': {
+        'id': entity.id?.toString(),
+        'name': entity.name,
+        'kind': entity.kind.name,
+        'countryCode': entity.countryCode,
+        'baseCurrencyCode': entity.baseCurrencyCode,
+        'timeZone': entity.timeZone,
+        'fiscalYearEndMonth': entity.fiscalYearEndMonth,
+        'fiscalYearEndDay': entity.fiscalYearEndDay,
+        'createdAt': entity.createdAt.toIso8601String(),
+      },
+      'categories': [
+        for (final c in categories)
+          {
+            'id': c.id?.toString(),
+            'name': c.name,
+            'sortOrder': c.sortOrder,
+            'isHidden': c.isHidden,
+          },
+      ],
+      'envelopes': [
+        for (final e in envelopes)
+          {
+            'id': e.id?.toString(),
+            'name': e.name,
+            'categoryId': e.categoryId.toString(),
+            'note': e.note,
+            'taxCategoryCode': e.taxCategoryCode,
+            'isHidden': e.isHidden,
+          },
+      ],
+      'accounts': [
+        for (final a in accounts)
+          {
+            'id': a.id?.toString(),
+            'name': a.name,
+            'kind': a.kind.name,
+            'currencyCode': a.currencyCode,
+            'balanceSource': a.balanceSource.name,
+            'balanceMinor': a.balanceMinor,
+            'onBudget': a.onBudget,
+            'closedAt': a.closedAt?.toIso8601String(),
+          },
+      ],
+      'transactions': [
+        for (final t in transactions)
+          {
+            'id': t.id?.toString(),
+            'accountId': t.accountId.toString(),
+            'date': t.date.toIso8601String(),
+            'amountMinor': t.amountMinor,
+            'baseAmountMinor': t.baseAmountMinor,
+            'fxRate': t.fxRate,
+            'fxRateDate': t.fxRateDate.toIso8601String(),
+            'fxRateSource': t.fxRateSource.name,
+            'kind': t.kind.name,
+            'status': t.status.name,
+            'description': t.description,
+            'memo': t.memo,
+            'payeeId': t.payeeId?.toString(),
+            'lines': [
+              for (final TransactionLine line
+                  in linesByTransaction[t.id!] ?? const <TransactionLine>[])
+                {
+                  'amountMinor': line.amountMinor,
+                  'baseAmountMinor': line.baseAmountMinor,
+                  'envelopeId': line.envelopeId?.toString(),
+                  'ledgerAccountId': line.ledgerAccountId?.toString(),
+                  'taxCategoryCode': line.taxCategoryCode,
+                  'businessUsePercent': line.businessUsePercent,
+                  'salesTaxMinor': line.salesTaxMinor,
+                  'memo': line.memo,
+                  'sortOrder': line.sortOrder,
+                },
+            ],
+          },
+      ],
+      'payees': [
+        for (final p in payees) {'id': p.id?.toString(), 'name': p.name},
+      ],
+      'recurringTransactions': [
+        for (final r in recurring)
+          {
+            'id': r.id?.toString(),
+            'accountId': r.accountId.toString(),
+            'description': r.description,
+            'amountMinor': r.amountMinor,
+            'frequency': r.frequency.name,
+            'nextDate': r.nextDate.toIso8601String(),
+            'endDate': r.endDate?.toIso8601String(),
+            'isActive': r.isActive,
+          },
+      ],
+      'monthlyAllocations': [
+        for (final a in allocations)
+          {
+            'envelopeId': a.envelopeId.toString(),
+            'month': a.month,
+            'allocatedMinor': a.allocatedMinor,
+          },
+      ],
+    };
+
+    return jsonEncode(export);
   }
 }

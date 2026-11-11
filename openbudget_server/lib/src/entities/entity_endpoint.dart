@@ -81,4 +81,8 @@ class EntityEndpoint extends Endpoint {
     UuidValue entityId,
     String confirmName,
   ) => EntityService.delete(session, entityId, confirmName);
+
+  /// Exports every record of the entity as one portable JSON document.
+  Future<String> exportData(Session session, UuidValue entityId) =>
+      EntityService.exportData(session, entityId);
 }
