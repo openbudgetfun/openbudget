@@ -1,28 +1,31 @@
 import 'dart:convert';
 
-import 'package:cryptography/cryptography.dart';
+import 'package:cryptography/cryptography.dart' as crypto;
 import 'package:openbudget_server/src/generated/protocol.dart';
 
 /// An AES-GCM ciphertext and the nonce that produced it, both base64.
-class AgentSealedSecret {
-  const AgentSealedSecret({required this.cipherText, required this.nonce});
+class SealedSecret {
+  const SealedSecret({required this.cipherText, required this.nonce});
 
   final String cipherText;
   final String nonce;
 }
 
-/// Encrypts provider API keys at rest.
+/// Encrypts server-held secrets at rest: provider API keys, Plaid access
+/// tokens.
 ///
 /// AES-256-GCM authenticates the ciphertext as well as hiding it, so a
-/// tampered row fails to decrypt instead of yielding a wrong key.
-abstract final class AgentSecretBox {
-  static final AesGcm _algorithm = AesGcm.with256bits();
+/// tampered row fails to decrypt instead of yielding a wrong secret. A
+/// service that stores both fields must always write [SealedSecret.cipherText]
+/// and [SealedSecret.nonce] together.
+abstract final class SecretBox {
+  static final crypto.AesGcm _algorithm = crypto.AesGcm.with256bits();
 
   /// Encrypts [plaintext] with the base64 [base64Key].
   ///
   /// The ciphertext carries the GCM tag; the nonce is stored beside it because
   /// a nonce must never be reused with the same key.
-  static Future<AgentSealedSecret> seal({
+  static Future<SealedSecret> seal({
     required String plaintext,
     required String base64Key,
   }) async {
@@ -33,7 +36,7 @@ abstract final class AgentSecretBox {
       secretKey: key,
       nonce: nonce,
     );
-    return AgentSealedSecret(
+    return SealedSecret(
       cipherText: base64Encode([
         ...secretBox.cipherText,
         ...secretBox.mac.bytes,
@@ -55,57 +58,51 @@ abstract final class AgentSecretBox {
       cipherBytes = base64Decode(cipherText);
       nonceBytes = base64Decode(nonce);
     } on FormatException {
-      throw AgentProviderUnavailableException(
-        message: 'The stored agent provider key is not valid base64.',
+      throw ValidationException(
+        message: 'The stored secret is not valid base64.',
       );
     }
     if (cipherBytes is! List<int> || nonceBytes is! List<int>) {
-      throw AgentProviderUnavailableException(
-        message: 'The stored agent provider key is unreadable.',
-      );
+      throw ValidationException(message: 'The stored secret is unreadable.');
     }
 
     final tagLength = _algorithm.macAlgorithm.macLength;
     if (cipherBytes.length <= tagLength) {
-      throw AgentProviderUnavailableException(
-        message: 'The stored agent provider key is too short.',
-      );
+      throw ValidationException(message: 'The stored secret is too short.');
     }
     final split = cipherBytes.length - tagLength;
-    final secretBox = SecretBox(
+    final secretBox = crypto.SecretBox(
       cipherBytes.sublist(0, split),
       nonce: nonceBytes,
-      mac: Mac(cipherBytes.sublist(split)),
+      mac: crypto.Mac(cipherBytes.sublist(split)),
     );
 
     try {
       final clearBytes = await _algorithm.decrypt(secretBox, secretKey: key);
       return utf8.decode(clearBytes);
-    } on SecretBoxAuthenticationError {
-      throw AgentProviderUnavailableException(
-        message: 'The stored agent provider key could not be decrypted.',
+    } on crypto.SecretBoxAuthenticationError {
+      throw ValidationException(
+        message: 'The stored secret could not be decrypted.',
       );
     } on FormatException {
-      throw AgentProviderUnavailableException(
-        message: 'The stored agent provider key is not valid text.',
-      );
+      throw ValidationException(message: 'The stored secret is not text.');
     }
   }
 
-  static SecretKey _keyFor(String base64Key) {
+  static crypto.SecretKey _keyFor(String base64Key) {
     final Object? decoded;
     try {
       decoded = base64Decode(base64Key.trim());
     } on FormatException {
-      throw AgentProviderUnavailableException(
-        message: 'agentKeyEncryptionKey must be base64.',
+      throw ValidationException(
+        message: 'The secret encryption key must be base64.',
       );
     }
     if (decoded is! List<int> || decoded.length != 32) {
-      throw AgentProviderUnavailableException(
-        message: 'agentKeyEncryptionKey must decode to 32 bytes.',
+      throw ValidationException(
+        message: 'The secret encryption key must decode to 32 bytes.',
       );
     }
-    return SecretKey(decoded);
+    return crypto.SecretKey(decoded);
   }
 }
