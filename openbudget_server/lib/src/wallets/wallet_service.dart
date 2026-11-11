@@ -96,10 +96,14 @@ abstract final class WalletService {
         session,
         entityId,
         transaction: tx,
-        lock: true,
+        lockMode: LockMode.forNoKeyUpdate,
       );
       _requireWritable(entity);
 
+      // Discover without a lock, then take the account before the wallet. A
+      // wallet cascades from its account, so account deletion holds the
+      // account row and then waits for the wallet; locking the wallet first
+      // would invert that order and deadlock.
       final existing = await Wallet.db.findFirstRow(
         session,
         where: (t) =>
@@ -107,23 +111,28 @@ abstract final class WalletService {
             t.network.equals(network) &
             t.address.equals(normalizedAddress),
         transaction: tx,
-        lockMode: LockMode.forUpdate,
       );
       if (existing != null) {
-        var wallet = existing;
-        final account = await Account.db.findById(
+        final account = await _lockWalletAccount(
           session,
           existing.accountId,
+          tx,
+        );
+        final current = await Wallet.db.findById(
+          session,
+          existing.id!,
           transaction: tx,
           lockMode: LockMode.forUpdate,
         );
-        if (account == null) {
-          throw StateError('Wallet ${existing.id} has no crypto account.');
+        if (current == null) throw NotFoundException();
+        if (current.accountId != account.id) {
+          throw StateError('Wallet ${current.id} changed its crypto account.');
         }
-        if (cleanLabel != null && cleanLabel != existing.label) {
+        var wallet = current;
+        if (cleanLabel != null && cleanLabel != current.label) {
           wallet = await Wallet.db.updateRow(
             session,
-            existing.copyWith(
+            current.copyWith(
               label: cleanLabel,
               updatedAt: DateTime.now().toUtc(),
             ),
@@ -440,7 +449,7 @@ LIMIT @limit''',
         session,
         wallet.entityId,
         transaction: tx,
-        lock: true,
+        lockMode: LockMode.forNoKeyUpdate,
       );
       await Wallet.db.findById(
         session,
@@ -498,7 +507,7 @@ LIMIT @limit''',
         session,
         wallet.entityId,
         transaction: tx,
-        lock: true,
+        lockMode: LockMode.forNoKeyUpdate,
       );
       _requireWritable(currentEntity);
       final current = await Wallet.db.findById(
@@ -531,9 +540,26 @@ LIMIT @limit''',
         session,
         wallet.entityId,
         transaction: tx,
-        lock: true,
+        lockMode: LockMode.forNoKeyUpdate,
       );
       _requireWritable(entity);
+
+      // Discover the account without a lock, lock it, then re-read the wallet
+      // under its own lock. The account comes first because deleting an
+      // account cascades into its wallet; taking the wallet first would let an
+      // account delete hold the account while this sync waits for it, and each
+      // would wait for the other.
+      final discovered = await Wallet.db.findById(
+        session,
+        wallet.id!,
+        transaction: tx,
+      );
+      if (discovered == null) throw NotFoundException();
+      final account = await _lockWalletAccount(
+        session,
+        discovered.accountId,
+        tx,
+      );
       final current = await Wallet.db.findById(
         session,
         wallet.id!,
@@ -541,6 +567,9 @@ LIMIT @limit''',
         lockMode: LockMode.forUpdate,
       );
       if (current == null) throw NotFoundException();
+      if (current.accountId != account.id) {
+        throw StateError('Wallet ${current.id} changed its crypto account.');
+      }
 
       final lastSyncedAt = current.lastSyncedAt;
       if (lastSyncedAt != null && lastSyncedAt.isAfter(startedAt)) {
@@ -1097,6 +1126,28 @@ LIMIT @limit''',
     } on Object catch (failure) {
       _log.warning('Could not mark wallet $walletId failed: $failure');
     }
+  }
+
+  /// Locks the account a wallet values before any wallet row.
+  ///
+  /// A wallet row cascades from its account, so account deletion locks the
+  /// account and then waits for the wallet. Every wallet write that also locks
+  /// an account must take the account first, matching the account-before-row
+  /// hierarchy the transaction writer uses. The account id is read without a
+  /// lock because a wallet never changes it.
+  static Future<Account> _lockWalletAccount(
+    Session session,
+    UuidValue accountId,
+    Transaction tx,
+  ) async {
+    final account = await Account.db.findById(
+      session,
+      accountId,
+      transaction: tx,
+      lockMode: LockMode.forUpdate,
+    );
+    if (account == null) throw NotFoundException();
+    return account;
   }
 
   static Future<Wallet> _ownedWallet(
