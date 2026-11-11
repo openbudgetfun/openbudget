@@ -487,7 +487,7 @@ in
         cd "$DEVENV_ROOT"
         dart run openbudget_scripts:dev_seeker stop
       '';
-      description = "Stop the Seeker Flutter runner and remove only its USB forwards. Leaves shared services running.";
+      description = "Stop the owned Seeker Flutter runner and remove only the USB forwards it created on the recorded device. Leaves shared services running.";
       binary = "bash";
     };
     "dev:seeker:restart" = {

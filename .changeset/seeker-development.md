@@ -8,5 +8,6 @@ openbudget_scripts: feat
 
 - An explicit `OPENBUDGET_API_URL` is preserved and must be reachable from the device.
 - Stale PID files, stale FIFOs, and stale flags are cleared before a new launch, and a failed Flutter launch prints the tail of its log before cleaning up.
-- `dev:seeker:stop` stops only the Flutter runner and FIFO holder it can verify, removes only the `adb reverse` rules it recorded, and leaves shared Postgres, Redis, and Serverpod processes alone.
+- `dev:seeker` serializes concurrent start, stop, and restart per checkout, while status and reload stay available.
+- `dev:seeker:stop` stops only the Flutter runner and FIFO holder this checkout can verify, removes only the `adb reverse` mappings it created on the recorded device, reuses preexisting mappings instead of overwriting them, and leaves shared Postgres, Redis, and Serverpod processes alone.
 - Hot reload and hot restart write through a timeout-guarded control pipe, so a FIFO with no reader reports an error instead of hanging.

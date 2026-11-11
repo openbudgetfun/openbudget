@@ -1,11 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:openbudget_scripts/dev_server_host.dart';
 
 /// Exit code for a command that was used incorrectly.
 const int seekerUsageExitCode = 64;
+
+/// Environment override for the startup grace period, in milliseconds.
+///
+/// The default is 20 seconds. Tests set a smaller value so executable coverage
+/// does not have to wait for the real grace period.
+const String seekerStartupGraceEnv = 'SEEKER_STARTUP_GRACE_MS';
 
 /// Error with a message suitable for printing to the terminal.
 class SeekerException implements Exception {
@@ -144,12 +151,13 @@ class SeekerEndpoint {
 ///
 /// An explicit URL is preserved and must work. Otherwise the candidates are
 /// probed in order; USB forwarding is the last resort because it is slower
-/// than a direct network route.
+/// than a direct network route. [openUsbForward] reports whether this call
+/// created the rule, so a preexisting mapping is never claimed or removed.
 Future<SeekerEndpoint> chooseSeekerEndpoint({
   required int apiPort,
   required Iterable<Uri> candidates,
   required Future<bool> Function(Uri url) canReachFromDevice,
-  required Future<void> Function(int port) openUsbForward,
+  required Future<bool> Function(int port) openUsbForward,
   required Future<void> Function(int port) closeUsbForward,
   Uri? explicitApiUrl,
 }) async {
@@ -175,7 +183,7 @@ Future<SeekerEndpoint> chooseSeekerEndpoint({
     }
   }
 
-  await openUsbForward(apiPort);
+  final created = await openUsbForward(apiPort);
   final usbUrl = Uri(
     scheme: 'http',
     host: '127.0.0.1',
@@ -190,7 +198,9 @@ Future<SeekerEndpoint> chooseSeekerEndpoint({
       );
     }
   } on Object {
-    await closeUsbForward(apiPort);
+    if (created) {
+      await closeUsbForward(apiPort);
+    }
     rethrow;
   }
 
@@ -209,61 +219,146 @@ class SeekerPaths {
   String get fifoHolderPid => '$logDirectory/seeker-fifo-holder.pid';
   String get controlFifo => '$logDirectory/seeker-flutter.stdin';
   String get apiUrlFile => '$logDirectory/seeker-api-url';
-  String get reversePortsFile => '$logDirectory/seeker-reverse-ports';
+  String get deviceSerialFile => '$logDirectory/seeker-device';
+  String get reverseForwardsFile => '$logDirectory/seeker-reverse-forwards';
+  String get lockFile => '$logDirectory/seeker.lock';
   String get activeFlag => '$root/.tmp/dev-seeker.active';
   String get generatedEnv => '$root/.tmp/flutter.env';
   String get appDirectory => '$root/openbudget_app';
 }
 
+/// A process this tool started, including the identity needed to verify it
+/// before signalling.
+///
+/// [token] is unique to one launch and appears in the process command line.
+/// [startedAt] is the process start time reported by `ps`, so a reused PID is
+/// never mistaken for the original process.
+class SeekerProcessRecord {
+  const SeekerProcessRecord({
+    required this.pid,
+    required this.startedAt,
+    required this.token,
+  });
+
+  final int pid;
+  final String startedAt;
+  final String token;
+
+  String encode() => jsonEncode({
+    'pid': pid,
+    'startedAt': startedAt,
+    'token': token,
+  });
+
+  static SeekerProcessRecord? decode(String? value) {
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+
+    try {
+      final decoded = jsonDecode(value);
+      if (decoded is! Map<String, Object?>) {
+        return null;
+      }
+
+      final pid = decoded['pid'];
+      final startedAt = decoded['startedAt'];
+      final token = decoded['token'];
+      if (pid is! int ||
+          pid <= 0 ||
+          startedAt is! String ||
+          startedAt.isEmpty ||
+          token is! String ||
+          token.isEmpty) {
+        return null;
+      }
+
+      return SeekerProcessRecord(
+        pid: pid,
+        startedAt: startedAt,
+        token: token,
+      );
+    } on FormatException {
+      return null;
+    }
+  }
+
+  static SeekerProcessRecord? read(String path) => decode(readStateFile(path));
+
+  void write(String path) => writeStateFile(path, encode());
+}
+
 /// Snapshot of the PID files and what those processes are actually running.
 class SeekerState {
   const SeekerState({
-    this.runnerPid,
+    this.runner,
     this.runnerCommand,
-    this.holderPid,
+    this.runnerStartVerified = true,
+    this.holder,
     this.holderCommand,
+    this.holderStartVerified = true,
   });
 
-  final int? runnerPid;
+  final SeekerProcessRecord? runner;
   final String? runnerCommand;
-  final int? holderPid;
+  final bool runnerStartVerified;
+  final SeekerProcessRecord? holder;
   final String? holderCommand;
+  final bool holderStartVerified;
+
+  int? get runnerPid => runner?.pid;
+  int? get holderPid => holder?.pid;
 
   bool get hasRunner =>
-      runnerPid != null &&
+      runner != null &&
+      runnerStartVerified &&
       runnerCommand != null &&
-      isSeekerRunnerCommand(runnerCommand!);
+      isSeekerRunnerCommand(runnerCommand!, ownerToken: runner!.token);
 
   bool get hasHolder =>
-      holderPid != null &&
+      holder != null &&
+      holderStartVerified &&
       holderCommand != null &&
-      isSeekerFifoHolderCommand(holderCommand!);
+      isSeekerFifoHolderCommand(holderCommand!, ownerToken: holder!.token);
 }
 
 typedef ProcessCommandLookup = Future<String?> Function(int pid);
+typedef ProcessStartLookup = Future<String?> Function(int pid);
 
-/// Whether [command] is the Flutter runner this tool started.
-bool isSeekerRunnerCommand(String command) =>
-    command.contains('main_dev.dart') && command.contains('flutter');
+/// Whether [command] is the Flutter runner this tool started for [ownerToken].
+bool isSeekerRunnerCommand(String command, {required String ownerToken}) =>
+    ownerToken.isNotEmpty &&
+    command.contains('main_dev.dart') &&
+    command.contains('flutter') &&
+    command.contains(ownerToken);
 
-/// Whether [command] is the FIFO holder this tool started.
-bool isSeekerFifoHolderCommand(String command) =>
-    command.contains('openbudget-seeker-fifo-holder');
+/// Whether [command] is the FIFO holder this tool started for [ownerToken].
+bool isSeekerFifoHolderCommand(String command, {required String ownerToken}) =>
+    ownerToken.isNotEmpty &&
+    command.contains('openbudget-seeker-fifo-holder') &&
+    command.contains(ownerToken);
 
-/// Reads both PID files and resolves what those processes are running.
+/// Reads both PID files and verifies each process against its recorded
+/// command token and start time.
 Future<SeekerState> readSeekerState(
   SeekerPaths paths, {
   ProcessCommandLookup? commandForPid,
+  ProcessStartLookup? startForPid,
 }) async {
-  final lookup = commandForPid ?? processCommand;
-  final runnerPid = _readPid(paths.flutterPid);
-  final holderPid = _readPid(paths.fifoHolderPid);
+  final lookupCommand = commandForPid ?? processCommand;
+  final lookupStart = startForPid ?? processStartTime;
+  final runner = SeekerProcessRecord.read(paths.flutterPid);
+  final holder = SeekerProcessRecord.read(paths.fifoHolderPid);
+  final runnerStart = runner == null ? null : await lookupStart(runner.pid);
+  final holderStart = holder == null ? null : await lookupStart(holder.pid);
 
   return SeekerState(
-    runnerPid: runnerPid,
-    runnerCommand: runnerPid == null ? null : await lookup(runnerPid),
-    holderPid: holderPid,
-    holderCommand: holderPid == null ? null : await lookup(holderPid),
+    runner: runner,
+    runnerCommand: runner == null ? null : await lookupCommand(runner.pid),
+    runnerStartVerified: runner != null && runnerStart == runner.startedAt,
+    holder: holder,
+    holderCommand: holder == null ? null : await lookupCommand(holder.pid),
+    holderStartVerified: holder != null && holderStart == holder.startedAt,
   );
 }
 
@@ -281,11 +376,12 @@ class StaleCleanup {
 /// Removes PID files, the flag, and the FIFO when no runner owns them.
 ///
 /// A live runner is never touched. A stale holder is stopped only after its
-/// command line proves it is the holder this tool created.
+/// recorded command token and start time prove it is the holder this tool
+/// created.
 Future<StaleCleanup> removeStaleSeekerState(
   SeekerPaths paths, {
   required SeekerState state,
-  Future<bool> Function(int pid)? stopProcess,
+  Future<bool> Function(SeekerProcessRecord record)? stopProcess,
 }) async {
   if (state.hasRunner) {
     return const StaleCleanup(removedPaths: [], stoppedHolderPid: null);
@@ -294,7 +390,7 @@ Future<StaleCleanup> removeStaleSeekerState(
   final stop = stopProcess ?? stopSeekerProcess;
   int? stoppedHolderPid;
   if (state.hasHolder) {
-    if (await stop(state.holderPid!)) {
+    if (await stop(state.holder!)) {
       stoppedHolderPid = state.holderPid;
     }
   }
@@ -317,34 +413,57 @@ Future<StaleCleanup> removeStaleSeekerState(
   );
 }
 
-/// Stops [pid] only when its command line belongs to the Seeker tooling.
+/// Stops [record] only when its command token and start time still match.
 ///
 /// This is the guard against a stale PID file pointing at an unrelated process
 /// after the operating system reused the number.
 Future<bool> stopSeekerProcess(
-  int pid, {
+  SeekerProcessRecord record, {
   ProcessCommandLookup? commandForPid,
+  ProcessStartLookup? startForPid,
   Future<void> Function(int pid)? terminate,
 }) async {
-  final command = await (commandForPid ?? processCommand)(pid);
-  if (command == null) {
+  final lookupCommand = commandForPid ?? processCommand;
+  final lookupStart = startForPid ?? processStartTime;
+
+  Future<bool> stillOwned() async {
+    if (await lookupStart(record.pid) != record.startedAt) {
+      return false;
+    }
+
+    final command = await lookupCommand(record.pid);
+    if (command == null) {
+      return false;
+    }
+
+    return isSeekerRunnerCommand(command, ownerToken: record.token) ||
+        isSeekerFifoHolderCommand(command, ownerToken: record.token);
+  }
+
+  if (!await stillOwned()) {
     return false;
   }
 
-  if (!isSeekerRunnerCommand(command) && !isSeekerFifoHolderCommand(command)) {
-    return false;
-  }
-
-  await (terminate ?? terminateProcess)(pid);
+  await (terminate ?? (pid) => terminateProcess(pid, stillOwned: stillOwned))(
+    record.pid,
+  );
   return true;
 }
 
 /// Sends SIGTERM, waits for [grace], then sends SIGKILL.
+///
+/// [stillOwned] is checked again before each signal so a process that exited
+/// and had its PID reused is never killed by the escalation.
 Future<void> terminateProcess(
   int pid, {
   Duration grace = const Duration(seconds: 5),
+  Future<bool> Function()? stillOwned,
 }) async {
   if (!await isProcessAlive(pid)) {
+    return;
+  }
+
+  if (stillOwned != null && !await stillOwned()) {
     return;
   }
 
@@ -358,14 +477,35 @@ Future<void> terminateProcess(
     await Future<void>.delayed(const Duration(milliseconds: 100));
   }
 
+  if (!await isProcessAlive(pid)) {
+    return;
+  }
+
+  if (stillOwned != null && !await stillOwned()) {
+    return;
+  }
+
   Process.killPid(pid, ProcessSignal.sigkill);
+  final killDeadline = DateTime.now().add(const Duration(seconds: 2));
+  while (DateTime.now().isBefore(killDeadline)) {
+    if (!await isProcessAlive(pid)) {
+      return;
+    }
+
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+  }
 }
 
-/// Whether [pid] currently exists.
+/// Whether [pid] currently exists and is not a zombie.
 Future<bool> isProcessAlive(int pid) async {
   try {
-    final result = await runCommand('ps', ['-p', '$pid', '-o', 'pid=']);
-    return result.exitCode == 0;
+    final result = await runCommand('ps', ['-p', '$pid', '-o', 'stat=']);
+    if (result.exitCode != 0) {
+      return false;
+    }
+
+    final state = (result.stdout as String).trim();
+    return state.isNotEmpty && !state.startsWith('Z');
   } on SeekerException {
     return false;
   }
@@ -383,6 +523,51 @@ Future<String?> processCommand(int pid) async {
     return command.isEmpty ? null : command;
   } on SeekerException {
     return null;
+  }
+}
+
+/// Returns the process start time for [pid], or `null` when it is gone.
+Future<String?> processStartTime(int pid) async {
+  try {
+    final result = await runCommand('ps', ['-p', '$pid', '-o', 'lstart=']);
+    if (result.exitCode != 0) {
+      return null;
+    }
+
+    final startedAt = (result.stdout as String).trim();
+    return startedAt.isEmpty ? null : startedAt;
+  } on SeekerException {
+    return null;
+  }
+}
+
+/// Serializes start, stop, and restart for one checkout.
+///
+/// The lock lives under the checkout's `.devlogs` directory, so it never
+/// blocks another worktree. Status, reload, and signal do not take it.
+class SeekerLock {
+  SeekerLock._(this._file);
+
+  final RandomAccessFile _file;
+
+  static Future<SeekerLock> acquire(SeekerPaths paths) async {
+    await Directory(paths.logDirectory).create(recursive: true);
+    final file = await File(paths.lockFile).open(mode: FileMode.append);
+    try {
+      await file.lock(FileLock.blockingExclusive);
+    } on Object catch (error) {
+      await file.close();
+      throw SeekerException(
+        'Could not lock ${paths.lockFile}: $error',
+      );
+    }
+
+    return SeekerLock._(file);
+  }
+
+  Future<void> release() async {
+    await _file.unlock();
+    await _file.close();
   }
 }
 
@@ -437,49 +622,193 @@ Future<bool> deviceCanReachApi({
   }
 }
 
-/// Adds an adb reverse rule for [port].
-Future<void> setUsbForward({
-  required AdbDevice device,
-  required int port,
-}) async {
+/// One adb reverse rule owned by this checkout.
+class ReverseForward {
+  const ReverseForward({
+    required this.serial,
+    required this.devicePort,
+    required this.hostPort,
+  });
+
+  final String serial;
+  final int devicePort;
+  final int hostPort;
+
+  String get deviceSpec => 'tcp:$devicePort';
+  String get hostSpec => 'tcp:$hostPort';
+  String get line => '$serial $deviceSpec $hostSpec';
+
+  @override
+  String toString() => line;
+}
+
+/// The result of ensuring one adb reverse rule exists.
+class UsbForward {
+  const UsbForward({required this.forward, required this.created});
+
+  final ReverseForward forward;
+  final bool created;
+}
+
+/// Parses `adb reverse --list` output for [serial].
+List<ReverseForward> parseReverseForwardList(
+  String output, {
+  required String serial,
+}) {
+  final forwards = <ReverseForward>[];
+  final pattern = RegExp(r'tcp:(\d+)\s+tcp:(\d+)');
+
+  for (final line in const LineSplitter().convert(output)) {
+    final matches = pattern.allMatches(line).toList(growable: false);
+    if (matches.isEmpty) {
+      continue;
+    }
+
+    final match = matches.last;
+    forwards.add(
+      ReverseForward(
+        serial: serial,
+        devicePort: int.parse(match.group(1)!),
+        hostPort: int.parse(match.group(2)!),
+      ),
+    );
+  }
+
+  return forwards;
+}
+
+/// Lists the adb reverse rules currently active on [device].
+Future<List<ReverseForward>> listUsbForwards(AdbDevice device) async {
   final result = await runCommand('adb', [
     '-s',
     device.serial,
     'reverse',
-    'tcp:$port',
-    'tcp:$port',
+    '--list',
   ]);
   if (result.exitCode != 0) {
     throw SeekerException(
-      'adb reverse tcp:$port failed: ${(result.stderr as String).trim()}',
+      'adb reverse --list failed: ${(result.stderr as String).trim()}',
     );
   }
+
+  return parseReverseForwardList(
+    result.stdout as String,
+    serial: device.serial,
+  );
 }
 
-/// Removes only the adb reverse rule for [port].
-Future<void> removeUsbForward({
+/// Ensures [port] is forwarded on [device] without overwriting another rule.
+///
+/// An identical preexisting mapping is reused and reported as not created.
+/// A different mapping for the same device port fails clearly instead of being
+/// replaced. `--no-rebind` closes the race between the list and the add.
+Future<UsbForward> ensureUsbForward({
   required AdbDevice device,
   required int port,
 }) async {
-  await runCommand('adb', [
+  final wanted = ReverseForward(
+    serial: device.serial,
+    devicePort: port,
+    hostPort: port,
+  );
+  final existing = await listUsbForwards(device);
+
+  for (final forward in existing) {
+    if (forward.devicePort != port) {
+      continue;
+    }
+
+    if (forward.hostPort == port) {
+      return UsbForward(forward: forward, created: false);
+    }
+
+    throw SeekerException(
+      'adb reverse ${wanted.deviceSpec} on ${device.serial} already maps to '
+      '${forward.hostSpec}. Remove that rule before starting dev:seeker.',
+    );
+  }
+
+  final result = await runCommand('adb', [
+    '-s',
+    device.serial,
+    'reverse',
+    '--no-rebind',
+    wanted.deviceSpec,
+    wanted.hostSpec,
+  ]);
+  if (result.exitCode != 0) {
+    final after = await listUsbForwards(device);
+    for (final forward in after) {
+      if (forward.devicePort != port) {
+        continue;
+      }
+
+      if (forward.hostPort == port) {
+        return UsbForward(forward: forward, created: false);
+      }
+
+      throw SeekerException(
+        'adb reverse ${wanted.deviceSpec} on ${device.serial} already maps to '
+        '${forward.hostSpec}. Remove that rule before starting dev:seeker.',
+      );
+    }
+
+    throw SeekerException(
+      'adb reverse ${wanted.deviceSpec} failed: '
+      '${(result.stderr as String).trim()}',
+    );
+  }
+
+  return UsbForward(forward: wanted, created: true);
+}
+
+/// Removes [forward] only when the device still has that exact mapping.
+///
+/// Returns `true` when the rule is gone. A mapping that changed since it was
+/// recorded is left alone and reported as an error so the record is preserved.
+Future<bool> removeUsbForward({
+  required AdbDevice device,
+  required ReverseForward forward,
+}) async {
+  if (forward.serial != device.serial) {
+    throw SeekerException(
+      'Refusing to remove ${forward.deviceSpec} recorded for '
+      '${forward.serial} from ${device.serial}.',
+    );
+  }
+
+  final existing = await listUsbForwards(device);
+  final matching = existing
+      .where((candidate) => candidate.devicePort == forward.devicePort)
+      .toList(growable: false);
+  if (matching.isEmpty) {
+    return true;
+  }
+
+  for (final candidate in matching) {
+    if (candidate.hostPort != forward.hostPort) {
+      throw SeekerException(
+        'adb reverse ${forward.deviceSpec} on ${device.serial} now maps to '
+        '${candidate.hostSpec}; leaving it alone.',
+      );
+    }
+  }
+
+  final result = await runCommand('adb', [
     '-s',
     device.serial,
     'reverse',
     '--remove',
-    'tcp:$port',
+    forward.deviceSpec,
   ]);
-}
+  if (result.exitCode != 0) {
+    throw SeekerException(
+      'adb reverse --remove ${forward.deviceSpec} failed: '
+      '${(result.stderr as String).trim()}',
+    );
+  }
 
-/// Stops the dev app on the attached device.
-Future<void> forceStopSeekerApp(AdbDevice device) async {
-  await runCommand('adb', [
-    '-s',
-    device.serial,
-    'shell',
-    'am',
-    'force-stop',
-    'com.openbudget.app.dev',
-  ]);
+  return true;
 }
 
 /// Whether [port] accepts TCP connections on the loopback interface.
@@ -516,11 +845,19 @@ Future<void> waitForApiPort(
   );
 }
 
-/// Starts the Flutter runner behind a FIFO and returns its PID.
+/// The processes created by one [launchFlutter] call.
+class SeekerLaunch {
+  const SeekerLaunch({required this.runner, required this.holder});
+
+  final SeekerProcessRecord runner;
+  final SeekerProcessRecord holder;
+}
+
+/// Starts the Flutter runner behind a FIFO and returns its identity.
 ///
 /// The log is truncated on each launch so a failure reports the current run,
 /// not output from an older one.
-Future<int> launchFlutter({
+Future<SeekerLaunch> launchFlutter({
   required SeekerPaths paths,
   required AdbDevice device,
   required Uri apiUrl,
@@ -528,6 +865,7 @@ Future<int> launchFlutter({
   await Directory(paths.logDirectory).create(recursive: true);
   removeIfExists(paths.controlFifo);
 
+  final token = _newOwnerToken();
   final fifo = await runCommand('mkfifo', [paths.controlFifo]);
   if (fifo.exitCode != 0) {
     throw SeekerException(
@@ -538,16 +876,22 @@ Future<int> launchFlutter({
 
   final holder = await _startDetached('bash', [
     '-c',
-    r'exec -a openbudget-seeker-fifo-holder sleep 1000000 > "$1"',
+    r'exec -a "openbudget-seeker-fifo-holder:$1" /bin/sleep 1000000 > "$2"',
     'bash',
+    token,
     paths.controlFifo,
   ]);
-  writeStateFile(paths.fifoHolderPid, '${holder.pid}');
+  final holderRecord = SeekerProcessRecord(
+    pid: holder.pid,
+    startedAt: await _startedAtOrKill(holder, label: 'FIFO holder'),
+    token: token,
+  )..write(paths.fifoHolderPid);
 
   const command =
       r'exec flutter run --flavor dev -t lib/main_dev.dart -d "$1" '
       r'--dart-define="OPENBUDGET_API_URL=$2" '
-      r'--dart-define="API_URL=$2" < "$3" > "$4" 2>&1';
+      r'--dart-define="API_URL=$2" '
+      r'--dart-define="SEEKER_OWNER_TOKEN=$5" < "$3" > "$4" 2>&1';
   final process = await _startDetached(
     'bash',
     [
@@ -558,11 +902,74 @@ Future<int> launchFlutter({
       apiUrl.toString(),
       paths.controlFifo,
       paths.flutterLog,
+      token,
     ],
     workingDirectory: paths.appDirectory,
   );
-  writeStateFile(paths.flutterPid, '${process.pid}');
-  return process.pid;
+  final runnerRecord = SeekerProcessRecord(
+    pid: process.pid,
+    startedAt: await _startedAtOrKill(
+      process,
+      label: 'Flutter runner',
+      logPath: paths.flutterLog,
+    ),
+    token: token,
+  )..write(paths.flutterPid);
+  return SeekerLaunch(runner: runnerRecord, holder: holderRecord);
+}
+
+Future<String> _startedAtOrKill(
+  Process process, {
+  required String label,
+  String? logPath,
+}) async {
+  try {
+    return await _requireProcessStart(
+      process.pid,
+      label: label,
+      logPath: logPath,
+    );
+  } on SeekerException {
+    process.kill(ProcessSignal.sigkill);
+    rethrow;
+  }
+}
+
+Future<String> _requireProcessStart(
+  int pid, {
+  required String label,
+  String? logPath,
+}) async {
+  for (var attempt = 0; attempt < 10; attempt++) {
+    final startedAt = await processStartTime(pid);
+    if (startedAt != null) {
+      return startedAt;
+    }
+
+    if (!await isProcessAlive(pid)) {
+      break;
+    }
+
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+  }
+
+  final log = logPath == null ? '' : '\n\n${_logTail(logPath)}';
+  throw SeekerException('$label exited before it could be tracked.$log');
+}
+
+String _logTail(String path) {
+  final file = File(path);
+  if (!file.existsSync()) {
+    return '';
+  }
+
+  return tailLines(file.readAsStringSync(), 20);
+}
+
+String _newOwnerToken() {
+  final random = Random.secure().nextInt(1 << 32).toRadixString(16);
+  final now = DateTime.now().microsecondsSinceEpoch.toRadixString(16);
+  return '$now-$random';
 }
 
 /// Waits [grace] and reports whether the detached runner exited.
@@ -581,7 +988,19 @@ Future<bool> waitForProcessExit(
     await Future<void>.delayed(const Duration(milliseconds: 200));
   }
 
-  return false;
+  return !await alive(pid);
+}
+
+/// The grace period before a new runner is considered healthy.
+Duration seekerStartupGrace() {
+  final milliseconds = int.tryParse(
+    Platform.environment[seekerStartupGraceEnv] ?? '',
+  );
+  if (milliseconds == null || milliseconds <= 0) {
+    return const Duration(seconds: 20);
+  }
+
+  return Duration(milliseconds: milliseconds);
 }
 
 /// Returns a clear failure message when Flutter exited during the grace period.
@@ -703,23 +1122,38 @@ int portForUri(Uri uri) {
   return uri.scheme == 'https' ? 443 : 80;
 }
 
-/// Reads the explicit API URL, rejecting a malformed override.
-Uri? explicitApiUrl() {
-  final value = Platform.environment['OPENBUDGET_API_URL']?.trim();
-  if (value == null || value.isEmpty) {
+/// Whether [host] points back at this machine.
+bool isLoopbackApiHost(String host) =>
+    host == 'localhost' ||
+    host == '::1' ||
+    host == '127.0.0.1' ||
+    host.startsWith('127.');
+
+/// Parses an explicit API URL, rejecting unsupported schemes and malformed
+/// values.
+Uri? parseExplicitApiUrl(String? value) {
+  final trimmed = value?.trim();
+  if (trimmed == null || trimmed.isEmpty) {
     return null;
   }
 
-  final uri = Uri.tryParse(value);
-  if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
+  final uri = Uri.tryParse(trimmed);
+  if (uri == null ||
+      !uri.hasScheme ||
+      uri.host.isEmpty ||
+      (uri.scheme != 'http' && uri.scheme != 'https')) {
     throw const SeekerException(
-      'OPENBUDGET_API_URL is not a valid URL.',
+      'OPENBUDGET_API_URL must be an http or https URL.',
       exitCode: seekerUsageExitCode,
     );
   }
 
   return uri;
 }
+
+/// Reads the explicit API URL, rejecting a malformed override.
+Uri? explicitApiUrl() =>
+    parseExplicitApiUrl(Platform.environment['OPENBUDGET_API_URL']);
 
 /// The machine's non-loopback IPv4 addresses.
 Future<List<String>> localIpv4Addresses() async {
@@ -733,41 +1167,70 @@ Future<List<String>> localIpv4Addresses() async {
   ];
 }
 
-/// Ports currently recorded as adb reverse rules.
-Set<int> readReversePorts(SeekerPaths paths) {
-  final value = readStateFile(paths.reversePortsFile);
+/// Reverse rules recorded by this checkout.
+List<ReverseForward> readReverseForwards(SeekerPaths paths) {
+  final value = readStateFile(paths.reverseForwardsFile);
   if (value == null || value.isEmpty) {
-    return <int>{};
+    return [];
   }
 
-  final ports = <int>{};
-  for (final part in value.split(RegExp(r'\s+'))) {
-    final port = int.tryParse(part);
-    if (port != null) {
-      ports.add(port);
+  final forwards = <ReverseForward>[];
+  final pattern = RegExp(r'^(\S+)\s+tcp:(\d+)\s+tcp:(\d+)$');
+  for (final line in const LineSplitter().convert(value)) {
+    final match = pattern.firstMatch(line.trim());
+    if (match == null) {
+      continue;
     }
+
+    forwards.add(
+      ReverseForward(
+        serial: match.group(1)!,
+        devicePort: int.parse(match.group(2)!),
+        hostPort: int.parse(match.group(3)!),
+      ),
+    );
   }
 
-  return ports;
+  return forwards;
 }
 
-/// Records [port] so `dev:seeker:stop` removes only this rule.
-void recordReversePort(SeekerPaths paths, int port) {
-  final ports = readReversePorts(paths)..add(port);
-  final sorted = ports.toList()..sort();
-  writeStateFile(paths.reversePortsFile, sorted.join(' '));
+/// Records [forward] so cleanup removes only a rule this checkout created.
+void recordReverseForward(SeekerPaths paths, ReverseForward forward) {
+  final forwards = readReverseForwards(paths)
+    ..removeWhere(
+      (candidate) =>
+          candidate.serial == forward.serial &&
+          candidate.devicePort == forward.devicePort,
+    )
+    ..add(forward)
+    ..sort((a, b) {
+      final bySerial = a.serial.compareTo(b.serial);
+      return bySerial != 0 ? bySerial : a.devicePort.compareTo(b.devicePort);
+    });
+  writeStateFile(
+    paths.reverseForwardsFile,
+    forwards.map((candidate) => candidate.line).join('\n'),
+  );
 }
 
 /// Forgets a recorded reverse rule after it has been removed.
-void forgetReversePort(SeekerPaths paths, int port) {
-  final ports = readReversePorts(paths)..remove(port);
-  if (ports.isEmpty) {
-    removeIfExists(paths.reversePortsFile);
+void forgetReverseForward(SeekerPaths paths, ReverseForward forward) {
+  final forwards = readReverseForwards(paths)
+    ..removeWhere(
+      (candidate) =>
+          candidate.serial == forward.serial &&
+          candidate.devicePort == forward.devicePort &&
+          candidate.hostPort == forward.hostPort,
+    );
+  if (forwards.isEmpty) {
+    removeIfExists(paths.reverseForwardsFile);
     return;
   }
 
-  final sorted = ports.toList()..sort();
-  writeStateFile(paths.reversePortsFile, sorted.join(' '));
+  writeStateFile(
+    paths.reverseForwardsFile,
+    forwards.map((candidate) => candidate.line).join('\n'),
+  );
 }
 
 Future<Process> _startProcess(
@@ -839,16 +1302,6 @@ Future<ProcessResult> runCommand(
       '$executable did not finish within ${timeout.inSeconds}s.',
     );
   }
-}
-
-int? _readPid(String path) {
-  final value = readStateFile(path);
-  if (value == null) {
-    return null;
-  }
-
-  final pid = int.tryParse(value);
-  return pid != null && pid > 0 ? pid : null;
 }
 
 String _shellQuote(String value) => "'${value.replaceAll("'", r"'\''")}'";

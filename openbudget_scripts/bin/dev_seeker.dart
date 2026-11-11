@@ -9,9 +9,9 @@ Future<void> main(List<String> arguments) async {
   try {
     switch (command) {
       case 'start':
-        await _start(paths);
+        await _withLock(paths, () => _start(paths));
       case 'stop':
-        await _stop(paths);
+        await _withLock(paths, () => _stop(paths));
       case 'status':
         await _status(paths);
       case 'reload':
@@ -32,8 +32,10 @@ Future<void> main(List<String> arguments) async {
           arguments.length > 2 ? arguments[2] : 'signal',
         );
       case 'restart':
-        await _stop(paths);
-        await _start(paths);
+        await _withLock(paths, () async {
+          await _stop(paths);
+          await _start(paths);
+        });
       default:
         throw SeekerException(
           'Unknown command "$command".',
@@ -46,7 +48,21 @@ Future<void> main(List<String> arguments) async {
   }
 }
 
+/// Serializes start, stop, and restart for this checkout only.
+Future<void> _withLock(
+  SeekerPaths paths,
+  Future<void> Function() action,
+) async {
+  final lock = await SeekerLock.acquire(paths);
+  try {
+    await action();
+  } finally {
+    await lock.release();
+  }
+}
+
 Future<void> _start(SeekerPaths paths) async {
+  final explicit = explicitApiUrl();
   final device = await resolveSeekerDevice(
     preferredSerial: Platform.environment['SEEKER_DEVICE_ID'],
   );
@@ -61,9 +77,18 @@ Future<void> _start(SeekerPaths paths) async {
     return;
   }
 
+  final previousSerial = readStateFile(paths.deviceSerialFile);
   final cleanup = await removeStaleSeekerState(paths, state: state);
   _printCleanup(cleanup);
-  final explicit = explicitApiUrl();
+  if (previousSerial != null) {
+    await _removeRecordedForwards(
+      paths,
+      device: await _resolveDeviceOrNull(previousSerial),
+      quiet: true,
+    );
+  }
+
+  writeStateFile(paths.deviceSerialFile, device.serial);
   writeStateFile(paths.activeFlag, '$pid');
 
   try {
@@ -81,8 +106,10 @@ Future<void> _start(SeekerPaths paths) async {
         ? 8080
         : portForUri(generated);
 
-    stdout.writeln('Waiting for Serverpod on port $apiPort...');
-    await waitForApiPort(apiPort);
+    if (explicit == null || isLoopbackApiHost(explicit.host)) {
+      stdout.writeln('Waiting for Serverpod on port $apiPort...');
+      await waitForApiPort(apiPort);
+    }
 
     final endpoint = await chooseSeekerEndpoint(
       apiPort: apiPort,
@@ -94,12 +121,20 @@ Future<void> _start(SeekerPaths paths) async {
       canReachFromDevice: (url) =>
           deviceCanReachApi(device: device, apiUrl: url),
       openUsbForward: (port) async {
-        await setUsbForward(device: device, port: port);
-        recordReversePort(paths, port);
+        final forward = await ensureUsbForward(device: device, port: port);
+        if (forward.created) {
+          recordReverseForward(paths, forward.forward);
+        }
+        return forward.created;
       },
       closeUsbForward: (port) async {
-        await removeUsbForward(device: device, port: port);
-        forgetReversePort(paths, port);
+        final forward = _recordedForward(paths, device.serial, port);
+        if (forward == null) {
+          return;
+        }
+
+        await removeUsbForward(device: device, forward: forward);
+        forgetReverseForward(paths, forward);
       },
     );
 
@@ -115,23 +150,25 @@ Future<void> _start(SeekerPaths paths) async {
       'Launching Flutter on ${device.serial} against ${endpoint.apiUrl}',
     );
 
-    final flutterPid = await launchFlutter(
+    final launch = await launchFlutter(
       paths: paths,
       device: device,
       apiUrl: endpoint.apiUrl,
     );
-    final exited = await waitForProcessExit(flutterPid);
+    final exited = await waitForProcessExit(
+      launch.runner.pid,
+      grace: seekerStartupGrace(),
+    );
     final failure = launchFailureFor(
       exited: exited,
       log: _readLog(paths.flutterLog),
       logPath: paths.flutterLog,
     );
     if (failure != null) {
-      await _cleanupAfterFailure(paths, device);
       throw SeekerException(failure);
     }
 
-    writeStateFile(paths.activeFlag, '$flutterPid');
+    writeStateFile(paths.activeFlag, '${launch.runner.pid}');
     stdout
       ..writeln('Seeker dev environment is starting.')
       ..writeln('API: ${endpoint.apiUrl}')
@@ -142,21 +179,26 @@ Future<void> _start(SeekerPaths paths) async {
       ..writeln('Hot restart: devenv shell dev:seeker:hot-restart')
       ..writeln('Stop: devenv shell dev:seeker:stop');
   } on Object {
-    await _cleanupAfterFailure(paths, device);
+    await _cleanupAfterFailure(paths, device: device);
     rethrow;
   }
 }
 
 Future<void> _stop(SeekerPaths paths) async {
   final state = await readSeekerState(paths);
+  final serial = readStateFile(paths.deviceSerialFile);
+  var keepState = false;
 
   if (state.hasRunner) {
-    if (await stopSeekerProcess(state.runnerPid!)) {
-      stdout.writeln('Stopped Seeker Flutter app (pid ${state.runnerPid}).');
-    } else {
+    final stopped = await stopSeekerProcess(state.runner!);
+    if (!stopped) {
       stdout.writeln(
         'Could not stop Seeker Flutter app (pid ${state.runnerPid}).',
       );
+    } else if (await isProcessAlive(state.runnerPid!)) {
+      keepState = true;
+    } else {
+      stdout.writeln('Stopped Seeker Flutter app (pid ${state.runnerPid}).');
     }
   } else if (state.runnerPid != null) {
     stdout.writeln(
@@ -166,44 +208,30 @@ Future<void> _stop(SeekerPaths paths) async {
   }
 
   if (state.hasHolder) {
-    if (await stopSeekerProcess(state.holderPid!)) {
+    if (await stopSeekerProcess(state.holder!)) {
       stdout.writeln('Stopped FIFO holder (pid ${state.holderPid}).');
     }
   }
 
-  final device = await tryResolveSeekerDevice(
-    preferredSerial: Platform.environment['SEEKER_DEVICE_ID'],
-  );
-  final ports = readReversePorts(paths);
-  if (ports.isNotEmpty && device != null) {
-    for (final port in ports) {
-      try {
-        await removeUsbForward(device: device, port: port);
-      } on SeekerException {
-        continue;
-      }
-    }
-    removeIfExists(paths.reversePortsFile);
-  } else if (ports.isNotEmpty) {
+  if (keepState) {
     stdout.writeln(
-      'Device is not attached; kept USB forward records for $ports.',
+      'Kept Seeker state and USB forwards because the Flutter runner is still '
+      'alive.',
+    );
+    return;
+  }
+
+  if (readReverseForwards(paths).isNotEmpty) {
+    await _removeRecordedForwards(
+      paths,
+      device: serial == null ? null : await _resolveDeviceOrNull(serial),
     );
   }
 
-  if (device != null) {
-    try {
-      await forceStopSeekerApp(device);
-    } on SeekerException {
-      // The runner is already stopped; a missing app on the phone is harmless.
-    }
-  }
-
-  [
-    paths.flutterPid,
-    paths.fifoHolderPid,
-    paths.controlFifo,
-    paths.activeFlag,
-  ].forEach(removeIfExists);
+  _removeSeekerStateFiles(
+    paths,
+    keepSerial: readReverseForwards(paths).isNotEmpty,
+  );
 
   stdout.writeln(
     'Seeker runner and USB forwards are stopped. Postgres, Redis, and '
@@ -261,25 +289,118 @@ Future<void> _signal(SeekerPaths paths, String key, String label) async {
 }
 
 Future<void> _cleanupAfterFailure(
-  SeekerPaths paths,
-  AdbDevice device,
-) async {
+  SeekerPaths paths, {
+  required AdbDevice device,
+}) async {
   final state = await readSeekerState(paths);
-  await removeStaleSeekerState(paths, state: state);
+  var keptLiveProcess = false;
 
-  final ports = readReversePorts(paths);
-  if (ports.isEmpty) {
+  for (final record in [state.runner, state.holder]) {
+    if (record == null) {
+      continue;
+    }
+
+    try {
+      final stopped = await stopSeekerProcess(record);
+      if (!stopped && await isProcessAlive(record.pid)) {
+        keptLiveProcess = true;
+      }
+    } on SeekerException {
+      keptLiveProcess = true;
+    }
+  }
+
+  if (keptLiveProcess) {
+    stdout.writeln(
+      'Could not stop an owned Seeker process; keeping its state and USB '
+      'forwards so it can be stopped safely.',
+    );
     return;
   }
 
-  for (final port in ports) {
-    try {
-      await removeUsbForward(device: device, port: port);
-    } on SeekerException {
+  await _removeRecordedForwards(paths, device: device);
+  _removeSeekerStateFiles(
+    paths,
+    keepSerial: readReverseForwards(paths).isNotEmpty,
+  );
+}
+
+Future<void> _removeRecordedForwards(
+  SeekerPaths paths, {
+  required AdbDevice? device,
+  bool quiet = false,
+}) async {
+  final forwards = readReverseForwards(paths);
+  if (forwards.isEmpty) {
+    return;
+  }
+
+  if (device == null) {
+    if (!quiet) {
+      stdout.writeln(
+        'Device is not attached; kept USB forward records for '
+        '${forwards.map((forward) => forward.line).join(', ')}.',
+      );
+    }
+    return;
+  }
+
+  final kept = <ReverseForward>[];
+  for (final forward in forwards) {
+    if (forward.serial != device.serial) {
+      kept.add(forward);
       continue;
     }
+
+    try {
+      await removeUsbForward(device: device, forward: forward);
+      forgetReverseForward(paths, forward);
+    } on SeekerException catch (error) {
+      kept.add(forward);
+      if (!quiet) {
+        stdout.writeln(error.message);
+      }
+    }
   }
-  removeIfExists(paths.reversePortsFile);
+
+  if (!quiet && kept.isNotEmpty) {
+    stdout.writeln(
+      'Kept USB forward records for '
+      '${kept.map((forward) => forward.line).join(', ')}.',
+    );
+  }
+}
+
+ReverseForward? _recordedForward(
+  SeekerPaths paths,
+  String serial,
+  int port,
+) {
+  for (final forward in readReverseForwards(paths)) {
+    if (forward.serial == serial && forward.devicePort == port) {
+      return forward;
+    }
+  }
+
+  return null;
+}
+
+Future<AdbDevice?> _resolveDeviceOrNull(String serial) async {
+  try {
+    return await resolveSeekerDevice(preferredSerial: serial);
+  } on SeekerException {
+    return null;
+  }
+}
+
+void _removeSeekerStateFiles(SeekerPaths paths, {bool keepSerial = false}) {
+  [
+    paths.flutterPid,
+    paths.fifoHolderPid,
+    paths.controlFifo,
+    paths.activeFlag,
+    if (!keepSerial) paths.deviceSerialFile,
+  ].forEach(removeIfExists);
 }
 
 void _printCleanup(StaleCleanup cleanup) {
