@@ -5508,6 +5508,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetBreakdownUncategorised => 'Uncategorised transactions';
 
   @override
+  String reviewTransactionsSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get transactionKindTransfer => 'Transfer';
+
+  @override
+  String get loadMoreButton => 'Load more';
+
+  @override
   String creditCardOwes(String amount) {
     return 'Owes $amount';
   }

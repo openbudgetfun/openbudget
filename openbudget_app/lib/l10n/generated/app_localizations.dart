@@ -9450,6 +9450,24 @@ abstract class AppLocalizations {
   /// **'Uncategorised transactions'**
   String get budgetBreakdownUncategorised;
 
+  /// No description provided for @reviewTransactionsSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String reviewTransactionsSelectedCount(int count);
+
+  /// No description provided for @transactionKindTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get transactionKindTransfer;
+
+  /// No description provided for @loadMoreButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get loadMoreButton;
+
   /// No description provided for @creditCardOwes.
   ///
   /// In en, this message translates to:
