@@ -8,14 +8,14 @@ part of 'spending_report_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// One month's spending and income in base minor units, read from the
-/// server's month view. Activity per envelope is grouped by its category.
+/// One month of spending grouped by category, from one `report.spending`
+/// call plus the month's figure from `report.monthSummaries`.
 
 @ProviderFor(spendingReport)
 final spendingReportProvider = SpendingReportFamily._();
 
-/// One month's spending and income in base minor units, read from the
-/// server's month view. Activity per envelope is grouped by its category.
+/// One month of spending grouped by category, from one `report.spending`
+/// call plus the month's figure from `report.monthSummaries`.
 
 final class SpendingReportProvider
     extends
@@ -25,8 +25,8 @@ final class SpendingReportProvider
           FutureOr<SpendingReport>
         >
     with $FutureModifier<SpendingReport>, $FutureProvider<SpendingReport> {
-  /// One month's spending and income in base minor units, read from the
-  /// server's month view. Activity per envelope is grouped by its category.
+  /// One month of spending grouped by category, from one `report.spending`
+  /// call plus the month's figure from `report.monthSummaries`.
   SpendingReportProvider._({
     required SpendingReportFamily super.from,
     required (String, int) super.argument,
@@ -71,10 +71,10 @@ final class SpendingReportProvider
   }
 }
 
-String _$spendingReportHash() => r'6a9a7e4943a60c1143b10b866d59cde4317b5c3c';
+String _$spendingReportHash() => r'90c1f17a37828e6aa4054636412763647fb9db5d';
 
-/// One month's spending and income in base minor units, read from the
-/// server's month view. Activity per envelope is grouped by its category.
+/// One month of spending grouped by category, from one `report.spending`
+/// call plus the month's figure from `report.monthSummaries`.
 
 final class SpendingReportFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<SpendingReport>, (String, int)> {
@@ -87,8 +87,8 @@ final class SpendingReportFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// One month's spending and income in base minor units, read from the
-  /// server's month view. Activity per envelope is grouped by its category.
+  /// One month of spending grouped by category, from one `report.spending`
+  /// call plus the month's figure from `report.monthSummaries`.
 
   SpendingReportProvider call(String entityId, int endMonth) =>
       SpendingReportProvider._(argument: (entityId, endMonth), from: this);
@@ -158,7 +158,7 @@ final class SpendingReportPresetProvider
 }
 
 String _$spendingReportPresetHash() =>
-    r'e9887f2b16f3ba9875b54a5f125188a694c1ac99';
+    r'c002ca6885b65923017d11292f0b50fa80968f28';
 
 /// The last [monthCount] months combined, for the preset ranges.
 

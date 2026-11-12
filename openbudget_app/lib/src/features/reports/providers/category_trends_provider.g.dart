@@ -9,15 +9,17 @@ part of 'category_trends_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Spending per category for each of the last [months] months, pivoted so
-/// each category carries a time series. One `monthFigures` fetch feeds the
-/// whole table.
+/// each category carries a time series. One `report.spending` call with
+/// [ReportGrouping.category] and `byMonth` feeds the whole table; the month
+/// headers come from `report.monthSummaries`.
 
 @ProviderFor(categoryTrends)
 final categoryTrendsProvider = CategoryTrendsFamily._();
 
 /// Spending per category for each of the last [months] months, pivoted so
-/// each category carries a time series. One `monthFigures` fetch feeds the
-/// whole table.
+/// each category carries a time series. One `report.spending` call with
+/// [ReportGrouping.category] and `byMonth` feeds the whole table; the month
+/// headers come from `report.monthSummaries`.
 
 final class CategoryTrendsProvider
     extends
@@ -30,8 +32,9 @@ final class CategoryTrendsProvider
         $FutureModifier<CategoryTrendsData>,
         $FutureProvider<CategoryTrendsData> {
   /// Spending per category for each of the last [months] months, pivoted so
-  /// each category carries a time series. One `monthFigures` fetch feeds the
-  /// whole table.
+  /// each category carries a time series. One `report.spending` call with
+  /// [ReportGrouping.category] and `byMonth` feeds the whole table; the month
+  /// headers come from `report.monthSummaries`.
   CategoryTrendsProvider._({
     required CategoryTrendsFamily super.from,
     required (String, {int months}) super.argument,
@@ -76,11 +79,12 @@ final class CategoryTrendsProvider
   }
 }
 
-String _$categoryTrendsHash() => r'4a02701ac8b7d6a70d9006f284cdcbe971f0429f';
+String _$categoryTrendsHash() => r'9dbad5d35f613e8cd57c1ed9ffbe48417eb9f1ba';
 
 /// Spending per category for each of the last [months] months, pivoted so
-/// each category carries a time series. One `monthFigures` fetch feeds the
-/// whole table.
+/// each category carries a time series. One `report.spending` call with
+/// [ReportGrouping.category] and `byMonth` feeds the whole table; the month
+/// headers come from `report.monthSummaries`.
 
 final class CategoryTrendsFamily extends $Family
     with
@@ -98,8 +102,9 @@ final class CategoryTrendsFamily extends $Family
       );
 
   /// Spending per category for each of the last [months] months, pivoted so
-  /// each category carries a time series. One `monthFigures` fetch feeds the
-  /// whole table.
+  /// each category carries a time series. One `report.spending` call with
+  /// [ReportGrouping.category] and `byMonth` feeds the whole table; the month
+  /// headers come from `report.monthSummaries`.
 
   CategoryTrendsProvider call(String entityId, {int months = 6}) =>
       CategoryTrendsProvider._(

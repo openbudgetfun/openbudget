@@ -8,20 +8,14 @@ part of 'spending_by_payee_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Spending grouped by payee for one month, in base minor units.
-///
-/// This pages the month's transactions and groups them here. When
-/// `report.spending(grouping: payee)` arrives on the generated client, this
-/// provider switches to it.
+/// Spending grouped by payee for one month, in base minor units, from one
+/// `report.spending` call with [ReportGrouping.payee].
 
 @ProviderFor(spendingByPayee)
 final spendingByPayeeProvider = SpendingByPayeeFamily._();
 
-/// Spending grouped by payee for one month, in base minor units.
-///
-/// This pages the month's transactions and groups them here. When
-/// `report.spending(grouping: payee)` arrives on the generated client, this
-/// provider switches to it.
+/// Spending grouped by payee for one month, in base minor units, from one
+/// `report.spending` call with [ReportGrouping.payee].
 
 final class SpendingByPayeeProvider
     extends
@@ -33,11 +27,8 @@ final class SpendingByPayeeProvider
     with
         $FutureModifier<PayeeSpendingReport>,
         $FutureProvider<PayeeSpendingReport> {
-  /// Spending grouped by payee for one month, in base minor units.
-  ///
-  /// This pages the month's transactions and groups them here. When
-  /// `report.spending(grouping: payee)` arrives on the generated client, this
-  /// provider switches to it.
+  /// Spending grouped by payee for one month, in base minor units, from one
+  /// `report.spending` call with [ReportGrouping.payee].
   SpendingByPayeeProvider._({
     required SpendingByPayeeFamily super.from,
     required (String, int) super.argument,
@@ -82,13 +73,10 @@ final class SpendingByPayeeProvider
   }
 }
 
-String _$spendingByPayeeHash() => r'660a6ed753c5be8b0cd6961c5f57b57eeb2afe7b';
+String _$spendingByPayeeHash() => r'594b2c919c7093e03ff8d7450df813d7336bb009';
 
-/// Spending grouped by payee for one month, in base minor units.
-///
-/// This pages the month's transactions and groups them here. When
-/// `report.spending(grouping: payee)` arrives on the generated client, this
-/// provider switches to it.
+/// Spending grouped by payee for one month, in base minor units, from one
+/// `report.spending` call with [ReportGrouping.payee].
 
 final class SpendingByPayeeFamily extends $Family
     with
@@ -105,11 +93,8 @@ final class SpendingByPayeeFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Spending grouped by payee for one month, in base minor units.
-  ///
-  /// This pages the month's transactions and groups them here. When
-  /// `report.spending(grouping: payee)` arrives on the generated client, this
-  /// provider switches to it.
+  /// Spending grouped by payee for one month, in base minor units, from one
+  /// `report.spending` call with [ReportGrouping.payee].
 
   SpendingByPayeeProvider call(String entityId, int month) =>
       SpendingByPayeeProvider._(argument: (entityId, month), from: this);

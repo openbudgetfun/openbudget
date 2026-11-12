@@ -8,33 +8,36 @@ part of 'month_figures_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// The month views for the [monthCount] months ending at [endMonth],
-/// newest first. The interim source for the spending reports until
-/// `report.spending` and `report.monthSummaries` land on the client;
-/// swapping to them is one file per feature.
+/// The month-level figures for [monthCount] months ending at [endMonth],
+/// newest first, from one `report.monthSummaries` call.
+///
+/// This replaces the old one-`budget.getMonth`-per-month loop; screens that
+/// also need grouped spending call `report.spending` once themselves.
 
 @ProviderFor(monthFigures)
 final monthFiguresProvider = MonthFiguresFamily._();
 
-/// The month views for the [monthCount] months ending at [endMonth],
-/// newest first. The interim source for the spending reports until
-/// `report.spending` and `report.monthSummaries` land on the client;
-/// swapping to them is one file per feature.
+/// The month-level figures for [monthCount] months ending at [endMonth],
+/// newest first, from one `report.monthSummaries` call.
+///
+/// This replaces the old one-`budget.getMonth`-per-month loop; screens that
+/// also need grouped spending call `report.spending` once themselves.
 
 final class MonthFiguresProvider
     extends
         $FunctionalProvider<
-          AsyncValue<List<BudgetMonthView>>,
-          List<BudgetMonthView>,
-          FutureOr<List<BudgetMonthView>>
+          AsyncValue<List<BudgetMonthSummary>>,
+          List<BudgetMonthSummary>,
+          FutureOr<List<BudgetMonthSummary>>
         >
     with
-        $FutureModifier<List<BudgetMonthView>>,
-        $FutureProvider<List<BudgetMonthView>> {
-  /// The month views for the [monthCount] months ending at [endMonth],
-  /// newest first. The interim source for the spending reports until
-  /// `report.spending` and `report.monthSummaries` land on the client;
-  /// swapping to them is one file per feature.
+        $FutureModifier<List<BudgetMonthSummary>>,
+        $FutureProvider<List<BudgetMonthSummary>> {
+  /// The month-level figures for [monthCount] months ending at [endMonth],
+  /// newest first, from one `report.monthSummaries` call.
+  ///
+  /// This replaces the old one-`budget.getMonth`-per-month loop; screens that
+  /// also need grouped spending call `report.spending` once themselves.
   MonthFiguresProvider._({
     required MonthFiguresFamily super.from,
     required (String, int, int) super.argument,
@@ -58,12 +61,12 @@ final class MonthFiguresProvider
 
   @$internal
   @override
-  $FutureProviderElement<List<BudgetMonthView>> $createElement(
+  $FutureProviderElement<List<BudgetMonthSummary>> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<List<BudgetMonthView>> create(Ref ref) {
+  FutureOr<List<BudgetMonthSummary>> create(Ref ref) {
     final argument = this.argument as (String, int, int);
     return monthFigures(ref, argument.$1, argument.$2, argument.$3);
   }
@@ -79,17 +82,18 @@ final class MonthFiguresProvider
   }
 }
 
-String _$monthFiguresHash() => r'a9437eab6363ef6353d9bcb7c898ada5f1bb1c8e';
+String _$monthFiguresHash() => r'7079789e471f8c1a359e3b756ac6dec80e8e6074';
 
-/// The month views for the [monthCount] months ending at [endMonth],
-/// newest first. The interim source for the spending reports until
-/// `report.spending` and `report.monthSummaries` land on the client;
-/// swapping to them is one file per feature.
+/// The month-level figures for [monthCount] months ending at [endMonth],
+/// newest first, from one `report.monthSummaries` call.
+///
+/// This replaces the old one-`budget.getMonth`-per-month loop; screens that
+/// also need grouped spending call `report.spending` once themselves.
 
 final class MonthFiguresFamily extends $Family
     with
         $FunctionalFamilyOverride<
-          FutureOr<List<BudgetMonthView>>,
+          FutureOr<List<BudgetMonthSummary>>,
           (String, int, int)
         > {
   MonthFiguresFamily._()
@@ -101,10 +105,11 @@ final class MonthFiguresFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// The month views for the [monthCount] months ending at [endMonth],
-  /// newest first. The interim source for the spending reports until
-  /// `report.spending` and `report.monthSummaries` land on the client;
-  /// swapping to them is one file per feature.
+  /// The month-level figures for [monthCount] months ending at [endMonth],
+  /// newest first, from one `report.monthSummaries` call.
+  ///
+  /// This replaces the old one-`budget.getMonth`-per-month loop; screens that
+  /// also need grouped spending call `report.spending` once themselves.
 
   MonthFiguresProvider call(String entityId, int endMonth, int monthCount) =>
       MonthFiguresProvider._(
