@@ -3,8 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_actions_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
@@ -179,12 +179,12 @@ class PlanSettingsScreen extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     Entity entity, {
+    required String successMessage,
     Object? name = _unset,
     Object? timeZone = _unset,
     Object? fiscalYearEndMonth = _unset,
     Object? fiscalYearEndDay = _unset,
     bool? includeInNetWorth,
-    required String successMessage,
   }) async {
     final client = ref.read(serverpodClientProvider);
     try {

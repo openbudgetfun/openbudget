@@ -5,7 +5,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/ledger/ledger_formatting.dart';
-import 'package:openbudget_app/src/features/ledger/ledger_labels.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_actions_provider.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_providers.dart';
 import 'package:openbudget_app/src/features/ledger/widgets/journal_status_chip.dart';
@@ -47,7 +46,7 @@ class JournalDetailScreen extends HookConsumerWidget {
     final journal = journals
         .where((j) => j.id?.toString() == journalId)
         .firstOrNull;
-    final status = journal == null ? null : ledgerStatusFor(journal.status);
+    final status = journal?.status;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.journalDetailTitle)),
@@ -82,7 +81,7 @@ class JournalDetailScreen extends HookConsumerWidget {
             );
           }
 
-          final status = ledgerStatusFor(journal.status);
+          final status = journal.status;
           final reversal = status == JournalStatus.reversed
               ? journals
                     .where(
@@ -107,7 +106,7 @@ class JournalDetailScreen extends HookConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        if (status != null) JournalStatusChip(status: status),
+                        JournalStatusChip(status: status),
                         const Spacer(),
                         Text(
                           DateFormat.yMMMd().format(journal.date),

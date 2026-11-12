@@ -6,11 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/ledger/ledger_formatting.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_actions_provider.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_providers.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -70,7 +69,7 @@ class JournalEditorScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
     final editingId = journalId;
-    final budgetAsync = ref.watch(budgetDetailProvider(entityId));
+    final currencyAsync = ref.watch(budgetMonthCurrencyProvider(entityId));
     final accountsAsync = ref.watch(ledgerAccountsProvider(entityId));
     final storedLinesAsync = editingId == null
         ? null
@@ -78,11 +77,7 @@ class JournalEditorScreen extends HookConsumerWidget {
     final storedJournalAsync = editingId == null
         ? null
         : ref.watch(ledgerJournalsProvider(entityId));
-    final currency =
-        budgetAsync.whenOrNull(
-          data: (budget) => normalizeCurrencyCode(budget.currencyCode),
-        ) ??
-        '';
+    final currency = currencyAsync.value ?? '';
     final decimals = currencyDecimalsForCode(currency);
 
     final date = useState(ledgerCalendarDate(DateTime.now()));
@@ -158,7 +153,7 @@ class JournalEditorScreen extends HookConsumerWidget {
     }, [storedJournal]);
 
     final accounts = accountsAsync.value ?? const <LedgerAccount>[];
-    final usableAccounts = accounts.where((a) => !a.archived).toList()
+    final usableAccounts = accounts.where((a) => a.archivedAt == null).toList()
       ..sort((a, b) => a.code.compareTo(b.code));
 
     final draftIssues = _validateDraft(lines.value, currency, decimals);
@@ -290,7 +285,7 @@ class JournalEditorScreen extends HookConsumerWidget {
           editingId == null ? l10n.journalNewTitle : l10n.journalEditTitle,
         ),
       ),
-      body: budgetAsync.when(
+      body: currencyAsync.when(
         loading: () => Center(
           child: ObLoadingPanel(label: l10n.booksTabJournals),
         ),
@@ -443,11 +438,8 @@ class JournalEditorScreen extends HookConsumerWidget {
           currencyCode: currency,
           debitMinor: line.isDebit ? amount : 0,
           creditMinor: line.isDebit ? 0 : amount,
-          functionalDebitMinor: line.isDebit ? amount : 0,
-          functionalCreditMinor: line.isDebit ? 0 : amount,
-          exchangeRate: '1',
-          rateDate: date,
-          rateSource: 'manual',
+          baseDebitMinor: line.isDebit ? amount : 0,
+          baseCreditMinor: line.isDebit ? 0 : amount,
         ),
       );
     }

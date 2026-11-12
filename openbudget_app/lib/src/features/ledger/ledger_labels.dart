@@ -41,18 +41,16 @@ const ledgerAccountTypeOrder = <LedgerAccountType>[
 
 /// The chart's account whose type is [name], or null for an unknown name.
 LedgerAccountType? ledgerAccountTypeFor(String name) {
-  try {
-    return LedgerAccountType.fromJson(name);
-  } on ArgumentError {
-    return null;
+  for (final type in LedgerAccountType.values) {
+    if (type.name == name) return type;
   }
+  return null;
 }
 
 /// The journal status whose enum name equals [name], or null.
 JournalStatus? ledgerStatusFor(String name) {
-  try {
-    return JournalStatus.fromJson(name);
-  } on ArgumentError {
-    return null;
+  for (final status in JournalStatus.values) {
+    if (status.name == name) return status;
   }
+  return null;
 }

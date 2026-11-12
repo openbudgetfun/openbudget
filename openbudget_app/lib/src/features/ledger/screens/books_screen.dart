@@ -297,7 +297,7 @@ class _JournalCard extends HookWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final status = ledgerStatusFor(journal.status);
+    final status = journal.status;
 
     return ObCard(
       margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
@@ -325,7 +325,7 @@ class _JournalCard extends HookWidget {
                   color: palette.mutedInk,
                 ),
               ),
-        trailing: status == null ? null : JournalStatusChip(status: status),
+        trailing: JournalStatusChip(status: status),
       ),
     );
   }
@@ -362,9 +362,7 @@ class _AccountsTab extends HookConsumerWidget {
       data: (accounts) {
         final byType = <LedgerAccountType, List<LedgerAccount>>{};
         for (final account in accounts) {
-          final type = ledgerAccountTypeFor(account.type);
-          if (type == null) continue;
-          byType.putIfAbsent(type, () => []).add(account);
+          byType.putIfAbsent(account.type, () => []).add(account);
         }
 
         if (accounts.isEmpty) {
@@ -450,7 +448,7 @@ class _AccountRow extends HookWidget {
           Expanded(
             child: Text(account.name, style: theme.textTheme.bodyMedium),
           ),
-          if (account.archived)
+          if (account.archivedAt != null)
             ObToneChip(
               key: const Key('ledger-account-archived'),
               label: AppLocalizations.of(context).ledgerAccountArchived,

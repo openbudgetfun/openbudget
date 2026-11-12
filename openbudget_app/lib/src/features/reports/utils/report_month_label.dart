@@ -7,7 +7,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 /// The month's name in the active locale, followed by its year, from a
 /// yyyymm int.
 String reportYyyymmLabel(AppLocalizations l10n, int yyyymm) {
-  final (year, calendarMonth) = monthKeyParts(yyyymm);
+  final (:year, :calendarMonth) = monthKeyParts(yyyymm);
   return reportMonthLabel(l10n, calendarMonth, year);
 }
 
