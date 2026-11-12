@@ -79,7 +79,7 @@ class HomeScreen extends HookConsumerWidget {
                   _EntityCard(
                     summary: summary,
                     onTap: () {
-                      final id = summary.entityId;
+                      final id = summary.entity.id?.toString() ?? '';
                       if (id.isEmpty) return;
                       unawaited(
                         context.pushNamed(
@@ -97,8 +97,8 @@ class HomeScreen extends HookConsumerWidget {
                       await ref
                           .read(entityActionsProvider.notifier)
                           .deleteEntity(
-                            entityId: summary.entityId,
-                            confirmName: summary.name,
+                            entityId: summary.entity.id?.toString() ?? '',
+                            confirmName: summary.entity.name,
                           );
                       if (context.mounted) {
                         showAppToast(
@@ -133,18 +133,20 @@ class HomeScreen extends HookConsumerWidget {
 class _DeleteEntityDialog extends HookWidget {
   const _DeleteEntityDialog({required this.summary});
 
-  final EntitySummary summary;
+  final EntitySummaryView summary;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
     final nameController = useTextEditingController();
-    final canDelete = useState(nameController.text.trim() == summary.name);
+    final canDelete = useState(
+      nameController.text.trim() == summary.entity.name,
+    );
 
     useEffect(() {
       void listener() {
-        canDelete.value = nameController.text.trim() == summary.name;
+        canDelete.value = nameController.text.trim() == summary.entity.name;
       }
 
       nameController.addListener(listener);
@@ -157,14 +159,14 @@ class _DeleteEntityDialog extends HookWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.budgetDeleteConfirm(summary.name)),
+          Text(l10n.budgetDeleteConfirm(summary.entity.name)),
           const SizedBox(height: SpacingTokens.md),
           TextField(
             controller: nameController,
             autofocus: true,
             decoration: InputDecoration(
               labelText: l10n.entityDeleteNameField,
-              hintText: summary.name,
+              hintText: summary.entity.name,
             ),
           ),
         ],
@@ -198,7 +200,7 @@ class _EntityCard extends HookConsumerWidget {
     required this.onLongPress,
   });
 
-  final EntitySummary summary;
+  final EntitySummaryView summary;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
 
@@ -217,7 +219,10 @@ class _EntityCard extends HookConsumerWidget {
         : ObTone.neutral;
     final readyLabel = readyToAssign == null
         ? null
-        : formatMinorForCode(readyToAssign, summary.baseCurrencyCode);
+        : formatMinorForCode(
+            readyToAssign,
+            summary.entity.baseCurrencyCode,
+          );
 
     return Card(
       margin: const EdgeInsets.only(bottom: SpacingTokens.md),
@@ -250,9 +255,12 @@ class _EntityCard extends HookConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(summary.name, style: theme.textTheme.titleMedium),
+                        Text(
+                          summary.entity.name,
+                          style: theme.textTheme.titleMedium,
+                        ),
                         const SizedBox(height: 2),
-                        ObToneChip(label: summary.baseCurrencyCode),
+                        ObToneChip(label: summary.entity.baseCurrencyCode),
                       ],
                     ),
                   ),
@@ -319,7 +327,7 @@ class _EntityCard extends HookConsumerWidget {
                       label: l10n.homeBudgetNetWorthShort(
                         formatMinorForCode(
                           summary.netWorthMinor,
-                          summary.baseCurrencyCode,
+                          summary.entity.baseCurrencyCode,
                         ),
                       ),
                       color: summary.netWorthMinor >= 0
