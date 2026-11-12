@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/ui_preferences_store.dart';
 import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
 import 'package:openbudget_app/src/features/whats_new/providers/whats_new_providers.dart';
-import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_test_utils/openbudget_test_utils.dart';
+
+import '../../../fixtures/budget_month.dart';
 
 const _entityId = 'test-budget-id';
 
@@ -15,14 +16,8 @@ void main() {
   testWidgets('settings shows the installed app version', (tester) async {
     final container = ProviderContainer(
       overrides: [
-        budgetDetailProvider.overrideWith(
-          (ref, entityId) async => Budget(
-            name: 'My Budget',
-            currencyCode: 'USD',
-            ownerId: UuidValue.fromString(
-              '00000000-0000-0000-0000-000000000402',
-            ),
-          ),
+        entityDetailProvider.overrideWith(
+          (ref, entityId) async => testEntity(baseCurrencyCode: 'USD'),
         ),
         uiPreferencesStoreProvider.overrideWithValue(
           InMemoryUiPreferencesStore(),
