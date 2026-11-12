@@ -1,5 +1,3 @@
-// UuidValue is needed for constructing test model data.
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -10,20 +8,16 @@ import 'package:openbudget_app/src/features/accounts/providers/account_actions_p
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/edit_account_dialog.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000010';
-final _budgetUuid = UuidValue.fromString(_budgetId);
+import '../../../fixtures/budget_month.dart';
 
-Account _makeAccount({bool isClosed = false}) => Account(
-  id: UuidValue.fromString('00000000-0000-0000-0000-000000000111'),
+const String _entityId = fixtureEntityId;
+
+Account _makeAccount({bool isClosed = false}) => testAccount(
   name: 'Daily',
-  accountType: 'checking',
-  balanceCents: 5000000,
-  currencyCode: 'USD',
-  budgetId: _budgetUuid,
-  onBudget: true,
-  sortOrder: 0,
-  isClosed: isClosed,
+  balanceMinor: 5000000,
+  closedAt: isClosed ? DateTime.utc(2026, 8) : null,
 );
 
 class _FakeAccountActions extends AccountActions {
@@ -38,30 +32,44 @@ class _FakeAccountActions extends AccountActions {
   @override
   Future<Account> deleteAccount({
     required String accountId,
-    required String budgetId,
+    required String entityId,
   }) async {
     onDelete?.call();
     if (throwOnDelete) {
-      throw StateError('delete response decode error');
+      throw Exception('delete response decode error');
     }
     return _makeAccount(isClosed: true);
   }
 
   @override
+  Future<Account> closeAccount({
+    required String accountId,
+    required String entityId,
+  }) async => _makeAccount(isClosed: true);
+
+  @override
+  Future<Account> reopenAccount({
+    required String accountId,
+    required String entityId,
+  }) async => _makeAccount();
+
+  @override
   Future<Account> updateAccount({
     required String accountId,
-    required String budgetId,
+    required String entityId,
     String? name,
-    String? accountType,
-    int? balanceCents,
+    AccountKind? kind,
     bool? onBudget,
+    String? institutionId,
+    bool clearInstitution = false,
+    String? note,
     int? sortOrder,
-    bool? isClosed,
-  }) async => _makeAccount(isClosed: isClosed ?? false);
+  }) async => _makeAccount();
 }
 
 class _RecordingAccountActions extends AccountActions {
-  int? updatedBalanceCents;
+  String? savedName;
+  String? savedNote;
 
   @override
   FutureOr<void> build() {}
@@ -69,16 +77,18 @@ class _RecordingAccountActions extends AccountActions {
   @override
   Future<Account> updateAccount({
     required String accountId,
-    required String budgetId,
+    required String entityId,
     String? name,
-    String? accountType,
-    int? balanceCents,
+    AccountKind? kind,
     bool? onBudget,
+    String? institutionId,
+    bool clearInstitution = false,
+    String? note,
     int? sortOrder,
-    bool? isClosed,
   }) async {
-    updatedBalanceCents = balanceCents;
-    return _makeAccount(isClosed: isClosed ?? false);
+    savedName = name;
+    savedNote = note;
+    return _makeAccount();
   }
 }
 
@@ -101,7 +111,7 @@ Widget _buildSubject({
     ),
     if (accountListOverride != null)
       accountListProvider(
-        _budgetId,
+        _entityId,
       ).overrideWith((ref) async => accountListOverride),
   ],
   child: MaterialApp(
@@ -116,7 +126,7 @@ Widget _buildSubject({
               context: context,
               builder: (_) => EditAccountDialog(
                 account: account,
-                budgetId: _budgetId,
+                entityId: _entityId,
                 onDeleted: onDeleted,
               ),
             ),
@@ -128,6 +138,15 @@ Widget _buildSubject({
   ),
 );
 
+Future<void> _scrollTo(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    300,
+    scrollable: find.byType(Scrollable).first,
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
   group('EditAccountDialog', () {
     testWidgets('open account shows close and delete actions', (tester) async {
@@ -136,14 +155,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Account Nickname'), findsOneWidget);
-      expect(find.text('Working Balance'), findsOneWidget);
-      expect(find.text('Link an Account (Unavailable)'), findsOneWidget);
-      await tester.scrollUntilVisible(
-        find.text('Close Account'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
+      await _scrollTo(tester, find.text('Close Account'));
       expect(find.text('Close Account'), findsOneWidget);
       expect(find.text('Delete Permanently'), findsOneWidget);
       expect(find.text('Reopen Account'), findsNothing);
@@ -158,56 +170,47 @@ void main() {
       await tester.tap(find.text('Open Edit Dialog'));
       await tester.pumpAndSettle();
 
-      await tester.scrollUntilVisible(
-        find.text('Delete Permanently'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
+      await _scrollTo(tester, find.text('Delete Permanently'));
 
       expect(find.text('Delete Permanently'), findsOneWidget);
       expect(find.text('Reopen Account'), findsOneWidget);
       expect(find.text('Close Account'), findsNothing);
     });
 
-    testWidgets('save stays disabled with invalid balance input', (
-      tester,
-    ) async {
-      await tester.pumpWidget(_buildSubject(account: _makeAccount()));
+    testWidgets('save keeps the nickname and note', (tester) async {
+      final actions = _RecordingAccountActions();
+      await tester.pumpWidget(
+        _buildSubject(account: _makeAccount(), actions: actions),
+      );
       await tester.tap(find.text('Open Edit Dialog'));
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextField).at(2), 'abc');
+      await tester.enterText(find.byType(TextField).first, 'Everyday');
+      final notesFields = find.byType(TextField);
+      await tester.enterText(notesFields.last, 'Paycheque lands here');
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Save'));
       await tester.pumpAndSettle();
 
-      final saveButton = tester.widget<TextButton>(
-        find.widgetWithText(TextButton, 'Save'),
-      );
-      expect(saveButton.onPressed, isNull);
+      expect(actions.savedName, 'Everyday');
+      expect(actions.savedNote, 'Paycheque lands here');
     });
 
     testWidgets('delete action triggers callback after successful delete', (
       tester,
     ) async {
       var deleteCalled = false;
-      var onDeletedCalled = false;
 
       await tester.pumpWidget(
         _buildSubject(
           account: _makeAccount(isClosed: true),
-          onDeleted: () => onDeletedCalled = true,
           onDeleteAction: () => deleteCalled = true,
         ),
       );
       await tester.tap(find.text('Open Edit Dialog'));
       await tester.pumpAndSettle();
 
-      await tester.scrollUntilVisible(
-        find.text('Delete Permanently'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
+      await _scrollTo(tester, find.text('Delete Permanently'));
 
       await tester.tap(find.text('Delete Permanently'));
       await tester.pumpAndSettle();
@@ -219,32 +222,25 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(deleteCalled, isTrue);
-      expect(onDeletedCalled, isTrue);
+      // onDeleted was the pre-port imperative refresh hook; the realtime
+      // entity events invalidate the list now, so only the delete call
+      // matters here.
       expect(find.text('Edit Account'), findsNothing);
     });
 
-    testWidgets('delete fallback succeeds when account is already gone', (
+    testWidgets('a failed delete shows the error toast and keeps the dialog', (
       tester,
     ) async {
-      var onDeletedCalled = false;
-
       await tester.pumpWidget(
         _buildSubject(
           account: _makeAccount(isClosed: true),
           throwOnDelete: true,
-          onDeleted: () => onDeletedCalled = true,
-          accountListOverride: const <Account>[],
         ),
       );
       await tester.tap(find.text('Open Edit Dialog'));
       await tester.pumpAndSettle();
 
-      await tester.scrollUntilVisible(
-        find.text('Delete Permanently'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
+      await _scrollTo(tester, find.text('Delete Permanently'));
 
       await tester.tap(find.text('Delete Permanently'));
       await tester.pumpAndSettle();
@@ -253,83 +249,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(onDeletedCalled, isTrue);
+      // The confirm dialog's inline error and the toast both show it.
       expect(
         find.text('Could not delete account. Please try again.'),
-        findsNothing,
+        findsWidgets,
       );
-      expect(find.text('Edit Account'), findsNothing);
-    });
-  });
-
-  group('EditAccountDialog balance entry', () {
-    Future<void> openDialog(
-      WidgetTester tester,
-      AccountActions actions,
-    ) async {
-      await tester.pumpWidget(
-        _buildSubject(account: _makeAccount(), actions: actions),
-      );
-      await tester.tap(find.text('Open Edit Dialog'));
-      await tester.pumpAndSettle();
-    }
-
-    testWidgets('saves 12.34 as 1234 minor units', (tester) async {
-      final actions = _RecordingAccountActions();
-      await openDialog(tester, actions);
-
-      await tester.enterText(find.byType(TextField).at(2), '12.34');
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(TextButton, 'Save'));
-      await tester.pumpAndSettle();
-
-      expect(actions.updatedBalanceCents, 1234);
-    });
-
-    testWidgets('refuses an over-precise amount instead of rounding it', (
-      tester,
-    ) async {
-      final actions = _RecordingAccountActions();
-      await openDialog(tester, actions);
-
-      await tester.enterText(find.byType(TextField).at(2), '12.345');
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('Enter a valid amount with at most 2 decimal places'),
-        findsOneWidget,
-      );
-
-      final saveButton = tester.widget<TextButton>(
-        find.widgetWithText(TextButton, 'Save'),
-      );
-      expect(saveButton.onPressed, isNull);
-      expect(actions.updatedBalanceCents, isNull);
-    });
-
-    testWidgets('refuses a negative balance', (tester) async {
-      final actions = _RecordingAccountActions();
-      await openDialog(tester, actions);
-
-      await tester.enterText(find.byType(TextField).at(2), '-12.34');
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('Enter a valid amount with at most 2 decimal places'),
-        findsOneWidget,
-      );
-
-      final saveButton = tester.widget<TextButton>(
-        find.widgetWithText(TextButton, 'Save'),
-      );
-      expect(saveButton.onPressed, isNull);
-      expect(actions.updatedBalanceCents, isNull);
-    });
-
-    testWidgets('shows the stored balance exactly', (tester) async {
-      await openDialog(tester, _RecordingAccountActions());
-
-      expect(find.text('50000.00'), findsOneWidget);
+      expect(find.text('Delete Permanently'), findsWidgets);
     });
   });
 }

@@ -5,15 +5,13 @@ import 'package:openbudget_app/src/features/budget/providers/credit_card_provide
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// The plan screen's credit-card section: each card's month spending and
+/// what it owes, each in the card's own currency — no cross-currency total,
+/// because the app never converts.
 class CreditCardSection extends HookWidget {
-  const CreditCardSection({
-    required this.payments,
-    required this.currencyCode,
-    super.key,
-  });
+  const CreditCardSection({required this.payments, super.key});
 
   final List<CreditCardPaymentInfo> payments;
-  final String currencyCode;
 
   @override
   Widget build(BuildContext context) {
@@ -22,11 +20,6 @@ class CreditCardSection extends HookWidget {
     final palette = theme.ob;
 
     if (payments.isEmpty) return const SizedBox.shrink();
-
-    final totalPayment = payments.fold<int>(
-      0,
-      (sum, p) => sum + p.paymentCents,
-    );
 
     return ObCard(
       padding: const EdgeInsets.all(SpacingTokens.md),
@@ -50,11 +43,6 @@ class CreditCardSection extends HookWidget {
                   ),
                 ),
               ),
-              ObAmount(
-                formatCentsForCode(totalPayment, currencyCode),
-                tone: ObTone.review,
-                style: theme.textTheme.titleSmall,
-              ),
             ],
           ),
           const SizedBox(height: SpacingTokens.sm),
@@ -70,24 +58,42 @@ class CreditCardSection extends HookWidget {
                   ),
                   const SizedBox(width: SpacingTokens.sm),
                   Expanded(
-                    child: Text(
-                      payment.account.name,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: palette.ink,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          payment.account.name,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: palette.ink,
+                          ),
+                        ),
+                        Text(
+                          l10n.creditCardOwes(
+                            formatMinorForCode(
+                              payment.balanceMinor,
+                              payment.account.currencyCode,
+                            ),
+                          ),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: palette.mutedInk,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       ObAmount(
-                        formatCentsForCode(payment.paymentCents, currencyCode),
+                        formatMinorForCode(
+                          payment.spentMinor,
+                          payment.account.currencyCode,
+                        ),
                         tone: ObTone.review,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${l10n.creditCardSpentThisMonth}: '
-                        '${formatCentsForCode(payment.spentCents, currencyCode)}',
+                        l10n.creditCardSpentThisMonth,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: palette.mutedInk,
                         ),

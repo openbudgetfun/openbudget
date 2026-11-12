@@ -1,78 +1,90 @@
-// UuidValue is needed for constructing test model data.
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
-import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_summary_provider.dart';
 import 'package:openbudget_app/src/features/home/screens/home_screen.dart';
-import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-final _ownerId = UuidValue.fromString('00000000-0000-0000-0000-000000000001');
-const _budgetIdStr = '00000000-0000-0000-0000-000000000010';
+import '../../../fixtures/budget_month.dart';
+
+EntitySummaryView _summary({
+  Entity? entity,
+  int? readyToAssignMinor,
+  int overspentEnvelopeCount = 0,
+  int netWorthMinor = 0,
+  int uncategorizedCount = 0,
+  int dueRecurringCount = 0,
+  int pendingProposalCount = 0,
+}) => EntitySummaryView(
+  entity: entity ?? testEntity(),
+  month: 202611,
+  readyToAssignMinor: readyToAssignMinor,
+  overspentEnvelopeCount: overspentEnvelopeCount,
+  netWorthMinor: netWorthMinor,
+  netWorthComplete: true,
+  uncategorizedCount: uncategorizedCount,
+  pendingProposalCount: pendingProposalCount,
+  dueRecurringCount: dueRecurringCount,
+);
+
+NetWorthView _netWorth({
+  String currencyCode = 'USD',
+  int assetsMinor = 1000000,
+  int liabilitiesMinor = 0,
+  bool isComplete = true,
+  List<String> missingCurrencyCodes = const [],
+}) => NetWorthView(
+  currencyCode: currencyCode,
+  asOf: DateTime.utc(2026, 11, 5),
+  assetsMinor: assetsMinor,
+  liabilitiesMinor: liabilitiesMinor,
+  netWorthMinor: assetsMinor + liabilitiesMinor,
+  isComplete: isComplete,
+  missingCurrencyCodes: missingCurrencyCodes,
+  hasStaleRates: false,
+  currencies: const [],
+  entities: const [],
+  accounts: const [],
+);
+
+Widget _buildSubject({
+  Object? summaries,
+  NetWorthView? netWorth,
+}) => ProviderScope(
+  overrides: [
+    if (summaries is Completer<List<EntitySummaryView>>)
+      entitySummariesProvider.overrideWith((ref) => summaries.future)
+    else if (summaries is Exception)
+      entitySummariesProvider.overrideWith((ref) => throw summaries)
+    else
+      entitySummariesProvider.overrideWith(
+        (ref) async =>
+            summaries as List<EntitySummaryView>? ?? <EntitySummaryView>[],
+      ),
+    netWorthProvider.overrideWith((ref) async => netWorth ?? _netWorth()),
+  ],
+  child: MaterialApp(
+    theme: OpenBudgetTheme.light,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: const HomeScreen(),
+  ),
+);
 
 Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
   (widget) => widget is SkribbleIcon && widget.data == data,
 );
 
-Budget _makeBudget({
-  String? id,
-  String name = 'My Budget',
-  String currencyCode = 'USD',
-}) => Budget(
-  id: id != null ? UuidValue.fromString(id) : null,
-  name: name,
-  currencyCode: currencyCode,
-  ownerId: _ownerId,
-);
-
-Account _makeAccount({
-  String name = 'Checking',
-  int balanceCents = 100000,
-  String budgetIdStr = _budgetIdStr,
-  String currencyCode = 'USD',
-  bool isClosed = false,
-  bool onBudget = true,
-  String accountType = 'checking',
-}) => Account(
-  name: name,
-  accountType: accountType,
-  balanceCents: balanceCents,
-  currencyCode: currencyCode,
-  budgetId: UuidValue.fromString(budgetIdStr),
-  onBudget: onBudget,
-  sortOrder: 0,
-  isClosed: isClosed,
-);
-
-BudgetSummary _emptySummary(Budget budget) => BudgetSummary(
-  budget: budget,
-  categories: const [],
-  totalIncomeCents: 0,
-  totalBudgetedCents: 0,
-  readyToAssignCents: 0,
-  year: 2026,
-  month: 2,
-);
-
 void main() {
   group('HomeScreen', () {
     testWidgets('renders loading indicator while budgets load', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
-        ),
-      );
+      final never = Completer<List<EntitySummaryView>>();
+      await tester.pumpWidget(_buildSubject(summaries: never));
       await tester.pump();
 
       expect(find.byType(ObLoadingPanel), findsOneWidget);
@@ -80,19 +92,7 @@ void main() {
 
     testWidgets('renders error state with retry button', (tester) async {
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith(
-              (ref) => throw Exception('Network error'),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
-        ),
+        _buildSubject(summaries: Exception('Network error')),
       );
       await tester.pumpAndSettle();
 
@@ -102,19 +102,7 @@ void main() {
     });
 
     testWidgets('renders empty state when no budgets', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => <Budget>[]),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
-        ),
-      );
+      await tester.pumpWidget(_buildSubject(summaries: <EntitySummaryView>[]));
       await tester.pumpAndSettle();
 
       expect(find.text('No Budgets Yet'), findsOneWidget);
@@ -123,46 +111,23 @@ void main() {
     });
 
     testWidgets('does not show FAB in empty state', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => <Budget>[]),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
-        ),
-      );
+      await tester.pumpWidget(_buildSubject(summaries: <EntitySummaryView>[]));
       await tester.pumpAndSettle();
 
       expect(find.byType(FloatingActionButton), findsNothing);
     });
 
     testWidgets('renders budget card with name and currency', (tester) async {
-      final budget = _makeBudget(
-        id: _budgetIdStr,
-        name: 'Family Budget',
-        currencyCode: 'EUR',
-      );
-
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => []),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budget),
+        _buildSubject(
+          summaries: [
+            _summary(
+              entity: testEntity(
+                name: 'Family Budget',
+                baseCurrencyCode: 'EUR',
+              ),
             ),
           ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -172,90 +137,33 @@ void main() {
     });
 
     testWidgets('shows FAB when budgets exist', (tester) async {
-      final budget = _makeBudget(id: _budgetIdStr);
-
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => []),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budget),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
-        ),
+        _buildSubject(summaries: [_summary()]),
       );
       await tester.pumpAndSettle();
 
       expect(find.byType(FloatingActionButton), findsOneWidget);
     });
 
-    testWidgets('renders account count and total balance on budget card', (
+    testWidgets('renders per-entity net worth on the budget card', (
       tester,
     ) async {
-      final budget = _makeBudget(id: _budgetIdStr);
-      final accounts = [
-        _makeAccount(balanceCents: 250000),
-        _makeAccount(name: 'Savings', balanceCents: 500000),
-      ];
-
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budget),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
-        ),
+        _buildSubject(summaries: [_summary(netWorthMinor: 1250000)]),
       );
       await tester.pumpAndSettle();
 
-      // Appears in both the budget card and net worth summary
-      expect(find.text('2 accounts'), findsAny);
+      // The server's per-entity net worth renders straight on the card.
+      expect(find.textContaining('Net worth'), findsOneWidget);
+      expect(find.textContaining('12,500.00'), findsOneWidget);
     });
 
     testWidgets('renders ready-to-assign amount on budget card', (
       tester,
     ) async {
-      final budget = _makeBudget(id: _budgetIdStr);
-
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => []),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => BudgetSummary(
-                budget: budget,
-                categories: const [],
-                totalIncomeCents: 300000,
-                totalBudgetedCents: 100000,
-                readyToAssignCents: 200000,
-                year: 2026,
-                month: 2,
-              ),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
+        _buildSubject(
+          summaries: [_summary(readyToAssignMinor: 200000)],
         ),
       );
       await tester.pumpAndSettle();
@@ -266,65 +174,8 @@ void main() {
     testWidgets('renders overspent count when envelopes are overspent', (
       tester,
     ) async {
-      final budget = _makeBudget(id: _budgetIdStr);
-      final envelope = Envelope(
-        name: 'Groceries',
-        budgetedAmountCents: 50000,
-        spentAmountCents: 70000,
-        currencyCode: 'USD',
-        categoryId: UuidValue.fromString(
-          '00000000-0000-0000-0000-000000000020',
-        ),
-        sortOrder: 0,
-      );
-      final category = Category(
-        name: 'Essentials',
-        budgetId: UuidValue.fromString(_budgetIdStr),
-        sortOrder: 0,
-        isHidden: false,
-      );
-
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => []),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => BudgetSummary(
-                budget: budget,
-                categories: [
-                  CategoryWithEnvelopes(
-                    category: category,
-                    envelopes: [envelope],
-                    monthlyEnvelopes: [
-                      MonthlyEnvelopeData(
-                        envelope: envelope,
-                        allocatedCents: 50000,
-                        spentCents: 70000,
-                        availableCents: -20000,
-                        carryoverCents: 0,
-                      ),
-                    ],
-                    totalBudgetedCents: 50000,
-                    totalSpentCents: 70000,
-                    totalAvailableCents: -20000,
-                  ),
-                ],
-                totalIncomeCents: 100000,
-                totalBudgetedCents: 50000,
-                readyToAssignCents: 50000,
-                year: 2026,
-                month: 2,
-              ),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
-        ),
+        _buildSubject(summaries: [_summary(overspentEnvelopeCount: 1)]),
       );
       await tester.pumpAndSettle();
 
@@ -332,199 +183,35 @@ void main() {
       expect(_skribbleIcon(OpenBudgetIcons.warning), findsOneWidget);
     });
 
-    testWidgets('renders net worth summary with total balance', (tester) async {
-      final budget = _makeBudget(id: _budgetIdStr);
-      final accounts = [
-        _makeAccount(balanceCents: 250000),
-        _makeAccount(name: 'Savings', balanceCents: 750000),
-      ];
-
+    testWidgets('renders net worth summary with assets and liabilities', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budget),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
+        _buildSubject(
+          summaries: [_summary()],
+          netWorth: _netWorth(liabilitiesMinor: -250000),
         ),
       );
       await tester.pumpAndSettle();
 
       expect(find.text('Net Worth'), findsOneWidget);
-      expect(find.text('2 accounts'), findsAny);
+      expect(find.text(r'Assets $10,000.00'), findsOneWidget);
+      expect(find.text(r'Liabilities -$2,500.00'), findsOneWidget);
     });
 
-    testWidgets('renders multi-currency net worth summary', (tester) async {
-      final budget = _makeBudget(id: _budgetIdStr);
-      final accounts = [
-        _makeAccount(name: 'USD Checking'),
-        _makeAccount(name: 'EUR Savings', currencyCode: 'EUR'),
-      ];
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budget),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('USD'), findsWidgets);
-      expect(find.textContaining('EUR'), findsWidgets);
-    });
-
-    testWidgets('renders multi-currency balances on budget card', (
+    testWidgets('renders every entity card with its base currency', (
       tester,
     ) async {
-      final budget = _makeBudget(id: _budgetIdStr);
-      final accounts = [
-        _makeAccount(name: 'USD Checking', balanceCents: 50000),
-        _makeAccount(
-          name: 'EUR Savings',
-          balanceCents: 50000,
-          currencyCode: 'EUR',
-        ),
-      ];
-
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budget),
+        _buildSubject(
+          summaries: [
+            _summary(
+              entity: testEntity(name: 'Personal', baseCurrencyCode: 'USD'),
             ),
+            _summary(entity: testEntity(name: 'Business')),
           ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('USD'), findsWidgets);
-      expect(find.textContaining('EUR'), findsWidgets);
-    });
-
-    testWidgets('excludes closed accounts from net worth', (tester) async {
-      final budget = _makeBudget(id: _budgetIdStr);
-      final accounts = [
-        _makeAccount(name: 'Active', balanceCents: 500000),
-        _makeAccount(name: 'Closed', isClosed: true),
-      ];
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budget),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // Only 1 active account shown in net worth header
-      expect(find.text('1 account'), findsAny);
-    });
-
-    testWidgets('renders logout button in app bar', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => <Budget>[]),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(_skribbleIcon(OpenBudgetIcons.logout), findsOneWidget);
-      expect(find.byTooltip('Sign Out'), findsOneWidget);
-    });
-
-    testWidgets('renders app title in app bar', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => <Budget>[]),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('OpenBudget'), findsOneWidget);
-    });
-
-    testWidgets('renders multiple budget cards', (tester) async {
-      final budgets = [
-        _makeBudget(
-          id: '00000000-0000-0000-0000-000000000010',
-          name: 'Personal',
-        ),
-        _makeBudget(
-          id: '00000000-0000-0000-0000-000000000011',
-          name: 'Business',
-          currencyCode: 'GBP',
-        ),
-      ];
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => budgets),
-            accountListProvider.overrideWith((ref, budgetId) async => []),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _emptySummary(budgets.first),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
+          // The combined card is EUR, so each entity's chip is unique.
+          netWorth: _netWorth(currencyCode: 'EUR'),
         ),
       );
       await tester.pumpAndSettle();
@@ -535,113 +222,73 @@ void main() {
       expect(find.text('GBP'), findsOneWidget);
     });
 
-    testWidgets(
-      'converts budget summary amounts when display override is active',
-      (tester) async {
-        final budget = _makeBudget(
-          id: _budgetIdStr,
-        ).copyWith(displayCurrencyCode: 'GBP');
-        final accounts = [
-          _makeAccount(
-            name: 'EUR Savings',
-            balanceCents: 10000,
-            currencyCode: 'EUR',
-          ),
-        ];
-        const converter = DisplayCurrencyConverter(
-          displayCurrency: CurrencyCode.gbp,
-          baseCurrencyCode: 'USD',
-          ratesByCode: {'USD': 1.0, 'EUR': 0.8, 'GBP': 0.7},
-        );
-
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              budgetListProvider.overrideWith((ref) async => [budget]),
-              accountListProvider.overrideWith(
-                (ref, budgetId) async => accounts,
-              ),
-              budgetSummaryProvider.overrideWith(
-                (ref, budgetId) async => BudgetSummary(
-                  budget: budget,
-                  categories: const [],
-                  totalIncomeCents: 10000,
-                  totalBudgetedCents: 0,
-                  readyToAssignCents: 10000,
-                  year: 2026,
-                  month: 2,
-                ),
-              ),
-              displayCurrencyConverterProvider.overrideWith(
-                (ref, budgetId) async => converter,
-              ),
-            ],
-            child: MaterialApp(
-              theme: OpenBudgetTheme.light,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              home: const HomeScreen(),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        expect(find.textContaining('\u00A387.50'), findsWidgets);
-        expect(find.textContaining('\u00A370.00 to assign'), findsOneWidget);
-      },
-    );
-
-    testWidgets('falls back to native formatting when rates are unavailable', (
+    testWidgets('renders the reporting currency on the net worth card', (
       tester,
     ) async {
-      final budget = _makeBudget(
-        id: _budgetIdStr,
-      ).copyWith(displayCurrencyCode: 'GBP');
-      final accounts = [
-        _makeAccount(
-          name: 'EUR Savings',
-          balanceCents: 10000,
-          currencyCode: 'EUR',
-        ),
-      ];
-      const converter = DisplayCurrencyConverter(
-        displayCurrency: CurrencyCode.gbp,
-        baseCurrencyCode: 'USD',
-        ratesByCode: {'USD': 1.0},
-      );
-
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetListProvider.overrideWith((ref) async => [budget]),
-            accountListProvider.overrideWith((ref, budgetId) async => accounts),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => BudgetSummary(
-                budget: budget,
-                categories: const [],
-                totalIncomeCents: 10000,
-                totalBudgetedCents: 0,
-                readyToAssignCents: 10000,
-                year: 2026,
-                month: 2,
-              ),
-            ),
-            displayCurrencyConverterProvider.overrideWith(
-              (ref, budgetId) async => converter,
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
+        _buildSubject(
+          summaries: [_summary()],
+          netWorth: _netWorth(currencyCode: 'GBP', assetsMinor: 100000),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // The server reports in the user's reporting currency; the card
+      // shows those figures and its chip.
+      expect(find.text('GBP'), findsWidgets);
+      expect(find.textContaining('£1,000.00'), findsWidgets);
+    });
+
+    testWidgets('warns when a currency has no rate', (tester) async {
+      await tester.pumpWidget(
+        _buildSubject(
+          summaries: [_summary()],
+          netWorth: _netWorth(
+            isComplete: false,
+            missingCurrencyCodes: ['EUR'],
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('\u20AC100.00'), findsWidgets);
-      expect(find.textContaining(r'$100.00 to assign'), findsOneWidget);
+      expect(find.textContaining('Not included'), findsOneWidget);
+      expect(find.textContaining('EUR'), findsWidgets);
+    });
+
+    testWidgets('renders logout button in app bar', (tester) async {
+      await tester.pumpWidget(_buildSubject(summaries: <EntitySummaryView>[]));
+      await tester.pumpAndSettle();
+
+      expect(_skribbleIcon(OpenBudgetIcons.logout), findsOneWidget);
+      expect(find.byTooltip('Sign Out'), findsOneWidget);
+    });
+
+    testWidgets('renders app title in app bar', (tester) async {
+      await tester.pumpWidget(_buildSubject(summaries: <EntitySummaryView>[]));
+      await tester.pumpAndSettle();
+
+      expect(find.text('OpenBudget'), findsOneWidget);
+    });
+
+    testWidgets('renders uncategorised, recurring and proposal chips', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildSubject(
+          summaries: [
+            _summary(
+              uncategorizedCount: 3,
+              dueRecurringCount: 2,
+              pendingProposalCount: 1,
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('3 uncategorised'), findsOneWidget);
+      expect(find.text('2 recurring due'), findsOneWidget);
+      expect(find.text('1 proposals'), findsOneWidget);
     });
   });
 }

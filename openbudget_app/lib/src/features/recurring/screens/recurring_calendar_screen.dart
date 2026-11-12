@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_calendar_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// A month of scheduled money, pressed into a hand-ruled grid.
 class RecurringCalendarScreen extends HookConsumerWidget {
-  const RecurringCalendarScreen({required this.budgetId, super.key});
+  const RecurringCalendarScreen({required this.entityId, super.key});
 
   /// Moves the calendar back one month.
   static const Key previousMonthKey = ValueKey('recurringCalendar.previous');
@@ -16,7 +19,7 @@ class RecurringCalendarScreen extends HookConsumerWidget {
   /// Moves the calendar forward one month.
   static const Key nextMonthKey = ValueKey('recurringCalendar.next');
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,10 +31,15 @@ class RecurringCalendarScreen extends HookConsumerWidget {
     final selectedYear = useState(now.year);
     final selectedMonth = useState(now.month);
     final selectedDay = useState<int?>(null);
+    final accountsAsync = ref.watch(accountListProvider(entityId));
+    final currencyByAccount = {
+      for (final account in accountsAsync.value ?? const <Account>[])
+        if (account.id != null) account.id!.toString(): account.currencyCode,
+    };
 
     final calendarAsync = ref.watch(
       recurringCalendarProvider(
-        budgetId,
+        entityId,
         selectedYear.value,
         selectedMonth.value,
       ),
@@ -130,6 +138,7 @@ class RecurringCalendarScreen extends HookConsumerWidget {
                             dayMap.containsKey(selectedDay.value)
                         ? _DayDetail(
                             occurrences: dayMap[selectedDay.value]!,
+                            currencyByAccount: currencyByAccount,
                           )
                         : ListView(
                             padding: const EdgeInsets.all(SpacingTokens.md),
@@ -386,9 +395,16 @@ class _CalendarGrid extends HookWidget {
 }
 
 class _DayDetail extends HookWidget {
-  const _DayDetail({required this.occurrences});
+  const _DayDetail({
+    required this.occurrences,
+    required this.currencyByAccount,
+  });
 
   final List<ScheduledOccurrence> occurrences;
+
+  /// Account id to currency code; recurring transactions have no currency
+  /// of their own.
+  final Map<String, String> currencyByAccount;
 
   @override
   Widget build(BuildContext context) {
@@ -407,15 +423,16 @@ class _DayDetail extends HookWidget {
       itemBuilder: (context, index) {
         final occurrence = occurrences[index];
         final recurring = occurrence.recurring;
-        final isIncome = recurring.amountCents > 0;
+        final isIncome = recurring.amountMinor > 0;
         final tone = isIncome ? ObTone.funded : ObTone.overspent;
+        final currencyCode =
+            currencyByAccount[recurring.accountId.toString()] ?? '';
         final frequencyLabel = switch (recurring.frequency) {
-          'daily' => l10n.recurringFreqDaily,
-          'weekly' => l10n.recurringFreqWeekly,
-          'biweekly' => l10n.recurringFreqBiweekly,
-          'monthly' => l10n.recurringFreqMonthly,
-          'yearly' => l10n.recurringFreqYearly,
-          _ => recurring.frequency,
+          RecurrenceFrequency.daily => l10n.recurringFreqDaily,
+          RecurrenceFrequency.weekly => l10n.recurringFreqWeekly,
+          RecurrenceFrequency.biweekly => l10n.recurringFreqBiweekly,
+          RecurrenceFrequency.monthly => l10n.recurringFreqMonthly,
+          RecurrenceFrequency.yearly => l10n.recurringFreqYearly,
         };
 
         return Padding(
@@ -492,10 +509,10 @@ class _DayDetail extends HookWidget {
               ),
               trailing: ObAmount(
                 isIncome
-                    ? '+${formatCentsForCode(recurring.amountCents, recurring.currencyCode)}'
-                    : formatCentsForCode(
-                        recurring.amountCents,
-                        recurring.currencyCode,
+                    ? '+${formatMinorForCode(recurring.amountMinor, currencyCode)}'
+                    : formatMinorForCode(
+                        recurring.amountMinor,
+                        currencyCode,
                       ),
                 tone: tone,
                 style: theme.textTheme.titleSmall,

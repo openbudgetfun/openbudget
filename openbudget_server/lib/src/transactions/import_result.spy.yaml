@@ -1,0 +1,8 @@
+### What `transaction.importRows` did.
+class: ImportResult
+fields:
+  insertedCount: int
+  ### Rows whose externalId already existed on the account.
+  skippedDuplicateCount: int
+  ### Rows rejected, with their 0-based index and reason.
+  errors: List<String>

@@ -263,7 +263,7 @@ class _BudgetAmountSheet extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final input = useState(initialInput);
-    final cents = parseBudgetAmountInputToCents(
+    final minor = parseBudgetAmountInputToMinor(
       input: input.value,
       currencyCode: currencyCode,
     );
@@ -306,7 +306,7 @@ class _BudgetAmountSheet extends HookWidget {
               ),
               const SizedBox(height: SpacingTokens.xs),
               ObAmount(
-                formatCentsForCode(cents ?? 0, currencyCode),
+                formatMinorForCode(minor ?? 0, currencyCode),
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: SpacingTokens.xs),
@@ -325,7 +325,7 @@ class _BudgetAmountSheet extends HookWidget {
   }
 }
 
-int? parseBudgetAmountInputToCents({
+int? parseBudgetAmountInputToMinor({
   required String input,
   required String currencyCode,
 }) {
@@ -334,8 +334,8 @@ int? parseBudgetAmountInputToCents({
   final digits = input.replaceAll('-', '');
   final units = int.tryParse(digits);
   if (units == null) return null;
-  final cents = units * _pow10(currencyDecimalsForCode(currencyCode));
-  return isNegative ? -cents : cents;
+  final minor = units * _pow10(currencyDecimalsForCode(currencyCode));
+  return isNegative ? -minor : minor;
 }
 
 String formatBudgetAmountInputForField({
@@ -343,20 +343,20 @@ String formatBudgetAmountInputForField({
   required String currencyCode,
 }) {
   if (input.isEmpty) return '';
-  final cents = parseBudgetAmountInputToCents(
+  final minor = parseBudgetAmountInputToMinor(
     input: input,
     currencyCode: currencyCode,
   );
-  if (cents == null) return '';
-  return formatMinorUnits(cents, currencyDecimalsForCode(currencyCode));
+  if (minor == null) return '';
+  return formatMinorUnits(minor, currencyDecimalsForCode(currencyCode));
 }
 
-String budgetAmountInputFromCents({
-  required int cents,
+String budgetAmountInputFromMinor({
+  required int minor,
   required String currencyCode,
 }) {
   final divisor = _pow10(currencyDecimalsForCode(currencyCode));
-  final units = (cents / divisor).round();
+  final units = (minor / divisor).round();
   return units.toString();
 }
 

@@ -6,21 +6,20 @@ import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart'
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _envelopeId = '00000000-0000-0000-0000-000000000001';
-final _budgetUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000010',
-);
+import '../../../fixtures/budget_month.dart';
 
-EnvelopeGoal _makeGoal({int monthlyFundingCents = 120000}) => EnvelopeGoal(
-  envelopeId: UuidValue.fromString(_envelopeId),
-  goalType: 'monthly_funding',
-  targetAmountCents: monthlyFundingCents,
-  monthlyFundingCents: monthlyFundingCents,
+EnvelopeMonthView _rowWithGoal({required int amountMinor}) => testEnvelopeRow(
+  goal: EnvelopeGoal(
+    entityId: UuidValue.fromString(fixtureEntityId),
+    envelopeId: UuidValue.fromString(fixtureEnvelopeId),
+    kind: EnvelopeGoalKind.monthlyFunding,
+    amountMinor: amountMinor,
+  ),
 );
 
 Widget _buildSubject({
   required String currencyCode,
-  required EnvelopeGoal goal,
+  required EnvelopeMonthView monthEnvelope,
 }) => ProviderScope(
   child: MaterialApp(
     theme: OpenBudgetTheme.light,
@@ -28,10 +27,10 @@ Widget _buildSubject({
     supportedLocales: AppLocalizations.supportedLocales,
     home: Scaffold(
       body: SetGoalDialog(
-        envelopeId: _envelopeId,
-        budgetId: _budgetUuid.toString(),
+        monthEnvelope: monthEnvelope,
+        entityId: fixtureEntityId,
         currencyCode: currencyCode,
-        existingGoal: goal,
+        month: 202611,
       ),
     ),
   ),
@@ -40,11 +39,15 @@ Widget _buildSubject({
 void main() {
   testWidgets('shows the stored contribution exactly', (tester) async {
     await tester.pumpWidget(
-      _buildSubject(currencyCode: 'USD', goal: _makeGoal()),
+      _buildSubject(
+        currencyCode: 'USD',
+        monthEnvelope: _rowWithGoal(amountMinor: 120000),
+      ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Set aside another 1200.00'), findsOneWidget);
+    expect(find.text(r'Set aside another $1,200.00'), findsOneWidget);
+    // The editable field carries the parsed amount with currency decimals.
     expect(find.text('1200.00'), findsOneWidget);
   });
 
@@ -54,12 +57,12 @@ void main() {
     await tester.pumpWidget(
       _buildSubject(
         currencyCode: 'JPY',
-        goal: _makeGoal(monthlyFundingCents: 1200),
+        monthEnvelope: _rowWithGoal(amountMinor: 1200),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Set aside another 1200'), findsOneWidget);
+    expect(find.text('Set aside another ¥1,200'), findsOneWidget);
     expect(find.text('1200'), findsOneWidget);
   });
 }

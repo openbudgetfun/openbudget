@@ -121,7 +121,7 @@ List<TaxOpportunity> _soleTraderOpportunities(
 ) {
   final position = _businessPosition(
     entries: input.entries,
-    kind: TaxEntityKind.soleTrader,
+    kind: EntityKind.soleTrader,
     reclaimVat: input.profile.salesTaxRegistered,
   );
   final opportunities = <TaxOpportunity>[
@@ -155,7 +155,7 @@ List<TaxOpportunity> _soleTraderOpportunities(
 List<TaxOpportunity> _companyOpportunities(TaxInput input, _NgTaxTable table) {
   final position = _businessPosition(
     entries: input.entries,
-    kind: TaxEntityKind.company,
+    kind: EntityKind.company,
     reclaimVat: input.profile.salesTaxRegistered,
   );
   final small = switch (table.regime) {

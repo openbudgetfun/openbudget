@@ -1,11 +1,17 @@
 account:
   - create:
   - list:
-  - listMine:
-  - addMineToBudget:
+  - listAll:
   - get:
   - update:
+  - reorder:
+  - close:
+  - reopen:
   - delete:
+  - getBalances:
+  - listValuations:
+  - setValuation:
+  - deleteValuation:
 agent:
   - chat:
   - listConversations:
@@ -47,20 +53,16 @@ billing:
   - getSolanaPlan:
   - solanaSubscriptionChallenge:
   - confirmSolanaSubscription:
-budgetTemplate:
-  - saveFromMonth:
-  - list:
-  - applyToMonth:
-  - delete:
 budget:
-  - create:
-  - list:
-  - get:
-  - update:
-  - delete:
-  - exportData:
-budgetStream:
-  - budgetUpdates:
+  - getMonth:
+  - setAllocations:
+  - moveMoney:
+  - copyMonth:
+  - saveTemplate:
+  - listTemplates:
+  - getTemplateLines:
+  - applyTemplate:
+  - deleteTemplate:
 category:
   - create:
   - list:
@@ -68,10 +70,21 @@ category:
   - update:
   - reorder:
   - delete:
+entity:
+  - create:
+  - list:
+  - listSummaries:
+  - get:
+  - update:
+  - archive:
+  - unarchive:
+  - delete:
+  - exportData:
+entityStream:
+  - watch:
 envelopeGoal:
   - upsert:
-  - getForEnvelope:
-  - listForEnvelopes:
+  - list:
   - delete:
 envelope:
   - create:
@@ -83,6 +96,7 @@ envelope:
 fxRate:
   - latest:
   - refresh:
+  - quote:
 institution:
   - list:
 ledger:
@@ -99,12 +113,7 @@ ledger:
   - getLockDate:
   - setLockDate:
   - trialBalance:
-monthlyAllocation:
-  - upsert:
-  - list:
-  - copyMonth:
-  - moveMoney:
-  - delete:
+  - listAuditEvents:
 payee:
   - create:
   - list:
@@ -117,6 +126,8 @@ plaid:
   - createLinkToken:
   - exchangePublicToken:
   - syncConnection:
+  - listConnections:
+  - removeConnection:
   - importSandboxAccounts:
 recurringTransaction:
   - create:
@@ -127,21 +138,21 @@ recurringTransaction:
   - skipOccurrence:
   - postDue:
   - countDue:
-solanaWallet:
-  - attach:
-  - list:
-  - getForAccount:
-  - sync:
-  - listTransactions:
-  - listHoldings:
-  - listTaxYearSummaries:
-  - updateTransactionMetadata:
+report:
+  - netWorth:
+  - netWorthHistory:
+  - spending:
+  - monthSummaries:
+  - ageOfMoney:
+settings:
+  - get:
+  - setReportingCurrency:
 tax:
   - getProfile:
   - saveProfile:
   - listCategories:
   - setEnvelopeTaxCategory:
-  - setTransactionTax:
+  - setLineTax:
   - getReport:
 transactionRule:
   - create:
@@ -152,23 +163,24 @@ transactionRule:
   - delete:
 transaction:
   - create:
-  - list:
-  - listByMonth:
   - get:
+  - list:
   - update:
-  - setFlag:
-  - transfer:
-  - listByAccount:
-  - toggleCleared:
-  - reconcileAccount:
-  - reconcileWithBalance:
-  - ageOfMoney:
-  - createSplit:
-  - listSplits:
-  - bulkImport:
-  - findDuplicates:
   - delete:
+  - setStatus:
+  - setFlag:
+  - createTransfer:
+  - updateTransfer:
+  - reconcile:
+  - importRows:
+  - findDuplicates:
 wallet:
-  - connectSolanaWallet:
-  - refreshSolanaWallet:
-  - listWalletHoldings:
+  - connect:
+  - list:
+  - getForAccount:
+  - sync:
+  - listHoldings:
+  - listTransactions:
+  - listTaxYearSummaries:
+  - updateTransactionMetadata:
+  - disconnect:

@@ -43,7 +43,7 @@ abstract interface class TaxRulePack {
   TaxYear taxYear(int startYear);
 
   /// Categories that may appear in books of [kind], in return order.
-  List<TaxCategory> categoriesFor(TaxEntityKind kind);
+  List<TaxCategory> categoriesFor(EntityKind kind);
 
   /// The category with [code], or null when this pack does not know it.
   TaxCategory? category(String code);

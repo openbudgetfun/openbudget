@@ -14,14 +14,14 @@ import 'dart:async' as _ida;
 
 import 'package:serverpod/serverpod.dart' as _is;
 
-/// A rule that auto-assigns an envelope when a specific payee is used.
+/// Assigns an envelope automatically when a transaction uses a payee.
 abstract class TransactionRule
     implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   TransactionRule._({
     this.id,
-    required this.budgetId,
+    required this.entityId,
     required this.payeeId,
-    required this.targetEnvelopeId,
+    required this.envelopeId,
     bool? enabled,
     DateTime? createdAt,
   }) : enabled = enabled ?? true,
@@ -29,9 +29,9 @@ abstract class TransactionRule
 
   factory TransactionRule({
     _is.UuidValue? id,
-    required _is.UuidValue budgetId,
+    required _is.UuidValue entityId,
     required _is.UuidValue payeeId,
-    required _is.UuidValue targetEnvelopeId,
+    required _is.UuidValue envelopeId,
     bool? enabled,
     DateTime? createdAt,
   }) = _TransactionRuleImpl;
@@ -41,14 +41,14 @@ abstract class TransactionRule
       id: jsonSerialization['id'] == null
           ? null
           : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _is.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _is.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
       payeeId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['payeeId'],
       ),
-      targetEnvelopeId: _is.UuidValueJsonExtension.fromJson(
-        jsonSerialization['targetEnvelopeId'],
+      envelopeId: _is.UuidValueJsonExtension.fromJson(
+        jsonSerialization['envelopeId'],
       ),
       enabled: jsonSerialization['enabled'] == null
           ? null
@@ -66,15 +66,12 @@ abstract class TransactionRule
   @override
   _is.UuidValue? id;
 
-  _is.UuidValue budgetId;
+  _is.UuidValue entityId;
 
-  /// The payee this rule matches against.
   _is.UuidValue payeeId;
 
-  /// The envelope to auto-assign when this rule matches.
-  _is.UuidValue targetEnvelopeId;
+  _is.UuidValue envelopeId;
 
-  /// Whether this rule is active.
   bool enabled;
 
   DateTime createdAt;
@@ -87,9 +84,9 @@ abstract class TransactionRule
   @_is.useResult
   TransactionRule copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    _is.UuidValue? budgetId,
+    _is.UuidValue? entityId,
     _is.UuidValue? payeeId,
-    _is.UuidValue? targetEnvelopeId,
+    _is.UuidValue? envelopeId,
     bool? enabled,
     DateTime? createdAt,
   });
@@ -98,9 +95,9 @@ abstract class TransactionRule
     return {
       '__className__': 'TransactionRule',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'payeeId': payeeId.toJson(),
-      'targetEnvelopeId': targetEnvelopeId.toJson(),
+      'envelopeId': envelopeId.toJson(),
       'enabled': enabled,
       'createdAt': createdAt.toJson(),
     };
@@ -111,9 +108,9 @@ abstract class TransactionRule
     return {
       '__className__': 'TransactionRule',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'payeeId': payeeId.toJson(),
-      'targetEnvelopeId': targetEnvelopeId.toJson(),
+      'envelopeId': envelopeId.toJson(),
       'enabled': enabled,
       'createdAt': createdAt.toJson(),
     };
@@ -150,16 +147,16 @@ abstract class TransactionRule
 class _TransactionRuleImpl extends TransactionRule {
   _TransactionRuleImpl({
     _is.UuidValue? id,
-    required _is.UuidValue budgetId,
+    required _is.UuidValue entityId,
     required _is.UuidValue payeeId,
-    required _is.UuidValue targetEnvelopeId,
+    required _is.UuidValue envelopeId,
     bool? enabled,
     DateTime? createdAt,
   }) : super._(
          id: id,
-         budgetId: budgetId,
+         entityId: entityId,
          payeeId: payeeId,
-         targetEnvelopeId: targetEnvelopeId,
+         envelopeId: envelopeId,
          enabled: enabled,
          createdAt: createdAt,
        );
@@ -170,17 +167,17 @@ class _TransactionRuleImpl extends TransactionRule {
   @override
   TransactionRule copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    _is.UuidValue? budgetId,
+    _is.UuidValue? entityId,
     _is.UuidValue? payeeId,
-    _is.UuidValue? targetEnvelopeId,
+    _is.UuidValue? envelopeId,
     bool? enabled,
     DateTime? createdAt,
   }) {
     return TransactionRule(
       id: id is _is.UndefinedSentinel ? this.id : id,
-      budgetId: budgetId ?? this.budgetId,
+      entityId: entityId ?? this.entityId,
       payeeId: payeeId ?? this.payeeId,
-      targetEnvelopeId: targetEnvelopeId ?? this.targetEnvelopeId,
+      envelopeId: envelopeId ?? this.envelopeId,
       enabled: enabled ?? this.enabled,
       createdAt: createdAt ?? this.createdAt,
     );
@@ -190,9 +187,9 @@ class _TransactionRuleImpl extends TransactionRule {
 class TransactionRuleUpdateTable extends _is.UpdateTable<TransactionRuleTable> {
   TransactionRuleUpdateTable(super.table);
 
-  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> entityId(_is.UuidValue value) =>
       _is.ColumnValue(
-        table.budgetId,
+        table.entityId,
         value,
       );
 
@@ -202,10 +199,10 @@ class TransactionRuleUpdateTable extends _is.UpdateTable<TransactionRuleTable> {
         value,
       );
 
-  _is.ColumnValue<_is.UuidValue, _is.UuidValue> targetEnvelopeId(
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> envelopeId(
     _is.UuidValue value,
   ) => _is.ColumnValue(
-    table.targetEnvelopeId,
+    table.envelopeId,
     value,
   );
 
@@ -225,16 +222,16 @@ class TransactionRuleTable extends _is.Table<_is.UuidValue?> {
   TransactionRuleTable({super.tableRelation})
     : super(tableName: 'transaction_rule') {
     updateTable = TransactionRuleUpdateTable(this);
-    budgetId = _is.ColumnUuid(
-      'budgetId',
+    entityId = _is.ColumnUuid(
+      'entityId',
       this,
     );
     payeeId = _is.ColumnUuid(
       'payeeId',
       this,
     );
-    targetEnvelopeId = _is.ColumnUuid(
-      'targetEnvelopeId',
+    envelopeId = _is.ColumnUuid(
+      'envelopeId',
       this,
     );
     enabled = _is.ColumnBool(
@@ -251,15 +248,12 @@ class TransactionRuleTable extends _is.Table<_is.UuidValue?> {
 
   late final TransactionRuleUpdateTable updateTable;
 
-  late final _is.ColumnUuid budgetId;
+  late final _is.ColumnUuid entityId;
 
-  /// The payee this rule matches against.
   late final _is.ColumnUuid payeeId;
 
-  /// The envelope to auto-assign when this rule matches.
-  late final _is.ColumnUuid targetEnvelopeId;
+  late final _is.ColumnUuid envelopeId;
 
-  /// Whether this rule is active.
   late final _is.ColumnBool enabled;
 
   late final _is.ColumnDateTime createdAt;
@@ -267,9 +261,9 @@ class TransactionRuleTable extends _is.Table<_is.UuidValue?> {
   @override
   List<_is.Column> get columns => [
     id,
-    budgetId,
+    entityId,
     payeeId,
-    targetEnvelopeId,
+    envelopeId,
     enabled,
     createdAt,
   ];

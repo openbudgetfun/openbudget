@@ -6,29 +6,29 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_detail_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
-import 'package:openbudget_app/src/features/accounts/providers/account_transactions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/plaid_account_link_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/wallet_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_list_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
-import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
+import 'package:openbudget_app/src/features/transactions/providers/transaction_pages_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_ui/openbudget_ui.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:patrol/patrol.dart';
 
 import 'common/patrol_helpers.dart';
+import 'common/test_data.dart';
 import 'helpers/screenshot_capture.dart';
 
-const _budgetId = 'test-budget-id';
-final _budgetUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000010',
-);
+const String _entityId = TestData.gbpEntityId;
+final UuidValue _entityUuid = UuidValue.fromString(_entityId);
 
 final _testInstitutions = <Institution>[
   Institution(slug: 'chase', name: 'Chase', website: 'chase.com'),
@@ -62,61 +62,69 @@ const _addAccountUnlinkedIntroText =
 
 Account _makeAccount({
   required String name,
-  required int balanceCents,
+  required int balanceMinor,
   required String currencyCode,
   UuidValue? id,
-  String accountType = 'checking',
+  AccountKind kind = AccountKind.checking,
   bool onBudget = true,
   bool isClosed = false,
 }) => Account(
   id: id,
   name: name,
-  accountType: accountType,
-  balanceCents: balanceCents,
+  kind: kind,
+  balanceSource: AccountBalanceSource.transactions,
+  balanceMinor: balanceMinor,
   currencyCode: currencyCode,
-  budgetId: _budgetUuid,
+  entityId: _entityUuid,
   onBudget: onBudget,
   sortOrder: 0,
-  isClosed: isClosed,
+  closedAt: isClosed ? DateTime.utc(2026, 10) : null,
 );
 
-Budget _makeBudget({String currencyCode = 'USD'}) => Budget(
-  id: _budgetUuid,
-  name: 'OpenBudget',
-  currencyCode: currencyCode,
-  ownerId: UuidValue.fromString('00000000-0000-0000-0000-000000000099'),
-  createdAt: DateTime(2026),
-);
-
-BudgetSummary _makeSummary({String currencyCode = 'USD'}) => BudgetSummary(
-  budget: _makeBudget(currencyCode: currencyCode),
-  categories: const [],
-  totalIncomeCents: 0,
-  totalBudgetedCents: 0,
-  readyToAssignCents: 0,
-  year: 2026,
-  month: 9,
-);
-
-Transaction _makeTransaction({
+TransactionView _makeTransactionView({
   required String id,
   required UuidValue accountId,
   required String description,
-  required int amountCents,
+  required int amountMinor,
   bool cleared = false,
-  bool reconciled = false,
-  DateTime? transactionDate,
-}) => Transaction(
-  id: UuidValue.fromString(id),
-  description: description,
-  amountCents: amountCents,
-  currencyCode: 'USD',
-  budgetId: _budgetUuid,
-  accountId: accountId,
-  transactionDate: transactionDate ?? DateTime(2026, 9, 3),
-  cleared: cleared,
-  reconciled: reconciled,
-);
+  DateTime? date,
+}) {
+  final transaction = Transaction(
+    id: UuidValue.fromString(id),
+    entityId: _entityUuid,
+    accountId: accountId,
+    date: date ?? DateTime(2026, 9, 3),
+    amountMinor: amountMinor,
+    baseAmountMinor: amountMinor,
+    fxRateDate: date ?? DateTime(2026, 9, 3),
+    description: description,
+    status: cleared ? TransactionStatus.cleared : TransactionStatus.uncleared,
+  );
+  return TransactionView(
+    transaction: transaction,
+    lines: [
+      TransactionLine(
+        id: UuidValue.fromString('$id-1'.replaceRange(0, 1, 'a')),
+        transactionId: transaction.id!,
+        amountMinor: amountMinor,
+        baseAmountMinor: amountMinor,
+      ),
+    ],
+    accountCurrencyCode: 'USD',
+    accountName: 'Daily USD',
+  );
+}
+
+/// The paged account transactions, served from memory.
+class _FakeTransactionPages extends TransactionPages {
+  _FakeTransactionPages(this.items);
+
+  final List<TransactionView> items;
+
+  @override
+  Future<TransactionPageState> build(String entityId) async =>
+      TransactionPageState(filter: const TransactionFilter(), items: items);
+}
 
 class _FakeAccountActions extends AccountActions {
   @override
@@ -125,24 +133,25 @@ class _FakeAccountActions extends AccountActions {
   @override
   Future<Account> createAccount({
     required String name,
-    required String accountType,
-    required int balanceCents,
+    required AccountKind kind,
     required String currencyCode,
-    required String budgetId,
-    required bool onBudget,
-    required int sortOrder,
-    String? walletAddress,
+    required String entityId,
+    AccountBalanceSource? balanceSource,
     String? institutionId,
+    String? note,
+    bool? onBudget,
+    int? openingBalanceMinor,
+    DateTime? openingDate,
   }) async => Account(
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000777'),
     name: name,
-    accountType: accountType,
-    balanceCents: balanceCents,
+    kind: kind,
+    balanceSource: balanceSource ?? AccountBalanceSource.transactions,
+    balanceMinor: openingBalanceMinor ?? 0,
     currencyCode: currencyCode,
-    budgetId: _budgetUuid,
-    onBudget: onBudget,
-    sortOrder: sortOrder,
-    isClosed: false,
+    entityId: _entityUuid,
+    onBudget: onBudget ?? true,
+    sortOrder: 0,
   );
 }
 
@@ -151,61 +160,96 @@ class _UnavailablePlaidAccountLink extends PlaidAccountLink {
   FutureOr<void> build() {}
 
   @override
-  Future<List<Account>> importSandboxAccounts({
-    required String budgetId,
+  Future<PlaidConnection> importSandboxAccounts({
+    required String entityId,
     String? plaidInstitutionId,
-  }) async => throw Exception('Bank linking is unavailable in this fixture.');
+  }) => throw Exception('Bank linking is unavailable in this fixture.');
 }
 
 Widget _buildApp({
   required List<Account> accounts,
-  List<Transaction> accountTransactions = const [],
-  String budgetCurrencyCode = 'USD',
+  List<TransactionView> accountTransactions = const [],
 }) {
   final router = GoRouter(
-    initialLocation: '/budgets/$_budgetId/accounts',
+    initialLocation: '/budgets/$_entityId/accounts',
     routes: [
+      // The detail and add screens are children of the list route, mirroring
+      // the app router, so the detail screen can pop back to the list.
       GoRoute(
         name: accountListRoute,
-        path: '/budgets/:id/accounts',
+        path: '/budgets/:entityId/accounts',
         builder: (context, state) =>
-            AccountListScreen(budgetId: state.pathParameters['id']!),
-      ),
-      GoRoute(
-        name: addAccountRoute,
-        path: '/budgets/:id/accounts/add',
-        builder: (context, state) =>
-            AddAccountScreen(budgetId: state.pathParameters['id']!),
-      ),
-      GoRoute(
-        name: accountDetailRoute,
-        path: '/budgets/:id/accounts/:accountId',
-        builder: (context, state) => AccountDetailScreen(
-          budgetId: state.pathParameters['id']!,
-          accountId: state.pathParameters['accountId']!,
-        ),
+            AccountListScreen(entityId: state.pathParameters['entityId']!),
+        routes: [
+          GoRoute(
+            name: addAccountRoute,
+            path: 'add',
+            builder: (context, state) =>
+                AddAccountScreen(entityId: state.pathParameters['entityId']!),
+          ),
+          GoRoute(
+            name: accountDetailRoute,
+            path: ':accountId',
+            builder: (context, state) => AccountDetailScreen(
+              entityId: state.pathParameters['entityId']!,
+              accountId: state.pathParameters['accountId']!,
+            ),
+          ),
+        ],
       ),
     ],
   );
 
   return ProviderScope(
     overrides: [
-      fxLatestRatesProvider.overrideWith((ref) async => null),
+      entityDetailProvider.overrideWith(
+        (ref, id) async => TestData.usdEntity(),
+      ),
+      accountDetailProvider.overrideWith(
+        (ref, accountId) async => accounts.firstWhere(
+          (account) => account.id?.toString() == accountId,
+        ),
+      ),
+      accountBalancesProvider.overrideWith((ref, accountId) async {
+        final account = accounts.firstWhere(
+          (account) => account.id?.toString() == accountId,
+        );
+        var clearedMinor = 0;
+        var unclearedMinor = 0;
+        for (final view in accountTransactions) {
+          if (view.transaction.accountId != account.id) continue;
+          if (view.transaction.status == TransactionStatus.uncleared) {
+            unclearedMinor += view.transaction.amountMinor;
+          } else {
+            clearedMinor += view.transaction.amountMinor;
+          }
+        }
+        return AccountBalancesView(
+          accountId: account.id ?? _entityUuid,
+          currencyCode: account.currencyCode,
+          balanceMinor: account.balanceMinor,
+          clearedMinor: clearedMinor,
+          unclearedMinor: unclearedMinor,
+        );
+      }),
+      accountValuationsProvider.overrideWith(
+        (ref, accountId) async => const [],
+      ),
+      walletForAccountProvider.overrideWith(
+        (ref, accountId) async => null,
+      ),
       accountActionsProvider.overrideWith(_FakeAccountActions.new),
       plaidAccountLinkProvider.overrideWith(_UnavailablePlaidAccountLink.new),
-      myReusableAccountsProvider.overrideWith(
-        (ref, budgetId) async => const [],
+      accountListProvider.overrideWith((ref, entityId) async => accounts),
+      transactionPagesProvider.overrideWith2(
+        (entityId) => _FakeTransactionPages(accountTransactions),
       ),
-      accountListProvider.overrideWith((ref, budgetId) async => accounts),
-      accountTransactionsProvider.overrideWith(
-        (ref, args) async => accountTransactions,
+      payeeListProvider.overrideWith((ref, entityId) async => const []),
+      netWorthForEntitiesProvider.overrideWith(
+        (ref, entityIds) async => TestData.gbpNetWorthWithUsd(),
       ),
-      payeeListProvider.overrideWith((ref, budgetId) async => const []),
-      budgetSummaryProvider.overrideWith(
-        (ref, budgetId) async => _makeSummary(currencyCode: budgetCurrencyCode),
-      ),
-      budgetDetailProvider.overrideWith(
-        (ref, budgetId) async => _makeBudget(currencyCode: budgetCurrencyCode),
+      plaidConnectionsProvider.overrideWith(
+        (ref, entityId) async => const [],
       ),
       institutionCatalogProvider.overrideWith(
         (ref, locationCode) async => _testInstitutions,
@@ -230,12 +274,12 @@ void main() {
         accounts: [
           _makeAccount(
             name: 'Daily USD',
-            balanceCents: 250000,
+            balanceMinor: 250000,
             currencyCode: 'USD',
           ),
           _makeAccount(
             name: 'Savings EUR',
-            balanceCents: 100000,
+            balanceMinor: 100000,
             currencyCode: 'EUR',
           ),
         ],
@@ -607,7 +651,8 @@ void main() {
     );
     expect(
       find.text(
-        "Accounts that have an outstanding balance you're currently paying off, and aren't spending from.",
+        "Accounts that hold money you don't plan to spend soon, such as "
+        'investments or loans.',
       ),
       findsOneWidget,
     );
@@ -778,19 +823,16 @@ void main() {
           _makeAccount(
             id: accountId,
             name: 'Daily USD',
-            balanceCents: 250000,
+            balanceMinor: 250000,
             currencyCode: 'USD',
           ),
         ],
         accountTransactions: [
-          Transaction(
-            id: UuidValue.fromString('00000000-0000-0000-0000-000000000211'),
-            description: 'Rent',
-            amountCents: -280000,
-            currencyCode: 'USD',
-            budgetId: _budgetUuid,
+          _makeTransactionView(
+            id: '00000000-0000-0000-0000-000000000211',
             accountId: accountId,
-            transactionDate: DateTime(2026, 9, 3),
+            description: 'Rent',
+            amountMinor: -280000,
           ),
         ],
       ),
@@ -799,15 +841,16 @@ void main() {
 
     await tester.tap(find.text('Daily USD'));
     await tester.pumpAndSettle();
+    await scrollIntoView(tester, find.text('Rent'));
     expect(find.text('Rent'), findsOneWidget);
 
-    await tester.tap(_skribbleIcon(OpenBudgetIcons.back));
+    await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.text('Daily USD'), findsOneWidget);
   });
 
   patrolWidgetTest(
-    'account detail overflow menu toggles reconciled visibility',
+    'account detail lists cleared and uncleared transactions together',
     ($) async {
       final tester = $.tester;
       final accountId = UuidValue.fromString(
@@ -819,24 +862,24 @@ void main() {
             _makeAccount(
               id: accountId,
               name: 'Daily USD',
-              balanceCents: 250000,
+              balanceMinor: 250000,
               currencyCode: 'USD',
             ),
           ],
           accountTransactions: [
-            _makeTransaction(
+            _makeTransactionView(
               id: '00000000-0000-0000-0000-000000000211',
               accountId: accountId,
               description: 'Self storage',
-              amountCents: -3000,
+              amountMinor: -3000,
             ),
-            _makeTransaction(
+            _makeTransactionView(
               id: '00000000-0000-0000-0000-000000000212',
               accountId: accountId,
               description: 'Starting Balance',
-              amountCents: 5000000,
-              reconciled: true,
-              transactionDate: DateTime(2026, 9, 2),
+              amountMinor: 5000000,
+              cleared: true,
+              date: DateTime(2026, 9, 2),
             ),
           ],
         ),
@@ -845,23 +888,16 @@ void main() {
 
       await tester.tap(find.text('Daily USD'));
       await tester.pumpAndSettle();
+      // The redesigned detail screen keeps every transaction in one list,
+      // cleared ones included, so both rows render.
+      await scrollIntoView(tester, find.text('Starting Balance'));
       expect(find.text('Starting Balance'), findsOneWidget);
-
-      await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Hide Reconciled'), warnIfMissed: false);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Starting Balance'), findsNothing);
-      expect(find.text('Self storage'), findsOneWidget);
-
-      await tester.tap(find.textContaining('uncleared transactions'));
-      await tester.pumpAndSettle();
+      await scrollIntoView(tester, find.text('Self storage'));
       expect(find.text('Self storage'), findsOneWidget);
     },
   );
 
-  patrolWidgetTest('account detail edit flow opens full-screen account form', (
+  patrolWidgetTest('account detail edit action opens the add account screen', (
     $,
   ) async {
     final tester = $.tester;
@@ -874,16 +910,16 @@ void main() {
           _makeAccount(
             id: accountId,
             name: 'Daily USD',
-            balanceCents: 250000,
+            balanceMinor: 250000,
             currencyCode: 'USD',
           ),
         ],
         accountTransactions: [
-          _makeTransaction(
+          _makeTransactionView(
             id: '00000000-0000-0000-0000-000000000512',
             accountId: accountId,
             description: 'Gym',
-            amountCents: -15000,
+            amountMinor: -15000,
           ),
         ],
       ),
@@ -893,18 +929,17 @@ void main() {
     await tester.tap(find.text('Daily USD'));
     await tester.pumpAndSettle();
 
-    await AccountDetailPage(tester).openEditAccount();
+    // The redesigned detail screen opens the account screens straight from
+    // the app bar edit action instead of a full-screen edit form.
+    await AccountDetailPage(tester).editViaAppBar();
+    await tester.pumpAndSettle();
 
-    expect(find.text('Account Nickname'), findsOneWidget);
-    expect(find.text('Account Notes'), findsOneWidget);
-    expect(find.text('Working Balance'), findsWidgets);
-    expect(find.text('Link an Account (Unavailable)'), findsOneWidget);
-    await EditAccountFormPage(tester).scrollToCloseAccount();
-    expect(find.text('Close Account'), findsOneWidget);
+    expect(find.text('Add Accounts'), findsOneWidget);
+    expect(find.text('Search for your bank'), findsOneWidget);
   });
 
   patrolWidgetTest(
-    'closed account edit dialog exposes delete and reopen actions',
+    'closed account detail exposes the reopen action without editing',
     ($) async {
       final tester = $.tester;
       final accountId = UuidValue.fromString(
@@ -916,7 +951,7 @@ void main() {
             _makeAccount(
               id: accountId,
               name: 'Loan',
-              balanceCents: -50000,
+              balanceMinor: -50000,
               currencyCode: 'USD',
               onBudget: false,
               isClosed: true,
@@ -929,20 +964,17 @@ void main() {
       await tester.tap(find.text('Loan'));
       await tester.pumpAndSettle();
 
-      await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Edit Account'));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('Delete Permanently', skipOffstage: false),
-        findsOneWidget,
-      );
-      expect(find.text('Reopen Account', skipOffstage: false), findsOneWidget);
+      // Closed accounts surface a Closed badge with an inline reopen action
+      // and no app-bar edit button.
+      expect(find.text('Closed'), findsOneWidget);
+      expect(find.text('Reopen Account'), findsOneWidget);
+      expect(AccountDetailPage(tester).editButton, findsNothing);
     },
   );
 
-  patrolWidgetTest('reconcile action opens balance match prompt', ($) async {
+  patrolWidgetTest('reconcile action opens the statement balance sheet', (
+    $,
+  ) async {
     final tester = $.tester;
     final accountId = UuidValue.fromString(
       '00000000-0000-0000-0000-000000000114',
@@ -953,16 +985,16 @@ void main() {
           _makeAccount(
             id: accountId,
             name: 'Daily USD',
-            balanceCents: 250000,
+            balanceMinor: 250000,
             currencyCode: 'USD',
           ),
         ],
         accountTransactions: [
-          _makeTransaction(
+          _makeTransactionView(
             id: '00000000-0000-0000-0000-000000000311',
             accountId: accountId,
             description: 'Rent',
-            amountCents: -280000,
+            amountMinor: -280000,
             cleared: true,
           ),
         ],
@@ -973,21 +1005,21 @@ void main() {
     await tester.tap(find.text('Daily USD'));
     await tester.pumpAndSettle();
 
-    await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Reconcile'));
-    await tester.pumpAndSettle();
+    await AccountDetailPage(tester).openReconcileSheet();
 
+    final sheet = find.byType(BottomSheet);
+    expect(sheet, findsOneWidget);
     expect(
-      find.textContaining('Does this match your bank balance'),
+      find.descendant(of: sheet, matching: find.text('Reconcile Daily USD')),
       findsOneWidget,
     );
-    expect(find.text('Yes'), findsOneWidget);
-    expect(find.text('No'), findsOneWidget);
-    expect(find.text('Cancel'), findsOneWidget);
+    expect(
+      find.descendant(of: sheet, matching: find.text('Statement balance')),
+      findsOneWidget,
+    );
   });
 
-  patrolWidgetTest('desktop account menu supports reconcile and edit flows', (
+  patrolWidgetTest('desktop account detail supports reconcile and edit flows', (
     $,
   ) async {
     final tester = $.tester;
@@ -1002,23 +1034,23 @@ void main() {
           _makeAccount(
             id: accountId,
             name: 'Daily USD',
-            balanceCents: 5222000,
+            balanceMinor: 5222000,
             currencyCode: 'USD',
           ),
         ],
         accountTransactions: [
-          _makeTransaction(
+          _makeTransactionView(
             id: '00000000-0000-0000-0000-000000000611',
             accountId: accountId,
             description: 'Landlord',
-            amountCents: -10000,
+            amountMinor: -10000,
             cleared: true,
           ),
-          _makeTransaction(
+          _makeTransactionView(
             id: '00000000-0000-0000-0000-000000000612',
             accountId: accountId,
             description: 'Supermarket',
-            amountCents: -50000,
+            amountMinor: -50000,
             cleared: true,
           ),
         ],
@@ -1029,13 +1061,11 @@ void main() {
     await tester.tap(find.text('Daily USD'));
     await tester.pumpAndSettle();
 
-    await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Reconcile'));
-    await tester.pumpAndSettle();
-
+    await AccountDetailPage(tester).openReconcileSheet();
+    final sheet = find.byType(BottomSheet);
+    expect(sheet, findsOneWidget);
     expect(
-      find.textContaining('Does this match your bank balance'),
+      find.descendant(of: sheet, matching: find.text('Reconcile Daily USD')),
       findsOneWidget,
     );
     await captureIntegrationScreenshot(
@@ -1043,25 +1073,23 @@ void main() {
       'accounts-reconcile-dialog-desktop-screen',
     );
 
-    await tester.tap(find.text('Cancel'));
+    // Drag the sheet away, then take the app-bar edit action.
+    await tester.drag(find.text('Reconcile Daily USD'), const Offset(0, 480));
     await tester.pumpAndSettle();
+    expect(find.text('Reconcile Daily USD'), findsNothing);
 
-    await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
+    await AccountDetailPage(tester).editViaAppBar();
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Edit Account'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Edit Account'), findsOneWidget);
-    expect(find.text('Account Nickname'), findsOneWidget);
-    expect(find.text('Account Notes'), findsOneWidget);
-    expect(find.text('Working Balance'), findsWidgets);
+    expect(find.text('Add Accounts'), findsOneWidget);
     await captureIntegrationScreenshot(
       tester,
       'accounts-edit-account-desktop-screen',
     );
   });
 
-  patrolWidgetTest('loan account shows overview and activity tabs', ($) async {
+  patrolWidgetTest('loan account shows its balance and payment history', (
+    $,
+  ) async {
     final tester = $.tester;
     final accountId = UuidValue.fromString(
       '00000000-0000-0000-0000-000000000115',
@@ -1072,26 +1100,26 @@ void main() {
           _makeAccount(
             id: accountId,
             name: 'Loan',
-            accountType: 'other',
-            balanceCents: -125,
+            kind: AccountKind.otherLiability,
+            balanceMinor: -125,
             currencyCode: 'USD',
             onBudget: false,
           ),
         ],
         accountTransactions: [
-          _makeTransaction(
+          _makeTransactionView(
             id: '00000000-0000-0000-0000-000000000411',
             accountId: accountId,
             description: 'Payment from Daily',
-            amountCents: 50000,
-            transactionDate: DateTime(2026, 9, 4),
+            amountMinor: 50000,
+            date: DateTime(2026, 9, 4),
           ),
-          _makeTransaction(
+          _makeTransactionView(
             id: '00000000-0000-0000-0000-000000000412',
             accountId: accountId,
             description: 'Initial Balance',
-            amountCents: -50000,
-            transactionDate: DateTime(2026, 9, 3),
+            amountMinor: -50000,
+            date: DateTime(2026, 9, 3),
           ),
         ],
       ),
@@ -1101,28 +1129,13 @@ void main() {
     await tester.tap(find.text('Loan'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Overview'), findsOneWidget);
-    expect(find.text('Activity'), findsOneWidget);
-    expect(find.text('Loan Payoff Overview'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Create Target'),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Create Target'));
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField).last, '600');
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
-    await tester.pumpAndSettle();
-    expect(find.text('Edit Target'), findsOneWidget);
-
-    await tester.tap(find.text('Activity'));
-    await tester.pumpAndSettle();
-
+    // The liability balance headlines the card; the activity follows in the
+    // same list, no tabs.
+    expect(find.textContaining('1.25'), findsWidgets);
+    await scrollIntoView(tester, find.text('Payment from Daily'));
     expect(find.text('Payment from Daily'), findsOneWidget);
-    expect(find.text('Payments'), findsOneWidget);
+    await scrollIntoView(tester, find.text('Initial Balance'));
+    expect(find.text('Initial Balance'), findsOneWidget);
   });
 }
 
@@ -1263,8 +1276,4 @@ Future<void> _captureAddAccountStepScreenshot(
   tester,
   name,
   captureTarget: find.byKey(addAccountScreenCaptureBoundaryKey),
-);
-
-Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
-  (widget) => widget is SkribbleIcon && widget.data == data,
 );

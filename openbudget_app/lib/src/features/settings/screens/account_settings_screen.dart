@@ -6,9 +6,9 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AccountSettingsScreen extends HookWidget {
-  const AccountSettingsScreen({required this.budgetId, super.key});
+  const AccountSettingsScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +175,7 @@ class AccountSettingsScreen extends HookWidget {
             ),
             onPressed: () => context.goNamed(
               deleteAccountRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
             child: Text(l10n.accountDeleteTitle),
           ),

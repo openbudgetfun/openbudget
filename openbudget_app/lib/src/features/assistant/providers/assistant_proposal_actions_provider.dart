@@ -16,18 +16,18 @@ class AssistantProposalActions extends _$AssistantProposalActions {
 
   /// Applies [proposalId] and returns the resolved proposal.
   Future<AgentProposal> apply({
-    required String budgetId,
+    required String entityId,
     required String proposalId,
-  }) => _resolve(budgetId: budgetId, proposalId: proposalId, apply: true);
+  }) => _resolve(entityId: entityId, proposalId: proposalId, apply: true);
 
   /// Dismisses [proposalId] and returns the resolved proposal.
   Future<AgentProposal> dismiss({
-    required String budgetId,
+    required String entityId,
     required String proposalId,
-  }) => _resolve(budgetId: budgetId, proposalId: proposalId, apply: false);
+  }) => _resolve(entityId: entityId, proposalId: proposalId, apply: false);
 
   Future<AgentProposal> _resolve({
-    required String budgetId,
+    required String entityId,
     required String proposalId,
     required bool apply,
   }) async {
@@ -39,9 +39,9 @@ class AssistantProposalActions extends _$AssistantProposalActions {
     if (!ref.mounted) return resolved;
 
     ref
-      ..invalidate(assistantProposalsProvider(budgetId))
+      ..invalidate(assistantProposalsProvider(entityId))
       ..invalidate(assistantUsageProvider);
-    ref.read(assistantChatProvider(budgetId).notifier).updateProposal(resolved);
+    ref.read(assistantChatProvider(entityId).notifier).updateProposal(resolved);
     return resolved;
   }
 }

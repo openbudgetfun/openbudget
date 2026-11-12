@@ -330,6 +330,7 @@
   "bulkMarkCleared": "Mark Cleared",
   "bulkMarkUncleared": "Mark Uncleared",
   "budgetAssignMoney": "Assign Money",
+  "budgetAgeOfMoneyEmpty": "Not enough history yet",
   "budgetAddCategory": "Add Category",
   "budgetAddEnvelope": "Add Envelope",
   "budgetCollapseExpand": "Collapse/Expand",
@@ -723,6 +724,7 @@
   "reportsLoadError": "Could not load report data",
   "reportsNetIncome": "Net Income",
   "reportsSpendingByCategory": "Spending by Category",
+  "reportsUncategorised": "Uncategorised",
   "reportsTitle": "Reports",
   "reportsTransactions": "Transactions",
   "settingsAccountSection": "Account",
@@ -925,7 +927,7 @@
   "transferFromAccount": "From Account",
   "transferNeedTwoAccounts": "You need at least two accounts to make a transfer",
   "transferSameAccountError": "Cannot transfer to the same account",
-  "transferSuccess": "Transfer completed",
+  "transferSuccess": "Transfer saved",
   "transferTitle": "Transfer",
   "transactionRulesTitle": "Transaction Rules",
   "transactionRulesEmptyTitle": "No Rules Yet",
@@ -1263,7 +1265,7 @@
   "@accountDetailLoanInMonth": {
     "placeholders": {
       "month": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -1745,7 +1747,7 @@
   "@taxYearLabel": {
     "placeholders": {
       "year": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -2413,5 +2415,391 @@
         "type": "String"
       }
     }
-  }
+  },
+  "createEntityTitle": "Create your books",
+  "createEntityKindLabel": "What are these books for?",
+  "entityKindPersonal": "Personal",
+  "entityKindSoleTrader": "Sole trader",
+  "entityKindCompany": "Company",
+  "createEntityCountry": "Country",
+  "createEntityTimeZone": "Time zone",
+  "createEntityFiscalYearEnd": "Financial year ends",
+  "createEntityFiscalYearValue": "Day {day} of month {month}",
+  "@createEntityFiscalYearValue": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+  "entityDeleteNameField": "Type the entity's name to confirm",
+  "homeBudgetNetWorthShort": "Net worth {amount}",
+  "@homeBudgetNetWorthShort": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeBudgetUncategorised": "{count} uncategorised",
+  "@homeBudgetUncategorised": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeBudgetDueRecurring": "{count} recurring due",
+  "@homeBudgetDueRecurring": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeBudgetPendingProposals": "{count} proposals",
+  "@homeBudgetPendingProposals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "netWorthAssetsLabel": "Assets {amount}",
+  "@netWorthAssetsLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "netWorthLiabilitiesLabel": "Liabilities {amount}",
+  "@netWorthLiabilitiesLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "netWorthMissingCurrencies": "Not included: no rate for {currencies}",
+  "netWorthRatesFrom": "Rates from {date}",
+  "@netWorthRatesFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "netWorthIncompleteTitle": "Some accounts are not included",
+  "netWorthIncompleteLine": "Not included: {count, plural, =1{1 account} other{{count} accounts}} in {currency} (no rate)",
+  "@netWorthIncompleteLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "netWorthTabByEntity": "By entity",
+  "netWorthTabByCurrency": "By currency",
+  "netWorthTabByAccount": "By account",
+  "netWorthValuedOn": "Valued {date}",
+  "@netWorthValuedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "netWorthRateLine": "1 {native} = {rate} {reporting}",
+  "@netWorthRateLine": {
+    "placeholders": {
+      "native": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "reporting": {
+        "type": "String"
+      }
+    }
+  },
+  "netWorthIncompletePoint": "Point based on incomplete data",
+  "netWorthHistory3M": "3M",
+  "netWorthHistory1Y": "1Y",
+  "netWorthHistoryAll": "All",
+  "netWorthAccountsCount": "{count} accounts",
+  "@netWorthMissingCurrencies": {
+    "placeholders": {
+      "currencies": {
+        "type": "String"
+      }
+    }
+  },
+  "entityCountInNetWorth": "Count in my net worth",
+  "entityCountInNetWorthHint": "Include this entity's accounts in your combined net worth.",
+  "settingsReportingCurrency": "Reporting currency",
+  "addAccountCurrencyQuestion": "What currency is this account in?",
+  "addAccountSelectCurrencyPlaceholder": "Pick a currency",
+  "addAccountOnBudgetQuestion": "Budget this account together with the plan",
+  "addAccountOnBudgetHint": "On-budget accounts feed Ready to Assign.",
+  "addAccountTrackByQuestion": "How should this account be tracked?",
+  "addAccountTrackByTransactions": "By transactions",
+  "addAccountTrackByValue": "By value",
+  "addAccountOpeningToday": "Opening balance is from today",
+  "addAccountTypeProperty": "Property",
+  "addAccountTypeVehicle": "Vehicle",
+  "addAccountTypeOtherAsset": "Other asset",
+  "accountGroupAssets": "Assets",
+  "accountGroupLiabilities": "Liabilities",
+  "accountBaseEquivalent": "≈ {amount} in base currency",
+  "@accountBaseEquivalent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsConnectionsTitle": "Bank connections",
+  "accountsConnectionPending": "Syncing…",
+  "accountsConnectionSynced": "Up to date",
+  "accountsConnectionFailed": "Sync failed",
+  "accountsConnectionRemove": "Remove",
+  "accountsConnectionRemoveTitle": "Remove this connection?",
+  "accountsConnectionRemoveMessage": "The bank link is removed. Accounts keep their history.",
+  "transactionTransferPeer": "to {accountName}",
+  "@transactionTransferPeer": {
+    "placeholders": {
+      "accountName": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionBaseAmount": "{amount} in base currency",
+  "@transactionBaseAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailReconcile": "Reconcile",
+  "accountDetailReportedBalance": "Bank says {amount}",
+  "accountDetailClearedLabel": "Cleared {amount}",
+  "@accountDetailClearedLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailUnclearedLabel": "Uncleared {amount}",
+  "@accountDetailUnclearedLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailValuationsTitle": "Value history",
+  "accountDetailUpdateValue": "Update value",
+  "accountDetailValuedOn": "Valued {date}",
+  "@accountDetailValuedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailHoldingsTitle": "Holdings",
+  "accountHoldingsValueLabel": "Value {amount}",
+  "@accountHoldingsValueLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountHoldingsCostLabel": "Cost {amount}",
+  "@accountHoldingsCostLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountHoldingsPnlLabel": "P&L {amount}",
+  "@accountHoldingsPnlLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountHoldingsQuantityLabel": "Quantity {quantity}",
+  "@accountHoldingsQuantityLabel": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
+  "accountReconcileTitle": "Reconcile {accountName}",
+  "@accountReconcileTitle": {
+    "placeholders": {
+      "accountName": {
+        "type": "String"
+      }
+    }
+  },
+  "accountReconcileStatementField": "Statement balance",
+  "accountReconcileDifference": "Difference {amount}",
+  "@accountReconcileDifference": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountReconcileCreateAdjustment": "Post the difference as an adjustment",
+  "accountReconcileSubmit": "Reconcile",
+  "accountReconcileSuccess": "{count} transactions reconciled",
+  "@accountReconcileSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountReconcileNoDifference": "Already balanced — nothing to do",
+  "accountValuationValueField": "Value",
+  "accountValuationDateField": "Date",
+  "accountValuationSaved": "Value saved",
+  "accountDetailTransactionsTitle": "Transactions",
+  "transactionLoadMore": "Load more",
+  "accountReconcileFailed": "Reconcile failed — check the statement balance",
+  "@accountDetailReportedBalance": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "fxRateLoading": "Fetching rate…",
+  "fxRateSetRate": "Set rate",
+  "fxRateSetRateTitle": "Use your own rate",
+  "fxRateRateField": "Exchange rate",
+  "fxRateInvalidRate": "Enter a positive rate, e.g. 0.79",
+  "fxRateUseThisRate": "Use this rate",
+  "fxRateStale": "stale",
+  "fxRateApproximate": "≈ {amount}",
+  "@fxRateApproximate": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "fxRateUnavailableTitle": "No exchange rate",
+  "linesEditorSplit": "Split into lines",
+  "linesEditorTitle": "Lines",
+  "linesEditorLineLabel": "Line {index}",
+  "@linesEditorLineLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "linesEditorLineAmount": "Line {index} amount",
+  "@linesEditorLineAmount": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "linesEditorAddLine": "Add a line",
+  "linesEditorRemaining": "{amount} left to allocate",
+  "@linesEditorRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionDateFullLabel": "{year}-{month}-{day}",
+  "@transactionDateFullLabel": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "importTargetAccount": "Import into account",
+  "transferFrom": "From account",
+  "transferTo": "To account",
+  "transferAmountLabel": "Amount",
+  "transferSentLabel": "Sent",
+  "transferReceivedLabel": "Received",
+  "transferUseTodayRate": "Use today's rate",
+  "transferEnvelopeLeavesPlan": "Envelope (money leaves the plan)",
+  "transferCrossEntityHint": "Transfers between your entities convert into each entity's base currency. Money never appears or disappears.",
+  "budgetBreakdownTitle": "Budget breakdown",
+  "budgetBreakdownHint": "Tap the amount to see where it comes from",
+  "budgetBreakdownFxDifference": "Exchange-rate difference",
+  "budgetBreakdownOverspentLastMonth": "Overspent last month",
+  "budgetBreakdownAssignedInFuture": "Assigned in future months",
+  "budgetBreakdownAvailable": "Available in envelopes",
+  "budgetBreakdownUncategorised": "Uncategorised transactions",
+  "reviewTransactionsSelectedCount": "{count} selected",
+  "@reviewTransactionsSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "transactionKindTransfer": "Transfer",
+  "transactionBaseEquivalent": "≈ {amount} in base currency",
+  "@transactionBaseEquivalent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "loadMoreButton": "Load more",
+  "creditCardOwes": "Owes {amount}",
+  "@creditCardOwes": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "setGoalSetAsideMonthlyLabel": "Every month",
+  "setGoalTargetBalanceLabel": "Target balance",
+  "setGoalTargetByDateLabel": "By the date",
+  "setGoalHaveAmount": "To have {amount}",
+  "@setGoalHaveAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "envelopeDeleteMoveHistoryTitle": "Move its history to which envelope?"
 }

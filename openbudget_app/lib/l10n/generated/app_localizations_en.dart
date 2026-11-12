@@ -338,6 +338,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetAssignMoney => 'Assign Money';
 
   @override
+  String get budgetAgeOfMoneyEmpty => 'Not enough history yet';
+
+  @override
   String get budgetAddCategory => 'Add Category';
 
   @override
@@ -1560,6 +1563,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportsSpendingByCategory => 'Spending by Category';
 
   @override
+  String get reportsUncategorised => 'Uncategorised';
+
+  @override
   String get reportsTitle => 'Reports';
 
   @override
@@ -2144,7 +2150,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transferSameAccountError => 'Cannot transfer to the same account';
 
   @override
-  String get transferSuccess => 'Transfer completed';
+  String get transferSuccess => 'Transfer saved';
 
   @override
   String get transferTitle => 'Transfer';
@@ -3059,7 +3065,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String accountDetailLoanInMonth(String month) {
+  String accountDetailLoanInMonth(int month) {
     return 'In $month';
   }
 
@@ -3583,7 +3589,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'OpenBudget doesn\'t have the tax rates for this year yet. Try another year.';
 
   @override
-  String taxYearLabel(String year) {
+  String taxYearLabel(int year) {
     return 'Tax year $year';
   }
 
@@ -5145,4 +5151,459 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get journalLinesLoadError =>
       'We couldn\'t load this journal\'s lines. Try again.';
+
+  @override
+  String get createEntityTitle => 'Create your books';
+
+  @override
+  String get createEntityKindLabel => 'What are these books for?';
+
+  @override
+  String get entityKindPersonal => 'Personal';
+
+  @override
+  String get entityKindSoleTrader => 'Sole trader';
+
+  @override
+  String get entityKindCompany => 'Company';
+
+  @override
+  String get createEntityCountry => 'Country';
+
+  @override
+  String get createEntityTimeZone => 'Time zone';
+
+  @override
+  String get createEntityFiscalYearEnd => 'Financial year ends';
+
+  @override
+  String createEntityFiscalYearValue(int day, int month) {
+    return 'Day $day of month $month';
+  }
+
+  @override
+  String get entityDeleteNameField => 'Type the entity\'s name to confirm';
+
+  @override
+  String homeBudgetNetWorthShort(String amount) {
+    return 'Net worth $amount';
+  }
+
+  @override
+  String homeBudgetUncategorised(int count) {
+    return '$count uncategorised';
+  }
+
+  @override
+  String homeBudgetDueRecurring(int count) {
+    return '$count recurring due';
+  }
+
+  @override
+  String homeBudgetPendingProposals(int count) {
+    return '$count proposals';
+  }
+
+  @override
+  String netWorthAssetsLabel(String amount) {
+    return 'Assets $amount';
+  }
+
+  @override
+  String netWorthLiabilitiesLabel(String amount) {
+    return 'Liabilities $amount';
+  }
+
+  @override
+  String netWorthMissingCurrencies(String currencies) {
+    return 'Not included: no rate for $currencies';
+  }
+
+  @override
+  String netWorthRatesFrom(String date) {
+    return 'Rates from $date';
+  }
+
+  @override
+  String get netWorthIncompleteTitle => 'Some accounts are not included';
+
+  @override
+  String netWorthIncompleteLine(int count, String currency) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count accounts',
+      one: '1 account',
+    );
+    return 'Not included: $_temp0 in $currency (no rate)';
+  }
+
+  @override
+  String get netWorthTabByEntity => 'By entity';
+
+  @override
+  String get netWorthTabByCurrency => 'By currency';
+
+  @override
+  String get netWorthTabByAccount => 'By account';
+
+  @override
+  String netWorthValuedOn(String date) {
+    return 'Valued $date';
+  }
+
+  @override
+  String netWorthRateLine(String native, String rate, String reporting) {
+    return '1 $native = $rate $reporting';
+  }
+
+  @override
+  String get netWorthIncompletePoint => 'Point based on incomplete data';
+
+  @override
+  String get netWorthHistory3M => '3M';
+
+  @override
+  String get netWorthHistory1Y => '1Y';
+
+  @override
+  String get netWorthHistoryAll => 'All';
+
+  @override
+  String netWorthAccountsCount(Object count) {
+    return '$count accounts';
+  }
+
+  @override
+  String get entityCountInNetWorth => 'Count in my net worth';
+
+  @override
+  String get entityCountInNetWorthHint =>
+      'Include this entity\'s accounts in your combined net worth.';
+
+  @override
+  String get settingsReportingCurrency => 'Reporting currency';
+
+  @override
+  String get addAccountCurrencyQuestion => 'What currency is this account in?';
+
+  @override
+  String get addAccountSelectCurrencyPlaceholder => 'Pick a currency';
+
+  @override
+  String get addAccountOnBudgetQuestion =>
+      'Budget this account together with the plan';
+
+  @override
+  String get addAccountOnBudgetHint =>
+      'On-budget accounts feed Ready to Assign.';
+
+  @override
+  String get addAccountTrackByQuestion => 'How should this account be tracked?';
+
+  @override
+  String get addAccountTrackByTransactions => 'By transactions';
+
+  @override
+  String get addAccountTrackByValue => 'By value';
+
+  @override
+  String get addAccountOpeningToday => 'Opening balance is from today';
+
+  @override
+  String get addAccountTypeProperty => 'Property';
+
+  @override
+  String get addAccountTypeVehicle => 'Vehicle';
+
+  @override
+  String get addAccountTypeOtherAsset => 'Other asset';
+
+  @override
+  String get accountGroupAssets => 'Assets';
+
+  @override
+  String get accountGroupLiabilities => 'Liabilities';
+
+  @override
+  String accountBaseEquivalent(String amount) {
+    return '≈ $amount in base currency';
+  }
+
+  @override
+  String get accountsConnectionsTitle => 'Bank connections';
+
+  @override
+  String get accountsConnectionPending => 'Syncing…';
+
+  @override
+  String get accountsConnectionSynced => 'Up to date';
+
+  @override
+  String get accountsConnectionFailed => 'Sync failed';
+
+  @override
+  String get accountsConnectionRemove => 'Remove';
+
+  @override
+  String get accountsConnectionRemoveTitle => 'Remove this connection?';
+
+  @override
+  String get accountsConnectionRemoveMessage =>
+      'The bank link is removed. Accounts keep their history.';
+
+  @override
+  String transactionTransferPeer(String accountName) {
+    return 'to $accountName';
+  }
+
+  @override
+  String transactionBaseAmount(String amount) {
+    return '$amount in base currency';
+  }
+
+  @override
+  String get accountDetailReconcile => 'Reconcile';
+
+  @override
+  String accountDetailReportedBalance(String amount) {
+    return 'Bank says $amount';
+  }
+
+  @override
+  String accountDetailClearedLabel(String amount) {
+    return 'Cleared $amount';
+  }
+
+  @override
+  String accountDetailUnclearedLabel(String amount) {
+    return 'Uncleared $amount';
+  }
+
+  @override
+  String get accountDetailValuationsTitle => 'Value history';
+
+  @override
+  String get accountDetailUpdateValue => 'Update value';
+
+  @override
+  String accountDetailValuedOn(String date) {
+    return 'Valued $date';
+  }
+
+  @override
+  String get accountDetailHoldingsTitle => 'Holdings';
+
+  @override
+  String accountHoldingsValueLabel(String amount) {
+    return 'Value $amount';
+  }
+
+  @override
+  String accountHoldingsCostLabel(String amount) {
+    return 'Cost $amount';
+  }
+
+  @override
+  String accountHoldingsPnlLabel(String amount) {
+    return 'P&L $amount';
+  }
+
+  @override
+  String accountHoldingsQuantityLabel(String quantity) {
+    return 'Quantity $quantity';
+  }
+
+  @override
+  String accountReconcileTitle(String accountName) {
+    return 'Reconcile $accountName';
+  }
+
+  @override
+  String get accountReconcileStatementField => 'Statement balance';
+
+  @override
+  String accountReconcileDifference(String amount) {
+    return 'Difference $amount';
+  }
+
+  @override
+  String get accountReconcileCreateAdjustment =>
+      'Post the difference as an adjustment';
+
+  @override
+  String get accountReconcileSubmit => 'Reconcile';
+
+  @override
+  String accountReconcileSuccess(int count) {
+    return '$count transactions reconciled';
+  }
+
+  @override
+  String get accountReconcileNoDifference => 'Already balanced — nothing to do';
+
+  @override
+  String get accountValuationValueField => 'Value';
+
+  @override
+  String get accountValuationDateField => 'Date';
+
+  @override
+  String get accountValuationSaved => 'Value saved';
+
+  @override
+  String get accountDetailTransactionsTitle => 'Transactions';
+
+  @override
+  String get transactionLoadMore => 'Load more';
+
+  @override
+  String get accountReconcileFailed =>
+      'Reconcile failed — check the statement balance';
+
+  @override
+  String get fxRateLoading => 'Fetching rate…';
+
+  @override
+  String get fxRateSetRate => 'Set rate';
+
+  @override
+  String get fxRateSetRateTitle => 'Use your own rate';
+
+  @override
+  String get fxRateRateField => 'Exchange rate';
+
+  @override
+  String get fxRateInvalidRate => 'Enter a positive rate, e.g. 0.79';
+
+  @override
+  String get fxRateUseThisRate => 'Use this rate';
+
+  @override
+  String get fxRateStale => 'stale';
+
+  @override
+  String fxRateApproximate(String amount) {
+    return '≈ $amount';
+  }
+
+  @override
+  String get fxRateUnavailableTitle => 'No exchange rate';
+
+  @override
+  String get linesEditorSplit => 'Split into lines';
+
+  @override
+  String get linesEditorTitle => 'Lines';
+
+  @override
+  String linesEditorLineLabel(int index) {
+    return 'Line $index';
+  }
+
+  @override
+  String linesEditorLineAmount(int index) {
+    return 'Line $index amount';
+  }
+
+  @override
+  String get linesEditorAddLine => 'Add a line';
+
+  @override
+  String linesEditorRemaining(String amount) {
+    return '$amount left to allocate';
+  }
+
+  @override
+  String transactionDateFullLabel(int year, int month, int day) {
+    return '$year-$month-$day';
+  }
+
+  @override
+  String get importTargetAccount => 'Import into account';
+
+  @override
+  String get transferFrom => 'From account';
+
+  @override
+  String get transferTo => 'To account';
+
+  @override
+  String get transferAmountLabel => 'Amount';
+
+  @override
+  String get transferSentLabel => 'Sent';
+
+  @override
+  String get transferReceivedLabel => 'Received';
+
+  @override
+  String get transferUseTodayRate => 'Use today\'s rate';
+
+  @override
+  String get transferEnvelopeLeavesPlan => 'Envelope (money leaves the plan)';
+
+  @override
+  String get transferCrossEntityHint =>
+      'Transfers between your entities convert into each entity\'s base currency. Money never appears or disappears.';
+
+  @override
+  String get budgetBreakdownTitle => 'Budget breakdown';
+
+  @override
+  String get budgetBreakdownHint => 'Tap the amount to see where it comes from';
+
+  @override
+  String get budgetBreakdownFxDifference => 'Exchange-rate difference';
+
+  @override
+  String get budgetBreakdownOverspentLastMonth => 'Overspent last month';
+
+  @override
+  String get budgetBreakdownAssignedInFuture => 'Assigned in future months';
+
+  @override
+  String get budgetBreakdownAvailable => 'Available in envelopes';
+
+  @override
+  String get budgetBreakdownUncategorised => 'Uncategorised transactions';
+
+  @override
+  String reviewTransactionsSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get transactionKindTransfer => 'Transfer';
+
+  @override
+  String transactionBaseEquivalent(String amount) {
+    return '≈ $amount in base currency';
+  }
+
+  @override
+  String get loadMoreButton => 'Load more';
+
+  @override
+  String creditCardOwes(String amount) {
+    return 'Owes $amount';
+  }
+
+  @override
+  String get setGoalSetAsideMonthlyLabel => 'Every month';
+
+  @override
+  String get setGoalTargetBalanceLabel => 'Target balance';
+
+  @override
+  String get setGoalTargetByDateLabel => 'By the date';
+
+  @override
+  String setGoalHaveAmount(String amount) {
+    return 'To have $amount';
+  }
+
+  @override
+  String get envelopeDeleteMoveHistoryTitle =>
+      'Move its history to which envelope?';
 }

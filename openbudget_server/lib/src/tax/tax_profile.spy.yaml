@@ -1,22 +1,16 @@
-### The tax profile attached to a budget, stored as the tax engine's JSON.
+### The tax profile of one entity, stored as the tax engine's JSON.
 class: TaxProfileRecord
 table: tax_profile
 fields:
   id: UuidValue?, defaultPersist=random_v7
-  budgetId: UuidValue, relation(parent=budget)
-  ### ISO 3166-1 alpha-2 country code, such as GB.
-  jurisdiction: String
-  ### TaxEntityKind name: individual, soleTrader, or company.
-  entityKind: String
-  ### TaxProfile.toJson payload for the jurisdiction.
+  entityId: UuidValue, relation(parent=entity, onDelete=Cascade)
+  ### `TaxProfile.toJson` payload. Its `jurisdiction`, `entityKind` and
+  ### accounting-period keys are rewritten from the entity on every save and
+  ### read; the entity is their source of truth.
   profileJson: String
-  ### Personal budget this business feeds, or the director's personal budget.
-  linkedBudgetId: UuidValue?
   createdAt: DateTime, default=now
   updatedAt: DateTime, default=now
 indexes:
-  tax_profile_budget_unique_idx:
-    fields: budgetId
+  tax_profile_entity_unique_idx:
+    fields: entityId
     unique: true
-  tax_profile_linked_budget_idx:
-    fields: linkedBudgetId

@@ -1,5 +1,6 @@
-### Currency exchange rate pair used in API responses.
+### One currency's rate against the snapshot base.
 class: FxRateQuote
 fields:
   currencyCode: String
-  rate: double
+  ### Units of currencyCode per one unit of the base, exact decimal string.
+  rate: String

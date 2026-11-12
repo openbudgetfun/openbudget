@@ -1,181 +1,152 @@
-import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/ledger/ledger_service.dart';
 import 'package:serverpod/serverpod.dart';
 
-/// API surface for a budget's double-entry books.
+/// API surface for an entity's double-entry books.
 ///
-/// All methods require authentication and check budget ownership. Posted
-/// journals have no update or delete path anywhere in this API: corrections
-/// go through `reverseJournal`.
+/// All methods require authentication and cross [LedgerService], which checks
+/// entity ownership. Posted journals have no update or delete path anywhere
+/// in this API: corrections go through [reverseJournal]. Revaluation is not
+/// exposed until the revaluation unit exists.
 class LedgerEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
 
-  /// Enables ledger accounting on a sole-trader or company budget and seeds
-  /// its chart of accounts from the jurisdiction template.
-  Future<Budget> enableLedger(Session session, UuidValue budgetId) async {
-    final budget = await LedgerService.enableLedger(
-      session,
-      budgetId: budgetId,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
-    return budget;
-  }
+  /// Enables ledger accounting on a sole-trader or company entity: seeds the
+  /// country chart, links one ledger account per money account, and switches
+  /// the entity to ledger mode atomically.
+  Future<Entity> enableLedger(Session session, UuidValue entityId) =>
+      LedgerService.enableLedger(session, entityId);
 
-  /// Lists the budget's ledger accounts.
+  /// Lists the entity's ledger accounts.
   Future<List<LedgerAccount>> listAccounts(
     Session session,
-    UuidValue budgetId, {
+    UuidValue entityId, {
     bool includeArchived = false,
   }) => LedgerService.listAccounts(
     session,
-    budgetId: budgetId,
+    entityId,
     includeArchived: includeArchived,
   );
 
-  /// Adds an account to the budget's chart of accounts.
+  /// Adds an account to the entity's chart of accounts.
   Future<LedgerAccount> createAccount(
     Session session,
-    UuidValue budgetId,
+    UuidValue entityId,
     String code,
     String name,
-    String type, {
-    String? systemRole,
+    LedgerAccountType type, {
+    LedgerSystemRole? systemRole,
     String? currencyCode,
     String? taxCategoryCode,
-  }) async {
-    final account = await LedgerService.createAccount(
-      session,
-      budgetId: budgetId,
-      code: code,
-      name: name,
-      type: type,
-      systemRole: systemRole,
-      currencyCode: currencyCode,
-      taxCategoryCode: taxCategoryCode,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
-    return account;
-  }
+  }) => LedgerService.createAccount(
+    session,
+    entityId,
+    code,
+    name,
+    type,
+    systemRole: systemRole,
+    currencyCode: currencyCode,
+    taxCategoryCode: taxCategoryCode,
+  );
 
-  /// Archives an account so it stops accepting postings.
+  /// Archives a non-structural account so it stops accepting postings.
   Future<LedgerAccount> archiveAccount(
     Session session,
     UuidValue accountId,
-  ) async {
-    final account = await LedgerService.archiveAccount(
-      session,
-      accountId: accountId,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(account.budgetId);
-    return account;
-  }
+  ) => LedgerService.archiveAccount(session, accountId);
 
-  /// Saves a draft journal: creates one, or replaces the lines of an
-  /// existing draft when [journalId] is given.
+  /// Saves a draft journal: creates one, or replaces the lines of an existing
+  /// draft when [journalId] is given.
   Future<Journal> saveDraftJournal(
     Session session,
-    UuidValue budgetId,
+    UuidValue entityId,
     DateTime date,
     List<JournalLineInput> lines, {
     UuidValue? journalId,
     String reference = '',
     String? narration,
-    String source = 'manual',
-  }) async {
-    final journal = await LedgerService.saveDraftJournal(
-      session,
-      budgetId: budgetId,
-      date: date,
-      lines: lines,
-      journalId: journalId,
-      reference: reference,
-      narration: narration,
-      source: source,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
-    return journal;
-  }
+    JournalSource source = JournalSource.manual,
+  }) => LedgerService.saveDraftJournal(
+    session,
+    entityId,
+    date,
+    lines,
+    journalId: journalId,
+    reference: reference,
+    narration: narration,
+    source: source,
+  );
 
   /// Deletes a draft journal. Posted journals cannot be deleted.
-  Future<void> deleteDraftJournal(
-    Session session,
-    UuidValue journalId,
-  ) async {
-    await LedgerService.deleteDraftJournal(session, journalId: journalId);
-  }
+  Future<void> deleteDraftJournal(Session session, UuidValue journalId) =>
+      LedgerService.deleteDraftJournal(session, journalId);
 
   /// Posts a draft journal, making it immutable.
-  Future<Journal> postJournal(Session session, UuidValue journalId) async {
-    final journal = await LedgerService.postJournal(
-      session,
-      journalId: journalId,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(journal.budgetId);
-    return journal;
-  }
+  Future<Journal> postJournal(Session session, UuidValue journalId) =>
+      LedgerService.postJournal(session, journalId);
 
   /// Reverses a posted journal on [date] with a mirror journal.
   Future<Journal> reverseJournal(
     Session session,
     UuidValue journalId,
     DateTime date,
-  ) async {
-    final reversal = await LedgerService.reverseJournal(
-      session,
-      journalId: journalId,
-      date: date,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(reversal.budgetId);
-    return reversal;
-  }
+  ) => LedgerService.reverseJournal(session, journalId, date);
 
-  /// Lists the budget's journals between the optional inclusive dates,
-  /// newest first.
+  /// Lists one bounded page of the entity's journals, newest first.
   Future<List<Journal>> listJournals(
     Session session,
-    UuidValue budgetId, {
+    UuidValue entityId, {
     DateTime? fromDate,
     DateTime? toDate,
+    int limit = 100,
+    String? cursor,
   }) => LedgerService.listJournals(
     session,
-    budgetId: budgetId,
+    entityId,
     fromDate: fromDate,
     toDate: toDate,
+    limit: limit,
+    cursor: cursor,
   );
 
   /// Lists one journal's lines, oldest first.
   Future<List<JournalLine>> listJournalLines(
     Session session,
     UuidValue journalId,
-  ) => LedgerService.listJournalLines(session, journalId: journalId);
+  ) => LedgerService.listJournalLines(session, journalId);
 
-  /// The budget's period lock, or null when no lock date has been set.
+  /// The entity's period lock, or null when no lock date has been set.
   Future<LedgerPeriodLock?> getLockDate(
     Session session,
-    UuidValue budgetId,
-  ) => LedgerService.getLockDate(session, budgetId: budgetId);
+    UuidValue entityId,
+  ) => LedgerService.getLockDate(session, entityId);
 
-  /// Sets or moves the budget's period lock date.
+  /// Sets or moves the entity's period lock date.
   Future<LedgerPeriodLock> setLockDate(
     Session session,
-    UuidValue budgetId,
+    UuidValue entityId,
     DateTime lockDate,
-  ) async {
-    final lock = await LedgerService.setLockDate(
-      session,
-      budgetId: budgetId,
-      lockDate: lockDate,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
-    return lock;
-  }
+  ) => LedgerService.setLockDate(session, entityId, lockDate);
 
   /// Computes the trial balance through [asOf] over posted journals.
   Future<TrialBalanceView> trialBalance(
     Session session,
-    UuidValue budgetId,
+    UuidValue entityId,
     DateTime asOf,
-  ) => LedgerService.trialBalance(session, budgetId: budgetId, asOf: asOf);
+  ) => LedgerService.trialBalance(session, entityId, asOf);
+
+  /// Lists one bounded page of the entity's audit trail, newest first.
+  Future<List<AuditEvent>> listAuditEvents(
+    Session session,
+    UuidValue entityId, {
+    DateTime? before,
+    int? limit,
+  }) => LedgerService.listAuditEvents(
+    session,
+    entityId,
+    before: before,
+    limit: limit,
+  );
 }

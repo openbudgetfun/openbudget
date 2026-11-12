@@ -8,14 +8,16 @@ part of 'auto_assign_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Computes an auto-assign proposal that distributes Ready to Assign money
-/// across underfunded envelopes based on their goals.
+/// Computes an auto-assign proposal from the month view alone: Ready to
+/// Assign money goes to underfunded envelopes, in envelope order. Nothing
+/// is written until [AutoAssignActions.execute] sends one `setAllocations`.
 
 @ProviderFor(autoAssignProposal)
 final autoAssignProposalProvider = AutoAssignProposalFamily._();
 
-/// Computes an auto-assign proposal that distributes Ready to Assign money
-/// across underfunded envelopes based on their goals.
+/// Computes an auto-assign proposal from the month view alone: Ready to
+/// Assign money goes to underfunded envelopes, in envelope order. Nothing
+/// is written until [AutoAssignActions.execute] sends one `setAllocations`.
 
 final class AutoAssignProposalProvider
     extends
@@ -27,8 +29,9 @@ final class AutoAssignProposalProvider
     with
         $FutureModifier<AutoAssignProposal>,
         $FutureProvider<AutoAssignProposal> {
-  /// Computes an auto-assign proposal that distributes Ready to Assign money
-  /// across underfunded envelopes based on their goals.
+  /// Computes an auto-assign proposal from the month view alone: Ready to
+  /// Assign money goes to underfunded envelopes, in envelope order. Nothing
+  /// is written until [AutoAssignActions.execute] sends one `setAllocations`.
   AutoAssignProposalProvider._({
     required AutoAssignProposalFamily super.from,
     required String super.argument,
@@ -74,10 +77,11 @@ final class AutoAssignProposalProvider
 }
 
 String _$autoAssignProposalHash() =>
-    r'1f3cbe112382e1fca9f467d99660eb290ed0718b';
+    r'6608a0f118c25a273d358154bbc985a29a0e10ac';
 
-/// Computes an auto-assign proposal that distributes Ready to Assign money
-/// across underfunded envelopes based on their goals.
+/// Computes an auto-assign proposal from the month view alone: Ready to
+/// Assign money goes to underfunded envelopes, in envelope order. Nothing
+/// is written until [AutoAssignActions.execute] sends one `setAllocations`.
 
 final class AutoAssignProposalFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<AutoAssignProposal>, String> {
@@ -90,11 +94,12 @@ final class AutoAssignProposalFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Computes an auto-assign proposal that distributes Ready to Assign money
-  /// across underfunded envelopes based on their goals.
+  /// Computes an auto-assign proposal from the month view alone: Ready to
+  /// Assign money goes to underfunded envelopes, in envelope order. Nothing
+  /// is written until [AutoAssignActions.execute] sends one `setAllocations`.
 
-  AutoAssignProposalProvider call(String budgetId) =>
-      AutoAssignProposalProvider._(argument: budgetId, from: this);
+  AutoAssignProposalProvider call(String entityId) =>
+      AutoAssignProposalProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'autoAssignProposalProvider';
@@ -132,7 +137,7 @@ final class AutoAssignActionsProvider
   }
 }
 
-String _$autoAssignActionsHash() => r'e269fe2244759846bf20a88a6846958abfe6ad71';
+String _$autoAssignActionsHash() => r'20ff4d02107a1913bef883bea54da984d5b287fe';
 
 abstract class _$AutoAssignActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

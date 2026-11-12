@@ -8,15 +8,21 @@ part of 'tax_actions_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Writes tax profiles and categorisation, then refreshes what they change.
+/// Writes tax profiles and per-line categorisation, then refreshes what
+/// they change. Line tax goes through `tax.setLineTax`, which posts a
+/// transaction revision, so the plan and books follow.
 
 @ProviderFor(TaxActions)
 final taxActionsProvider = TaxActionsProvider._();
 
-/// Writes tax profiles and categorisation, then refreshes what they change.
+/// Writes tax profiles and per-line categorisation, then refreshes what
+/// they change. Line tax goes through `tax.setLineTax`, which posts a
+/// transaction revision, so the plan and books follow.
 final class TaxActionsProvider
     extends $NotifierProvider<TaxActions, AsyncValue<void>> {
-  /// Writes tax profiles and categorisation, then refreshes what they change.
+  /// Writes tax profiles and per-line categorisation, then refreshes what
+  /// they change. Line tax goes through `tax.setLineTax`, which posts a
+  /// transaction revision, so the plan and books follow.
   TaxActionsProvider._()
     : super(
         from: null,
@@ -44,9 +50,11 @@ final class TaxActionsProvider
   }
 }
 
-String _$taxActionsHash() => r'1af385abec0014bf41dd6af82a43092814e19ab9';
+String _$taxActionsHash() => r'3a37031bff041934c22148725e4efee0a7559591';
 
-/// Writes tax profiles and categorisation, then refreshes what they change.
+/// Writes tax profiles and per-line categorisation, then refreshes what
+/// they change. Line tax goes through `tax.setLineTax`, which posts a
+/// transaction revision, so the plan and books follow.
 
 abstract class _$TaxActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

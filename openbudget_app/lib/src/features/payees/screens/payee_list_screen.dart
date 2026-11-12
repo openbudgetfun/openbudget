@@ -16,14 +16,14 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 const payeeListEmptyKey = Key('payee-list-empty');
 
 class PayeeListScreen extends HookConsumerWidget {
-  const PayeeListScreen({required this.budgetId, super.key});
+  const PayeeListScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final payeesAsync = ref.watch(payeeListProvider(budgetId));
+    final payeesAsync = ref.watch(payeeListProvider(entityId));
     final theme = Theme.of(context);
     final palette = theme.ob;
     final searchController = useTextEditingController();
@@ -40,8 +40,10 @@ class PayeeListScreen extends HookConsumerWidget {
         leading: IconButton(
           icon: const SkribbleIcon(data: OpenBudgetIcons.back),
           tooltip: l10n.transactionsBack,
-          onPressed: () =>
-              context.goNamed(moreRoute, pathParameters: {'id': budgetId}),
+          onPressed: () => context.goNamed(
+            moreRoute,
+            pathParameters: {'entityId': entityId},
+          ),
         ),
         title: Text(l10n.payeeListTitle),
         actions: [
@@ -64,7 +66,7 @@ class PayeeListScreen extends HookConsumerWidget {
               message: error.toString(),
               action: ObStateAction(
                 label: l10n.homeRetry,
-                onPressed: () => ref.invalidate(payeeListProvider(budgetId)),
+                onPressed: () => ref.invalidate(payeeListProvider(entityId)),
               ),
             ),
           ),
@@ -96,7 +98,7 @@ class PayeeListScreen extends HookConsumerWidget {
                     .toList();
 
           return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(payeeListProvider(budgetId)),
+            onRefresh: () async => ref.invalidate(payeeListProvider(entityId)),
             child: Column(
               children: [
                 Padding(
@@ -156,7 +158,7 @@ class PayeeListScreen extends HookConsumerWidget {
                           itemCount: filtered.length,
                           itemBuilder: (context, index) {
                             final payee = filtered[index];
-                            return _PayeeTile(payee: payee, budgetId: budgetId);
+                            return _PayeeTile(payee: payee, entityId: entityId);
                           },
                         ),
                 ),
@@ -172,17 +174,17 @@ class PayeeListScreen extends HookConsumerWidget {
     unawaited(
       showDialog<void>(
         context: context,
-        builder: (_) => _AddPayeeDialog(budgetId: budgetId),
+        builder: (_) => _AddPayeeDialog(entityId: entityId),
       ),
     );
   }
 }
 
 class _PayeeTile extends HookConsumerWidget {
-  const _PayeeTile({required this.payee, required this.budgetId});
+  const _PayeeTile({required this.payee, required this.entityId});
 
   final Payee payee;
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -279,7 +281,7 @@ class _PayeeTile extends HookConsumerWidget {
       showDialog<void>(
         context: context,
         builder: (_) =>
-            _MergePayeeDialog(sourcePayee: payee, budgetId: budgetId),
+            _MergePayeeDialog(sourcePayee: payee, entityId: entityId),
       ),
     );
   }
@@ -320,7 +322,7 @@ class _PayeeTile extends HookConsumerWidget {
     try {
       final deleted = await ref
           .read(payeeActionsProvider.notifier)
-          .deletePayee(payeeId: payee.id?.toString() ?? '', budgetId: budgetId);
+          .deletePayee(payeeId: payee.id?.toString() ?? '', entityId: entityId);
       if (context.mounted) {
         showAppToast(
           context,
@@ -350,7 +352,7 @@ class _PayeeTile extends HookConsumerWidget {
     try {
       await ref
           .read(payeeActionsProvider.notifier)
-          .undoDeletePayee(deletedPayee: deleted, budgetId: budgetId);
+          .undoDeletePayee(deletedPayee: deleted, entityId: entityId);
       if (context.mounted) {
         showAppToast(
           context,
@@ -373,16 +375,16 @@ class _PayeeTile extends HookConsumerWidget {
     unawaited(
       showDialog<void>(
         context: context,
-        builder: (_) => _EditPayeeDialog(payee: payee, budgetId: budgetId),
+        builder: (_) => _EditPayeeDialog(payee: payee, entityId: entityId),
       ),
     );
   }
 }
 
 class _AddPayeeDialog extends HookConsumerWidget {
-  const _AddPayeeDialog({required this.budgetId});
+  const _AddPayeeDialog({required this.entityId});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -431,7 +433,7 @@ class _AddPayeeDialog extends HookConsumerWidget {
     try {
       await ref
           .read(payeeActionsProvider.notifier)
-          .createPayee(name: name, budgetId: budgetId);
+          .createPayee(name: name, entityId: entityId);
       if (!context.mounted) return;
       showAppToast(
         context,
@@ -452,10 +454,10 @@ class _AddPayeeDialog extends HookConsumerWidget {
 }
 
 class _EditPayeeDialog extends HookConsumerWidget {
-  const _EditPayeeDialog({required this.payee, required this.budgetId});
+  const _EditPayeeDialog({required this.payee, required this.entityId});
 
   final Payee payee;
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -506,7 +508,7 @@ class _EditPayeeDialog extends HookConsumerWidget {
           .read(payeeActionsProvider.notifier)
           .updatePayee(
             payeeId: payee.id?.toString() ?? '',
-            budgetId: budgetId,
+            entityId: entityId,
             name: name,
           );
       if (!context.mounted) return;
@@ -529,16 +531,16 @@ class _EditPayeeDialog extends HookConsumerWidget {
 }
 
 class _MergePayeeDialog extends HookConsumerWidget {
-  const _MergePayeeDialog({required this.sourcePayee, required this.budgetId});
+  const _MergePayeeDialog({required this.sourcePayee, required this.entityId});
 
   final Payee sourcePayee;
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final payeesAsync = ref.watch(payeeListProvider(budgetId));
+    final payeesAsync = ref.watch(payeeListProvider(entityId));
     final selectedTargetId = useState<String?>(null);
     final isSubmitting = useState(false);
 
@@ -624,7 +626,7 @@ class _MergePayeeDialog extends HookConsumerWidget {
           .mergePayees(
             sourcePayeeId: sourcePayee.id?.toString() ?? '',
             targetPayeeId: targetPayeeId,
-            budgetId: budgetId,
+            entityId: entityId,
           );
       if (!context.mounted) return;
       showAppToast(

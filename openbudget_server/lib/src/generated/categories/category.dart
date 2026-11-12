@@ -14,26 +14,30 @@ import 'dart:async' as _ida;
 
 import 'package:serverpod/serverpod.dart' as _is;
 
-/// A grouping of envelopes within a budget.
+/// A group of envelopes in an entity's envelope plan.
 abstract class Category
     implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   Category._({
     this.id,
+    required this.entityId,
     required this.name,
-    required this.budgetId,
-    required this.sortOrder,
+    int? sortOrder,
     bool? isHidden,
     DateTime? createdAt,
-  }) : isHidden = isHidden ?? false,
-       createdAt = createdAt ?? DateTime.now();
+    DateTime? updatedAt,
+  }) : sortOrder = sortOrder ?? 0,
+       isHidden = isHidden ?? false,
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   factory Category({
     _is.UuidValue? id,
+    required _is.UuidValue entityId,
     required String name,
-    required _is.UuidValue budgetId,
-    required int sortOrder,
+    int? sortOrder,
     bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) = _CategoryImpl;
 
   factory Category.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -41,17 +45,20 @@ abstract class Category
       id: jsonSerialization['id'] == null
           ? null
           : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      name: jsonSerialization['name'] as String,
-      budgetId: _is.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _is.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
-      sortOrder: jsonSerialization['sortOrder'] as int,
+      name: jsonSerialization['name'] as String,
+      sortOrder: jsonSerialization['sortOrder'] as int?,
       isHidden: jsonSerialization['isHidden'] == null
           ? null
           : _is.BoolJsonExtension.fromJson(jsonSerialization['isHidden']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+      updatedAt: jsonSerialization['updatedAt'] == null
+          ? null
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
@@ -62,16 +69,18 @@ abstract class Category
   @override
   _is.UuidValue? id;
 
-  String name;
+  _is.UuidValue entityId;
 
-  _is.UuidValue budgetId;
+  String name;
 
   int sortOrder;
 
-  /// Whether this category is hidden from the default budget view.
-  bool? isHidden;
+  /// Hidden categories are left out of the default Plan view.
+  bool isHidden;
 
   DateTime createdAt;
+
+  DateTime updatedAt;
 
   @override
   _is.Table<_is.UuidValue?> get table => t;
@@ -81,22 +90,24 @@ abstract class Category
   @_is.useResult
   Category copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? entityId,
     String? name,
-    _is.UuidValue? budgetId,
     int? sortOrder,
     bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Category',
       if (id != null) 'id': id?.toJson(),
+      'entityId': entityId.toJson(),
       'name': name,
-      'budgetId': budgetId.toJson(),
       'sortOrder': sortOrder,
-      if (isHidden != null) 'isHidden': isHidden,
+      'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -105,11 +116,12 @@ abstract class Category
     return {
       '__className__': 'Category',
       if (id != null) 'id': id?.toJson(),
+      'entityId': entityId.toJson(),
       'name': name,
-      'budgetId': budgetId.toJson(),
       'sortOrder': sortOrder,
-      if (isHidden != null) 'isHidden': isHidden,
+      'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -141,23 +153,23 @@ abstract class Category
   }
 }
 
-class _Undefined {}
-
 class _CategoryImpl extends Category {
   _CategoryImpl({
     _is.UuidValue? id,
+    required _is.UuidValue entityId,
     required String name,
-    required _is.UuidValue budgetId,
-    required int sortOrder,
+    int? sortOrder,
     bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) : super._(
          id: id,
+         entityId: entityId,
          name: name,
-         budgetId: budgetId,
          sortOrder: sortOrder,
          isHidden: isHidden,
          createdAt: createdAt,
+         updatedAt: updatedAt,
        );
 
   /// Returns a shallow copy of this [Category]
@@ -166,19 +178,21 @@ class _CategoryImpl extends Category {
   @override
   Category copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? entityId,
     String? name,
-    _is.UuidValue? budgetId,
     int? sortOrder,
-    Object? isHidden = _Undefined,
+    bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return Category(
       id: id is _is.UndefinedSentinel ? this.id : id,
+      entityId: entityId ?? this.entityId,
       name: name ?? this.name,
-      budgetId: budgetId ?? this.budgetId,
       sortOrder: sortOrder ?? this.sortOrder,
-      isHidden: isHidden is bool? ? isHidden : this.isHidden,
+      isHidden: isHidden ?? this.isHidden,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }
@@ -186,23 +200,23 @@ class _CategoryImpl extends Category {
 class CategoryUpdateTable extends _is.UpdateTable<CategoryTable> {
   CategoryUpdateTable(super.table);
 
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> entityId(_is.UuidValue value) =>
+      _is.ColumnValue(
+        table.entityId,
+        value,
+      );
+
   _is.ColumnValue<String, String> name(String value) => _is.ColumnValue(
     table.name,
     value,
   );
-
-  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
-      _is.ColumnValue(
-        table.budgetId,
-        value,
-      );
 
   _is.ColumnValue<int, int> sortOrder(int value) => _is.ColumnValue(
     table.sortOrder,
     value,
   );
 
-  _is.ColumnValue<bool, bool> isHidden(bool? value) => _is.ColumnValue(
+  _is.ColumnValue<bool, bool> isHidden(bool value) => _is.ColumnValue(
     table.isHidden,
     value,
   );
@@ -212,22 +226,29 @@ class CategoryUpdateTable extends _is.UpdateTable<CategoryTable> {
         table.createdAt,
         value,
       );
+
+  _is.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
+      _is.ColumnValue(
+        table.updatedAt,
+        value,
+      );
 }
 
 class CategoryTable extends _is.Table<_is.UuidValue?> {
   CategoryTable({super.tableRelation}) : super(tableName: 'category') {
     updateTable = CategoryUpdateTable(this);
-    name = _is.ColumnString(
-      'name',
+    entityId = _is.ColumnUuid(
+      'entityId',
       this,
     );
-    budgetId = _is.ColumnUuid(
-      'budgetId',
+    name = _is.ColumnString(
+      'name',
       this,
     );
     sortOrder = _is.ColumnInt(
       'sortOrder',
       this,
+      hasDefault: true,
     );
     isHidden = _is.ColumnBool(
       'isHidden',
@@ -239,29 +260,37 @@ class CategoryTable extends _is.Table<_is.UuidValue?> {
       this,
       hasDefault: true,
     );
+    updatedAt = _is.ColumnDateTime(
+      'updatedAt',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final CategoryUpdateTable updateTable;
 
-  late final _is.ColumnString name;
+  late final _is.ColumnUuid entityId;
 
-  late final _is.ColumnUuid budgetId;
+  late final _is.ColumnString name;
 
   late final _is.ColumnInt sortOrder;
 
-  /// Whether this category is hidden from the default budget view.
+  /// Hidden categories are left out of the default Plan view.
   late final _is.ColumnBool isHidden;
 
   late final _is.ColumnDateTime createdAt;
 
+  late final _is.ColumnDateTime updatedAt;
+
   @override
   List<_is.Column> get columns => [
     id,
+    entityId,
     name,
-    budgetId,
     sortOrder,
     isHidden,
     createdAt,
+    updatedAt,
   ];
 }
 

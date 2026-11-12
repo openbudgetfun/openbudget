@@ -21,7 +21,7 @@ void main() {
           year: 2025,
           entries: [entryMinor(2025, 'us.ind.wages', 15000000)],
           profile: const UsTaxProfile(
-            entityKind: TaxEntityKind.individual,
+            entityKind: EntityKind.individual,
             filingStatus: UsFilingStatus.marriedFilingJointly,
             dependents: [
               UsDependent(underSeventeen: true, hasValidSsn: true),
@@ -47,7 +47,7 @@ void main() {
           year: 2025,
           entries: [entryMinor(2025, 'us.ind.wages', 44000000)],
           profile: const UsTaxProfile(
-            entityKind: TaxEntityKind.individual,
+            entityKind: EntityKind.individual,
             filingStatus: UsFilingStatus.marriedFilingJointly,
             dependents: [
               UsDependent(underSeventeen: true, hasValidSsn: true),
@@ -73,7 +73,7 @@ void main() {
           year: 2025,
           entries: [entryMinor(2025, 'us.ind.wages', 15000000)],
           profile: const UsTaxProfile(
-            entityKind: TaxEntityKind.individual,
+            entityKind: EntityKind.individual,
             filingStatus: UsFilingStatus.marriedFilingJointly,
             dependents: [
               UsDependent(underSeventeen: true, hasValidSsn: true),
@@ -98,7 +98,7 @@ void main() {
           year: 2025,
           entries: [entryMinor(2025, 'us.ind.wages', 15000000)],
           profile: const UsTaxProfile(
-            entityKind: TaxEntityKind.individual,
+            entityKind: EntityKind.individual,
             filingStatus: UsFilingStatus.marriedFilingJointly,
             dependents: [
               UsDependent(underSeventeen: true, hasValidSsn: true),
@@ -127,7 +127,7 @@ void main() {
           year: 2025,
           entries: [entryMinor(2025, 'us.ind.wages', 3000000)],
           profile: const UsTaxProfile(
-            entityKind: TaxEntityKind.individual,
+            entityKind: EntityKind.individual,
             filingStatus: UsFilingStatus.marriedFilingJointly,
             dependents: [
               UsDependent(underSeventeen: true, hasValidSsn: true),
@@ -160,7 +160,7 @@ void main() {
             entryMinor(2025, 'us.ind.tax_exempt_interest', 1000000),
           ],
           profile: const UsTaxProfile(
-            entityKind: TaxEntityKind.individual,
+            entityKind: EntityKind.individual,
             filingStatus: UsFilingStatus.qualifyingSurvivingSpouse,
             dependents: [UsDependent(underSeventeen: true, hasValidSsn: true)],
           ),
@@ -185,7 +185,7 @@ void main() {
 
     test('round-trips through JSON', () {
       const profile = UsTaxProfile(
-        entityKind: TaxEntityKind.individual,
+        entityKind: EntityKind.individual,
         filingStatus: UsFilingStatus.qualifyingSurvivingSpouse,
         homeOfficeMethod: UsHomeOfficeMethod.regular,
         specifiedServiceTrade: true,
@@ -349,7 +349,7 @@ void main() {
             soleTraderInput(
               entries: [entryDollars(2026, 'us.sch_c.gross_receipts', 300000)],
               profile: const UsTaxProfile(
-                entityKind: TaxEntityKind.soleTrader,
+                entityKind: EntityKind.soleTrader,
                 specifiedServiceTrade: true,
               ),
             ),
@@ -362,7 +362,7 @@ void main() {
             soleTraderInput(
               entries: [entryDollars(2026, 'us.sch_c.gross_receipts', 500000)],
               profile: const UsTaxProfile(
-                entityKind: TaxEntityKind.soleTrader,
+                entityKind: EntityKind.soleTrader,
                 specifiedServiceTrade: true,
               ),
             ),

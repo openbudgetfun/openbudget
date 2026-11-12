@@ -1,82 +1,76 @@
-import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/month_figures_provider.dart';
+import 'package:openbudget_app/src/features/reports/utils/month_range.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_group_names.dart';
+import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
+import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'category_trends_provider.g.dart';
 
-/// Fetches spending‐by‐category for each of the last [months] months and
-/// pivots the data so each category has a time series of spending amounts.
+/// Spending per category for each of the last [months] months, pivoted so
+/// each category carries a time series. One `report.spending` call with
+/// [ReportGrouping.category] and `byMonth` feeds the whole table; the month
+/// headers come from `report.monthSummaries`.
 @riverpod
 Future<CategoryTrendsData> categoryTrends(
   Ref ref,
-  String budgetId, {
+  String entityId, {
   int months = 6,
 }) async {
-  final now = DateTime.now();
-  final monthHeaders = <MonthLabel>[];
-  final categoryMap = <String, List<int>>{};
+  final client = ref.read(serverpodClientProvider);
+  final endMonth = MonthKey.fromDate(DateTime.now());
+  final summaries = await ref.watch(
+    monthFiguresProvider(entityId, endMonth, months).future,
+  );
+  final entity = await ref.watch(entityDetailProvider(entityId).future);
+  final rows = await client.report.spending(
+    UuidValue.fromString(entityId),
+    monthRangeStart(endMonth, months),
+    endMonth,
+    ReportGrouping.category,
+    true,
+  );
 
-  for (var i = months - 1; i >= 0; i--) {
-    var year = now.year;
-    var month = now.month - i;
-    while (month <= 0) {
-      month += 12;
-      year--;
-    }
-
-    monthHeaders.add(MonthLabel(year: year, month: month));
-
-    final report = await ref.watch(
-      spendingReportProvider(budgetId, year, month).future,
-    );
-
-    // Ensure every category has an entry for this month index.
-    final monthIndex = monthHeaders.length - 1;
-    for (final existing in categoryMap.keys) {
-      if (categoryMap[existing]!.length <= monthIndex) {
-        categoryMap[existing]!.add(0);
-      }
-    }
-
-    for (final entry in report.categorySpending.entries) {
-      categoryMap.putIfAbsent(entry.key, () => List.filled(monthIndex, 0));
-      categoryMap[entry.key]!.add(entry.value);
-    }
-
-    // Back-fill any newly added categories for this month.
-    for (final entry in categoryMap.entries) {
-      while (entry.value.length <= monthIndex) {
-        entry.value.add(0);
-      }
-    }
+  final spentByCategory = <String, Map<int, int>>{};
+  for (final row in rows) {
+    final month = row.month;
+    if (month == null || row.outflowMinor >= 0) continue;
+    final name = row.groupId == null ? reportUncategorisedGroup : row.name;
+    spentByCategory
+        .putIfAbsent(name, () => {})
+        .update(
+          month,
+          (spent) => spent + row.outflowMinor.abs(),
+          ifAbsent: row.outflowMinor.abs,
+        );
   }
 
-  // Sort categories by total descending.
-  final sortedEntries = categoryMap.entries.toList()
-    ..sort((a, b) {
-      final totalA = a.value.fold<int>(0, (s, v) => s + v);
-      final totalB = b.value.fold<int>(0, (s, v) => s + v);
-      return totalB.compareTo(totalA);
-    });
-
-  final categories = sortedEntries
-      .map(
-        (e) => CategoryTrendLine(
-          categoryName: e.key,
-          monthlyCents: e.value,
-          totalCents: e.value.fold<int>(0, (s, v) => s + v),
-        ),
-      )
-      .toList();
-
-  // Resolve the currency from the first report that has data.
-  final firstReport = await ref.watch(
-    spendingReportProvider(budgetId, now.year, now.month).future,
-  );
+  final monthHeaders = [for (final summary in summaries) summary.month];
+  final categories =
+      spentByCategory.entries
+          .map(
+            (entry) => CategoryTrendLine(
+              categoryName: entry.key,
+              monthlyMinor: [
+                for (final month in monthHeaders) entry.value[month] ?? 0,
+              ],
+              totalMinor: entry.value.values.fold<int>(
+                0,
+                (sum, spent) => sum + spent,
+              ),
+            ),
+          )
+          .toList()
+        ..sort(
+          (first, second) => second.totalMinor.compareTo(first.totalMinor),
+        );
 
   return CategoryTrendsData(
     months: monthHeaders,
     categories: categories,
-    currencyCode: firstReport.currencyCode,
+    currencyCode: entity.baseCurrencyCode,
   );
 }
 
@@ -87,26 +81,20 @@ class CategoryTrendsData {
     required this.currencyCode,
   });
 
-  final List<MonthLabel> months;
+  /// yyyymm month headers, newest first.
+  final List<int> months;
   final List<CategoryTrendLine> categories;
   final String currencyCode;
-}
-
-class MonthLabel {
-  const MonthLabel({required this.year, required this.month});
-
-  final int year;
-  final int month;
 }
 
 class CategoryTrendLine {
   const CategoryTrendLine({
     required this.categoryName,
-    required this.monthlyCents,
-    required this.totalCents,
+    required this.monthlyMinor,
+    required this.totalMinor,
   });
 
   final String categoryName;
-  final List<int> monthlyCents;
-  final int totalCents;
+  final List<int> monthlyMinor;
+  final int totalMinor;
 }

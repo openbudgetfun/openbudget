@@ -1,25 +1,21 @@
-### Per-month allocation for an envelope, enabling monthly budget cycles.
+### Money assigned to an envelope for one month. The only stored figure of
+### the envelope plan; activity, carryover and available are derived.
 class: MonthlyAllocation
 table: monthly_allocation
 fields:
   id: UuidValue?, defaultPersist=random_v7
-  envelopeId: UuidValue, relation(parent=envelope)
-  budgetId: UuidValue, relation(parent=budget)
-  ### The year of the budget month (e.g. 2026).
-  year: int
-  ### The month of the budget month (1-12).
+  entityId: UuidValue, relation(parent=entity, onDelete=Cascade)
+  envelopeId: UuidValue, relation(parent=envelope, onDelete=Cascade)
+  ### Budget month as yyyymm, such as 202611.
   month: int
-  ### Amount allocated to this envelope for this month, in integer cents.
-  allocatedCents: int
-  ### Amount carried over from the previous month, in integer cents.
-  carryoverCents: int
+  ### Assigned amount in base-currency minor units. Negative when more was
+  ### moved out than was assigned this month. Never 0: a zero deletes the row.
+  allocatedMinor: int
   createdAt: DateTime, default=now
   updatedAt: DateTime, default=now
 indexes:
-  monthly_allocation_envelope_idx:
-    fields: envelopeId
-  monthly_allocation_budget_idx:
-    fields: budgetId
-  monthly_allocation_unique_idx:
-    fields: envelopeId, year, month
+  monthly_allocation_envelope_month_unique_idx:
+    fields: envelopeId, month
     unique: true
+  monthly_allocation_entity_month_idx:
+    fields: entityId, month

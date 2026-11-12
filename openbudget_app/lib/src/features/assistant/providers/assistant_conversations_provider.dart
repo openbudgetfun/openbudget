@@ -8,5 +8,5 @@ part 'assistant_conversations_provider.g.dart';
 @riverpod
 Future<List<AgentConversation>> assistantConversations(
   Ref ref,
-  String budgetId,
-) => ref.watch(assistantApiProvider).listConversations(budgetId);
+  String entityId,
+) => ref.watch(assistantApiProvider).listConversations(entityId);

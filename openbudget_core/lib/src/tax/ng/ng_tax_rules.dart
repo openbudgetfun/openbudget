@@ -70,10 +70,10 @@ final class NgTaxRules implements TaxRulePack {
   );
 
   @override
-  List<TaxCategory> categoriesFor(TaxEntityKind kind) => switch (kind) {
-    TaxEntityKind.individual => _NgTaxCategories.individual,
-    TaxEntityKind.soleTrader => _NgTaxCategories.soleTrader,
-    TaxEntityKind.company => _NgTaxCategories.company,
+  List<TaxCategory> categoriesFor(EntityKind kind) => switch (kind) {
+    EntityKind.individual => _NgTaxCategories.individual,
+    EntityKind.soleTrader => _NgTaxCategories.soleTrader,
+    EntityKind.company => _NgTaxCategories.company,
   };
 
   @override
@@ -83,9 +83,9 @@ final class NgTaxRules implements TaxRulePack {
   TaxReport report(TaxInput input) {
     final table = _tableFor(input);
     return switch (input.profile.entityKind) {
-      TaxEntityKind.individual => _individualReport(input, table),
-      TaxEntityKind.soleTrader => _soleTraderReport(input, table),
-      TaxEntityKind.company => _companyReport(input, table),
+      EntityKind.individual => _individualReport(input, table),
+      EntityKind.soleTrader => _soleTraderReport(input, table),
+      EntityKind.company => _companyReport(input, table),
     };
   }
 
@@ -93,13 +93,13 @@ final class NgTaxRules implements TaxRulePack {
   List<TaxOpportunity> opportunities(TaxInput input, TaxReport report) {
     final table = _tableFor(input);
     return switch (input.profile.entityKind) {
-      TaxEntityKind.individual => _individualOpportunities(
+      EntityKind.individual => _individualOpportunities(
         input,
         report,
         table,
       ),
-      TaxEntityKind.soleTrader => _soleTraderOpportunities(input, table),
-      TaxEntityKind.company => _companyOpportunities(input, table),
+      EntityKind.soleTrader => _soleTraderOpportunities(input, table),
+      EntityKind.company => _companyOpportunities(input, table),
     };
   }
 }

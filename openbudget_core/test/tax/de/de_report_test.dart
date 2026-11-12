@@ -25,7 +25,7 @@ TaxInput individualInput(
   List<TaxInput> linked = const [],
 }) => TaxInput(
   profile: DeTaxProfile(
-    entityKind: TaxEntityKind.individual,
+    entityKind: EntityKind.individual,
     jointAssessment: joint,
     churchTax: church,
     churchTaxState: churchState,
@@ -49,7 +49,7 @@ TaxInput soleTraderInput(
   int year = 2026,
 }) => TaxInput(
   profile: DeTaxProfile(
-    entityKind: TaxEntityKind.soleTrader,
+    entityKind: EntityKind.soleTrader,
     salesTaxRegistered: vatRegistered,
     smallBusinessExemption: smallBusinessExemption,
     einkunftsArt: einkunftsArt,
@@ -61,7 +61,7 @@ TaxInput soleTraderInput(
 
 TaxInput companyInput(List<TaxEntry> entries, {int year = 2026}) => TaxInput(
   profile: const DeTaxProfile(
-    entityKind: TaxEntityKind.company,
+    entityKind: EntityKind.company,
     salesTaxRegistered: true,
     smallBusinessExemption: false,
   ),
@@ -109,7 +109,7 @@ void main() {
       expect(
         () => rules.report(
           TaxInput(
-            profile: const DeTaxProfile(entityKind: TaxEntityKind.individual),
+            profile: const DeTaxProfile(entityKind: EntityKind.individual),
             year: TaxYear(
               jurisdiction: TaxJurisdiction.de,
               startYear: 2024,
@@ -849,7 +849,7 @@ void main() {
 
   group('category catalog', () {
     test('every entity kind has categories in return order', () {
-      for (final kind in TaxEntityKind.values) {
+      for (final kind in EntityKind.values) {
         final categories = rules.categoriesFor(kind);
         expect(categories, isNotEmpty);
         expect(

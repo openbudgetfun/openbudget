@@ -2,28 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/quick_budget_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
+import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// Quick-budget choices for one envelope from the previous three months'
+/// views. Picking one sends a single-allocation `setAllocations`.
 class QuickBudgetDialog extends HookConsumerWidget {
   const QuickBudgetDialog({
-    required this.budgetId,
+    required this.entityId,
     required this.envelopeId,
     required this.envelopeName,
     required this.currencyCode,
-    required this.year,
     required this.month,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final String envelopeId;
   final String envelopeName;
   final String currencyCode;
-  final int year;
+
+  /// The month being budgeted, as yyyymm.
   final int month;
 
   @override
@@ -31,7 +34,7 @@ class QuickBudgetDialog extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final suggestion = ref.watch(
-      quickBudgetSuggestionProvider(budgetId, envelopeId, year, month),
+      quickBudgetSuggestionProvider(entityId, envelopeId, month),
     );
 
     return AlertDialog(
@@ -56,23 +59,35 @@ class QuickBudgetDialog extends HookConsumerWidget {
             const SizedBox(height: SpacingTokens.md),
             _QuickBudgetOption(
               label: l10n.quickBudgetLastMonth,
-              amount: formatCentsForCode(data.budgetedLastMonth, currencyCode),
-              onTap: () => _apply(context, ref, data.budgetedLastMonth),
+              amount: formatMinorForCode(
+                data.allocatedLastMonthMinor,
+                currencyCode,
+              ),
+              onTap: () => _apply(context, ref, data.allocatedLastMonthMinor),
             ),
             _QuickBudgetOption(
               label: l10n.quickBudgetSpentLastMonth,
-              amount: formatCentsForCode(data.spentLastMonth, currencyCode),
-              onTap: () => _apply(context, ref, data.spentLastMonth),
+              amount: formatMinorForCode(
+                data.spentLastMonthMinor,
+                currencyCode,
+              ),
+              onTap: () => _apply(context, ref, data.spentLastMonthMinor),
             ),
             _QuickBudgetOption(
               label: l10n.quickBudgetAverageBudgeted,
-              amount: formatCentsForCode(data.averageBudgeted, currencyCode),
-              onTap: () => _apply(context, ref, data.averageBudgeted),
+              amount: formatMinorForCode(
+                data.averageAllocatedMinor,
+                currencyCode,
+              ),
+              onTap: () => _apply(context, ref, data.averageAllocatedMinor),
             ),
             _QuickBudgetOption(
               label: l10n.quickBudgetAverageSpent,
-              amount: formatCentsForCode(data.averageSpent, currencyCode),
-              onTap: () => _apply(context, ref, data.averageSpent),
+              amount: formatMinorForCode(
+                data.averageSpentMinor,
+                currencyCode,
+              ),
+              onTap: () => _apply(context, ref, data.averageSpentMinor),
             ),
           ],
         ),
@@ -86,18 +101,24 @@ class QuickBudgetDialog extends HookConsumerWidget {
     );
   }
 
-  Future<void> _apply(BuildContext context, WidgetRef ref, int cents) async {
+  Future<void> _apply(
+    BuildContext context,
+    WidgetRef ref,
+    int allocatedMinor,
+  ) async {
     final l10n = AppLocalizations.of(context);
 
     try {
       await ref
-          .read(monthlyAllocationActionsProvider.notifier)
-          .upsertAllocation(
-            envelopeId: envelopeId,
-            budgetId: budgetId,
-            year: year,
-            month: month,
-            allocatedCents: cents,
+          .read(budgetMonthActionsProvider.notifier)
+          .setAllocations(
+            entityId: entityId,
+            allocations: [
+              AllocationInput(
+                envelopeId: UuidValue.fromString(envelopeId),
+                allocatedMinor: allocatedMinor,
+              ),
+            ],
           );
       if (!context.mounted) return;
       showAppToast(

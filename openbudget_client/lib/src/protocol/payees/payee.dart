@@ -12,20 +12,20 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// A payee (merchant or person) associated with transactions in a budget.
+/// A merchant or person an entity pays or is paid by.
 abstract class Payee
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   Payee._({
     this.id,
+    required this.entityId,
     required this.name,
-    required this.budgetId,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory Payee({
     _isc.UuidValue? id,
+    required _isc.UuidValue entityId,
     required String name,
-    required _isc.UuidValue budgetId,
     DateTime? createdAt,
   }) = _PayeeImpl;
 
@@ -34,10 +34,10 @@ abstract class Payee
       id: jsonSerialization['id'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      name: jsonSerialization['name'] as String,
-      budgetId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
+      name: jsonSerialization['name'] as String,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -49,9 +49,9 @@ abstract class Payee
   /// the id will be null.
   _isc.UuidValue? id;
 
-  String name;
+  _isc.UuidValue entityId;
 
-  _isc.UuidValue budgetId;
+  String name;
 
   DateTime createdAt;
 
@@ -60,8 +60,8 @@ abstract class Payee
   @_isc.useResult
   Payee copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? entityId,
     String? name,
-    _isc.UuidValue? budgetId,
     DateTime? createdAt,
   });
   @override
@@ -69,8 +69,8 @@ abstract class Payee
     return {
       '__className__': 'Payee',
       if (id != null) 'id': id?.toJson(),
+      'entityId': entityId.toJson(),
       'name': name,
-      'budgetId': budgetId.toJson(),
       'createdAt': createdAt.toJson(),
     };
   }
@@ -80,8 +80,8 @@ abstract class Payee
     return {
       '__className__': 'Payee',
       if (id != null) 'id': id?.toJson(),
+      'entityId': entityId.toJson(),
       'name': name,
-      'budgetId': budgetId.toJson(),
       'createdAt': createdAt.toJson(),
     };
   }
@@ -95,13 +95,13 @@ abstract class Payee
 class _PayeeImpl extends Payee {
   _PayeeImpl({
     _isc.UuidValue? id,
+    required _isc.UuidValue entityId,
     required String name,
-    required _isc.UuidValue budgetId,
     DateTime? createdAt,
   }) : super._(
          id: id,
+         entityId: entityId,
          name: name,
-         budgetId: budgetId,
          createdAt: createdAt,
        );
 
@@ -111,14 +111,14 @@ class _PayeeImpl extends Payee {
   @override
   Payee copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? entityId,
     String? name,
-    _isc.UuidValue? budgetId,
     DateTime? createdAt,
   }) {
     return Payee(
       id: id is _isc.UndefinedSentinel ? this.id : id,
+      entityId: entityId ?? this.entityId,
       name: name ?? this.name,
-      budgetId: budgetId ?? this.budgetId,
       createdAt: createdAt ?? this.createdAt,
     );
   }

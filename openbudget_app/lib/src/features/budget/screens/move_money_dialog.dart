@@ -2,55 +2,50 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// Moves money between envelopes, or from Ready to Assign into one. Sends
+/// one `budget.moveMoney`; a null envelope id means Ready to Assign.
 class MoveMoneyDialog extends HookConsumerWidget {
   const MoveMoneyDialog({
-    required this.budgetId,
-    required this.year,
-    required this.month,
-    required this.categories,
+    required this.entityId,
+    required this.currencyCode,
     super.key,
   });
 
-  final String budgetId;
-  final int year;
-  final int month;
-  final List<CategoryWithEnvelopes> categories;
+  final String entityId;
+  final String currencyCode;
+
+  /// The dropdown sentinel for Ready to Assign, which `moveMoney` takes as
+  /// a null envelope id.
+  static const _readyToAssign = '';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
     final amountInput = useState('');
     final fromEnvelopeId = useState<String?>(null);
     final toEnvelopeId = useState<String?>(null);
     final isSubmitting = useState(false);
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
-    final currency =
-        budgetAsync.whenOrNull(
-          data: (budget) => normalizeCurrencyCode(budget.currencyCode),
-        ) ??
-        '';
 
-    // Build a flat list of envelopes with category labels.
-    final envelopeItems = <DropdownMenuItem<String>>[];
-    for (final cat in categories) {
-      for (final me in cat.monthlyEnvelopes) {
-        final envId = me.envelope.id?.toString() ?? '';
-        envelopeItems.add(
+    // Ready to Assign first, then every envelope under its category label.
+    final groups = groupsAsync.value ?? const <CategoryMonthGroup>[];
+    final envelopeItems = <DropdownMenuItem<String>>[
+      DropdownMenuItem(
+        value: _readyToAssign,
+        child: Text(l10n.budgetReadyToAssign),
+      ),
+      for (final group in groups)
+        for (final view in group.envelopes)
           DropdownMenuItem(
-            value: envId,
-            child: Text('${cat.category.name} > ${me.envelope.name}'),
+            value: view.envelope.id?.toString() ?? '',
+            child: Text('${group.category.name} > ${view.envelope.name}'),
           ),
-        );
-      }
-    }
+    ];
 
     return AlertDialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
@@ -81,19 +76,19 @@ class MoveMoneyDialog extends HookConsumerWidget {
             ),
             const SizedBox(height: SpacingTokens.md),
             BudgetAmountField(
-              labelText: '${l10n.transactionAmountLabel} ($currency)',
-              currencyCode: currency,
+              labelText: '${l10n.transactionAmountLabel} ($currencyCode)',
+              currencyCode: currencyCode,
               inputValue: amountInput.value,
               hintText: formatBudgetAmountInputForField(
                 input: '0',
-                currencyCode: currency,
+                currencyCode: currencyCode,
               ),
               prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.payment),
               enabled: !isSubmitting.value,
               onTap: () async {
                 final nextInput = await showBudgetAmountKeypadSheet(
                   context: context,
-                  currencyCode: currency,
+                  currencyCode: currencyCode,
                   initialInput: amountInput.value,
                   title: l10n.moveMoneyTitle,
                   allowNegative: false,
@@ -118,9 +113,8 @@ class MoveMoneyDialog extends HookConsumerWidget {
                   context,
                   ref,
                   amountInput.value,
-                  fromEnvelopeId,
-                  toEnvelopeId,
-                  currency,
+                  fromEnvelopeId.value,
+                  toEnvelopeId.value,
                   isSubmitting,
                 ),
           child: isSubmitting.value
@@ -139,15 +133,14 @@ class MoveMoneyDialog extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     String amountInput,
-    ValueNotifier<String?> fromEnvelopeId,
-    ValueNotifier<String?> toEnvelopeId,
-    String currency,
+    String? fromEnvelopeId,
+    String? toEnvelopeId,
     ValueNotifier<bool> isSubmitting,
   ) async {
     final l10n = AppLocalizations.of(context);
 
-    if (fromEnvelopeId.value == null || toEnvelopeId.value == null) return;
-    if (fromEnvelopeId.value == toEnvelopeId.value) {
+    if (fromEnvelopeId == null || toEnvelopeId == null) return;
+    if (fromEnvelopeId == toEnvelopeId) {
       showAppToast(
         context,
         message: l10n.moveMoneySameError,
@@ -156,25 +149,25 @@ class MoveMoneyDialog extends HookConsumerWidget {
       return;
     }
 
-    final amountCents =
-        parseBudgetAmountInputToCents(
+    final amountMinor =
+        parseBudgetAmountInputToMinor(
           input: amountInput,
-          currencyCode: currency,
+          currencyCode: currencyCode,
         ) ??
         0;
-    if (amountCents <= 0) return;
+    if (amountMinor <= 0) return;
     isSubmitting.value = true;
 
     try {
       await ref
-          .read(monthlyAllocationActionsProvider.notifier)
+          .read(budgetMonthActionsProvider.notifier)
           .moveMoney(
-            fromEnvelopeId: fromEnvelopeId.value!,
-            toEnvelopeId: toEnvelopeId.value!,
-            budgetId: budgetId,
-            year: year,
-            month: month,
-            amountCents: amountCents,
+            entityId: entityId,
+            fromEnvelopeId: fromEnvelopeId == _readyToAssign
+                ? null
+                : fromEnvelopeId,
+            toEnvelopeId: toEnvelopeId == _readyToAssign ? null : toEnvelopeId,
+            amountMinor: amountMinor,
           );
       if (!context.mounted) return;
       showAppToast(

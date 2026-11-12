@@ -123,7 +123,7 @@ void main() {
               entryDollars(2025, 'us.ind.vehicle_loan_interest', 3000),
             ],
             profile: const UsTaxProfile(
-              entityKind: TaxEntityKind.individual,
+              entityKind: EntityKind.individual,
               taxpayer65OrOlder: true,
             ),
           ),
@@ -184,7 +184,7 @@ TaxInput individualWages(
   year: year,
   entries: [entryMinor(year, 'us.ind.wages', wagesMinor)],
   profile: UsTaxProfile(
-    entityKind: TaxEntityKind.individual,
+    entityKind: EntityKind.individual,
     filingStatus: status,
     dependents: dependents,
   ),

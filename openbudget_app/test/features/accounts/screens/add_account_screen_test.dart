@@ -7,40 +7,42 @@ import 'package:openbudget_app/src/features/accounts/providers/account_actions_p
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+import '../../../fixtures/budget_month.dart';
+
 class _RecordingCreateAccountActions extends AccountActions {
-  int? createdBalanceCents;
+  int? createdBalanceMinor;
 
   @override
   Future<void> build() async {}
 
   @override
   Future<Account> createAccount({
+    required String entityId,
     required String name,
-    required String accountType,
-    required int balanceCents,
+    required AccountKind kind,
     required String currencyCode,
-    required String budgetId,
-    required bool onBudget,
-    required int sortOrder,
-    String? walletAddress,
+    AccountBalanceSource? balanceSource,
+    bool? onBudget,
+    int? openingBalanceMinor,
+    DateTime? openingDate,
     String? institutionId,
+    String? note,
   }) async {
-    createdBalanceCents = balanceCents;
-    return Account(
-      id: UuidValue.fromString('00000000-0000-0000-0000-000000000777'),
+    createdBalanceMinor = openingBalanceMinor;
+    return testAccount(
+      id: '00000000-0000-0000-0000-000000000777',
+      entityId: entityId,
       name: name,
-      accountType: accountType,
-      balanceCents: balanceCents,
+      kind: kind,
       currencyCode: currencyCode,
-      budgetId: UuidValue.fromString(budgetId),
-      onBudget: onBudget,
-      sortOrder: sortOrder,
-      isClosed: false,
+      balanceMinor: openingBalanceMinor ?? 0,
+      onBudget: onBudget ?? true,
     );
   }
 }
@@ -51,22 +53,23 @@ class _ThrowingCreateAccountActions extends AccountActions {
 
   @override
   Future<Account> createAccount({
+    required String entityId,
     required String name,
-    required String accountType,
-    required int balanceCents,
+    required AccountKind kind,
     required String currencyCode,
-    required String budgetId,
-    required bool onBudget,
-    required int sortOrder,
-    String? walletAddress,
+    AccountBalanceSource? balanceSource,
+    bool? onBudget,
+    int? openingBalanceMinor,
+    DateTime? openingDate,
     String? institutionId,
+    String? note,
   }) async {
-    throw StateError('createAccount decode error');
+    throw Exception('createAccount decode error');
   }
 }
 
 void main() {
-  const budgetId = 'test-budget-1';
+  const entityId = 'test-budget-1';
   const unlinkedTypeTileKey = Key('add-account-unlinked-type-tile');
   const checkingTypeOptionKey = ValueKey('add-account-type-option-checking');
   final testInstitutions = <Institution>[
@@ -75,27 +78,25 @@ void main() {
     Institution(slug: 'wise', name: 'Wise', plaidInstitutionId: 'ins_wise'),
   ];
 
-  Budget makeBudget({String currencyCode = 'USD'}) => Budget(
-    id: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
+  Entity makeEntity({String currencyCode = 'USD'}) => testEntity(
+    id: '00000000-0000-0000-0000-000000000001',
     name: 'My Budget',
-    currencyCode: currencyCode,
-    ownerId: UuidValue.fromString('00000000-0000-0000-0000-000000000099'),
-    createdAt: DateTime(2026),
+    baseCurrencyCode: currencyCode,
   );
 
   Widget buildSubject({String currencyCode = 'USD'}) {
     final router = GoRouter(
-      initialLocation: '/budgets/$budgetId/accounts/add',
+      initialLocation: '/budgets/$entityId/accounts/add',
       routes: [
         GoRoute(
           name: addAccountRoute,
-          path: '/budgets/:id/accounts/add',
+          path: '/budgets/:entityId/accounts/add',
           builder: (context, state) =>
-              AddAccountScreen(budgetId: state.pathParameters['id']!),
+              AddAccountScreen(entityId: state.pathParameters['entityId']!),
         ),
         GoRoute(
           name: accountListRoute,
-          path: '/budgets/:id/accounts',
+          path: '/budgets/:entityId/accounts',
           builder: (_, _) => const Scaffold(body: Text('Account List')),
         ),
       ],
@@ -103,8 +104,8 @@ void main() {
 
     return ProviderScope(
       overrides: [
-        budgetDetailProvider.overrideWith(
-          (ref, id) async => makeBudget(currencyCode: currencyCode),
+        entityDetailProvider.overrideWith(
+          (ref, id) async => makeEntity(currencyCode: currencyCode),
         ),
         institutionCatalogProvider.overrideWith(
           (ref, locationCode) async => testInstitutions,
@@ -260,15 +261,22 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('Mortgages and Loans'), findsOneWidget);
+    expect(_skribbleIcon(OpenBudgetIcons.bank), findsOneWidget);
+    expect(_skribbleIcon(OpenBudgetIcons.savings), findsOneWidget);
+
+    // The third group starts below the sheet's fold at 800x600.
+    await tester.scrollUntilVisible(
+      find.text('Tracking Accounts'),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('Tracking Accounts'), findsOneWidget);
     expect(
       find.text(
-        "Accounts that have an outstanding balance you're currently paying off, and aren't spending from.",
+        "Accounts that hold money you don't plan to spend soon, such as investments or loans.",
       ),
       findsOneWidget,
     );
-    expect(_skribbleIcon(OpenBudgetIcons.bank), findsOneWidget);
-    expect(_skribbleIcon(OpenBudgetIcons.savings), findsOneWidget);
   });
 
   testWidgets('next stays disabled until type and balance are provided', (
@@ -305,45 +313,28 @@ void main() {
     expect(nextButton.onPressed, isNotNull);
   });
 
-  testWidgets('create account fallback succeeds when row exists after error', (
+  testWidgets('create failure shows the error toast and keeps the form', (
     tester,
   ) async {
-    var accountListReads = 0;
-    final before = Account(
-      id: UuidValue.fromString('00000000-0000-0000-0000-000000000201'),
+    final before = testAccount(
+      id: '00000000-0000-0000-0000-000000000201',
+      entityId: '00000000-0000-0000-0000-000000000001',
       name: 'Existing',
-      accountType: 'checking',
-      balanceCents: 1000,
-      currencyCode: 'USD',
-      budgetId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
-      onBudget: true,
-      sortOrder: 0,
-      isClosed: false,
-    );
-    final after = Account(
-      id: UuidValue.fromString('00000000-0000-0000-0000-000000000202'),
-      name: 'New',
-      accountType: 'checking',
-      balanceCents: 5000,
-      currencyCode: 'USD',
-      budgetId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
-      onBudget: true,
-      sortOrder: 1,
-      isClosed: false,
+      balanceMinor: 1000,
     );
 
     final router = GoRouter(
-      initialLocation: '/budgets/$budgetId/accounts/add',
+      initialLocation: '/budgets/$entityId/accounts/add',
       routes: [
         GoRoute(
           name: addAccountRoute,
-          path: '/budgets/:id/accounts/add',
+          path: '/budgets/:entityId/accounts/add',
           builder: (context, state) =>
-              AddAccountScreen(budgetId: state.pathParameters['id']!),
+              AddAccountScreen(entityId: state.pathParameters['entityId']!),
         ),
         GoRoute(
           name: accountListRoute,
-          path: '/budgets/:id/accounts',
+          path: '/budgets/:entityId/accounts',
           builder: (_, _) => const Scaffold(body: Text('Account List')),
         ),
       ],
@@ -352,17 +343,16 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          budgetDetailProvider.overrideWith((ref, id) async => makeBudget()),
+          entityDetailProvider.overrideWith(
+            (ref, id) async => makeEntity(),
+          ),
           institutionCatalogProvider.overrideWith(
             (ref, locationCode) async => testInstitutions,
           ),
           accountActionsProvider.overrideWith(
             _ThrowingCreateAccountActions.new,
           ),
-          accountListProvider(budgetId).overrideWith((ref) async {
-            accountListReads++;
-            return accountListReads == 1 ? [before] : [before, after];
-          }),
+          accountListProvider(entityId).overrideWith((ref) async => [before]),
         ],
         child: MaterialApp.router(
           theme: OpenBudgetTheme.light,
@@ -391,29 +381,30 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Next'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Account Added'), findsOneWidget);
-    expect(find.text('Success!'), findsOneWidget);
+    // The old undo-create fallback is gone with cascade deletes: a failed
+    // create surfaces the error toast and keeps the form open.
     expect(
       find.text('Could not create account. Please try again.'),
-      findsNothing,
+      findsOneWidget,
     );
-    expect(accountListReads, greaterThanOrEqualTo(2));
+    expect(find.text('Account Added'), findsNothing);
+    expect(find.text('Add Unlinked Account'), findsOneWidget);
   });
 
   group('unlinked account balance entry', () {
     Widget buildSubjectWith(AccountActions actions) {
       final router = GoRouter(
-        initialLocation: '/budgets/$budgetId/accounts/add',
+        initialLocation: '/budgets/$entityId/accounts/add',
         routes: [
           GoRoute(
             name: addAccountRoute,
-            path: '/budgets/:id/accounts/add',
+            path: '/budgets/:entityId/accounts/add',
             builder: (context, state) =>
-                AddAccountScreen(budgetId: state.pathParameters['id']!),
+                AddAccountScreen(entityId: state.pathParameters['entityId']!),
           ),
           GoRoute(
             name: accountListRoute,
-            path: '/budgets/:id/accounts',
+            path: '/budgets/:entityId/accounts',
             builder: (_, _) => const Scaffold(body: Text('Account List')),
           ),
         ],
@@ -421,12 +412,14 @@ void main() {
 
       return ProviderScope(
         overrides: [
-          budgetDetailProvider.overrideWith((ref, id) async => makeBudget()),
+          entityDetailProvider.overrideWith(
+            (ref, id) async => makeEntity(),
+          ),
           institutionCatalogProvider.overrideWith(
             (ref, locationCode) async => testInstitutions,
           ),
           accountActionsProvider.overrideWith(() => actions),
-          accountListProvider(budgetId).overrideWith((ref) async => const []),
+          accountListProvider(entityId).overrideWith((ref) async => const []),
         ],
         child: MaterialApp.router(
           theme: OpenBudgetTheme.light,
@@ -464,7 +457,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Next'));
       await tester.pumpAndSettle();
 
-      expect(actions.createdBalanceCents, 1234);
+      expect(actions.createdBalanceMinor, 1234);
     });
 
     testWidgets('refuses an over-precise balance instead of rounding it', (
@@ -483,7 +476,7 @@ void main() {
         find.widgetWithText(FilledButton, 'Next'),
       );
       expect(nextButton.onPressed, isNull);
-      expect(actions.createdBalanceCents, isNull);
+      expect(actions.createdBalanceMinor, isNull);
     });
 
     testWidgets('accepts a negative balance', (tester) async {
@@ -499,7 +492,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Next'));
       await tester.pumpAndSettle();
 
-      expect(actions.createdBalanceCents, -1234);
+      expect(actions.createdBalanceMinor, -1234);
     });
   });
 }

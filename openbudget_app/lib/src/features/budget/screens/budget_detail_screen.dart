@@ -5,15 +5,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/category_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/credit_card_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/recent_moves_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/review_queue_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/add_category_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/add_envelope_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/auto_assign_dialog.dart';
@@ -23,10 +20,12 @@ import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.
 import 'package:openbudget_app/src/features/budget/screens/move_money_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/quick_budget_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/review_transactions_sheet.dart';
+import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_header.dart';
 import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
 import 'package:openbudget_app/src/features/budget/widgets/credit_card_section.dart';
-import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_post_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_app/src/features/recurring/providers/recurring_actions_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
@@ -34,6 +33,7 @@ import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum _PlanMenuAction {
@@ -52,19 +52,20 @@ enum _PlanMenuAction {
 
 enum _PlanOnboardingType { addAccounts, assignMoney, finish }
 
+/// The plan screen: month header with Ready to Assign, category groups of
+/// envelope rows from the server's month view, spotlight, inline allocation
+/// editor and the overspending cover sheet.
 class BudgetDetailScreen extends HookConsumerWidget {
-  const BudgetDetailScreen({required this.budgetId, super.key});
+  const BudgetDetailScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
-    final goalsAsync = ref.watch(budgetGoalsProvider(budgetId));
+    final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
+    final viewAsync = ref.watch(budgetMonthProvider(entityId));
     final hideAmounts = ref.watch(hideAmountsProvider);
-    final isPosting = useState(false);
-    final hasAutoPosted = useState(false);
     final isReordering = useState(false);
     final showHidden = useState(false);
     final collapsedCategoryIds = useState<Set<String>>(<String>{});
@@ -78,10 +79,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final inlineEditorSheetOpen = useState(false);
     final theme = Theme.of(context);
 
-    // Only watch whether due count has a positive value; the actual count
-    // is consumed inside _DueBannerLoader which watches independently.
-    final dueCountAsync = ref.watch(recurringDueCountProvider(budgetId));
-
     void toggleSearchMode() {
       isSearching.value = !isSearching.value;
       selectedEditor.value = null;
@@ -91,39 +88,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
         searchQuery.value = '';
       }
     }
-
-    // Auto-post due recurring transactions when the budget opens.
-    useEffect(() {
-      if (hasAutoPosted.value) return null;
-      if (!dueCountAsync.hasValue || dueCountAsync.value! <= 0) return null;
-      if (!summaryAsync.hasValue) return null;
-
-      hasAutoPosted.value = true;
-
-      unawaited(
-        Future.microtask(() async {
-          isPosting.value = true;
-          try {
-            final count = await ref
-                .read(recurringAutoPostActionsProvider.notifier)
-                .postDue(budgetId: budgetId);
-            if (context.mounted && count > 0) {
-              showAppToast(
-                context,
-                message: l10n.recurringAutoPosted(count),
-                variant: AppToastVariant.success,
-              );
-            }
-          } on Exception catch (_) {
-            hasAutoPosted.value = false;
-          } finally {
-            isPosting.value = false;
-          }
-        }),
-      );
-
-      return null;
-    }, [dueCountAsync, summaryAsync]);
 
     useEffect(() {
       if (showSpotlight.value && selectedEditor.value != null) {
@@ -138,11 +102,11 @@ class BudgetDetailScreen extends HookConsumerWidget {
         if (showSpotlight.value) return null;
         if (selectedEditor.value == null) return null;
         if (inlineEditorSheetOpen.value) return null;
-        if (!summaryAsync.hasValue) return null;
+        final view = viewAsync.value;
+        if (view == null) return null;
 
-        final summary = summaryAsync.value!;
         final selection = selectedEditor.value!;
-        final currencyCode = summary.budget.currencyCode;
+        final currencyCode = view.currencyCode;
         inlineEditorSheetOpen.value = true;
 
         unawaited(
@@ -171,20 +135,21 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     inputValue: sheetInput,
                     amountLabel: hideAmounts
                         ? hiddenAmountPlaceholder
-                        : formatCentsForCode(
-                            _parseEditorCents(sheetInput) ??
-                                (selection.monthlyData?.allocatedCents ??
-                                    selection.envelope.budgetedAmountCents),
+                        : formatMinorForCode(
+                            parseBudgetAmountInputToMinor(
+                                  input: sheetInput,
+                                  currencyCode: currencyCode,
+                                ) ??
+                                selection.monthEnvelope.allocatedMinor,
                             currencyCode,
                           ),
                     onAutoAssign: () {
                       Navigator.of(sheetContext).pop();
                       _showQuickBudgetDialog(
                         context,
-                        selection.envelope,
+                        selection.monthEnvelope.envelope,
                         currencyCode,
-                        year: summary.year,
-                        month: summary.month,
+                        month: view.month,
                       );
                     },
                     onMoveMoney: () {
@@ -196,17 +161,15 @@ class BudgetDetailScreen extends HookConsumerWidget {
                             Theme.of(context),
                           ).withAlpha(210),
                           builder: (_) => MoveMoneyDialog(
-                            budgetId: budgetId,
-                            year: summary.year,
-                            month: summary.month,
-                            categories: summary.categories,
+                            entityId: entityId,
+                            currencyCode: currencyCode,
                           ),
                         ),
                       );
                     },
                     onDetails: () {
                       final envelopeId =
-                          selection.envelope.id?.toString() ?? '';
+                          selection.monthEnvelope.envelope.id?.toString() ?? '';
                       final categoryId = selection.categoryId;
                       if (envelopeId.isEmpty || categoryId.isEmpty) return;
                       Navigator.of(sheetContext).pop();
@@ -214,7 +177,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                         context.pushNamed(
                           categoryDetailRoute,
                           pathParameters: {
-                            'id': budgetId,
+                            'entityId': entityId,
                             'categoryId': categoryId,
                             'envelopeId': envelopeId,
                           },
@@ -232,32 +195,41 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       );
                     },
                     onNegative: () {
-                      final delta = _parseEditorCents(sheetInput);
+                      final delta = parseBudgetAmountInputToMinor(
+                        input: sheetInput,
+                        currencyCode: currencyCode,
+                      );
                       if (delta == null || delta == 0) return;
-                      final currentCents =
-                          selection.monthlyData?.allocatedCents ??
-                          selection.envelope.budgetedAmountCents;
-                      final nextDollars = ((currentCents - delta) / 100)
-                          .round();
-                      setInputValue('$nextDollars');
+                      final nextMinor =
+                          selection.monthEnvelope.allocatedMinor - delta;
+                      setInputValue(
+                        budgetAmountInputFromMinor(
+                          minor: nextMinor,
+                          currencyCode: currencyCode,
+                        ),
+                      );
                     },
                     onPositive: () {
-                      final delta = _parseEditorCents(sheetInput);
+                      final delta = parseBudgetAmountInputToMinor(
+                        input: sheetInput,
+                        currencyCode: currencyCode,
+                      );
                       if (delta == null || delta == 0) return;
-                      final currentCents =
-                          selection.monthlyData?.allocatedCents ??
-                          selection.envelope.budgetedAmountCents;
-                      final nextDollars = ((currentCents + delta) / 100)
-                          .round();
-                      setInputValue('$nextDollars');
+                      final nextMinor =
+                          selection.monthEnvelope.allocatedMinor + delta;
+                      setInputValue(
+                        budgetAmountInputFromMinor(
+                          minor: nextMinor,
+                          currencyCode: currencyCode,
+                        ),
+                      );
                     },
                     onCancel: () => Navigator.of(sheetContext).pop(),
                     onApply: () => _applyInlineAllocation(
                       context: context,
                       ref: ref,
                       selection: selection,
-                      year: summary.year,
-                      month: summary.month,
+                      currencyCode: currencyCode,
                       input: sheetInput,
                       closeEditor: false,
                     ),
@@ -265,8 +237,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       context: context,
                       ref: ref,
                       selection: selection,
-                      year: summary.year,
-                      month: summary.month,
+                      currencyCode: currencyCode,
                       input: sheetInput,
                       closeEditor: true,
                       onCloseEditor: () => Navigator.of(sheetContext).pop(),
@@ -288,13 +259,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
       [
         showSpotlight.value,
         selectedEditor.value,
-        summaryAsync,
+        viewAsync,
         hideAmounts,
         inlineEditorSheetOpen.value,
       ],
     );
 
-    return summaryAsync.when(
+    return groupsAsync.when(
       loading: () => Scaffold(
         appBar: AppBar(title: Text(l10n.appTitle)),
         body: Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
@@ -316,66 +287,59 @@ class BudgetDetailScreen extends HookConsumerWidget {
           ),
         ),
       ),
-      data: (summary) {
-        final currencyCode = summary.budget.currencyCode;
-        final goalsMap = goalsAsync.hasValue
-            ? goalsAsync.value!
-            : <String, EnvelopeGoal>{};
+      data: (groups) {
+        final view = viewAsync.value;
+        final summary = view?.summary;
+        final currencyCode = view?.currencyCode ?? '';
+        final entityAsync = ref.watch(entityDetailProvider(entityId));
+        final entityName = entityAsync.value?.name ?? '';
 
-        // Compute total overspent and total activity cents.
-        var totalOverspentCents = 0;
-        var totalActivityCents = 0;
-        for (final cat in summary.categories) {
-          if (cat.totalAvailableCents < 0) {
-            totalOverspentCents += cat.totalAvailableCents.abs();
+        // This month's overspent total, from the visible groups.
+        var totalOverspentMinor = 0;
+        for (final group in groups) {
+          if (group.availableMinor < 0) {
+            totalOverspentMinor += group.availableMinor.abs();
           }
-          totalActivityCents += cat.totalSpentCents;
         }
 
         var hiddenCount = 0;
-        for (final cat in summary.categories) {
-          if (cat.category.isHidden ?? false) {
-            hiddenCount++;
-          }
-          for (final env in cat.envelopes) {
-            if (env.isHidden ?? false) hiddenCount++;
+        for (final group in groups) {
+          if (group.category.isHidden) hiddenCount++;
+          for (final envelopeView in group.envelopes) {
+            if (envelopeView.envelope.isHidden) hiddenCount++;
           }
         }
         final filteredCategories = _filterCategories(
-          summary.categories,
+          groups,
           searchQuery.value,
           showHidden: showHidden.value,
         );
         final overspentEnvelopes = <_OverspentEnvelopeEntry>[];
-        for (final categoryWithEnvelopes in summary.categories) {
-          final categoryId =
-              categoryWithEnvelopes.category.id?.toString() ?? '';
+        for (final group in groups) {
+          final categoryId = group.category.id?.toString() ?? '';
           if (categoryId.isEmpty) continue;
-          for (
-            var index = 0;
-            index < categoryWithEnvelopes.monthlyEnvelopes.length;
-            index++
-          ) {
-            final monthlyData = categoryWithEnvelopes.monthlyEnvelopes[index];
-            if (monthlyData.availableCents >= 0) continue;
-            final envelopeId = monthlyData.envelope.id?.toString() ?? '';
+          for (final envelopeView in group.envelopes) {
+            if (envelopeView.availableMinor >= 0) continue;
+            final envelopeId = envelopeView.envelope.id?.toString() ?? '';
             if (envelopeId.isEmpty) continue;
-            if (monthlyData.envelope.isHidden ?? false) continue;
+            if (envelopeView.envelope.isHidden) continue;
             overspentEnvelopes.add(
               _OverspentEnvelopeEntry(
                 categoryId: categoryId,
                 envelopeId: envelopeId,
-                envelopeName: monthlyData.envelope.name,
-                overspentCents: monthlyData.availableCents.abs(),
-                allocatedCents: monthlyData.allocatedCents,
+                envelopeName: envelopeView.envelope.name,
+                overspentMinor: envelopeView.availableMinor.abs(),
+                allocatedMinor: envelopeView.allocatedMinor,
               ),
             );
           }
         }
-        final onboardingType = _resolveOnboardingType(
-          summary: summary,
-          onboardingComplete: onboardingComplete.value,
-        );
+        final onboardingType = summary == null
+            ? null
+            : _resolveOnboardingType(
+                summary: summary,
+                onboardingComplete: onboardingComplete.value,
+              );
         final showBudgetHeader =
             showSpotlight.value ||
             onboardingType == null ||
@@ -396,7 +360,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
             ),
             centerTitle: true,
             title: Text(
-              summary.budget.name,
+              entityName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.titleMedium?.copyWith(
@@ -410,7 +374,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   child: Text(l10n.budgetReorderDone),
                 ),
               _BudgetAppBarMenu(
-                budgetId: budgetId,
+                entityId: entityId,
                 isSearching: isSearching.value,
                 showHidden: showHidden.value,
                 hiddenCount: hiddenCount,
@@ -423,7 +387,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                 onPlanSettings: () {
                   context.goNamed(
                     planSettingsRoute,
-                    pathParameters: {'id': budgetId},
+                    pathParameters: {'entityId': entityId},
                   );
                 },
                 onSaveTemplate: () {
@@ -431,7 +395,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     showDialog<void>(
                       context: context,
                       barrierColor: _dialogBarrierColor(context),
-                      builder: (_) => BudgetTemplateDialog(budgetId: budgetId),
+                      builder: (_) => BudgetTemplateDialog(entityId: entityId),
                     ),
                   );
                 },
@@ -439,7 +403,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   unawaited(
                     context.pushNamed(
                       recentMovesRoute,
-                      pathParameters: {'id': budgetId},
+                      pathParameters: {'entityId': entityId},
                     ),
                   );
                 },
@@ -448,29 +412,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
           ),
           body: RefreshIndicator(
             onRefresh: () async {
-              final selectedMonth = ref.read(selectedMonthProvider(budgetId));
               ref
-                ..invalidate(budgetDetailProvider(budgetId))
-                ..invalidate(categoryListProvider(budgetId))
-                ..invalidate(transactionListProvider(budgetId))
-                ..invalidate(budgetSummaryProvider(budgetId))
-                ..invalidate(budgetMonthlySummaryProvider(budgetId))
-                ..invalidate(budgetGoalsProvider(budgetId))
-                ..invalidate(recurringDueCountProvider(budgetId))
-                ..invalidate(
-                  monthlyAllocationsProvider(
-                    budgetId,
-                    selectedMonth.year,
-                    selectedMonth.month,
-                  ),
-                )
-                ..invalidate(
-                  monthlyTransactionsProvider(
-                    budgetId,
-                    selectedMonth.year,
-                    selectedMonth.month,
-                  ),
-                );
+                ..invalidate(budgetMonthProvider(entityId))
+                ..invalidate(budgetMonthGroupsProvider(entityId))
+                ..invalidate(entityDetailProvider(entityId))
+                ..invalidate(recurringDueCountProvider(entityId))
+                ..invalidate(reviewQueueProvider(entityId))
+                ..invalidate(creditCardPaymentsProvider(entityId));
             },
             child: ListView(
               padding: const EdgeInsets.all(SpacingTokens.md),
@@ -486,23 +434,17 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: SpacingTokens.sm),
-                if (showBudgetHeader)
+                if (showBudgetHeader && summary != null)
                   BudgetHeader(
-                    readyToAssignCents: summary.readyToAssignCents,
+                    summary: summary,
                     currencyCode: currencyCode,
-                    budgetId: budgetId,
-                    year: summary.year,
-                    month: summary.month,
-                    totalOverspentCents: totalOverspentCents,
-                    totalIncomeCents: summary.totalIncomeCents,
-                    totalBudgetedCents: summary.totalBudgetedCents,
-                    totalActivityCents: totalActivityCents,
+                    entityId: entityId,
+                    month: view!.month,
+                    totalOverspentMinor: totalOverspentMinor,
                     onCopyLastMonth: () => _confirmCopyLastMonth(
                       context,
                       ref,
-                      budgetId,
-                      summary.year,
-                      summary.month,
+                      entityId,
                     ),
                   ),
                 const SizedBox(height: SpacingTokens.md),
@@ -511,14 +453,14 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     type: onboardingType,
                     readyToAssign: hideAmounts
                         ? hiddenAmountPlaceholder
-                        : formatCentsForCode(
-                            summary.readyToAssignCents,
+                        : formatMinorForCode(
+                            summary?.readyToAssignMinor ?? 0,
                             currencyCode,
                           ),
                     onPrimaryAction: () => switch (onboardingType) {
                       _PlanOnboardingType.addAccounts => context.goNamed(
                         addAccountRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'entityId': entityId},
                       ),
                       _PlanOnboardingType.assignMoney => _showAutoAssignDialog(
                         context,
@@ -531,52 +473,43 @@ class BudgetDetailScreen extends HookConsumerWidget {
                         onboardingType == _PlanOnboardingType.assignMoney
                         ? () => context.goNamed(
                             addAccountRoute,
-                            pathParameters: {'id': budgetId},
+                            pathParameters: {'entityId': entityId},
                           )
                         : null,
                   ),
                   const SizedBox(height: SpacingTokens.md),
                 ],
                 if (!showSpotlight.value)
-                  _ReviewTransactionsBannerLoader(
-                    budgetId: budgetId,
-                    year: summary.year,
-                    month: summary.month,
-                  ),
+                  _ReviewTransactionsBannerLoader(entityId: entityId),
                 if (!showSpotlight.value && overspentEnvelopes.isNotEmpty) ...[
                   _CoverOverspentBanner(
                     count: overspentEnvelopes.length,
                     onTap: () => _showCoverOverspendingSheet(
                       context,
                       currencyCode,
-                      year: summary.year,
-                      month: summary.month,
                       overspentEnvelopes: overspentEnvelopes,
                     ),
                   ),
                   const SizedBox(height: SpacingTokens.sm),
                 ],
-                _DueBannerLoader(budgetId: budgetId, isPosting: isPosting),
-                _CreditCardSectionLoader(
-                  budgetId: budgetId,
-                  currencyCode: currencyCode,
-                ),
-                if (showSpotlight.value)
+                _DueBannerLoader(entityId: entityId),
+                _CreditCardSectionLoader(entityId: entityId),
+                if (showSpotlight.value && summary != null)
                   _SpotlightOverview(
+                    groups: groups,
                     summary: summary,
-                    goalsMap: goalsMap,
-                    totalActivityCents: totalActivityCents,
                     currencyCode: currencyCode,
                     hideAmounts: hideAmounts,
+                    month: view?.month ?? MonthKey.fromDate(DateTime.now()),
                     onEditTargets: () => context.goNamed(
                       editPlanRoute,
-                      pathParameters: {'id': budgetId},
+                      pathParameters: {'entityId': entityId},
                     ),
                     onAssign: () =>
                         _showAutoAssignDialog(context, currencyCode),
                     onReflect: () => context.goNamed(
                       reflectRoute,
-                      pathParameters: {'id': budgetId},
+                      pathParameters: {'entityId': entityId},
                     ),
                   ),
                 if (!showSpotlight.value && isSearching.value) ...[
@@ -607,7 +540,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: SpacingTokens.md),
                 ],
-                if (!showSpotlight.value && summary.categories.isEmpty)
+                if (!showSpotlight.value && groups.isEmpty)
                   ObStatePanel.empty(
                     title: l10n.budgetEmptyTitle,
                     message: l10n.budgetEmptySubtitle,
@@ -624,24 +557,24 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ),
                 if (!showSpotlight.value &&
                     isReordering.value &&
-                    summary.categories.isNotEmpty)
+                    groups.isNotEmpty)
                   _ReorderableCategoryList(
-                    categories: summary.categories,
-                    budgetId: budgetId,
+                    categories: groups,
+                    entityId: entityId,
                   ),
                 if (!showSpotlight.value && !isReordering.value)
                   ...filteredCategories.map(
-                    (catWithEnvelopes) => Padding(
+                    (group) => Padding(
                       padding: const EdgeInsets.only(bottom: SpacingTokens.md),
                       child: CategoryGroup(
-                        categoryWithEnvelopes: catWithEnvelopes,
+                        group: group,
                         currencyCode: currencyCode,
                         collapsed: collapsedCategoryIds.value.contains(
-                          catWithEnvelopes.category.id?.toString() ?? '',
+                          group.category.id?.toString() ?? '',
                         ),
                         onToggleCollapsed: () {
                           final categoryId =
-                              catWithEnvelopes.category.id?.toString() ?? '';
+                              group.category.id?.toString() ?? '';
                           if (categoryId.isEmpty) return;
                           final next = Set<String>.from(
                             collapsedCategoryIds.value,
@@ -651,58 +584,61 @@ class BudgetDetailScreen extends HookConsumerWidget {
                           }
                           collapsedCategoryIds.value = next;
                         },
-                        goalsMap: goalsMap,
                         onAddEnvelope: () => _showAddEnvelopeDialog(
                           context,
-                          catWithEnvelopes.category.id?.toString() ?? '',
+                          group.category.id?.toString() ?? '',
                           currencyCode,
-                          year: summary.year,
-                          month: summary.month,
+                          view!.month,
                         ),
                         onEditCategory: () => _showEditCategoryDialog(
                           context,
-                          catWithEnvelopes.category.id?.toString() ?? '',
-                          catWithEnvelopes.category.name,
-                          catWithEnvelopes.envelopes.length,
-                          catWithEnvelopes.totalBudgetedCents,
+                          group.category.id?.toString() ?? '',
+                          group.category.name,
+                          group.envelopes.length,
+                          group.allocatedMinor,
                           currencyCode,
                         ),
                         onDeleteCategory: () => _confirmDeleteCategory(
                           context,
                           ref,
-                          catWithEnvelopes,
+                          group,
                           currencyCode,
                         ),
-                        onEditEnvelope: (envelope) => _showEditEnvelopeDialog(
-                          context,
-                          envelope,
-                          catWithEnvelopes.category.id?.toString() ?? '',
-                          currencyCode,
-                          year: summary.year,
-                          month: summary.month,
-                        ),
+                        onEditEnvelope: (envelope) {
+                          final envelopeId = envelope.id?.toString() ?? '';
+                          final monthEnvelope = group.envelopes.firstWhere(
+                            (view) =>
+                                view.envelope.id?.toString() == envelopeId,
+                          );
+                          _showEditEnvelopeDialog(
+                            context,
+                            monthEnvelope,
+                            group.category.id?.toString() ?? '',
+                            currencyCode,
+                            view!.month,
+                          );
+                        },
                         onDeleteEnvelope: (envelope) => _confirmDeleteEnvelope(
                           context,
                           ref,
                           envelope.id?.toString() ?? '',
-                          catWithEnvelopes.category.id?.toString() ?? '',
                           envelope.name,
                         ),
                         onQuickBudget: (envelope) => _showQuickBudgetDialog(
                           context,
                           envelope,
                           currencyCode,
-                          year: summary.year,
-                          month: summary.month,
                         ),
-                        onShowActivity: (envelope, monthlyData, goal) => (() {
+                        onShowActivity: (monthEnvelope) => (() {
                           final categoryId =
-                              catWithEnvelopes.category.id?.toString() ?? '';
-                          final envelopeId = envelope.id?.toString() ?? '';
+                              group.category.id?.toString() ?? '';
+                          final envelopeId =
+                              monthEnvelope.envelope.id?.toString() ?? '';
                           if (categoryId.isEmpty || envelopeId.isEmpty) {
                             return;
                           }
-                          if (selectedEditor.value?.envelope.id?.toString() ==
+                          if (selectedEditor.value?.monthEnvelope.envelope.id
+                                  ?.toString() ==
                               envelopeId) {
                             selectedEditor.value = null;
                             editorInput.value = '';
@@ -710,8 +646,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                           }
                           selectedEditor.value = _InlineEditorSelection(
                             categoryId: categoryId,
-                            envelope: envelope,
-                            monthlyData: monthlyData,
+                            monthEnvelope: monthEnvelope,
                           );
                           editorInput.value = '';
                         })(),
@@ -721,18 +656,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
                                 .read(envelopeActionsProvider.notifier)
                                 .reorderEnvelopes(
                                   categoryId:
-                                      catWithEnvelopes.category.id
-                                          ?.toString() ??
-                                      '',
-                                  budgetId: budgetId,
+                                      group.category.id?.toString() ?? '',
                                   envelopeIds: envelopeIds,
                                 );
                           } on Exception catch (_) {
                             // Handled by provider re-fetch.
                           }
                         },
-                        showHidden: showHidden.value,
-                        selectedEnvelopeId: selectedEditor.value?.envelope.id
+                        selectedEnvelopeId: selectedEditor
+                            .value
+                            ?.monthEnvelope
+                            .envelope
+                            .id
                             ?.toString(),
                         onToggleHideCategory: ({required isHidden}) async {
                           try {
@@ -740,10 +675,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
                                 .read(categoryActionsProvider.notifier)
                                 .toggleHidden(
                                   categoryId:
-                                      catWithEnvelopes.category.id
-                                          ?.toString() ??
-                                      '',
-                                  budgetId: budgetId,
+                                      group.category.id?.toString() ?? '',
+                                  entityId: entityId,
                                   isHidden: isHidden,
                                 );
                           } on Exception catch (_) {
@@ -757,11 +690,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                                     .read(envelopeActionsProvider.notifier)
                                     .toggleHidden(
                                       envelopeId: envelope.id?.toString() ?? '',
-                                      categoryId:
-                                          catWithEnvelopes.category.id
-                                              ?.toString() ??
-                                          '',
-                                      budgetId: budgetId,
+                                      entityId: entityId,
                                       isHidden: isHidden,
                                     );
                               } on Exception catch (_) {
@@ -777,7 +706,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     child: OutlinedButton.icon(
                       onPressed: () => _showAddCategoryDialog(
                         context,
-                        summary.categories.length,
+                        groups.length,
                       ),
                       icon: const SkribbleIcon(data: OpenBudgetIcons.add),
                       label: Text(l10n.budgetAddCategory),
@@ -793,8 +722,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
     );
   }
 
-  List<CategoryWithEnvelopes> _filterCategories(
-    List<CategoryWithEnvelopes> categories,
+  List<CategoryMonthGroup> _filterCategories(
+    List<CategoryMonthGroup> categories,
     String query, {
     required bool showHidden,
   }) {
@@ -802,30 +731,16 @@ class BudgetDetailScreen extends HookConsumerWidget {
 
     // Filter hidden categories and envelopes.
     if (!showHidden) {
-      final visible = <CategoryWithEnvelopes>[];
-      for (final cat in result) {
-        if (cat.category.isHidden ?? false) continue;
-
-        final visibleEnvelopeIndices = <int>[];
-        for (var i = 0; i < cat.envelopes.length; i++) {
-          if (!(cat.envelopes[i].isHidden ?? false)) {
-            visibleEnvelopeIndices.add(i);
-          }
-        }
-
+      final visible = <CategoryMonthGroup>[];
+      for (final group in result) {
+        if (group.category.isHidden) continue;
+        final visibleEnvelopes = group.envelopes
+            .where((view) => !view.envelope.isHidden)
+            .toList();
         visible.add(
-          CategoryWithEnvelopes(
-            category: cat.category,
-            envelopes: visibleEnvelopeIndices
-                .map((i) => cat.envelopes[i])
-                .toList(),
-            monthlyEnvelopes: visibleEnvelopeIndices
-                .where((i) => i < cat.monthlyEnvelopes.length)
-                .map((i) => cat.monthlyEnvelopes[i])
-                .toList(),
-            totalBudgetedCents: cat.totalBudgetedCents,
-            totalSpentCents: cat.totalSpentCents,
-            totalAvailableCents: cat.totalAvailableCents,
+          CategoryMonthGroup(
+            category: group.category,
+            envelopes: visibleEnvelopes,
           ),
         );
       }
@@ -835,41 +750,31 @@ class BudgetDetailScreen extends HookConsumerWidget {
     if (query.isEmpty) return result;
 
     final lowerQuery = query.toLowerCase();
-    final filtered = <CategoryWithEnvelopes>[];
+    final filtered = <CategoryMonthGroup>[];
 
-    for (final cat in result) {
+    for (final group in result) {
       // Check if category name matches.
-      final categoryMatches = cat.category.name.toLowerCase().contains(
+      final categoryMatches = group.category.name.toLowerCase().contains(
         lowerQuery,
       );
 
       // Filter matching envelopes.
-      final matchingEnvelopeIndices = <int>[];
-      for (var i = 0; i < cat.envelopes.length; i++) {
-        if (cat.envelopes[i].name.toLowerCase().contains(lowerQuery)) {
-          matchingEnvelopeIndices.add(i);
-        }
-      }
+      final matchingEnvelopes = group.envelopes
+          .where(
+            (view) => view.envelope.name.toLowerCase().contains(lowerQuery),
+          )
+          .toList();
 
-      if (categoryMatches || matchingEnvelopeIndices.isNotEmpty) {
+      if (categoryMatches || matchingEnvelopes.isNotEmpty) {
         if (categoryMatches) {
           // Show all envelopes when category name matches.
-          filtered.add(cat);
+          filtered.add(group);
         } else {
           // Only show matching envelopes.
           filtered.add(
-            CategoryWithEnvelopes(
-              category: cat.category,
-              envelopes: matchingEnvelopeIndices
-                  .map((i) => cat.envelopes[i])
-                  .toList(),
-              monthlyEnvelopes: matchingEnvelopeIndices
-                  .where((i) => i < cat.monthlyEnvelopes.length)
-                  .map((i) => cat.monthlyEnvelopes[i])
-                  .toList(),
-              totalBudgetedCents: cat.totalBudgetedCents,
-              totalSpentCents: cat.totalSpentCents,
-              totalAvailableCents: cat.totalAvailableCents,
+            CategoryMonthGroup(
+              category: group.category,
+              envelopes: matchingEnvelopes,
             ),
           );
         }
@@ -879,33 +784,25 @@ class BudgetDetailScreen extends HookConsumerWidget {
     return filtered;
   }
 
-  int? _parseEditorCents(String value) {
-    if (value.isEmpty || value == '-') return null;
-    final isNegative = value.startsWith('-');
-    final digits = value.replaceAll('-', '');
-    final dollars = int.tryParse(digits);
-    if (dollars == null) return null;
-    final cents = dollars * 100;
-    return isNegative ? -cents : cents;
-  }
-
   Future<void> _applyInlineAllocation({
     required BuildContext context,
     required WidgetRef ref,
     required _InlineEditorSelection selection,
-    required int year,
-    required int month,
+    required String currencyCode,
     required String input,
     required bool closeEditor,
     VoidCallback? onCloseEditor,
   }) async {
-    final allocatedCents = _parseEditorCents(input);
-    if (allocatedCents == null) {
+    final allocatedMinor = parseBudgetAmountInputToMinor(
+      input: input,
+      currencyCode: currencyCode,
+    );
+    if (allocatedMinor == null) {
       if (closeEditor) onCloseEditor?.call();
       return;
     }
 
-    final envelopeId = selection.envelope.id?.toString() ?? '';
+    final envelopeId = selection.monthEnvelope.envelope.id?.toString() ?? '';
     if (envelopeId.isEmpty) {
       if (closeEditor) onCloseEditor?.call();
       return;
@@ -914,13 +811,15 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     try {
       await ref
-          .read(monthlyAllocationActionsProvider.notifier)
-          .upsertAllocation(
-            envelopeId: envelopeId,
-            budgetId: budgetId,
-            year: year,
-            month: month,
-            allocatedCents: allocatedCents,
+          .read(budgetMonthActionsProvider.notifier)
+          .setAllocations(
+            entityId: entityId,
+            allocations: [
+              AllocationInput(
+                envelopeId: UuidValue.fromString(envelopeId),
+                allocatedMinor: allocatedMinor,
+              ),
+            ],
           );
       if (context.mounted) {
         showAppToast(
@@ -943,15 +842,15 @@ class BudgetDetailScreen extends HookConsumerWidget {
   }
 
   _PlanOnboardingType? _resolveOnboardingType({
-    required BudgetSummary summary,
+    required BudgetMonthSummary summary,
     required bool onboardingComplete,
   }) {
     if (onboardingComplete) return null;
-    if (summary.totalIncomeCents <= 0) return _PlanOnboardingType.addAccounts;
-    if (summary.totalBudgetedCents <= 0 && summary.readyToAssignCents > 0) {
+    if (summary.incomeMinor <= 0) return _PlanOnboardingType.addAccounts;
+    if (summary.allocatedMinor <= 0 && summary.readyToAssignMinor > 0) {
       return _PlanOnboardingType.assignMoney;
     }
-    if (summary.totalBudgetedCents > 0 && summary.readyToAssignCents > 0) {
+    if (summary.allocatedMinor > 0 && summary.readyToAssignMinor > 0) {
       return _PlanOnboardingType.finish;
     }
     return null;
@@ -966,7 +865,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
         context: context,
         barrierColor: _dialogBarrierColor(context),
         builder: (_) =>
-            AutoAssignDialog(budgetId: budgetId, currencyCode: currencyCode),
+            AutoAssignDialog(entityId: entityId, currencyCode: currencyCode),
       ),
     );
   }
@@ -974,8 +873,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
   void _showCoverOverspendingSheet(
     BuildContext context,
     String currencyCode, {
-    required int year,
-    required int month,
     required List<_OverspentEnvelopeEntry> overspentEnvelopes,
   }) {
     unawaited(
@@ -986,9 +883,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
         builder: (context) => FractionallySizedBox(
           heightFactor: 0.9,
           child: _CoverOverspendingSheet(
-            budgetId: budgetId,
-            year: year,
-            month: month,
+            entityId: entityId,
             currencyCode: currencyCode,
             overspentEnvelopes: overspentEnvelopes,
           ),
@@ -1001,20 +896,19 @@ class BudgetDetailScreen extends HookConsumerWidget {
     BuildContext context,
     Envelope envelope,
     String currencyCode, {
-    required int year,
-    required int month,
+    int? month,
   }) {
+    final selectedMonth = month ?? MonthKey.fromDate(DateTime.now());
     unawaited(
       showDialog<void>(
         context: context,
         barrierColor: _dialogBarrierColor(context),
         builder: (_) => QuickBudgetDialog(
-          budgetId: budgetId,
+          entityId: entityId,
           envelopeId: envelope.id?.toString() ?? '',
           envelopeName: envelope.name,
           currencyCode: currencyCode,
-          year: year,
-          month: month,
+          month: selectedMonth,
         ),
       ),
     );
@@ -1025,7 +919,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     String categoryId,
     String currentName,
     int envelopeCount,
-    int totalAllocatedCents,
+    int totalAllocatedMinor,
     String currencyCode,
   ) {
     unawaited(
@@ -1034,10 +928,10 @@ class BudgetDetailScreen extends HookConsumerWidget {
         barrierColor: _dialogBarrierColor(context),
         builder: (_) => EditCategoryDialog(
           categoryId: categoryId,
-          budgetId: budgetId,
+          entityId: entityId,
           currentName: currentName,
           envelopeCount: envelopeCount,
-          totalAllocatedCents: totalAllocatedCents,
+          totalAllocatedMinor: totalAllocatedMinor,
           currencyCode: currencyCode,
         ),
       ),
@@ -1050,7 +944,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
         context: context,
         barrierColor: _dialogBarrierColor(context),
         builder: (_) =>
-            AddCategoryDialog(budgetId: budgetId, nextSortOrder: nextSortOrder),
+            AddCategoryDialog(entityId: entityId, nextSortOrder: nextSortOrder),
       ),
     );
   }
@@ -1058,19 +952,17 @@ class BudgetDetailScreen extends HookConsumerWidget {
   void _showAddEnvelopeDialog(
     BuildContext context,
     String categoryId,
-    String currencyCode, {
-    required int year,
-    required int month,
-  }) {
+    String currencyCode,
+    int month,
+  ) {
     unawaited(
       showDialog<void>(
         context: context,
         barrierColor: _dialogBarrierColor(context),
         builder: (_) => AddEnvelopeDialog(
           categoryId: categoryId,
-          budgetId: budgetId,
+          entityId: entityId,
           currencyCode: currencyCode,
-          year: year,
           month: month,
         ),
       ),
@@ -1079,22 +971,20 @@ class BudgetDetailScreen extends HookConsumerWidget {
 
   void _showEditEnvelopeDialog(
     BuildContext context,
-    Envelope envelope,
+    EnvelopeMonthView monthEnvelope,
     String categoryId,
-    String currencyCode, {
-    required int year,
-    required int month,
-  }) {
+    String currencyCode,
+    int month,
+  ) {
     unawaited(
       showDialog<void>(
         context: context,
         barrierColor: _dialogBarrierColor(context),
         builder: (_) => EditEnvelopeDialog(
-          envelope: envelope,
+          monthEnvelope: monthEnvelope,
           categoryId: categoryId,
-          budgetId: budgetId,
+          entityId: entityId,
           currencyCode: currencyCode,
-          year: year,
           month: month,
         ),
       ),
@@ -1104,18 +994,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
   Future<void> _confirmDeleteCategory(
     BuildContext context,
     WidgetRef ref,
-    CategoryWithEnvelopes categoryWithEnvelopes,
+    CategoryMonthGroup group,
     String currencyCode,
   ) async {
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
-    final categoryId = categoryWithEnvelopes.category.id?.toString() ?? '';
+    final categoryId = group.category.id?.toString() ?? '';
     if (categoryId.isEmpty) return;
 
-    final categoryName = categoryWithEnvelopes.category.name;
-    final envelopeCount = categoryWithEnvelopes.envelopes.length;
-    final totalAllocated = formatCentsForCode(
-      categoryWithEnvelopes.totalBudgetedCents,
+    final categoryName = group.category.name;
+    final envelopeCount = group.envelopes.length;
+    final totalAllocated = formatMinorForCode(
+      group.allocatedMinor,
       currencyCode,
     );
     final envelopeSummary = l10n.budgetEnvelopeCount(envelopeCount);
@@ -1150,17 +1040,14 @@ class BudgetDetailScreen extends HookConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     try {
-      final deleted = await ref
+      await ref
           .read(categoryActionsProvider.notifier)
-          .deleteCategory(categoryId: categoryId, budgetId: budgetId);
+          .deleteCategory(categoryId: categoryId, entityId: entityId);
       if (context.mounted) {
         showAppToast(
           context,
           message: l10n.deleteSuccess,
           variant: AppToastVariant.success,
-          actionLabel: l10n.undoAction,
-          onAction: () => _undoDeleteCategory(context, ref, deleted, l10n),
-          duration: const Duration(seconds: 5),
         );
       }
     } on Exception catch (_) {
@@ -1174,40 +1061,10 @@ class BudgetDetailScreen extends HookConsumerWidget {
     }
   }
 
-  Future<void> _undoDeleteCategory(
-    BuildContext context,
-    WidgetRef ref,
-    Category deleted,
-    AppLocalizations l10n,
-  ) async {
-    try {
-      await ref
-          .read(categoryActionsProvider.notifier)
-          .undoDeleteCategory(deletedCategory: deleted, budgetId: budgetId);
-      if (context.mounted) {
-        showAppToast(
-          context,
-          message: l10n.undoDeleteSuccess,
-          variant: AppToastVariant.success,
-        );
-      }
-    } on Exception catch (_) {
-      if (context.mounted) {
-        showAppToast(
-          context,
-          message: l10n.undoDeleteError,
-          variant: AppToastVariant.error,
-        );
-      }
-    }
-  }
-
   Future<void> _confirmCopyLastMonth(
     BuildContext context,
     WidgetRef ref,
-    String budgetId,
-    int year,
-    int month,
+    String entityId,
   ) async {
     final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
@@ -1237,12 +1094,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
 
     try {
       await ref
-          .read(monthlyAllocationActionsProvider.notifier)
-          .copyPreviousMonth(
-            budgetId: budgetId,
-            currentYear: year,
-            currentMonth: month,
-          );
+          .read(budgetMonthActionsProvider.notifier)
+          .copyPreviousMonth(entityId: entityId);
       if (context.mounted) {
         showAppToast(
           context,
@@ -1265,7 +1118,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     String envelopeId,
-    String categoryId,
     String envelopeName,
   ) async {
     final l10n = AppLocalizations.of(context);
@@ -1296,22 +1148,14 @@ class BudgetDetailScreen extends HookConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     try {
-      final deleted = await ref
+      await ref
           .read(envelopeActionsProvider.notifier)
-          .deleteEnvelope(
-            envelopeId: envelopeId,
-            categoryId: categoryId,
-            budgetId: budgetId,
-          );
+          .deleteEnvelope(envelopeId: envelopeId);
       if (context.mounted) {
         showAppToast(
           context,
           message: l10n.deleteSuccess,
           variant: AppToastVariant.success,
-          actionLabel: l10n.undoAction,
-          onAction: () =>
-              _undoDeleteEnvelope(context, ref, deleted, categoryId, l10n),
-          duration: const Duration(seconds: 5),
         );
       }
     } on Exception catch (_) {
@@ -1324,39 +1168,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
       }
     }
   }
-
-  Future<void> _undoDeleteEnvelope(
-    BuildContext context,
-    WidgetRef ref,
-    Envelope deleted,
-    String categoryId,
-    AppLocalizations l10n,
-  ) async {
-    try {
-      await ref
-          .read(envelopeActionsProvider.notifier)
-          .undoDeleteEnvelope(
-            deletedEnvelope: deleted,
-            categoryId: categoryId,
-            budgetId: budgetId,
-          );
-      if (context.mounted) {
-        showAppToast(
-          context,
-          message: l10n.undoDeleteSuccess,
-          variant: AppToastVariant.success,
-        );
-      }
-    } on Exception catch (_) {
-      if (context.mounted) {
-        showAppToast(
-          context,
-          message: l10n.undoDeleteError,
-          variant: AppToastVariant.error,
-        );
-      }
-    }
-  }
 }
 
 /// Extracted popup-menu widget that independently watches display-option and
@@ -1364,7 +1175,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
 /// [BudgetDetailScreen] widget tree.
 class _BudgetAppBarMenu extends HookConsumerWidget {
   const _BudgetAppBarMenu({
-    required this.budgetId,
+    required this.entityId,
     required this.isSearching,
     required this.showHidden,
     required this.hiddenCount,
@@ -1379,12 +1190,12 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
     required this.onRecentMoves,
   });
 
-  final String budgetId;
+  final String entityId;
   final bool isSearching;
   final bool showHidden;
   final int hiddenCount;
   final bool isReordering;
-  final List<CategoryWithEnvelopes> filteredCategories;
+  final List<CategoryMonthGroup> filteredCategories;
   final ValueNotifier<Set<String>> collapsedCategoryIds;
   final VoidCallback onToggleSearch;
   final VoidCallback onToggleHidden;
@@ -1401,7 +1212,7 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
     final hasRecentMoves = ref.watch(
       recentMovesForBudgetProvider(
-        budgetId,
+        entityId,
       ).select((moves) => moves.isNotEmpty),
     );
     final currentThemeMode = ref.watch(themeModeProvider);
@@ -1445,7 +1256,7 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
       offset: const Offset(0, 8),
       onSelected: (action) => switch (action) {
         _PlanMenuAction.undoLastMove =>
-          ref.read(recentMovesProvider.notifier).undoLast(budgetId: budgetId),
+          ref.read(recentMovesProvider.notifier).undoLast(entityId: entityId),
         _PlanMenuAction.recentMoves => navigateAfterMenuClose(onRecentMoves),
         _PlanMenuAction.toggleSearch => onToggleSearch(),
         _PlanMenuAction.toggleHidden => onToggleHidden(),
@@ -1584,17 +1395,13 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
 /// Watches [creditCardPaymentsProvider] independently so credit card data
 /// changes do not rebuild the entire budget detail screen.
 class _CreditCardSectionLoader extends HookConsumerWidget {
-  const _CreditCardSectionLoader({
-    required this.budgetId,
-    required this.currencyCode,
-  });
+  const _CreditCardSectionLoader({required this.entityId});
 
-  final String budgetId;
-  final String currencyCode;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ccPayments = ref.watch(creditCardPaymentsProvider(budgetId));
+    final ccPayments = ref.watch(creditCardPaymentsProvider(entityId));
 
     if (!ccPayments.hasValue || ccPayments.value!.isEmpty) {
       return const SizedBox.shrink();
@@ -1602,89 +1409,55 @@ class _CreditCardSectionLoader extends HookConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: SpacingTokens.md),
-      child: CreditCardSection(
-        payments: ccPayments.value!,
-        currencyCode: currencyCode,
-      ),
+      child: CreditCardSection(payments: ccPayments.value!),
     );
   }
 }
 
 /// Watches [recurringDueCountProvider] independently so recurring-due changes
-/// do not rebuild the entire budget detail screen.
+/// do not rebuild the entire budget detail screen. The server posts due
+/// transactions itself; tapping goes to the recurring list.
 class _DueBannerLoader extends HookConsumerWidget {
-  const _DueBannerLoader({required this.budgetId, required this.isPosting});
+  const _DueBannerLoader({required this.entityId});
 
-  final String budgetId;
-  final ValueNotifier<bool> isPosting;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dueCountAsync = ref.watch(recurringDueCountProvider(budgetId));
+    final dueCountAsync = ref.watch(recurringDueCountProvider(entityId));
 
     if (!dueCountAsync.hasValue || dueCountAsync.value! <= 0) {
       return const SizedBox.shrink();
     }
 
-    return _DueBanner(
-      count: dueCountAsync.value!,
-      isPosting: isPosting.value,
-      onPost: () => _postDueTransactions(context, ref, isPosting),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: SpacingTokens.md),
+      child: _DueBanner(
+        count: dueCountAsync.value!,
+        onTap: () => unawaited(
+          context.pushNamed(
+            recurringListRoute,
+            pathParameters: {'entityId': entityId},
+          ),
+        ),
+      ),
     );
-  }
-
-  Future<void> _postDueTransactions(
-    BuildContext context,
-    WidgetRef ref,
-    ValueNotifier<bool> isPosting,
-  ) async {
-    final l10n = AppLocalizations.of(context);
-    isPosting.value = true;
-    try {
-      final count = await ref
-          .read(recurringAutoPostActionsProvider.notifier)
-          .postDue(budgetId: budgetId);
-      if (context.mounted) {
-        showAppToast(
-          context,
-          message: l10n.recurringPostSuccess(count),
-          variant: AppToastVariant.success,
-        );
-      }
-    } on Exception catch (_) {
-      if (context.mounted) {
-        showAppToast(
-          context,
-          message: l10n.recurringPostError,
-          variant: AppToastVariant.error,
-        );
-      }
-    } finally {
-      isPosting.value = false;
-    }
   }
 }
 
-/// Watches [monthlyTransactionsProvider] independently so transaction-review
-/// count changes do not rebuild the entire budget detail screen.
+/// Watches [reviewQueueProvider] independently so the review count does not
+/// rebuild the entire budget detail screen.
 class _ReviewTransactionsBannerLoader extends HookConsumerWidget {
-  const _ReviewTransactionsBannerLoader({
-    required this.budgetId,
-    required this.year,
-    required this.month,
-  });
+  const _ReviewTransactionsBannerLoader({required this.entityId});
 
-  final String budgetId;
-  final int year;
-  final int month;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final reviewTransactionCount = ref.watch(
-      monthlyTransactionsProvider(budgetId, year, month).select(
+      reviewQueueProvider(entityId).select(
         (asyncValue) => asyncValue.when(
-          data: (transactions) =>
-              transactions.where((t) => !t.cleared && !t.reconciled).length,
+          data: (queue) => queue.length,
           loading: () => 0,
           error: (_, _) => 0,
         ),
@@ -1699,12 +1472,7 @@ class _ReviewTransactionsBannerLoader extends HookConsumerWidget {
       padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
       child: _ReviewTransactionsBanner(
         count: reviewTransactionCount,
-        onTap: () => showReviewTransactionsSheet(
-          context,
-          budgetId: budgetId,
-          year: year,
-          month: month,
-        ),
+        onTap: () => showReviewTransactionsSheet(context, entityId: entityId),
       ),
     );
   }
@@ -1895,21 +1663,21 @@ class _ToggleButton extends HookWidget {
 
 class _SpotlightOverview extends HookWidget {
   const _SpotlightOverview({
+    required this.groups,
     required this.summary,
-    required this.goalsMap,
-    required this.totalActivityCents,
     required this.currencyCode,
     required this.hideAmounts,
+    required this.month,
     required this.onEditTargets,
     required this.onAssign,
     required this.onReflect,
   });
 
-  final BudgetSummary summary;
-  final Map<String, EnvelopeGoal> goalsMap;
-  final int totalActivityCents;
+  final List<CategoryMonthGroup> groups;
+  final BudgetMonthSummary summary;
   final String currencyCode;
   final bool hideAmounts;
+  final int month;
   final VoidCallback onEditTargets;
   final VoidCallback onAssign;
   final VoidCallback onReflect;
@@ -1918,49 +1686,20 @@ class _SpotlightOverview extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    var totalTargetsCents = 0;
-    var totalUnderfundedCents = 0;
+    var totalTargetsMinor = 0;
+    var totalUnderfundedMinor = 0;
 
-    for (final categoryWithEnvelopes in summary.categories) {
-      for (
-        var index = 0;
-        index < categoryWithEnvelopes.envelopes.length;
-        index++
-      ) {
-        final envelope = categoryWithEnvelopes.envelopes[index];
-        final envelopeId = envelope.id?.toString();
-        if (envelopeId == null) continue;
-
-        final goal = goalsMap[envelopeId];
+    for (final group in groups) {
+      for (final envelopeView in group.envelopes) {
+        final goal = envelopeView.goal;
         if (goal == null) continue;
-
-        final monthlyData =
-            index < categoryWithEnvelopes.monthlyEnvelopes.length
-            ? categoryWithEnvelopes.monthlyEnvelopes[index]
-            : null;
-        final budgetedCents =
-            monthlyData?.allocatedCents ?? envelope.budgetedAmountCents;
-        final spentCents = monthlyData?.spentCents ?? envelope.spentAmountCents;
-        final availableCents =
-            monthlyData?.availableCents ?? (budgetedCents - spentCents);
-
-        final targetCents = switch (goal.goalType) {
-          'monthly_funding' =>
-            goal.monthlyFundingCents ?? goal.targetAmountCents,
-          _ => goal.targetAmountCents,
-        };
-
-        totalTargetsCents += targetCents;
-        totalUnderfundedCents += computeUnderfundedCents(
-          goal: goal,
-          budgetedCents: budgetedCents,
-          availableCents: availableCents,
-        );
+        totalTargetsMinor += goal.amountMinor;
+        totalUnderfundedMinor += envelopeView.goalUnderfundedMinor;
       }
     }
 
     final summaryTitle =
-        '${_monthLabel(l10n, summary.month)} ${l10n.budgetSpotlightSummarySuffix}';
+        '${_monthLabel(l10n, month)} ${l10n.budgetSpotlightSummarySuffix}';
 
     return Column(
       children: [
@@ -2035,8 +1774,8 @@ class _SpotlightOverview extends HookWidget {
                         tone: ObTone.brand,
                         value: hideAmounts
                             ? hiddenAmountPlaceholder
-                            : formatCentsForCode(
-                                totalTargetsCents,
+                            : formatMinorForCode(
+                                totalTargetsMinor,
                                 currencyCode,
                               ),
                         actionLabel: l10n.budgetSpotlightEdit,
@@ -2054,8 +1793,8 @@ class _SpotlightOverview extends HookWidget {
                         tone: ObTone.underfunded,
                         value: hideAmounts
                             ? hiddenAmountPlaceholder
-                            : formatCentsForCode(
-                                totalUnderfundedCents,
+                            : formatMinorForCode(
+                                totalUnderfundedMinor,
                                 currencyCode,
                               ),
                       ),
@@ -2075,8 +1814,8 @@ class _SpotlightOverview extends HookWidget {
                         tone: ObTone.funded,
                         value: hideAmounts
                             ? hiddenAmountPlaceholder
-                            : formatCentsForCode(
-                                summary.totalBudgetedCents,
+                            : formatMinorForCode(
+                                summary.allocatedMinor,
                                 currencyCode,
                               ),
                         actionLabel: l10n.budgetSpotlightAssign,
@@ -2094,8 +1833,8 @@ class _SpotlightOverview extends HookWidget {
                         tone: ObTone.overspent,
                         value: hideAmounts
                             ? hiddenAmountPlaceholder
-                            : formatCentsForCode(
-                                totalActivityCents,
+                            : formatMinorForCode(
+                                summary.activityMinor.abs(),
                                 currencyCode,
                               ),
                         actionLabel: l10n.budgetSpotlightReflect,
@@ -2112,7 +1851,7 @@ class _SpotlightOverview extends HookWidget {
     );
   }
 
-  String _monthLabel(AppLocalizations l10n, int month) => switch (month) {
+  String _monthLabel(AppLocalizations l10n, int month) => switch (month % 100) {
     1 => l10n.budgetMonthJanuary,
     2 => l10n.budgetMonthFebruary,
     3 => l10n.budgetMonthMarch,
@@ -2233,13 +1972,11 @@ class _SpotlightPriorityIcon extends HookWidget {
 class _InlineEditorSelection {
   const _InlineEditorSelection({
     required this.categoryId,
-    required this.envelope,
-    this.monthlyData,
+    required this.monthEnvelope,
   });
 
   final String categoryId;
-  final Envelope envelope;
-  final MonthlyEnvelopeData? monthlyData;
+  final EnvelopeMonthView monthEnvelope;
 }
 
 class _InlineAmountEditor extends HookWidget {
@@ -2433,15 +2170,10 @@ class _InlineAmountEditor extends HookWidget {
 }
 
 class _DueBanner extends HookWidget {
-  const _DueBanner({
-    required this.count,
-    required this.isPosting,
-    required this.onPost,
-  });
+  const _DueBanner({required this.count, required this.onTap});
 
   final int count;
-  final bool isPosting;
-  final VoidCallback onPost;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -2449,47 +2181,34 @@ class _DueBanner extends HookWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: SpacingTokens.md),
-      child: ObCard(
-        tone: ObTone.brand,
-        padding: const EdgeInsets.all(SpacingTokens.sm),
-        child: Row(
-          children: [
-            SkribbleIcon(
-              data: OpenBudgetIcons.recurring,
-              size: 20,
-              color: palette.brand,
-            ),
-            const SizedBox(width: SpacingTokens.sm),
-            Expanded(
-              child: Text(
-                l10n.recurringDueBanner(count),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: palette.ink,
-                  fontWeight: FontWeight.w500,
-                ),
+    return ObCard(
+      onTap: onTap,
+      tone: ObTone.brand,
+      padding: const EdgeInsets.all(SpacingTokens.sm),
+      child: Row(
+        children: [
+          SkribbleIcon(
+            data: OpenBudgetIcons.recurring,
+            size: 20,
+            color: palette.brand,
+          ),
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(
+            child: Text(
+              l10n.recurringDueBanner(count),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: palette.ink,
+                fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(width: SpacingTokens.sm),
-            FilledButton.icon(
-              onPressed: isPosting ? null : onPost,
-              icon: isPosting
-                  ? WiredLoadingIndicator(
-                      size: 16,
-                      color: palette.onAction,
-                    )
-                  : SkribbleIcon(
-                      data: OpenBudgetIcons.play,
-                      size: 16,
-                      color: palette.onAction,
-                    ),
-              label: Text(
-                isPosting ? l10n.recurringPosting : l10n.recurringPostDue,
-              ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(width: SpacingTokens.sm),
+          SkribbleIcon(
+            data: OpenBudgetIcons.chevronRight,
+            size: 18,
+            color: palette.mutedInk,
+          ),
+        ],
       ),
     );
   }
@@ -2547,15 +2266,15 @@ class _OverspentEnvelopeEntry {
     required this.categoryId,
     required this.envelopeId,
     required this.envelopeName,
-    required this.overspentCents,
-    required this.allocatedCents,
+    required this.overspentMinor,
+    required this.allocatedMinor,
   });
 
   final String categoryId;
   final String envelopeId;
   final String envelopeName;
-  final int overspentCents;
-  final int allocatedCents;
+  final int overspentMinor;
+  final int allocatedMinor;
 }
 
 class _CoverOverspentBanner extends HookWidget {
@@ -2607,16 +2326,12 @@ class _CoverOverspentBanner extends HookWidget {
 
 class _CoverOverspendingSheet extends HookConsumerWidget {
   const _CoverOverspendingSheet({
-    required this.budgetId,
-    required this.year,
-    required this.month,
+    required this.entityId,
     required this.currencyCode,
     required this.overspentEnvelopes,
   });
 
-  final String budgetId;
-  final int year;
-  final int month;
+  final String entityId;
   final String currencyCode;
   final List<_OverspentEnvelopeEntry> overspentEnvelopes;
 
@@ -2630,18 +2345,26 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
     );
     final isApplying = useState(false);
 
+    Future<void> invalidateMonth() async {
+      ref
+        ..invalidate(budgetMonthProvider(entityId))
+        ..invalidate(budgetMonthGroupsProvider(entityId));
+    }
+
     Future<void> coverEnvelope(_OverspentEnvelopeEntry item) async {
       if (isApplying.value) return;
       isApplying.value = true;
       try {
         await ref
-            .read(monthlyAllocationActionsProvider.notifier)
-            .upsertAllocation(
-              envelopeId: item.envelopeId,
-              budgetId: budgetId,
-              year: year,
-              month: month,
-              allocatedCents: item.allocatedCents + item.overspentCents,
+            .read(budgetMonthActionsProvider.notifier)
+            .setAllocations(
+              entityId: entityId,
+              allocations: [
+                AllocationInput(
+                  envelopeId: UuidValue.fromString(item.envelopeId),
+                  allocatedMinor: item.allocatedMinor + item.overspentMinor,
+                ),
+              ],
             );
         remainingItems.value = remainingItems.value
             .where((candidate) => candidate.envelopeId != item.envelopeId)
@@ -2654,9 +2377,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
           variant: AppToastVariant.error,
         );
       } finally {
-        ref
-          ..invalidate(monthlyTransactionsProvider(budgetId, year, month))
-          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        await invalidateMonth();
         isApplying.value = false;
       }
     }
@@ -2669,13 +2390,15 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
         for (final item in remainingItems.value) {
           try {
             await ref
-                .read(monthlyAllocationActionsProvider.notifier)
-                .upsertAllocation(
-                  envelopeId: item.envelopeId,
-                  budgetId: budgetId,
-                  year: year,
-                  month: month,
-                  allocatedCents: item.allocatedCents + item.overspentCents,
+                .read(budgetMonthActionsProvider.notifier)
+                .setAllocations(
+                  entityId: entityId,
+                  allocations: [
+                    AllocationInput(
+                      envelopeId: UuidValue.fromString(item.envelopeId),
+                      allocatedMinor: item.allocatedMinor + item.overspentMinor,
+                    ),
+                  ],
                 );
             coveredIds.add(item.envelopeId);
           } on Exception catch (_) {
@@ -2686,9 +2409,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
             .where((item) => !coveredIds.contains(item.envelopeId))
             .toList(growable: false);
       } finally {
-        ref
-          ..invalidate(monthlyTransactionsProvider(budgetId, year, month))
-          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        await invalidateMonth();
         isApplying.value = false;
       }
     }
@@ -2754,8 +2475,8 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                             ),
                             subtitle: Text(
                               l10n.budgetDetailNeedsToCover(
-                                formatCentsForCode(
-                                  item.overspentCents,
+                                formatMinorForCode(
+                                  item.overspentMinor,
                                   currencyCode,
                                 ),
                               ),
@@ -2807,11 +2528,11 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
 class _ReorderableCategoryList extends HookConsumerWidget {
   const _ReorderableCategoryList({
     required this.categories,
-    required this.budgetId,
+    required this.entityId,
   });
 
-  final List<CategoryWithEnvelopes> categories;
-  final String budgetId;
+  final List<CategoryMonthGroup> categories;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -2856,7 +2577,7 @@ class _ReorderableCategoryList extends HookConsumerWidget {
   }
 
   Future<void> _swap(
-    ValueNotifier<List<CategoryWithEnvelopes>> orderedCategories,
+    ValueNotifier<List<CategoryMonthGroup>> orderedCategories,
     int from,
     int to,
     WidgetRef ref,
@@ -2874,7 +2595,7 @@ class _ReorderableCategoryList extends HookConsumerWidget {
     try {
       await ref
           .read(categoryActionsProvider.notifier)
-          .reorderCategories(budgetId: budgetId, categoryIds: categoryIds);
+          .reorderCategories(entityId: entityId, categoryIds: categoryIds);
     } on Exception catch (_) {
       // Revert on error handled by provider re-fetch.
     }
@@ -2891,7 +2612,7 @@ class _ReorderableCategoryTile extends HookWidget {
     super.key,
   });
 
-  final CategoryWithEnvelopes category;
+  final CategoryMonthGroup category;
   final int index;
   final int total;
   final VoidCallback? onMoveUp;

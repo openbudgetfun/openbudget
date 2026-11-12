@@ -19,9 +19,9 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 /// The financial assistant: a conversation about one budget, the changes it
 /// proposes, and how much of the included usage is left.
 class AssistantScreen extends HookConsumerWidget {
-  const AssistantScreen({required this.budgetId, super.key});
+  const AssistantScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   static const composerFieldKey = Key('assistant-composer-field');
   static const sendButtonKey = Key('assistant-send-button');
@@ -33,9 +33,9 @@ class AssistantScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final chat = ref.watch(assistantChatProvider(budgetId));
+    final chat = ref.watch(assistantChatProvider(entityId));
     final usage = ref.watch(assistantUsageProvider);
-    final proposals = ref.watch(assistantProposalsProvider(budgetId));
+    final proposals = ref.watch(assistantProposalsProvider(entityId));
     final controller = useTextEditingController();
     final scrollController = useScrollController();
     final hasText = useState(false);
@@ -67,18 +67,18 @@ class AssistantScreen extends HookConsumerWidget {
       final text = controller.text.trim();
       if (text.isEmpty || chat.isStreaming) return;
       controller.clear();
-      ref.read(assistantChatProvider(budgetId).notifier).send(text);
+      ref.read(assistantChatProvider(entityId).notifier).send(text);
     }
 
     void sendPrompt(String prompt) {
-      ref.read(assistantChatProvider(budgetId).notifier).send(prompt);
+      ref.read(assistantChatProvider(entityId).notifier).send(prompt);
     }
 
     Future<void> openConversations() => showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      builder: (_) => AssistantConversationsSheet(budgetId: budgetId),
+      builder: (_) => AssistantConversationsSheet(entityId: entityId),
     );
 
     return Scaffold(
@@ -99,7 +99,7 @@ class AssistantScreen extends HookConsumerWidget {
             tooltip: l10n.assistantOpenProposals,
             onPressed: () => context.pushNamed(
               assistantProposalsRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
             icon: SkribbleIcon(
               data: OpenBudgetIcons.note,
@@ -122,7 +122,7 @@ class AssistantScreen extends HookConsumerWidget {
               pendingProposals: proposals.asData?.value.pending.length ?? 0,
               onOpenProposals: () => context.pushNamed(
                 assistantProposalsRoute,
-                pathParameters: {'id': budgetId},
+                pathParameters: {'entityId': entityId},
               ),
             ),
           ),
@@ -147,7 +147,7 @@ class AssistantScreen extends HookConsumerWidget {
                               bottom: SpacingTokens.xs,
                             ),
                             child: _TimelineItemView(
-                              budgetId: budgetId,
+                              entityId: entityId,
                               item: item,
                             ),
                           ),
@@ -162,10 +162,10 @@ class AssistantScreen extends HookConsumerWidget {
                         ),
                       if (chat.failure case final failure?)
                         AssistantFailurePanel(
-                          budgetId: budgetId,
+                          entityId: entityId,
                           failure: failure,
                           onRetry: () => ref
-                              .read(assistantChatProvider(budgetId).notifier)
+                              .read(assistantChatProvider(entityId).notifier)
                               .retryLastMessage(),
                         ),
                     ],
@@ -266,9 +266,9 @@ class _EmptyConversation extends HookWidget {
 }
 
 class _TimelineItemView extends HookWidget {
-  const _TimelineItemView({required this.budgetId, required this.item});
+  const _TimelineItemView({required this.entityId, required this.item});
 
-  final String budgetId;
+  final String entityId;
   final AssistantTimelineItem item;
 
   @override
@@ -288,7 +288,7 @@ class _TimelineItemView extends HookWidget {
         label: assistantToolLabel(l10n, toolName),
       ),
       AssistantProposalItem(:final proposal) => AssistantProposalCardView(
-        budgetId: budgetId,
+        entityId: entityId,
         proposal: proposal,
       ),
     };

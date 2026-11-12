@@ -1,1157 +1,1630 @@
-import 'dart:convert';
+// Calendar dates are naturally written with their day component.
+// ignore_for_file: avoid_redundant_argument_values
 
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/accounts/account_service.dart';
+import 'package:openbudget_server/src/entities/entity_realtime_notifier.dart';
+import 'package:openbudget_server/src/entities/entity_service.dart';
+import 'package:openbudget_server/src/fx_rates/fx_service.dart';
+import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/generated/transactions/transaction.dart'
+    as model;
+import 'package:openbudget_server/src/ledger/ledger_endpoint.dart';
+import 'package:openbudget_server/src/transactions/transaction_writer.dart';
+import 'package:serverpod/serverpod.dart';
 import 'package:test/test.dart';
 
-import '../integration/helpers/auth_helper.dart';
-import '../integration/test_tools/serverpod_test_tools.dart';
+import '../support/ledger_test_book.dart';
+import '../support/pg_test_server.dart';
 
 void main() {
-  withServerpod('Given LedgerEndpoint', (sessionBuilder, endpoints) {
-    late TestSessionBuilder owner;
-    late TestSessionBuilder stranger;
+  late PgTestServer server;
+  var serverStarted = false;
 
-    /// Fixed calendar dates well inside an open period.
-    final openingDate = DateTime(2026, 11);
-    final feeDate = DateTime(2026, 11, 3);
-    final laterDate = DateTime(2026, 11, 20);
+  setUpAll(() async {
+    server = await PgTestServer.start();
+    serverStarted = true;
+  });
 
-    setUp(() {
-      owner = createAuthenticatedSession(sessionBuilder);
-      stranger = createAuthenticatedSession(sessionBuilder);
+  tearDownAll(() async {
+    if (serverStarted) await server.stop();
+  });
+
+  setUp(() async {
+    EntityRealtimeNotifier.debugPublisher = LedgerTestBook.ignoreEvent;
+    AccountService.debugPublisher = LedgerTestBook.ignoreEvent;
+    TransactionWriter.debugPublisher = LedgerTestBook.ignoreEvent;
+    FxService.configure(
+      apiKey: null,
+      baseUrl: null,
+      backfillScheduler: (_, _) async {},
+    );
+    await server.clearRates();
+  });
+
+  tearDown(() {
+    EntityRealtimeNotifier.resetForTests();
+    AccountService.resetForTests();
+    TransactionWriter.resetForTests();
+    FxService.resetForTests();
+  });
+
+  group('Given LedgerEndpoint', () {
+    group('authentication', () {
+      test('then requireLogin is true', () {
+        expect(LedgerEndpoint().requireLogin, isTrue);
+      });
+
+      test('then every method rejects an anonymous session', () async {
+        final book = await LedgerTestBook.create(server);
+        final anonymous = server.anonymousSession();
+        addTearDown(anonymous.close);
+        final entityId = book.entity.id!;
+        final ledgerAccountId = const Uuid().v7obj();
+        final journalId = const Uuid().v7obj();
+        final date = DateTime.utc(2026, 11);
+
+        final calls = <Future<Object?> Function()>[
+          () => book.endpoint.enableLedger(anonymous, entityId),
+          () => book.endpoint.listAccounts(anonymous, entityId),
+          () => book.endpoint.createAccount(
+            anonymous,
+            entityId,
+            '9000',
+            'Anonymous',
+            LedgerAccountType.expense,
+          ),
+          () => book.endpoint.archiveAccount(anonymous, ledgerAccountId),
+          () => book.endpoint.saveDraftJournal(
+            anonymous,
+            entityId,
+            date,
+            const [],
+          ),
+          () => book.endpoint.deleteDraftJournal(anonymous, journalId),
+          () => book.endpoint.postJournal(anonymous, journalId),
+          () => book.endpoint.reverseJournal(anonymous, journalId, date),
+          () => book.endpoint.listJournals(anonymous, entityId),
+          () => book.endpoint.listJournalLines(anonymous, journalId),
+          () => book.endpoint.getLockDate(anonymous, entityId),
+          () => book.endpoint.setLockDate(anonymous, entityId, date),
+          () => book.endpoint.trialBalance(anonymous, entityId, date),
+          () => book.endpoint.listAuditEvents(anonymous, entityId),
+        ];
+        for (final call in calls) {
+          await expectLater(
+            call(),
+            throwsA(isA<AuthenticationRequiredException>()),
+          );
+        }
+      });
     });
 
-    /// Creates a GB budget with a tax profile of [entityKind].
-    Future<Budget> createBudget(
-      TestSessionBuilder session,
-      TaxEntityKind entityKind, {
-      String currency = 'GBP',
-      String jurisdiction = 'GB',
-      bool withProfile = true,
-    }) async {
-      final budget = await endpoints.budget.create(session, 'Books', currency);
-      if (withProfile) {
-        final profileJson = switch (jurisdiction) {
-          'US' => jsonEncode(
-            UsTaxProfile(entityKind: entityKind).toJson(),
-          ),
-          'NG' => jsonEncode(
-            NgTaxProfile(entityKind: entityKind).toJson(),
-          ),
-          'DE' => jsonEncode(
-            DeTaxProfile(entityKind: entityKind).toJson(),
-          ),
-          _ => jsonEncode(GbTaxProfile(entityKind: entityKind).toJson()),
-        };
-        await endpoints.tax.saveProfile(
-          session,
-          budget.id!,
-          jurisdiction,
-          entityKind.name,
-          profileJson,
+    group('cross-owner access', () {
+      test('then every method rejects a foreign entity or row', () async {
+        final owner = await LedgerTestBook.create(server);
+        final stranger = await LedgerTestBook.createStranger(server);
+        final checking = await owner.addAccount();
+        await owner.enable();
+        final linked = await owner.linkedAccount(
+          await owner.reloadAccount(checking.id!),
         );
-      }
-      return budget;
-    }
+        final expense = await owner.accountWithRole(
+          LedgerSystemRole.rounding,
+        );
+        final lines = LedgerLineBuilder(owner.baseCurrency);
+        final journal = await owner.post(DateTime.utc(2026, 11), [
+          lines.debit(linked, 1000),
+          lines.credit(expense, 1000),
+        ]);
+        final foreignSession = stranger.session;
+        final entityId = owner.entity.id!;
 
-    /// Enables the ledger and returns the seeded accounts by code.
-    Future<Map<String, LedgerAccount>> enableLedger(
-      TestSessionBuilder session,
-      Budget budget,
-    ) async {
-      await endpoints.ledger.enableLedger(session, budget.id!);
-      final accounts = await endpoints.ledger.listAccounts(
-        session,
-        budget.id!,
-        includeArchived: false,
-      );
-      return {for (final account in accounts) account.code: account};
-    }
-
-    JournalLineInput line(
-      LedgerAccount account, {
-      required bool isDebit,
-      required int amountMinor,
-      String currency = 'GBP',
-      int functionalAmountMinor = -1,
-      String rate = '1',
-    }) => JournalLineInput(
-      ledgerAccountId: account.id!,
-      debitMinor: isDebit ? amountMinor : 0,
-      creditMinor: isDebit ? 0 : amountMinor,
-      currencyCode: currency,
-      functionalDebitMinor: isDebit
-          ? (functionalAmountMinor < 0 ? amountMinor : functionalAmountMinor)
-          : 0,
-      functionalCreditMinor: isDebit
-          ? 0
-          : (functionalAmountMinor < 0 ? amountMinor : functionalAmountMinor),
-      exchangeRate: rate,
-      rateDate: DateTime(2026, 11),
-      rateSource: 'manual',
-    );
-
-    /// Posts a one-shot journal through the draft and post paths.
-    Future<Journal> post(
-      TestSessionBuilder session,
-      Budget budget, {
-      required DateTime date,
-      required List<JournalLineInput> lines,
-      String source = 'manual',
-    }) async {
-      final draft = await endpoints.ledger.saveDraftJournal(
-        session,
-        budget.id!,
-        date,
-        lines,
-        reference: 'JB-test',
-        source: source,
-      );
-      return endpoints.ledger.postJournal(session, draft.id!);
-    }
-
-    group('when enabling the ledger', () {
-      test('then the caller must own the budget', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
+        final calls = <Future<Object?> Function()>[
+          () => owner.endpoint.enableLedger(foreignSession, entityId),
+          () => owner.endpoint.listAccounts(foreignSession, entityId),
+          () => owner.endpoint.createAccount(
+            foreignSession,
+            entityId,
+            '9000',
+            'Foreign',
+            LedgerAccountType.expense,
+          ),
+          () => owner.endpoint.archiveAccount(foreignSession, linked.id!),
+          () => owner.endpoint.saveDraftJournal(
+            foreignSession,
+            entityId,
+            DateTime.utc(2026, 11),
+            const [],
+          ),
+          () => owner.endpoint.deleteDraftJournal(foreignSession, journal.id!),
+          () => owner.endpoint.postJournal(foreignSession, journal.id!),
+          () => owner.endpoint.reverseJournal(
+            foreignSession,
+            journal.id!,
+            DateTime.utc(2026, 11, 2),
+          ),
+          () => owner.endpoint.listJournals(foreignSession, entityId),
+          () => owner.endpoint.listJournalLines(foreignSession, journal.id!),
+          () => owner.endpoint.getLockDate(foreignSession, entityId),
+          () => owner.endpoint.setLockDate(
+            foreignSession,
+            entityId,
+            DateTime.utc(2026, 11),
+          ),
+          () => owner.endpoint.trialBalance(
+            foreignSession,
+            entityId,
+            DateTime.utc(2026, 11),
+          ),
+          () => owner.endpoint.listAuditEvents(foreignSession, entityId),
+        ];
+        for (final call in calls) {
+          await expectLater(call(), throwsA(isA<ForbiddenException>()));
+        }
 
         await expectLater(
-          endpoints.ledger.enableLedger(stranger, budget.id!),
+          owner.endpoint.postJournal(owner.session, const Uuid().v7obj()),
           throwsA(isA<NotFoundException>()),
         );
       });
+    });
 
-      test('then a budget without a tax profile is rejected', () async {
-        final budget = await createBudget(
-          owner,
-          TaxEntityKind.company,
-          withProfile: false,
-        );
-
-        await expectLater(
-          endpoints.ledger.enableLedger(owner, budget.id!),
-          throwsA(isA<ValidationException>()),
-        );
-      });
-
-      test('then individual budgets are rejected', () async {
-        final budget = await createBudget(
-          owner,
-          TaxEntityKind.individual,
-        );
-
-        await expectLater(
-          endpoints.ledger.enableLedger(owner, budget.id!),
-          throwsA(isA<ValidationException>()),
-        );
-        expect(budget.accountingMode, 'envelope');
-      });
-
-      test('then a company budget seeds the chart and switches mode', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
-
-        final accounts = await enableLedger(owner, budget);
-
-        final updated = await endpoints.budget.get(owner, budget.id!);
-        expect(updated.accountingMode, 'ledger');
-        final codes = accounts.keys.toList()..sort();
-        expect(codes, hasLength(greaterThanOrEqualTo(20)));
-        expect(accounts['2200']!.systemRole, 'vatControl');
-        expect(accounts['2500']!.systemRole, 'directorsLoan');
-        expect(accounts['1000']!.systemRole, 'bank');
-        expect(codes.toSet(), hasLength(codes.length));
-      });
-
+    group('enabling the ledger', () {
       test(
-        'then a sole-trader chart has drawings and no director loan',
+        'then the chart comes from core and money accounts are linked',
         () async {
-          final budget = await createBudget(
-            owner,
-            TaxEntityKind.soleTrader,
+          final book = await LedgerTestBook.create(server);
+          final checking = await book.addAccount(name: 'Current');
+          final card = await book.addAccount(
+            name: 'Card',
+            kind: AccountKind.creditCard,
           );
 
-          final accounts = await enableLedger(owner, budget);
+          final enabled = await book.enable();
 
-          final roles = accounts.values
-              .map((account) => account.systemRole)
-              .whereType<String>()
-              .toSet();
-          expect(roles, contains('ownerDrawings'));
-          expect(roles, isNot(contains('directorsLoan')));
+          expect(enabled.accountingMode, AccountingMode.ledger);
+          final template = LedgerChartTemplate.forBooks(
+            jurisdiction: TaxJurisdiction.gb,
+            entityKind: EntityKind.company,
+          )!;
+          final chart = await book.chart();
+          expect(chart, hasLength(template.accounts.length + 2));
+          for (final seeded in template.accounts) {
+            final match = chart.where((account) => account.code == seeded.code);
+            expect(match, hasLength(1));
+            expect(match.single.name, seeded.name);
+            expect(match.single.type, seeded.type);
+            expect(match.single.systemRole, seeded.systemRole);
+          }
+
+          final reloadedChecking = await book.reloadAccount(checking.id!);
+          final reloadedCard = await book.reloadAccount(card.id!);
+          expect(reloadedChecking.ledgerAccountId, isNotNull);
+          expect(reloadedCard.ledgerAccountId, isNotNull);
+          expect(
+            reloadedChecking.ledgerAccountId,
+            isNot(reloadedCard.ledgerAccountId),
+          );
+          final checkingLedger = await book.linkedAccount(reloadedChecking);
+          final cardLedger = await book.linkedAccount(reloadedCard);
+          expect(checkingLedger.systemRole, isNull);
+          expect(cardLedger.systemRole, isNull);
+          expect(checkingLedger.type, LedgerAccountType.asset);
+          expect(cardLedger.type, LedgerAccountType.liability);
+          expect(checkingLedger.currencyCode, isNull);
+          expect(cardLedger.currencyCode, isNull);
+          expect(
+            chart.map((account) => account.code).toSet(),
+            hasLength(chart.length),
+          );
         },
       );
 
-      test('then each jurisdiction seeds its own codes', () async {
-        final usBudget = await createBudget(
-          owner,
-          TaxEntityKind.soleTrader,
-          currency: 'USD',
-          jurisdiction: 'US',
-        );
-        final deBudget = await createBudget(
-          owner,
-          TaxEntityKind.company,
-          currency: 'EUR',
-          jurisdiction: 'DE',
-        );
+      test('then enabling twice is idempotent', () async {
+        final book = await LedgerTestBook.create(server);
+        final checking = await book.addAccount();
+        await book.enable();
+        final firstChart = await book.chart();
+        final firstLink = (await book.reloadAccount(checking.id!))
+            .ledgerAccountId;
 
-        final usAccounts = await enableLedger(owner, usBudget);
-        final deAccounts = await enableLedger(owner, deBudget);
+        final second = await book.enable();
 
-        expect(usAccounts['2200']!.name, 'Sales tax payable');
-        expect(deAccounts['1800']!.systemRole, 'bank');
-        expect(deAccounts['2900']!.name, 'Stammkapital');
-      });
-
-      test('then enabling twice is rejected', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
-        await enableLedger(owner, budget);
-
-        await expectLater(
-          endpoints.ledger.enableLedger(owner, budget.id!),
-          throwsA(isA<ValidationException>()),
-        );
-      });
-
-      test('then an audit event records the switch', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
-        await enableLedger(owner, budget);
-
-        final events = await LedgerAuditEvent.db.find(sessionBuilder.build());
+        expect(second.accountingMode, AccountingMode.ledger);
+        final secondChart = await book.chart();
+        expect(secondChart, hasLength(firstChart.length));
         expect(
-          events.any((event) => event.action == 'ledger.enabled'),
-          isTrue,
-        );
-      });
-    });
-
-    group('when budget ownership is checked', () {
-      test('then a stranger cannot list accounts', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
-        await enableLedger(owner, budget);
-
-        await expectLater(
-          endpoints.ledger.listAccounts(
-            stranger,
-            budget.id!,
-            includeArchived: false,
-          ),
-          throwsA(isA<NotFoundException>()),
-        );
-      });
-
-      test('then a stranger cannot save drafts or post', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
-        final accounts = await enableLedger(owner, budget);
-
-        await expectLater(
-          endpoints.ledger.saveDraftJournal(
-            stranger,
-            budget.id!,
-            openingDate,
-            [
-              line(accounts['1000']!, isDebit: true, amountMinor: 1000),
-              line(accounts['3200']!, isDebit: false, amountMinor: 1000),
-            ],
-            reference: '',
-            source: 'manual',
-          ),
-          throwsA(isA<NotFoundException>()),
-        );
-      });
-
-      test('then a stranger cannot post or reverse by journal id', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
-        final accounts = await enableLedger(owner, budget);
-        final journal = await post(
-          owner,
-          budget,
-          date: openingDate,
-          lines: [
-            line(accounts['1000']!, isDebit: true, amountMinor: 1000),
-            line(accounts['3200']!, isDebit: false, amountMinor: 1000),
-          ],
-          source: 'opening',
-        );
-
-        await expectLater(
-          endpoints.ledger.postJournal(stranger, journal.id!),
-          throwsA(isA<NotFoundException>()),
-        );
-        await expectLater(
-          endpoints.ledger.reverseJournal(stranger, journal.id!, laterDate),
-          throwsA(isA<NotFoundException>()),
-        );
-      });
-
-      test('then a stranger cannot read lines or the lock date', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
-        final accounts = await enableLedger(owner, budget);
-        final journal = await post(
-          owner,
-          budget,
-          date: openingDate,
-          lines: [
-            line(accounts['1000']!, isDebit: true, amountMinor: 1000),
-            line(accounts['3200']!, isDebit: false, amountMinor: 1000),
-          ],
-          source: 'opening',
-        );
-
-        await expectLater(
-          endpoints.ledger.listJournalLines(stranger, journal.id!),
-          throwsA(isA<NotFoundException>()),
-        );
-        await expectLater(
-          endpoints.ledger.getLockDate(stranger, budget.id!),
-          throwsA(isA<NotFoundException>()),
-        );
-      });
-    });
-
-    group('when saving drafts', () {
-      late Budget budget;
-      late Map<String, LedgerAccount> accounts;
-
-      setUp(() async {
-        budget = await createBudget(owner, TaxEntityKind.company);
-        accounts = await enableLedger(owner, budget);
-      });
-
-      test('then a balanced draft is stored', () async {
-        final draft = await endpoints.ledger.saveDraftJournal(
-          owner,
-          budget.id!,
-          openingDate,
-          [
-            line(accounts['1000']!, isDebit: true, amountMinor: 50000),
-            line(accounts['3200']!, isDebit: false, amountMinor: 50000),
-          ],
-          reference: 'JB-OPEN-1',
-          narration: 'Opening cash',
-          source: 'opening',
-        );
-
-        expect(draft.status, 'draft');
-        expect(draft.reference, 'JB-OPEN-1');
-        expect(draft.source, 'opening');
-        expect(draft.postedAt, isNull);
-      });
-
-      test('then an unbalanced draft is rejected (T1)', () async {
-        await expectLater(
-          endpoints.ledger.saveDraftJournal(
-            owner,
-            budget.id!,
-            openingDate,
-            [
-              line(accounts['1000']!, isDebit: true, amountMinor: 10000),
-              line(accounts['4000']!, isDebit: false, amountMinor: 9999),
-            ],
-            reference: '',
-            source: 'manual',
-          ),
-          throwsA(isA<ValidationException>()),
-        );
-      });
-
-      test('then a single-line draft is rejected (T1)', () async {
-        await expectLater(
-          endpoints.ledger.saveDraftJournal(
-            owner,
-            budget.id!,
-            openingDate,
-            [
-              line(accounts['1000']!, isDebit: true, amountMinor: 10000),
-            ],
-            reference: '',
-            source: 'manual',
-          ),
-          throwsA(isA<ValidationException>()),
-        );
-      });
-
-      test('then a line with both sides is rejected (T1)', () async {
-        final badLine = JournalLineInput(
-          ledgerAccountId: accounts['1000']!.id!,
-          debitMinor: 100,
-          creditMinor: 100,
-          currencyCode: 'GBP',
-          functionalDebitMinor: 100,
-          functionalCreditMinor: 0,
-          exchangeRate: '1',
-          rateDate: DateTime(2026, 11),
-          rateSource: 'manual',
-        );
-
-        await expectLater(
-          endpoints.ledger.saveDraftJournal(
-            owner,
-            budget.id!,
-            openingDate,
-            [
-              badLine,
-              line(accounts['4000']!, isDebit: false, amountMinor: 100),
-            ],
-            reference: '',
-            source: 'manual',
-          ),
-          throwsA(isA<ValidationException>()),
-        );
-      });
-
-      test('then foreign-currency lines balance per currency (T1)', () async {
-        // USD 100.00 Dr at 0.8 and USD 99.00 Cr at 0.808081: both GBP 80.00,
-        // balanced in the functional currency but not in USD. Rejected.
-        await expectLater(
-          endpoints.ledger.saveDraftJournal(
-            owner,
-            budget.id!,
-            openingDate,
-            [
-              line(
-                accounts['1000']!,
-                isDebit: true,
-                amountMinor: 10000,
-                currency: 'USD',
-                functionalAmountMinor: 8000,
-                rate: '0.8',
-              ),
-              line(
-                accounts['4000']!,
-                isDebit: false,
-                amountMinor: 9900,
-                currency: 'USD',
-                functionalAmountMinor: 8000,
-                rate: '0.808081',
-              ),
-            ],
-            reference: '',
-            source: 'manual',
-          ),
-          throwsA(isA<ValidationException>()),
-        );
-      });
-
-      test('then a draft lists its lines for editing', () async {
-        final draft = await endpoints.ledger.saveDraftJournal(
-          owner,
-          budget.id!,
-          openingDate,
-          [
-            line(accounts['1000']!, isDebit: true, amountMinor: 2500),
-            line(accounts['3200']!, isDebit: false, amountMinor: 2500),
-          ],
-          reference: 'JB-lines',
-          source: 'manual',
-        );
-
-        final lines = await endpoints.ledger.listJournalLines(
-          owner,
-          draft.id!,
-        );
-
-        expect(lines, hasLength(2));
-        expect(
-          {
-            for (final l in lines)
-              l.ledgerAccountId: (l.debitMinor, l.creditMinor),
-          },
-          {
-            accounts['1000']!.id: (2500, 0),
-            accounts['3200']!.id: (0, 2500),
-          },
-        );
-      });
-
-      test('then a draft can be edited', () async {
-        final draft = await endpoints.ledger.saveDraftJournal(
-          owner,
-          budget.id!,
-          openingDate,
-          [
-            line(accounts['1000']!, isDebit: true, amountMinor: 50000),
-            line(accounts['3200']!, isDebit: false, amountMinor: 50000),
-          ],
-          reference: 'JB-OPEN-1',
-          source: 'manual',
-        );
-
-        final updated = await endpoints.ledger.saveDraftJournal(
-          owner,
-          budget.id!,
-          feeDate,
-          [
-            line(accounts['1000']!, isDebit: true, amountMinor: 60000),
-            line(accounts['3200']!, isDebit: false, amountMinor: 60000),
-          ],
-          journalId: draft.id,
-          reference: 'JB-OPEN-1',
-          source: 'manual',
-        );
-
-        expect(updated.id, draft.id);
-        expect(updated.date.year, feeDate.year);
-        expect(updated.date.month, feeDate.month);
-        expect(updated.date.day, feeDate.day);
-        final lines = await JournalLine.db.find(
-          owner.build(),
-          where: (l) => l.journalId.equals(draft.id),
-        );
-        expect(lines, hasLength(2));
-        expect(
-          lines.fold<int>(0, (sum, l) => sum + l.functionalDebitMinor),
-          60000,
-        );
-      });
-
-      test('then a draft can be deleted', () async {
-        final draft = await endpoints.ledger.saveDraftJournal(
-          owner,
-          budget.id!,
-          openingDate,
-          [
-            line(accounts['1000']!, isDebit: true, amountMinor: 50000),
-            line(accounts['3200']!, isDebit: false, amountMinor: 50000),
-          ],
-          reference: '',
-          source: 'manual',
-        );
-
-        await endpoints.ledger.deleteDraftJournal(owner, draft.id!);
-
-        final journals = await endpoints.ledger.listJournals(
-          owner,
-          budget.id!,
-        );
-        expect(journals, isEmpty);
-      });
-
-      test('then drafts reference only accounts inside the budget', () async {
-        final otherBudget = await createBudget(owner, TaxEntityKind.company);
-        await enableLedger(owner, otherBudget);
-        final otherAccounts = await endpoints.ledger.listAccounts(
-          owner,
-          otherBudget.id!,
-          includeArchived: false,
-        );
-
-        await expectLater(
-          endpoints.ledger.saveDraftJournal(
-            owner,
-            budget.id!,
-            openingDate,
-            [
-              line(otherAccounts.first, isDebit: true, amountMinor: 1000),
-              line(accounts['3200']!, isDebit: false, amountMinor: 1000),
-            ],
-            reference: '',
-            source: 'manual',
-          ),
-          throwsA(isA<ValidationException>()),
-        );
-      });
-    });
-
-    group('when posting and reversing', () {
-      late Budget budget;
-      late Map<String, LedgerAccount> accounts;
-
-      setUp(() async {
-        budget = await createBudget(owner, TaxEntityKind.company);
-        accounts = await enableLedger(owner, budget);
-      });
-
-      test('then a posted journal is stamped and immutable', () async {
-        final journal = await post(
-          owner,
-          budget,
-          date: openingDate,
-          lines: [
-            line(accounts['1000']!, isDebit: true, amountMinor: 50000),
-            line(accounts['3200']!, isDebit: false, amountMinor: 50000),
-          ],
-          source: 'opening',
-        );
-
-        expect(journal.status, 'posted');
-        expect(journal.postedAt, isNotNull);
-        expect(journal.postedBy, isNotNull);
-
-        await expectLater(
-          endpoints.ledger.postJournal(owner, journal.id!),
-          throwsA(isA<ValidationException>()),
-        );
-        await expectLater(
-          endpoints.ledger.deleteDraftJournal(owner, journal.id!),
-          throwsA(isA<ValidationException>()),
-        );
-        await expectLater(
-          endpoints.ledger.saveDraftJournal(
-            owner,
-            budget.id!,
-            openingDate,
-            [
-              line(accounts['1000']!, isDebit: true, amountMinor: 1),
-              line(accounts['3200']!, isDebit: false, amountMinor: 1),
-            ],
-            journalId: journal.id,
-            reference: '',
-            source: 'manual',
-          ),
-          throwsA(isA<ValidationException>()),
-        );
-      });
-
-      test('then the bank-fee journal posts and reverses (T5.3)', () async {
-        await post(
-          owner,
-          budget,
-          date: openingDate,
-          lines: [
-            line(accounts['1000']!, isDebit: true, amountMinor: 50000),
-            line(accounts['3200']!, isDebit: false, amountMinor: 50000),
-          ],
-          source: 'opening',
-        );
-        final fee = await post(
-          owner,
-          budget,
-          date: feeDate,
-          lines: [
-            line(accounts['5600']!, isDebit: true, amountMinor: 1250),
-            line(accounts['1000']!, isDebit: false, amountMinor: 1250),
-          ],
-        );
-
-        final before = await endpoints.ledger.trialBalance(
-          owner,
-          budget.id!,
-          feeDate,
-        );
-        expect(before.totalDebitMinor, 51250);
-
-        final reversal = await endpoints.ledger.reverseJournal(
-          owner,
-          fee.id!,
-          laterDate,
-        );
-
-        expect(reversal.status, 'posted');
-        expect(reversal.source, 'reversal');
-        expect(reversal.reversalOfJournalId, fee.id);
-        final refetchedFee = await endpoints.ledger.listJournals(
-          owner,
-          budget.id!,
+          secondChart.map((account) => account.id).toSet(),
+          firstChart.map((account) => account.id).toSet(),
         );
         expect(
-          refetchedFee.firstWhere((j) => j.id == fee.id).status,
-          'reversed',
-        );
-
-        final after = await endpoints.ledger.trialBalance(
-          owner,
-          budget.id!,
-          laterDate,
-        );
-        final netByCode = {
-          for (final row in after.rows) row.accountCode: row.netMinor,
-        };
-        expect(netByCode['1000'], 50000);
-        expect(netByCode['5600'], 0);
-        expect(netByCode['3200'], -50000);
-        // Opening plus the fee and its reversal: both journals stay in the
-        // books and the mirror journal cancels the fee.
-        expect(after.totalDebitMinor, 52500);
-        expect(after.totalCreditMinor, 52500);
-      });
-
-      test('then a journal cannot be reversed twice', () async {
-        final journal = await post(
-          owner,
-          budget,
-          date: openingDate,
-          lines: [
-            line(accounts['1000']!, isDebit: true, amountMinor: 50000),
-            line(accounts['3200']!, isDebit: false, amountMinor: 50000),
-          ],
-          source: 'opening',
-        );
-        await endpoints.ledger.reverseJournal(owner, journal.id!, feeDate);
-
-        await expectLater(
-          endpoints.ledger.reverseJournal(owner, journal.id!, laterDate),
-          throwsA(isA<ValidationException>()),
+          (await book.reloadAccount(checking.id!)).ledgerAccountId,
+          firstLink,
         );
       });
 
-      test('then a mixed-currency settlement journal posts (T6.1)', () async {
-        // Day 1: USD 1,000.00 invoice at 0.8 GBP per USD books GBP 800.00
-        // (Dr AR, Cr Sales). Day 20: paid USD 1,000.00 at 0.769231 = GBP
-        // 769.23, realised FX loss GBP 30.77 releases the AR at 0.8.
-        await post(
-          owner,
-          budget,
-          date: openingDate,
-          lines: [
-            line(
-              accounts['1100']!,
-              isDebit: true,
-              amountMinor: 100000,
-              currency: 'USD',
-              functionalAmountMinor: 80000,
-              rate: '0.8',
-            ),
-            line(
-              accounts['4000']!,
-              isDebit: false,
-              amountMinor: 80000,
-            ),
-          ],
+      test('then a foreign account link carries its currency', () async {
+        final book = await LedgerTestBook.create(server);
+        final usd = await book.addAccount(
+          name: 'USD current',
+          currencyCode: 'USD',
         );
-        await post(
-          owner,
-          budget,
-          date: laterDate,
-          lines: [
-            line(
-              accounts['1000']!,
-              isDebit: true,
-              amountMinor: 100000,
-              currency: 'USD',
-              functionalAmountMinor: 76923,
-              rate: '0.769231',
-            ),
-            line(accounts['5800']!, isDebit: true, amountMinor: 3077),
-            line(
-              accounts['1100']!,
-              isDebit: false,
-              amountMinor: 100000,
-              currency: 'USD',
-              functionalAmountMinor: 80000,
-              rate: '0.8',
-            ),
-          ],
-        );
+        await book.enable();
 
-        final trialBalance = await endpoints.ledger.trialBalance(
-          owner,
-          budget.id!,
-          laterDate,
+        final linked = await book.linkedAccount(
+          await book.reloadAccount(usd.id!),
         );
-        final netByCode = {
-          for (final row in trialBalance.rows) row.accountCode: row.netMinor,
-        };
-        expect(netByCode['1100'], 0);
-        expect(netByCode['1000'], 76923);
-        expect(netByCode['5800'], 3077);
-        expect(netByCode['4000'], -80000);
-        expect(trialBalance.totalDebitMinor, trialBalance.totalCreditMinor);
+        expect(linked.currencyCode, 'USD');
+        expect(linked.type, LedgerAccountType.asset);
+        expect(linked.systemRole, isNull);
+      });
+
+      test('then valuations accounts get no ledger link', () async {
+        final book = await LedgerTestBook.create(server);
+        final investment = await book.addAccount(
+          name: 'Brokerage',
+          kind: AccountKind.investment,
+          balanceSource: AccountBalanceSource.valuations,
+          onBudget: false,
+        );
+        await book.enable();
+
+        expect(
+          (await book.reloadAccount(investment.id!)).ledgerAccountId,
+          isNull,
+        );
       });
 
       test(
-        'then a functional amount contradicting the rate is rejected',
+        'then a new money account links without a second source of truth',
         () async {
+          final book = await LedgerTestBook.create(server);
+          await book.enable();
+
+          final created = await book.addAccount(name: 'Savings');
+          final reloaded = await book.reloadAccount(created.id!);
+          final linked = await book.linkedAccount(reloaded);
+          final chart = await book.chart();
+
+          expect(reloaded.ledgerAccountId, linked.id);
+          expect(linked.name, 'Savings');
+          expect(linked.type, LedgerAccountType.asset);
+          expect(linked.systemRole, isNull);
+          expect(linked.entityId, book.entity.id);
+          expect(
+            chart.where((account) => account.code == linked.code),
+            hasLength(1),
+          );
+
+          final lines = LedgerLineBuilder(book.baseCurrency);
+          final journal = await book.post(DateTime.utc(2026, 11), [
+            lines.debit(linked, 2500),
+            lines.credit(
+              await book.accountWithRole(LedgerSystemRole.openingBalanceEquity),
+              2500,
+            ),
+          ]);
+          expect(journal.status, JournalStatus.posted);
+        },
+      );
+
+      test('then an individual entity is rejected', () async {
+        final book = await LedgerTestBook.create(
+          server,
+          kind: EntityKind.individual,
+        );
+        await expectLater(
+          book.enable(),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test('then an unsupported country has no template', () async {
+        final book = await LedgerTestBook.create(
+          server,
+          countryCode: 'ZZ',
+        );
+        await expectLater(
+          book.enable(),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test('then an archived entity rejects enabling', () async {
+        final book = await LedgerTestBook.create(server);
+        await EntityService.setArchived(
+          book.session,
+          book.entity.id!,
+          archived: true,
+        );
+        await expectLater(
+          book.enable(),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+    });
+
+    group('managing chart accounts', () {
+      test('then structural accounts protect their role and archive', () async {
+        final book = await LedgerTestBook.create(server);
+        await book.enable();
+        final bank = await book.accountWithRole(LedgerSystemRole.bank);
+
+        await expectLater(
+          book.endpoint.archiveAccount(book.session, bank.id!),
+          throwsA(isA<ValidationException>()),
+        );
+        await expectLater(
+          book.endpoint.createAccount(
+            book.session,
+            book.entity.id!,
+            '1500',
+            'Second bank',
+            LedgerAccountType.asset,
+            systemRole: LedgerSystemRole.bank,
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+        await expectLater(
+          book.endpoint.createAccount(
+            book.session,
+            book.entity.id!,
+            bank.code,
+            'Duplicate code',
+            LedgerAccountType.asset,
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test(
+        'then a non-structural account archives and stops taking lines',
+        () async {
+          final book = await LedgerTestBook.create(server);
+          await book.enable();
+          final created = await book.endpoint.createAccount(
+            book.session,
+            book.entity.id!,
+            '6100',
+            'Marketing',
+            LedgerAccountType.expense,
+          );
+          final lines = LedgerLineBuilder(book.baseCurrency);
+          final bank = await book.accountWithRole(LedgerSystemRole.bank);
+
+          final archived = await book.endpoint.archiveAccount(
+            book.session,
+            created.id!,
+          );
+          expect(archived.archivedAt, isNotNull);
+          final visible = await book.chart();
+          expect(visible.any((account) => account.id == created.id), isFalse);
+          final all = await book.chart(includeArchived: true);
+          expect(all.any((account) => account.id == created.id), isTrue);
+          final second = await book.endpoint.archiveAccount(
+            book.session,
+            created.id!,
+          );
+          expect(second.archivedAt, archived.archivedAt);
+
           await expectLater(
-            endpoints.ledger.saveDraftJournal(
-              owner,
-              budget.id!,
-              openingDate,
-              [
-                line(
-                  accounts['1000']!,
-                  isDebit: true,
-                  amountMinor: 100000,
-                  currency: 'USD',
-                  functionalAmountMinor: 76923,
-                  rate: '0.8',
-                ),
-                line(accounts['4000']!, isDebit: false, amountMinor: 76923),
-              ],
-              reference: '',
-              source: 'manual',
+            book.endpoint.saveDraftJournal(
+              book.session,
+              book.entity.id!,
+              DateTime.utc(2026, 11),
+              [lines.debit(created, 100), lines.credit(bank, 100)],
             ),
             throwsA(isA<ValidationException>()),
           );
         },
       );
 
-      test('then audit rows exist for post and reversal', () async {
-        final journal = await post(
-          owner,
-          budget,
-          date: openingDate,
-          lines: [
-            line(accounts['1000']!, isDebit: true, amountMinor: 50000),
-            line(accounts['3200']!, isDebit: false, amountMinor: 50000),
-          ],
-          source: 'opening',
-        );
-        await endpoints.ledger.reverseJournal(owner, journal.id!, feeDate);
+      test('then supported currencies and enums are validated', () async {
+        final book = await LedgerTestBook.create(server);
+        await book.enable();
 
-        final events = await LedgerAuditEvent.db.find(owner.build());
-        final actions = events.map((event) => event.action).toSet();
-        expect(actions, containsAll(['journal.posted', 'journal.reversed']));
+        await expectLater(
+          book.endpoint.createAccount(
+            book.session,
+            book.entity.id!,
+            '9001',
+            'Bad currency',
+            LedgerAccountType.asset,
+            currencyCode: 'ZZZ',
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+        await expectLater(
+          book.endpoint.createAccount(
+            book.session,
+            book.entity.id!,
+            '  ',
+            'Blank code',
+            LedgerAccountType.asset,
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+        final valid = await book.endpoint.createAccount(
+          book.session,
+          book.entity.id!,
+          '9002',
+          'USD clearing',
+          LedgerAccountType.asset,
+          currencyCode: 'usd',
+        );
+        expect(valid.currencyCode, 'USD');
       });
     });
 
-    group('when the period is locked', () {
-      late Budget budget;
-      late Map<String, LedgerAccount> accounts;
+    group('saving drafts', () {
+      late LedgerTestBook book;
+      late LedgerLineBuilder lines;
+      late LedgerAccount bank;
+      late LedgerAccount equity;
+      late LedgerAccount income;
 
       setUp(() async {
-        budget = await createBudget(owner, TaxEntityKind.company);
-        accounts = await enableLedger(owner, budget);
+        book = await LedgerTestBook.create(server);
+        final checking = await book.addAccount();
+        await book.enable();
+        lines = LedgerLineBuilder(book.baseCurrency);
+        bank = await book.linkedAccount(await book.reloadAccount(checking.id!));
+        equity = await book.accountWithRole(
+          LedgerSystemRole.openingBalanceEquity,
+        );
+        income = await book.accountWithCode('4000');
       });
 
-      test('then posting on or before the lock date is rejected', () async {
-        await endpoints.ledger.setLockDate(owner, budget.id!, feeDate);
+      test(
+        'then a balanced draft stores base facts and identity rates',
+        () async {
+          final draft = await book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [lines.debit(bank, 50000), lines.credit(equity, 50000)],
+            reference: 'JB-OPEN-1',
+            narration: 'Opening cash',
+            source: JournalSource.opening,
+          );
 
-        final draft = await endpoints.ledger.saveDraftJournal(
-          owner,
-          budget.id!,
-          feeDate,
-          [
-            line(accounts['1000']!, isDebit: true, amountMinor: 1000),
-            line(accounts['5600']!, isDebit: false, amountMinor: 1000),
-          ],
-          reference: '',
-          source: 'manual',
-        );
+          expect(draft.status, JournalStatus.draft);
+          expect(draft.source, JournalSource.opening);
+          expect(draft.postedAt, isNull);
+          expect(draft.postedBy, isNull);
+          final stored = await book.endpoint.listJournalLines(
+            book.session,
+            draft.id!,
+          );
+          expect(stored, hasLength(2));
+          expect(stored.first.baseDebitMinor, 50000);
+          expect(stored.first.fxRate, '1');
+          expect(stored.first.fxRateSource, FxRateSource.identity);
+          expect(stored.first.fxRateDate, DateTime.utc(2026, 11));
+        },
+      );
 
+      test('then a single-line draft is rejected', () async {
         await expectLater(
-          endpoints.ledger.postJournal(owner, draft.id!),
-          throwsA(isA<ValidationException>()),
-        );
-
-        final openDraft = await endpoints.ledger.saveDraftJournal(
-          owner,
-          budget.id!,
-          laterDate,
-          [
-            line(accounts['1000']!, isDebit: true, amountMinor: 1000),
-            line(accounts['5600']!, isDebit: false, amountMinor: 1000),
-          ],
-          reference: '',
-          source: 'manual',
-        );
-        final posted = await endpoints.ledger.postJournal(owner, openDraft.id!);
-        expect(posted.status, 'posted');
-      });
-
-      test('then reversing into the locked period is rejected', () async {
-        final journal = await post(
-          owner,
-          budget,
-          date: openingDate,
-          lines: [
-            line(accounts['1000']!, isDebit: true, amountMinor: 50000),
-            line(accounts['3200']!, isDebit: false, amountMinor: 50000),
-          ],
-          source: 'opening',
-        );
-        await endpoints.ledger.setLockDate(owner, budget.id!, feeDate);
-
-        await expectLater(
-          endpoints.ledger.reverseJournal(owner, journal.id!, feeDate),
-          throwsA(isA<ValidationException>()),
-        );
-
-        final reversal = await endpoints.ledger.reverseJournal(
-          owner,
-          journal.id!,
-          laterDate,
-        );
-        expect(reversal.status, 'posted');
-      });
-
-      test('then the lock date reads back once set', () async {
-        expect(await endpoints.ledger.getLockDate(owner, budget.id!), isNull);
-
-        await endpoints.ledger.setLockDate(owner, budget.id!, feeDate);
-
-        final lock = await endpoints.ledger.getLockDate(owner, budget.id!);
-        expect(lock?.lockDate, DateTime.utc(2026, 11, 3));
-      });
-
-      test('then setting the lock is audited', () async {
-        await endpoints.ledger.setLockDate(owner, budget.id!, feeDate);
-
-        final events = await LedgerAuditEvent.db.find(owner.build());
-        final lockEvents = events
-            .where((event) => event.action == 'lock.set')
-            .toList();
-        expect(lockEvents, hasLength(1));
-        expect(
-          lockEvents.single.payloadJson,
-          contains(feeDate.toIso8601String().substring(0, 10)),
-        );
-      });
-    });
-
-    group('when archiving accounts', () {
-      late Budget budget;
-      late Map<String, LedgerAccount> accounts;
-
-      setUp(() async {
-        budget = await createBudget(owner, TaxEntityKind.company);
-        accounts = await enableLedger(owner, budget);
-      });
-
-      test('then system accounts are refused', () async {
-        await expectLater(
-          endpoints.ledger.archiveAccount(owner, accounts['1000']!.id!),
-          throwsA(isA<ValidationException>()),
-        );
-      });
-
-      test('then a cleared account archives', () async {
-        final journal = await post(
-          owner,
-          budget,
-          date: openingDate,
-          lines: [
-            line(accounts['5600']!, isDebit: true, amountMinor: 1250),
-            line(accounts['1000']!, isDebit: false, amountMinor: 1250),
-          ],
-        );
-        await endpoints.ledger.reverseJournal(owner, journal.id!, feeDate);
-
-        final archived = await endpoints.ledger.archiveAccount(
-          owner,
-          accounts['5600']!.id!,
-        );
-        expect(archived.archived, isTrue);
-
-        final visible = await endpoints.ledger.listAccounts(
-          owner,
-          budget.id!,
-          includeArchived: false,
-        );
-        expect(
-          visible.any((account) => account.code == '5600'),
-          isFalse,
-        );
-        final all = await endpoints.ledger.listAccounts(
-          owner,
-          budget.id!,
-          includeArchived: true,
-        );
-        expect(all.any((account) => account.code == '5600'), isTrue);
-      });
-
-      test('then a non-zero balance refuses to archive', () async {
-        await post(
-          owner,
-          budget,
-          date: openingDate,
-          lines: [
-            line(accounts['5600']!, isDebit: true, amountMinor: 1250),
-            line(accounts['1000']!, isDebit: false, amountMinor: 1250),
-          ],
-        );
-
-        await expectLater(
-          endpoints.ledger.archiveAccount(owner, accounts['5600']!.id!),
-          throwsA(isA<ValidationException>()),
-        );
-      });
-
-      test('then a duplicate code is refused', () async {
-        await expectLater(
-          endpoints.ledger.createAccount(
-            owner,
-            budget.id!,
-            '1000',
-            'Second bank',
-            'asset',
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [lines.debit(bank, 100)],
           ),
           throwsA(isA<ValidationException>()),
         );
       });
 
-      test('then a duplicate system role is refused', () async {
+      test('then an unbalanced draft is rejected', () async {
         await expectLater(
-          endpoints.ledger.createAccount(
-            owner,
-            budget.id!,
-            '1500',
-            'Piggy bank',
-            'asset',
-            systemRole: 'bank',
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [lines.debit(bank, 10000), lines.credit(income, 9999)],
           ),
           throwsA(isA<ValidationException>()),
         );
       });
 
-      test('then a new account can be created and used', () async {
-        final account = await endpoints.ledger.createAccount(
-          owner,
-          budget.id!,
-          '6100',
-          'Marketing',
-          'expense',
+      test('then a line with both sides or a zero line is rejected', () async {
+        final bothSides = JournalLineInput(
+          ledgerAccountId: bank.id!,
+          debitMinor: 100,
+          creditMinor: 100,
+          currencyCode: 'GBP',
+          baseDebitMinor: 100,
+          baseCreditMinor: 0,
+          fxRate: '1',
+          fxRateDate: DateTime.utc(2026, 11),
+          fxRateSource: FxRateSource.identity,
         );
-        expect(account.systemRole, isNull);
+        await expectLater(
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [bothSides, lines.credit(income, 100)],
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+        await expectLater(
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [
+              JournalLineInput(
+                ledgerAccountId: bank.id!,
+                currencyCode: 'GBP',
+                fxRate: '1',
+                fxRateDate: DateTime.utc(2026, 11),
+                fxRateSource: FxRateSource.identity,
+              ),
+              lines.credit(income, 100),
+            ],
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+      });
 
-        final journal = await post(
-          owner,
-          budget,
-          date: openingDate,
-          lines: [
-            line(account, isDebit: true, amountMinor: 2000),
-            line(accounts['1000']!, isDebit: false, amountMinor: 2000),
+      test('then negative and unsafe amounts are rejected', () async {
+        await expectLater(
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [
+              JournalLineInput(
+                ledgerAccountId: bank.id!,
+                debitMinor: -100,
+                currencyCode: 'GBP',
+                baseDebitMinor: -100,
+                fxRate: '1',
+                fxRateDate: DateTime.utc(2026, 11),
+                fxRateSource: FxRateSource.identity,
+              ),
+              lines.credit(income, 100),
+            ],
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+        await expectLater(
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [
+              lines.debit(bank, 100, baseAmountMinor: maxSafeMinor + 1),
+              lines.credit(income, 100),
+            ],
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test('then foreign-currency lines must balance per currency', () async {
+        // USD 100.00 Dr at 0.8 and USD 99.00 Cr at 0.808081 both land on GBP
+        // 80.00. The base balances, the transaction currency does not.
+        await expectLater(
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [
+              lines.debit(
+                bank,
+                10000,
+                currencyCode: 'USD',
+                baseAmountMinor: 8000,
+                fxRate: '0.8',
+              ),
+              lines.credit(
+                income,
+                9900,
+                currencyCode: 'USD',
+                baseAmountMinor: 8000,
+                fxRate: '0.808081',
+              ),
+            ],
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test('then a base amount contradicting the rate is rejected', () async {
+        await expectLater(
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [
+              lines.debit(
+                bank,
+                100000,
+                currencyCode: 'USD',
+                baseAmountMinor: 76923,
+                fxRate: '0.8',
+              ),
+              lines.credit(income, 76923),
+            ],
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test('then unsupported currencies and bad rates are rejected', () async {
+        await expectLater(
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [
+              lines.debit(bank, 100, currencyCode: 'ZZZ'),
+              lines.credit(income, 100),
+            ],
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+        await expectLater(
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [
+              lines.debit(
+                bank,
+                100,
+                currencyCode: 'USD',
+                baseAmountMinor: 80,
+                fxRate: 'zero',
+              ),
+              lines.credit(income, 80),
+            ],
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test('then a rate date after the journal is rejected', () async {
+        await expectLater(
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11, 2),
+            [
+              lines.debit(
+                bank,
+                100,
+                currencyCode: 'USD',
+                baseAmountMinor: 80,
+                fxRate: '0.8',
+                fxRateDate: DateTime.utc(2026, 11, 3),
+              ),
+              lines.credit(income, 80),
+            ],
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test('then identity is only valid for the base currency', () async {
+        await expectLater(
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [
+              lines.debit(
+                bank,
+                100,
+                currencyCode: 'USD',
+                baseAmountMinor: 100,
+                fxRateSource: FxRateSource.identity,
+              ),
+              lines.credit(income, 100),
+            ],
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+        await expectLater(
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [
+              lines.debit(bank, 100, fxRateSource: FxRateSource.manual),
+              lines.credit(income, 100),
+            ],
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test('then system sources are not caller-forgeable', () async {
+        for (final source in [
+          JournalSource.reversal,
+          JournalSource.transaction,
+          JournalSource.revaluation,
+        ]) {
+          await expectLater(
+            book.endpoint.saveDraftJournal(
+              book.session,
+              book.entity.id!,
+              DateTime.utc(2026, 11),
+              [lines.debit(bank, 100), lines.credit(income, 100)],
+              source: source,
+            ),
+            throwsA(isA<ValidationException>()),
+          );
+        }
+      });
+
+      test('then control accounts reject manual lines', () async {
+        final receivable = await book.accountWithRole(
+          LedgerSystemRole.accountsReceivable,
+        );
+        await expectLater(
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [lines.debit(receivable, 100), lines.credit(income, 100)],
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test('then a foreign ledger reference is rejected', () async {
+        final other = await LedgerTestBook.create(server);
+        await other.enable();
+        final otherBank = await other.accountWithRole(LedgerSystemRole.bank);
+        await expectLater(
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [lines.debit(otherBank, 100), lines.credit(income, 100)],
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test('then a draft edits in place and keeps its identity', () async {
+        final draft = await book.endpoint.saveDraftJournal(
+          book.session,
+          book.entity.id!,
+          DateTime.utc(2026, 11),
+          [lines.debit(bank, 50000), lines.credit(equity, 50000)],
+          reference: 'JB-EDIT',
+        );
+        final updated = await book.endpoint.saveDraftJournal(
+          book.session,
+          book.entity.id!,
+          DateTime.utc(2026, 11, 2),
+          [lines.debit(bank, 60000), lines.credit(equity, 60000)],
+          journalId: draft.id,
+          reference: 'JB-EDIT',
+        );
+
+        expect(updated.id, draft.id);
+        expect(updated.date, DateTime.utc(2026, 11, 2));
+        final stored = await book.endpoint.listJournalLines(
+          book.session,
+          draft.id!,
+        );
+        expect(stored, hasLength(2));
+        expect(
+          stored.fold<int>(0, (sum, line) => sum + line.baseDebitMinor),
+          60000,
+        );
+      });
+
+      test('then a draft deletes and posted journals never do', () async {
+        final draft = await book.endpoint.saveDraftJournal(
+          book.session,
+          book.entity.id!,
+          DateTime.utc(2026, 11),
+          [lines.debit(bank, 50000), lines.credit(equity, 50000)],
+        );
+        await book.endpoint.deleteDraftJournal(book.session, draft.id!);
+        expect(
+          await book.endpoint.listJournals(book.session, book.entity.id!),
+          isEmpty,
+        );
+
+        final posted = await book.post(DateTime.utc(2026, 11), [
+          lines.debit(bank, 50000),
+          lines.credit(equity, 50000),
+        ]);
+        await expectLater(
+          book.endpoint.postJournal(book.session, posted.id!),
+          throwsA(isA<ValidationException>()),
+        );
+        await expectLater(
+          book.endpoint.deleteDraftJournal(book.session, posted.id!),
+          throwsA(isA<ValidationException>()),
+        );
+        await expectLater(
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [lines.debit(bank, 1), lines.credit(equity, 1)],
+            journalId: posted.id,
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test(
+        'then an account archived after the draft rejects posting',
+        () async {
+          final created = await book.endpoint.createAccount(
+            book.session,
+            book.entity.id!,
+            '6100',
+            'Marketing',
+            LedgerAccountType.expense,
+          );
+          final draft = await book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            [lines.debit(created, 100), lines.credit(bank, 100)],
+          );
+          await book.endpoint.archiveAccount(book.session, created.id!);
+
+          await expectLater(
+            book.endpoint.postJournal(book.session, draft.id!),
+            throwsA(isA<ValidationException>()),
+          );
+          final stored = (await Journal.db.findById(book.session, draft.id!))!;
+          expect(stored.status, JournalStatus.draft);
+        },
+      );
+
+      test('then a posted journal keeps its exact facts', () async {
+        final posted = await book.post(DateTime.utc(2026, 11), [
+          lines.debit(bank, 12345),
+          lines.credit(equity, 12345),
+        ]);
+        final before = await book.endpoint.listJournalLines(
+          book.session,
+          posted.id!,
+        );
+
+        await book.endpoint.reverseJournal(
+          book.session,
+          posted.id!,
+          DateTime.utc(2026, 11, 2),
+        );
+
+        final after = await book.endpoint.listJournalLines(
+          book.session,
+          posted.id!,
+        );
+        expect(
+          [
+            for (final line in after)
+              (
+                line.id,
+                line.debitMinor,
+                line.creditMinor,
+                line.baseDebitMinor,
+                line.baseCreditMinor,
+              ),
+          ],
+          [
+            for (final line in before)
+              (
+                line.id,
+                line.debitMinor,
+                line.creditMinor,
+                line.baseDebitMinor,
+                line.baseCreditMinor,
+              ),
           ],
         );
-        expect(journal.status, 'posted');
       });
     });
 
-    group('when computing the trial balance', () {
-      test('then it balances across posted journals (T8.1 shape)', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
-        final accounts = await enableLedger(owner, budget);
+    group('posting, reversing and the trial balance', () {
+      late LedgerTestBook book;
+      late LedgerLineBuilder lines;
+      late LedgerAccount bank;
+      late LedgerAccount equity;
+      late LedgerAccount expense;
+      late LedgerAccount income;
 
-        await post(
-          owner,
-          budget,
-          date: openingDate,
-          lines: [
-            line(accounts['1000']!, isDebit: true, amountMinor: 50000),
-            line(accounts['3200']!, isDebit: false, amountMinor: 50000),
-          ],
-          source: 'opening',
+      setUp(() async {
+        book = await LedgerTestBook.create(server);
+        final checking = await book.addAccount();
+        await book.enable();
+        lines = LedgerLineBuilder(book.baseCurrency);
+        bank = await book.linkedAccount(await book.reloadAccount(checking.id!));
+        equity = await book.accountWithRole(
+          LedgerSystemRole.openingBalanceEquity,
         );
-        await post(
-          owner,
-          budget,
-          date: feeDate,
-          lines: [
-            line(accounts['5600']!, isDebit: true, amountMinor: 1250),
-            line(accounts['1000']!, isDebit: false, amountMinor: 1250),
-          ],
-        );
-
-        final trialBalance = await endpoints.ledger.trialBalance(
-          owner,
-          budget.id!,
-          feeDate,
-        );
-
-        expect(trialBalance.currencyCode, 'GBP');
-        final byCode = {
-          for (final row in trialBalance.rows) row.accountCode: row,
-        };
-        expect(byCode['1000']!.debitMinor, 50000);
-        expect(byCode['1000']!.creditMinor, 1250);
-        expect(byCode['1000']!.netMinor, 48750);
-        expect(byCode['5600']!.netMinor, 1250);
-        expect(byCode['3200']!.netMinor, -50000);
-        expect(byCode['3200']!.accountType, 'equity');
-        expect(trialBalance.totalDebitMinor, 51250);
-        expect(trialBalance.totalCreditMinor, 51250);
+        expense = await book.accountWithCode('5600');
+        income = await book.accountWithCode('4000');
       });
 
-      test('then journals after the as-of date are excluded', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
-        final accounts = await enableLedger(owner, budget);
+      test(
+        'then posting stamps server facts and the audit before state',
+        () async {
+          final posted = await book.post(
+            DateTime.utc(2026, 11),
+            [lines.debit(bank, 50000), lines.credit(equity, 50000)],
+            source: JournalSource.opening,
+          );
 
-        await post(
-          owner,
-          budget,
-          date: openingDate,
-          lines: [
-            line(accounts['1000']!, isDebit: true, amountMinor: 50000),
-            line(accounts['3200']!, isDebit: false, amountMinor: 50000),
-          ],
-          source: 'opening',
+          expect(posted.status, JournalStatus.posted);
+          expect(posted.postedAt, isNotNull);
+          expect(posted.postedAt!.isUtc, isTrue);
+          expect(posted.postedBy, book.userId);
+          final events = await book.endpoint.listAuditEvents(
+            book.session,
+            book.entity.id!,
+          );
+          final event = events.singleWhere(
+            (event) => event.action == AuditAction.journalPosted,
+          );
+          expect(event.actorId, book.userId);
+          expect(event.payloadJson, contains('"status":"draft"'));
+          expect(event.subjectType, AuditSubject.journal);
+          expect(event.subjectId, posted.id);
+        },
+      );
+
+      test(
+        'then a posted fee reverses and the trial balance nets zero',
+        () async {
+          await book.post(
+            DateTime.utc(2026, 11),
+            [lines.debit(bank, 50000), lines.credit(equity, 50000)],
+            source: JournalSource.opening,
+          );
+          final fee = await book.post(DateTime.utc(2026, 11, 3), [
+            lines.debit(expense, 1250),
+            lines.credit(bank, 1250),
+          ]);
+
+          final before = await book.endpoint.trialBalance(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11, 3),
+          );
+          expect(before.totalDebitMinor, 51250);
+          expect(before.totalCreditMinor, 51250);
+
+          final reversal = await book.endpoint.reverseJournal(
+            book.session,
+            fee.id!,
+            DateTime.utc(2026, 11, 20),
+          );
+          expect(reversal.status, JournalStatus.posted);
+          expect(reversal.source, JournalSource.reversal);
+          expect(reversal.reversalOfJournalId, fee.id);
+          final journals = await book.endpoint.listJournals(
+            book.session,
+            book.entity.id!,
+          );
+          expect(
+            journals.singleWhere((journal) => journal.id == fee.id).status,
+            JournalStatus.reversed,
+          );
+
+          final after = await book.endpoint.trialBalance(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11, 20),
+          );
+          final byCode = {
+            for (final row in after.rows) row.accountCode: row.netMinor,
+          };
+          expect(byCode[bank.code], 50000);
+          expect(byCode[expense.code], 0);
+          expect(byCode[equity.code], -50000);
+          expect(after.totalDebitMinor, 52500);
+          expect(after.totalCreditMinor, 52500);
+
+          await expectLater(
+            book.endpoint.reverseJournal(
+              book.session,
+              fee.id!,
+              DateTime.utc(2026, 11, 21),
+            ),
+            throwsA(isA<ValidationException>()),
+          );
+        },
+      );
+
+      test('then a reversal preserves the stored rate and rate date', () async {
+        final usdChecking = await book.addAccount(
+          name: 'USD current',
+          currencyCode: 'USD',
         );
-        await post(
-          owner,
-          budget,
-          date: laterDate,
-          lines: [
-            line(accounts['5600']!, isDebit: true, amountMinor: 1250),
-            line(accounts['1000']!, isDebit: false, amountMinor: 1250),
-          ],
+        final usdBank = await book.linkedAccount(
+          await book.reloadAccount(usdChecking.id!),
+        );
+        final original = await book.post(DateTime.utc(2026, 11), [
+          lines.debit(
+            usdBank,
+            100000,
+            currencyCode: 'USD',
+            baseAmountMinor: 80000,
+            fxRate: '0.8',
+            fxRateDate: DateTime.utc(2026, 10, 31),
+          ),
+          lines.credit(equity, 80000),
+        ]);
+        final originalLines = await book.endpoint.listJournalLines(
+          book.session,
+          original.id!,
+        );
+        final usdLine = originalLines.singleWhere(
+          (line) => line.ledgerAccountId == usdBank.id,
         );
 
-        final before = await endpoints.ledger.trialBalance(
-          owner,
-          budget.id!,
-          openingDate,
+        final reversal = await book.endpoint.reverseJournal(
+          book.session,
+          original.id!,
+          DateTime.utc(2026, 11, 20),
+        );
+        final reversalLines = await book.endpoint.listJournalLines(
+          book.session,
+          reversal.id!,
+        );
+        final reversedUsd = reversalLines.singleWhere(
+          (line) => line.ledgerAccountId == usdBank.id,
+        );
+
+        expect(reversedUsd.fxRate, '0.8');
+        expect(reversedUsd.fxRateDate, usdLine.fxRateDate);
+        expect(reversedUsd.fxRateSource, FxRateSource.manual);
+        expect(reversedUsd.debitMinor, usdLine.creditMinor);
+        expect(reversedUsd.creditMinor, usdLine.debitMinor);
+        expect(reversedUsd.baseDebitMinor, usdLine.baseCreditMinor);
+        expect(reversedUsd.baseCreditMinor, usdLine.baseDebitMinor);
+        final refetchedOriginal = await book.endpoint.listJournalLines(
+          book.session,
+          original.id!,
+        );
+        expect(
+          refetchedOriginal
+              .singleWhere(
+                (line) => line.ledgerAccountId == usdBank.id,
+              )
+              .fxRate,
+          '0.8',
+        );
+      });
+
+      test('then the trial balance honors as-of and excludes drafts', () async {
+        await book.post(
+          DateTime.utc(2026, 11),
+          [lines.debit(bank, 50000), lines.credit(equity, 50000)],
+          source: JournalSource.opening,
+        );
+        await book.post(DateTime.utc(2026, 11, 20), [
+          lines.debit(expense, 1250),
+          lines.credit(bank, 1250),
+        ]);
+        await book.endpoint.saveDraftJournal(
+          book.session,
+          book.entity.id!,
+          DateTime.utc(2026, 11),
+          [lines.debit(expense, 99999), lines.credit(bank, 99999)],
+        );
+
+        final before = await book.endpoint.trialBalance(
+          book.session,
+          book.entity.id!,
+          DateTime.utc(2026, 11),
         );
         expect(before.rows, hasLength(2));
         expect(before.totalDebitMinor, 50000);
-      });
-
-      test('then drafts never feed the trial balance', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
-        final accounts = await enableLedger(owner, budget);
-
-        await endpoints.ledger.saveDraftJournal(
-          owner,
-          budget.id!,
-          openingDate,
-          [
-            line(accounts['1000']!, isDebit: true, amountMinor: 99999),
-            line(accounts['3200']!, isDebit: false, amountMinor: 99999),
-          ],
-          reference: '',
-          source: 'manual',
-        );
-
-        final trialBalance = await endpoints.ledger.trialBalance(
-          owner,
-          budget.id!,
-          laterDate,
-        );
-        expect(trialBalance.rows, isEmpty);
-        expect(trialBalance.totalDebitMinor, 0);
-      });
-
-      test('then a stranger cannot read the trial balance', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
-        await enableLedger(owner, budget);
+        expect(before.currencyCode, book.baseCurrency);
 
         await expectLater(
-          endpoints.ledger.trialBalance(stranger, budget.id!, laterDate),
-          throwsA(isA<NotFoundException>()),
+          book.endpoint.trialBalance(
+            book.session,
+            book.entity.id!,
+            DateTime(2026, 11),
+          ),
+          throwsA(isA<ValidationException>()),
         );
+      });
+
+      test('then an unbalanced book is a hard error', () async {
+        final posted = await book.post(DateTime.utc(2026, 11), [
+          lines.debit(bank, 100),
+          lines.credit(equity, 100),
+        ]);
+        await JournalLine.db.insertRow(
+          book.session,
+          JournalLine(
+            journalId: posted.id!,
+            ledgerAccountId: income.id!,
+            debitMinor: 1,
+            currencyCode: book.baseCurrency,
+            baseDebitMinor: 1,
+            fxRate: '1',
+            fxRateDate: DateTime.utc(2026, 11),
+            fxRateSource: FxRateSource.identity,
+          ),
+        );
+
+        await expectLater(
+          book.endpoint.trialBalance(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test(
+        'then posted bank movements are not fake cash transactions',
+        () async {
+          final moneyAccount = (await Account.db.findFirstRow(
+            book.session,
+            where: (t) => t.ledgerAccountId.equals(bank.id),
+          ))!;
+          expect(moneyAccount.balanceMinor, 0);
+          final transactionsBefore = await model.Transaction.db.count(
+            book.session,
+          );
+
+          await book.post(DateTime.utc(2026, 11), [
+            lines.debit(bank, 7500),
+            lines.credit(equity, 7500),
+          ]);
+
+          final after = await Account.db.findById(
+            book.session,
+            moneyAccount.id!,
+          );
+          expect(after!.balanceMinor, 0);
+          expect(
+            await model.Transaction.db.count(book.session),
+            transactionsBefore,
+          );
+        },
+      );
+
+      test('then JPY and KWD post with their own exponents', () async {
+        final jpyBook = await LedgerTestBook.create(
+          server,
+          baseCurrencyCode: 'JPY',
+        );
+        final jpyChecking = await jpyBook.addAccount(currencyCode: 'JPY');
+        await jpyBook.enable();
+        final jpyBank = await jpyBook.linkedAccount(
+          await jpyBook.reloadAccount(jpyChecking.id!),
+        );
+        final jpyEquity = await jpyBook.accountWithRole(
+          LedgerSystemRole.openingBalanceEquity,
+        );
+        final jpyLines = LedgerLineBuilder('JPY');
+        // USD 100.00 at 150 JPY per USD is 15,000 yen minor units; a *100
+        // assumption would produce 1,500,000.
+        await jpyBook.post(DateTime.utc(2026, 11), [
+          jpyLines.debit(
+            jpyBank,
+            10000,
+            currencyCode: 'USD',
+            baseAmountMinor: 15000,
+            fxRate: '150',
+          ),
+          jpyLines.credit(jpyEquity, 15000),
+        ]);
+        final jpyTrial = await jpyBook.endpoint.trialBalance(
+          jpyBook.session,
+          jpyBook.entity.id!,
+          DateTime.utc(2026, 11),
+        );
+        expect(jpyTrial.totalDebitMinor, 15000);
+
+        final kwdBook = await LedgerTestBook.create(
+          server,
+          baseCurrencyCode: 'KWD',
+        );
+        final kwdChecking = await kwdBook.addAccount(currencyCode: 'KWD');
+        await kwdBook.enable();
+        final kwdBank = await kwdBook.linkedAccount(
+          await kwdBook.reloadAccount(kwdChecking.id!),
+        );
+        final kwdEquity = await kwdBook.accountWithRole(
+          LedgerSystemRole.openingBalanceEquity,
+        );
+        final kwdLines = LedgerLineBuilder('KWD');
+        // USD 100.00 at 0.307 KWD per USD is 30.700 KWD, or 30,700 fils.
+        await kwdBook.post(DateTime.utc(2026, 11), [
+          kwdLines.debit(
+            kwdBank,
+            10000,
+            currencyCode: 'USD',
+            baseAmountMinor: 30700,
+            fxRate: '0.307',
+          ),
+          kwdLines.credit(kwdEquity, 30700),
+        ]);
+        final kwdTrial = await kwdBook.endpoint.trialBalance(
+          kwdBook.session,
+          kwdBook.entity.id!,
+          DateTime.utc(2026, 11),
+        );
+        expect(kwdTrial.totalDebitMinor, 30700);
       });
     });
 
-    group('when the budget is in envelope mode', () {
-      test('then ledger calls are refused', () async {
-        final budget = await createBudget(
-          owner,
-          TaxEntityKind.company,
-          withProfile: false,
+    group('the period lock', () {
+      late LedgerTestBook book;
+      late LedgerLineBuilder lines;
+      late LedgerAccount bank;
+      late LedgerAccount expense;
+
+      setUp(() async {
+        book = await LedgerTestBook.create(server);
+        final checking = await book.addAccount();
+        await book.enable();
+        lines = LedgerLineBuilder(book.baseCurrency);
+        bank = await book.linkedAccount(await book.reloadAccount(checking.id!));
+        expense = await book.accountWithCode('5600');
+      });
+
+      test(
+        'then dates on or before the lock reject post and draft writes',
+        () async {
+          final locked = DateTime.utc(2026, 11, 3);
+          await book.endpoint.setLockDate(
+            book.session,
+            book.entity.id!,
+            locked,
+          );
+          final lock = await book.endpoint.getLockDate(
+            book.session,
+            book.entity.id!,
+          );
+          expect(lock!.lockDate, locked);
+
+          await expectLater(
+            book.endpoint.saveDraftJournal(
+              book.session,
+              book.entity.id!,
+              locked,
+              [lines.debit(expense, 100), lines.credit(bank, 100)],
+            ),
+            throwsA(isA<ValidationException>()),
+          );
+          await expectLater(
+            book.endpoint.setLockDate(
+              book.session,
+              book.entity.id!,
+              DateTime(2026, 11, 3),
+            ),
+            throwsA(isA<ValidationException>()),
+          );
+
+          final open = await book.post(DateTime.utc(2026, 11, 4), [
+            lines.debit(expense, 100),
+            lines.credit(bank, 100),
+          ]);
+          expect(open.status, JournalStatus.posted);
+        },
+      );
+
+      test('then a draft in the lock cannot be edited or deleted', () async {
+        final draft = await book.endpoint.saveDraftJournal(
+          book.session,
+          book.entity.id!,
+          DateTime.utc(2026, 11, 2),
+          [lines.debit(expense, 100), lines.credit(bank, 100)],
+        );
+        await book.endpoint.setLockDate(
+          book.session,
+          book.entity.id!,
+          DateTime.utc(2026, 11, 3),
         );
 
         await expectLater(
-          endpoints.ledger.listAccounts(
-            owner,
-            budget.id!,
-            includeArchived: false,
+          book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11, 4),
+            [lines.debit(expense, 100), lines.credit(bank, 100)],
+            journalId: draft.id,
           ),
           throwsA(isA<ValidationException>()),
         );
         await expectLater(
-          endpoints.ledger.saveDraftJournal(
-            owner,
-            budget.id!,
-            openingDate,
-            [],
-            reference: '',
-            source: 'manual',
+          book.endpoint.deleteDraftJournal(book.session, draft.id!),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test(
+        'then reversal into the lock is rejected and after it succeeds',
+        () async {
+          final journal = await book.post(DateTime.utc(2026, 11), [
+            lines.debit(expense, 100),
+            lines.credit(bank, 100),
+          ]);
+          await book.endpoint.setLockDate(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11, 3),
+          );
+
+          await expectLater(
+            book.endpoint.reverseJournal(
+              book.session,
+              journal.id!,
+              DateTime.utc(2026, 11, 3),
+            ),
+            throwsA(isA<ValidationException>()),
+          );
+          final reversal = await book.endpoint.reverseJournal(
+            book.session,
+            journal.id!,
+            DateTime.utc(2026, 11, 4),
+          );
+          expect(reversal.status, JournalStatus.posted);
+        },
+      );
+
+      test('then moving the lock is audited with both dates', () async {
+        await book.endpoint.setLockDate(
+          book.session,
+          book.entity.id!,
+          DateTime.utc(2026, 11, 3),
+        );
+        await book.endpoint.setLockDate(
+          book.session,
+          book.entity.id!,
+          DateTime.utc(2026, 11, 1),
+        );
+
+        final events = await book.endpoint.listAuditEvents(
+          book.session,
+          book.entity.id!,
+        );
+        final lockEvents = events
+            .where((event) => event.action == AuditAction.lockSet)
+            .toList();
+        expect(lockEvents, hasLength(2));
+        expect(lockEvents.first.payloadJson, contains('2026-11-03'));
+        expect(lockEvents.first.payloadJson, contains('2026-11-01'));
+        expect(lockEvents.first.actorId, book.userId);
+      });
+    });
+
+    group('bounded lists and audit pages', () {
+      test(
+        'then journals page by date and id with the documented cursor',
+        () async {
+          final book = await LedgerTestBook.create(server);
+          final checking = await book.addAccount();
+          await book.enable();
+          final lines = LedgerLineBuilder(book.baseCurrency);
+          final bank = await book.linkedAccount(
+            await book.reloadAccount(checking.id!),
+          );
+          final equity = await book.accountWithRole(
+            LedgerSystemRole.openingBalanceEquity,
+          );
+          final date = DateTime.utc(2026, 11, 3);
+          final journals = <Journal>[];
+          for (var index = 0; index < 3; index++) {
+            journals.add(
+              await book.post(date, [
+                lines.debit(bank, 100 + index),
+                lines.credit(equity, 100 + index),
+              ], reference: 'JB-$index'),
+            );
+          }
+          final ordered = [...journals]
+            ..sort((a, b) => b.id!.uuid.compareTo(a.id!.uuid));
+
+          final firstPage = await book.endpoint.listJournals(
+            book.session,
+            book.entity.id!,
+            limit: 2,
+          );
+          expect(firstPage, hasLength(2));
+          expect(
+            firstPage.map((journal) => journal.id),
+            ordered.take(2).map((journal) => journal.id),
+          );
+
+          final secondPage = await book.endpoint.listJournals(
+            book.session,
+            book.entity.id!,
+            limit: 2,
+            cursor: journalCursor(firstPage.last.date, firstPage.last.id!),
+          );
+          expect(secondPage.map((journal) => journal.id), [ordered.last.id]);
+
+          await expectLater(
+            book.endpoint.listJournals(
+              book.session,
+              book.entity.id!,
+              limit: 0,
+            ),
+            throwsA(isA<ValidationException>()),
+          );
+          await expectLater(
+            book.endpoint.listJournals(
+              book.session,
+              book.entity.id!,
+              limit: 201,
+            ),
+            throwsA(isA<ValidationException>()),
+          );
+          await expectLater(
+            book.endpoint.listJournals(
+              book.session,
+              book.entity.id!,
+              cursor: 'not a cursor',
+            ),
+            throwsA(isA<ValidationException>()),
+          );
+          await expectLater(
+            book.endpoint.listJournals(
+              book.session,
+              book.entity.id!,
+              fromDate: DateTime.utc(2026, 11, 4),
+              toDate: DateTime.utc(2026, 11, 3),
+            ),
+            throwsA(isA<ValidationException>()),
+          );
+        },
+      );
+
+      test('then audit events page newest first with bounded ties', () async {
+        final book = await LedgerTestBook.create(server);
+        final checking = await book.addAccount();
+        await book.enable();
+        final lines = LedgerLineBuilder(book.baseCurrency);
+        final bank = await book.linkedAccount(
+          await book.reloadAccount(checking.id!),
+        );
+        final equity = await book.accountWithRole(
+          LedgerSystemRole.openingBalanceEquity,
+        );
+        await book.post(DateTime.utc(2026, 11), [
+          lines.debit(bank, 100),
+          lines.credit(equity, 100),
+        ]);
+        await book.endpoint.setLockDate(
+          book.session,
+          book.entity.id!,
+          DateTime.utc(2026, 11, 5),
+        );
+
+        final page = await book.endpoint.listAuditEvents(
+          book.session,
+          book.entity.id!,
+          limit: 1,
+        );
+        expect(page, hasLength(1));
+        final all = await book.endpoint.listAuditEvents(
+          book.session,
+          book.entity.id!,
+        );
+        expect(all.length, greaterThanOrEqualTo(3));
+        expect(
+          all.map((event) => event.action),
+          containsAll([
+            AuditAction.ledgerEnabled,
+            AuditAction.journalPosted,
+            AuditAction.lockSet,
+          ]),
+        );
+        expect(
+          all.every((event) => event.createdAt.isUtc),
+          isTrue,
+        );
+
+        final before = await book.endpoint.listAuditEvents(
+          book.session,
+          book.entity.id!,
+          before: page.single.createdAt,
+        );
+        expect(
+          before.every(
+            (event) => event.createdAt.isBefore(page.single.createdAt),
+          ),
+          isTrue,
+        );
+        await expectLater(
+          book.endpoint.listAuditEvents(
+            book.session,
+            book.entity.id!,
+            limit: 201,
           ),
           throwsA(isA<ValidationException>()),
         );
+
+        // Equal server timestamps still have one stable id order.
+        final timestamp = DateTime.utc(2020);
+        final first = const Uuid().v7obj();
+        final second = const Uuid().v7obj();
+        for (final id in [first, second]) {
+          await AuditEvent.db.insertRow(
+            book.session,
+            AuditEvent(
+              id: id,
+              entityId: book.entity.id!,
+              actorId: book.userId,
+              action: AuditAction.balanceRepaired,
+              payloadJson: '{"before":null}',
+              createdAt: timestamp,
+            ),
+          );
+        }
+        final ties = await book.endpoint.listAuditEvents(
+          book.session,
+          book.entity.id!,
+          before: DateTime.utc(2020).add(const Duration(seconds: 1)),
+        );
+        final tieIds = ties
+            .where((event) => event.createdAt == timestamp)
+            .map((event) => event.id!.uuid)
+            .toList();
+        final expectedTies = [first.uuid, second.uuid]
+          ..sort((a, b) => b.compareTo(a));
+        expect(tieIds, expectedTies);
+      });
+
+      test('then failed writes leave no audit event', () async {
+        final individual = await LedgerTestBook.create(
+          server,
+          kind: EntityKind.individual,
+        );
         await expectLater(
-          endpoints.ledger.trialBalance(owner, budget.id!, laterDate),
+          individual.enable(),
           throwsA(isA<ValidationException>()),
         );
+        expect(
+          await AuditEvent.db.count(
+            individual.session,
+            where: (t) => t.entityId.equals(individual.entity.id),
+          ),
+          0,
+        );
+
+        final book = await LedgerTestBook.create(server);
+        await book.enable();
+        final before = await book.endpoint.listAuditEvents(
+          book.session,
+          book.entity.id!,
+        );
+        final bank = await book.accountWithRole(LedgerSystemRole.bank);
+        await expectLater(
+          book.endpoint.archiveAccount(book.session, bank.id!),
+          throwsA(isA<ValidationException>()),
+        );
+        await expectLater(
+          book.endpoint.createAccount(
+            book.session,
+            book.entity.id!,
+            bank.code,
+            'Duplicate',
+            LedgerAccountType.expense,
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+        final after = await book.endpoint.listAuditEvents(
+          book.session,
+          book.entity.id!,
+        );
+        expect(after, hasLength(before.length));
       });
     });
   });

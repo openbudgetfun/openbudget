@@ -10,6 +10,7 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:openbudget_server/src/generated/protocol.dart' as _is0sbm8r;
 import 'package:serverpod/serverpod.dart' as _is;
 
@@ -17,7 +18,7 @@ import '../tax/tax_liability_view.dart' as _iyg1xvx7;
 import '../tax/tax_opportunity_view.dart' as _i7gx5xr1;
 import '../tax/tax_report_line_view.dart' as _i8pphqdm;
 
-/// The computed tax position for one budget and tax year.
+/// The computed tax position for one entity and tax year.
 abstract class TaxReportView
     implements _is.SerializableModel, _is.ProtocolSerialization {
   TaxReportView._({
@@ -47,7 +48,7 @@ abstract class TaxReportView
     required String yearLabel,
     required DateTime yearStart,
     required DateTime yearEnd,
-    required String entityKind,
+    required _ifz8weqz.EntityKind entityKind,
     required String currencyCode,
     required List<_i8pphqdm.TaxReportLineView> lines,
     required List<_iyg1xvx7.TaxLiabilityView> liabilities,
@@ -71,7 +72,9 @@ abstract class TaxReportView
         jsonSerialization['yearStart'],
       ),
       yearEnd: _is.DateTimeJsonExtension.fromJson(jsonSerialization['yearEnd']),
-      entityKind: jsonSerialization['entityKind'] as String,
+      entityKind: _ifz8weqz.EntityKind.fromJson(
+        (jsonSerialization['entityKind'] as String),
+      ),
       currencyCode: jsonSerialization['currencyCode'] as String,
       lines: _is0sbm8r.Protocol()
           .deserialize<List<_i8pphqdm.TaxReportLineView>>(
@@ -115,8 +118,8 @@ abstract class TaxReportView
 
   DateTime yearEnd;
 
-  /// TaxEntityKind name.
-  String entityKind;
+  /// The entity kind.
+  _ifz8weqz.EntityKind entityKind;
 
   /// ISO 4217 code every amount in this report is in.
   String currencyCode;
@@ -159,7 +162,7 @@ abstract class TaxReportView
     String? yearLabel,
     DateTime? yearStart,
     DateTime? yearEnd,
-    String? entityKind,
+    _ifz8weqz.EntityKind? entityKind,
     String? currencyCode,
     List<_i8pphqdm.TaxReportLineView>? lines,
     List<_iyg1xvx7.TaxLiabilityView>? liabilities,
@@ -182,7 +185,7 @@ abstract class TaxReportView
       'yearLabel': yearLabel,
       'yearStart': yearStart.toJson(),
       'yearEnd': yearEnd.toJson(),
-      'entityKind': entityKind,
+      'entityKind': entityKind.toJson(),
       'currencyCode': currencyCode,
       'lines': lines.toJson(valueToJson: (v) => v.toJson()),
       'liabilities': liabilities.toJson(valueToJson: (v) => v.toJson()),
@@ -207,7 +210,7 @@ abstract class TaxReportView
       'yearLabel': yearLabel,
       'yearStart': yearStart.toJson(),
       'yearEnd': yearEnd.toJson(),
-      'entityKind': entityKind,
+      'entityKind': entityKind.toJson(),
       'currencyCode': currencyCode,
       'lines': lines.toJson(valueToJson: (v) => v.toJsonForProtocol()),
       'liabilities': liabilities.toJson(
@@ -240,7 +243,7 @@ class _TaxReportViewImpl extends TaxReportView {
     required String yearLabel,
     required DateTime yearStart,
     required DateTime yearEnd,
-    required String entityKind,
+    required _ifz8weqz.EntityKind entityKind,
     required String currencyCode,
     required List<_i8pphqdm.TaxReportLineView> lines,
     required List<_iyg1xvx7.TaxLiabilityView> liabilities,
@@ -284,7 +287,7 @@ class _TaxReportViewImpl extends TaxReportView {
     String? yearLabel,
     DateTime? yearStart,
     DateTime? yearEnd,
-    String? entityKind,
+    _ifz8weqz.EntityKind? entityKind,
     String? currencyCode,
     List<_i8pphqdm.TaxReportLineView>? lines,
     List<_iyg1xvx7.TaxLiabilityView>? liabilities,

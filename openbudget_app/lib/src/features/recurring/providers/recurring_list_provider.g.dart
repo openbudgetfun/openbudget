@@ -66,7 +66,7 @@ final class RecurringListProvider
   }
 }
 
-String _$recurringListHash() => r'72158de0fca2dad2be3436eb007b354fa05bfa22';
+String _$recurringListHash() => r'3d9c46f161791598422fa7c995cc498c684e388e';
 
 final class RecurringListFamily extends $Family
     with
@@ -83,8 +83,8 @@ final class RecurringListFamily extends $Family
         isAutoDispose: true,
       );
 
-  RecurringListProvider call(String budgetId) =>
-      RecurringListProvider._(argument: budgetId, from: this);
+  RecurringListProvider call(String entityId) =>
+      RecurringListProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'recurringListProvider';

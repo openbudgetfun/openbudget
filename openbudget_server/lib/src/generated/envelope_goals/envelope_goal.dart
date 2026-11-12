@@ -14,16 +14,18 @@ import 'dart:async' as _ida;
 
 import 'package:serverpod/serverpod.dart' as _is;
 
-/// A savings goal or target for an envelope.
+import '../envelope_goals/envelope_goal_kind.dart' as _ietq9ydg;
+
+/// A savings or funding target for one envelope.
 abstract class EnvelopeGoal
     implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   EnvelopeGoal._({
     this.id,
+    required this.entityId,
     required this.envelopeId,
-    required this.goalType,
-    required this.targetAmountCents,
+    required this.kind,
+    required this.amountMinor,
     this.targetDate,
-    this.monthlyFundingCents,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : createdAt = createdAt ?? DateTime.now(),
@@ -31,11 +33,11 @@ abstract class EnvelopeGoal
 
   factory EnvelopeGoal({
     _is.UuidValue? id,
+    required _is.UuidValue entityId,
     required _is.UuidValue envelopeId,
-    required String goalType,
-    required int targetAmountCents,
+    required _ietq9ydg.EnvelopeGoalKind kind,
+    required int amountMinor,
     DateTime? targetDate,
-    int? monthlyFundingCents,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _EnvelopeGoalImpl;
@@ -45,15 +47,19 @@ abstract class EnvelopeGoal
       id: jsonSerialization['id'] == null
           ? null
           : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      entityId: _is.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
+      ),
       envelopeId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['envelopeId'],
       ),
-      goalType: jsonSerialization['goalType'] as String,
-      targetAmountCents: jsonSerialization['targetAmountCents'] as int,
+      kind: _ietq9ydg.EnvelopeGoalKind.fromJson(
+        (jsonSerialization['kind'] as String),
+      ),
+      amountMinor: jsonSerialization['amountMinor'] as int,
       targetDate: jsonSerialization['targetDate'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['targetDate']),
-      monthlyFundingCents: jsonSerialization['monthlyFundingCents'] as int?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -70,19 +76,19 @@ abstract class EnvelopeGoal
   @override
   _is.UuidValue? id;
 
+  _is.UuidValue entityId;
+
   _is.UuidValue envelopeId;
 
-  /// Goal type: 'target_balance', 'monthly_funding', or 'target_by_date'.
-  String goalType;
+  _ietq9ydg.EnvelopeGoalKind kind;
 
-  /// Target amount in integer cents.
-  int targetAmountCents;
+  /// Base-currency minor units, positive. The target balance for
+  /// targetBalance and targetByDate; the amount to assign each month for
+  /// monthlyFunding.
+  int amountMinor;
 
-  /// Target date for 'target_by_date' goals (nullable for other types).
+  /// Calendar date; required for targetByDate, null otherwise.
   DateTime? targetDate;
-
-  /// Monthly funding amount in cents for 'monthly_funding' goals.
-  int? monthlyFundingCents;
 
   DateTime createdAt;
 
@@ -96,11 +102,11 @@ abstract class EnvelopeGoal
   @_is.useResult
   EnvelopeGoal copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? entityId,
     _is.UuidValue? envelopeId,
-    String? goalType,
-    int? targetAmountCents,
+    _ietq9ydg.EnvelopeGoalKind? kind,
+    int? amountMinor,
     DateTime? targetDate = const _is.$UndefinedDateTime(),
-    int? monthlyFundingCents,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -109,12 +115,11 @@ abstract class EnvelopeGoal
     return {
       '__className__': 'EnvelopeGoal',
       if (id != null) 'id': id?.toJson(),
+      'entityId': entityId.toJson(),
       'envelopeId': envelopeId.toJson(),
-      'goalType': goalType,
-      'targetAmountCents': targetAmountCents,
+      'kind': kind.toJson(),
+      'amountMinor': amountMinor,
       if (targetDate != null) 'targetDate': targetDate?.toJson(),
-      if (monthlyFundingCents != null)
-        'monthlyFundingCents': monthlyFundingCents,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -125,12 +130,11 @@ abstract class EnvelopeGoal
     return {
       '__className__': 'EnvelopeGoal',
       if (id != null) 'id': id?.toJson(),
+      'entityId': entityId.toJson(),
       'envelopeId': envelopeId.toJson(),
-      'goalType': goalType,
-      'targetAmountCents': targetAmountCents,
+      'kind': kind.toJson(),
+      'amountMinor': amountMinor,
       if (targetDate != null) 'targetDate': targetDate?.toJson(),
-      if (monthlyFundingCents != null)
-        'monthlyFundingCents': monthlyFundingCents,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -164,25 +168,23 @@ abstract class EnvelopeGoal
   }
 }
 
-class _Undefined {}
-
 class _EnvelopeGoalImpl extends EnvelopeGoal {
   _EnvelopeGoalImpl({
     _is.UuidValue? id,
+    required _is.UuidValue entityId,
     required _is.UuidValue envelopeId,
-    required String goalType,
-    required int targetAmountCents,
+    required _ietq9ydg.EnvelopeGoalKind kind,
+    required int amountMinor,
     DateTime? targetDate,
-    int? monthlyFundingCents,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
          id: id,
+         entityId: entityId,
          envelopeId: envelopeId,
-         goalType: goalType,
-         targetAmountCents: targetAmountCents,
+         kind: kind,
+         amountMinor: amountMinor,
          targetDate: targetDate,
-         monthlyFundingCents: monthlyFundingCents,
          createdAt: createdAt,
          updatedAt: updatedAt,
        );
@@ -193,25 +195,23 @@ class _EnvelopeGoalImpl extends EnvelopeGoal {
   @override
   EnvelopeGoal copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? entityId,
     _is.UuidValue? envelopeId,
-    String? goalType,
-    int? targetAmountCents,
+    _ietq9ydg.EnvelopeGoalKind? kind,
+    int? amountMinor,
     DateTime? targetDate = const _is.$UndefinedDateTime(),
-    Object? monthlyFundingCents = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return EnvelopeGoal(
       id: id is _is.UndefinedSentinel ? this.id : id,
+      entityId: entityId ?? this.entityId,
       envelopeId: envelopeId ?? this.envelopeId,
-      goalType: goalType ?? this.goalType,
-      targetAmountCents: targetAmountCents ?? this.targetAmountCents,
+      kind: kind ?? this.kind,
+      amountMinor: amountMinor ?? this.amountMinor,
       targetDate: targetDate is _is.UndefinedSentinel
           ? this.targetDate
           : targetDate,
-      monthlyFundingCents: monthlyFundingCents is int?
-          ? monthlyFundingCents
-          : this.monthlyFundingCents,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -221,6 +221,12 @@ class _EnvelopeGoalImpl extends EnvelopeGoal {
 class EnvelopeGoalUpdateTable extends _is.UpdateTable<EnvelopeGoalTable> {
   EnvelopeGoalUpdateTable(super.table);
 
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> entityId(_is.UuidValue value) =>
+      _is.ColumnValue(
+        table.entityId,
+        value,
+      );
+
   _is.ColumnValue<_is.UuidValue, _is.UuidValue> envelopeId(
     _is.UuidValue value,
   ) => _is.ColumnValue(
@@ -228,13 +234,15 @@ class EnvelopeGoalUpdateTable extends _is.UpdateTable<EnvelopeGoalTable> {
     value,
   );
 
-  _is.ColumnValue<String, String> goalType(String value) => _is.ColumnValue(
-    table.goalType,
+  _is.ColumnValue<_ietq9ydg.EnvelopeGoalKind, _ietq9ydg.EnvelopeGoalKind> kind(
+    _ietq9ydg.EnvelopeGoalKind value,
+  ) => _is.ColumnValue(
+    table.kind,
     value,
   );
 
-  _is.ColumnValue<int, int> targetAmountCents(int value) => _is.ColumnValue(
-    table.targetAmountCents,
+  _is.ColumnValue<int, int> amountMinor(int value) => _is.ColumnValue(
+    table.amountMinor,
     value,
   );
 
@@ -243,11 +251,6 @@ class EnvelopeGoalUpdateTable extends _is.UpdateTable<EnvelopeGoalTable> {
         table.targetDate,
         value,
       );
-
-  _is.ColumnValue<int, int> monthlyFundingCents(int? value) => _is.ColumnValue(
-    table.monthlyFundingCents,
-    value,
-  );
 
   _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _is.ColumnValue(
@@ -265,24 +268,25 @@ class EnvelopeGoalUpdateTable extends _is.UpdateTable<EnvelopeGoalTable> {
 class EnvelopeGoalTable extends _is.Table<_is.UuidValue?> {
   EnvelopeGoalTable({super.tableRelation}) : super(tableName: 'envelope_goal') {
     updateTable = EnvelopeGoalUpdateTable(this);
+    entityId = _is.ColumnUuid(
+      'entityId',
+      this,
+    );
     envelopeId = _is.ColumnUuid(
       'envelopeId',
       this,
     );
-    goalType = _is.ColumnString(
-      'goalType',
+    kind = _is.ColumnEnum(
+      'kind',
       this,
+      _is.EnumSerialization.byName,
     );
-    targetAmountCents = _is.ColumnInt(
-      'targetAmountCents',
+    amountMinor = _is.ColumnInt(
+      'amountMinor',
       this,
     );
     targetDate = _is.ColumnDateTime(
       'targetDate',
-      this,
-    );
-    monthlyFundingCents = _is.ColumnInt(
-      'monthlyFundingCents',
       this,
     );
     createdAt = _is.ColumnDateTime(
@@ -299,19 +303,19 @@ class EnvelopeGoalTable extends _is.Table<_is.UuidValue?> {
 
   late final EnvelopeGoalUpdateTable updateTable;
 
+  late final _is.ColumnUuid entityId;
+
   late final _is.ColumnUuid envelopeId;
 
-  /// Goal type: 'target_balance', 'monthly_funding', or 'target_by_date'.
-  late final _is.ColumnString goalType;
+  late final _is.ColumnEnum<_ietq9ydg.EnvelopeGoalKind> kind;
 
-  /// Target amount in integer cents.
-  late final _is.ColumnInt targetAmountCents;
+  /// Base-currency minor units, positive. The target balance for
+  /// targetBalance and targetByDate; the amount to assign each month for
+  /// monthlyFunding.
+  late final _is.ColumnInt amountMinor;
 
-  /// Target date for 'target_by_date' goals (nullable for other types).
+  /// Calendar date; required for targetByDate, null otherwise.
   late final _is.ColumnDateTime targetDate;
-
-  /// Monthly funding amount in cents for 'monthly_funding' goals.
-  late final _is.ColumnInt monthlyFundingCents;
 
   late final _is.ColumnDateTime createdAt;
 
@@ -320,11 +324,11 @@ class EnvelopeGoalTable extends _is.Table<_is.UuidValue?> {
   @override
   List<_is.Column> get columns => [
     id,
+    entityId,
     envelopeId,
-    goalType,
-    targetAmountCents,
+    kind,
+    amountMinor,
     targetDate,
-    monthlyFundingCents,
     createdAt,
     updatedAt,
   ];

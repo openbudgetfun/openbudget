@@ -11,8 +11,11 @@
 // ignore_for_file: dead_code, unnecessary_type_check
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:openbudget_server/src/generated/accounts/account.dart'
     as _i3fh9aci;
+import 'package:openbudget_server/src/generated/accounts/account_valuation.dart'
+    as _itqzh2rv;
 import 'package:openbudget_server/src/generated/agent/agent_conversation.dart'
     as _ihq3j0fx;
 import 'package:openbudget_server/src/generated/agent/agent_message.dart'
@@ -21,12 +24,22 @@ import 'package:openbudget_server/src/generated/agent/agent_proposal.dart'
     as _iqa5uoc4;
 import 'package:openbudget_server/src/generated/agent/mcp/agent_access_token_view.dart'
     as _i8fy0qox;
+import 'package:openbudget_server/src/generated/audit/audit_event.dart'
+    as _ictk02ka;
+import 'package:openbudget_server/src/generated/budget/allocation_input.dart'
+    as _inwbkajl;
+import 'package:openbudget_server/src/generated/budget/budget_month_summary.dart'
+    as _ipz3w5am;
 import 'package:openbudget_server/src/generated/budget_templates/budget_template.dart'
     as _ihbdj8p6;
-import 'package:openbudget_server/src/generated/budgets/budget.dart'
-    as _ihk6o4ea;
+import 'package:openbudget_server/src/generated/budget_templates/budget_template_line.dart'
+    as _iz4ekkcc;
 import 'package:openbudget_server/src/generated/categories/category.dart'
     as _iwlneq7u;
+import 'package:openbudget_server/src/generated/entities/entity.dart'
+    as _if2ry2np;
+import 'package:openbudget_server/src/generated/entities/entity_summary_view.dart'
+    as _im3neacv;
 import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dart'
     as _iuyjld9f;
 import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
@@ -41,31 +54,29 @@ import 'package:openbudget_server/src/generated/ledger/journal_line_input.dart'
     as _in0sxdux;
 import 'package:openbudget_server/src/generated/ledger/ledger_account.dart'
     as _iab1c098;
-import 'package:openbudget_server/src/generated/monthly_allocations/monthly_allocation.dart'
-    as _i01zjgtu;
 import 'package:openbudget_server/src/generated/payees/payee.dart' as _i2xhh3nq;
+import 'package:openbudget_server/src/generated/plaid/plaid_connection.dart'
+    as _iyqk0wcc;
 import 'package:openbudget_server/src/generated/recurring_transactions/recurring_transaction.dart'
     as _i6lbncsb;
-import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet.dart'
-    as _ieq0zunc;
-import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet_holding.dart'
-    as _iry3zuft;
-import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet_tax_year_summary.dart'
-    as _ik6g6ols;
-import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet_transaction.dart'
-    as _imyeu1oa;
+import 'package:openbudget_server/src/generated/reports/spending_row.dart'
+    as _ijvd4zl8;
 import 'package:openbudget_server/src/generated/tax/tax_category_view.dart'
     as _i687t6y5;
 import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
     as _i4wqhpw2;
 import 'package:openbudget_server/src/generated/transactions/import_row.dart'
     as _iyod81ld;
-import 'package:openbudget_server/src/generated/transactions/split_item.dart'
-    as _ii8zyh2l;
-import 'package:openbudget_server/src/generated/transactions/transaction.dart'
-    as _ioie3qid;
+import 'package:openbudget_server/src/generated/transactions/transaction_view.dart'
+    as _iw07wj0h;
+import 'package:openbudget_server/src/generated/wallets/wallet.dart'
+    as _igcr1vxe;
 import 'package:openbudget_server/src/generated/wallets/wallet_holding.dart'
     as _icu5m6lt;
+import 'package:openbudget_server/src/generated/wallets/wallet_tax_year_summary.dart'
+    as _ilgsya0a;
+import 'package:openbudget_server/src/generated/wallets/wallet_transaction.dart'
+    as _imzwq91q;
 import 'package:serverpod/protocol.dart' as _isp;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
@@ -74,6 +85,9 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
 
 import 'accounts/account.dart' as _iz2jf14v;
+import 'accounts/account_balances_view.dart' as _i53yl4yp;
+import 'accounts/account_valuation.dart' as _i87oqvv1;
+import 'accounts/valuation_source.dart' as _ig9cy6ku;
 import 'agent/agent_conversation.dart' as _isfmgqgu;
 import 'agent/agent_event.dart' as _i769eo9u;
 import 'agent/agent_event_kind.dart' as _iyhb15ax;
@@ -90,16 +104,30 @@ import 'agent/agent_usage_view.dart' as _ipqjijih;
 import 'agent/mcp/agent_access_token.dart' as _i8betnj7;
 import 'agent/mcp/agent_access_token_created.dart' as _iis6jewo;
 import 'agent/mcp/agent_access_token_view.dart' as _i4mcrc97;
+import 'audit/audit_action.dart' as _iqje9mi5;
+import 'audit/audit_event.dart' as _ijhj7cd7;
+import 'audit/audit_subject.dart' as _i2sn5a56;
 import 'billing/entitlement.dart' as _iq2w1sa5;
 import 'billing/entitlement_source.dart' as _ipnf4x0i;
 import 'billing/entitlement_status.dart' as _imqwzx9j;
 import 'billing/solana_billing_challenge.dart' as _iw7l0hzr;
 import 'billing/solana_plan_view.dart' as _iwxkomal;
 import 'billing/stripe_customer.dart' as _in1nt6tx;
+import 'budget/allocation_input.dart' as _iouaddet;
+import 'budget/budget_month_summary.dart' as _ixyov90t;
+import 'budget/budget_month_view.dart' as _ihanl5km;
+import 'budget/envelope_month_view.dart' as _ii8h2sft;
 import 'budget_templates/budget_template.dart' as _i01fne9j;
-import 'budgets/budget.dart' as _idtyoogy;
+import 'budget_templates/budget_template_line.dart' as _iagnrffn;
 import 'categories/category.dart' as _iwxpkdmg;
+import 'common/confidence.dart' as _i4zfq652;
+import 'common/sync_status.dart' as _iynfhhr3;
+import 'entities/change_scope.dart' as _i03vgs6n;
+import 'entities/entity.dart' as _iamyw1yn;
+import 'entities/entity_changed_event.dart' as _is12mxpv;
+import 'entities/entity_summary_view.dart' as _ihqn2h4c;
 import 'envelope_goals/envelope_goal.dart' as _ifl4yivq;
+import 'envelope_goals/envelope_goal_kind.dart' as _i61aeoqs;
 import 'envelopes/envelope.dart' as _ikt21dfw;
 import 'exceptions/agent_allowance_exhausted_exception.dart' as _iozei2bz;
 import 'exceptions/agent_provider_exception.dart' as _iurccglg;
@@ -109,21 +137,23 @@ import 'exceptions/billing_provider_exception.dart' as _i9zkhl6f;
 import 'exceptions/billing_rail_unavailable_exception.dart' as _i5kq7itn;
 import 'exceptions/entitlement_required_exception.dart' as _ik3lny6q;
 import 'exceptions/forbidden_exception.dart' as _iha6yc5u;
+import 'exceptions/fx_rate_unavailable_exception.dart' as _if5umnl3;
 import 'exceptions/not_found_exception.dart' as _izob2ctl;
-import 'exceptions/tax_rate_unavailable_exception.dart' as _in744jyg;
 import 'exceptions/tax_rules_unavailable_exception.dart' as _i4yu9vcq;
 import 'exceptions/validation_exception.dart' as _igpdbyom;
+import 'future_calls_generated_models/fx_backfill_future_call_fetch_model.dart'
+    as _iuflqeka;
 import 'fx_rates/fx_latest_snapshot.dart' as _i8cxakqz;
-import 'fx_rates/fx_rate_entry.dart' as _i41ek9pv;
+import 'fx_rates/fx_provider.dart' as _ifsg8hc8;
+import 'fx_rates/fx_quote_view.dart' as _i8bj7347;
+import 'fx_rates/fx_rate.dart' as _i46rvf1t;
 import 'fx_rates/fx_rate_quote.dart' as _i15udi7x;
-import 'fx_rates/fx_rate_snapshot.dart' as _i4xgo4ij;
 import 'institutions/institution.dart' as _ikgmcjq7;
 import 'institutions/institution_location.dart' as _iclizrec;
 import 'ledger/journal.dart' as _iqqjzj2w;
 import 'ledger/journal_line.dart' as _i6l0fo54;
 import 'ledger/journal_line_input.dart' as _id7zp91q;
 import 'ledger/ledger_account.dart' as _ivazbnnp;
-import 'ledger/ledger_audit_event.dart' as _ipq97xjw;
 import 'ledger/ledger_period_lock.dart' as _i7t4btg4;
 import 'ledger/trial_balance_row_view.dart' as _i5gsx3ds;
 import 'ledger/trial_balance_view.dart' as _i7q128aw;
@@ -131,11 +161,16 @@ import 'monthly_allocations/monthly_allocation.dart' as _igdgld5u;
 import 'payees/payee.dart' as _ignezpci;
 import 'plaid/plaid_connection.dart' as _i1vmvtrm;
 import 'recurring_transactions/recurring_transaction.dart' as _i9is7zb8;
-import 'solana_wallets/solana_wallet.dart' as _iotf4y4d;
-import 'solana_wallets/solana_wallet_holding.dart' as _ivqf8i64;
-import 'solana_wallets/solana_wallet_sync_result.dart' as _ir1c2di9;
-import 'solana_wallets/solana_wallet_tax_year_summary.dart' as _ijmvodfo;
-import 'solana_wallets/solana_wallet_transaction.dart' as _iwwk92r1;
+import 'reports/net_worth_account_row.dart' as _ieg4kkwo;
+import 'reports/net_worth_currency_row.dart' as _if6ke1e2;
+import 'reports/net_worth_entity_row.dart' as _i2p47r1m;
+import 'reports/net_worth_granularity.dart' as _iiyi1fdi;
+import 'reports/net_worth_history_view.dart' as _izpykydm;
+import 'reports/net_worth_point.dart' as _ihwosu5p;
+import 'reports/net_worth_view.dart' as _idk5va87;
+import 'reports/report_grouping.dart' as _ijpgwwdu;
+import 'reports/spending_row.dart' as _ikppksh7;
+import 'settings/user_settings.dart' as _i99f9doz;
 import 'tax/tax_band_slice_view.dart' as _ic4zfx3b;
 import 'tax/tax_category_view.dart' as _iv5oayw3;
 import 'tax/tax_liability_view.dart' as _ivss6b81;
@@ -144,14 +179,35 @@ import 'tax/tax_profile.dart' as _i20z9jax;
 import 'tax/tax_report_line_view.dart' as _i6llsezf;
 import 'tax/tax_report_view.dart' as _inb54q20;
 import 'transaction_rules/transaction_rule.dart' as _i6dj6ji0;
+import 'transactions/import_result.dart' as _ibzcfs2k;
 import 'transactions/import_row.dart' as _isp6bezg;
-import 'transactions/split_item.dart' as _i0jd5x9z;
+import 'transactions/reconcile_result.dart' as _igokbqfh;
 import 'transactions/transaction.dart' as _iqhl4hru;
-import 'wallets/asset_quote_cache.dart' as _i2gu4pwf;
-import 'wallets/wallet_connect_result.dart' as _igiy3v19;
-import 'wallets/wallet_connection.dart' as _i9uqpb1b;
+import 'transactions/transaction_flag.dart' as _i4fvctax;
+import 'transactions/transaction_input.dart' as _ipd1rac6;
+import 'transactions/transaction_kind.dart' as _ioneruif;
+import 'transactions/transaction_line.dart' as _ipio7ws3;
+import 'transactions/transaction_line_input.dart' as _imsv7m6w;
+import 'transactions/transaction_page.dart' as _i7f3q91r;
+import 'transactions/transaction_query.dart' as _ioinkgwn;
+import 'transactions/transaction_status.dart' as _i3rynkdl;
+import 'transactions/transaction_view.dart' as _ilixdhed;
+import 'transactions/transfer.dart' as _ign516jt;
+import 'transactions/transfer_input.dart' as _iah0rmrk;
+import 'transactions/transfer_peer_view.dart' as _i3n9n3ej;
+import 'wallets/asset_price.dart' as _iw6q2afx;
+import 'wallets/price_quality.dart' as _i6j30n20;
+import 'wallets/price_source.dart' as _iu1a5mev;
+import 'wallets/wallet.dart' as _ilu5i0rn;
 import 'wallets/wallet_holding.dart' as _iqqppnaa;
+import 'wallets/wallet_network.dart' as _ifam4bx7;
+import 'wallets/wallet_sync_result.dart' as _ipdq2p58;
+import 'wallets/wallet_tax_year_summary.dart' as _ivsmsmw6;
+import 'wallets/wallet_transaction.dart' as _i6m1jx15;
 export 'accounts/account.dart';
+export 'accounts/account_balances_view.dart';
+export 'accounts/account_valuation.dart';
+export 'accounts/valuation_source.dart';
 export 'agent/agent_conversation.dart';
 export 'agent/agent_event.dart';
 export 'agent/agent_event_kind.dart';
@@ -168,16 +224,30 @@ export 'agent/agent_usage_view.dart';
 export 'agent/mcp/agent_access_token.dart';
 export 'agent/mcp/agent_access_token_created.dart';
 export 'agent/mcp/agent_access_token_view.dart';
+export 'audit/audit_action.dart';
+export 'audit/audit_event.dart';
+export 'audit/audit_subject.dart';
 export 'billing/entitlement.dart';
 export 'billing/entitlement_source.dart';
 export 'billing/entitlement_status.dart';
 export 'billing/solana_billing_challenge.dart';
 export 'billing/solana_plan_view.dart';
 export 'billing/stripe_customer.dart';
+export 'budget/allocation_input.dart';
+export 'budget/budget_month_summary.dart';
+export 'budget/budget_month_view.dart';
+export 'budget/envelope_month_view.dart';
 export 'budget_templates/budget_template.dart';
-export 'budgets/budget.dart';
+export 'budget_templates/budget_template_line.dart';
 export 'categories/category.dart';
+export 'common/confidence.dart';
+export 'common/sync_status.dart';
+export 'entities/change_scope.dart';
+export 'entities/entity.dart';
+export 'entities/entity_changed_event.dart';
+export 'entities/entity_summary_view.dart';
 export 'envelope_goals/envelope_goal.dart';
+export 'envelope_goals/envelope_goal_kind.dart';
 export 'envelopes/envelope.dart';
 export 'exceptions/agent_allowance_exhausted_exception.dart';
 export 'exceptions/agent_provider_exception.dart';
@@ -187,21 +257,21 @@ export 'exceptions/billing_provider_exception.dart';
 export 'exceptions/billing_rail_unavailable_exception.dart';
 export 'exceptions/entitlement_required_exception.dart';
 export 'exceptions/forbidden_exception.dart';
+export 'exceptions/fx_rate_unavailable_exception.dart';
 export 'exceptions/not_found_exception.dart';
-export 'exceptions/tax_rate_unavailable_exception.dart';
 export 'exceptions/tax_rules_unavailable_exception.dart';
 export 'exceptions/validation_exception.dart';
 export 'fx_rates/fx_latest_snapshot.dart';
-export 'fx_rates/fx_rate_entry.dart';
+export 'fx_rates/fx_provider.dart';
+export 'fx_rates/fx_quote_view.dart';
+export 'fx_rates/fx_rate.dart';
 export 'fx_rates/fx_rate_quote.dart';
-export 'fx_rates/fx_rate_snapshot.dart';
 export 'institutions/institution.dart';
 export 'institutions/institution_location.dart';
 export 'ledger/journal.dart';
 export 'ledger/journal_line.dart';
 export 'ledger/journal_line_input.dart';
 export 'ledger/ledger_account.dart';
-export 'ledger/ledger_audit_event.dart';
 export 'ledger/ledger_period_lock.dart';
 export 'ledger/trial_balance_row_view.dart';
 export 'ledger/trial_balance_view.dart';
@@ -209,11 +279,16 @@ export 'monthly_allocations/monthly_allocation.dart';
 export 'payees/payee.dart';
 export 'plaid/plaid_connection.dart';
 export 'recurring_transactions/recurring_transaction.dart';
-export 'solana_wallets/solana_wallet.dart';
-export 'solana_wallets/solana_wallet_holding.dart';
-export 'solana_wallets/solana_wallet_sync_result.dart';
-export 'solana_wallets/solana_wallet_tax_year_summary.dart';
-export 'solana_wallets/solana_wallet_transaction.dart';
+export 'reports/net_worth_account_row.dart';
+export 'reports/net_worth_currency_row.dart';
+export 'reports/net_worth_entity_row.dart';
+export 'reports/net_worth_granularity.dart';
+export 'reports/net_worth_history_view.dart';
+export 'reports/net_worth_point.dart';
+export 'reports/net_worth_view.dart';
+export 'reports/report_grouping.dart';
+export 'reports/spending_row.dart';
+export 'settings/user_settings.dart';
 export 'tax/tax_band_slice_view.dart';
 export 'tax/tax_category_view.dart';
 export 'tax/tax_liability_view.dart';
@@ -222,13 +297,31 @@ export 'tax/tax_profile.dart';
 export 'tax/tax_report_line_view.dart';
 export 'tax/tax_report_view.dart';
 export 'transaction_rules/transaction_rule.dart';
+export 'transactions/import_result.dart';
 export 'transactions/import_row.dart';
-export 'transactions/split_item.dart';
+export 'transactions/reconcile_result.dart';
 export 'transactions/transaction.dart';
-export 'wallets/asset_quote_cache.dart';
-export 'wallets/wallet_connect_result.dart';
-export 'wallets/wallet_connection.dart';
+export 'transactions/transaction_flag.dart';
+export 'transactions/transaction_input.dart';
+export 'transactions/transaction_kind.dart';
+export 'transactions/transaction_line.dart';
+export 'transactions/transaction_line_input.dart';
+export 'transactions/transaction_page.dart';
+export 'transactions/transaction_query.dart';
+export 'transactions/transaction_status.dart';
+export 'transactions/transaction_view.dart';
+export 'transactions/transfer.dart';
+export 'transactions/transfer_input.dart';
+export 'transactions/transfer_peer_view.dart';
+export 'wallets/asset_price.dart';
+export 'wallets/price_quality.dart';
+export 'wallets/price_source.dart';
+export 'wallets/wallet.dart';
 export 'wallets/wallet_holding.dart';
+export 'wallets/wallet_network.dart';
+export 'wallets/wallet_sync_result.dart';
+export 'wallets/wallet_tax_year_summary.dart';
+export 'wallets/wallet_transaction.dart';
 
 class Protocol extends _is.DatabaseSerializationManager
     implements _is.DatabaseProtocolDeserializationProvider {
@@ -244,6 +337,9 @@ class Protocol extends _is.DatabaseSerializationManager
         this,
         types: const [
           _is.getType<_iz2jf14v.Account>,
+          _is.getType<_i53yl4yp.AccountBalancesView>,
+          _is.getType<_i87oqvv1.AccountValuation>,
+          _is.getType<_ig9cy6ku.ValuationSource>,
           _is.getType<_isfmgqgu.AgentConversation>,
           _is.getType<_i769eo9u.AgentEvent>,
           _is.getType<_iyhb15ax.AgentEventKind>,
@@ -260,16 +356,30 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i8betnj7.AgentAccessToken>,
           _is.getType<_iis6jewo.AgentAccessTokenCreated>,
           _is.getType<_i4mcrc97.AgentAccessTokenView>,
+          _is.getType<_iqje9mi5.AuditAction>,
+          _is.getType<_ijhj7cd7.AuditEvent>,
+          _is.getType<_i2sn5a56.AuditSubject>,
           _is.getType<_iq2w1sa5.Entitlement>,
           _is.getType<_ipnf4x0i.EntitlementSource>,
           _is.getType<_imqwzx9j.EntitlementStatus>,
           _is.getType<_iw7l0hzr.SolanaBillingChallenge>,
           _is.getType<_iwxkomal.SolanaPlanView>,
           _is.getType<_in1nt6tx.StripeCustomer>,
+          _is.getType<_iouaddet.AllocationInput>,
+          _is.getType<_ixyov90t.BudgetMonthSummary>,
+          _is.getType<_ihanl5km.BudgetMonthView>,
+          _is.getType<_ii8h2sft.EnvelopeMonthView>,
           _is.getType<_i01fne9j.BudgetTemplate>,
-          _is.getType<_idtyoogy.Budget>,
+          _is.getType<_iagnrffn.BudgetTemplateLine>,
           _is.getType<_iwxpkdmg.Category>,
+          _is.getType<_i4zfq652.Confidence>,
+          _is.getType<_iynfhhr3.SyncStatus>,
+          _is.getType<_i03vgs6n.ChangeScope>,
+          _is.getType<_iamyw1yn.Entity>,
+          _is.getType<_is12mxpv.EntityChangedEvent>,
+          _is.getType<_ihqn2h4c.EntitySummaryView>,
           _is.getType<_ifl4yivq.EnvelopeGoal>,
+          _is.getType<_i61aeoqs.EnvelopeGoalKind>,
           _is.getType<_ikt21dfw.Envelope>,
           _is.getType<_iozei2bz.AgentAllowanceExhaustedException>,
           _is.getType<_iurccglg.AgentProviderException>,
@@ -279,21 +389,22 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i5kq7itn.BillingRailUnavailableException>,
           _is.getType<_ik3lny6q.EntitlementRequiredException>,
           _is.getType<_iha6yc5u.ForbiddenException>,
+          _is.getType<_if5umnl3.FxRateUnavailableException>,
           _is.getType<_izob2ctl.NotFoundException>,
-          _is.getType<_in744jyg.TaxRateUnavailableException>,
           _is.getType<_i4yu9vcq.TaxRulesUnavailableException>,
           _is.getType<_igpdbyom.ValidationException>,
+          _is.getType<_iuflqeka.FxBackfillFutureCallFetchModel>,
           _is.getType<_i8cxakqz.FxLatestSnapshot>,
-          _is.getType<_i41ek9pv.FxRateEntry>,
+          _is.getType<_ifsg8hc8.FxProvider>,
+          _is.getType<_i8bj7347.FxQuoteView>,
+          _is.getType<_i46rvf1t.FxRate>,
           _is.getType<_i15udi7x.FxRateQuote>,
-          _is.getType<_i4xgo4ij.FxRateSnapshot>,
           _is.getType<_ikgmcjq7.Institution>,
           _is.getType<_iclizrec.InstitutionLocation>,
           _is.getType<_iqqjzj2w.Journal>,
           _is.getType<_i6l0fo54.JournalLine>,
           _is.getType<_id7zp91q.JournalLineInput>,
           _is.getType<_ivazbnnp.LedgerAccount>,
-          _is.getType<_ipq97xjw.LedgerAuditEvent>,
           _is.getType<_i7t4btg4.LedgerPeriodLock>,
           _is.getType<_i5gsx3ds.TrialBalanceRowView>,
           _is.getType<_i7q128aw.TrialBalanceView>,
@@ -301,11 +412,16 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_ignezpci.Payee>,
           _is.getType<_i1vmvtrm.PlaidConnection>,
           _is.getType<_i9is7zb8.RecurringTransaction>,
-          _is.getType<_iotf4y4d.SolanaWallet>,
-          _is.getType<_ivqf8i64.SolanaWalletHolding>,
-          _is.getType<_ir1c2di9.SolanaWalletSyncResult>,
-          _is.getType<_ijmvodfo.SolanaWalletTaxYearSummary>,
-          _is.getType<_iwwk92r1.SolanaWalletTransaction>,
+          _is.getType<_ieg4kkwo.NetWorthAccountRow>,
+          _is.getType<_if6ke1e2.NetWorthCurrencyRow>,
+          _is.getType<_i2p47r1m.NetWorthEntityRow>,
+          _is.getType<_iiyi1fdi.NetWorthGranularity>,
+          _is.getType<_izpykydm.NetWorthHistoryView>,
+          _is.getType<_ihwosu5p.NetWorthPoint>,
+          _is.getType<_idk5va87.NetWorthView>,
+          _is.getType<_ijpgwwdu.ReportGrouping>,
+          _is.getType<_ikppksh7.SpendingRow>,
+          _is.getType<_i99f9doz.UserSettings>,
           _is.getType<_ic4zfx3b.TaxBandSliceView>,
           _is.getType<_iv5oayw3.TaxCategoryView>,
           _is.getType<_ivss6b81.TaxLiabilityView>,
@@ -314,14 +430,35 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i6llsezf.TaxReportLineView>,
           _is.getType<_inb54q20.TaxReportView>,
           _is.getType<_i6dj6ji0.TransactionRule>,
+          _is.getType<_ibzcfs2k.ImportResult>,
           _is.getType<_isp6bezg.ImportRow>,
-          _is.getType<_i0jd5x9z.SplitItem>,
+          _is.getType<_igokbqfh.ReconcileResult>,
           _is.getType<_iqhl4hru.Transaction>,
-          _is.getType<_i2gu4pwf.AssetQuoteCache>,
-          _is.getType<_igiy3v19.WalletConnectResult>,
-          _is.getType<_i9uqpb1b.WalletConnection>,
+          _is.getType<_i4fvctax.TransactionFlag>,
+          _is.getType<_ipd1rac6.TransactionInput>,
+          _is.getType<_ioneruif.TransactionKind>,
+          _is.getType<_ipio7ws3.TransactionLine>,
+          _is.getType<_imsv7m6w.TransactionLineInput>,
+          _is.getType<_i7f3q91r.TransactionPage>,
+          _is.getType<_ioinkgwn.TransactionQuery>,
+          _is.getType<_i3rynkdl.TransactionStatus>,
+          _is.getType<_ilixdhed.TransactionView>,
+          _is.getType<_ign516jt.Transfer>,
+          _is.getType<_iah0rmrk.TransferInput>,
+          _is.getType<_i3n9n3ej.TransferPeerView>,
+          _is.getType<_iw6q2afx.AssetPrice>,
+          _is.getType<_i6j30n20.PriceQuality>,
+          _is.getType<_iu1a5mev.PriceSource>,
+          _is.getType<_ilu5i0rn.Wallet>,
           _is.getType<_iqqppnaa.WalletHolding>,
+          _is.getType<_ifam4bx7.WalletNetwork>,
+          _is.getType<_ipdq2p58.WalletSyncResult>,
+          _is.getType<_ivsmsmw6.WalletTaxYearSummary>,
+          _is.getType<_i6m1jx15.WalletTransaction>,
           _is.getType<_iz2jf14v.Account?>,
+          _is.getType<_i53yl4yp.AccountBalancesView?>,
+          _is.getType<_i87oqvv1.AccountValuation?>,
+          _is.getType<_ig9cy6ku.ValuationSource?>,
           _is.getType<_isfmgqgu.AgentConversation?>,
           _is.getType<_i769eo9u.AgentEvent?>,
           _is.getType<_iyhb15ax.AgentEventKind?>,
@@ -338,16 +475,30 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i8betnj7.AgentAccessToken?>,
           _is.getType<_iis6jewo.AgentAccessTokenCreated?>,
           _is.getType<_i4mcrc97.AgentAccessTokenView?>,
+          _is.getType<_iqje9mi5.AuditAction?>,
+          _is.getType<_ijhj7cd7.AuditEvent?>,
+          _is.getType<_i2sn5a56.AuditSubject?>,
           _is.getType<_iq2w1sa5.Entitlement?>,
           _is.getType<_ipnf4x0i.EntitlementSource?>,
           _is.getType<_imqwzx9j.EntitlementStatus?>,
           _is.getType<_iw7l0hzr.SolanaBillingChallenge?>,
           _is.getType<_iwxkomal.SolanaPlanView?>,
           _is.getType<_in1nt6tx.StripeCustomer?>,
+          _is.getType<_iouaddet.AllocationInput?>,
+          _is.getType<_ixyov90t.BudgetMonthSummary?>,
+          _is.getType<_ihanl5km.BudgetMonthView?>,
+          _is.getType<_ii8h2sft.EnvelopeMonthView?>,
           _is.getType<_i01fne9j.BudgetTemplate?>,
-          _is.getType<_idtyoogy.Budget?>,
+          _is.getType<_iagnrffn.BudgetTemplateLine?>,
           _is.getType<_iwxpkdmg.Category?>,
+          _is.getType<_i4zfq652.Confidence?>,
+          _is.getType<_iynfhhr3.SyncStatus?>,
+          _is.getType<_i03vgs6n.ChangeScope?>,
+          _is.getType<_iamyw1yn.Entity?>,
+          _is.getType<_is12mxpv.EntityChangedEvent?>,
+          _is.getType<_ihqn2h4c.EntitySummaryView?>,
           _is.getType<_ifl4yivq.EnvelopeGoal?>,
+          _is.getType<_i61aeoqs.EnvelopeGoalKind?>,
           _is.getType<_ikt21dfw.Envelope?>,
           _is.getType<_iozei2bz.AgentAllowanceExhaustedException?>,
           _is.getType<_iurccglg.AgentProviderException?>,
@@ -357,21 +508,22 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i5kq7itn.BillingRailUnavailableException?>,
           _is.getType<_ik3lny6q.EntitlementRequiredException?>,
           _is.getType<_iha6yc5u.ForbiddenException?>,
+          _is.getType<_if5umnl3.FxRateUnavailableException?>,
           _is.getType<_izob2ctl.NotFoundException?>,
-          _is.getType<_in744jyg.TaxRateUnavailableException?>,
           _is.getType<_i4yu9vcq.TaxRulesUnavailableException?>,
           _is.getType<_igpdbyom.ValidationException?>,
+          _is.getType<_iuflqeka.FxBackfillFutureCallFetchModel?>,
           _is.getType<_i8cxakqz.FxLatestSnapshot?>,
-          _is.getType<_i41ek9pv.FxRateEntry?>,
+          _is.getType<_ifsg8hc8.FxProvider?>,
+          _is.getType<_i8bj7347.FxQuoteView?>,
+          _is.getType<_i46rvf1t.FxRate?>,
           _is.getType<_i15udi7x.FxRateQuote?>,
-          _is.getType<_i4xgo4ij.FxRateSnapshot?>,
           _is.getType<_ikgmcjq7.Institution?>,
           _is.getType<_iclizrec.InstitutionLocation?>,
           _is.getType<_iqqjzj2w.Journal?>,
           _is.getType<_i6l0fo54.JournalLine?>,
           _is.getType<_id7zp91q.JournalLineInput?>,
           _is.getType<_ivazbnnp.LedgerAccount?>,
-          _is.getType<_ipq97xjw.LedgerAuditEvent?>,
           _is.getType<_i7t4btg4.LedgerPeriodLock?>,
           _is.getType<_i5gsx3ds.TrialBalanceRowView?>,
           _is.getType<_i7q128aw.TrialBalanceView?>,
@@ -379,11 +531,16 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_ignezpci.Payee?>,
           _is.getType<_i1vmvtrm.PlaidConnection?>,
           _is.getType<_i9is7zb8.RecurringTransaction?>,
-          _is.getType<_iotf4y4d.SolanaWallet?>,
-          _is.getType<_ivqf8i64.SolanaWalletHolding?>,
-          _is.getType<_ir1c2di9.SolanaWalletSyncResult?>,
-          _is.getType<_ijmvodfo.SolanaWalletTaxYearSummary?>,
-          _is.getType<_iwwk92r1.SolanaWalletTransaction?>,
+          _is.getType<_ieg4kkwo.NetWorthAccountRow?>,
+          _is.getType<_if6ke1e2.NetWorthCurrencyRow?>,
+          _is.getType<_i2p47r1m.NetWorthEntityRow?>,
+          _is.getType<_iiyi1fdi.NetWorthGranularity?>,
+          _is.getType<_izpykydm.NetWorthHistoryView?>,
+          _is.getType<_ihwosu5p.NetWorthPoint?>,
+          _is.getType<_idk5va87.NetWorthView?>,
+          _is.getType<_ijpgwwdu.ReportGrouping?>,
+          _is.getType<_ikppksh7.SpendingRow?>,
+          _is.getType<_i99f9doz.UserSettings?>,
           _is.getType<_ic4zfx3b.TaxBandSliceView?>,
           _is.getType<_iv5oayw3.TaxCategoryView?>,
           _is.getType<_ivss6b81.TaxLiabilityView?>,
@@ -392,60 +549,97 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i6llsezf.TaxReportLineView?>,
           _is.getType<_inb54q20.TaxReportView?>,
           _is.getType<_i6dj6ji0.TransactionRule?>,
+          _is.getType<_ibzcfs2k.ImportResult?>,
           _is.getType<_isp6bezg.ImportRow?>,
-          _is.getType<_i0jd5x9z.SplitItem?>,
+          _is.getType<_igokbqfh.ReconcileResult?>,
           _is.getType<_iqhl4hru.Transaction?>,
-          _is.getType<_i2gu4pwf.AssetQuoteCache?>,
-          _is.getType<_igiy3v19.WalletConnectResult?>,
-          _is.getType<_i9uqpb1b.WalletConnection?>,
+          _is.getType<_i4fvctax.TransactionFlag?>,
+          _is.getType<_ipd1rac6.TransactionInput?>,
+          _is.getType<_ioneruif.TransactionKind?>,
+          _is.getType<_ipio7ws3.TransactionLine?>,
+          _is.getType<_imsv7m6w.TransactionLineInput?>,
+          _is.getType<_i7f3q91r.TransactionPage?>,
+          _is.getType<_ioinkgwn.TransactionQuery?>,
+          _is.getType<_i3rynkdl.TransactionStatus?>,
+          _is.getType<_ilixdhed.TransactionView?>,
+          _is.getType<_ign516jt.Transfer?>,
+          _is.getType<_iah0rmrk.TransferInput?>,
+          _is.getType<_i3n9n3ej.TransferPeerView?>,
+          _is.getType<_iw6q2afx.AssetPrice?>,
+          _is.getType<_i6j30n20.PriceQuality?>,
+          _is.getType<_iu1a5mev.PriceSource?>,
+          _is.getType<_ilu5i0rn.Wallet?>,
           _is.getType<_iqqppnaa.WalletHolding?>,
+          _is.getType<_ifam4bx7.WalletNetwork?>,
+          _is.getType<_ipdq2p58.WalletSyncResult?>,
+          _is.getType<_ivsmsmw6.WalletTaxYearSummary?>,
+          _is.getType<_i6m1jx15.WalletTransaction?>,
+          _is.getType<List<_iwxpkdmg.Category>>,
+          _is.getType<List<_ii8h2sft.EnvelopeMonthView>>,
           _is.getType<List<_i15udi7x.FxRateQuote>>,
           _is.getType<List<_i5gsx3ds.TrialBalanceRowView>>,
+          _is.getType<List<_ihwosu5p.NetWorthPoint>>,
+          _is.getType<List<String>>,
+          _is.getType<List<_if6ke1e2.NetWorthCurrencyRow>>,
+          _is.getType<List<_i2p47r1m.NetWorthEntityRow>>,
+          _is.getType<List<_ieg4kkwo.NetWorthAccountRow>>,
           _is.getType<List<_ic4zfx3b.TaxBandSliceView>>,
           _is.getType<List<_i6llsezf.TaxReportLineView>>,
           _is.getType<List<_ivss6b81.TaxLiabilityView>>,
-          _is.getType<List<String>>,
           _is.getType<List<_iuft4v7q.TaxOpportunityView>>,
-          _is.getType<List<_iqqppnaa.WalletHolding>>,
+          _is.getType<List<_imsv7m6w.TransactionLineInput>>,
+          _is.getType<List<_ilixdhed.TransactionView>>,
+          _is.getType<List<_ipio7ws3.TransactionLine>>,
+          _is.getType<List<String>?>,
           _is.getType<List<_i3fh9aci.Account>>,
+          _is.getType<List<_is.UuidValue>>,
+          _is.getType<List<_itqzh2rv.AccountValuation>>,
           _is.getType<List<_ihq3j0fx.AgentConversation>>,
           _is.getType<List<_ixbh63dx.AgentMessage>>,
           _is.getType<List<_iqa5uoc4.AgentProposal>>,
           _is.getType<List<_i8fy0qox.AgentAccessTokenView>>,
+          _is.getType<List<_inwbkajl.AllocationInput>>,
           _is.getType<List<_ihbdj8p6.BudgetTemplate>>,
-          _is.getType<List<_i01zjgtu.MonthlyAllocation>>,
-          _is.getType<List<_ihk6o4ea.Budget>>,
+          _is.getType<List<_iz4ekkcc.BudgetTemplateLine>>,
           _is.getType<List<_iwlneq7u.Category>>,
-          _is.getType<List<_is.UuidValue>>,
+          _is.getType<List<_if2ry2np.Entity>>,
+          _is.getType<List<_im3neacv.EntitySummaryView>>,
           _is.getType<List<_iuyjld9f.EnvelopeGoal>>,
           _is.getType<List<_igwnqatb.Envelope>>,
-          _is.getType<List<String>>,
           _is.getType<List<_izagyfe8.Institution>>,
           _is.getType<List<_iab1c098.LedgerAccount>>,
           _is.getType<List<_in0sxdux.JournalLineInput>>,
           _is.getType<List<_ixvlhhyv.Journal>>,
           _is.getType<List<_icjh3b69.JournalLine>>,
+          _is.getType<List<_ictk02ka.AuditEvent>>,
           _is.getType<List<_i2xhh3nq.Payee>>,
+          _is.getType<List<_iyqk0wcc.PlaidConnection>>,
           _is.getType<List<_i6lbncsb.RecurringTransaction>>,
-          _is.getType<List<_ieq0zunc.SolanaWallet>>,
-          _is.getType<List<_imyeu1oa.SolanaWalletTransaction>>,
-          _is.getType<List<_iry3zuft.SolanaWalletHolding>>,
-          _is.getType<List<_ik6g6ols.SolanaWalletTaxYearSummary>>,
+          _is.getType<List<_is.UuidValue>?>,
+          _is.getType<List<_ijvd4zl8.SpendingRow>>,
+          _is.getType<List<_ipz3w5am.BudgetMonthSummary>>,
           _is.getType<List<_i687t6y5.TaxCategoryView>>,
           _is.getType<List<_i4wqhpw2.TransactionRule>>,
-          _is.getType<List<_ioie3qid.Transaction>>,
-          _is.getType<List<int>>,
-          _is.getType<List<_ii8zyh2l.SplitItem>>,
+          _is.getType<List<_iw07wj0h.TransactionView>>,
           _is.getType<List<_iyod81ld.ImportRow>>,
+          _is.getType<List<_igcr1vxe.Wallet>>,
           _is.getType<List<_icu5m6lt.WalletHolding>>,
+          _is.getType<List<_imzwq91q.WalletTransaction>>,
+          _is.getType<List<_ilgsya0a.WalletTaxYearSummary>>,
+          _is.getType<List<String>>,
+          _is.getType<List<String>?>,
         ],
         modules: const [
           _iais.Protocol.new,
           _iacs.Protocol.new,
+          _ifz8weqz.Protocol.new,
           _isp.Protocol.new,
         ],
         classNames: const [
           'Account',
+          'AccountBalancesView',
+          'AccountValuation',
+          'ValuationSource',
           'AgentConversation',
           'AgentEvent',
           'AgentEventKind',
@@ -462,16 +656,30 @@ class Protocol extends _is.DatabaseSerializationManager
           'AgentAccessToken',
           'AgentAccessTokenCreated',
           'AgentAccessTokenView',
+          'AuditAction',
+          'AuditEvent',
+          'AuditSubject',
           'Entitlement',
           'EntitlementSource',
           'EntitlementStatus',
           'SolanaBillingChallenge',
           'SolanaPlanView',
           'StripeCustomer',
+          'AllocationInput',
+          'BudgetMonthSummary',
+          'BudgetMonthView',
+          'EnvelopeMonthView',
           'BudgetTemplate',
-          'Budget',
+          'BudgetTemplateLine',
           'Category',
+          'Confidence',
+          'SyncStatus',
+          'ChangeScope',
+          'Entity',
+          'EntityChangedEvent',
+          'EntitySummaryView',
           'EnvelopeGoal',
+          'EnvelopeGoalKind',
           'Envelope',
           'AgentAllowanceExhaustedException',
           'AgentProviderException',
@@ -481,21 +689,22 @@ class Protocol extends _is.DatabaseSerializationManager
           'BillingRailUnavailableException',
           'EntitlementRequiredException',
           'ForbiddenException',
+          'FxRateUnavailableException',
           'NotFoundException',
-          'TaxRateUnavailableException',
           'TaxRulesUnavailableException',
           'ValidationException',
+          'FxBackfillFutureCallFetchModel',
           'FxLatestSnapshot',
-          'FxRateEntry',
+          'FxProvider',
+          'FxQuoteView',
+          'FxRate',
           'FxRateQuote',
-          'FxRateSnapshot',
           'Institution',
           'InstitutionLocation',
           'Journal',
           'JournalLine',
           'JournalLineInput',
           'LedgerAccount',
-          'LedgerAuditEvent',
           'LedgerPeriodLock',
           'TrialBalanceRowView',
           'TrialBalanceView',
@@ -503,11 +712,16 @@ class Protocol extends _is.DatabaseSerializationManager
           'Payee',
           'PlaidConnection',
           'RecurringTransaction',
-          'SolanaWallet',
-          'SolanaWalletHolding',
-          'SolanaWalletSyncResult',
-          'SolanaWalletTaxYearSummary',
-          'SolanaWalletTransaction',
+          'NetWorthAccountRow',
+          'NetWorthCurrencyRow',
+          'NetWorthEntityRow',
+          'NetWorthGranularity',
+          'NetWorthHistoryView',
+          'NetWorthPoint',
+          'NetWorthView',
+          'ReportGrouping',
+          'SpendingRow',
+          'UserSettings',
           'TaxBandSliceView',
           'TaxCategoryView',
           'TaxLiabilityView',
@@ -516,13 +730,31 @@ class Protocol extends _is.DatabaseSerializationManager
           'TaxReportLineView',
           'TaxReportView',
           'TransactionRule',
+          'ImportResult',
           'ImportRow',
-          'SplitItem',
+          'ReconcileResult',
           'Transaction',
-          'AssetQuoteCache',
-          'WalletConnectResult',
-          'WalletConnection',
+          'TransactionFlag',
+          'TransactionInput',
+          'TransactionKind',
+          'TransactionLine',
+          'TransactionLineInput',
+          'TransactionPage',
+          'TransactionQuery',
+          'TransactionStatus',
+          'TransactionView',
+          'Transfer',
+          'TransferInput',
+          'TransferPeerView',
+          'AssetPrice',
+          'PriceQuality',
+          'PriceSource',
+          'Wallet',
           'WalletHolding',
+          'WalletNetwork',
+          'WalletSyncResult',
+          'WalletTaxYearSummary',
+          'WalletTransaction',
         ],
       );
 
@@ -541,22 +773,22 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
+          name: 'entityId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
           name: 'name',
           columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'String',
         ),
         _isp.ColumnDefinition(
-          name: 'accountType',
+          name: 'kind',
           columnType: _isp.ColumnType.text,
           isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'balanceCents',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
+          dartType: 'openbudget_core:AccountKind',
         ),
         _isp.ColumnDefinition(
           name: 'currencyCode',
@@ -565,16 +797,24 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'String',
         ),
         _isp.ColumnDefinition(
-          name: 'budgetId',
-          columnType: _isp.ColumnType.uuid,
+          name: 'balanceSource',
+          columnType: _isp.ColumnType.text,
           isNullable: false,
-          dartType: 'UuidValue',
+          dartType: 'openbudget_core:AccountBalanceSource',
         ),
         _isp.ColumnDefinition(
-          name: 'creatorId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: true,
-          dartType: 'UuidValue?',
+          name: 'balanceMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _isp.ColumnDefinition(
+          name: 'onBudget',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
         ),
         _isp.ColumnDefinition(
           name: 'institutionId',
@@ -583,49 +823,207 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'UuidValue?',
         ),
         _isp.ColumnDefinition(
-          name: 'onBudget',
-          columnType: _isp.ColumnType.boolean,
-          isNullable: false,
-          dartType: 'bool',
+          name: 'plaidConnectionId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'plaidAccountId',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'reportedBalanceMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'reportedBalanceAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ledgerAccountId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'reconciledThroughDate',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'note',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
         ),
         _isp.ColumnDefinition(
           name: 'sortOrder',
           columnType: _isp.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
+          columnDefault: '0',
         ),
         _isp.ColumnDefinition(
-          name: 'isClosed',
-          columnType: _isp.ColumnType.boolean,
-          isNullable: false,
-          dartType: 'bool',
-        ),
-        _isp.ColumnDefinition(
-          name: 'sourceType',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'externalAccountId',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'connectionId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: true,
-          dartType: 'UuidValue?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'lastSyncedAt',
+          name: 'closedAt',
           columnType: _isp.ColumnType.timestampWithoutTimeZone,
           isNullable: true,
           dartType: 'DateTime?',
         ),
         _isp.ColumnDefinition(
-          name: 'syncStatus',
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'account_fk_0',
+          columns: ['entityId'],
+          referenceTable: 'entity',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'account_fk_1',
+          columns: ['institutionId'],
+          referenceTable: 'institution',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.setNull,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'account_fk_2',
+          columns: ['plaidConnectionId'],
+          referenceTable: 'plaid_connection',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.setNull,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'account_fk_3',
+          columns: ['ledgerAccountId'],
+          referenceTable: 'ledger_account',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'account_entity_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'entityId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'sortOrder',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'account_plaid_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'plaidConnectionId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'plaidAccountId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'account_ledger_account_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ledgerAccountId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'account_valuation',
+      dartName: 'AccountValuation',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'accountId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'valuationDate',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'valueMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'source',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:ValuationSource',
+        ),
+        _isp.ColumnDefinition(
+          name: 'note',
           columnType: _isp.ColumnType.text,
           isNullable: true,
           dartType: 'String?',
@@ -637,58 +1035,42 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'DateTime',
           columnDefault: 'now',
         ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
       ],
       foreignKeys: [
         _isp.ForeignKeyDefinition(
-          constraintName: 'account_fk_0',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
+          constraintName: 'account_valuation_fk_0',
+          columns: ['accountId'],
+          referenceTable: 'account',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-        _isp.ForeignKeyDefinition(
-          constraintName: 'account_fk_1',
-          columns: ['institutionId'],
-          referenceTable: 'institution',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'account_budget_idx',
+          indexName: 'account_valuation_account_date_unique_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'account_budget_external_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'accountId',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'externalAccountId',
+              definition: 'valuationDate',
             ),
           ],
           type: 'btree',
-          isUnique: false,
+          isUnique: true,
           isPrimary: false,
         ),
       ],
@@ -757,7 +1139,18 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'DateTime?',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'agent_access_token_fk_0',
+          columns: ['userId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _isp.IndexDefinition(
           indexName: 'agent_access_token_hash_unique_idx',
@@ -812,7 +1205,7 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'UuidValue',
         ),
         _isp.ColumnDefinition(
-          name: 'budgetId',
+          name: 'entityId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
@@ -841,8 +1234,18 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'agent_conversation_fk_0',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
+          columns: ['userId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'agent_conversation_fk_1',
+          columns: ['entityId'],
+          referenceTable: 'entity',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
@@ -852,12 +1255,12 @@ class Protocol extends _is.DatabaseSerializationManager
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'agent_conversation_budget_idx',
+          indexName: 'agent_conversation_entity_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'entityId',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
@@ -988,7 +1391,7 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'UuidValue',
         ),
         _isp.ColumnDefinition(
-          name: 'budgetId',
+          name: 'entityId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
@@ -1022,6 +1425,13 @@ class Protocol extends _is.DatabaseSerializationManager
           columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'protocol:AgentProposalStatus',
+          columnDefault: '\'pending\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'rulesVersion',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
         ),
         _isp.ColumnDefinition(
           name: 'createdAt',
@@ -1040,23 +1450,43 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'agent_proposal_fk_0',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
+          columns: ['userId'],
+          referenceTable: 'serverpod_auth_core_user',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
           onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'agent_proposal_fk_1',
+          columns: ['entityId'],
+          referenceTable: 'entity',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'agent_proposal_fk_2',
+          columns: ['conversationId'],
+          referenceTable: 'agent_conversation',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.setNull,
+          matchType: null,
+        ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'agent_proposal_budget_idx',
+          indexName: 'agent_proposal_entity_status_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'entityId',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
@@ -1144,7 +1574,18 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'now',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'agent_provider_settings_fk_0',
+          columns: ['userId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _isp.IndexDefinition(
           indexName: 'agent_provider_settings_user_unique_idx',
@@ -1231,7 +1672,28 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'now',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'agent_usage_record_fk_0',
+          columns: ['userId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'agent_usage_record_fk_1',
+          columns: ['conversationId'],
+          referenceTable: 'agent_conversation',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.setNull,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _isp.IndexDefinition(
           indexName: 'agent_usage_user_idx',
@@ -1267,8 +1729,8 @@ class Protocol extends _is.DatabaseSerializationManager
       managed: true,
     ),
     _isp.TableDefinition(
-      name: 'asset_quote_cache',
-      dartName: 'AssetQuoteCache',
+      name: 'asset_price',
+      dartName: 'AssetPrice',
       schema: 'public',
       module: 'openbudget',
       columns: [
@@ -1280,10 +1742,10 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'chain',
+          name: 'network',
           columnType: _isp.ColumnType.text,
           isNullable: false,
-          dartType: 'String',
+          dartType: 'protocol:WalletNetwork',
         ),
         _isp.ColumnDefinition(
           name: 'assetId',
@@ -1294,21 +1756,32 @@ class Protocol extends _is.DatabaseSerializationManager
         _isp.ColumnDefinition(
           name: 'symbol',
           columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'currencyCode',
+          columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'String',
         ),
         _isp.ColumnDefinition(
-          name: 'usdPrice',
-          columnType: _isp.ColumnType.doublePrecision,
+          name: 'unitPrice',
+          columnType: _isp.ColumnType.text,
           isNullable: false,
-          dartType: 'double',
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'source',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:PriceSource',
         ),
         _isp.ColumnDefinition(
           name: 'fetchedAt',
           columnType: _isp.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
           dartType: 'DateTime',
-          columnDefault: 'now',
         ),
         _isp.ColumnDefinition(
           name: 'expiresAt',
@@ -1320,12 +1793,12 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'asset_quote_cache_chain_asset_idx',
+          indexName: 'asset_price_network_asset_unique_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'chain',
+              definition: 'network',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
@@ -1337,7 +1810,7 @@ class Protocol extends _is.DatabaseSerializationManager
           isPrimary: false,
         ),
         _isp.IndexDefinition(
-          indexName: 'asset_quote_cache_expires_idx',
+          indexName: 'asset_price_expires_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
@@ -1353,8 +1826,8 @@ class Protocol extends _is.DatabaseSerializationManager
       managed: true,
     ),
     _isp.TableDefinition(
-      name: 'budget',
-      dartName: 'Budget',
+      name: 'audit_event',
+      dartName: 'AuditEvent',
       schema: 'public',
       module: 'openbudget',
       columns: [
@@ -1366,35 +1839,41 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'name',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'currencyCode',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'displayCurrencyCode',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'ownerId',
+          name: 'entityId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
         ),
         _isp.ColumnDefinition(
-          name: 'accountingMode',
+          name: 'actorId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'action',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:AuditAction',
+        ),
+        _isp.ColumnDefinition(
+          name: 'subjectType',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'protocol:AuditSubject?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'subjectId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'payloadJson',
           columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'String',
-          columnDefault: '\'envelope\'',
+          columnDefault: '\'{}\'',
         ),
         _isp.ColumnDefinition(
           name: 'createdAt',
@@ -1403,23 +1882,31 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'DateTime',
           columnDefault: 'now',
         ),
-        _isp.ColumnDefinition(
-          name: 'updatedAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: false,
-          dartType: 'DateTime',
-          columnDefault: 'now',
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'audit_event_fk_0',
+          columns: ['entityId'],
+          referenceTable: 'entity',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
         ),
       ],
-      foreignKeys: [],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'budget_owner_idx',
+          indexName: 'audit_event_entity_created_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'ownerId',
+              definition: 'entityId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'createdAt',
             ),
           ],
           type: 'btree',
@@ -1443,19 +1930,13 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'budgetId',
+          name: 'entityId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
         ),
         _isp.ColumnDefinition(
           name: 'name',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'allocationData',
           columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'String',
@@ -1478,27 +1959,102 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'budget_template_fk_0',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
+          columns: ['entityId'],
+          referenceTable: 'entity',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'budget_template_budget_idx',
+          indexName: 'budget_template_entity_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'entityId',
             ),
           ],
           type: 'btree',
           isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'budget_template_line',
+      dartName: 'BudgetTemplateLine',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'templateId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'envelopeId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'allocatedMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'budget_template_line_fk_0',
+          columns: ['templateId'],
+          referenceTable: 'budget_template',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'budget_template_line_fk_1',
+          columns: ['envelopeId'],
+          referenceTable: 'envelope',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'budget_template_line_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'templateId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'envelopeId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
           isPrimary: false,
         ),
       ],
@@ -1518,28 +2074,29 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
+          name: 'entityId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
           name: 'name',
           columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'String',
         ),
         _isp.ColumnDefinition(
-          name: 'budgetId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
           name: 'sortOrder',
           columnType: _isp.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
+          columnDefault: '0',
         ),
         _isp.ColumnDefinition(
           name: 'isHidden',
           columnType: _isp.ColumnType.boolean,
-          isNullable: true,
-          dartType: 'bool?',
+          isNullable: false,
+          dartType: 'bool',
           columnDefault: 'false',
         ),
         _isp.ColumnDefinition(
@@ -1549,27 +2106,38 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'DateTime',
           columnDefault: 'now',
         ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
       ],
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'category_fk_0',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
+          columns: ['entityId'],
+          referenceTable: 'entity',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'category_budget_idx',
+          indexName: 'category_entity_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'entityId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'sortOrder',
             ),
           ],
           type: 'btree',
@@ -1643,7 +2211,18 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'now',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'entitlement_fk_0',
+          columns: ['userId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _isp.IndexDefinition(
           indexName: 'entitlement_rail_unique_idx',
@@ -1679,6 +2258,171 @@ class Protocol extends _is.DatabaseSerializationManager
       managed: true,
     ),
     _isp.TableDefinition(
+      name: 'entity',
+      dartName: 'Entity',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ownerId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'name',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'kind',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'openbudget_core:EntityKind',
+        ),
+        _isp.ColumnDefinition(
+          name: 'countryCode',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'baseCurrencyCode',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'timeZone',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'accountingMode',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'openbudget_core:AccountingMode',
+          columnDefault: '\'envelope\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'fiscalYearEndMonth',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'fiscalYearEndDay',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'includeInNetWorth',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'true',
+        ),
+        _isp.ColumnDefinition(
+          name: 'linkedPersonalEntityId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'sortOrder',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _isp.ColumnDefinition(
+          name: 'archivedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'entity_fk_0',
+          columns: ['ownerId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.restrict,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'entity_fk_1',
+          columns: ['linkedPersonalEntityId'],
+          referenceTable: 'entity',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.setNull,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'entity_owner_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ownerId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'sortOrder',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'entity_linked_personal_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'linkedPersonalEntityId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
       name: 'envelope',
       dartName: 'Envelope',
       schema: 'public',
@@ -1692,10 +2436,10 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'name',
-          columnType: _isp.ColumnType.text,
+          name: 'entityId',
+          columnType: _isp.ColumnType.uuid,
           isNullable: false,
-          dartType: 'String',
+          dartType: 'UuidValue',
         ),
         _isp.ColumnDefinition(
           name: 'categoryId',
@@ -1704,19 +2448,7 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'UuidValue',
         ),
         _isp.ColumnDefinition(
-          name: 'budgetedAmountCents',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
-        ),
-        _isp.ColumnDefinition(
-          name: 'spentAmountCents',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
-        ),
-        _isp.ColumnDefinition(
-          name: 'currencyCode',
+          name: 'name',
           columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'String',
@@ -1726,6 +2458,7 @@ class Protocol extends _is.DatabaseSerializationManager
           columnType: _isp.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
+          columnDefault: '0',
         ),
         _isp.ColumnDefinition(
           name: 'note',
@@ -1740,10 +2473,16 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'String?',
         ),
         _isp.ColumnDefinition(
+          name: 'defaultLedgerAccountId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
           name: 'isHidden',
           columnType: _isp.ColumnType.boolean,
-          isNullable: true,
-          dartType: 'bool?',
+          isNullable: false,
+          dartType: 'bool',
           columnDefault: 'false',
         ),
         _isp.ColumnDefinition(
@@ -1753,10 +2492,27 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'DateTime',
           columnDefault: 'now',
         ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
       ],
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'envelope_fk_0',
+          columns: ['entityId'],
+          referenceTable: 'entity',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'envelope_fk_1',
           columns: ['categoryId'],
           referenceTable: 'category',
           referenceTableSchema: 'public',
@@ -1765,8 +2521,31 @@ class Protocol extends _is.DatabaseSerializationManager
           onDelete: _isp.ForeignKeyAction.noAction,
           matchType: null,
         ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'envelope_fk_2',
+          columns: ['defaultLedgerAccountId'],
+          referenceTable: 'ledger_account',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.setNull,
+          matchType: null,
+        ),
       ],
       indexes: [
+        _isp.IndexDefinition(
+          indexName: 'envelope_entity_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'entityId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
         _isp.IndexDefinition(
           indexName: 'envelope_category_idx',
           tableSpace: null,
@@ -1774,6 +2553,10 @@ class Protocol extends _is.DatabaseSerializationManager
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'categoryId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'sortOrder',
             ),
           ],
           type: 'btree',
@@ -1797,19 +2580,25 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
+          name: 'entityId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
           name: 'envelopeId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
         ),
         _isp.ColumnDefinition(
-          name: 'goalType',
+          name: 'kind',
           columnType: _isp.ColumnType.text,
           isNullable: false,
-          dartType: 'String',
+          dartType: 'protocol:EnvelopeGoalKind',
         ),
         _isp.ColumnDefinition(
-          name: 'targetAmountCents',
+          name: 'amountMinor',
           columnType: _isp.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
@@ -1819,12 +2608,6 @@ class Protocol extends _is.DatabaseSerializationManager
           columnType: _isp.ColumnType.timestampWithoutTimeZone,
           isNullable: true,
           dartType: 'DateTime?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'monthlyFundingCents',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: true,
-          dartType: 'int?',
         ),
         _isp.ColumnDefinition(
           name: 'createdAt',
@@ -1844,18 +2627,28 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'envelope_goal_fk_0',
+          columns: ['entityId'],
+          referenceTable: 'entity',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'envelope_goal_fk_1',
           columns: ['envelopeId'],
           referenceTable: 'envelope',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'envelope_goal_envelope_idx',
+          indexName: 'envelope_goal_envelope_unique_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
@@ -1871,8 +2664,8 @@ class Protocol extends _is.DatabaseSerializationManager
       managed: true,
     ),
     _isp.TableDefinition(
-      name: 'fx_rate_entry',
-      dartName: 'FxRateEntry',
+      name: 'fx_rate',
+      dartName: 'FxRate',
       schema: 'public',
       module: 'openbudget',
       columns: [
@@ -1884,10 +2677,10 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'snapshotId',
-          columnType: _isp.ColumnType.uuid,
+          name: 'rateDate',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
-          dartType: 'UuidValue',
+          dartType: 'DateTime',
         ),
         _isp.ColumnDefinition(
           name: 'currencyCode',
@@ -1897,88 +2690,15 @@ class Protocol extends _is.DatabaseSerializationManager
         ),
         _isp.ColumnDefinition(
           name: 'rate',
-          columnType: _isp.ColumnType.doublePrecision,
+          columnType: _isp.ColumnType.text,
           isNullable: false,
-          dartType: 'double',
-        ),
-        _isp.ColumnDefinition(
-          name: 'createdAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: false,
-          dartType: 'DateTime',
-          columnDefault: 'now',
-        ),
-      ],
-      foreignKeys: [
-        _isp.ForeignKeyDefinition(
-          constraintName: 'fx_rate_entry_fk_0',
-          columns: ['snapshotId'],
-          referenceTable: 'fx_rate_snapshot',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-      ],
-      indexes: [
-        _isp.IndexDefinition(
-          indexName: 'fx_rate_entry_snapshot_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'snapshotId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'fx_rate_entry_snapshot_currency_unique_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'snapshotId',
-            ),
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'currencyCode',
-            ),
-          ],
-          type: 'btree',
-          isUnique: true,
-          isPrimary: false,
-        ),
-      ],
-      managed: true,
-    ),
-    _isp.TableDefinition(
-      name: 'fx_rate_snapshot',
-      dartName: 'FxRateSnapshot',
-      schema: 'public',
-      module: 'openbudget',
-      columns: [
-        _isp.ColumnDefinition(
-          name: 'id',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue?',
-          columnDefault: 'random_v7',
+          dartType: 'String',
         ),
         _isp.ColumnDefinition(
           name: 'provider',
           columnType: _isp.ColumnType.text,
           isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'baseCurrencyCode',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
+          dartType: 'protocol:FxProvider',
         ),
         _isp.ColumnDefinition(
           name: 'fetchedAt',
@@ -1986,84 +2706,37 @@ class Protocol extends _is.DatabaseSerializationManager
           isNullable: false,
           dartType: 'DateTime',
         ),
-        _isp.ColumnDefinition(
-          name: 'isLatest',
-          columnType: _isp.ColumnType.boolean,
-          isNullable: false,
-          dartType: 'bool',
-          columnDefault: 'false',
-        ),
-        _isp.ColumnDefinition(
-          name: 'createdAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: false,
-          dartType: 'DateTime',
-          columnDefault: 'now',
-        ),
       ],
       foreignKeys: [],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'fx_rate_snapshot_latest_idx',
+          indexName: 'fx_rate_currency_date_unique_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'provider',
+              definition: 'currencyCode',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'baseCurrencyCode',
-            ),
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'isLatest',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'fx_rate_snapshot_fetched_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'provider',
-            ),
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'baseCurrencyCode',
-            ),
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'fetchedAt',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'fx_rate_snapshot_provider_base_time_unique_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'provider',
-            ),
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'baseCurrencyCode',
-            ),
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'fetchedAt',
+              definition: 'rateDate',
             ),
           ],
           type: 'btree',
           isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'fx_rate_date_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'rateDate',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
           isPrimary: false,
         ),
       ],
@@ -2206,7 +2879,7 @@ class Protocol extends _is.DatabaseSerializationManager
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
       ],
@@ -2279,7 +2952,7 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'budgetId',
+          name: 'entityId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
@@ -2307,15 +2980,27 @@ class Protocol extends _is.DatabaseSerializationManager
           name: 'status',
           columnType: _isp.ColumnType.text,
           isNullable: false,
-          dartType: 'String',
+          dartType: 'openbudget_core:JournalStatus',
           columnDefault: '\'draft\'',
         ),
         _isp.ColumnDefinition(
           name: 'source',
           columnType: _isp.ColumnType.text,
           isNullable: false,
-          dartType: 'String',
+          dartType: 'openbudget_core:JournalSource',
           columnDefault: '\'manual\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'sourceTransactionId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'sourceRevision',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
         ),
         _isp.ColumnDefinition(
           name: 'postedAt',
@@ -2346,8 +3031,18 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'journal_fk_0',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
+          columns: ['entityId'],
+          referenceTable: 'entity',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'journal_fk_1',
+          columns: ['reversalOfJournalId'],
+          referenceTable: 'journal',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
@@ -2357,12 +3052,12 @@ class Protocol extends _is.DatabaseSerializationManager
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'journal_budget_date_idx',
+          indexName: 'journal_entity_date_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'entityId',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
@@ -2374,16 +3069,46 @@ class Protocol extends _is.DatabaseSerializationManager
           isPrimary: false,
         ),
         _isp.IndexDefinition(
-          indexName: 'journal_budget_status_idx',
+          indexName: 'journal_entity_status_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'entityId',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'status',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'journal_source_transaction_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'sourceTransactionId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'sourceRevision',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'journal_reversal_of_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'reversalOfJournalId',
             ),
           ],
           type: 'btree',
@@ -2445,37 +3170,38 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'String',
         ),
         _isp.ColumnDefinition(
-          name: 'functionalDebitMinor',
+          name: 'baseDebitMinor',
           columnType: _isp.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
           columnDefault: '0',
         ),
         _isp.ColumnDefinition(
-          name: 'functionalCreditMinor',
+          name: 'baseCreditMinor',
           columnType: _isp.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
           columnDefault: '0',
         ),
         _isp.ColumnDefinition(
-          name: 'exchangeRate',
+          name: 'fxRate',
           columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'String',
           columnDefault: '\'1\'',
         ),
         _isp.ColumnDefinition(
-          name: 'rateDate',
+          name: 'fxRateDate',
           columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: true,
-          dartType: 'DateTime?',
+          isNullable: false,
+          dartType: 'DateTime',
         ),
         _isp.ColumnDefinition(
-          name: 'rateSource',
+          name: 'fxRateSource',
           columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
+          isNullable: false,
+          dartType: 'openbudget_core:FxRateSource',
+          columnDefault: '\'identity\'',
         ),
         _isp.ColumnDefinition(
           name: 'taxCode',
@@ -2521,7 +3247,7 @@ class Protocol extends _is.DatabaseSerializationManager
           isPrimary: false,
         ),
         _isp.IndexDefinition(
-          indexName: 'journal_line_account_idx',
+          indexName: 'journal_line_ledger_account_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
@@ -2550,7 +3276,7 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'budgetId',
+          name: 'entityId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
@@ -2571,13 +3297,13 @@ class Protocol extends _is.DatabaseSerializationManager
           name: 'type',
           columnType: _isp.ColumnType.text,
           isNullable: false,
-          dartType: 'String',
+          dartType: 'openbudget_core:LedgerAccountType',
         ),
         _isp.ColumnDefinition(
           name: 'systemRole',
           columnType: _isp.ColumnType.text,
           isNullable: true,
-          dartType: 'String?',
+          dartType: 'openbudget_core:LedgerSystemRole?',
         ),
         _isp.ColumnDefinition(
           name: 'currencyCode',
@@ -2592,11 +3318,10 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'String?',
         ),
         _isp.ColumnDefinition(
-          name: 'archived',
-          columnType: _isp.ColumnType.boolean,
-          isNullable: false,
-          dartType: 'bool',
-          columnDefault: 'false',
+          name: 'archivedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
         ),
         _isp.ColumnDefinition(
           name: 'createdAt',
@@ -2609,23 +3334,23 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'ledger_account_fk_0',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
+          columns: ['entityId'],
+          referenceTable: 'entity',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'ledger_account_budget_code_unique_idx',
+          indexName: 'ledger_account_entity_code_unique_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'entityId',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
@@ -2636,95 +3361,21 @@ class Protocol extends _is.DatabaseSerializationManager
           isUnique: true,
           isPrimary: false,
         ),
-      ],
-      managed: true,
-    ),
-    _isp.TableDefinition(
-      name: 'ledger_audit_event',
-      dartName: 'LedgerAuditEvent',
-      schema: 'public',
-      module: 'openbudget',
-      columns: [
-        _isp.ColumnDefinition(
-          name: 'id',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int?',
-          columnDefault: 'serial',
-        ),
-        _isp.ColumnDefinition(
-          name: 'budgetId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
-          name: 'actor',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
-          name: 'action',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'entity',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'entityId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: true,
-          dartType: 'UuidValue?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'payloadJson',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-          columnDefault: '\'{}\'',
-        ),
-        _isp.ColumnDefinition(
-          name: 'createdAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: false,
-          dartType: 'DateTime',
-          columnDefault: 'now',
-        ),
-      ],
-      foreignKeys: [
-        _isp.ForeignKeyDefinition(
-          constraintName: 'ledger_audit_event_fk_0',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-      ],
-      indexes: [
         _isp.IndexDefinition(
-          indexName: 'ledger_audit_event_budget_idx',
+          indexName: 'ledger_account_entity_role_unique_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'entityId',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'createdAt',
+              definition: 'systemRole',
             ),
           ],
           type: 'btree',
-          isUnique: false,
+          isUnique: true,
           isPrimary: false,
         ),
       ],
@@ -2744,7 +3395,7 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'budgetId',
+          name: 'entityId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
@@ -2772,23 +3423,23 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'ledger_period_lock_fk_0',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
+          columns: ['entityId'],
+          referenceTable: 'entity',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'ledger_period_lock_budget_unique_idx',
+          indexName: 'ledger_period_lock_entity_unique_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'entityId',
             ),
           ],
           type: 'btree',
@@ -2812,22 +3463,16 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
+          name: 'entityId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
           name: 'envelopeId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
-          name: 'budgetId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
-          name: 'year',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
         ),
         _isp.ColumnDefinition(
           name: 'month',
@@ -2836,13 +3481,7 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'int',
         ),
         _isp.ColumnDefinition(
-          name: 'allocatedCents',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
-        ),
-        _isp.ColumnDefinition(
-          name: 'carryoverCents',
+          name: 'allocatedMinor',
           columnType: _isp.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
@@ -2865,63 +3504,33 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'monthly_allocation_fk_0',
+          columns: ['entityId'],
+          referenceTable: 'entity',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'monthly_allocation_fk_1',
           columns: ['envelopeId'],
           referenceTable: 'envelope',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-        _isp.ForeignKeyDefinition(
-          constraintName: 'monthly_allocation_fk_1',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'monthly_allocation_envelope_idx',
+          indexName: 'monthly_allocation_envelope_month_unique_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'envelopeId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'monthly_allocation_budget_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'monthly_allocation_unique_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'envelopeId',
-            ),
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'year',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
@@ -2930,6 +3539,23 @@ class Protocol extends _is.DatabaseSerializationManager
           ],
           type: 'btree',
           isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'monthly_allocation_entity_month_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'entityId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'month',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
           isPrimary: false,
         ),
       ],
@@ -2949,16 +3575,16 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
+          name: 'entityId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
           name: 'name',
           columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'budgetId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue',
         ),
         _isp.ColumnDefinition(
           name: 'createdAt',
@@ -2971,36 +3597,23 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'payee_fk_0',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
+          columns: ['entityId'],
+          referenceTable: 'entity',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'payee_budget_idx',
+          indexName: 'payee_entity_name_unique_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'payee_name_budget_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'entityId',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
@@ -3028,7 +3641,7 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'budgetId',
+          name: 'entityId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
@@ -3040,10 +3653,22 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'String',
         ),
         _isp.ColumnDefinition(
-          name: 'accessToken',
+          name: 'accessTokenCiphertext',
           columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'accessTokenNonce',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'plaidInstitutionId',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
         ),
         _isp.ColumnDefinition(
           name: 'institutionName',
@@ -3052,7 +3677,26 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'String?',
         ),
         _isp.ColumnDefinition(
-          name: 'institutionId',
+          name: 'transactionsCursor',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'syncStatus',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:SyncStatus',
+          columnDefault: '\'pending\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'lastSyncedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'lastSyncError',
           columnType: _isp.ColumnType.text,
           isNullable: true,
           dartType: 'String?',
@@ -3071,34 +3715,24 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'DateTime',
           columnDefault: 'now',
         ),
-        _isp.ColumnDefinition(
-          name: 'lastSyncedAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: true,
-          dartType: 'DateTime?',
-        ),
       ],
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'plaid_connection_fk_0',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
+          columns: ['entityId'],
+          referenceTable: 'entity',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'plaid_connection_budget_item_idx',
+          indexName: 'plaid_connection_item_unique_idx',
           tableSpace: null,
           elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
-            ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'plaidItemId',
@@ -3109,12 +3743,12 @@ class Protocol extends _is.DatabaseSerializationManager
           isPrimary: false,
         ),
         _isp.IndexDefinition(
-          indexName: 'plaid_connection_budget_idx',
+          indexName: 'plaid_connection_entity_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'entityId',
             ),
           ],
           type: 'btree',
@@ -3138,31 +3772,7 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'description',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'amountCents',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
-        ),
-        _isp.ColumnDefinition(
-          name: 'currencyCode',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'envelopeId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: true,
-          dartType: 'UuidValue?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'budgetId',
+          name: 'entityId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
@@ -3170,8 +3780,8 @@ class Protocol extends _is.DatabaseSerializationManager
         _isp.ColumnDefinition(
           name: 'accountId',
           columnType: _isp.ColumnType.uuid,
-          isNullable: true,
-          dartType: 'UuidValue?',
+          isNullable: false,
+          dartType: 'UuidValue',
         ),
         _isp.ColumnDefinition(
           name: 'payeeId',
@@ -3180,13 +3790,37 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'UuidValue?',
         ),
         _isp.ColumnDefinition(
-          name: 'frequency',
+          name: 'envelopeId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'description',
           columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'String',
         ),
         _isp.ColumnDefinition(
-          name: 'nextOccurrence',
+          name: 'memo',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'amountMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'frequency',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'openbudget_core:RecurrenceFrequency',
+        ),
+        _isp.ColumnDefinition(
+          name: 'nextDate',
           columnType: _isp.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
           dartType: 'DateTime',
@@ -3202,6 +3836,7 @@ class Protocol extends _is.DatabaseSerializationManager
           columnType: _isp.ColumnType.boolean,
           isNullable: false,
           dartType: 'bool',
+          columnDefault: 'true',
         ),
         _isp.ColumnDefinition(
           name: 'createdAt',
@@ -3221,83 +3856,74 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'recurring_transaction_fk_0',
-          columns: ['envelopeId'],
-          referenceTable: 'envelope',
+          columns: ['entityId'],
+          referenceTable: 'entity',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
         _isp.ForeignKeyDefinition(
           constraintName: 'recurring_transaction_fk_1',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-        _isp.ForeignKeyDefinition(
-          constraintName: 'recurring_transaction_fk_2',
           columns: ['accountId'],
           referenceTable: 'account',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
         _isp.ForeignKeyDefinition(
-          constraintName: 'recurring_transaction_fk_3',
+          constraintName: 'recurring_transaction_fk_2',
           columns: ['payeeId'],
           referenceTable: 'payee',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.setNull,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'recurring_transaction_fk_3',
+          columns: ['envelopeId'],
+          referenceTable: 'envelope',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.setNull,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'recurring_transaction_budget_idx',
+          indexName: 'recurring_transaction_entity_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'recurring_transaction_next_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'nextOccurrence',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'recurring_transaction_active_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'entityId',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'isActive',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'recurring_transaction_due_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'isActive',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'nextDate',
             ),
           ],
           type: 'btree',
@@ -3352,7 +3978,18 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'now',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'solana_billing_challenge_fk_0',
+          columns: ['userId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _isp.IndexDefinition(
           indexName: 'solana_billing_challenge_user_idx',
@@ -3374,642 +4011,6 @@ class Protocol extends _is.DatabaseSerializationManager
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'message',
-            ),
-          ],
-          type: 'btree',
-          isUnique: true,
-          isPrimary: false,
-        ),
-      ],
-      managed: true,
-    ),
-    _isp.TableDefinition(
-      name: 'solana_wallet',
-      dartName: 'SolanaWallet',
-      schema: 'public',
-      module: 'openbudget',
-      columns: [
-        _isp.ColumnDefinition(
-          name: 'id',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue?',
-          columnDefault: 'random_v7',
-        ),
-        _isp.ColumnDefinition(
-          name: 'accountId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
-          name: 'budgetId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
-          name: 'address',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'label',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'cluster',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'lastSignature',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'lastSyncedAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: true,
-          dartType: 'DateTime?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'syncStatus',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'lastSyncError',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'createdAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: false,
-          dartType: 'DateTime',
-          columnDefault: 'now',
-        ),
-        _isp.ColumnDefinition(
-          name: 'updatedAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: false,
-          dartType: 'DateTime',
-          columnDefault: 'now',
-        ),
-      ],
-      foreignKeys: [
-        _isp.ForeignKeyDefinition(
-          constraintName: 'solana_wallet_fk_0',
-          columns: ['accountId'],
-          referenceTable: 'account',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-        _isp.ForeignKeyDefinition(
-          constraintName: 'solana_wallet_fk_1',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-      ],
-      indexes: [
-        _isp.IndexDefinition(
-          indexName: 'solana_wallet_account_unique',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'accountId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: true,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'solana_wallet_budget_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'solana_wallet_address_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'address',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-      ],
-      managed: true,
-    ),
-    _isp.TableDefinition(
-      name: 'solana_wallet_holding',
-      dartName: 'SolanaWalletHolding',
-      schema: 'public',
-      module: 'openbudget',
-      columns: [
-        _isp.ColumnDefinition(
-          name: 'id',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue?',
-          columnDefault: 'random_v7',
-        ),
-        _isp.ColumnDefinition(
-          name: 'walletId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
-          name: 'budgetId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
-          name: 'assetId',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'symbol',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'name',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'tokenProgram',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'decimals',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
-        ),
-        _isp.ColumnDefinition(
-          name: 'balanceRaw',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'balanceUi',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'isNft',
-          columnType: _isp.ColumnType.boolean,
-          isNullable: false,
-          dartType: 'bool',
-        ),
-        _isp.ColumnDefinition(
-          name: 'priceCurrency',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'pricePerToken',
-          columnType: _isp.ColumnType.doublePrecision,
-          isNullable: true,
-          dartType: 'double?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'totalValue',
-          columnType: _isp.ColumnType.doublePrecision,
-          isNullable: true,
-          dartType: 'double?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'estimatedCostBasis',
-          columnType: _isp.ColumnType.doublePrecision,
-          isNullable: true,
-          dartType: 'double?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'estimatedUnrealizedPnl',
-          columnType: _isp.ColumnType.doublePrecision,
-          isNullable: true,
-          dartType: 'double?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'estimatedUnrealizedPnlPercent',
-          columnType: _isp.ColumnType.doublePrecision,
-          isNullable: true,
-          dartType: 'double?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'estimatedRealizedPnl',
-          columnType: _isp.ColumnType.doublePrecision,
-          isNullable: true,
-          dartType: 'double?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'pnlCurrency',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'pnlAsOf',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: true,
-          dartType: 'DateTime?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'priceSource',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'priceQuality',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'priceConfidence',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'isPriceStale',
-          columnType: _isp.ColumnType.boolean,
-          isNullable: true,
-          dartType: 'bool?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'priceAsOf',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: true,
-          dartType: 'DateTime?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'metadataJson',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'updatedAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: false,
-          dartType: 'DateTime',
-          columnDefault: 'now',
-        ),
-      ],
-      foreignKeys: [
-        _isp.ForeignKeyDefinition(
-          constraintName: 'solana_wallet_holding_fk_0',
-          columns: ['walletId'],
-          referenceTable: 'solana_wallet',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-        _isp.ForeignKeyDefinition(
-          constraintName: 'solana_wallet_holding_fk_1',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-      ],
-      indexes: [
-        _isp.IndexDefinition(
-          indexName: 'solana_wallet_holding_wallet_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'walletId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'solana_wallet_holding_budget_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'solana_wallet_holding_asset_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'assetId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'solana_wallet_holding_wallet_asset_unique',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'walletId',
-            ),
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'assetId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: true,
-          isPrimary: false,
-        ),
-      ],
-      managed: true,
-    ),
-    _isp.TableDefinition(
-      name: 'solana_wallet_transaction',
-      dartName: 'SolanaWalletTransaction',
-      schema: 'public',
-      module: 'openbudget',
-      columns: [
-        _isp.ColumnDefinition(
-          name: 'id',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue?',
-          columnDefault: 'random_v7',
-        ),
-        _isp.ColumnDefinition(
-          name: 'walletId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
-          name: 'budgetId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
-          name: 'signature',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'slot',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
-        ),
-        _isp.ColumnDefinition(
-          name: 'occurredAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: true,
-          dartType: 'DateTime?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'description',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'txType',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'source',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'interpretationConfidence',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'programsJson',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'nativeTransfersJson',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'tokenTransfersJson',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'estimatedCostBasis',
-          columnType: _isp.ColumnType.doublePrecision,
-          isNullable: true,
-          dartType: 'double?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'estimatedProceeds',
-          columnType: _isp.ColumnType.doublePrecision,
-          isNullable: true,
-          dartType: 'double?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'estimatedRealizedPnl',
-          columnType: _isp.ColumnType.doublePrecision,
-          isNullable: true,
-          dartType: 'double?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'pnlCurrency',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'taxYear',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: true,
-          dartType: 'int?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'category',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'tagsCsv',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'memo',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'rawJson',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'createdAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: false,
-          dartType: 'DateTime',
-          columnDefault: 'now',
-        ),
-        _isp.ColumnDefinition(
-          name: 'updatedAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: false,
-          dartType: 'DateTime',
-          columnDefault: 'now',
-        ),
-      ],
-      foreignKeys: [
-        _isp.ForeignKeyDefinition(
-          constraintName: 'solana_wallet_transaction_fk_0',
-          columns: ['walletId'],
-          referenceTable: 'solana_wallet',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-        _isp.ForeignKeyDefinition(
-          constraintName: 'solana_wallet_transaction_fk_1',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-      ],
-      indexes: [
-        _isp.IndexDefinition(
-          indexName: 'solana_wallet_tx_wallet_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'walletId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'solana_wallet_tx_budget_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'solana_wallet_tx_signature_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'signature',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'solana_wallet_tx_wallet_signature_unique',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'walletId',
-            ),
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'signature',
             ),
           ],
           type: 'btree',
@@ -4052,7 +4053,18 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'now',
         ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'stripe_customer_fk_0',
+          columns: ['userId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _isp.IndexDefinition(
           indexName: 'stripe_customer_user_idx',
@@ -4097,34 +4109,16 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'budgetId',
+          name: 'entityId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
-          name: 'jurisdiction',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'entityKind',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
         ),
         _isp.ColumnDefinition(
           name: 'profileJson',
           columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'linkedBudgetId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: true,
-          dartType: 'UuidValue?',
         ),
         _isp.ColumnDefinition(
           name: 'createdAt',
@@ -4144,40 +4138,27 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'tax_profile_fk_0',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
+          columns: ['entityId'],
+          referenceTable: 'entity',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'tax_profile_budget_unique_idx',
+          indexName: 'tax_profile_entity_unique_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'entityId',
             ),
           ],
           type: 'btree',
           isUnique: true,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'tax_profile_linked_budget_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'linkedBudgetId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
           isPrimary: false,
         ),
       ],
@@ -4197,31 +4178,7 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'description',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'amountCents',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
-        ),
-        _isp.ColumnDefinition(
-          name: 'currencyCode',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'envelopeId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: true,
-          dartType: 'UuidValue?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'budgetId',
+          name: 'entityId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
@@ -4229,8 +4186,66 @@ class Protocol extends _is.DatabaseSerializationManager
         _isp.ColumnDefinition(
           name: 'accountId',
           columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'date',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'amountMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'baseAmountMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'fxRate',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+          columnDefault: '\'1\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'fxRateDate',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'fxRateSource',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'openbudget_core:FxRateSource',
+          columnDefault: '\'identity\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'kind',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:TransactionKind',
+          columnDefault: '\'standard\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'status',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:TransactionStatus',
+          columnDefault: '\'uncleared\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'flag',
+          columnType: _isp.ColumnType.text,
           isNullable: true,
-          dartType: 'UuidValue?',
+          dartType: 'protocol:TransactionFlag?',
         ),
         _isp.ColumnDefinition(
           name: 'payeeId',
@@ -4239,22 +4254,11 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'UuidValue?',
         ),
         _isp.ColumnDefinition(
-          name: 'transactionDate',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          name: 'description',
+          columnType: _isp.ColumnType.text,
           isNullable: false,
-          dartType: 'DateTime',
-        ),
-        _isp.ColumnDefinition(
-          name: 'transferPairId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: true,
-          dartType: 'UuidValue?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'parentTransactionId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: true,
-          dartType: 'UuidValue?',
+          dartType: 'String',
+          columnDefault: '\'\'',
         ),
         _isp.ColumnDefinition(
           name: 'memo',
@@ -4263,45 +4267,33 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'String?',
         ),
         _isp.ColumnDefinition(
-          name: 'cleared',
-          columnType: _isp.ColumnType.boolean,
-          isNullable: false,
-          dartType: 'bool',
-          columnDefault: 'false',
-        ),
-        _isp.ColumnDefinition(
-          name: 'reconciled',
-          columnType: _isp.ColumnType.boolean,
-          isNullable: false,
-          dartType: 'bool',
-          columnDefault: 'false',
-        ),
-        _isp.ColumnDefinition(
-          name: 'flagColor',
+          name: 'externalId',
           columnType: _isp.ColumnType.text,
           isNullable: true,
           dartType: 'String?',
         ),
         _isp.ColumnDefinition(
-          name: 'taxCategoryCode',
-          columnType: _isp.ColumnType.text,
+          name: 'recurringTransactionId',
+          columnType: _isp.ColumnType.uuid,
           isNullable: true,
-          dartType: 'String?',
+          dartType: 'UuidValue?',
         ),
         _isp.ColumnDefinition(
-          name: 'businessUsePercent',
+          name: 'revision',
           columnType: _isp.ColumnType.bigint,
-          isNullable: true,
-          dartType: 'int?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'salesTaxCents',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: true,
-          dartType: 'int?',
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
         ),
         _isp.ColumnDefinition(
           name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
           columnType: _isp.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
           dartType: 'DateTime',
@@ -4311,53 +4303,57 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'transaction_fk_0',
-          columns: ['envelopeId'],
-          referenceTable: 'envelope',
+          columns: ['entityId'],
+          referenceTable: 'entity',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
         _isp.ForeignKeyDefinition(
           constraintName: 'transaction_fk_1',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-        _isp.ForeignKeyDefinition(
-          constraintName: 'transaction_fk_2',
           columns: ['accountId'],
           referenceTable: 'account',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
         _isp.ForeignKeyDefinition(
-          constraintName: 'transaction_fk_3',
+          constraintName: 'transaction_fk_2',
           columns: ['payeeId'],
           referenceTable: 'payee',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.setNull,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'transaction_fk_3',
+          columns: ['recurringTransactionId'],
+          referenceTable: 'recurring_transaction',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.setNull,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'transaction_envelope_idx',
+          indexName: 'transaction_entity_date_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'envelopeId',
+              definition: 'entityId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'date',
             ),
           ],
           type: 'btree',
@@ -4365,25 +4361,16 @@ class Protocol extends _is.DatabaseSerializationManager
           isPrimary: false,
         ),
         _isp.IndexDefinition(
-          indexName: 'transaction_budget_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'transaction_account_idx',
+          indexName: 'transaction_account_date_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'accountId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'date',
             ),
           ],
           type: 'btree',
@@ -4404,12 +4391,12 @@ class Protocol extends _is.DatabaseSerializationManager
           isPrimary: false,
         ),
         _isp.IndexDefinition(
-          indexName: 'transaction_date_idx',
+          indexName: 'transaction_recurring_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'transactionDate',
+              definition: 'recurringTransactionId',
             ),
           ],
           type: 'btree',
@@ -4417,12 +4404,166 @@ class Protocol extends _is.DatabaseSerializationManager
           isPrimary: false,
         ),
         _isp.IndexDefinition(
-          indexName: 'transaction_parent_idx',
+          indexName: 'transaction_account_external_unique_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'parentTransactionId',
+              definition: 'accountId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'externalId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'transaction_line',
+      dartName: 'TransactionLine',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'transactionId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'amountMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'baseAmountMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'envelopeId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'ledgerAccountId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'taxCategoryCode',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'businessUsePercent',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'salesTaxMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'memo',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'sortOrder',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'transaction_line_fk_0',
+          columns: ['transactionId'],
+          referenceTable: 'transaction',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'transaction_line_fk_1',
+          columns: ['envelopeId'],
+          referenceTable: 'envelope',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'transaction_line_fk_2',
+          columns: ['ledgerAccountId'],
+          referenceTable: 'ledger_account',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'transaction_line_transaction_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'transactionId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'transaction_line_envelope_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'envelopeId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'transaction_line_ledger_account_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'ledgerAccountId',
             ),
           ],
           type: 'btree',
@@ -4446,7 +4587,7 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'budgetId',
+          name: 'entityId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
@@ -4458,7 +4599,7 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'UuidValue',
         ),
         _isp.ColumnDefinition(
-          name: 'targetEnvelopeId',
+          name: 'envelopeId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
@@ -4481,12 +4622,12 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'transaction_rule_fk_0',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
+          columns: ['entityId'],
+          referenceTable: 'entity',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
         _isp.ForeignKeyDefinition(
@@ -4496,28 +4637,28 @@ class Protocol extends _is.DatabaseSerializationManager
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
         _isp.ForeignKeyDefinition(
           constraintName: 'transaction_rule_fk_2',
-          columns: ['targetEnvelopeId'],
+          columns: ['envelopeId'],
           referenceTable: 'envelope',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'transaction_rule_budget_idx',
+          indexName: 'transaction_rule_entity_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'entityId',
             ),
           ],
           type: 'btree',
@@ -4525,13 +4666,9 @@ class Protocol extends _is.DatabaseSerializationManager
           isPrimary: false,
         ),
         _isp.IndexDefinition(
-          indexName: 'transaction_rule_payee_budget_idx',
+          indexName: 'transaction_rule_payee_unique_idx',
           tableSpace: null,
           elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
-            ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'payeeId',
@@ -4545,8 +4682,8 @@ class Protocol extends _is.DatabaseSerializationManager
       managed: true,
     ),
     _isp.TableDefinition(
-      name: 'wallet_connection',
-      dartName: 'WalletConnection',
+      name: 'transfer',
+      dartName: 'Transfer',
       schema: 'public',
       module: 'openbudget',
       columns: [
@@ -4558,16 +4695,169 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'budgetId',
+          name: 'fromTransactionId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
         ),
         _isp.ColumnDefinition(
-          name: 'chain',
+          name: 'toTransactionId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'transfer_fk_0',
+          columns: ['fromTransactionId'],
+          referenceTable: 'transaction',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'transfer_fk_1',
+          columns: ['toTransactionId'],
+          referenceTable: 'transaction',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'transfer_from_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'fromTransactionId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'transfer_to_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'toTransactionId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'user_settings',
+      dartName: 'UserSettings',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'userId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'reportingCurrencyCode',
           columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'user_settings_fk_0',
+          columns: ['userId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'user_settings_user_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'wallet',
+      dartName: 'Wallet',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'entityId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'accountId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'network',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:WalletNetwork',
         ),
         _isp.ColumnDefinition(
           name: 'address',
@@ -4577,6 +4867,31 @@ class Protocol extends _is.DatabaseSerializationManager
         ),
         _isp.ColumnDefinition(
           name: 'label',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'lastSignature',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'syncStatus',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:SyncStatus',
+          columnDefault: '\'pending\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'lastSyncedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'lastSyncError',
           columnType: _isp.ColumnType.text,
           isNullable: true,
           dartType: 'String?',
@@ -4595,49 +4910,54 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'DateTime',
           columnDefault: 'now',
         ),
-        _isp.ColumnDefinition(
-          name: 'lastSyncedAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: true,
-          dartType: 'DateTime?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'syncStatus',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'lastError',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
       ],
       foreignKeys: [
         _isp.ForeignKeyDefinition(
-          constraintName: 'wallet_connection_fk_0',
-          columns: ['budgetId'],
-          referenceTable: 'budget',
+          constraintName: 'wallet_fk_0',
+          columns: ['entityId'],
+          referenceTable: 'entity',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _isp.ForeignKeyDefinition(
+          constraintName: 'wallet_fk_1',
+          columns: ['accountId'],
+          referenceTable: 'account',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'wallet_connection_budget_chain_address_idx',
+          indexName: 'wallet_account_unique_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'accountId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'wallet_entity_network_address_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'entityId',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'chain',
+              definition: 'network',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
@@ -4649,12 +4969,12 @@ class Protocol extends _is.DatabaseSerializationManager
           isPrimary: false,
         ),
         _isp.IndexDefinition(
-          indexName: 'wallet_connection_budget_idx',
+          indexName: 'wallet_address_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'budgetId',
+              definition: 'address',
             ),
           ],
           type: 'btree',
@@ -4678,16 +4998,10 @@ class Protocol extends _is.DatabaseSerializationManager
           columnDefault: 'random_v7',
         ),
         _isp.ColumnDefinition(
-          name: 'walletConnectionId',
+          name: 'walletId',
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
-          name: 'chain',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
         ),
         _isp.ColumnDefinition(
           name: 'assetId',
@@ -4698,8 +5012,20 @@ class Protocol extends _is.DatabaseSerializationManager
         _isp.ColumnDefinition(
           name: 'symbol',
           columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'name',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'tokenProgram',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
         ),
         _isp.ColumnDefinition(
           name: 'decimals',
@@ -4708,31 +5034,87 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'int',
         ),
         _isp.ColumnDefinition(
-          name: 'quantityBaseUnits',
+          name: 'quantityRaw',
           columnType: _isp.ColumnType.text,
           isNullable: false,
-          dartType: 'String',
+          dartType: 'BigInt',
         ),
         _isp.ColumnDefinition(
-          name: 'quantityDisplay',
-          columnType: _isp.ColumnType.doublePrecision,
+          name: 'isNft',
+          columnType: _isp.ColumnType.boolean,
           isNullable: false,
-          dartType: 'double',
+          dartType: 'bool',
+          columnDefault: 'false',
         ),
         _isp.ColumnDefinition(
-          name: 'usdPrice',
-          columnType: _isp.ColumnType.doublePrecision,
+          name: 'priceCurrencyCode',
+          columnType: _isp.ColumnType.text,
           isNullable: true,
-          dartType: 'double?',
+          dartType: 'String?',
         ),
         _isp.ColumnDefinition(
-          name: 'usdValue',
-          columnType: _isp.ColumnType.doublePrecision,
+          name: 'unitPrice',
+          columnType: _isp.ColumnType.text,
           isNullable: true,
-          dartType: 'double?',
+          dartType: 'String?',
         ),
         _isp.ColumnDefinition(
-          name: 'lastSyncedAt',
+          name: 'valueMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'priceSource',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'protocol:PriceSource?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'priceQuality',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:PriceQuality',
+          columnDefault: '\'unpriced\'',
+        ),
+        _isp.ColumnDefinition(
+          name: 'priceConfidence',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'protocol:Confidence?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'priceAsOf',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'costBasisMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'realizedPnlMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'pnlAsOf',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'metadataJson',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
           columnType: _isp.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
           dartType: 'DateTime',
@@ -4742,23 +5124,23 @@ class Protocol extends _is.DatabaseSerializationManager
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'wallet_holding_fk_0',
-          columns: ['walletConnectionId'],
-          referenceTable: 'wallet_connection',
+          columns: ['walletId'],
+          referenceTable: 'wallet',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
           matchType: null,
         ),
       ],
       indexes: [
         _isp.IndexDefinition(
-          indexName: 'wallet_holding_connection_asset_idx',
+          indexName: 'wallet_holding_wallet_asset_unique_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'walletConnectionId',
+              definition: 'walletId',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
@@ -4770,12 +5152,204 @@ class Protocol extends _is.DatabaseSerializationManager
           isPrimary: false,
         ),
         _isp.IndexDefinition(
-          indexName: 'wallet_holding_connection_idx',
+          indexName: 'wallet_holding_asset_idx',
           tableSpace: null,
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
-              definition: 'walletConnectionId',
+              definition: 'assetId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'wallet_transaction',
+      dartName: 'WalletTransaction',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'walletId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'signature',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'slot',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'occurredAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'description',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'txType',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'source',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'interpretationConfidence',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'protocol:Confidence?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'programsJson',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'nativeTransfersJson',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'tokenTransfersJson',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'pnlCurrencyCode',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'costBasisMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'proceedsMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'realizedPnlMinor',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'category',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'tags',
+          columnType: _isp.ColumnType.json,
+          isNullable: true,
+          dartType: 'List<String>?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'memo',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'rawJson',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'wallet_transaction_fk_0',
+          columns: ['walletId'],
+          referenceTable: 'wallet',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'wallet_transaction_wallet_signature_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'walletId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'signature',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'wallet_transaction_wallet_time_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'walletId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'occurredAt',
             ),
           ],
           type: 'btree',
@@ -4787,6 +5361,10 @@ class Protocol extends _is.DatabaseSerializationManager
     ),
     ..._iais.Protocol.targetTableDefinitions,
     ..._iacs.Protocol.targetTableDefinitions,
+    ..._ifz8weqz.Protocol() is _is.DatabaseSerializationManager
+        ? (_ifz8weqz.Protocol() as _is.DatabaseSerializationManager)
+              .getTargetTableDefinitions()
+        : [],
     ..._isp.Protocol.targetTableDefinitions,
   ];
 
@@ -4816,6 +5394,15 @@ class Protocol extends _is.DatabaseSerializationManager
 
     if (t == _iz2jf14v.Account) {
       return _iz2jf14v.Account.fromJson(data) as T;
+    }
+    if (t == _i53yl4yp.AccountBalancesView) {
+      return _i53yl4yp.AccountBalancesView.fromJson(data) as T;
+    }
+    if (t == _i87oqvv1.AccountValuation) {
+      return _i87oqvv1.AccountValuation.fromJson(data) as T;
+    }
+    if (t == _ig9cy6ku.ValuationSource) {
+      return _ig9cy6ku.ValuationSource.fromJson(data) as T;
     }
     if (t == _isfmgqgu.AgentConversation) {
       return _isfmgqgu.AgentConversation.fromJson(data) as T;
@@ -4865,6 +5452,15 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _i4mcrc97.AgentAccessTokenView) {
       return _i4mcrc97.AgentAccessTokenView.fromJson(data) as T;
     }
+    if (t == _iqje9mi5.AuditAction) {
+      return _iqje9mi5.AuditAction.fromJson(data) as T;
+    }
+    if (t == _ijhj7cd7.AuditEvent) {
+      return _ijhj7cd7.AuditEvent.fromJson(data) as T;
+    }
+    if (t == _i2sn5a56.AuditSubject) {
+      return _i2sn5a56.AuditSubject.fromJson(data) as T;
+    }
     if (t == _iq2w1sa5.Entitlement) {
       return _iq2w1sa5.Entitlement.fromJson(data) as T;
     }
@@ -4883,17 +5479,50 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _in1nt6tx.StripeCustomer) {
       return _in1nt6tx.StripeCustomer.fromJson(data) as T;
     }
+    if (t == _iouaddet.AllocationInput) {
+      return _iouaddet.AllocationInput.fromJson(data) as T;
+    }
+    if (t == _ixyov90t.BudgetMonthSummary) {
+      return _ixyov90t.BudgetMonthSummary.fromJson(data) as T;
+    }
+    if (t == _ihanl5km.BudgetMonthView) {
+      return _ihanl5km.BudgetMonthView.fromJson(data) as T;
+    }
+    if (t == _ii8h2sft.EnvelopeMonthView) {
+      return _ii8h2sft.EnvelopeMonthView.fromJson(data) as T;
+    }
     if (t == _i01fne9j.BudgetTemplate) {
       return _i01fne9j.BudgetTemplate.fromJson(data) as T;
     }
-    if (t == _idtyoogy.Budget) {
-      return _idtyoogy.Budget.fromJson(data) as T;
+    if (t == _iagnrffn.BudgetTemplateLine) {
+      return _iagnrffn.BudgetTemplateLine.fromJson(data) as T;
     }
     if (t == _iwxpkdmg.Category) {
       return _iwxpkdmg.Category.fromJson(data) as T;
     }
+    if (t == _i4zfq652.Confidence) {
+      return _i4zfq652.Confidence.fromJson(data) as T;
+    }
+    if (t == _iynfhhr3.SyncStatus) {
+      return _iynfhhr3.SyncStatus.fromJson(data) as T;
+    }
+    if (t == _i03vgs6n.ChangeScope) {
+      return _i03vgs6n.ChangeScope.fromJson(data) as T;
+    }
+    if (t == _iamyw1yn.Entity) {
+      return _iamyw1yn.Entity.fromJson(data) as T;
+    }
+    if (t == _is12mxpv.EntityChangedEvent) {
+      return _is12mxpv.EntityChangedEvent.fromJson(data) as T;
+    }
+    if (t == _ihqn2h4c.EntitySummaryView) {
+      return _ihqn2h4c.EntitySummaryView.fromJson(data) as T;
+    }
     if (t == _ifl4yivq.EnvelopeGoal) {
       return _ifl4yivq.EnvelopeGoal.fromJson(data) as T;
+    }
+    if (t == _i61aeoqs.EnvelopeGoalKind) {
+      return _i61aeoqs.EnvelopeGoalKind.fromJson(data) as T;
     }
     if (t == _ikt21dfw.Envelope) {
       return _ikt21dfw.Envelope.fromJson(data) as T;
@@ -4922,11 +5551,11 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _iha6yc5u.ForbiddenException) {
       return _iha6yc5u.ForbiddenException.fromJson(data) as T;
     }
+    if (t == _if5umnl3.FxRateUnavailableException) {
+      return _if5umnl3.FxRateUnavailableException.fromJson(data) as T;
+    }
     if (t == _izob2ctl.NotFoundException) {
       return _izob2ctl.NotFoundException.fromJson(data) as T;
-    }
-    if (t == _in744jyg.TaxRateUnavailableException) {
-      return _in744jyg.TaxRateUnavailableException.fromJson(data) as T;
     }
     if (t == _i4yu9vcq.TaxRulesUnavailableException) {
       return _i4yu9vcq.TaxRulesUnavailableException.fromJson(data) as T;
@@ -4934,17 +5563,23 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _igpdbyom.ValidationException) {
       return _igpdbyom.ValidationException.fromJson(data) as T;
     }
+    if (t == _iuflqeka.FxBackfillFutureCallFetchModel) {
+      return _iuflqeka.FxBackfillFutureCallFetchModel.fromJson(data) as T;
+    }
     if (t == _i8cxakqz.FxLatestSnapshot) {
       return _i8cxakqz.FxLatestSnapshot.fromJson(data) as T;
     }
-    if (t == _i41ek9pv.FxRateEntry) {
-      return _i41ek9pv.FxRateEntry.fromJson(data) as T;
+    if (t == _ifsg8hc8.FxProvider) {
+      return _ifsg8hc8.FxProvider.fromJson(data) as T;
+    }
+    if (t == _i8bj7347.FxQuoteView) {
+      return _i8bj7347.FxQuoteView.fromJson(data) as T;
+    }
+    if (t == _i46rvf1t.FxRate) {
+      return _i46rvf1t.FxRate.fromJson(data) as T;
     }
     if (t == _i15udi7x.FxRateQuote) {
       return _i15udi7x.FxRateQuote.fromJson(data) as T;
-    }
-    if (t == _i4xgo4ij.FxRateSnapshot) {
-      return _i4xgo4ij.FxRateSnapshot.fromJson(data) as T;
     }
     if (t == _ikgmcjq7.Institution) {
       return _ikgmcjq7.Institution.fromJson(data) as T;
@@ -4963,9 +5598,6 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (t == _ivazbnnp.LedgerAccount) {
       return _ivazbnnp.LedgerAccount.fromJson(data) as T;
-    }
-    if (t == _ipq97xjw.LedgerAuditEvent) {
-      return _ipq97xjw.LedgerAuditEvent.fromJson(data) as T;
     }
     if (t == _i7t4btg4.LedgerPeriodLock) {
       return _i7t4btg4.LedgerPeriodLock.fromJson(data) as T;
@@ -4988,20 +5620,35 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _i9is7zb8.RecurringTransaction) {
       return _i9is7zb8.RecurringTransaction.fromJson(data) as T;
     }
-    if (t == _iotf4y4d.SolanaWallet) {
-      return _iotf4y4d.SolanaWallet.fromJson(data) as T;
+    if (t == _ieg4kkwo.NetWorthAccountRow) {
+      return _ieg4kkwo.NetWorthAccountRow.fromJson(data) as T;
     }
-    if (t == _ivqf8i64.SolanaWalletHolding) {
-      return _ivqf8i64.SolanaWalletHolding.fromJson(data) as T;
+    if (t == _if6ke1e2.NetWorthCurrencyRow) {
+      return _if6ke1e2.NetWorthCurrencyRow.fromJson(data) as T;
     }
-    if (t == _ir1c2di9.SolanaWalletSyncResult) {
-      return _ir1c2di9.SolanaWalletSyncResult.fromJson(data) as T;
+    if (t == _i2p47r1m.NetWorthEntityRow) {
+      return _i2p47r1m.NetWorthEntityRow.fromJson(data) as T;
     }
-    if (t == _ijmvodfo.SolanaWalletTaxYearSummary) {
-      return _ijmvodfo.SolanaWalletTaxYearSummary.fromJson(data) as T;
+    if (t == _iiyi1fdi.NetWorthGranularity) {
+      return _iiyi1fdi.NetWorthGranularity.fromJson(data) as T;
     }
-    if (t == _iwwk92r1.SolanaWalletTransaction) {
-      return _iwwk92r1.SolanaWalletTransaction.fromJson(data) as T;
+    if (t == _izpykydm.NetWorthHistoryView) {
+      return _izpykydm.NetWorthHistoryView.fromJson(data) as T;
+    }
+    if (t == _ihwosu5p.NetWorthPoint) {
+      return _ihwosu5p.NetWorthPoint.fromJson(data) as T;
+    }
+    if (t == _idk5va87.NetWorthView) {
+      return _idk5va87.NetWorthView.fromJson(data) as T;
+    }
+    if (t == _ijpgwwdu.ReportGrouping) {
+      return _ijpgwwdu.ReportGrouping.fromJson(data) as T;
+    }
+    if (t == _ikppksh7.SpendingRow) {
+      return _ikppksh7.SpendingRow.fromJson(data) as T;
+    }
+    if (t == _i99f9doz.UserSettings) {
+      return _i99f9doz.UserSettings.fromJson(data) as T;
     }
     if (t == _ic4zfx3b.TaxBandSliceView) {
       return _ic4zfx3b.TaxBandSliceView.fromJson(data) as T;
@@ -5027,29 +5674,97 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _i6dj6ji0.TransactionRule) {
       return _i6dj6ji0.TransactionRule.fromJson(data) as T;
     }
+    if (t == _ibzcfs2k.ImportResult) {
+      return _ibzcfs2k.ImportResult.fromJson(data) as T;
+    }
     if (t == _isp6bezg.ImportRow) {
       return _isp6bezg.ImportRow.fromJson(data) as T;
     }
-    if (t == _i0jd5x9z.SplitItem) {
-      return _i0jd5x9z.SplitItem.fromJson(data) as T;
+    if (t == _igokbqfh.ReconcileResult) {
+      return _igokbqfh.ReconcileResult.fromJson(data) as T;
     }
     if (t == _iqhl4hru.Transaction) {
       return _iqhl4hru.Transaction.fromJson(data) as T;
     }
-    if (t == _i2gu4pwf.AssetQuoteCache) {
-      return _i2gu4pwf.AssetQuoteCache.fromJson(data) as T;
+    if (t == _i4fvctax.TransactionFlag) {
+      return _i4fvctax.TransactionFlag.fromJson(data) as T;
     }
-    if (t == _igiy3v19.WalletConnectResult) {
-      return _igiy3v19.WalletConnectResult.fromJson(data) as T;
+    if (t == _ipd1rac6.TransactionInput) {
+      return _ipd1rac6.TransactionInput.fromJson(data) as T;
     }
-    if (t == _i9uqpb1b.WalletConnection) {
-      return _i9uqpb1b.WalletConnection.fromJson(data) as T;
+    if (t == _ioneruif.TransactionKind) {
+      return _ioneruif.TransactionKind.fromJson(data) as T;
+    }
+    if (t == _ipio7ws3.TransactionLine) {
+      return _ipio7ws3.TransactionLine.fromJson(data) as T;
+    }
+    if (t == _imsv7m6w.TransactionLineInput) {
+      return _imsv7m6w.TransactionLineInput.fromJson(data) as T;
+    }
+    if (t == _i7f3q91r.TransactionPage) {
+      return _i7f3q91r.TransactionPage.fromJson(data) as T;
+    }
+    if (t == _ioinkgwn.TransactionQuery) {
+      return _ioinkgwn.TransactionQuery.fromJson(data) as T;
+    }
+    if (t == _i3rynkdl.TransactionStatus) {
+      return _i3rynkdl.TransactionStatus.fromJson(data) as T;
+    }
+    if (t == _ilixdhed.TransactionView) {
+      return _ilixdhed.TransactionView.fromJson(data) as T;
+    }
+    if (t == _ign516jt.Transfer) {
+      return _ign516jt.Transfer.fromJson(data) as T;
+    }
+    if (t == _iah0rmrk.TransferInput) {
+      return _iah0rmrk.TransferInput.fromJson(data) as T;
+    }
+    if (t == _i3n9n3ej.TransferPeerView) {
+      return _i3n9n3ej.TransferPeerView.fromJson(data) as T;
+    }
+    if (t == _iw6q2afx.AssetPrice) {
+      return _iw6q2afx.AssetPrice.fromJson(data) as T;
+    }
+    if (t == _i6j30n20.PriceQuality) {
+      return _i6j30n20.PriceQuality.fromJson(data) as T;
+    }
+    if (t == _iu1a5mev.PriceSource) {
+      return _iu1a5mev.PriceSource.fromJson(data) as T;
+    }
+    if (t == _ilu5i0rn.Wallet) {
+      return _ilu5i0rn.Wallet.fromJson(data) as T;
     }
     if (t == _iqqppnaa.WalletHolding) {
       return _iqqppnaa.WalletHolding.fromJson(data) as T;
     }
+    if (t == _ifam4bx7.WalletNetwork) {
+      return _ifam4bx7.WalletNetwork.fromJson(data) as T;
+    }
+    if (t == _ipdq2p58.WalletSyncResult) {
+      return _ipdq2p58.WalletSyncResult.fromJson(data) as T;
+    }
+    if (t == _ivsmsmw6.WalletTaxYearSummary) {
+      return _ivsmsmw6.WalletTaxYearSummary.fromJson(data) as T;
+    }
+    if (t == _i6m1jx15.WalletTransaction) {
+      return _i6m1jx15.WalletTransaction.fromJson(data) as T;
+    }
     if (t == _is.getType<_iz2jf14v.Account?>()) {
       return (data != null ? _iz2jf14v.Account.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i53yl4yp.AccountBalancesView?>()) {
+      return (data != null
+              ? _i53yl4yp.AccountBalancesView.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_i87oqvv1.AccountValuation?>()) {
+      return (data != null ? _i87oqvv1.AccountValuation.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ig9cy6ku.ValuationSource?>()) {
+      return (data != null ? _ig9cy6ku.ValuationSource.fromJson(data) : null)
+          as T;
     }
     if (t == _is.getType<_isfmgqgu.AgentConversation?>()) {
       return (data != null ? _isfmgqgu.AgentConversation.fromJson(data) : null)
@@ -5123,6 +5838,15 @@ class Protocol extends _is.DatabaseSerializationManager
               : null)
           as T;
     }
+    if (t == _is.getType<_iqje9mi5.AuditAction?>()) {
+      return (data != null ? _iqje9mi5.AuditAction.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ijhj7cd7.AuditEvent?>()) {
+      return (data != null ? _ijhj7cd7.AuditEvent.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i2sn5a56.AuditSubject?>()) {
+      return (data != null ? _i2sn5a56.AuditSubject.fromJson(data) : null) as T;
+    }
     if (t == _is.getType<_iq2w1sa5.Entitlement?>()) {
       return (data != null ? _iq2w1sa5.Entitlement.fromJson(data) : null) as T;
     }
@@ -5148,18 +5872,59 @@ class Protocol extends _is.DatabaseSerializationManager
       return (data != null ? _in1nt6tx.StripeCustomer.fromJson(data) : null)
           as T;
     }
+    if (t == _is.getType<_iouaddet.AllocationInput?>()) {
+      return (data != null ? _iouaddet.AllocationInput.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ixyov90t.BudgetMonthSummary?>()) {
+      return (data != null ? _ixyov90t.BudgetMonthSummary.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ihanl5km.BudgetMonthView?>()) {
+      return (data != null ? _ihanl5km.BudgetMonthView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ii8h2sft.EnvelopeMonthView?>()) {
+      return (data != null ? _ii8h2sft.EnvelopeMonthView.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_i01fne9j.BudgetTemplate?>()) {
       return (data != null ? _i01fne9j.BudgetTemplate.fromJson(data) : null)
           as T;
     }
-    if (t == _is.getType<_idtyoogy.Budget?>()) {
-      return (data != null ? _idtyoogy.Budget.fromJson(data) : null) as T;
+    if (t == _is.getType<_iagnrffn.BudgetTemplateLine?>()) {
+      return (data != null ? _iagnrffn.BudgetTemplateLine.fromJson(data) : null)
+          as T;
     }
     if (t == _is.getType<_iwxpkdmg.Category?>()) {
       return (data != null ? _iwxpkdmg.Category.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_i4zfq652.Confidence?>()) {
+      return (data != null ? _i4zfq652.Confidence.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iynfhhr3.SyncStatus?>()) {
+      return (data != null ? _iynfhhr3.SyncStatus.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i03vgs6n.ChangeScope?>()) {
+      return (data != null ? _i03vgs6n.ChangeScope.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iamyw1yn.Entity?>()) {
+      return (data != null ? _iamyw1yn.Entity.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_is12mxpv.EntityChangedEvent?>()) {
+      return (data != null ? _is12mxpv.EntityChangedEvent.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ihqn2h4c.EntitySummaryView?>()) {
+      return (data != null ? _ihqn2h4c.EntitySummaryView.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_ifl4yivq.EnvelopeGoal?>()) {
       return (data != null ? _ifl4yivq.EnvelopeGoal.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i61aeoqs.EnvelopeGoalKind?>()) {
+      return (data != null ? _i61aeoqs.EnvelopeGoalKind.fromJson(data) : null)
+          as T;
     }
     if (t == _is.getType<_ikt21dfw.Envelope?>()) {
       return (data != null ? _ikt21dfw.Envelope.fromJson(data) : null) as T;
@@ -5210,14 +5975,14 @@ class Protocol extends _is.DatabaseSerializationManager
       return (data != null ? _iha6yc5u.ForbiddenException.fromJson(data) : null)
           as T;
     }
-    if (t == _is.getType<_izob2ctl.NotFoundException?>()) {
-      return (data != null ? _izob2ctl.NotFoundException.fromJson(data) : null)
+    if (t == _is.getType<_if5umnl3.FxRateUnavailableException?>()) {
+      return (data != null
+              ? _if5umnl3.FxRateUnavailableException.fromJson(data)
+              : null)
           as T;
     }
-    if (t == _is.getType<_in744jyg.TaxRateUnavailableException?>()) {
-      return (data != null
-              ? _in744jyg.TaxRateUnavailableException.fromJson(data)
-              : null)
+    if (t == _is.getType<_izob2ctl.NotFoundException?>()) {
+      return (data != null ? _izob2ctl.NotFoundException.fromJson(data) : null)
           as T;
     }
     if (t == _is.getType<_i4yu9vcq.TaxRulesUnavailableException?>()) {
@@ -5232,19 +5997,27 @@ class Protocol extends _is.DatabaseSerializationManager
               : null)
           as T;
     }
+    if (t == _is.getType<_iuflqeka.FxBackfillFutureCallFetchModel?>()) {
+      return (data != null
+              ? _iuflqeka.FxBackfillFutureCallFetchModel.fromJson(data)
+              : null)
+          as T;
+    }
     if (t == _is.getType<_i8cxakqz.FxLatestSnapshot?>()) {
       return (data != null ? _i8cxakqz.FxLatestSnapshot.fromJson(data) : null)
           as T;
     }
-    if (t == _is.getType<_i41ek9pv.FxRateEntry?>()) {
-      return (data != null ? _i41ek9pv.FxRateEntry.fromJson(data) : null) as T;
+    if (t == _is.getType<_ifsg8hc8.FxProvider?>()) {
+      return (data != null ? _ifsg8hc8.FxProvider.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i8bj7347.FxQuoteView?>()) {
+      return (data != null ? _i8bj7347.FxQuoteView.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i46rvf1t.FxRate?>()) {
+      return (data != null ? _i46rvf1t.FxRate.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_i15udi7x.FxRateQuote?>()) {
       return (data != null ? _i15udi7x.FxRateQuote.fromJson(data) : null) as T;
-    }
-    if (t == _is.getType<_i4xgo4ij.FxRateSnapshot?>()) {
-      return (data != null ? _i4xgo4ij.FxRateSnapshot.fromJson(data) : null)
-          as T;
     }
     if (t == _is.getType<_ikgmcjq7.Institution?>()) {
       return (data != null ? _ikgmcjq7.Institution.fromJson(data) : null) as T;
@@ -5267,10 +6040,6 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (t == _is.getType<_ivazbnnp.LedgerAccount?>()) {
       return (data != null ? _ivazbnnp.LedgerAccount.fromJson(data) : null)
-          as T;
-    }
-    if (t == _is.getType<_ipq97xjw.LedgerAuditEvent?>()) {
-      return (data != null ? _ipq97xjw.LedgerAuditEvent.fromJson(data) : null)
           as T;
     }
     if (t == _is.getType<_i7t4btg4.LedgerPeriodLock?>()) {
@@ -5304,32 +6073,48 @@ class Protocol extends _is.DatabaseSerializationManager
               : null)
           as T;
     }
-    if (t == _is.getType<_iotf4y4d.SolanaWallet?>()) {
-      return (data != null ? _iotf4y4d.SolanaWallet.fromJson(data) : null) as T;
+    if (t == _is.getType<_ieg4kkwo.NetWorthAccountRow?>()) {
+      return (data != null ? _ieg4kkwo.NetWorthAccountRow.fromJson(data) : null)
+          as T;
     }
-    if (t == _is.getType<_ivqf8i64.SolanaWalletHolding?>()) {
+    if (t == _is.getType<_if6ke1e2.NetWorthCurrencyRow?>()) {
       return (data != null
-              ? _ivqf8i64.SolanaWalletHolding.fromJson(data)
+              ? _if6ke1e2.NetWorthCurrencyRow.fromJson(data)
               : null)
           as T;
     }
-    if (t == _is.getType<_ir1c2di9.SolanaWalletSyncResult?>()) {
+    if (t == _is.getType<_i2p47r1m.NetWorthEntityRow?>()) {
+      return (data != null ? _i2p47r1m.NetWorthEntityRow.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iiyi1fdi.NetWorthGranularity?>()) {
       return (data != null
-              ? _ir1c2di9.SolanaWalletSyncResult.fromJson(data)
+              ? _iiyi1fdi.NetWorthGranularity.fromJson(data)
               : null)
           as T;
     }
-    if (t == _is.getType<_ijmvodfo.SolanaWalletTaxYearSummary?>()) {
+    if (t == _is.getType<_izpykydm.NetWorthHistoryView?>()) {
       return (data != null
-              ? _ijmvodfo.SolanaWalletTaxYearSummary.fromJson(data)
+              ? _izpykydm.NetWorthHistoryView.fromJson(data)
               : null)
           as T;
     }
-    if (t == _is.getType<_iwwk92r1.SolanaWalletTransaction?>()) {
-      return (data != null
-              ? _iwwk92r1.SolanaWalletTransaction.fromJson(data)
-              : null)
+    if (t == _is.getType<_ihwosu5p.NetWorthPoint?>()) {
+      return (data != null ? _ihwosu5p.NetWorthPoint.fromJson(data) : null)
           as T;
+    }
+    if (t == _is.getType<_idk5va87.NetWorthView?>()) {
+      return (data != null ? _idk5va87.NetWorthView.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ijpgwwdu.ReportGrouping?>()) {
+      return (data != null ? _ijpgwwdu.ReportGrouping.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ikppksh7.SpendingRow?>()) {
+      return (data != null ? _ikppksh7.SpendingRow.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i99f9doz.UserSettings?>()) {
+      return (data != null ? _i99f9doz.UserSettings.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_ic4zfx3b.TaxBandSliceView?>()) {
       return (data != null ? _ic4zfx3b.TaxBandSliceView.fromJson(data) : null)
@@ -5363,31 +6148,112 @@ class Protocol extends _is.DatabaseSerializationManager
       return (data != null ? _i6dj6ji0.TransactionRule.fromJson(data) : null)
           as T;
     }
+    if (t == _is.getType<_ibzcfs2k.ImportResult?>()) {
+      return (data != null ? _ibzcfs2k.ImportResult.fromJson(data) : null) as T;
+    }
     if (t == _is.getType<_isp6bezg.ImportRow?>()) {
       return (data != null ? _isp6bezg.ImportRow.fromJson(data) : null) as T;
     }
-    if (t == _is.getType<_i0jd5x9z.SplitItem?>()) {
-      return (data != null ? _i0jd5x9z.SplitItem.fromJson(data) : null) as T;
+    if (t == _is.getType<_igokbqfh.ReconcileResult?>()) {
+      return (data != null ? _igokbqfh.ReconcileResult.fromJson(data) : null)
+          as T;
     }
     if (t == _is.getType<_iqhl4hru.Transaction?>()) {
       return (data != null ? _iqhl4hru.Transaction.fromJson(data) : null) as T;
     }
-    if (t == _is.getType<_i2gu4pwf.AssetQuoteCache?>()) {
-      return (data != null ? _i2gu4pwf.AssetQuoteCache.fromJson(data) : null)
+    if (t == _is.getType<_i4fvctax.TransactionFlag?>()) {
+      return (data != null ? _i4fvctax.TransactionFlag.fromJson(data) : null)
           as T;
     }
-    if (t == _is.getType<_igiy3v19.WalletConnectResult?>()) {
+    if (t == _is.getType<_ipd1rac6.TransactionInput?>()) {
+      return (data != null ? _ipd1rac6.TransactionInput.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ioneruif.TransactionKind?>()) {
+      return (data != null ? _ioneruif.TransactionKind.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ipio7ws3.TransactionLine?>()) {
+      return (data != null ? _ipio7ws3.TransactionLine.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_imsv7m6w.TransactionLineInput?>()) {
       return (data != null
-              ? _igiy3v19.WalletConnectResult.fromJson(data)
+              ? _imsv7m6w.TransactionLineInput.fromJson(data)
               : null)
           as T;
     }
-    if (t == _is.getType<_i9uqpb1b.WalletConnection?>()) {
-      return (data != null ? _i9uqpb1b.WalletConnection.fromJson(data) : null)
+    if (t == _is.getType<_i7f3q91r.TransactionPage?>()) {
+      return (data != null ? _i7f3q91r.TransactionPage.fromJson(data) : null)
           as T;
+    }
+    if (t == _is.getType<_ioinkgwn.TransactionQuery?>()) {
+      return (data != null ? _ioinkgwn.TransactionQuery.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i3rynkdl.TransactionStatus?>()) {
+      return (data != null ? _i3rynkdl.TransactionStatus.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ilixdhed.TransactionView?>()) {
+      return (data != null ? _ilixdhed.TransactionView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ign516jt.Transfer?>()) {
+      return (data != null ? _ign516jt.Transfer.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iah0rmrk.TransferInput?>()) {
+      return (data != null ? _iah0rmrk.TransferInput.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i3n9n3ej.TransferPeerView?>()) {
+      return (data != null ? _i3n9n3ej.TransferPeerView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iw6q2afx.AssetPrice?>()) {
+      return (data != null ? _iw6q2afx.AssetPrice.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i6j30n20.PriceQuality?>()) {
+      return (data != null ? _i6j30n20.PriceQuality.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iu1a5mev.PriceSource?>()) {
+      return (data != null ? _iu1a5mev.PriceSource.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ilu5i0rn.Wallet?>()) {
+      return (data != null ? _ilu5i0rn.Wallet.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_iqqppnaa.WalletHolding?>()) {
       return (data != null ? _iqqppnaa.WalletHolding.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ifam4bx7.WalletNetwork?>()) {
+      return (data != null ? _ifam4bx7.WalletNetwork.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ipdq2p58.WalletSyncResult?>()) {
+      return (data != null ? _ipdq2p58.WalletSyncResult.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ivsmsmw6.WalletTaxYearSummary?>()) {
+      return (data != null
+              ? _ivsmsmw6.WalletTaxYearSummary.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_i6m1jx15.WalletTransaction?>()) {
+      return (data != null ? _i6m1jx15.WalletTransaction.fromJson(data) : null)
+          as T;
+    }
+    if (t == List<_iwxpkdmg.Category>) {
+      return (data as List)
+              .map((e) => deserialize<_iwxpkdmg.Category>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ii8h2sft.EnvelopeMonthView>) {
+      return (data as List)
+              .map((e) => deserialize<_ii8h2sft.EnvelopeMonthView>(e))
+              .toList()
           as T;
     }
     if (t == List<_i15udi7x.FxRateQuote>) {
@@ -5399,6 +6265,33 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == List<_i5gsx3ds.TrialBalanceRowView>) {
       return (data as List)
               .map((e) => deserialize<_i5gsx3ds.TrialBalanceRowView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ihwosu5p.NetWorthPoint>) {
+      return (data as List)
+              .map((e) => deserialize<_ihwosu5p.NetWorthPoint>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == List<_if6ke1e2.NetWorthCurrencyRow>) {
+      return (data as List)
+              .map((e) => deserialize<_if6ke1e2.NetWorthCurrencyRow>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i2p47r1m.NetWorthEntityRow>) {
+      return (data as List)
+              .map((e) => deserialize<_i2p47r1m.NetWorthEntityRow>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ieg4kkwo.NetWorthAccountRow>) {
+      return (data as List)
+              .map((e) => deserialize<_ieg4kkwo.NetWorthAccountRow>(e))
               .toList()
           as T;
     }
@@ -5420,24 +6313,49 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
-    if (t == List<String>) {
-      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
-    }
     if (t == List<_iuft4v7q.TaxOpportunityView>) {
       return (data as List)
               .map((e) => deserialize<_iuft4v7q.TaxOpportunityView>(e))
               .toList()
           as T;
     }
-    if (t == List<_iqqppnaa.WalletHolding>) {
+    if (t == List<_imsv7m6w.TransactionLineInput>) {
       return (data as List)
-              .map((e) => deserialize<_iqqppnaa.WalletHolding>(e))
+              .map((e) => deserialize<_imsv7m6w.TransactionLineInput>(e))
               .toList()
+          as T;
+    }
+    if (t == List<_ilixdhed.TransactionView>) {
+      return (data as List)
+              .map((e) => deserialize<_ilixdhed.TransactionView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ipio7ws3.TransactionLine>) {
+      return (data as List)
+              .map((e) => deserialize<_ipio7ws3.TransactionLine>(e))
+              .toList()
+          as T;
+    }
+    if (t == _is.getType<List<String>?>()) {
+      return (data != null
+              ? (data as List).map((e) => deserialize<String>(e)).toList()
+              : null)
           as T;
     }
     if (t == List<_i3fh9aci.Account>) {
       return (data as List)
               .map((e) => deserialize<_i3fh9aci.Account>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_is.UuidValue>) {
+      return (data as List).map((e) => deserialize<_is.UuidValue>(e)).toList()
+          as T;
+    }
+    if (t == List<_itqzh2rv.AccountValuation>) {
+      return (data as List)
+              .map((e) => deserialize<_itqzh2rv.AccountValuation>(e))
               .toList()
           as T;
     }
@@ -5465,21 +6383,21 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
+    if (t == List<_inwbkajl.AllocationInput>) {
+      return (data as List)
+              .map((e) => deserialize<_inwbkajl.AllocationInput>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_ihbdj8p6.BudgetTemplate>) {
       return (data as List)
               .map((e) => deserialize<_ihbdj8p6.BudgetTemplate>(e))
               .toList()
           as T;
     }
-    if (t == List<_i01zjgtu.MonthlyAllocation>) {
+    if (t == List<_iz4ekkcc.BudgetTemplateLine>) {
       return (data as List)
-              .map((e) => deserialize<_i01zjgtu.MonthlyAllocation>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_ihk6o4ea.Budget>) {
-      return (data as List)
-              .map((e) => deserialize<_ihk6o4ea.Budget>(e))
+              .map((e) => deserialize<_iz4ekkcc.BudgetTemplateLine>(e))
               .toList()
           as T;
     }
@@ -5489,8 +6407,16 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
-    if (t == List<_is.UuidValue>) {
-      return (data as List).map((e) => deserialize<_is.UuidValue>(e)).toList()
+    if (t == List<_if2ry2np.Entity>) {
+      return (data as List)
+              .map((e) => deserialize<_if2ry2np.Entity>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_im3neacv.EntitySummaryView>) {
+      return (data as List)
+              .map((e) => deserialize<_im3neacv.EntitySummaryView>(e))
+              .toList()
           as T;
     }
     if (t == List<_iuyjld9f.EnvelopeGoal>) {
@@ -5504,9 +6430,6 @@ class Protocol extends _is.DatabaseSerializationManager
               .map((e) => deserialize<_igwnqatb.Envelope>(e))
               .toList()
           as T;
-    }
-    if (t == List<String>) {
-      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
     if (t == List<_izagyfe8.Institution>) {
       return (data as List)
@@ -5538,8 +6461,20 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
+    if (t == List<_ictk02ka.AuditEvent>) {
+      return (data as List)
+              .map((e) => deserialize<_ictk02ka.AuditEvent>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_i2xhh3nq.Payee>) {
       return (data as List).map((e) => deserialize<_i2xhh3nq.Payee>(e)).toList()
+          as T;
+    }
+    if (t == List<_iyqk0wcc.PlaidConnection>) {
+      return (data as List)
+              .map((e) => deserialize<_iyqk0wcc.PlaidConnection>(e))
+              .toList()
           as T;
     }
     if (t == List<_i6lbncsb.RecurringTransaction>) {
@@ -5548,27 +6483,23 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
-    if (t == List<_ieq0zunc.SolanaWallet>) {
+    if (t == _is.getType<List<_is.UuidValue>?>()) {
+      return (data != null
+              ? (data as List)
+                    .map((e) => deserialize<_is.UuidValue>(e))
+                    .toList()
+              : null)
+          as T;
+    }
+    if (t == List<_ijvd4zl8.SpendingRow>) {
       return (data as List)
-              .map((e) => deserialize<_ieq0zunc.SolanaWallet>(e))
+              .map((e) => deserialize<_ijvd4zl8.SpendingRow>(e))
               .toList()
           as T;
     }
-    if (t == List<_imyeu1oa.SolanaWalletTransaction>) {
+    if (t == List<_ipz3w5am.BudgetMonthSummary>) {
       return (data as List)
-              .map((e) => deserialize<_imyeu1oa.SolanaWalletTransaction>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_iry3zuft.SolanaWalletHolding>) {
-      return (data as List)
-              .map((e) => deserialize<_iry3zuft.SolanaWalletHolding>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_ik6g6ols.SolanaWalletTaxYearSummary>) {
-      return (data as List)
-              .map((e) => deserialize<_ik6g6ols.SolanaWalletTaxYearSummary>(e))
+              .map((e) => deserialize<_ipz3w5am.BudgetMonthSummary>(e))
               .toList()
           as T;
     }
@@ -5584,18 +6515,9 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
-    if (t == List<_ioie3qid.Transaction>) {
+    if (t == List<_iw07wj0h.TransactionView>) {
       return (data as List)
-              .map((e) => deserialize<_ioie3qid.Transaction>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<int>) {
-      return (data as List).map((e) => deserialize<int>(e)).toList() as T;
-    }
-    if (t == List<_ii8zyh2l.SplitItem>) {
-      return (data as List)
-              .map((e) => deserialize<_ii8zyh2l.SplitItem>(e))
+              .map((e) => deserialize<_iw07wj0h.TransactionView>(e))
               .toList()
           as T;
     }
@@ -5605,10 +6527,37 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
+    if (t == List<_igcr1vxe.Wallet>) {
+      return (data as List)
+              .map((e) => deserialize<_igcr1vxe.Wallet>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_icu5m6lt.WalletHolding>) {
       return (data as List)
               .map((e) => deserialize<_icu5m6lt.WalletHolding>(e))
               .toList()
+          as T;
+    }
+    if (t == List<_imzwq91q.WalletTransaction>) {
+      return (data as List)
+              .map((e) => deserialize<_imzwq91q.WalletTransaction>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ilgsya0a.WalletTaxYearSummary>) {
+      return (data as List)
+              .map((e) => deserialize<_ilgsya0a.WalletTaxYearSummary>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == _is.getType<List<String>?>()) {
+      return (data != null
+              ? (data as List).map((e) => deserialize<String>(e)).toList()
+              : null)
           as T;
     }
     final modules = deserializationMetadata.modulesForDeserialization(
@@ -5627,6 +6576,9 @@ class Protocol extends _is.DatabaseSerializationManager
   static String? getClassNameForType(Type type) {
     return switch (type) {
       _iz2jf14v.Account => 'Account',
+      _i53yl4yp.AccountBalancesView => 'AccountBalancesView',
+      _i87oqvv1.AccountValuation => 'AccountValuation',
+      _ig9cy6ku.ValuationSource => 'ValuationSource',
       _isfmgqgu.AgentConversation => 'AgentConversation',
       _i769eo9u.AgentEvent => 'AgentEvent',
       _iyhb15ax.AgentEventKind => 'AgentEventKind',
@@ -5643,16 +6595,30 @@ class Protocol extends _is.DatabaseSerializationManager
       _i8betnj7.AgentAccessToken => 'AgentAccessToken',
       _iis6jewo.AgentAccessTokenCreated => 'AgentAccessTokenCreated',
       _i4mcrc97.AgentAccessTokenView => 'AgentAccessTokenView',
+      _iqje9mi5.AuditAction => 'AuditAction',
+      _ijhj7cd7.AuditEvent => 'AuditEvent',
+      _i2sn5a56.AuditSubject => 'AuditSubject',
       _iq2w1sa5.Entitlement => 'Entitlement',
       _ipnf4x0i.EntitlementSource => 'EntitlementSource',
       _imqwzx9j.EntitlementStatus => 'EntitlementStatus',
       _iw7l0hzr.SolanaBillingChallenge => 'SolanaBillingChallenge',
       _iwxkomal.SolanaPlanView => 'SolanaPlanView',
       _in1nt6tx.StripeCustomer => 'StripeCustomer',
+      _iouaddet.AllocationInput => 'AllocationInput',
+      _ixyov90t.BudgetMonthSummary => 'BudgetMonthSummary',
+      _ihanl5km.BudgetMonthView => 'BudgetMonthView',
+      _ii8h2sft.EnvelopeMonthView => 'EnvelopeMonthView',
       _i01fne9j.BudgetTemplate => 'BudgetTemplate',
-      _idtyoogy.Budget => 'Budget',
+      _iagnrffn.BudgetTemplateLine => 'BudgetTemplateLine',
       _iwxpkdmg.Category => 'Category',
+      _i4zfq652.Confidence => 'Confidence',
+      _iynfhhr3.SyncStatus => 'SyncStatus',
+      _i03vgs6n.ChangeScope => 'ChangeScope',
+      _iamyw1yn.Entity => 'Entity',
+      _is12mxpv.EntityChangedEvent => 'EntityChangedEvent',
+      _ihqn2h4c.EntitySummaryView => 'EntitySummaryView',
       _ifl4yivq.EnvelopeGoal => 'EnvelopeGoal',
+      _i61aeoqs.EnvelopeGoalKind => 'EnvelopeGoalKind',
       _ikt21dfw.Envelope => 'Envelope',
       _iozei2bz.AgentAllowanceExhaustedException =>
         'AgentAllowanceExhaustedException',
@@ -5666,21 +6632,23 @@ class Protocol extends _is.DatabaseSerializationManager
         'BillingRailUnavailableException',
       _ik3lny6q.EntitlementRequiredException => 'EntitlementRequiredException',
       _iha6yc5u.ForbiddenException => 'ForbiddenException',
+      _if5umnl3.FxRateUnavailableException => 'FxRateUnavailableException',
       _izob2ctl.NotFoundException => 'NotFoundException',
-      _in744jyg.TaxRateUnavailableException => 'TaxRateUnavailableException',
       _i4yu9vcq.TaxRulesUnavailableException => 'TaxRulesUnavailableException',
       _igpdbyom.ValidationException => 'ValidationException',
+      _iuflqeka.FxBackfillFutureCallFetchModel =>
+        'FxBackfillFutureCallFetchModel',
       _i8cxakqz.FxLatestSnapshot => 'FxLatestSnapshot',
-      _i41ek9pv.FxRateEntry => 'FxRateEntry',
+      _ifsg8hc8.FxProvider => 'FxProvider',
+      _i8bj7347.FxQuoteView => 'FxQuoteView',
+      _i46rvf1t.FxRate => 'FxRate',
       _i15udi7x.FxRateQuote => 'FxRateQuote',
-      _i4xgo4ij.FxRateSnapshot => 'FxRateSnapshot',
       _ikgmcjq7.Institution => 'Institution',
       _iclizrec.InstitutionLocation => 'InstitutionLocation',
       _iqqjzj2w.Journal => 'Journal',
       _i6l0fo54.JournalLine => 'JournalLine',
       _id7zp91q.JournalLineInput => 'JournalLineInput',
       _ivazbnnp.LedgerAccount => 'LedgerAccount',
-      _ipq97xjw.LedgerAuditEvent => 'LedgerAuditEvent',
       _i7t4btg4.LedgerPeriodLock => 'LedgerPeriodLock',
       _i5gsx3ds.TrialBalanceRowView => 'TrialBalanceRowView',
       _i7q128aw.TrialBalanceView => 'TrialBalanceView',
@@ -5688,11 +6656,16 @@ class Protocol extends _is.DatabaseSerializationManager
       _ignezpci.Payee => 'Payee',
       _i1vmvtrm.PlaidConnection => 'PlaidConnection',
       _i9is7zb8.RecurringTransaction => 'RecurringTransaction',
-      _iotf4y4d.SolanaWallet => 'SolanaWallet',
-      _ivqf8i64.SolanaWalletHolding => 'SolanaWalletHolding',
-      _ir1c2di9.SolanaWalletSyncResult => 'SolanaWalletSyncResult',
-      _ijmvodfo.SolanaWalletTaxYearSummary => 'SolanaWalletTaxYearSummary',
-      _iwwk92r1.SolanaWalletTransaction => 'SolanaWalletTransaction',
+      _ieg4kkwo.NetWorthAccountRow => 'NetWorthAccountRow',
+      _if6ke1e2.NetWorthCurrencyRow => 'NetWorthCurrencyRow',
+      _i2p47r1m.NetWorthEntityRow => 'NetWorthEntityRow',
+      _iiyi1fdi.NetWorthGranularity => 'NetWorthGranularity',
+      _izpykydm.NetWorthHistoryView => 'NetWorthHistoryView',
+      _ihwosu5p.NetWorthPoint => 'NetWorthPoint',
+      _idk5va87.NetWorthView => 'NetWorthView',
+      _ijpgwwdu.ReportGrouping => 'ReportGrouping',
+      _ikppksh7.SpendingRow => 'SpendingRow',
+      _i99f9doz.UserSettings => 'UserSettings',
       _ic4zfx3b.TaxBandSliceView => 'TaxBandSliceView',
       _iv5oayw3.TaxCategoryView => 'TaxCategoryView',
       _ivss6b81.TaxLiabilityView => 'TaxLiabilityView',
@@ -5701,13 +6674,31 @@ class Protocol extends _is.DatabaseSerializationManager
       _i6llsezf.TaxReportLineView => 'TaxReportLineView',
       _inb54q20.TaxReportView => 'TaxReportView',
       _i6dj6ji0.TransactionRule => 'TransactionRule',
+      _ibzcfs2k.ImportResult => 'ImportResult',
       _isp6bezg.ImportRow => 'ImportRow',
-      _i0jd5x9z.SplitItem => 'SplitItem',
+      _igokbqfh.ReconcileResult => 'ReconcileResult',
       _iqhl4hru.Transaction => 'Transaction',
-      _i2gu4pwf.AssetQuoteCache => 'AssetQuoteCache',
-      _igiy3v19.WalletConnectResult => 'WalletConnectResult',
-      _i9uqpb1b.WalletConnection => 'WalletConnection',
+      _i4fvctax.TransactionFlag => 'TransactionFlag',
+      _ipd1rac6.TransactionInput => 'TransactionInput',
+      _ioneruif.TransactionKind => 'TransactionKind',
+      _ipio7ws3.TransactionLine => 'TransactionLine',
+      _imsv7m6w.TransactionLineInput => 'TransactionLineInput',
+      _i7f3q91r.TransactionPage => 'TransactionPage',
+      _ioinkgwn.TransactionQuery => 'TransactionQuery',
+      _i3rynkdl.TransactionStatus => 'TransactionStatus',
+      _ilixdhed.TransactionView => 'TransactionView',
+      _ign516jt.Transfer => 'Transfer',
+      _iah0rmrk.TransferInput => 'TransferInput',
+      _i3n9n3ej.TransferPeerView => 'TransferPeerView',
+      _iw6q2afx.AssetPrice => 'AssetPrice',
+      _i6j30n20.PriceQuality => 'PriceQuality',
+      _iu1a5mev.PriceSource => 'PriceSource',
+      _ilu5i0rn.Wallet => 'Wallet',
       _iqqppnaa.WalletHolding => 'WalletHolding',
+      _ifam4bx7.WalletNetwork => 'WalletNetwork',
+      _ipdq2p58.WalletSyncResult => 'WalletSyncResult',
+      _ivsmsmw6.WalletTaxYearSummary => 'WalletTaxYearSummary',
+      _i6m1jx15.WalletTransaction => 'WalletTransaction',
       _ => null,
     };
   }
@@ -5724,6 +6715,12 @@ class Protocol extends _is.DatabaseSerializationManager
     switch (data) {
       case _iz2jf14v.Account():
         return 'Account';
+      case _i53yl4yp.AccountBalancesView():
+        return 'AccountBalancesView';
+      case _i87oqvv1.AccountValuation():
+        return 'AccountValuation';
+      case _ig9cy6ku.ValuationSource():
+        return 'ValuationSource';
       case _isfmgqgu.AgentConversation():
         return 'AgentConversation';
       case _i769eo9u.AgentEvent():
@@ -5756,6 +6753,12 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'AgentAccessTokenCreated';
       case _i4mcrc97.AgentAccessTokenView():
         return 'AgentAccessTokenView';
+      case _iqje9mi5.AuditAction():
+        return 'AuditAction';
+      case _ijhj7cd7.AuditEvent():
+        return 'AuditEvent';
+      case _i2sn5a56.AuditSubject():
+        return 'AuditSubject';
       case _iq2w1sa5.Entitlement():
         return 'Entitlement';
       case _ipnf4x0i.EntitlementSource():
@@ -5768,14 +6771,36 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'SolanaPlanView';
       case _in1nt6tx.StripeCustomer():
         return 'StripeCustomer';
+      case _iouaddet.AllocationInput():
+        return 'AllocationInput';
+      case _ixyov90t.BudgetMonthSummary():
+        return 'BudgetMonthSummary';
+      case _ihanl5km.BudgetMonthView():
+        return 'BudgetMonthView';
+      case _ii8h2sft.EnvelopeMonthView():
+        return 'EnvelopeMonthView';
       case _i01fne9j.BudgetTemplate():
         return 'BudgetTemplate';
-      case _idtyoogy.Budget():
-        return 'Budget';
+      case _iagnrffn.BudgetTemplateLine():
+        return 'BudgetTemplateLine';
       case _iwxpkdmg.Category():
         return 'Category';
+      case _i4zfq652.Confidence():
+        return 'Confidence';
+      case _iynfhhr3.SyncStatus():
+        return 'SyncStatus';
+      case _i03vgs6n.ChangeScope():
+        return 'ChangeScope';
+      case _iamyw1yn.Entity():
+        return 'Entity';
+      case _is12mxpv.EntityChangedEvent():
+        return 'EntityChangedEvent';
+      case _ihqn2h4c.EntitySummaryView():
+        return 'EntitySummaryView';
       case _ifl4yivq.EnvelopeGoal():
         return 'EnvelopeGoal';
+      case _i61aeoqs.EnvelopeGoalKind():
+        return 'EnvelopeGoalKind';
       case _ikt21dfw.Envelope():
         return 'Envelope';
       case _iozei2bz.AgentAllowanceExhaustedException():
@@ -5794,22 +6819,26 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'EntitlementRequiredException';
       case _iha6yc5u.ForbiddenException():
         return 'ForbiddenException';
+      case _if5umnl3.FxRateUnavailableException():
+        return 'FxRateUnavailableException';
       case _izob2ctl.NotFoundException():
         return 'NotFoundException';
-      case _in744jyg.TaxRateUnavailableException():
-        return 'TaxRateUnavailableException';
       case _i4yu9vcq.TaxRulesUnavailableException():
         return 'TaxRulesUnavailableException';
       case _igpdbyom.ValidationException():
         return 'ValidationException';
+      case _iuflqeka.FxBackfillFutureCallFetchModel():
+        return 'FxBackfillFutureCallFetchModel';
       case _i8cxakqz.FxLatestSnapshot():
         return 'FxLatestSnapshot';
-      case _i41ek9pv.FxRateEntry():
-        return 'FxRateEntry';
+      case _ifsg8hc8.FxProvider():
+        return 'FxProvider';
+      case _i8bj7347.FxQuoteView():
+        return 'FxQuoteView';
+      case _i46rvf1t.FxRate():
+        return 'FxRate';
       case _i15udi7x.FxRateQuote():
         return 'FxRateQuote';
-      case _i4xgo4ij.FxRateSnapshot():
-        return 'FxRateSnapshot';
       case _ikgmcjq7.Institution():
         return 'Institution';
       case _iclizrec.InstitutionLocation():
@@ -5822,8 +6851,6 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'JournalLineInput';
       case _ivazbnnp.LedgerAccount():
         return 'LedgerAccount';
-      case _ipq97xjw.LedgerAuditEvent():
-        return 'LedgerAuditEvent';
       case _i7t4btg4.LedgerPeriodLock():
         return 'LedgerPeriodLock';
       case _i5gsx3ds.TrialBalanceRowView():
@@ -5838,16 +6865,26 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'PlaidConnection';
       case _i9is7zb8.RecurringTransaction():
         return 'RecurringTransaction';
-      case _iotf4y4d.SolanaWallet():
-        return 'SolanaWallet';
-      case _ivqf8i64.SolanaWalletHolding():
-        return 'SolanaWalletHolding';
-      case _ir1c2di9.SolanaWalletSyncResult():
-        return 'SolanaWalletSyncResult';
-      case _ijmvodfo.SolanaWalletTaxYearSummary():
-        return 'SolanaWalletTaxYearSummary';
-      case _iwwk92r1.SolanaWalletTransaction():
-        return 'SolanaWalletTransaction';
+      case _ieg4kkwo.NetWorthAccountRow():
+        return 'NetWorthAccountRow';
+      case _if6ke1e2.NetWorthCurrencyRow():
+        return 'NetWorthCurrencyRow';
+      case _i2p47r1m.NetWorthEntityRow():
+        return 'NetWorthEntityRow';
+      case _iiyi1fdi.NetWorthGranularity():
+        return 'NetWorthGranularity';
+      case _izpykydm.NetWorthHistoryView():
+        return 'NetWorthHistoryView';
+      case _ihwosu5p.NetWorthPoint():
+        return 'NetWorthPoint';
+      case _idk5va87.NetWorthView():
+        return 'NetWorthView';
+      case _ijpgwwdu.ReportGrouping():
+        return 'ReportGrouping';
+      case _ikppksh7.SpendingRow():
+        return 'SpendingRow';
+      case _i99f9doz.UserSettings():
+        return 'UserSettings';
       case _ic4zfx3b.TaxBandSliceView():
         return 'TaxBandSliceView';
       case _iv5oayw3.TaxCategoryView():
@@ -5864,20 +6901,56 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'TaxReportView';
       case _i6dj6ji0.TransactionRule():
         return 'TransactionRule';
+      case _ibzcfs2k.ImportResult():
+        return 'ImportResult';
       case _isp6bezg.ImportRow():
         return 'ImportRow';
-      case _i0jd5x9z.SplitItem():
-        return 'SplitItem';
+      case _igokbqfh.ReconcileResult():
+        return 'ReconcileResult';
       case _iqhl4hru.Transaction():
         return 'Transaction';
-      case _i2gu4pwf.AssetQuoteCache():
-        return 'AssetQuoteCache';
-      case _igiy3v19.WalletConnectResult():
-        return 'WalletConnectResult';
-      case _i9uqpb1b.WalletConnection():
-        return 'WalletConnection';
+      case _i4fvctax.TransactionFlag():
+        return 'TransactionFlag';
+      case _ipd1rac6.TransactionInput():
+        return 'TransactionInput';
+      case _ioneruif.TransactionKind():
+        return 'TransactionKind';
+      case _ipio7ws3.TransactionLine():
+        return 'TransactionLine';
+      case _imsv7m6w.TransactionLineInput():
+        return 'TransactionLineInput';
+      case _i7f3q91r.TransactionPage():
+        return 'TransactionPage';
+      case _ioinkgwn.TransactionQuery():
+        return 'TransactionQuery';
+      case _i3rynkdl.TransactionStatus():
+        return 'TransactionStatus';
+      case _ilixdhed.TransactionView():
+        return 'TransactionView';
+      case _ign516jt.Transfer():
+        return 'Transfer';
+      case _iah0rmrk.TransferInput():
+        return 'TransferInput';
+      case _i3n9n3ej.TransferPeerView():
+        return 'TransferPeerView';
+      case _iw6q2afx.AssetPrice():
+        return 'AssetPrice';
+      case _i6j30n20.PriceQuality():
+        return 'PriceQuality';
+      case _iu1a5mev.PriceSource():
+        return 'PriceSource';
+      case _ilu5i0rn.Wallet():
+        return 'Wallet';
       case _iqqppnaa.WalletHolding():
         return 'WalletHolding';
+      case _ifam4bx7.WalletNetwork():
+        return 'WalletNetwork';
+      case _ipdq2p58.WalletSyncResult():
+        return 'WalletSyncResult';
+      case _ivsmsmw6.WalletTaxYearSummary():
+        return 'WalletTaxYearSummary';
+      case _i6m1jx15.WalletTransaction():
+        return 'WalletTransaction';
     }
     className = _iais.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -5890,6 +6963,10 @@ class Protocol extends _is.DatabaseSerializationManager
       return className.contains('.')
           ? className
           : 'serverpod_auth_core.$className';
+    }
+    className = _ifz8weqz.Protocol().getClassNameForObject(data);
+    if (className != null) {
+      return className.contains('.') ? className : 'openbudget_core.$className';
     }
     className = _isp.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -5906,6 +6983,15 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (dataClassName == 'Account') {
       return deserialize<_iz2jf14v.Account>(data['data']);
+    }
+    if (dataClassName == 'AccountBalancesView') {
+      return deserialize<_i53yl4yp.AccountBalancesView>(data['data']);
+    }
+    if (dataClassName == 'AccountValuation') {
+      return deserialize<_i87oqvv1.AccountValuation>(data['data']);
+    }
+    if (dataClassName == 'ValuationSource') {
+      return deserialize<_ig9cy6ku.ValuationSource>(data['data']);
     }
     if (dataClassName == 'AgentConversation') {
       return deserialize<_isfmgqgu.AgentConversation>(data['data']);
@@ -5955,6 +7041,15 @@ class Protocol extends _is.DatabaseSerializationManager
     if (dataClassName == 'AgentAccessTokenView') {
       return deserialize<_i4mcrc97.AgentAccessTokenView>(data['data']);
     }
+    if (dataClassName == 'AuditAction') {
+      return deserialize<_iqje9mi5.AuditAction>(data['data']);
+    }
+    if (dataClassName == 'AuditEvent') {
+      return deserialize<_ijhj7cd7.AuditEvent>(data['data']);
+    }
+    if (dataClassName == 'AuditSubject') {
+      return deserialize<_i2sn5a56.AuditSubject>(data['data']);
+    }
     if (dataClassName == 'Entitlement') {
       return deserialize<_iq2w1sa5.Entitlement>(data['data']);
     }
@@ -5973,17 +7068,50 @@ class Protocol extends _is.DatabaseSerializationManager
     if (dataClassName == 'StripeCustomer') {
       return deserialize<_in1nt6tx.StripeCustomer>(data['data']);
     }
+    if (dataClassName == 'AllocationInput') {
+      return deserialize<_iouaddet.AllocationInput>(data['data']);
+    }
+    if (dataClassName == 'BudgetMonthSummary') {
+      return deserialize<_ixyov90t.BudgetMonthSummary>(data['data']);
+    }
+    if (dataClassName == 'BudgetMonthView') {
+      return deserialize<_ihanl5km.BudgetMonthView>(data['data']);
+    }
+    if (dataClassName == 'EnvelopeMonthView') {
+      return deserialize<_ii8h2sft.EnvelopeMonthView>(data['data']);
+    }
     if (dataClassName == 'BudgetTemplate') {
       return deserialize<_i01fne9j.BudgetTemplate>(data['data']);
     }
-    if (dataClassName == 'Budget') {
-      return deserialize<_idtyoogy.Budget>(data['data']);
+    if (dataClassName == 'BudgetTemplateLine') {
+      return deserialize<_iagnrffn.BudgetTemplateLine>(data['data']);
     }
     if (dataClassName == 'Category') {
       return deserialize<_iwxpkdmg.Category>(data['data']);
     }
+    if (dataClassName == 'Confidence') {
+      return deserialize<_i4zfq652.Confidence>(data['data']);
+    }
+    if (dataClassName == 'SyncStatus') {
+      return deserialize<_iynfhhr3.SyncStatus>(data['data']);
+    }
+    if (dataClassName == 'ChangeScope') {
+      return deserialize<_i03vgs6n.ChangeScope>(data['data']);
+    }
+    if (dataClassName == 'Entity') {
+      return deserialize<_iamyw1yn.Entity>(data['data']);
+    }
+    if (dataClassName == 'EntityChangedEvent') {
+      return deserialize<_is12mxpv.EntityChangedEvent>(data['data']);
+    }
+    if (dataClassName == 'EntitySummaryView') {
+      return deserialize<_ihqn2h4c.EntitySummaryView>(data['data']);
+    }
     if (dataClassName == 'EnvelopeGoal') {
       return deserialize<_ifl4yivq.EnvelopeGoal>(data['data']);
+    }
+    if (dataClassName == 'EnvelopeGoalKind') {
+      return deserialize<_i61aeoqs.EnvelopeGoalKind>(data['data']);
     }
     if (dataClassName == 'Envelope') {
       return deserialize<_ikt21dfw.Envelope>(data['data']);
@@ -6020,11 +7148,11 @@ class Protocol extends _is.DatabaseSerializationManager
     if (dataClassName == 'ForbiddenException') {
       return deserialize<_iha6yc5u.ForbiddenException>(data['data']);
     }
+    if (dataClassName == 'FxRateUnavailableException') {
+      return deserialize<_if5umnl3.FxRateUnavailableException>(data['data']);
+    }
     if (dataClassName == 'NotFoundException') {
       return deserialize<_izob2ctl.NotFoundException>(data['data']);
-    }
-    if (dataClassName == 'TaxRateUnavailableException') {
-      return deserialize<_in744jyg.TaxRateUnavailableException>(data['data']);
     }
     if (dataClassName == 'TaxRulesUnavailableException') {
       return deserialize<_i4yu9vcq.TaxRulesUnavailableException>(data['data']);
@@ -6032,17 +7160,25 @@ class Protocol extends _is.DatabaseSerializationManager
     if (dataClassName == 'ValidationException') {
       return deserialize<_igpdbyom.ValidationException>(data['data']);
     }
+    if (dataClassName == 'FxBackfillFutureCallFetchModel') {
+      return deserialize<_iuflqeka.FxBackfillFutureCallFetchModel>(
+        data['data'],
+      );
+    }
     if (dataClassName == 'FxLatestSnapshot') {
       return deserialize<_i8cxakqz.FxLatestSnapshot>(data['data']);
     }
-    if (dataClassName == 'FxRateEntry') {
-      return deserialize<_i41ek9pv.FxRateEntry>(data['data']);
+    if (dataClassName == 'FxProvider') {
+      return deserialize<_ifsg8hc8.FxProvider>(data['data']);
+    }
+    if (dataClassName == 'FxQuoteView') {
+      return deserialize<_i8bj7347.FxQuoteView>(data['data']);
+    }
+    if (dataClassName == 'FxRate') {
+      return deserialize<_i46rvf1t.FxRate>(data['data']);
     }
     if (dataClassName == 'FxRateQuote') {
       return deserialize<_i15udi7x.FxRateQuote>(data['data']);
-    }
-    if (dataClassName == 'FxRateSnapshot') {
-      return deserialize<_i4xgo4ij.FxRateSnapshot>(data['data']);
     }
     if (dataClassName == 'Institution') {
       return deserialize<_ikgmcjq7.Institution>(data['data']);
@@ -6061,9 +7197,6 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (dataClassName == 'LedgerAccount') {
       return deserialize<_ivazbnnp.LedgerAccount>(data['data']);
-    }
-    if (dataClassName == 'LedgerAuditEvent') {
-      return deserialize<_ipq97xjw.LedgerAuditEvent>(data['data']);
     }
     if (dataClassName == 'LedgerPeriodLock') {
       return deserialize<_i7t4btg4.LedgerPeriodLock>(data['data']);
@@ -6086,20 +7219,35 @@ class Protocol extends _is.DatabaseSerializationManager
     if (dataClassName == 'RecurringTransaction') {
       return deserialize<_i9is7zb8.RecurringTransaction>(data['data']);
     }
-    if (dataClassName == 'SolanaWallet') {
-      return deserialize<_iotf4y4d.SolanaWallet>(data['data']);
+    if (dataClassName == 'NetWorthAccountRow') {
+      return deserialize<_ieg4kkwo.NetWorthAccountRow>(data['data']);
     }
-    if (dataClassName == 'SolanaWalletHolding') {
-      return deserialize<_ivqf8i64.SolanaWalletHolding>(data['data']);
+    if (dataClassName == 'NetWorthCurrencyRow') {
+      return deserialize<_if6ke1e2.NetWorthCurrencyRow>(data['data']);
     }
-    if (dataClassName == 'SolanaWalletSyncResult') {
-      return deserialize<_ir1c2di9.SolanaWalletSyncResult>(data['data']);
+    if (dataClassName == 'NetWorthEntityRow') {
+      return deserialize<_i2p47r1m.NetWorthEntityRow>(data['data']);
     }
-    if (dataClassName == 'SolanaWalletTaxYearSummary') {
-      return deserialize<_ijmvodfo.SolanaWalletTaxYearSummary>(data['data']);
+    if (dataClassName == 'NetWorthGranularity') {
+      return deserialize<_iiyi1fdi.NetWorthGranularity>(data['data']);
     }
-    if (dataClassName == 'SolanaWalletTransaction') {
-      return deserialize<_iwwk92r1.SolanaWalletTransaction>(data['data']);
+    if (dataClassName == 'NetWorthHistoryView') {
+      return deserialize<_izpykydm.NetWorthHistoryView>(data['data']);
+    }
+    if (dataClassName == 'NetWorthPoint') {
+      return deserialize<_ihwosu5p.NetWorthPoint>(data['data']);
+    }
+    if (dataClassName == 'NetWorthView') {
+      return deserialize<_idk5va87.NetWorthView>(data['data']);
+    }
+    if (dataClassName == 'ReportGrouping') {
+      return deserialize<_ijpgwwdu.ReportGrouping>(data['data']);
+    }
+    if (dataClassName == 'SpendingRow') {
+      return deserialize<_ikppksh7.SpendingRow>(data['data']);
+    }
+    if (dataClassName == 'UserSettings') {
+      return deserialize<_i99f9doz.UserSettings>(data['data']);
     }
     if (dataClassName == 'TaxBandSliceView') {
       return deserialize<_ic4zfx3b.TaxBandSliceView>(data['data']);
@@ -6125,26 +7273,80 @@ class Protocol extends _is.DatabaseSerializationManager
     if (dataClassName == 'TransactionRule') {
       return deserialize<_i6dj6ji0.TransactionRule>(data['data']);
     }
+    if (dataClassName == 'ImportResult') {
+      return deserialize<_ibzcfs2k.ImportResult>(data['data']);
+    }
     if (dataClassName == 'ImportRow') {
       return deserialize<_isp6bezg.ImportRow>(data['data']);
     }
-    if (dataClassName == 'SplitItem') {
-      return deserialize<_i0jd5x9z.SplitItem>(data['data']);
+    if (dataClassName == 'ReconcileResult') {
+      return deserialize<_igokbqfh.ReconcileResult>(data['data']);
     }
     if (dataClassName == 'Transaction') {
       return deserialize<_iqhl4hru.Transaction>(data['data']);
     }
-    if (dataClassName == 'AssetQuoteCache') {
-      return deserialize<_i2gu4pwf.AssetQuoteCache>(data['data']);
+    if (dataClassName == 'TransactionFlag') {
+      return deserialize<_i4fvctax.TransactionFlag>(data['data']);
     }
-    if (dataClassName == 'WalletConnectResult') {
-      return deserialize<_igiy3v19.WalletConnectResult>(data['data']);
+    if (dataClassName == 'TransactionInput') {
+      return deserialize<_ipd1rac6.TransactionInput>(data['data']);
     }
-    if (dataClassName == 'WalletConnection') {
-      return deserialize<_i9uqpb1b.WalletConnection>(data['data']);
+    if (dataClassName == 'TransactionKind') {
+      return deserialize<_ioneruif.TransactionKind>(data['data']);
+    }
+    if (dataClassName == 'TransactionLine') {
+      return deserialize<_ipio7ws3.TransactionLine>(data['data']);
+    }
+    if (dataClassName == 'TransactionLineInput') {
+      return deserialize<_imsv7m6w.TransactionLineInput>(data['data']);
+    }
+    if (dataClassName == 'TransactionPage') {
+      return deserialize<_i7f3q91r.TransactionPage>(data['data']);
+    }
+    if (dataClassName == 'TransactionQuery') {
+      return deserialize<_ioinkgwn.TransactionQuery>(data['data']);
+    }
+    if (dataClassName == 'TransactionStatus') {
+      return deserialize<_i3rynkdl.TransactionStatus>(data['data']);
+    }
+    if (dataClassName == 'TransactionView') {
+      return deserialize<_ilixdhed.TransactionView>(data['data']);
+    }
+    if (dataClassName == 'Transfer') {
+      return deserialize<_ign516jt.Transfer>(data['data']);
+    }
+    if (dataClassName == 'TransferInput') {
+      return deserialize<_iah0rmrk.TransferInput>(data['data']);
+    }
+    if (dataClassName == 'TransferPeerView') {
+      return deserialize<_i3n9n3ej.TransferPeerView>(data['data']);
+    }
+    if (dataClassName == 'AssetPrice') {
+      return deserialize<_iw6q2afx.AssetPrice>(data['data']);
+    }
+    if (dataClassName == 'PriceQuality') {
+      return deserialize<_i6j30n20.PriceQuality>(data['data']);
+    }
+    if (dataClassName == 'PriceSource') {
+      return deserialize<_iu1a5mev.PriceSource>(data['data']);
+    }
+    if (dataClassName == 'Wallet') {
+      return deserialize<_ilu5i0rn.Wallet>(data['data']);
     }
     if (dataClassName == 'WalletHolding') {
       return deserialize<_iqqppnaa.WalletHolding>(data['data']);
+    }
+    if (dataClassName == 'WalletNetwork') {
+      return deserialize<_ifam4bx7.WalletNetwork>(data['data']);
+    }
+    if (dataClassName == 'WalletSyncResult') {
+      return deserialize<_ipdq2p58.WalletSyncResult>(data['data']);
+    }
+    if (dataClassName == 'WalletTaxYearSummary') {
+      return deserialize<_ivsmsmw6.WalletTaxYearSummary>(data['data']);
+    }
+    if (dataClassName == 'WalletTransaction') {
+      return deserialize<_i6m1jx15.WalletTransaction>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       return _iais.Protocol().deserializeByClassName({
@@ -6156,6 +7358,12 @@ class Protocol extends _is.DatabaseSerializationManager
       return _iacs.Protocol().deserializeByClassName({
         ...data,
         'className': dataClassName.substring(20),
+      });
+    }
+    if (dataClassName.startsWith('openbudget_core.')) {
+      return _ifz8weqz.Protocol().deserializeByClassName({
+        ...data,
+        'className': dataClassName.substring(16),
       });
     }
     if (dataClassName.startsWith('serverpod.')) {
@@ -6170,6 +7378,7 @@ class Protocol extends _is.DatabaseSerializationManager
   void _registerHostProtocols() {
     _iais.Protocol().registerHostProtocol('openbudget', this);
     _iacs.Protocol().registerHostProtocol('openbudget', this);
+    _ifz8weqz.Protocol().registerHostProtocol('openbudget', this);
   }
 
   @override
@@ -6187,6 +7396,15 @@ class Protocol extends _is.DatabaseSerializationManager
       }
     }
     {
+      var protocol = _ifz8weqz.Protocol();
+      var table = protocol is _is.DatabaseSerializationManager
+          ? (protocol as _is.DatabaseSerializationManager).getTableForType(t)
+          : null;
+      if (table != null) {
+        return table;
+      }
+    }
+    {
       var table = _isp.Protocol().getTableForType(t);
       if (table != null) {
         return table;
@@ -6195,6 +7413,8 @@ class Protocol extends _is.DatabaseSerializationManager
     switch (t) {
       case _iz2jf14v.Account:
         return _iz2jf14v.Account.t;
+      case _i87oqvv1.AccountValuation:
+        return _i87oqvv1.AccountValuation.t;
       case _isfmgqgu.AgentConversation:
         return _isfmgqgu.AgentConversation.t;
       case _inwxyid7.AgentMessage:
@@ -6207,6 +7427,8 @@ class Protocol extends _is.DatabaseSerializationManager
         return _igo4k2bu.AgentUsageRecord.t;
       case _i8betnj7.AgentAccessToken:
         return _i8betnj7.AgentAccessToken.t;
+      case _ijhj7cd7.AuditEvent:
+        return _ijhj7cd7.AuditEvent.t;
       case _iq2w1sa5.Entitlement:
         return _iq2w1sa5.Entitlement.t;
       case _iw7l0hzr.SolanaBillingChallenge:
@@ -6215,18 +7437,18 @@ class Protocol extends _is.DatabaseSerializationManager
         return _in1nt6tx.StripeCustomer.t;
       case _i01fne9j.BudgetTemplate:
         return _i01fne9j.BudgetTemplate.t;
-      case _idtyoogy.Budget:
-        return _idtyoogy.Budget.t;
+      case _iagnrffn.BudgetTemplateLine:
+        return _iagnrffn.BudgetTemplateLine.t;
       case _iwxpkdmg.Category:
         return _iwxpkdmg.Category.t;
+      case _iamyw1yn.Entity:
+        return _iamyw1yn.Entity.t;
       case _ifl4yivq.EnvelopeGoal:
         return _ifl4yivq.EnvelopeGoal.t;
       case _ikt21dfw.Envelope:
         return _ikt21dfw.Envelope.t;
-      case _i41ek9pv.FxRateEntry:
-        return _i41ek9pv.FxRateEntry.t;
-      case _i4xgo4ij.FxRateSnapshot:
-        return _i4xgo4ij.FxRateSnapshot.t;
+      case _i46rvf1t.FxRate:
+        return _i46rvf1t.FxRate.t;
       case _ikgmcjq7.Institution:
         return _ikgmcjq7.Institution.t;
       case _iclizrec.InstitutionLocation:
@@ -6237,8 +7459,6 @@ class Protocol extends _is.DatabaseSerializationManager
         return _i6l0fo54.JournalLine.t;
       case _ivazbnnp.LedgerAccount:
         return _ivazbnnp.LedgerAccount.t;
-      case _ipq97xjw.LedgerAuditEvent:
-        return _ipq97xjw.LedgerAuditEvent.t;
       case _i7t4btg4.LedgerPeriodLock:
         return _i7t4btg4.LedgerPeriodLock.t;
       case _igdgld5u.MonthlyAllocation:
@@ -6249,24 +7469,26 @@ class Protocol extends _is.DatabaseSerializationManager
         return _i1vmvtrm.PlaidConnection.t;
       case _i9is7zb8.RecurringTransaction:
         return _i9is7zb8.RecurringTransaction.t;
-      case _iotf4y4d.SolanaWallet:
-        return _iotf4y4d.SolanaWallet.t;
-      case _ivqf8i64.SolanaWalletHolding:
-        return _ivqf8i64.SolanaWalletHolding.t;
-      case _iwwk92r1.SolanaWalletTransaction:
-        return _iwwk92r1.SolanaWalletTransaction.t;
+      case _i99f9doz.UserSettings:
+        return _i99f9doz.UserSettings.t;
       case _i20z9jax.TaxProfileRecord:
         return _i20z9jax.TaxProfileRecord.t;
       case _i6dj6ji0.TransactionRule:
         return _i6dj6ji0.TransactionRule.t;
       case _iqhl4hru.Transaction:
         return _iqhl4hru.Transaction.t;
-      case _i2gu4pwf.AssetQuoteCache:
-        return _i2gu4pwf.AssetQuoteCache.t;
-      case _i9uqpb1b.WalletConnection:
-        return _i9uqpb1b.WalletConnection.t;
+      case _ipio7ws3.TransactionLine:
+        return _ipio7ws3.TransactionLine.t;
+      case _ign516jt.Transfer:
+        return _ign516jt.Transfer.t;
+      case _iw6q2afx.AssetPrice:
+        return _iw6q2afx.AssetPrice.t;
+      case _ilu5i0rn.Wallet:
+        return _ilu5i0rn.Wallet.t;
       case _iqqppnaa.WalletHolding:
         return _iqqppnaa.WalletHolding.t;
+      case _i6m1jx15.WalletTransaction:
+        return _i6m1jx15.WalletTransaction.t;
     }
     return null;
   }

@@ -1,0 +1,9 @@
+### Which pricing source valued a holding.
+enum: PriceSource
+serialized: byName
+values:
+  - helius
+  - jupiter
+  - magicEden
+  ### Computed from a related asset or pool.
+  - derived

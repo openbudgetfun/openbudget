@@ -1,0 +1,10 @@
+### Spacing of net worth history points.
+enum: NetWorthGranularity
+serialized: byName
+values:
+  ### Ranges up to 92 days.
+  - day
+  ### Ranges up to 2 years. Weeks end on Sunday.
+  - week
+  ### Any range up to 400 months.
+  - month

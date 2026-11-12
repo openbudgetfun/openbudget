@@ -14,14 +14,13 @@ import 'dart:async' as _ida;
 
 import 'package:serverpod/serverpod.dart' as _is;
 
-/// A saved allocation template that can be applied to any month.
+/// A saved set of allocations that can be applied to any month.
 abstract class BudgetTemplate
     implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   BudgetTemplate._({
     this.id,
-    required this.budgetId,
+    required this.entityId,
     required this.name,
-    required this.allocationData,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : createdAt = createdAt ?? DateTime.now(),
@@ -29,9 +28,8 @@ abstract class BudgetTemplate
 
   factory BudgetTemplate({
     _is.UuidValue? id,
-    required _is.UuidValue budgetId,
+    required _is.UuidValue entityId,
     required String name,
-    required String allocationData,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _BudgetTemplateImpl;
@@ -41,11 +39,10 @@ abstract class BudgetTemplate
       id: jsonSerialization['id'] == null
           ? null
           : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _is.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _is.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
       name: jsonSerialization['name'] as String,
-      allocationData: jsonSerialization['allocationData'] as String,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -62,13 +59,10 @@ abstract class BudgetTemplate
   @override
   _is.UuidValue? id;
 
-  _is.UuidValue budgetId;
+  _is.UuidValue entityId;
 
-  /// User-chosen name for the template (e.g. "Standard Month").
+  /// User-chosen name, such as "Standard month".
   String name;
-
-  /// JSON-encoded map of envelope ID → allocated cents.
-  String allocationData;
 
   DateTime createdAt;
 
@@ -82,9 +76,8 @@ abstract class BudgetTemplate
   @_is.useResult
   BudgetTemplate copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    _is.UuidValue? budgetId,
+    _is.UuidValue? entityId,
     String? name,
-    String? allocationData,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -93,9 +86,8 @@ abstract class BudgetTemplate
     return {
       '__className__': 'BudgetTemplate',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'name': name,
-      'allocationData': allocationData,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -106,9 +98,8 @@ abstract class BudgetTemplate
     return {
       '__className__': 'BudgetTemplate',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'name': name,
-      'allocationData': allocationData,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -145,16 +136,14 @@ abstract class BudgetTemplate
 class _BudgetTemplateImpl extends BudgetTemplate {
   _BudgetTemplateImpl({
     _is.UuidValue? id,
-    required _is.UuidValue budgetId,
+    required _is.UuidValue entityId,
     required String name,
-    required String allocationData,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
          id: id,
-         budgetId: budgetId,
+         entityId: entityId,
          name: name,
-         allocationData: allocationData,
          createdAt: createdAt,
          updatedAt: updatedAt,
        );
@@ -165,17 +154,15 @@ class _BudgetTemplateImpl extends BudgetTemplate {
   @override
   BudgetTemplate copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    _is.UuidValue? budgetId,
+    _is.UuidValue? entityId,
     String? name,
-    String? allocationData,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return BudgetTemplate(
       id: id is _is.UndefinedSentinel ? this.id : id,
-      budgetId: budgetId ?? this.budgetId,
+      entityId: entityId ?? this.entityId,
       name: name ?? this.name,
-      allocationData: allocationData ?? this.allocationData,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -185,9 +172,9 @@ class _BudgetTemplateImpl extends BudgetTemplate {
 class BudgetTemplateUpdateTable extends _is.UpdateTable<BudgetTemplateTable> {
   BudgetTemplateUpdateTable(super.table);
 
-  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> entityId(_is.UuidValue value) =>
       _is.ColumnValue(
-        table.budgetId,
+        table.entityId,
         value,
       );
 
@@ -195,12 +182,6 @@ class BudgetTemplateUpdateTable extends _is.UpdateTable<BudgetTemplateTable> {
     table.name,
     value,
   );
-
-  _is.ColumnValue<String, String> allocationData(String value) =>
-      _is.ColumnValue(
-        table.allocationData,
-        value,
-      );
 
   _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _is.ColumnValue(
@@ -219,16 +200,12 @@ class BudgetTemplateTable extends _is.Table<_is.UuidValue?> {
   BudgetTemplateTable({super.tableRelation})
     : super(tableName: 'budget_template') {
     updateTable = BudgetTemplateUpdateTable(this);
-    budgetId = _is.ColumnUuid(
-      'budgetId',
+    entityId = _is.ColumnUuid(
+      'entityId',
       this,
     );
     name = _is.ColumnString(
       'name',
-      this,
-    );
-    allocationData = _is.ColumnString(
-      'allocationData',
       this,
     );
     createdAt = _is.ColumnDateTime(
@@ -245,13 +222,10 @@ class BudgetTemplateTable extends _is.Table<_is.UuidValue?> {
 
   late final BudgetTemplateUpdateTable updateTable;
 
-  late final _is.ColumnUuid budgetId;
+  late final _is.ColumnUuid entityId;
 
-  /// User-chosen name for the template (e.g. "Standard Month").
+  /// User-chosen name, such as "Standard month".
   late final _is.ColumnString name;
-
-  /// JSON-encoded map of envelope ID → allocated cents.
-  late final _is.ColumnString allocationData;
 
   late final _is.ColumnDateTime createdAt;
 
@@ -260,9 +234,8 @@ class BudgetTemplateTable extends _is.Table<_is.UuidValue?> {
   @override
   List<_is.Column> get columns => [
     id,
-    budgetId,
+    entityId,
     name,
-    allocationData,
     createdAt,
     updatedAt,
   ];

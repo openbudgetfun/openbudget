@@ -3,32 +3,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/more/screens/more_screen.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_repository.dart';
 import 'package:openbudget_app/src/features/tax/screens/tax_overview_screen.dart';
 import 'package:openbudget_app/src/features/tax/screens/tax_profile_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
 import 'common/patrol_helpers.dart';
 import 'common/test_data.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000701';
-final _budgetUuid = UuidValue.fromString(_budgetId);
-final _ownerUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000702',
-);
+const String _entityId = TestData.gbpEntityId;
 
-Budget _makeBudget() => Budget(
-  id: _budgetUuid,
-  name: TestData.budgetName,
-  currencyCode: 'GBP',
-  ownerId: _ownerUuid,
-  createdAt: DateTime.utc(2026),
-);
+/// The entity drives the jurisdiction and kind; the profile screen reads
+/// both from it.
+Entity _gbEntity() => TestData.gbpEntity();
 
 TaxReportView _makeReport(int startYear) => TaxReportView(
   jurisdiction: 'GB',
@@ -36,7 +29,7 @@ TaxReportView _makeReport(int startYear) => TaxReportView(
   yearLabel: '$startYear/${(startYear + 1) % 100}',
   yearStart: DateTime.utc(startYear, 4, 6),
   yearEnd: DateTime.utc(startYear + 1, 4, 6),
-  entityKind: 'individual',
+  entityKind: EntityKind.individual,
   currencyCode: 'GBP',
   lines: [
     TaxReportLineView(
@@ -76,38 +69,33 @@ class _FakeTaxRepository implements TaxRepository {
   TaxProfileRecord? profile;
   final List<
     ({
-      String budgetId,
+      String entityId,
       String jurisdiction,
       String entityKind,
       String profileJson,
-      String? linkedBudgetId,
     })
   >
   savedProfiles = [];
 
   @override
-  Future<TaxProfileRecord?> getProfile(String budgetId) async => profile;
+  Future<TaxProfileRecord?> getProfile(String entityId) async => profile;
 
   @override
   Future<TaxProfileRecord> saveProfile({
-    required String budgetId,
+    required String entityId,
     required String jurisdiction,
     required String entityKind,
     required String profileJson,
-    String? linkedBudgetId,
   }) async {
     savedProfiles.add((
-      budgetId: budgetId,
+      entityId: entityId,
       jurisdiction: jurisdiction,
       entityKind: entityKind,
       profileJson: profileJson,
-      linkedBudgetId: linkedBudgetId,
     ));
     final record = TaxProfileRecord(
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000703'),
-      budgetId: _budgetUuid,
-      jurisdiction: jurisdiction,
-      entityKind: entityKind,
+      entityId: UuidValue.fromString(entityId),
       profileJson: profileJson,
       createdAt: DateTime.utc(2026),
       updatedAt: DateTime.utc(2026, 7),
@@ -117,7 +105,7 @@ class _FakeTaxRepository implements TaxRepository {
   }
 
   @override
-  Future<List<TaxCategoryView>> listCategories(String budgetId) async => [];
+  Future<List<TaxCategoryView>> listCategories(String entityId) async => [];
 
   @override
   Future<Envelope> setEnvelopeTaxCategory({
@@ -126,41 +114,41 @@ class _FakeTaxRepository implements TaxRepository {
   }) => throw UnimplementedError();
 
   @override
-  Future<Transaction> setTransactionTax({
-    required String transactionId,
+  Future<TransactionView> setLineTax({
+    required String transactionLineId,
     String? code,
     int? businessUsePercent,
-    int? salesTaxCents,
+    int? salesTaxMinor,
   }) => throw UnimplementedError();
 
   @override
-  Future<TaxReportView> getReport(String budgetId, int startYear) async =>
+  Future<TaxReportView> getReport(String entityId, int startYear) async =>
       _makeReport(startYear);
 }
 
 Widget _buildApp(_FakeTaxRepository repository) {
   final router = GoRouter(
-    initialLocation: morePath.replaceFirst(':id', _budgetId),
+    initialLocation: morePath.replaceFirst(':entityId', _entityId),
     routes: [
       GoRoute(
         name: moreRoute,
         path: morePath,
         builder: (context, state) => MoreScreen(
-          budgetId: state.pathParameters['id']!,
+          entityId: state.pathParameters['entityId']!,
         ),
       ),
       GoRoute(
         name: taxOverviewRoute,
         path: taxOverviewPath,
         builder: (context, state) => TaxOverviewScreen(
-          budgetId: state.pathParameters['id']!,
+          entityId: state.pathParameters['entityId']!,
         ),
         routes: [
           GoRoute(
             name: taxProfileRoute,
             path: 'profile',
             builder: (context, state) => TaxProfileScreen(
-              budgetId: state.pathParameters['id']!,
+              entityId: state.pathParameters['entityId']!,
             ),
           ),
         ],
@@ -171,7 +159,7 @@ Widget _buildApp(_FakeTaxRepository repository) {
   return ProviderScope(
     overrides: [
       taxRepositoryProvider.overrideWithValue(repository),
-      budgetListProvider.overrideWith((ref) async => [_makeBudget()]),
+      entityDetailProvider.overrideWith((ref, id) async => _gbEntity()),
     ],
     child: MaterialApp.router(
       theme: OpenBudgetTheme.light,
@@ -213,6 +201,7 @@ void main() {
       await profile.save();
 
       expect(repository.savedProfiles, hasLength(1));
+      expect(repository.savedProfiles.single.entityId, _entityId);
       expect(repository.savedProfiles.single.jurisdiction, 'GB');
       expect(repository.savedProfiles.single.entityKind, 'individual');
       expect(

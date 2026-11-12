@@ -3,12 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_realtime_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/entity_events_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_shell_screen.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  const budgetId = 'test-budget-1';
+  const entityId = 'test-budget-1';
 
   Widget buildSubject() {
     // Use non-parameterized paths to satisfy GoRouter constraints in tests.
@@ -18,7 +18,7 @@ void main() {
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) => BudgetShellScreen(
             navigationShell: navigationShell,
-            budgetId: budgetId,
+            entityId: entityId,
           ),
           branches: [
             StatefulShellBranch(
@@ -63,7 +63,11 @@ void main() {
     );
 
     return ProviderScope(
-      overrides: [budgetRealtimeProvider.overrideWith((ref, budgetId) {})],
+      overrides: [
+        entityEventsProvider(entityId).overrideWith(
+          (ref) => const Stream.empty(),
+        ),
+      ],
       child: MaterialApp.router(
         theme: OpenBudgetTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,

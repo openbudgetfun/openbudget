@@ -40,7 +40,7 @@ abstract final class AgentService {
   /// proposed, one `textDelta` with the assistant's reply, and finally `done`.
   static Stream<AgentEvent> chat(
     Session session, {
-    required UuidValue budgetId,
+    required UuidValue entityId,
     required String message,
     UuidValue? conversationId,
   }) async* {
@@ -53,19 +53,19 @@ abstract final class AgentService {
     // Resolve before writing anything, so a missing plan or key leaves no
     // half-started conversation behind.
     await AgentProviderResolver.resolve(session, userId);
-    await requireOwnedBudget(session, userId: userId, budgetId: budgetId);
+    await requireOwnedEntity(session, userId: userId, entityId: entityId);
 
     final conversation = conversationId == null
         ? await _createConversation(
             session,
             userId: userId,
-            budgetId: budgetId,
+            entityId: entityId,
             title: _titleFor(trimmed),
           )
         : await _requireConversation(
             session,
             userId: userId,
-            budgetId: budgetId,
+            entityId: entityId,
             conversationId: conversationId,
           );
     final id = conversation.id!;
@@ -172,17 +172,17 @@ abstract final class AgentService {
     yield AgentEvent(kind: AgentEventKind.done, conversationId: id);
   }
 
-  /// Lists the user's conversations for one budget, newest first.
+  /// Lists the user's conversations for one entity, newest first.
   static Future<List<AgentConversation>> listConversations(
     Session session, {
-    required UuidValue budgetId,
+    required UuidValue entityId,
   }) async {
     final userId = requireAgentUserId(session);
-    await requireOwnedBudget(session, userId: userId, budgetId: budgetId);
+    await requireOwnedEntity(session, userId: userId, entityId: entityId);
 
     return AgentConversation.db.find(
       session,
-      where: (t) => t.budgetId.equals(budgetId) & t.userId.equals(userId),
+      where: (t) => t.entityId.equals(entityId) & t.userId.equals(userId),
       orderBy: (t) => t.updatedAt.desc(),
     );
   }
@@ -240,7 +240,7 @@ abstract final class AgentService {
   static Future<AgentConversation> _createConversation(
     Session session, {
     required UuidValue userId,
-    required UuidValue budgetId,
+    required UuidValue entityId,
     required String title,
   }) {
     final now = DateTime.now().toUtc();
@@ -248,7 +248,7 @@ abstract final class AgentService {
       session,
       AgentConversation(
         userId: userId,
-        budgetId: budgetId,
+        entityId: entityId,
         title: title,
         createdAt: now,
         updatedAt: now,
@@ -260,7 +260,7 @@ abstract final class AgentService {
     Session session, {
     required UuidValue userId,
     required UuidValue conversationId,
-    UuidValue? budgetId,
+    UuidValue? entityId,
   }) async {
     final conversation = await AgentConversation.db.findById(
       session,
@@ -268,7 +268,7 @@ abstract final class AgentService {
     );
     if (conversation == null ||
         conversation.userId != userId ||
-        (budgetId != null && conversation.budgetId != budgetId)) {
+        (entityId != null && conversation.entityId != entityId)) {
       throw NotFoundException(message: 'Conversation not found');
     }
     return conversation;

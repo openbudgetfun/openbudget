@@ -3,16 +3,17 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_group_names.dart';
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
-import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// A month or a range of months, split across the envelopes it was spent in.
 class SpendingByPayeeScreen extends HookConsumerWidget {
   const SpendingByPayeeScreen({
-    required this.budgetId,
+    required this.entityId,
     this.initialUsePreset = false,
     this.initialYear,
     this.initialMonth,
@@ -27,7 +28,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
   /// Moves the statement forward one month.
   static const Key nextMonthKey = ValueKey('spendingByPayee.nextMonth');
 
-  final String budgetId;
+  final String entityId;
   final bool initialUsePreset;
   final int? initialYear;
   final int? initialMonth;
@@ -38,31 +39,27 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
     final now = DateTime.now();
-    final selectedYear = useState(initialYear ?? now.year);
-    final normalizedInitialMonth = initialMonth?.clamp(1, 12) ?? now.month;
-    final selectedMonth = useState(normalizedInitialMonth);
+    final initialYearValue = initialYear;
+    final initialMonthValue = initialMonth;
+    final initialYyyymm = MonthKey.fromDate(
+      initialYearValue != null && initialMonthValue != null
+          ? DateTime(initialYearValue, initialMonthValue)
+          : now,
+    );
+    final selectedMonth = useState(initialYyyymm);
     final presetMonths = useState(3);
     final usePreset = useState(initialUsePreset);
-    final converter = ref
-        .watch(displayCurrencyConverterProvider(budgetId))
-        .asData
-        ?.value;
 
     final reportAsync = usePreset.value
         ? ref.watch(
             spendingReportPresetProvider(
-              budgetId,
-              selectedYear.value,
+              entityId,
               selectedMonth.value,
               presetMonths.value,
             ),
           )
         : ref.watch(
-            spendingReportProvider(
-              budgetId,
-              selectedYear.value,
-              selectedMonth.value,
-            ),
+            spendingReportProvider(entityId, selectedMonth.value),
           );
 
     return Scaffold(
@@ -81,17 +78,12 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
           ],
         ),
         data: (report) {
-          final sourceCurrency = report.currencyCode;
+          final currencyCode = report.currencyCode;
           final sortedEntries = report.categorySpending.entries.toList()
             ..sort((a, b) => b.value.compareTo(a.value));
           final totalSpent = report.totalExpenses;
           final series = reportSeriesColors(theme);
-          String format(int cents) =>
-              converter?.formatAmount(
-                amountCents: cents,
-                currencyCode: sourceCurrency,
-              ) ??
-              formatCentsForCode(cents, sourceCurrency);
+          String format(int minor) => formatMinorForCode(minor, currencyCode);
           final topEntries = sortedEntries.take(series.length).toList();
           final listedTotal = topEntries.fold<int>(
             0,
@@ -100,7 +92,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
           final segments = [
             for (final (index, entry) in topEntries.indexed)
               ReportChartDatum(
-                label: entry.key,
+                label: reportGroupLabel(l10n, entry.key),
                 amountLabel: format(entry.value),
                 value: entry.value,
                 color: series[index],
@@ -115,17 +107,12 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
           ];
           final rangeLabel = _presetRangeLabel(
             l10n,
-            selectedYear.value,
             selectedMonth.value,
             presetMonths.value,
           );
           final periodLabel = usePreset.value
               ? l10n.spendingByPayeeLastMonths(presetMonths.value)
-              : reportMonthLabel(
-                  l10n,
-                  selectedMonth.value,
-                  selectedYear.value,
-                );
+              : reportYyyymmLabel(l10n, selectedMonth.value);
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(
@@ -169,27 +156,12 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
               ],
               const SizedBox(height: SpacingTokens.sm),
               _MonthSelector(
-                label: reportMonthLabel(
-                  l10n,
+                label: reportYyyymmLabel(l10n, selectedMonth.value),
+                onPrevious: () => selectedMonth.value = MonthKey.previous(
                   selectedMonth.value,
-                  selectedYear.value,
                 ),
-                onPrevious: () {
-                  if (selectedMonth.value == 1) {
-                    selectedMonth.value = 12;
-                    selectedYear.value--;
-                  } else {
-                    selectedMonth.value--;
-                  }
-                },
-                onNext: () {
-                  if (selectedMonth.value == 12) {
-                    selectedMonth.value = 1;
-                    selectedYear.value++;
-                  } else {
-                    selectedMonth.value++;
-                  }
-                },
+                onNext: () =>
+                    selectedMonth.value = MonthKey.next(selectedMonth.value),
               ),
               const SizedBox(height: SpacingTokens.sm),
               ObCard(
@@ -264,11 +236,10 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                     children: [
                       for (final (index, entry) in sortedEntries.indexed) ...[
                         _CategoryRow(
-                          categoryName: entry.key,
-                          amountCents: entry.value,
-                          totalCents: totalSpent,
-                          sourceCurrency: sourceCurrency,
-                          converter: converter,
+                          categoryName: reportGroupLabel(l10n, entry.key),
+                          amountMinor: entry.value,
+                          totalMinor: totalSpent,
+                          currencyCode: currencyCode,
                           color: series[index % series.length],
                           seed: 61 + index,
                         ),
@@ -297,14 +268,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(width: SpacingTokens.sm),
                     ObAmount(
-                      converter?.formatAmount(
-                            amountCents: report.totalIncome,
-                            currencyCode: sourceCurrency,
-                          ) ??
-                          formatCentsForCode(
-                            report.totalIncome,
-                            sourceCurrency,
-                          ),
+                      format(report.totalIncome),
                       tone: ObTone.funded,
                       style: theme.textTheme.titleSmall,
                     ),
@@ -320,24 +284,17 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
 
   String _presetRangeLabel(
     AppLocalizations l10n,
-    int endYear,
     int endMonth,
     int monthCount,
   ) {
     final normalizedCount = monthCount < 1 ? 1 : monthCount;
-    var startYear = endYear;
     var startMonth = endMonth;
     for (var index = 1; index < normalizedCount; index++) {
-      if (startMonth == 1) {
-        startMonth = 12;
-        startYear -= 1;
-      } else {
-        startMonth -= 1;
-      }
+      startMonth = MonthKey.previous(startMonth);
     }
 
-    final startLabel = reportMonthLabel(l10n, startMonth, startYear);
-    final endLabel = reportMonthLabel(l10n, endMonth, endYear);
+    final startLabel = reportYyyymmLabel(l10n, startMonth);
+    final endLabel = reportYyyymmLabel(l10n, endMonth);
     return '$startLabel\u2013$endLabel';
   }
 }
@@ -386,19 +343,17 @@ class _MonthSelector extends HookWidget {
 class _CategoryRow extends HookWidget {
   const _CategoryRow({
     required this.categoryName,
-    required this.amountCents,
-    required this.totalCents,
-    required this.sourceCurrency,
-    required this.converter,
+    required this.amountMinor,
+    required this.totalMinor,
+    required this.currencyCode,
     required this.color,
     required this.seed,
   });
 
   final String categoryName;
-  final int amountCents;
-  final int totalCents;
-  final String sourceCurrency;
-  final DisplayCurrencyConverter? converter;
+  final int amountMinor;
+  final int totalMinor;
+  final String currencyCode;
   final Color color;
   final int seed;
 
@@ -406,7 +361,7 @@ class _CategoryRow extends HookWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final percentage = totalCents > 0 ? (amountCents / totalCents) * 100 : 0.0;
+    final percentage = totalMinor > 0 ? (amountMinor / totalMinor) * 100 : 0.0;
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(
@@ -431,11 +386,7 @@ class _CategoryRow extends HookWidget {
         style: theme.textTheme.bodySmall?.copyWith(color: palette.mutedInk),
       ),
       trailing: ObAmount(
-        converter?.formatAmount(
-              amountCents: amountCents,
-              currencyCode: sourceCurrency,
-            ) ??
-            formatCentsForCode(amountCents, sourceCurrency),
+        formatMinorForCode(amountMinor, currencyCode),
         style: theme.textTheme.titleSmall,
       ),
     );

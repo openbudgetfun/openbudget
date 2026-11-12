@@ -48,10 +48,10 @@ final class DeTaxRules implements TaxRulePack {
   }
 
   @override
-  List<TaxCategory> categoriesFor(TaxEntityKind kind) => switch (kind) {
-    TaxEntityKind.individual => deIndividualCategories,
-    TaxEntityKind.soleTrader => deSoleTraderCategories,
-    TaxEntityKind.company => deCompanyCategories,
+  List<TaxCategory> categoriesFor(EntityKind kind) => switch (kind) {
+    EntityKind.individual => deIndividualCategories,
+    EntityKind.soleTrader => deSoleTraderCategories,
+    EntityKind.company => deCompanyCategories,
   };
 
   @override

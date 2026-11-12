@@ -1,0 +1,11 @@
+### Estimated realised wallet P&L for one tax year of the wallet's entity.
+class: WalletTaxYearSummary
+fields:
+  walletId: UuidValue
+  ### Calendar year the entity's tax year starts in.
+  taxYear: int
+  transactionCount: int
+  pnlCurrencyCode: String
+  realizedPnlMinor: int
+  proceedsMinor: int
+  costBasisMinor: int

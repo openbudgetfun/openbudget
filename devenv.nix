@@ -47,6 +47,11 @@ in
   # Ensure redis-cli health probes authenticate against local development redis.
   env.REDISCLI_AUTH = "PTpOute8-systr4hDRsD6biK5x06B7Vv";
 
+  # The server's database tests start throwaway clusters with `initdb` and
+  # `pg_ctl` (test/support/pg_test_server.dart). Point them at the same
+  # PostgreSQL the dev service uses, including in CI where that service is off.
+  env.OPENBUDGET_TEST_POSTGRES_BIN = "${pkgs.postgresql_16}/bin";
+
   git-hooks = {
     package = pkgs.prek;
 

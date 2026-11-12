@@ -1,567 +1,442 @@
-// UuidValue is needed for constructing test model data.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/recurring/providers/recurring_actions_provider.dart';
-import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
 import 'package:openbudget_app/src/features/recurring/screens/recurring_list_screen.dart';
+import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
+import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
-final _budgetUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000010',
-);
-final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000011');
+import '../../../fixtures/budget_month.dart';
+import '../../../fixtures/transactions.dart';
+import '../../../support/fake_endpoint_client.dart';
 
-Budget _makeBudget() => Budget(
-  id: _budgetUuid,
-  name: 'Test Budget',
-  currencyCode: 'USD',
-  ownerId: _ownerUuid,
-  createdAt: DateTime(2026),
+const String _entityId = fixtureEntityId;
+const String _usdAccountId = '00000000-0000-0000-0000-0000000000f0d1';
+
+GoRouter _router() => GoRouter(
+  initialLocation: recurringListPath.replaceFirst(':entityId', _entityId),
+  routes: [
+    GoRoute(
+      name: recurringCalendarRoute,
+      path: recurringCalendarPath,
+      builder: (_, _) => const Scaffold(body: Text('Calendar Route')),
+    ),
+    GoRoute(
+      name: recurringListRoute,
+      path: recurringListPath,
+      builder: (context, state) =>
+          RecurringListScreen(entityId: state.pathParameters['entityId']!),
+    ),
+  ],
 );
 
-RecurringTransaction _makeRecurring({
-  String description = 'Netflix Subscription',
-  int amountCents = -1499,
-  String currencyCode = 'USD',
-  String frequency = 'monthly',
-  DateTime? nextOccurrence,
+class _Harness {
+  _Harness(this.client);
+
+  final FakeEndpointClient client;
+}
+
+Future<_Harness> _pumpRecurring(
+  WidgetTester tester, {
+  List<RecurringTransaction>? items,
+  List<Account>? accounts,
+  bool failToLoad = false,
+}) async {
+  final list = items ?? [_recurring()];
+  final client = FakeEndpointClient()
+    ..handle('recurringTransaction', 'list', (_) {
+      if (failToLoad) throw StateError('offline');
+      return list;
+    })
+    ..handle('budget', 'getMonth', (_) => testMonthView())
+    ..handle('account', 'list', (_) => accounts ?? [testAccount()])
+    ..handle('recurringTransaction', 'create', (_) => _recurring())
+    ..handle('recurringTransaction', 'update', (_) => _recurring())
+    ..handle('recurringTransaction', 'skipOccurrence', (_) => _recurring())
+    ..handle('recurringTransaction', 'delete', (_) => _recurring());
+  final container = ProviderContainer(
+    retry: (_, _) => null,
+    overrides: [serverpodClientProvider.overrideWithValue(client)],
+  );
+  addTearDown(container.dispose);
+  await tester.pumpApp(
+    const SizedBox.shrink(),
+    container: container,
+    router: _router(),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+  );
+  await tester.pumpAndSettle();
+  return _Harness(client);
+}
+
+RecurringTransaction _recurring({
+  String id = fixtureRecurringId,
+  String accountId = fixtureAccountId,
+  String description = 'Rent',
+  int amountMinor = -120000,
+  RecurrenceFrequency frequency = RecurrenceFrequency.monthly,
+  DateTime? nextDate,
   bool isActive = true,
-  UuidValue? id,
-}) => RecurringTransaction(
+}) => testRecurring(
   id: id,
+  accountId: accountId,
   description: description,
-  amountCents: amountCents,
-  currencyCode: currencyCode,
-  budgetId: _budgetUuid,
+  amountMinor: amountMinor,
   frequency: frequency,
-  nextOccurrence: nextOccurrence ?? DateTime(2099, 12, 31),
+  nextDate: nextDate,
   isActive: isActive,
 );
 
-class _RecordingRecurringActions extends RecurringActions {
-  int? createdAmountCents;
-
-  @override
-  AsyncValue<void> build() => const AsyncValue.data(null);
-
-  @override
-  Future<RecurringTransaction> createRecurring({
-    required String description,
-    required int amountCents,
-    required String currencyCode,
-    required String budgetId,
-    required String frequency,
-    required DateTime nextOccurrence,
-    String? envelopeId,
-    String? accountId,
-    String? payeeId,
-    DateTime? endDate,
-  }) async {
-    createdAmountCents = amountCents;
-    return _makeRecurring(
-      description: description,
-      amountCents: amountCents,
-      currencyCode: currencyCode,
-      frequency: frequency,
-      nextOccurrence: nextOccurrence,
-    );
-  }
-}
-
 void main() {
   group('RecurringListScreen', () {
-    testWidgets('renders loading indicator while recurring transactions load', (
+    testWidgets('renders the loading panel while the schedule loads', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
-          ),
-        ),
+      await tester.pumpApp(
+        const RecurringListScreen(entityId: _entityId),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
       );
       await tester.pump();
 
-      expect(find.byType(ObLoadingPanel), findsOneWidget);
+      expect(find.text('Fetching the schedule…'), findsOneWidget);
     });
 
-    testWidgets('renders error state with error icon', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith(
-              (ref, budgetId) =>
-                  throw Exception('Could not load recurring transactions'),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+    testWidgets('renders the problem panel when loading fails', (
+      tester,
+    ) async {
+      await _pumpRecurring(tester, failToLoad: true);
 
       expect(
         find.text('Could not load recurring transactions'),
         findsOneWidget,
       );
-      expect(find.byType(ObStatePanel), findsOneWidget);
     });
 
-    testWidgets('renders empty state with add button', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith(
-              (ref, budgetId) async => <RecurringTransaction>[],
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+    testWidgets('renders the empty state with an add action', (tester) async {
+      await _pumpRecurring(tester, items: const []);
 
       expect(find.text('No Recurring Transactions'), findsOneWidget);
       expect(
-        find.text(
-          'Set up recurring transactions for bills, subscriptions, and regular income',
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('Add Recurring'), findsOneWidget);
-      expect(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is WiredDoodle && widget.kind == WiredDoodleKind.sun,
-        ),
+        find.widgetWithText(FilledButton, 'Add Recurring'),
         findsOneWidget,
       );
     });
 
-    testWidgets('renders recurring list with descriptions', (tester) async {
-      final items = [
-        _makeRecurring(
-          description: 'Netflix',
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000020'),
-        ),
-        _makeRecurring(
-          description: 'Spotify',
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000021'),
-        ),
-        _makeRecurring(
-          description: 'Rent',
-          amountCents: -150000,
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000022'),
-        ),
-      ];
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith((ref, budgetId) async => items),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Netflix'), findsOneWidget);
-      expect(find.text('Spotify'), findsOneWidget);
-      expect(find.text('Rent'), findsOneWidget);
-    });
-
-    testWidgets('renders frequency for recurring transactions', (tester) async {
-      final items = [
-        _makeRecurring(
-          description: 'Monthly Bill',
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000030'),
-        ),
-      ];
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith((ref, budgetId) async => items),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // Frequency label is embedded in the subtitle: "Monthly • Next: ..."
-      expect(find.textContaining('Monthly \u2022'), findsOneWidget);
-    });
-
-    testWidgets('renders next date for recurring transactions', (tester) async {
-      final nextDate = DateTime(2026, 3, 15);
-      final items = [
-        _makeRecurring(
-          description: 'Gym Membership',
-          nextOccurrence: nextDate,
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000040'),
-        ),
-      ];
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith((ref, budgetId) async => items),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('2026-03-15'), findsOneWidget);
-    });
-
-    testWidgets('renders app bar with recurring transactions title', (
+    testWidgets('lists the descriptions, frequency and next date', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith(
-              (ref, budgetId) async => <RecurringTransaction>[],
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+      await _pumpRecurring(
+        tester,
+        items: [
+          _recurring(),
+          _recurring(
+            id: '00000000-0000-0000-0000-0000000000f0d2',
+            description: 'Salary',
+            amountMinor: 250000,
+            frequency: RecurrenceFrequency.yearly,
+            nextDate: DateTime.utc(2027, 2, 2),
           ),
-        ),
+        ],
       );
-      await tester.pumpAndSettle();
+
+      expect(find.text('Rent'), findsOneWidget);
+      expect(find.text('Salary'), findsOneWidget);
+      expect(find.textContaining('Monthly'), findsOneWidget);
+      expect(find.textContaining('Yearly'), findsOneWidget);
+      expect(find.textContaining('2026-11-15'), findsOneWidget);
+      expect(find.textContaining('2027-02-02'), findsOneWidget);
+    });
+
+    testWidgets('shows the title, add and calendar actions', (tester) async {
+      final harness = await _pumpRecurring(tester);
 
       expect(find.text('Recurring Transactions'), findsOneWidget);
-    });
+      expect(find.byKey(RecurringListScreen.addButtonKey), findsOneWidget);
+      expect(find.byKey(RecurringListScreen.calendarButtonKey), findsOneWidget);
 
-    testWidgets('renders add button in app bar', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith(
-              (ref, budgetId) async => <RecurringTransaction>[],
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
+      await tester.tap(find.byKey(RecurringListScreen.calendarButtonKey));
       await tester.pumpAndSettle();
 
-      // The add action lives in the app bar; the empty state repeats it as
-      // a labelled button without an icon.
+      expect(find.text('Calendar Route'), findsOneWidget);
       expect(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is SkribbleIcon && widget.data == OpenBudgetIcons.add,
-        ),
-        findsOneWidget,
+        harness.client.callsTo('recurringTransaction', 'list'),
+        hasLength(1),
       );
     });
 
-    testWidgets('renders calendar button in app bar', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith(
-              (ref, budgetId) async => <RecurringTransaction>[],
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
+    testWidgets('toggles a schedule through update', (tester) async {
+      final harness = await _pumpRecurring(tester);
+
+      await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
-      expect(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is SkribbleIcon &&
-              widget.data == OpenBudgetIcons.calendarMonth,
-        ),
-        findsOneWidget,
-      );
+      final call = harness.client
+          .callsTo('recurringTransaction', 'update')
+          .single;
+      expect(call.args['isActive'], isFalse);
     });
 
-    testWidgets('renders toggle switch for each recurring item', (
+    testWidgets('shows the paused chip for an inactive schedule', (
       tester,
     ) async {
-      final items = [
-        _makeRecurring(
-          description: 'Active Bill',
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000050'),
-        ),
-        _makeRecurring(
-          description: 'Paused Bill',
-          isActive: false,
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000051'),
-        ),
-      ];
+      await _pumpRecurring(tester, items: [_recurring(isActive: false)]);
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith((ref, budgetId) async => items),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byType(Switch), findsWidgets);
+      expect(find.text('Paused'), findsOneWidget);
     });
 
-    testWidgets('renders summary card and filter chips', (tester) async {
-      final items = [
-        _makeRecurring(
-          description: 'Rent',
-          amountCents: -150000,
-          nextOccurrence: DateTime(2020),
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000061'),
-        ),
-        _makeRecurring(
-          description: 'Salary',
-          amountCents: 500000,
-          nextOccurrence: DateTime(2099),
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000062'),
-        ),
-      ];
+    testWidgets('shows the summary card and filter chips', (tester) async {
+      await _pumpRecurring(tester);
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith((ref, budgetId) async => items),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Expense'), findsWidgets);
-      expect(find.text('Income'), findsWidgets);
-      expect(find.byType(ChoiceChip), findsWidgets);
+      expect(find.text('Scheduled totals'), findsOneWidget);
+      expect(find.text('1 recurring transaction'), findsOneWidget);
+      expect(find.widgetWithText(ChoiceChip, 'All'), findsOneWidget);
+      expect(find.widgetWithText(ChoiceChip, 'Expense'), findsOneWidget);
+      expect(find.widgetWithText(ChoiceChip, 'Income'), findsOneWidget);
+      expect(find.widgetWithText(ChoiceChip, 'Due now'), findsOneWidget);
     });
 
-    testWidgets('shows multi-currency totals in summary card', (tester) async {
-      final items = [
-        _makeRecurring(
-          description: 'Rent',
-          amountCents: -280000,
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000081'),
-        ),
-        _makeRecurring(
-          description: 'Insurance',
-          amountCents: -50000,
-          currencyCode: 'EUR',
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000082'),
-        ),
-        _makeRecurring(
-          description: 'Salary',
-          amountCents: 800000,
-          currencyCode: 'EUR',
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000083'),
-        ),
-      ];
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith((ref, budgetId) async => items),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+    testWidgets('shows a multi-currency total per account currency', (
+      tester,
+    ) async {
+      await _pumpRecurring(
+        tester,
+        items: [
+          _recurring(),
+          _recurring(
+            id: '00000000-0000-0000-0000-0000000000f0d3',
+            description: 'Streaming',
+            amountMinor: -1500,
           ),
-        ),
+          _recurring(
+            id: '00000000-0000-0000-0000-0000000000f0d4',
+            accountId: _usdAccountId,
+            description: 'US bill',
+            amountMinor: -5000,
+          ),
+        ],
+        accounts: [
+          testAccount(),
+          testAccount(
+            id: _usdAccountId,
+            name: 'Dollar account',
+            currencyCode: 'USD',
+          ),
+        ],
       );
-      await tester.pumpAndSettle();
 
-      expect(find.textContaining('USD'), findsWidgets);
-      expect(find.textContaining('EUR'), findsWidgets);
+      expect(find.text(r'GBP £1,215.00 · USD $50.00'), findsOneWidget);
     });
 
-    testWidgets('filters recurring list by selected chip', (tester) async {
-      final items = [
-        _makeRecurring(
-          description: 'Rent',
-          amountCents: -150000,
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000071'),
-        ),
-        _makeRecurring(
-          description: 'Salary',
-          amountCents: 500000,
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000072'),
-        ),
-      ];
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-            recurringListProvider.overrideWith((ref, budgetId) async => items),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecurringListScreen(budgetId: _budgetId),
+    testWidgets('filters by expense and income', (tester) async {
+      await _pumpRecurring(
+        tester,
+        items: [
+          _recurring(),
+          _recurring(
+            id: '00000000-0000-0000-0000-0000000000f0d2',
+            description: 'Salary',
+            amountMinor: 250000,
           ),
-        ),
+        ],
       );
+
+      await tester.tap(find.widgetWithText(ChoiceChip, 'Expense'));
       await tester.pumpAndSettle();
+      expect(find.text('Rent'), findsOneWidget);
+      expect(find.text('Salary'), findsNothing);
 
       await tester.tap(find.widgetWithText(ChoiceChip, 'Income'));
       await tester.pumpAndSettle();
-
       expect(find.text('Salary'), findsOneWidget);
       expect(find.text('Rent'), findsNothing);
     });
-  });
 
-  group('add recurring amount entry', () {
-    Widget buildSubject(RecurringActions actions) => ProviderScope(
-      overrides: [
-        budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
-        recurringListProvider.overrideWith(
-          (ref, budgetId) async => <RecurringTransaction>[],
+    testWidgets('shows a skip action on a due schedule', (tester) async {
+      final harness = await _pumpRecurring(
+        tester,
+        items: [
+          _recurring(
+            nextDate: DateTime.now().subtract(const Duration(days: 1)),
+          ),
+        ],
+      );
+
+      expect(find.text('Due now'), findsWidgets);
+      await tester.tap(find.text('Skip'));
+      await tester.pumpAndSettle();
+
+      expect(
+        harness.client.callsTo('recurringTransaction', 'skipOccurrence'),
+        hasLength(1),
+      );
+    });
+
+    testWidgets('deletes a schedule after confirmation', (tester) async {
+      final harness = await _pumpRecurring(tester);
+
+      await tester.drag(find.text('Rent'), const Offset(-500, 0));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(ObFilledButton, 'Delete'));
+      await tester.pumpAndSettle();
+
+      expect(
+        harness.client
+            .callsTo('recurringTransaction', 'delete')
+            .single
+            .args['recurringTransactionId']
+            .toString(),
+        fixtureRecurringId,
+      );
+    });
+
+    testWidgets('the add dialog works from the empty state', (tester) async {
+      await _pumpRecurring(tester, items: const []);
+
+      await tester.tap(find.text('Add Recurring'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add Recurring Transaction'), findsOneWidget);
+      await tester.tap(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is ObDropdown<String> && widget.labelText == 'Account',
         ),
-        recurringActionsProvider.overrideWith(() => actions),
-      ],
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const RecurringListScreen(budgetId: _budgetId),
-      ),
-    );
-
-    Future<void> openDialog(WidgetTester tester) async {
-      await tester.tap(find.byKey(RecurringListScreen.addButtonKey));
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField).at(0), 'Rent');
-    }
-
-    testWidgets('saves 12.34 as 1234 minor units', (tester) async {
-      final actions = _RecordingRecurringActions();
-      await tester.pumpWidget(buildSubject(actions));
+      );
       await tester.pumpAndSettle();
 
-      await openDialog(tester);
-      await tester.enterText(find.byType(TextField).at(1), '12.34');
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
-      await tester.pumpAndSettle();
-
-      expect(actions.createdAmountCents, -1234);
+      expect(find.text('Current account').last, findsOneWidget);
     });
 
-    testWidgets('refuses an over-precise amount instead of rounding it', (
-      tester,
-    ) async {
-      final actions = _RecordingRecurringActions();
-      await tester.pumpWidget(buildSubject(actions));
-      await tester.pumpAndSettle();
+    group('add recurring amount entry', () {
+      Future<void> openAddDialog(WidgetTester tester) async {
+        await tester.tap(find.byKey(RecurringListScreen.addButtonKey));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is ObDropdown<String> && widget.labelText == 'Account',
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Current account').last);
+        await tester.pumpAndSettle();
+      }
 
-      await openDialog(tester);
-      await tester.enterText(find.byType(TextField).at(1), '12.345');
-      await tester.pumpAndSettle();
+      testWidgets('saves 12.34 as 1234 minor units', (tester) async {
+        final harness = await _pumpRecurring(tester);
+        await openAddDialog(tester);
 
-      expect(
-        find.text('Enter a valid amount with at most 2 decimal places'),
-        findsOneWidget,
-      );
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Description'),
+          'Gym',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Amount (GBP)'),
+          '12.34',
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(ObFilledButton, 'Save'));
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
-      await tester.pumpAndSettle();
+        final call = harness.client
+            .callsTo('recurringTransaction', 'create')
+            .single;
+        expect(call.args['amountMinor'], -1234);
+        expect(call.args['description'], 'Gym');
+        expect(call.args['frequency'], RecurrenceFrequency.monthly);
+        expect(call.args['accountId'].toString(), fixtureAccountId);
+      });
 
-      expect(actions.createdAmountCents, isNull);
-    });
+      testWidgets('refuses an over-precise amount instead of rounding it', (
+        tester,
+      ) async {
+        final harness = await _pumpRecurring(tester);
+        await openAddDialog(tester);
 
-    testWidgets('refuses a negative recurring amount', (tester) async {
-      final actions = _RecordingRecurringActions();
-      await tester.pumpWidget(buildSubject(actions));
-      await tester.pumpAndSettle();
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Description'),
+          'Gym',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Amount (GBP)'),
+          '12.345',
+        );
+        await tester.pumpAndSettle();
 
-      await openDialog(tester);
-      await tester.enterText(find.byType(TextField).at(1), '-12.34');
-      await tester.pumpAndSettle();
+        expect(
+          find.text('Enter a valid amount with at most 2 decimal places'),
+          findsOneWidget,
+        );
+        await tester.tap(find.widgetWithText(ObFilledButton, 'Save'));
+        await tester.pumpAndSettle();
 
-      expect(
-        find.text('Enter a valid amount with at most 2 decimal places'),
-        findsOneWidget,
-      );
+        expect(
+          harness.client.callsTo('recurringTransaction', 'create'),
+          isEmpty,
+        );
+      });
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
-      await tester.pumpAndSettle();
+      testWidgets('refuses a negative recurring amount', (tester) async {
+        final harness = await _pumpRecurring(tester);
+        await openAddDialog(tester);
 
-      expect(actions.createdAmountCents, isNull);
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Description'),
+          'Gym',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Amount (GBP)'),
+          '-12.34',
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(ObFilledButton, 'Save'));
+        await tester.pumpAndSettle();
+
+        expect(
+          harness.client.callsTo('recurringTransaction', 'create'),
+          isEmpty,
+        );
+      });
+
+      testWidgets('saves an income schedule as a positive amount', (
+        tester,
+      ) async {
+        final harness = await _pumpRecurring(tester);
+        await openAddDialog(tester);
+
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Description'),
+          'Salary',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Amount (GBP)'),
+          '2500',
+        );
+        await tester.tap(
+          find.descendant(
+            of: find.byType(SegmentedButton<bool>),
+            matching: find.text('Income'),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(ObFilledButton, 'Save'));
+        await tester.pumpAndSettle();
+
+        expect(
+          harness.client
+              .callsTo('recurringTransaction', 'create')
+              .single
+              .args['amountMinor'],
+          250000,
+        );
+      });
     });
   });
 }

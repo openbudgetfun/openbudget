@@ -102,15 +102,7 @@ abstract class SolanaBillingChallenge
 
   @override
   Map<String, dynamic> toJsonForProtocol() {
-    return {
-      '__className__': 'SolanaBillingChallenge',
-      if (id != null) 'id': id?.toJson(),
-      'userId': userId.toJson(),
-      'message': message,
-      'expiresAt': expiresAt.toJson(),
-      if (usedAt != null) 'usedAt': usedAt?.toJson(),
-      'createdAt': createdAt.toJson(),
-    };
+    return {};
   }
 
   static SolanaBillingChallengeInclude include() {

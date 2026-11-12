@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/ui_preferences_store.dart';
 import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
 import 'package:openbudget_app/src/features/whats_new/providers/whats_new_providers.dart';
@@ -11,18 +11,12 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+import '../../../fixtures/budget_month.dart';
+
 import '../../whats_new/whats_new_test_helpers.dart';
 
-const _budgetId = 'test-budget-id';
-final _ownerUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000401',
-);
-
-Budget _makeBudget() => Budget(
-  name: 'My Budget',
-  currencyCode: 'USD',
-  ownerId: _ownerUuid,
-);
+const _entityId = 'test-budget-id';
+Entity _makeBudget() => testEntity(baseCurrencyCode: 'USD');
 
 void main() {
   group("Settings What's new row", () {
@@ -31,8 +25,8 @@ void main() {
     ) async {
       final container = ProviderContainer(
         overrides: [
-          budgetDetailProvider.overrideWith(
-            (ref, budgetId) async => _makeBudget(),
+          entityDetailProvider.overrideWith(
+            (ref, entityId) async => _makeBudget(),
           ),
           uiPreferencesStoreProvider.overrideWithValue(
             InMemoryUiPreferencesStore(),
@@ -46,7 +40,7 @@ void main() {
       addTearDown(container.dispose);
 
       await tester.pumpApp(
-        const SettingsScreen(budgetId: _budgetId),
+        const SettingsScreen(entityId: _entityId),
         container: container,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -74,8 +68,8 @@ void main() {
     ) async {
       final container = ProviderContainer(
         overrides: [
-          budgetDetailProvider.overrideWith(
-            (ref, budgetId) async => _makeBudget(),
+          entityDetailProvider.overrideWith(
+            (ref, entityId) async => _makeBudget(),
           ),
           uiPreferencesStoreProvider.overrideWithValue(
             InMemoryUiPreferencesStore(),
@@ -92,7 +86,7 @@ void main() {
       addTearDown(container.dispose);
 
       await tester.pumpApp(
-        const SettingsScreen(budgetId: _budgetId),
+        const SettingsScreen(entityId: _entityId),
         container: container,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

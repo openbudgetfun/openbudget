@@ -1,89 +1,93 @@
-import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
-import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:openbudget_server/src/tax/tax_service.dart';
-import 'package:serverpod/serverpod.dart' hide Transaction;
+import 'package:serverpod/serverpod.dart';
 
-/// API surface for tax profiles, categorisation, and reports.
+/// API surface for tax profiles, line coding, envelope defaults and reports.
 ///
-/// All methods require authentication and check budget ownership.
+/// Every method requires authentication and delegates to [TaxService], which
+/// owns the entity boundary and the write rules.
 class TaxEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
 
-  /// Returns the budget's tax profile, or null when none is set.
+  /// Returns the entity's canonical tax profile, or null when none is set.
   Future<TaxProfileRecord?> getProfile(
     Session session,
-    UuidValue budgetId,
-  ) async => TaxService.getProfile(session, budgetId: budgetId);
+    UuidValue entityId,
+  ) => TaxService.getProfile(session, entityId: entityId);
 
-  /// Creates or replaces the budget's tax profile.
+  /// Creates or replaces the entity's tax profile.
+  ///
+  /// [jurisdiction] and [entityKind] are kept for the documented §7.1 surface,
+  /// but they are redundant assertions: the entity's country and kind are the
+  /// source of truth and always rewrite the stored profile, and a conflicting
+  /// value rejects. The personal-business link is set on the entity, not here.
   Future<TaxProfileRecord> saveProfile(
     Session session,
-    UuidValue budgetId,
+    UuidValue entityId,
     String jurisdiction,
     String entityKind,
-    String profileJson, {
-    UuidValue? linkedBudgetId,
-  }) async {
-    final profile = await TaxService.saveProfile(
-      session,
-      budgetId: budgetId,
-      jurisdiction: jurisdiction,
-      entityKind: entityKind,
-      profileJson: profileJson,
-      linkedBudgetId: linkedBudgetId,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
-    return profile;
-  }
+    String profileJson,
+  ) => TaxService.saveProfile(
+    session,
+    entityId: entityId,
+    jurisdiction: jurisdiction,
+    entityKind: entityKind,
+    profileJson: profileJson,
+  );
 
-  /// Lists the tax categories available to the budget's entity kind.
+  /// Lists the tax categories available to the entity's kind.
   Future<List<TaxCategoryView>> listCategories(
     Session session,
-    UuidValue budgetId,
-  ) async => TaxService.listCategories(session, budgetId: budgetId);
+    UuidValue entityId,
+  ) => TaxService.listCategories(session, entityId: entityId);
 
   /// Sets or clears the default tax category on an envelope.
+  ///
+  /// A null or blank [code] clears the default, matching the existing surface.
   Future<Envelope> setEnvelopeTaxCategory(
     Session session,
     UuidValue envelopeId, {
     String? code,
-  }) async {
-    final envelope = await TaxService.setEnvelopeTaxCategory(
-      session,
-      envelopeId: envelopeId,
-      code: code,
-    );
-    await BudgetRealtimeNotifier.notifyEnvelopeChanged(session, envelopeId);
-    return envelope;
-  }
+  }) => TaxService.setEnvelopeTaxCategory(
+    session,
+    envelopeId: envelopeId,
+    code: code,
+  );
 
-  /// Sets or clears a transaction's tax treatment.
-  Future<Transaction> setTransactionTax(
-    Session session,
-    UuidValue transactionId, {
-    String? code,
-    int? businessUsePercent,
-    int? salesTaxCents,
-  }) async {
-    final transaction = await TaxService.setTransactionTax(
-      session,
-      transactionId: transactionId,
-      code: code,
-      businessUsePercent: businessUsePercent,
-      salesTaxCents: salesTaxCents,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(transaction.budgetId);
-    return transaction;
-  }
-
-  /// Computes the budget's tax report for the year starting in [startYear].
+  /// Sets or clears one transaction line's tax treatment.
   ///
-  /// When [startYear] is null the tax year containing today is used.
+  /// Null leaves a field unchanged; [clearTaxCategoryCode] clears only the
+  /// category. The write uses the transaction writer's rules, so reconciled
+  /// rows, period locks, transfers and ledger revisions behave exactly as an
+  /// ordinary line edit.
+  Future<TransactionView> setLineTax(
+    Session session,
+    UuidValue transactionLineId, {
+    String? taxCategoryCode,
+    bool? clearTaxCategoryCode,
+    int? businessUsePercent,
+    int? salesTaxMinor,
+  }) => TaxService.setLineTax(
+    session,
+    transactionLineId: transactionLineId,
+    taxCategoryCode: taxCategoryCode,
+    clearTaxCategoryCode: clearTaxCategoryCode,
+    businessUsePercent: businessUsePercent,
+    salesTaxMinor: salesTaxMinor,
+  );
+
+  /// Computes the entity's tax report for the year starting in [startYear].
+  ///
+  /// When [startYear] is null the tax year containing the entity's local today
+  /// is used.
   Future<TaxReportView> getReport(
     Session session,
-    UuidValue budgetId, {
+    UuidValue entityId, {
     int? startYear,
-  }) async =>
-      TaxService.report(session, budgetId: budgetId, startYear: startYear);
+  }) => TaxService.report(
+    session,
+    entityId: entityId,
+    startYear: startYear,
+  );
 }

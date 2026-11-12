@@ -1,57 +1,50 @@
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
-import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/month_figures_provider.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'spending_trends_provider.g.dart';
 
-/// Fetches spending reports for the last [months] months.
+/// Income, expenses and net income for the last [months] months, from one
+/// `report.monthSummaries` call.
 @riverpod
 Future<SpendingTrendsData> spendingTrends(
   Ref ref,
-  String budgetId, {
+  String entityId, {
   int months = 6,
 }) async {
-  final now = DateTime.now();
-  final reports = <MonthlyTrend>[];
+  final endMonth = MonthKey.fromDate(DateTime.now());
+  final summaries = await ref.watch(
+    monthFiguresProvider(entityId, endMonth, months).future,
+  );
+  final entity = await ref.watch(entityDetailProvider(entityId).future);
 
-  for (var i = months - 1; i >= 0; i--) {
-    var year = now.year;
-    var month = now.month - i;
-    while (month <= 0) {
-      month += 12;
-      year--;
-    }
-
-    final report = await ref.watch(
-      spendingReportProvider(budgetId, year, month).future,
-    );
-
-    reports.add(
+  final reports = [
+    for (final summary in summaries)
       MonthlyTrend(
-        year: year,
-        month: month,
-        totalIncome: report.totalIncome,
-        totalExpenses: report.totalExpenses,
-        netIncome: report.netIncome,
-        transactionCount: report.transactionCount,
+        month: summary.month,
+        totalIncome: summary.incomeMinor,
+        totalExpenses: summary.activityMinor < 0
+            ? summary.activityMinor.abs()
+            : 0,
+        netIncome: summary.incomeMinor + summary.activityMinor,
       ),
-    );
-  }
+  ];
 
   final avgIncome = reports.isEmpty
       ? 0
-      : reports.fold<int>(0, (s, r) => s + r.totalIncome) ~/ reports.length;
+      : reports.fold<int>(0, (sum, report) => sum + report.totalIncome) ~/
+            reports.length;
   final avgExpenses = reports.isEmpty
       ? 0
-      : reports.fold<int>(0, (s, r) => s + r.totalExpenses) ~/ reports.length;
-
-  final summary = await ref.watch(budgetSummaryProvider(budgetId).future);
+      : reports.fold<int>(0, (sum, report) => sum + report.totalExpenses) ~/
+            reports.length;
 
   return SpendingTrendsData(
     months: reports,
     averageIncome: avgIncome,
     averageExpenses: avgExpenses,
-    currencyCode: summary.budget.currencyCode,
+    currencyCode: entity.baseCurrencyCode,
   );
 }
 
@@ -71,18 +64,15 @@ class SpendingTrendsData {
 
 class MonthlyTrend {
   const MonthlyTrend({
-    required this.year,
     required this.month,
     required this.totalIncome,
     required this.totalExpenses,
     required this.netIncome,
-    required this.transactionCount,
   });
 
-  final int year;
+  /// The yyyymm month.
   final int month;
   final int totalIncome;
   final int totalExpenses;
   final int netIncome;
-  final int transactionCount;
 }

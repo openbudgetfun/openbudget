@@ -1,5 +1,5 @@
 import 'package:openbudget_server/src/agent/agent_egress_guard.dart';
-import 'package:openbudget_server/src/agent/agent_secret_box.dart';
+import 'package:openbudget_server/src/common/secret_box.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -74,7 +74,7 @@ abstract final class AgentProviderSettingsService {
         message: 'agentKeyEncryptionKey is not configured.',
       );
     }
-    final apiKey = await AgentSecretBox.open(
+    final apiKey = await SecretBox.open(
       cipherText: settings.encryptedApiKey,
       nonce: settings.nonce,
       base64Key: encryptionKey,
@@ -127,7 +127,7 @@ abstract final class AgentProviderSettingsService {
         message: 'agentKeyEncryptionKey is not configured.',
       );
     }
-    final sealed = await AgentSecretBox.seal(
+    final sealed = await SecretBox.seal(
       plaintext: trimmedKey,
       base64Key: encryptionKey,
     );

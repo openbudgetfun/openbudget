@@ -5,21 +5,22 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/duplicate_check_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
+import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AddIncomeScreen extends HookConsumerWidget {
-  const AddIncomeScreen({required this.budgetId, super.key});
+  const AddIncomeScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,34 +32,53 @@ class AddIncomeScreen extends HookConsumerWidget {
     final selectedDate = useState(DateTime.now());
     final selectedPayeeId = useState<String?>(null);
     final duplicateCount = useState(0);
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
-    final payeesAsync = ref.watch(payeeListProvider(budgetId));
+    final entityAsync = ref.watch(entityDetailProvider(entityId));
+    final accountsAsync = ref.watch(accountListProvider(entityId));
+    final payeesAsync = ref.watch(payeeListProvider(entityId));
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final budgetCurrency =
-        budgetAsync.whenOrNull(
-          data: (budget) => normalizeCurrencyCode(budget.currencyCode),
-        ) ??
-        '';
+    final baseCurrency = entityAsync.value?.baseCurrencyCode ?? '';
+    final accounts = accountsAsync.value ?? const <Account>[];
+    final onBudgetAccounts = accounts
+        .where((a) => a.onBudget && a.closedAt == null)
+        .toList(growable: false);
+    final allAccounts = accounts
+        .where((a) => a.closedAt == null)
+        .toList(growable: false);
+    final selectedAccountId = useState<String?>(null);
+
+    // The account defaults to the first on-budget account, then follows the
+    // picker once the accounts have loaded.
+    final defaultAccountId = useMemoized(
+      () =>
+          selectedAccountId.value ??
+          onBudgetAccounts.firstOrNull?.id?.toString() ??
+          allAccounts.firstOrNull?.id?.toString() ??
+          '',
+      [selectedAccountId.value, accountsAsync],
+    );
+    final selectedAccount = allAccounts
+        .where((a) => a.id?.toString() == defaultAccountId)
+        .firstOrNull;
+    final budgetCurrency = selectedAccount?.currencyCode ?? baseCurrency;
 
     useValueListenable(amountController);
 
     Future<void> checkDuplicates() async {
-      final budget = budgetAsync.value;
-      if (budget == null) return;
-      final amountCents = parseMoneyInput(
+      if (defaultAccountId.isEmpty) return;
+      final amountMinor = parseMoneyInput(
         amountController.text,
         decimals: currencyDecimalsForCode(budgetCurrency),
       );
-      if (amountCents == null || amountCents <= 0) {
+      if (amountMinor == null || amountMinor <= 0) {
         duplicateCount.value = 0;
         return;
       }
       try {
         final duplicates = await ref.read(
           duplicateCheckProvider(
-            budgetId,
-            amountCents,
+            defaultAccountId,
+            amountMinor,
             selectedDate.value,
           ).future,
         );
@@ -84,15 +104,15 @@ class AddIncomeScreen extends HookConsumerWidget {
 
     final amountDecimals = currencyDecimalsForCode(budgetCurrency);
     final amountText = amountController.text.trim();
-    final amountCents = parseMoneyInput(amountText, decimals: amountDecimals);
+    final amountMinor = parseMoneyInput(amountText, decimals: amountDecimals);
     final amountError = moneyInputError(
       amountText,
       decimals: amountDecimals,
       message: l10n.amountInvalidFormat(amountDecimals),
     );
-    final formattedAmount = amountCents == null || amountCents == 0
-        ? formatCentsForCode(0, budgetCurrency)
-        : formatCentsForCode(amountCents, budgetCurrency);
+    final formattedAmount = amountMinor == null || amountMinor == 0
+        ? formatMinorForCode(0, budgetCurrency)
+        : formatMinorForCode(amountMinor, budgetCurrency);
 
     return Scaffold(
       appBar: AppBar(
@@ -100,8 +120,10 @@ class AddIncomeScreen extends HookConsumerWidget {
         leading: Align(
           alignment: Alignment.centerLeft,
           child: TextButton(
-            onPressed: () =>
-                context.goNamed(planRoute, pathParameters: {'id': budgetId}),
+            onPressed: () => context.goNamed(
+              planRoute,
+              pathParameters: {'entityId': entityId},
+            ),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -139,7 +161,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                               tone: ObTone.overspent,
                               onTap: () => context.goNamed(
                                 addExpenseRoute,
-                                pathParameters: {'id': budgetId},
+                                pathParameters: {'entityId': entityId},
                               ),
                             ),
                           ),
@@ -161,8 +183,8 @@ class AddIncomeScreen extends HookConsumerWidget {
                         },
                         child: TextField(
                           controller: amountController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
+                          keyboardType: TextInputType.numberWithOptions(
+                            decimal: amountDecimals > 0,
                           ),
                           textAlign: TextAlign.center,
                           style:
@@ -182,7 +204,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                             filled: false,
                             isDense: true,
                             contentPadding: EdgeInsets.zero,
-                            hintText: formatCentsForCode(0, budgetCurrency),
+                            hintText: formatMinorForCode(0, budgetCurrency),
                             hintStyle:
                                 ObTextStyles.amount(
                                   theme.textTheme.displaySmall,
@@ -248,10 +270,10 @@ class AddIncomeScreen extends HookConsumerWidget {
                         value: l10n.budgetReadyToAssign,
                       ),
                       const SizedBox(height: SpacingTokens.sm),
-                      _ReadOnlyRow(
-                        icon: OpenBudgetIcons.bank,
-                        label: l10n.transactionAccountLabel,
-                        value: budgetAsync.value?.name ?? l10n.accountListTitle,
+                      _AccountPickerRow(
+                        accounts: allAccounts,
+                        selectedAccountId: defaultAccountId,
+                        onChanged: (value) => selectedAccountId.value = value,
                       ),
                       const SizedBox(height: SpacingTokens.sm),
                       ListTile(
@@ -339,15 +361,14 @@ class AddIncomeScreen extends HookConsumerWidget {
                       : () async {
                           final description = descriptionController.text.trim();
                           final amountText = amountController.text.trim();
-                          final budget = budgetAsync.value;
-                          if (budget == null) return;
-                          final amountCents = parseMoneyInput(
+                          if (defaultAccountId.isEmpty) return;
+                          final amountMinor = parseMoneyInput(
                             amountText,
                             decimals: currencyDecimalsForCode(budgetCurrency),
                           );
                           if (description.isEmpty ||
-                              amountCents == null ||
-                              amountCents <= 0) {
+                              amountMinor == null ||
+                              amountMinor <= 0) {
                             return;
                           }
 
@@ -357,13 +378,22 @@ class AddIncomeScreen extends HookConsumerWidget {
                             final memoText = memoController.text.trim();
                             await ref
                                 .read(transactionActionsProvider.notifier)
-                                .addIncome(
-                                  description: description,
-                                  amountCents: amountCents,
-                                  currencyCode: budgetCurrency,
-                                  budgetId: budgetId,
-                                  date: selectedDate.value,
-                                  memo: memoText.isEmpty ? null : memoText,
+                                .create(
+                                  entityId: entityId,
+                                  input: TransactionInput(
+                                    accountId: UuidValue.fromString(
+                                      defaultAccountId,
+                                    ),
+                                    date: DateTime.utc(
+                                      selectedDate.value.year,
+                                      selectedDate.value.month,
+                                      selectedDate.value.day,
+                                    ),
+                                    amountMinor: amountMinor,
+                                    description: description,
+                                    memo: memoText.isEmpty ? null : memoText,
+                                    lines: const [],
+                                  ),
                                 );
                             if (!context.mounted) return;
                             showAppToast(
@@ -373,7 +403,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                             );
                             router.goNamed(
                               planRoute,
-                              pathParameters: {'id': budgetId},
+                              pathParameters: {'entityId': entityId},
                             );
                           } on Exception catch (_) {
                             isSubmitting.value = false;
@@ -509,6 +539,51 @@ class _ReadOnlyRow extends HookWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The account picker row for income: any open account, its currency shown.
+class _AccountPickerRow extends HookWidget {
+  const _AccountPickerRow({
+    required this.accounts,
+    required this.selectedAccountId,
+    required this.onChanged,
+  });
+
+  final List<Account> accounts;
+  final String selectedAccountId;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    return Row(
+      children: [
+        SkribbleIcon(
+          data: OpenBudgetIcons.bank,
+          size: 20,
+          color: palette.brand,
+        ),
+        const SizedBox(width: SpacingTokens.sm),
+        Expanded(
+          child: ObDropdown<String>(
+            value: selectedAccountId,
+            items: [
+              for (final account in accounts)
+                DropdownMenuItem<String>(
+                  value: account.id?.toString() ?? '',
+                  child: Text('${account.name} (${account.currencyCode})'),
+                ),
+            ],
+            labelText: AppLocalizations.of(context).transactionAccountLabel,
+            onChanged: (value) {
+              if (value != null && value.isNotEmpty) onChanged(value);
+            },
           ),
         ),
       ],

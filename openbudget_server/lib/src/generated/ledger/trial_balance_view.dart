@@ -15,14 +15,12 @@ import 'package:serverpod/serverpod.dart' as _is;
 
 import '../ledger/trial_balance_row_view.dart' as _ijohnc57;
 
-/// The computed trial balance for one budget as of one date.
-///
-/// A trial balance whose debits differ from its credits is a hard error,
-/// so the endpoint throws instead of returning an unbalanced report.
+/// The computed trial balance for one entity as of one date. An unbalanced
+/// result is a hard error, so the endpoint throws instead of returning one.
 abstract class TrialBalanceView
     implements _is.SerializableModel, _is.ProtocolSerialization {
   TrialBalanceView._({
-    required this.budgetId,
+    required this.entityId,
     required this.currencyCode,
     required this.asOf,
     required this.rows,
@@ -31,7 +29,7 @@ abstract class TrialBalanceView
   });
 
   factory TrialBalanceView({
-    required _is.UuidValue budgetId,
+    required _is.UuidValue entityId,
     required String currencyCode,
     required DateTime asOf,
     required List<_ijohnc57.TrialBalanceRowView> rows,
@@ -41,8 +39,8 @@ abstract class TrialBalanceView
 
   factory TrialBalanceView.fromJson(Map<String, dynamic> jsonSerialization) {
     return TrialBalanceView(
-      budgetId: _is.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _is.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
       currencyCode: jsonSerialization['currencyCode'] as String,
       asOf: _is.DateTimeJsonExtension.fromJson(jsonSerialization['asOf']),
@@ -55,12 +53,12 @@ abstract class TrialBalanceView
     );
   }
 
-  _is.UuidValue budgetId;
+  _is.UuidValue entityId;
 
-  /// ISO 4217 functional currency code.
+  /// ISO 4217 base currency code.
   String currencyCode;
 
-  /// The inclusive as-of date the figures run through.
+  /// Inclusive calendar date the figures run through.
   DateTime asOf;
 
   List<_ijohnc57.TrialBalanceRowView> rows;
@@ -73,7 +71,7 @@ abstract class TrialBalanceView
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
   TrialBalanceView copyWith({
-    _is.UuidValue? budgetId,
+    _is.UuidValue? entityId,
     String? currencyCode,
     DateTime? asOf,
     List<_ijohnc57.TrialBalanceRowView>? rows,
@@ -84,7 +82,7 @@ abstract class TrialBalanceView
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'TrialBalanceView',
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'currencyCode': currencyCode,
       'asOf': asOf.toJson(),
       'rows': rows.toJson(valueToJson: (v) => v.toJson()),
@@ -97,7 +95,7 @@ abstract class TrialBalanceView
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'TrialBalanceView',
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'currencyCode': currencyCode,
       'asOf': asOf.toJson(),
       'rows': rows.toJson(valueToJson: (v) => v.toJsonForProtocol()),
@@ -114,14 +112,14 @@ abstract class TrialBalanceView
 
 class _TrialBalanceViewImpl extends TrialBalanceView {
   _TrialBalanceViewImpl({
-    required _is.UuidValue budgetId,
+    required _is.UuidValue entityId,
     required String currencyCode,
     required DateTime asOf,
     required List<_ijohnc57.TrialBalanceRowView> rows,
     required int totalDebitMinor,
     required int totalCreditMinor,
   }) : super._(
-         budgetId: budgetId,
+         entityId: entityId,
          currencyCode: currencyCode,
          asOf: asOf,
          rows: rows,
@@ -134,7 +132,7 @@ class _TrialBalanceViewImpl extends TrialBalanceView {
   @_is.useResult
   @override
   TrialBalanceView copyWith({
-    _is.UuidValue? budgetId,
+    _is.UuidValue? entityId,
     String? currencyCode,
     DateTime? asOf,
     List<_ijohnc57.TrialBalanceRowView>? rows,
@@ -142,7 +140,7 @@ class _TrialBalanceViewImpl extends TrialBalanceView {
     int? totalCreditMinor,
   }) {
     return TrialBalanceView(
-      budgetId: budgetId ?? this.budgetId,
+      entityId: entityId ?? this.entityId,
       currencyCode: currencyCode ?? this.currencyCode,
       asOf: asOf ?? this.asOf,
       rows: rows ?? this.rows.map((e0) => e0.copyWith()).toList(),

@@ -8,14 +8,18 @@ part of 'category_trends_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Fetches spending‐by‐category for each of the last [months] months and
-/// pivots the data so each category has a time series of spending amounts.
+/// Spending per category for each of the last [months] months, pivoted so
+/// each category carries a time series. One `report.spending` call with
+/// [ReportGrouping.category] and `byMonth` feeds the whole table; the month
+/// headers come from `report.monthSummaries`.
 
 @ProviderFor(categoryTrends)
 final categoryTrendsProvider = CategoryTrendsFamily._();
 
-/// Fetches spending‐by‐category for each of the last [months] months and
-/// pivots the data so each category has a time series of spending amounts.
+/// Spending per category for each of the last [months] months, pivoted so
+/// each category carries a time series. One `report.spending` call with
+/// [ReportGrouping.category] and `byMonth` feeds the whole table; the month
+/// headers come from `report.monthSummaries`.
 
 final class CategoryTrendsProvider
     extends
@@ -27,8 +31,10 @@ final class CategoryTrendsProvider
     with
         $FutureModifier<CategoryTrendsData>,
         $FutureProvider<CategoryTrendsData> {
-  /// Fetches spending‐by‐category for each of the last [months] months and
-  /// pivots the data so each category has a time series of spending amounts.
+  /// Spending per category for each of the last [months] months, pivoted so
+  /// each category carries a time series. One `report.spending` call with
+  /// [ReportGrouping.category] and `byMonth` feeds the whole table; the month
+  /// headers come from `report.monthSummaries`.
   CategoryTrendsProvider._({
     required CategoryTrendsFamily super.from,
     required (String, {int months}) super.argument,
@@ -73,10 +79,12 @@ final class CategoryTrendsProvider
   }
 }
 
-String _$categoryTrendsHash() => r'043d4aa143716c1e02277cc9b0481205b84bbb26';
+String _$categoryTrendsHash() => r'5bc7f61b2c299f9e64c34497188753e2820f0b9e';
 
-/// Fetches spending‐by‐category for each of the last [months] months and
-/// pivots the data so each category has a time series of spending amounts.
+/// Spending per category for each of the last [months] months, pivoted so
+/// each category carries a time series. One `report.spending` call with
+/// [ReportGrouping.category] and `byMonth` feeds the whole table; the month
+/// headers come from `report.monthSummaries`.
 
 final class CategoryTrendsFamily extends $Family
     with
@@ -93,12 +101,14 @@ final class CategoryTrendsFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Fetches spending‐by‐category for each of the last [months] months and
-  /// pivots the data so each category has a time series of spending amounts.
+  /// Spending per category for each of the last [months] months, pivoted so
+  /// each category carries a time series. One `report.spending` call with
+  /// [ReportGrouping.category] and `byMonth` feeds the whole table; the month
+  /// headers come from `report.monthSummaries`.
 
-  CategoryTrendsProvider call(String budgetId, {int months = 6}) =>
+  CategoryTrendsProvider call(String entityId, {int months = 6}) =>
       CategoryTrendsProvider._(
-        argument: (budgetId, months: months),
+        argument: (entityId, months: months),
         from: this,
       );
 

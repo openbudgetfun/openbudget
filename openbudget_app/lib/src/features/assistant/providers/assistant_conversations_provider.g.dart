@@ -72,7 +72,7 @@ final class AssistantConversationsProvider
 }
 
 String _$assistantConversationsHash() =>
-    r'dc7768114e3c412acc74ca544d862b78cfe8f513';
+    r'f631b939c21046df9796fac7ab74add2e8ccc082';
 
 /// The conversations in one budget, newest first.
 
@@ -89,8 +89,8 @@ final class AssistantConversationsFamily extends $Family
 
   /// The conversations in one budget, newest first.
 
-  AssistantConversationsProvider call(String budgetId) =>
-      AssistantConversationsProvider._(argument: budgetId, from: this);
+  AssistantConversationsProvider call(String entityId) =>
+      AssistantConversationsProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'assistantConversationsProvider';

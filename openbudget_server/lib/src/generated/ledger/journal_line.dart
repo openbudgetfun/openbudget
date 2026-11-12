@@ -12,16 +12,14 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod/serverpod.dart' as _is;
 
-/// One line of a [Journal]: a one-sided amount on one ledger account.
+/// One line of a journal: a one-sided amount on one ledger account.
 ///
-/// Every line carries the transaction-currency amount and the functional
-/// amount (the budget's currencyCode) with the exact exchange rate that
-/// produced it. `functionalDebitMinor`/`functionalCreditMinor` follow the
-/// same direction as the transaction side; exactly one of each pair is
-/// positive. A zero functional amount is legitimate only where the stated
-/// rate rounds a small amount to zero.
+/// Each line carries the transaction-currency amount and the base amount
+/// with the exact rate that produced it. Exactly one of debitMinor and
+/// creditMinor is positive, and the base pair follows the same side.
 abstract class JournalLine
     implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   JournalLine._({
@@ -32,17 +30,18 @@ abstract class JournalLine
     int? debitMinor,
     int? creditMinor,
     required this.currencyCode,
-    int? functionalDebitMinor,
-    int? functionalCreditMinor,
-    String? exchangeRate,
-    this.rateDate,
-    this.rateSource,
+    int? baseDebitMinor,
+    int? baseCreditMinor,
+    String? fxRate,
+    required this.fxRateDate,
+    _ifz8weqz.FxRateSource? fxRateSource,
     this.taxCode,
   }) : debitMinor = debitMinor ?? 0,
        creditMinor = creditMinor ?? 0,
-       functionalDebitMinor = functionalDebitMinor ?? 0,
-       functionalCreditMinor = functionalCreditMinor ?? 0,
-       exchangeRate = exchangeRate ?? '1';
+       baseDebitMinor = baseDebitMinor ?? 0,
+       baseCreditMinor = baseCreditMinor ?? 0,
+       fxRate = fxRate ?? '1',
+       fxRateSource = fxRateSource ?? _ifz8weqz.FxRateSource.identity;
 
   factory JournalLine({
     _is.UuidValue? id,
@@ -52,11 +51,11 @@ abstract class JournalLine
     int? debitMinor,
     int? creditMinor,
     required String currencyCode,
-    int? functionalDebitMinor,
-    int? functionalCreditMinor,
-    String? exchangeRate,
-    DateTime? rateDate,
-    String? rateSource,
+    int? baseDebitMinor,
+    int? baseCreditMinor,
+    String? fxRate,
+    required DateTime fxRateDate,
+    _ifz8weqz.FxRateSource? fxRateSource,
     String? taxCode,
   }) = _JournalLineImpl;
 
@@ -75,13 +74,17 @@ abstract class JournalLine
       debitMinor: jsonSerialization['debitMinor'] as int?,
       creditMinor: jsonSerialization['creditMinor'] as int?,
       currencyCode: jsonSerialization['currencyCode'] as String,
-      functionalDebitMinor: jsonSerialization['functionalDebitMinor'] as int?,
-      functionalCreditMinor: jsonSerialization['functionalCreditMinor'] as int?,
-      exchangeRate: jsonSerialization['exchangeRate'] as String?,
-      rateDate: jsonSerialization['rateDate'] == null
+      baseDebitMinor: jsonSerialization['baseDebitMinor'] as int?,
+      baseCreditMinor: jsonSerialization['baseCreditMinor'] as int?,
+      fxRate: jsonSerialization['fxRate'] as String?,
+      fxRateDate: _is.DateTimeJsonExtension.fromJson(
+        jsonSerialization['fxRateDate'],
+      ),
+      fxRateSource: jsonSerialization['fxRateSource'] == null
           ? null
-          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['rateDate']),
-      rateSource: jsonSerialization['rateSource'] as String?,
+          : _ifz8weqz.FxRateSource.fromJson(
+              (jsonSerialization['fxRateSource'] as String),
+            ),
       taxCode: jsonSerialization['taxCode'] as String?,
     );
   }
@@ -108,23 +111,21 @@ abstract class JournalLine
   /// ISO 4217 code of the transaction currency.
   String currencyCode;
 
-  /// Debit in functional-currency minor units, or 0.
-  int functionalDebitMinor;
+  /// Debit in base-currency minor units, or 0.
+  int baseDebitMinor;
 
-  /// Credit in functional-currency minor units, or 0.
-  int functionalCreditMinor;
+  /// Credit in base-currency minor units, or 0.
+  int baseCreditMinor;
 
-  /// Functional per 1 transaction currency, exact decimal string such as
-  /// `1.234567`. Never a double.
-  String exchangeRate;
+  /// Base currency per one transaction-currency unit, exact decimal.
+  String fxRate;
 
-  /// The calendar date the rate was struck on.
-  DateTime? rateDate;
+  /// Calendar date of the rate.
+  DateTime fxRateDate;
 
-  /// Where the rate came from, such as `manual` or a provider name.
-  String? rateSource;
+  _ifz8weqz.FxRateSource fxRateSource;
 
-  /// Optional sales-tax code applied to this line.
+  /// Sales-tax code applied to this line.
   String? taxCode;
 
   @override
@@ -141,11 +142,11 @@ abstract class JournalLine
     int? debitMinor,
     int? creditMinor,
     String? currencyCode,
-    int? functionalDebitMinor,
-    int? functionalCreditMinor,
-    String? exchangeRate,
-    DateTime? rateDate = const _is.$UndefinedDateTime(),
-    String? rateSource,
+    int? baseDebitMinor,
+    int? baseCreditMinor,
+    String? fxRate,
+    DateTime? fxRateDate,
+    _ifz8weqz.FxRateSource? fxRateSource,
     String? taxCode,
   });
   @override
@@ -159,11 +160,11 @@ abstract class JournalLine
       'debitMinor': debitMinor,
       'creditMinor': creditMinor,
       'currencyCode': currencyCode,
-      'functionalDebitMinor': functionalDebitMinor,
-      'functionalCreditMinor': functionalCreditMinor,
-      'exchangeRate': exchangeRate,
-      if (rateDate != null) 'rateDate': rateDate?.toJson(),
-      if (rateSource != null) 'rateSource': rateSource,
+      'baseDebitMinor': baseDebitMinor,
+      'baseCreditMinor': baseCreditMinor,
+      'fxRate': fxRate,
+      'fxRateDate': fxRateDate.toJson(),
+      'fxRateSource': fxRateSource.toJson(),
       if (taxCode != null) 'taxCode': taxCode,
     };
   }
@@ -179,11 +180,11 @@ abstract class JournalLine
       'debitMinor': debitMinor,
       'creditMinor': creditMinor,
       'currencyCode': currencyCode,
-      'functionalDebitMinor': functionalDebitMinor,
-      'functionalCreditMinor': functionalCreditMinor,
-      'exchangeRate': exchangeRate,
-      if (rateDate != null) 'rateDate': rateDate?.toJson(),
-      if (rateSource != null) 'rateSource': rateSource,
+      'baseDebitMinor': baseDebitMinor,
+      'baseCreditMinor': baseCreditMinor,
+      'fxRate': fxRate,
+      'fxRateDate': fxRateDate.toJson(),
+      'fxRateSource': fxRateSource.toJson(),
       if (taxCode != null) 'taxCode': taxCode,
     };
   }
@@ -227,11 +228,11 @@ class _JournalLineImpl extends JournalLine {
     int? debitMinor,
     int? creditMinor,
     required String currencyCode,
-    int? functionalDebitMinor,
-    int? functionalCreditMinor,
-    String? exchangeRate,
-    DateTime? rateDate,
-    String? rateSource,
+    int? baseDebitMinor,
+    int? baseCreditMinor,
+    String? fxRate,
+    required DateTime fxRateDate,
+    _ifz8weqz.FxRateSource? fxRateSource,
     String? taxCode,
   }) : super._(
          id: id,
@@ -241,11 +242,11 @@ class _JournalLineImpl extends JournalLine {
          debitMinor: debitMinor,
          creditMinor: creditMinor,
          currencyCode: currencyCode,
-         functionalDebitMinor: functionalDebitMinor,
-         functionalCreditMinor: functionalCreditMinor,
-         exchangeRate: exchangeRate,
-         rateDate: rateDate,
-         rateSource: rateSource,
+         baseDebitMinor: baseDebitMinor,
+         baseCreditMinor: baseCreditMinor,
+         fxRate: fxRate,
+         fxRateDate: fxRateDate,
+         fxRateSource: fxRateSource,
          taxCode: taxCode,
        );
 
@@ -261,11 +262,11 @@ class _JournalLineImpl extends JournalLine {
     int? debitMinor,
     int? creditMinor,
     String? currencyCode,
-    int? functionalDebitMinor,
-    int? functionalCreditMinor,
-    String? exchangeRate,
-    DateTime? rateDate = const _is.$UndefinedDateTime(),
-    Object? rateSource = _Undefined,
+    int? baseDebitMinor,
+    int? baseCreditMinor,
+    String? fxRate,
+    DateTime? fxRateDate,
+    _ifz8weqz.FxRateSource? fxRateSource,
     Object? taxCode = _Undefined,
   }) {
     return JournalLine(
@@ -276,12 +277,11 @@ class _JournalLineImpl extends JournalLine {
       debitMinor: debitMinor ?? this.debitMinor,
       creditMinor: creditMinor ?? this.creditMinor,
       currencyCode: currencyCode ?? this.currencyCode,
-      functionalDebitMinor: functionalDebitMinor ?? this.functionalDebitMinor,
-      functionalCreditMinor:
-          functionalCreditMinor ?? this.functionalCreditMinor,
-      exchangeRate: exchangeRate ?? this.exchangeRate,
-      rateDate: rateDate is _is.UndefinedSentinel ? this.rateDate : rateDate,
-      rateSource: rateSource is String? ? rateSource : this.rateSource,
+      baseDebitMinor: baseDebitMinor ?? this.baseDebitMinor,
+      baseCreditMinor: baseCreditMinor ?? this.baseCreditMinor,
+      fxRate: fxRate ?? this.fxRate,
+      fxRateDate: fxRateDate ?? this.fxRateDate,
+      fxRateSource: fxRateSource ?? this.fxRateSource,
       taxCode: taxCode is String? ? taxCode : this.taxCode,
     );
   }
@@ -324,29 +324,31 @@ class JournalLineUpdateTable extends _is.UpdateTable<JournalLineTable> {
     value,
   );
 
-  _is.ColumnValue<int, int> functionalDebitMinor(int value) => _is.ColumnValue(
-    table.functionalDebitMinor,
+  _is.ColumnValue<int, int> baseDebitMinor(int value) => _is.ColumnValue(
+    table.baseDebitMinor,
     value,
   );
 
-  _is.ColumnValue<int, int> functionalCreditMinor(int value) => _is.ColumnValue(
-    table.functionalCreditMinor,
+  _is.ColumnValue<int, int> baseCreditMinor(int value) => _is.ColumnValue(
+    table.baseCreditMinor,
     value,
   );
 
-  _is.ColumnValue<String, String> exchangeRate(String value) => _is.ColumnValue(
-    table.exchangeRate,
+  _is.ColumnValue<String, String> fxRate(String value) => _is.ColumnValue(
+    table.fxRate,
     value,
   );
 
-  _is.ColumnValue<DateTime, DateTime> rateDate(DateTime? value) =>
+  _is.ColumnValue<DateTime, DateTime> fxRateDate(DateTime value) =>
       _is.ColumnValue(
-        table.rateDate,
+        table.fxRateDate,
         value,
       );
 
-  _is.ColumnValue<String, String> rateSource(String? value) => _is.ColumnValue(
-    table.rateSource,
+  _is.ColumnValue<_ifz8weqz.FxRateSource, _ifz8weqz.FxRateSource> fxRateSource(
+    _ifz8weqz.FxRateSource value,
+  ) => _is.ColumnValue(
+    table.fxRateSource,
     value,
   );
 
@@ -385,28 +387,30 @@ class JournalLineTable extends _is.Table<_is.UuidValue?> {
       'currencyCode',
       this,
     );
-    functionalDebitMinor = _is.ColumnInt(
-      'functionalDebitMinor',
+    baseDebitMinor = _is.ColumnInt(
+      'baseDebitMinor',
       this,
       hasDefault: true,
     );
-    functionalCreditMinor = _is.ColumnInt(
-      'functionalCreditMinor',
+    baseCreditMinor = _is.ColumnInt(
+      'baseCreditMinor',
       this,
       hasDefault: true,
     );
-    exchangeRate = _is.ColumnString(
-      'exchangeRate',
+    fxRate = _is.ColumnString(
+      'fxRate',
       this,
       hasDefault: true,
     );
-    rateDate = _is.ColumnDateTime(
-      'rateDate',
+    fxRateDate = _is.ColumnDateTime(
+      'fxRateDate',
       this,
     );
-    rateSource = _is.ColumnString(
-      'rateSource',
+    fxRateSource = _is.ColumnEnum(
+      'fxRateSource',
       this,
+      _is.EnumSerialization.byName,
+      hasDefault: true,
     );
     taxCode = _is.ColumnString(
       'taxCode',
@@ -431,23 +435,21 @@ class JournalLineTable extends _is.Table<_is.UuidValue?> {
   /// ISO 4217 code of the transaction currency.
   late final _is.ColumnString currencyCode;
 
-  /// Debit in functional-currency minor units, or 0.
-  late final _is.ColumnInt functionalDebitMinor;
+  /// Debit in base-currency minor units, or 0.
+  late final _is.ColumnInt baseDebitMinor;
 
-  /// Credit in functional-currency minor units, or 0.
-  late final _is.ColumnInt functionalCreditMinor;
+  /// Credit in base-currency minor units, or 0.
+  late final _is.ColumnInt baseCreditMinor;
 
-  /// Functional per 1 transaction currency, exact decimal string such as
-  /// `1.234567`. Never a double.
-  late final _is.ColumnString exchangeRate;
+  /// Base currency per one transaction-currency unit, exact decimal.
+  late final _is.ColumnString fxRate;
 
-  /// The calendar date the rate was struck on.
-  late final _is.ColumnDateTime rateDate;
+  /// Calendar date of the rate.
+  late final _is.ColumnDateTime fxRateDate;
 
-  /// Where the rate came from, such as `manual` or a provider name.
-  late final _is.ColumnString rateSource;
+  late final _is.ColumnEnum<_ifz8weqz.FxRateSource> fxRateSource;
 
-  /// Optional sales-tax code applied to this line.
+  /// Sales-tax code applied to this line.
   late final _is.ColumnString taxCode;
 
   @override
@@ -459,11 +461,11 @@ class JournalLineTable extends _is.Table<_is.UuidValue?> {
     debitMinor,
     creditMinor,
     currencyCode,
-    functionalDebitMinor,
-    functionalCreditMinor,
-    exchangeRate,
-    rateDate,
-    rateSource,
+    baseDebitMinor,
+    baseCreditMinor,
+    fxRate,
+    fxRateDate,
+    fxRateSource,
     taxCode,
   ];
 }

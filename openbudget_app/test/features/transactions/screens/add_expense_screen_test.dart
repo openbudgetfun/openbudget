@@ -3,571 +3,379 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
-import 'package:openbudget_app/src/features/payees/providers/payee_last_envelope_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
-import 'package:openbudget_app/src/features/transaction_rules/providers/rule_match_provider.dart';
+import 'package:openbudget_app/src/features/transactions/providers/duplicate_check_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_expense_screen.dart';
+import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-class _RecordingExpenseActions extends TransactionActions {
-  int? expenseAmountCents;
-  String? expenseCurrencyCode;
+import '../../../fixtures/budget_month.dart';
+import '../../../fixtures/transactions.dart';
+import '../../../support/fake_endpoint_client.dart' as fake;
+
+const String _entityId = fixtureEntityId;
+const String _usdAccountId = '00000000-0000-0000-0000-0000000000f0a1';
+const String _jpyAccountId = '00000000-0000-0000-0000-0000000000f0a2';
+
+/// Captures the input the form submits.
+class _RecordingActions extends TransactionActions {
+  TransactionInput? created;
+  String? createdEntityId;
 
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
   @override
-  Future<Transaction> addExpense({
-    required String description,
-    required int amountCents,
-    required String currencyCode,
-    required String budgetId,
-    required DateTime date,
-    String? envelopeId,
-    String? categoryId,
-    String? payeeId,
-    String? memo,
+  Future<TransactionView> create({
+    required TransactionInput input,
+    required String entityId,
   }) async {
-    expenseAmountCents = amountCents;
-    expenseCurrencyCode = currencyCode;
-    return Transaction(
-      description: description,
-      amountCents: amountCents,
-      currencyCode: currencyCode,
-      budgetId: UuidValue.fromString(
-        '00000000-0000-0000-0000-000000000001',
+    created = input;
+    createdEntityId = entityId;
+    return testTransactionView(
+      transaction: testTransaction(
+        accountId: input.accountId.toString(),
+        amountMinor: input.amountMinor,
       ),
-      transactionDate: date,
     );
   }
 }
 
-void main() {
-  const budgetId = 'test-budget-1';
-  final budgetUuid = UuidValue.fromString(
-    '00000000-0000-0000-0000-000000000001',
-  );
-  final ownerUuid = UuidValue.fromString(
-    '00000000-0000-0000-0000-000000000099',
-  );
-  final categoryUuid = UuidValue.fromString(
-    '00000000-0000-0000-0000-000000000020',
-  );
-  final envelopeUuid1 = UuidValue.fromString(
-    '00000000-0000-0000-0000-000000000030',
-  );
-  final envelopeUuid2 = UuidValue.fromString(
-    '00000000-0000-0000-0000-000000000031',
-  );
-
-  Budget makeBudget({String currencyCode = 'USD'}) => Budget(
-    id: budgetUuid,
-    name: 'My Budget',
-    currencyCode: currencyCode,
-    ownerId: ownerUuid,
-    createdAt: DateTime(2026),
-  );
-
-  List<Payee> makePayees() => [
-    Payee(
-      id: UuidValue.fromString('00000000-0000-0000-0000-000000000010'),
-      name: 'Grocery Store',
-      budgetId: budgetUuid,
+GoRouter _router() => GoRouter(
+  initialLocation: addExpensePath.replaceFirst(':entityId', _entityId),
+  routes: [
+    GoRoute(
+      name: planRoute,
+      path: planPath,
+      builder: (_, _) => const Scaffold(body: Text('Plan Route')),
     ),
-    Payee(
-      id: UuidValue.fromString('00000000-0000-0000-0000-000000000011'),
-      name: 'Coffee Shop',
-      budgetId: budgetUuid,
+    GoRoute(
+      name: addIncomeRoute,
+      path: addIncomePath,
+      builder: (_, _) => const Scaffold(body: Text('Add Income Route')),
     ),
-  ];
+    GoRoute(
+      name: addExpenseRoute,
+      path: addExpensePath,
+      builder: (context, state) =>
+          AddExpenseScreen(entityId: state.pathParameters['entityId']!),
+    ),
+  ],
+);
 
-  BudgetSummary makeSummary({List<CategoryWithEnvelopes>? categories}) =>
-      BudgetSummary(
-        budget: makeBudget(),
-        categories:
-            categories ??
-            [
-              CategoryWithEnvelopes(
-                category: Category(
-                  id: categoryUuid,
-                  name: 'Essentials',
-                  budgetId: budgetUuid,
-                  sortOrder: 0,
-                ),
-                envelopes: [
-                  Envelope(
-                    id: envelopeUuid1,
-                    name: 'Groceries',
-                    categoryId: categoryUuid,
-                    budgetedAmountCents: 50000,
-                    spentAmountCents: 20000,
-                    currencyCode: 'USD',
-                    sortOrder: 0,
-                  ),
-                  Envelope(
-                    id: envelopeUuid2,
-                    name: 'Dining Out',
-                    categoryId: categoryUuid,
-                    budgetedAmountCents: 20000,
-                    spentAmountCents: 5000,
-                    currencyCode: 'USD',
-                    sortOrder: 1,
-                  ),
-                ],
-                monthlyEnvelopes: const [],
-                totalBudgetedCents: 70000,
-                totalSpentCents: 25000,
-                totalAvailableCents: 45000,
-              ),
-            ],
-        totalIncomeCents: 100000,
-        totalBudgetedCents: 70000,
-        readyToAssignCents: 30000,
-        year: 2026,
-        month: 2,
-      );
-
-  Widget buildSubject({
-    Budget? budget,
-    List<Payee>? payees,
-    BudgetSummary? summary,
-    String? Function(Ref, (String, String))? ruleMatchOverride,
-    String? Function(Ref, (String, String))? payeeLastEnvelopeOverride,
-    TransactionActions? actions,
-  }) => ProviderScope(
+/// Pumps the expense form over stubbed providers.
+Future<_RecordingActions> _pumpExpense(
+  WidgetTester tester, {
+  List<Account>? accounts,
+  List<Payee>? payees,
+  BudgetMonthView? monthView,
+  FxQuoteView? quote,
+  Exception? quoteError,
+  List<TransactionView> duplicates = const [],
+  bool routed = false,
+}) async {
+  final actions = _RecordingActions();
+  final container = ProviderContainer(
+    // Failed quotes stay failed instead of retrying on a timer.
+    retry: (_, _) => null,
     overrides: [
-      if (actions != null)
-        transactionActionsProvider.overrideWith(() => actions),
-      budgetDetailProvider.overrideWith(
-        (ref, id) async => budget ?? makeBudget(),
+      entityDetailProvider.overrideWith(
+        (ref, id) async => testEntity(),
       ),
-      payeeListProvider.overrideWith((ref, id) async => payees ?? makePayees()),
-      budgetSummaryProvider.overrideWith(
-        (ref, id) async => summary ?? makeSummary(),
+      accountListProvider.overrideWith(
+        (ref, id) async => accounts ?? [testAccount()],
       ),
-      ruleMatchEnvelopeProvider.overrideWith(
-        (ref, args) async =>
-            ruleMatchOverride != null ? ruleMatchOverride(ref, args) : null,
+      payeeListProvider.overrideWith((ref, id) async => payees ?? const []),
+      budgetMonthProvider.overrideWith(
+        (ref, id) async => monthView ?? testMonthView(),
       ),
-      payeeLastEnvelopeProvider.overrideWith(
-        (ref, args) async => payeeLastEnvelopeOverride != null
-            ? payeeLastEnvelopeOverride(ref, args)
-            : null,
+      duplicateCheckProvider.overrideWith(
+        (ref, args) async => duplicates,
       ),
+      serverpodClientProvider.overrideWithValue(
+        fake.FakeEndpointClient()..handle('fxRate', 'quote', (_) {
+          if (quoteError != null) throw quoteError;
+          return quote ?? testFxQuote();
+        }),
+      ),
+      transactionActionsProvider.overrideWith(() => actions),
     ],
-    child: MaterialApp(
-      theme: OpenBudgetTheme.light,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: const AddExpenseScreen(budgetId: budgetId),
-    ),
   );
+  addTearDown(container.dispose);
+  await tester.pumpApp(
+    routed
+        ? const SizedBox.shrink()
+        : const AddExpenseScreen(entityId: _entityId),
+    container: container,
+    router: routed ? _router() : null,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+  );
+  await tester.pumpAndSettle();
+  return actions;
+}
 
-  Widget buildRoutedSubject({
-    Budget? budget,
-    List<Payee>? payees,
-    BudgetSummary? summary,
-    String? Function(Ref, (String, String))? ruleMatchOverride,
-    String? Function(Ref, (String, String))? payeeLastEnvelopeOverride,
-    TransactionActions? actions,
-  }) {
-    final router = GoRouter(
-      initialLocation: '/budgets/$budgetId/expenses/add',
-      routes: [
-        GoRoute(
-          name: planRoute,
-          path: planPath,
-          builder: (_, _) =>
-              const Scaffold(body: Center(child: Text('Plan Route'))),
-        ),
-        GoRoute(
-          name: addExpenseRoute,
-          path: addExpensePath,
-          builder: (context, state) =>
-              AddExpenseScreen(budgetId: state.pathParameters['id']!),
-        ),
-        GoRoute(
-          name: addIncomeRoute,
-          path: addIncomePath,
-          builder: (_, _) =>
-              const Scaffold(body: Center(child: Text('Add Income Route'))),
-        ),
-      ],
-    );
+Finder _field(String label) => find.widgetWithText(TextField, label);
 
-    return ProviderScope(
-      overrides: [
-        if (actions != null)
-          transactionActionsProvider.overrideWith(() => actions),
-        budgetDetailProvider.overrideWith(
-          (ref, id) async => budget ?? makeBudget(),
-        ),
-        payeeListProvider.overrideWith(
-          (ref, id) async => payees ?? makePayees(),
-        ),
-        budgetSummaryProvider.overrideWith(
-          (ref, id) async => summary ?? makeSummary(),
-        ),
-        ruleMatchEnvelopeProvider.overrideWith(
-          (ref, args) async =>
-              ruleMatchOverride != null ? ruleMatchOverride(ref, args) : null,
-        ),
-        payeeLastEnvelopeProvider.overrideWith(
-          (ref, args) async => payeeLastEnvelopeOverride != null
-              ? payeeLastEnvelopeOverride(ref, args)
-              : null,
-        ),
-      ],
-      child: MaterialApp.router(
-        theme: OpenBudgetTheme.light,
+Future<void> _enterLine(WidgetTester tester, int index, String text) async {
+  final field = find.byKey(ValueKey('line-amount-$index'));
+  await tester.ensureVisible(field);
+  await tester.pumpAndSettle();
+  await tester.enterText(field, text);
+  await tester.pumpAndSettle();
+}
+
+Future<void> _tapBelowFold(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+  await tester.tap(finder);
+  await tester.pumpAndSettle();
+}
+
+Future<void> _tapSave(WidgetTester tester) async {
+  await tester.ensureVisible(find.text('Save Transaction'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Save Transaction'));
+  await tester.pumpAndSettle();
+}
+
+void main() {
+  group('AddExpenseScreen', () {
+    testWidgets('renders a scaffold while the accounts load', (tester) async {
+      await tester.pumpApp(
+        const AddExpenseScreen(entityId: _entityId),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        routerConfig: router,
-      ),
-    );
-  }
-
-  group('AddExpenseScreen', () {
-    testWidgets('renders loading state initially', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const AddExpenseScreen(budgetId: budgetId),
-          ),
-        ),
       );
       await tester.pump();
 
       expect(find.byType(Scaffold), findsOneWidget);
     });
 
-    testWidgets('shows Add Expense title', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+    testWidgets('shows the transaction title, expense mode and cancel', (
+      tester,
+    ) async {
+      await _pumpExpense(tester, routed: true);
 
-      // Title in app bar + title text inside card.
+      expect(find.text('Add Transaction'), findsOneWidget);
       expect(find.text('Add Expense'), findsNWidgets(2));
-    });
-
-    testWidgets('shows expense icon', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
       expect(
         find.byWidgetPredicate(
-          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.outflow,
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.outflow,
         ),
         findsOneWidget,
       );
-    });
-
-    testWidgets('shows cancel button', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
       expect(find.widgetWithText(TextButton, 'Cancel'), findsOneWidget);
     });
 
-    testWidgets('shows description text field', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Description'), findsOneWidget);
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.document,
-        ),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('shows amount text field', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Amount'), findsOneWidget);
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.money,
-        ),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('shows payee dropdown with No Payee option', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Payee'), findsOneWidget);
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.store,
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('No Payee'), findsOneWidget);
-    });
-
-    testWidgets('shows envelope dropdown with Unassigned option', (
+    testWidgets('shows description, amount, payee, envelope and memo fields', (
       tester,
     ) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+      await _pumpExpense(tester, payees: [testPayee()]);
 
-      // The envelope dropdown label and the default selected item.
-      expect(find.text('Unassigned'), findsNWidgets(2));
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.envelope,
-        ),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('shows memo text field with hint', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Memo'), findsOneWidget);
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.note,
-        ),
-        findsOneWidget,
-      );
+      expect(_field('Description'), findsOneWidget);
+      expect(_field('Amount'), findsOneWidget);
+      expect(_field('Memo'), findsOneWidget);
       expect(find.text('Add a note (optional)'), findsOneWidget);
+      expect(find.text('Payee'), findsOneWidget);
+      expect(find.text('No Payee'), findsOneWidget);
+      expect(find.text('Unassigned'), findsNWidgets(2));
     });
 
-    testWidgets('shows save button', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Save Transaction'), findsOneWidget);
-      expect(find.byType(FilledButton), findsOneWidget);
-    });
-
-    testWidgets('renders payee dropdown items when payees available', (
+    testWidgets('lists the entity payees in the payee dropdown', (
       tester,
     ) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+      await _pumpExpense(
+        tester,
+        payees: [
+          testPayee(),
+          testPayee(id: fixtureSecondPayeeId, name: 'Coffee Shop'),
+        ],
+      );
 
-      // Tap the payee dropdown to open it.
       await tester.tap(find.text('No Payee'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Grocery Store'), findsOneWidget);
+      expect(find.text('Tesco'), findsOneWidget);
       expect(find.text('Coffee Shop'), findsOneWidget);
     });
 
-    testWidgets('renders empty payee dropdown when no payees', (tester) async {
-      await tester.pumpWidget(buildSubject(payees: []));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('No Payee'));
-      await tester.pumpAndSettle();
-
-      // Only the 'No Payee' option (selected + dropdown item).
-      expect(find.text('No Payee'), findsNWidgets(2));
-      expect(find.text('Grocery Store'), findsNothing);
-    });
-
-    testWidgets('renders envelope dropdown with category/envelope names', (
+    testWidgets('list the month envelopes under their category', (
       tester,
     ) async {
-      await tester.pumpWidget(buildSubject());
+      await _pumpExpense(tester);
+
+      await tester.tap(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is ObDropdown<String> && widget.labelText == 'Unassigned',
+        ),
+      );
       await tester.pumpAndSettle();
 
-      // Tap envelope dropdown to open it. Find by the mail icon area.
-      final envelopeDropdowns = find.byType(DropdownButtonFormField<String>);
-      // Second dropdown is the envelope dropdown.
-      await tester.tap(envelopeDropdowns.at(1));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Essentials / Groceries'), findsOneWidget);
-      expect(find.text('Essentials / Dining Out'), findsOneWidget);
+      expect(find.text('Living / Groceries'), findsOneWidget);
     });
 
-    testWidgets('renders empty envelope dropdown when no categories', (
+    testWidgets('saves 12.34 as -1234 minor units on the account', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        buildSubject(summary: makeSummary(categories: [])),
-      );
+      final actions = await _pumpExpense(tester, routed: true);
+
+      await tester.enterText(_field('Description'), 'Coffee');
+      await tester.enterText(_field('Amount'), '12.34');
       await tester.pumpAndSettle();
+      await _tapSave(tester);
 
-      // Open the envelope dropdown.
-      final envelopeDropdowns = find.byType(DropdownButtonFormField<String>);
-      await tester.tap(envelopeDropdowns.at(1));
-      await tester.pumpAndSettle();
-
-      // Only 'Unassigned' option should be present.
-      expect(find.text('Essentials / Groceries'), findsNothing);
-    });
-
-    testWidgets('can enter description text', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      final descField = find.widgetWithText(TextField, 'Description');
-      await tester.enterText(descField, 'Weekly groceries');
-      await tester.pumpAndSettle();
-
-      expect(find.text('Weekly groceries'), findsOneWidget);
-    });
-
-    testWidgets('can enter amount text', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      final amountField = find.widgetWithText(TextField, 'Amount');
-      await tester.enterText(amountField, '42.50');
-      await tester.pumpAndSettle();
-
-      expect(find.text('42.50'), findsOneWidget);
-    });
-
-    testWidgets('saves 12.34 as 1234 minor units', (tester) async {
-      final actions = _RecordingExpenseActions();
-      await tester.pumpWidget(buildRoutedSubject(actions: actions));
-      await tester.pumpAndSettle();
-
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Description'),
-        'Coffee',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Amount'),
-        '12.34',
-      );
-      await tester.pumpAndSettle();
-
-      await tester.ensureVisible(find.text('Save Transaction'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Save Transaction'));
-      await tester.pumpAndSettle();
-
-      expect(actions.expenseAmountCents, 1234);
-      expect(actions.expenseCurrencyCode, 'USD');
+      expect(actions.created, isNotNull);
+      expect(actions.created!.amountMinor, -1234);
+      expect(actions.created!.accountId.toString(), fixtureAccountId);
+      expect(actions.createdEntityId, _entityId);
+      expect(actions.created!.fxRate, isNull);
+      expect(find.text('Plan Route'), findsOneWidget);
     });
 
     testWidgets('refuses an over-precise amount instead of rounding it', (
       tester,
     ) async {
-      final actions = _RecordingExpenseActions();
-      await tester.pumpWidget(buildRoutedSubject(actions: actions));
-      await tester.pumpAndSettle();
+      final actions = await _pumpExpense(tester, routed: true);
 
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Description'),
-        'Coffee',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Amount'),
-        '12.345',
-      );
+      await tester.enterText(_field('Description'), 'Coffee');
+      await tester.enterText(_field('Amount'), '12.345');
       await tester.pumpAndSettle();
 
       expect(
         find.text('Enter a valid amount with at most 2 decimal places'),
         findsOneWidget,
       );
+      await _tapSave(tester);
 
-      await tester.ensureVisible(find.text('Save Transaction'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Save Transaction'));
-      await tester.pumpAndSettle();
-
-      expect(actions.expenseAmountCents, isNull);
+      expect(actions.created, isNull);
     });
 
     testWidgets('refuses a negative expense amount', (tester) async {
-      final actions = _RecordingExpenseActions();
-      await tester.pumpWidget(buildRoutedSubject(actions: actions));
-      await tester.pumpAndSettle();
+      final actions = await _pumpExpense(tester, routed: true);
 
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Description'),
-        'Coffee',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Amount'),
-        '-12.34',
-      );
+      await tester.enterText(_field('Description'), 'Coffee');
+      await tester.enterText(_field('Amount'), '-12.34');
       await tester.pumpAndSettle();
 
       expect(
         find.text('Enter a valid amount with at most 2 decimal places'),
         findsOneWidget,
       );
+      await _tapSave(tester);
 
-      await tester.ensureVisible(find.text('Save Transaction'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Save Transaction'));
-      await tester.pumpAndSettle();
-
-      expect(actions.expenseAmountCents, isNull);
+      expect(actions.created, isNull);
     });
 
-    testWidgets('shows negative amount hint in budget currency', (
+    testWidgets('shows the amount hint in a zero-decimal currency', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        buildSubject(budget: makeBudget(currencyCode: 'JPY')),
+      await _pumpExpense(
+        tester,
+        accounts: [
+          testAccount(
+            id: _jpyAccountId,
+            currencyCode: 'JPY',
+          ),
+        ],
+        monthView: testMonthView(currencyCode: 'JPY'),
       );
-      await tester.pumpAndSettle();
 
       expect(find.textContaining('-¥0'), findsAtLeast(1));
     });
 
-    testWidgets('can enter memo text', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      final memoField = find.widgetWithText(TextField, 'Memo');
-      await tester.enterText(memoField, 'Bought vegetables');
-      await tester.pumpAndSettle();
-
-      expect(find.text('Bought vegetables'), findsOneWidget);
-    });
-
-    testWidgets('amount field has number keyboard with decimal', (
+    testWidgets('a zero-decimal amount field refuses a decimal point', (
       tester,
     ) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      final amountField = tester.widget<TextField>(
-        find.widgetWithText(TextField, 'Amount'),
+      final actions = await _pumpExpense(
+        tester,
+        accounts: [
+          testAccount(
+            id: _jpyAccountId,
+            currencyCode: 'JPY',
+          ),
+        ],
+        monthView: testMonthView(currencyCode: 'JPY'),
+        routed: true,
       );
-      expect(amountField.keyboardType, isNotNull);
-      expect(amountField.keyboardType.decimal, isTrue);
-    });
 
-    testWidgets('no auto-assign hint visible initially', (tester) async {
-      await tester.pumpWidget(buildSubject());
+      await tester.enterText(_field('Description'), 'Lunch');
+      await tester.enterText(_field('Amount'), '1500.5');
       await tester.pumpAndSettle();
 
-      expect(find.text('Auto-assigned by rule'), findsNothing);
       expect(
-        find.text(
-          'Envelope auto-suggested from last transaction with this payee',
-        ),
-        findsNothing,
+        find.text('Enter a valid amount with at most 0 decimal places'),
+        findsOneWidget,
+      );
+      await _tapSave(tester);
+      expect(actions.created, isNull);
+
+      await tester.enterText(_field('Amount'), '1500');
+      await tester.pumpAndSettle();
+      await _tapSave(tester);
+
+      expect(actions.created!.amountMinor, -1500);
+    });
+
+    testWidgets('a currency with decimals offers the decimal key', (
+      tester,
+    ) async {
+      await _pumpExpense(tester);
+      final pounds = tester.widget<TextField>(_field('Amount'));
+      expect(pounds.keyboardType.decimal, isTrue);
+    });
+
+    testWidgets('a zero-decimal currency offers no decimal key', (
+      tester,
+    ) async {
+      await _pumpExpense(
+        tester,
+        accounts: [
+          testAccount(
+            id: _jpyAccountId,
+            currencyCode: 'JPY',
+          ),
+        ],
+        monthView: testMonthView(currencyCode: 'JPY'),
+      );
+      final yen = tester.widget<TextField>(_field('Amount'));
+      expect(yen.keyboardType.decimal, isFalse);
+    });
+
+    testWidgets('shows a duplicate warning when similar transactions exist', (
+      tester,
+    ) async {
+      await _pumpExpense(
+        tester,
+        duplicates: [testTransactionView()],
+      );
+
+      await tester.enterText(_field('Amount'), '12.34');
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(_field('Description'));
+      await tester.pumpAndSettle();
+      await tester.tap(_field('Description'));
+      await tester.pumpAndSettle();
+      await tester.enterText(_field('Description'), 'Groceries');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Possible duplicate: 1 similar transaction found'),
+        findsOneWidget,
       );
     });
 
-    testWidgets('cancel navigates back to plan route', (tester) async {
-      await tester.pumpWidget(buildRoutedSubject());
-      await tester.pumpAndSettle();
+    testWidgets('cancel goes back to the plan', (tester) async {
+      await _pumpExpense(tester, routed: true);
 
       await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
       await tester.pumpAndSettle();
@@ -575,16 +383,254 @@ void main() {
       expect(find.text('Plan Route'), findsOneWidget);
     });
 
-    testWidgets('tapping Add Income mode navigates to add income route', (
-      tester,
-    ) async {
-      await tester.pumpWidget(buildRoutedSubject());
-      await tester.pumpAndSettle();
+    testWidgets('the income chip swaps to the income form', (tester) async {
+      await _pumpExpense(tester, routed: true);
 
-      await tester.tap(find.text('Add Income').first);
+      await tester.tap(find.text('Add Income'));
       await tester.pumpAndSettle();
 
       expect(find.text('Add Income Route'), findsOneWidget);
+    });
+
+    testWidgets('shows the live FX line for a foreign account', (
+      tester,
+    ) async {
+      await _pumpExpense(
+        tester,
+        accounts: [
+          testAccount(
+            id: _usdAccountId,
+            currencyCode: 'USD',
+          ),
+        ],
+        quote: testFxQuote(
+          // The quote's own rate date, not the transaction date.
+          rateDate: DateTime.utc(2026, 11, 6),
+        ),
+      );
+
+      await tester.enterText(_field('Amount'), '100');
+      await tester.pumpAndSettle();
+
+      final line = find.textContaining('1 USD = 0.7891 GBP');
+      expect(line, findsOneWidget);
+      final text = tester.widget<Text>(line).data!;
+      expect(text, contains('≈ £78.91'));
+      expect(text, contains('6 Nov 2026'));
+      expect(text, contains('market'));
+      expect(find.widgetWithText(TextButton, 'Set rate'), findsOneWidget);
+    });
+
+    testWidgets('the manual rate sheet carries the typed rate', (
+      tester,
+    ) async {
+      final actions = await _pumpExpense(
+        tester,
+        accounts: [
+          testAccount(
+            id: _usdAccountId,
+            currencyCode: 'USD',
+          ),
+        ],
+        routed: true,
+      );
+
+      await tester.enterText(_field('Amount'), '100');
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Set rate'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Use your own rate'), findsOneWidget);
+      expect(find.text('1 USD = ? GBP'), findsOneWidget);
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Exchange rate'),
+        '0',
+      );
+      await tester.tap(find.text('Use this rate'));
+      await tester.pumpAndSettle();
+      expect(find.text('Enter a positive rate, e.g. 0.79'), findsOneWidget);
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Exchange rate'),
+        '0.8',
+      );
+      await tester.tap(find.text('Use this rate'));
+      await tester.pumpAndSettle();
+      expect(find.text('Use your own rate'), findsNothing);
+
+      await tester.enterText(_field('Description'), 'Coffee');
+      await tester.pumpAndSettle();
+      await _tapSave(tester);
+
+      expect(actions.created!.fxRate, '0.8');
+      expect(actions.created!.amountMinor, -10000);
+    });
+
+    testWidgets('a missing rate explains itself and opens the rate sheet', (
+      tester,
+    ) async {
+      await _pumpExpense(
+        tester,
+        accounts: [
+          testAccount(
+            id: _usdAccountId,
+            currencyCode: 'USD',
+          ),
+        ],
+        quoteError: FxRateUnavailableException(
+          message: 'No USD to GBP rate for 8 Nov 2026',
+          fromCurrencyCode: 'USD',
+          toCurrencyCode: 'GBP',
+          date: DateTime.utc(2026, 11, 8),
+        ),
+      );
+
+      await tester.enterText(_field('Amount'), '100');
+      await tester.pumpAndSettle();
+
+      expect(find.text('No USD to GBP rate for 8 Nov 2026'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(TextButton, 'Set rate'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Use your own rate'), findsOneWidget);
+      expect(find.text('No USD to GBP rate for 8 Nov 2026'), findsWidgets);
+    });
+  });
+
+  group('the expense lines editor (replaces the deleted split screen)', () {
+    testWidgets('splits an amount into exact minor units', (tester) async {
+      final actions = await _pumpExpense(tester, routed: true);
+
+      await tester.enterText(_field('Description'), 'Lunch');
+      await tester.enterText(_field('Amount'), '12.34');
+      await tester.pumpAndSettle();
+
+      await _tapBelowFold(tester, find.text('Split into lines'));
+
+      expect(find.text('Lines'), findsOneWidget);
+      expect(find.byKey(const ValueKey('line-amount-0')), findsOneWidget);
+
+      await _tapBelowFold(tester, find.text('Add a line'));
+      expect(find.byKey(const ValueKey('line-amount-1')), findsOneWidget);
+
+      await _enterLine(tester, 0, '6.17');
+      await _enterLine(tester, 1, '6.17');
+
+      await _tapSave(tester);
+
+      expect(actions.created, isNotNull);
+      expect(
+        [for (final line in actions.created!.lines) line.amountMinor],
+        [-617, -617],
+      );
+      expect(
+        actions.created!.lines.fold<int>(
+          0,
+          (sum, line) => sum + line.amountMinor,
+        ),
+        actions.created!.amountMinor,
+      );
+    });
+
+    testWidgets('will not save while the lines do not sum exactly', (
+      tester,
+    ) async {
+      final actions = await _pumpExpense(tester, routed: true);
+
+      await tester.enterText(_field('Description'), 'Lunch');
+      await tester.enterText(_field('Amount'), '12.34');
+      await tester.pumpAndSettle();
+      await _tapBelowFold(tester, find.text('Split into lines'));
+
+      await _tapBelowFold(tester, find.text('Add a line'));
+
+      await _enterLine(tester, 0, '6.17');
+
+      expect(find.text('£6.17 left to allocate'), findsOneWidget);
+      await _tapSave(tester);
+      expect(actions.created, isNull);
+
+      await _enterLine(tester, 1, '6.16');
+      expect(find.text('£0.01 left to allocate'), findsOneWidget);
+      await _tapSave(tester);
+      expect(actions.created, isNull);
+
+      await _enterLine(tester, 1, '6.17');
+      expect(find.textContaining('left to allocate'), findsNothing);
+      await _tapSave(tester);
+      expect(actions.created, isNotNull);
+    });
+
+    testWidgets('refuses an over-precise line instead of rounding it', (
+      tester,
+    ) async {
+      final actions = await _pumpExpense(tester, routed: true);
+
+      await tester.enterText(_field('Description'), 'Lunch');
+      await tester.enterText(_field('Amount'), '12.34');
+      await tester.pumpAndSettle();
+      await _tapBelowFold(tester, find.text('Split into lines'));
+
+      await _enterLine(tester, 0, '12.345');
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsOneWidget,
+      );
+      await _tapSave(tester);
+      expect(actions.created, isNull);
+
+      await _enterLine(tester, 0, '12.34');
+      await _tapSave(tester);
+
+      expect(actions.created, isNotNull);
+      expect(
+        [for (final line in actions.created!.lines) line.amountMinor],
+        [-1234],
+      );
+    });
+
+    testWidgets('refuses a negative line', (tester) async {
+      final actions = await _pumpExpense(tester, routed: true);
+
+      await tester.enterText(_field('Description'), 'Lunch');
+      await tester.enterText(_field('Amount'), '12.34');
+      await tester.pumpAndSettle();
+      await _tapBelowFold(tester, find.text('Split into lines'));
+
+      await _enterLine(tester, 0, '-12.34');
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsOneWidget,
+      );
+      await _tapSave(tester);
+
+      expect(actions.created, isNull);
+    });
+
+    testWidgets('assigns a line to an envelope', (tester) async {
+      final actions = await _pumpExpense(tester, routed: true);
+
+      await tester.enterText(_field('Description'), 'Lunch');
+      await tester.enterText(_field('Amount'), '12.34');
+      await tester.pumpAndSettle();
+      await _tapBelowFold(tester, find.text('Split into lines'));
+
+      await _tapBelowFold(
+        tester,
+        find.byType(DropdownButtonFormField<String>).last,
+      );
+      await tester.tap(find.text('Living / Groceries').last);
+      await tester.pumpAndSettle();
+      await _tapSave(tester);
+
+      expect(
+        actions.created!.lines.single.envelopeId.toString(),
+        fixtureEnvelopeId,
+      );
     });
   });
 }

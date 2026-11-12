@@ -1,153 +1,330 @@
-import 'dart:convert';
-import 'dart:math';
-
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/accounts/account_service.dart';
+import 'package:openbudget_server/src/entities/entity_access.dart';
+import 'package:openbudget_server/src/entities/entity_realtime_notifier.dart';
+import 'package:openbudget_server/src/fx_rates/fx_service.dart';
+import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/transactions/transaction_writer.dart';
 import 'package:test/test.dart';
 
-import '../integration/helpers/auth_helper.dart';
-import '../integration/test_tools/serverpod_test_tools.dart';
+import '../support/ledger_test_book.dart';
+import '../support/pg_test_server.dart';
 
-/// Concurrent requests need real transactions, so this group commits its
-/// writes. Each run uses fresh random users, so committed rows never collide
-/// with other test files that reuse the helper's counter-based identities.
+/// These tests commit their writes, because two requests only serialize when
+/// they run in separate transactions. Every test creates fresh users, so
+/// committed rows never collide across runs.
 void main() {
-  withServerpod(
-    'Given LedgerEndpoint under concurrent requests',
-    rollbackDatabase: RollbackDatabase.disabled,
-    (sessionBuilder, endpoints) {
-      late TestSessionBuilder owner;
-      late Budget budget;
-      late Map<String, LedgerAccount> accounts;
+  late PgTestServer server;
+  var serverStarted = false;
 
-      String randomUserId() {
-        final random = Random.secure();
-        final hex = List.generate(
-          12,
-          (_) => random.nextInt(16).toRadixString(16),
-        ).join();
-        return '20000000-0000-4000-a000-$hex';
-      }
+  setUpAll(() async {
+    server = await PgTestServer.start();
+    serverStarted = true;
+  });
 
-      JournalLineInput line(
-        LedgerAccount account, {
-        required bool isDebit,
-        required int amountMinor,
-      }) => JournalLineInput(
-        ledgerAccountId: account.id!,
-        debitMinor: isDebit ? amountMinor : 0,
-        creditMinor: isDebit ? 0 : amountMinor,
-        currencyCode: 'GBP',
-        functionalDebitMinor: isDebit ? amountMinor : 0,
-        functionalCreditMinor: isDebit ? 0 : amountMinor,
-        exchangeRate: '1',
-        rateDate: DateTime(2026, 11),
-        rateSource: 'manual',
+  tearDownAll(() async {
+    if (serverStarted) await server.stop();
+  });
+
+  setUp(() async {
+    EntityRealtimeNotifier.debugPublisher = LedgerTestBook.ignoreEvent;
+    AccountService.debugPublisher = LedgerTestBook.ignoreEvent;
+    TransactionWriter.debugPublisher = LedgerTestBook.ignoreEvent;
+    FxService.configure(
+      apiKey: null,
+      baseUrl: null,
+      backfillScheduler: (_, _) async {},
+    );
+    await server.clearRates();
+  });
+
+  tearDown(() {
+    EntityRealtimeNotifier.resetForTests();
+    AccountService.resetForTests();
+    TransactionWriter.resetForTests();
+    FxService.resetForTests();
+  });
+
+  group('Given LedgerEndpoint under concurrent requests', () {
+    test('then two enables seed one chart and one link per account', () async {
+      final book = await LedgerTestBook.create(server);
+      final checking = await book.addAccount(name: 'Current');
+      final first = book.newSession();
+      final second = book.newSession();
+
+      final results = await Future.wait([
+        book.endpoint.enableLedger(first, book.entity.id!),
+        book.endpoint.enableLedger(second, book.entity.id!),
+      ]);
+
+      expect(
+        results.map((entity) => entity.accountingMode),
+        everyElement(AccountingMode.ledger),
       );
-
-      Future<Journal> saveDraft() => endpoints.ledger.saveDraftJournal(
-        owner,
-        budget.id!,
-        DateTime(2026, 11),
-        [
-          line(accounts['1000']!, isDebit: true, amountMinor: 50000),
-          line(accounts['3200']!, isDebit: false, amountMinor: 50000),
-        ],
-        reference: 'JB-race',
-        source: 'opening',
+      final chart = await book.chart();
+      final template = LedgerChartTemplate.forBooks(
+        jurisdiction: TaxJurisdiction.gb,
+        entityKind: EntityKind.company,
+      )!;
+      expect(chart, hasLength(template.accounts.length + 1));
+      expect(
+        chart.map((account) => account.code).toSet(),
+        hasLength(chart.length),
       );
+      expect(
+        chart.map((account) => account.id).toSet(),
+        hasLength(chart.length),
+      );
+      final roles = chart
+          .map((account) => account.systemRole)
+          .whereType<LedgerSystemRole>()
+          .toList();
+      expect(roles.toSet(), hasLength(roles.length));
+      final reloaded = await book.reloadAccount(checking.id!);
+      expect(reloaded.ledgerAccountId, isNotNull);
+      expect(
+        chart.where((account) => account.id == reloaded.ledgerAccountId),
+        hasLength(1),
+      );
+    });
 
-      /// Settles every future and returns how many completed and how many
-      /// failed with a [ValidationException].
-      Future<({int succeeded, int rejected})> race(
-        List<Future<Journal>> attempts,
-      ) async {
-        var succeeded = 0;
-        var rejected = 0;
-        await Future.wait([
-          for (final attempt in attempts)
-            () async {
-              try {
-                await attempt;
-                succeeded++;
-              } on ValidationException {
-                rejected++;
-              }
-            }(),
-        ]);
-        return (succeeded: succeeded, rejected: rejected);
-      }
+    test(
+      'then an account created while enabling still gets one link',
+      () async {
+        for (var attempt = 0; attempt < 3; attempt++) {
+          final book = await LedgerTestBook.create(server);
+          final enabling = book.newSession();
+          final creating = book.newSession();
 
-      setUp(() async {
-        owner = createAuthenticatedSession(
-          sessionBuilder,
-          userIdentifier: randomUserId(),
-        );
-        budget = await endpoints.budget.create(owner, 'Books', 'GBP');
-        await endpoints.tax.saveProfile(
-          owner,
-          budget.id!,
-          'GB',
-          TaxEntityKind.company.name,
-          jsonEncode(
-            const GbTaxProfile(entityKind: TaxEntityKind.company).toJson(),
-          ),
-        );
-        await endpoints.ledger.enableLedger(owner, budget.id!);
-        final listed = await endpoints.ledger.listAccounts(
-          owner,
-          budget.id!,
-          includeArchived: false,
-        );
-        accounts = {for (final account in listed) account.code: account};
-      });
-
-      test('then concurrent posts of one draft post it once', () async {
-        final draft = await saveDraft();
-
-        final outcome = await race([
-          for (var i = 0; i < 4; i++)
-            endpoints.ledger.postJournal(owner, draft.id!),
-        ]);
-
-        expect(outcome, (succeeded: 1, rejected: 3));
-        final journals = await endpoints.ledger.listJournals(
-          owner,
-          budget.id!,
-        );
-        expect(journals.single.status, 'posted');
-      });
-
-      test(
-        'then concurrent reversals of one journal reverse it once',
-        () async {
-          final draft = await saveDraft();
-          final journal = await endpoints.ledger.postJournal(owner, draft.id!);
-
-          final outcome = await race([
-            for (var i = 0; i < 4; i++)
-              endpoints.ledger.reverseJournal(
-                owner,
-                journal.id!,
-                DateTime(2026, 11, 20),
-              ),
+          final results = await Future.wait<Object?>([
+            book.endpoint.enableLedger(enabling, book.entity.id!),
+            book.addAccount(session: creating, name: 'Racer $attempt'),
           ]);
+          final entity = results.first! as Entity;
+          final account = results.last! as Account;
+          expect(entity.accountingMode, AccountingMode.ledger);
 
-          expect(outcome, (succeeded: 1, rejected: 3));
-          final journals = await endpoints.ledger.listJournals(
-            owner,
-            budget.id!,
+          final reloaded = await book.reloadAccount(account.id!);
+          expect(reloaded.ledgerAccountId, isNotNull);
+          final chart = await book.chart();
+          final matches = chart.where(
+            (ledger) => ledger.id == reloaded.ledgerAccountId,
           );
-          expect(journals, hasLength(2));
-          final trialBalance = await endpoints.ledger.trialBalance(
-            owner,
-            budget.id!,
-            DateTime(2026, 11, 30),
-          );
-          expect(trialBalance.totalDebitMinor, 100000);
-          expect(trialBalance.totalCreditMinor, 100000);
-        },
+          expect(matches, hasLength(1));
+          expect(matches.single.entityId, book.entity.id);
+          expect(matches.single.systemRole, isNull);
+          expect(matches.single.name, 'Racer $attempt');
+        }
+      },
+    );
+
+    test('then concurrent posts of one draft have one winner', () async {
+      final book = await LedgerTestBook.create(server);
+      final checking = await book.addAccount();
+      await book.enable();
+      final lines = LedgerLineBuilder(book.baseCurrency);
+      final bank = await book.linkedAccount(
+        await book.reloadAccount(checking.id!),
       );
-    },
-  );
+      final equity = await book.accountWithRole(
+        LedgerSystemRole.openingBalanceEquity,
+      );
+      final draft = await book.endpoint.saveDraftJournal(
+        book.session,
+        book.entity.id!,
+        DateTime.utc(2026, 11),
+        [lines.debit(bank, 5000), lines.credit(equity, 5000)],
+      );
+      final first = book.newSession();
+      final second = book.newSession();
+
+      var succeeded = 0;
+      var rejected = 0;
+      await Future.wait([
+        for (final session in [first, second])
+          () async {
+            try {
+              await book.endpoint.postJournal(session, draft.id!);
+              succeeded++;
+            } on ValidationException {
+              rejected++;
+            }
+          }(),
+      ]);
+
+      expect(succeeded, 1);
+      expect(rejected, 1);
+      final stored = (await Journal.db.findById(book.session, draft.id!))!;
+      expect(stored.status, JournalStatus.posted);
+      final events = await book.endpoint.listAuditEvents(
+        book.session,
+        book.entity.id!,
+      );
+      expect(
+        events.where((event) => event.action == AuditAction.journalPosted),
+        hasLength(1),
+      );
+    });
+
+    test('then concurrent reversals create one mirror journal', () async {
+      final book = await LedgerTestBook.create(server);
+      final checking = await book.addAccount();
+      await book.enable();
+      final lines = LedgerLineBuilder(book.baseCurrency);
+      final bank = await book.linkedAccount(
+        await book.reloadAccount(checking.id!),
+      );
+      final equity = await book.accountWithRole(
+        LedgerSystemRole.openingBalanceEquity,
+      );
+      final original = await book.post(DateTime.utc(2026, 11), [
+        lines.debit(bank, 5000),
+        lines.credit(equity, 5000),
+      ]);
+      final first = book.newSession();
+      final second = book.newSession();
+
+      var succeeded = 0;
+      var rejected = 0;
+      await Future.wait([
+        for (final session in [first, second])
+          () async {
+            try {
+              await book.endpoint.reverseJournal(
+                session,
+                original.id!,
+                DateTime.utc(2026, 11, 2),
+              );
+              succeeded++;
+            } on ValidationException {
+              rejected++;
+            }
+          }(),
+      ]);
+
+      expect(succeeded, 1);
+      expect(rejected, 1);
+      final reversals = await Journal.db.find(
+        book.session,
+        where: (j) => j.reversalOfJournalId.equals(original.id),
+      );
+      expect(reversals, hasLength(1));
+      final refetched = (await Journal.db.findById(
+        book.session,
+        original.id!,
+      ))!;
+      expect(refetched.status, JournalStatus.reversed);
+      final trial = await book.endpoint.trialBalance(
+        book.session,
+        book.entity.id!,
+        DateTime.utc(2026, 11, 3),
+      );
+      expect(trial.totalDebitMinor, 10000);
+      expect(trial.totalCreditMinor, 10000);
+      expect(
+        trial.rows.fold<int>(0, (sum, row) => sum + row.netMinor),
+        0,
+      );
+    });
+
+    test(
+      'then a lock committed under the entity lock rejects a waiting post',
+      () async {
+        final book = await LedgerTestBook.create(server);
+        final checking = await book.addAccount();
+        await book.enable();
+        final lines = LedgerLineBuilder(book.baseCurrency);
+        final bank = await book.linkedAccount(
+          await book.reloadAccount(checking.id!),
+        );
+        final equity = await book.accountWithRole(
+          LedgerSystemRole.openingBalanceEquity,
+        );
+        final draft = await book.endpoint.saveDraftJournal(
+          book.session,
+          book.entity.id!,
+          DateTime.utc(2026, 11, 3),
+          [lines.debit(bank, 5000), lines.credit(equity, 5000)],
+        );
+        final locker = book.newSession();
+        final poster = book.newSession();
+
+        late Future<Journal> postFuture;
+        await locker.db.transaction((transaction) async {
+          await EntityAccess.requireOwned(
+            locker,
+            book.entity.id!,
+            transaction: transaction,
+            lock: true,
+          );
+          await LedgerPeriodLock.db.insertRow(
+            locker,
+            LedgerPeriodLock(
+              entityId: book.entity.id!,
+              lockDate: DateTime.utc(2026, 11, 3),
+              setBy: book.userId,
+              setAt: DateTime.now().toUtc(),
+            ),
+            transaction: transaction,
+          );
+          postFuture = book.endpoint.postJournal(poster, draft.id!);
+          await Future<void>.delayed(const Duration(milliseconds: 250));
+        });
+
+        await expectLater(
+          postFuture,
+          throwsA(isA<ValidationException>()),
+        );
+        final stored = (await Journal.db.findById(book.session, draft.id!))!;
+        expect(stored.status, JournalStatus.draft);
+        final lock = await book.endpoint.getLockDate(
+          book.session,
+          book.entity.id!,
+        );
+        expect(lock!.lockDate, DateTime.utc(2026, 11, 3));
+        final events = await book.endpoint.listAuditEvents(
+          book.session,
+          book.entity.id!,
+        );
+        expect(
+          events.where((event) => event.action == AuditAction.journalPosted),
+          isEmpty,
+        );
+      },
+    );
+
+    test('then concurrent lock writers keep one lock row', () async {
+      final book = await LedgerTestBook.create(server);
+      await book.enable();
+      final first = book.newSession();
+      final second = book.newSession();
+
+      await Future.wait([
+        book.endpoint.setLockDate(
+          first,
+          book.entity.id!,
+          DateTime.utc(2026, 10, 31),
+        ),
+        book.endpoint.setLockDate(
+          second,
+          book.entity.id!,
+          DateTime.utc(2026, 11, 30),
+        ),
+      ]);
+
+      final locks = await LedgerPeriodLock.db.find(
+        book.session,
+        where: (l) => l.entityId.equals(book.entity.id),
+      );
+      expect(locks, hasLength(1));
+      final events = await book.endpoint.listAuditEvents(
+        book.session,
+        book.entity.id!,
+      );
+      expect(
+        events.where((event) => event.action == AuditAction.lockSet),
+        hasLength(2),
+      );
+    });
+  });
 }

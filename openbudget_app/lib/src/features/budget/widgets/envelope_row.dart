@@ -2,34 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// One envelope row of the plan list. Every figure comes from the server's
+/// [EnvelopeMonthView]; the envelope itself only supplies identity.
 class EnvelopeRow extends HookConsumerWidget {
   const EnvelopeRow({
-    required this.envelope,
+    required this.monthEnvelope,
     required this.currencyCode,
     required this.onTap,
     required this.onLongPress,
-    this.monthlyData,
     this.onQuickBudget,
-    this.goal,
     this.hideAmounts = false,
     this.hideProgressBars = false,
     this.isSelected = false,
     super.key,
   });
 
-  final Envelope envelope;
+  final EnvelopeMonthView monthEnvelope;
   final String currencyCode;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
-  final MonthlyEnvelopeData? monthlyData;
   final VoidCallback? onQuickBudget;
-  final EnvelopeGoal? goal;
   final bool hideAmounts;
   final bool hideProgressBars;
   final bool isSelected;
@@ -39,11 +36,13 @@ class EnvelopeRow extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
     final theme = Theme.of(context);
-    final budgeted =
-        monthlyData?.allocatedCents ?? envelope.budgetedAmountCents;
-    final spent = monthlyData?.spentCents ?? envelope.spentAmountCents;
-    final available = monthlyData?.availableCents ?? (budgeted - spent);
-    final carryover = monthlyData?.carryoverCents ?? 0;
+    final envelope = monthEnvelope.envelope;
+
+    final allocated = monthEnvelope.allocatedMinor;
+    final spent = monthEnvelope.activityMinor.abs();
+    final available = monthEnvelope.availableMinor;
+    final carryover = monthEnvelope.carryoverMinor;
+    final goal = monthEnvelope.goal;
     final balanceStyle = ref.watch(balanceStyleProvider);
     final isOverspent = available < 0;
     final amountTone = isOverspent
@@ -55,16 +54,14 @@ class EnvelopeRow extends HookConsumerWidget {
         balanceStyle == BalanceStyle.differentiateWithoutColor &&
         available != 0;
 
-    final fraction = _fractionFor(
-      goal: goal,
-      budgetedCents: budgeted,
-      spentCents: spent,
-      availableCents: available,
-    );
+    final presentation = goalPresentation(monthEnvelope: monthEnvelope);
+    final fraction = goal != null
+        ? presentation.progress
+        : allocated <= 0
+        ? 0.0
+        : (spent / allocated).clamp(0.0, 1.0);
     final progressPercent = (fraction * 100).round();
-    final underfunded = goal == null
-        ? 0
-        : _underfundedFor(goal!, budgeted, available);
+    final underfunded = presentation.underfundedMinor;
     final (statusLabel, statusTone) = isOverspent
         ? (l10n.budgetStatusOverspent, ObTone.overspent)
         : goal != null && underfunded > 0
@@ -118,7 +115,7 @@ class EnvelopeRow extends HookConsumerWidget {
                               envelope.name,
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: (envelope.isHidden ?? false)
+                                color: envelope.isHidden
                                     ? palette.mutedInk
                                     : palette.ink,
                               ),
@@ -131,7 +128,7 @@ class EnvelopeRow extends HookConsumerWidget {
                               message: l10n.envelopeCarryover(
                                 hideAmounts
                                     ? hiddenAmountPlaceholder
-                                    : formatCentsForCode(
+                                    : formatMinorForCode(
                                         carryover,
                                         currencyCode,
                                       ),
@@ -190,7 +187,7 @@ class EnvelopeRow extends HookConsumerWidget {
                                   l10n.envelopeUnderfunded(
                                     hideAmounts
                                         ? hiddenAmountPlaceholder
-                                        : formatCentsForCode(
+                                        : formatMinorForCode(
                                             underfunded,
                                             currencyCode,
                                           ),
@@ -237,7 +234,7 @@ class EnvelopeRow extends HookConsumerWidget {
                         ObAmount(
                           hideAmounts
                               ? hiddenAmountPlaceholder
-                              : formatCentsForCode(available, currencyCode),
+                              : formatMinorForCode(available, currencyCode),
                           tone: amountTone,
                           style: theme.textTheme.titleSmall,
                         ),
@@ -271,31 +268,4 @@ class EnvelopeRow extends HookConsumerWidget {
       ),
     );
   }
-
-  double _fractionFor({
-    required EnvelopeGoal? goal,
-    required int budgetedCents,
-    required int spentCents,
-    required int availableCents,
-  }) {
-    if (goal != null) {
-      return computeFundingProgress(
-        goal: goal,
-        budgetedCents: budgetedCents,
-        availableCents: availableCents,
-      );
-    }
-    if (budgetedCents <= 0) return 0;
-    return spentCents / budgetedCents;
-  }
-
-  int _underfundedFor(
-    EnvelopeGoal goal,
-    int budgetedCents,
-    int availableCents,
-  ) => computeUnderfundedCents(
-    goal: goal,
-    budgetedCents: budgetedCents,
-    availableCents: availableCents,
-  );
 }

@@ -4,27 +4,22 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/multi_month_comparison_provider.dart';
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
-import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// Months side by side, written as one wide hand-ruled table.
 class MultiMonthComparisonScreen extends HookConsumerWidget {
-  const MultiMonthComparisonScreen({required this.budgetId, super.key});
+  const MultiMonthComparisonScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final monthCount = useState(3);
-    final converter = ref
-        .watch(displayCurrencyConverterProvider(budgetId))
-        .asData
-        ?.value;
 
     final comparisonAsync = ref.watch(
-      multiMonthComparisonProvider(budgetId, monthCount: monthCount.value),
+      multiMonthComparisonProvider(entityId, monthCount: monthCount.value),
     );
 
     return Scaffold(
@@ -58,9 +53,8 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
           ],
         ),
         data: (comparison) {
-          final sourceCurrency = comparison.budget.currencyCode;
-
-          if (comparison.categories.isEmpty) {
+          if (comparison.categories.isEmpty &&
+              comparison.uncategorisedMonthlyActivityMinor.isEmpty) {
             return ListView(
               padding: const EdgeInsets.all(SpacingTokens.md),
               children: [
@@ -75,8 +69,7 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
 
           return _ComparisonTable(
             comparison: comparison,
-            sourceCurrency: sourceCurrency,
-            converter: converter,
+            currencyCode: comparison.currencyCode,
           );
         },
       ),
@@ -90,13 +83,11 @@ const double _monthColumnWidth = 112;
 class _ComparisonTable extends HookWidget {
   const _ComparisonTable({
     required this.comparison,
-    required this.sourceCurrency,
-    required this.converter,
+    required this.currencyCode,
   });
 
   final MultiMonthComparison comparison;
-  final String sourceCurrency;
-  final DisplayCurrencyConverter? converter;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context) {
@@ -105,13 +96,8 @@ class _ComparisonTable extends HookWidget {
     final palette = theme.ob;
     final scrollController = useScrollController();
     final months = comparison.months;
-    final monthKeys = months.map((m) => '${m.year}-${m.month}').toList();
-    String format(int cents) =>
-        converter?.formatAmount(
-          amountCents: cents,
-          currencyCode: sourceCurrency,
-        ) ??
-        formatCentsForCode(cents, sourceCurrency);
+    final monthKeys = months.map((m) => m.month).toList();
+    String format(int minor) => formatMinorForCode(minor, currencyCode);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(SpacingTokens.md),
@@ -184,7 +170,7 @@ class _ComparisonTable extends HookWidget {
                         SizedBox(
                           width: _monthColumnWidth,
                           child: ObAmount(
-                            format(month.totalSpentCents),
+                            format(month.totalActivityMinor.abs()),
                             style: theme.textTheme.bodyMedium,
                             textAlign: TextAlign.end,
                           ),
@@ -221,7 +207,7 @@ class _ComparisonTable extends HookWidget {
                         SizedBox(
                           width: _monthColumnWidth,
                           child: ObAmount(
-                            format(category.monthTotals[key]?[1] ?? 0),
+                            format(category.monthlyActivityMinor[key] ?? 0),
                             style: theme.textTheme.bodyMedium,
                             textAlign: TextAlign.end,
                           ),
@@ -257,7 +243,7 @@ class _ComparisonTable extends HookWidget {
                           SizedBox(
                             width: _monthColumnWidth,
                             child: ObAmount(
-                              format(envelope.monthData[key]?[1] ?? 0),
+                              format(envelope.monthlyActivityMinor[key] ?? 0),
                               style: theme.textTheme.bodySmall,
                               textAlign: TextAlign.end,
                             ),
@@ -265,6 +251,45 @@ class _ComparisonTable extends HookWidget {
                       ],
                     ),
                   ),
+              ],
+              if (comparison.uncategorisedMonthlyActivityMinor.isNotEmpty) ...[
+                if (comparison.categories.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: SpacingTokens.sm,
+                    ),
+                    child: Divider(height: 1, color: palette.line),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.sm,
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: _categoryColumnWidth,
+                        child: Text(
+                          l10n.reportsUncategorised,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall,
+                        ),
+                      ),
+                      for (final key in monthKeys)
+                        SizedBox(
+                          width: _monthColumnWidth,
+                          child: ObAmount(
+                            format(
+                              comparison
+                                      .uncategorisedMonthlyActivityMinor[key] ??
+                                  0,
+                            ),
+                            style: theme.textTheme.bodyMedium,
+                            textAlign: TextAlign.end,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ],
             ],
           ),
@@ -274,8 +299,11 @@ class _ComparisonTable extends HookWidget {
   }
 
   String _monthColumnLabel(AppLocalizations l10n, MonthColumn month) {
-    final name = reportMonthAxisLabel(l10n, month.month);
-    final year = (month.year % 100).toString().padLeft(2, '0');
+    final name = reportYyyymmAxisLabel(l10n, month.month);
+    final year = (monthKeyParts(month.month).year % 100).toString().padLeft(
+      2,
+      '0',
+    );
     return "$name '$year";
   }
 }

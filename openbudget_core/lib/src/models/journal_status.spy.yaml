@@ -1,0 +1,7 @@
+### Where a journal is in its lifecycle.
+enum: JournalStatus
+serialized: byName
+values:
+  - draft
+  - posted
+  - reversed

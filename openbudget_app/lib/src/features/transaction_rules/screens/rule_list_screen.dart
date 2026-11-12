@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_actions_provider.dart';
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_list_provider.dart';
@@ -17,17 +17,17 @@ enum RuleViewFilter { all, enabled, disabled }
 const ruleListEmptyKey = Key('rule-list-empty');
 
 class RuleListScreen extends HookConsumerWidget {
-  const RuleListScreen({required this.budgetId, super.key});
+  const RuleListScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final viewFilter = useState(RuleViewFilter.all);
-    final rulesAsync = ref.watch(ruleListProvider(budgetId));
-    final payeesAsync = ref.watch(payeeListProvider(budgetId));
-    final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
+    final rulesAsync = ref.watch(ruleListProvider(entityId));
+    final payeesAsync = ref.watch(payeeListProvider(entityId));
+    final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
 
     // Build lookup maps.
     final payeeNames = <String, String>{};
@@ -39,12 +39,13 @@ class RuleListScreen extends HookConsumerWidget {
     }
 
     final envelopeNames = <String, String>{};
-    if (summaryAsync.hasValue) {
-      for (final catEnv in summaryAsync.value!.categories) {
-        for (final envelope in catEnv.envelopes) {
-          final id = envelope.id?.toString();
+    if (groupsAsync.hasValue) {
+      for (final group in groupsAsync.value!) {
+        for (final envelopeView in group.envelopes) {
+          final id = envelopeView.envelope.id?.toString();
           if (id != null) {
-            envelopeNames[id] = '${catEnv.category.name} / ${envelope.name}';
+            envelopeNames[id] =
+                '${group.category.name} / ${envelopeView.envelope.name}';
           }
         }
       }
@@ -55,8 +56,10 @@ class RuleListScreen extends HookConsumerWidget {
         leading: IconButton(
           icon: const SkribbleIcon(data: OpenBudgetIcons.back),
           tooltip: l10n.transactionsBack,
-          onPressed: () =>
-              context.goNamed(moreRoute, pathParameters: {'id': budgetId}),
+          onPressed: () => context.goNamed(
+            moreRoute,
+            pathParameters: {'entityId': entityId},
+          ),
         ),
         title: Text(l10n.transactionRulesTitle),
       ),
@@ -77,7 +80,7 @@ class RuleListScreen extends HookConsumerWidget {
               message: error.toString(),
               action: ObStateAction(
                 label: l10n.homeRetry,
-                onPressed: () => ref.invalidate(ruleListProvider(budgetId)),
+                onPressed: () => ref.invalidate(ruleListProvider(entityId)),
               ),
             ),
           ),
@@ -160,7 +163,7 @@ class RuleListScreen extends HookConsumerWidget {
                     payeeNames[rule.payeeId.toString()] ??
                     l10n.transactionsUnknownPayee;
                 final envelopeName =
-                    envelopeNames[rule.targetEnvelopeId.toString()] ??
+                    envelopeNames[rule.envelopeId.toString()] ??
                     l10n.transactionsUnknownEnvelope;
                 return _RuleTile(
                   payeeName: payeeName,
@@ -192,7 +195,7 @@ class RuleListScreen extends HookConsumerWidget {
     try {
       await ref
           .read(ruleActionsProvider.notifier)
-          .toggleRule(ruleId: ruleId, enabled: enabled, budgetId: budgetId);
+          .toggleRule(ruleId: ruleId, enabled: enabled, entityId: entityId);
     } on Exception catch (_) {
       if (!context.mounted) return;
       showAppToast(
@@ -237,7 +240,7 @@ class RuleListScreen extends HookConsumerWidget {
     try {
       await ref
           .read(ruleActionsProvider.notifier)
-          .deleteRule(ruleId: ruleId, budgetId: budgetId);
+          .deleteRule(ruleId: ruleId, entityId: entityId);
       if (!context.mounted) return;
       showAppToast(
         context,
@@ -257,7 +260,7 @@ class RuleListScreen extends HookConsumerWidget {
   Future<void> _showAddRuleDialog(BuildContext context, WidgetRef ref) async {
     final result = await showDialog<_AddRuleResult>(
       context: context,
-      builder: (ctx) => _AddRuleDialog(budgetId: budgetId),
+      builder: (ctx) => _AddRuleDialog(entityId: entityId),
     );
 
     if (result == null || !context.mounted) return;
@@ -268,7 +271,7 @@ class RuleListScreen extends HookConsumerWidget {
       await ref
           .read(ruleActionsProvider.notifier)
           .createRule(
-            budgetId: budgetId,
+            entityId: entityId,
             payeeId: result.payeeId,
             targetEnvelopeId: result.envelopeId,
           );
@@ -551,16 +554,16 @@ class _AddRuleResult {
 }
 
 class _AddRuleDialog extends HookConsumerWidget {
-  const _AddRuleDialog({required this.budgetId});
+  const _AddRuleDialog({required this.entityId});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
-    final payeesAsync = ref.watch(payeeListProvider(budgetId));
-    final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
+    final payeesAsync = ref.watch(payeeListProvider(entityId));
+    final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
     final selectedPayeeId = useState<String?>(null);
     final selectedEnvelopeId = useState<String?>(null);
 
@@ -579,13 +582,15 @@ class _AddRuleDialog extends HookConsumerWidget {
 
     // Build envelope items.
     final envelopeItems = <DropdownMenuItem<String>>[];
-    if (summaryAsync.hasValue) {
-      for (final catEnv in summaryAsync.value!.categories) {
-        for (final envelope in catEnv.envelopes) {
+    if (groupsAsync.hasValue) {
+      for (final group in groupsAsync.value!) {
+        for (final envelopeView in group.envelopes) {
           envelopeItems.add(
             DropdownMenuItem<String>(
-              value: envelope.id?.toString() ?? '',
-              child: Text('${catEnv.category.name} / ${envelope.name}'),
+              value: envelopeView.envelope.id?.toString() ?? '',
+              child: Text(
+                '${group.category.name} / ${envelopeView.envelope.name}',
+              ),
             ),
           );
         }

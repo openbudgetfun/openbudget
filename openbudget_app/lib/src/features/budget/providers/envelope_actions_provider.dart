@@ -1,11 +1,13 @@
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'envelope_actions_provider.g.dart';
 
+/// Envelope writes: create, edit, hide, reorder and delete. Deleting an
+/// envelope with history asks which envelope to move it to; allocations and
+/// goals are plan data, edited through `budget.*` elsewhere.
 @Riverpod(keepAlive: true)
 class EnvelopeActions extends _$EnvelopeActions {
   @override
@@ -14,23 +16,20 @@ class EnvelopeActions extends _$EnvelopeActions {
   Future<Envelope> createEnvelope({
     required String name,
     required String categoryId,
-    required int budgetedAmountCents,
-    required String currencyCode,
-    required String budgetId,
+    String? note,
+    String? taxCategoryCode,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
       final envelope = await client.envelope.create(
-        name,
         UuidValue.fromString(categoryId),
-        budgetedAmountCents,
-        currencyCode,
+        name,
+        note: note,
+        taxCategoryCode: taxCategoryCode,
       );
       if (ref.mounted) {
-        ref
-          ..invalidate(envelopeListProvider(categoryId))
-          ..invalidate(budgetSummaryProvider(budgetId));
+        ref.invalidate(budgetMonthGroupsProvider);
         state = const AsyncValue.data(null);
       }
       return envelope;
@@ -45,11 +44,12 @@ class EnvelopeActions extends _$EnvelopeActions {
   Future<void> updateEnvelope({
     required String envelopeId,
     required String categoryId,
-    required String budgetId,
+    required String entityId,
     String? name,
-    int? budgetedAmountCents,
-    int? spentAmountCents,
     String? note,
+    bool? isHidden,
+    String? taxCategoryCode,
+    bool clearTaxCategoryCode = false,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
@@ -57,14 +57,16 @@ class EnvelopeActions extends _$EnvelopeActions {
       await client.envelope.update(
         UuidValue.fromString(envelopeId),
         name: name,
-        budgetedAmountCents: budgetedAmountCents,
-        spentAmountCents: spentAmountCents,
+        categoryId: UuidValue.fromString(categoryId),
         note: note,
+        isHidden: isHidden,
+        taxCategoryCode: taxCategoryCode,
+        clearTaxCategoryCode: clearTaxCategoryCode,
       );
       if (ref.mounted) {
         ref
-          ..invalidate(envelopeListProvider(categoryId))
-          ..invalidate(budgetSummaryProvider(budgetId));
+          ..invalidate(budgetMonthGroupsProvider)
+          ..invalidate(budgetMonthProvider);
         state = const AsyncValue.data(null);
       }
     } on Exception catch (e, st) {
@@ -76,8 +78,7 @@ class EnvelopeActions extends _$EnvelopeActions {
 
   Future<void> toggleHidden({
     required String envelopeId,
-    required String categoryId,
-    required String budgetId,
+    required String entityId,
     required bool isHidden,
   }) async {
     state = const AsyncValue.loading();
@@ -89,9 +90,8 @@ class EnvelopeActions extends _$EnvelopeActions {
       );
       if (ref.mounted) {
         ref
-          ..invalidate(envelopeListProvider(categoryId))
-          ..invalidate(budgetSummaryProvider(budgetId))
-          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+          ..invalidate(budgetMonthGroupsProvider)
+          ..invalidate(budgetMonthProvider);
         state = const AsyncValue.data(null);
       }
     } on Exception catch (e, st) {
@@ -103,67 +103,39 @@ class EnvelopeActions extends _$EnvelopeActions {
 
   Future<void> reorderEnvelopes({
     required String categoryId,
-    required String budgetId,
     required List<String> envelopeIds,
   }) async {
     final client = ref.read(serverpodClientProvider);
-    final categoryUuid = UuidValue.fromString(categoryId);
-    await client.envelope.reorder(categoryUuid, envelopeIds);
+    await client.envelope.reorder(
+      UuidValue.fromString(categoryId),
+      envelopeIds.map(UuidValue.fromString).toList(),
+    );
     if (ref.mounted) {
-      ref
-        ..invalidate(envelopeListProvider(categoryId))
-        ..invalidate(budgetSummaryProvider(budgetId));
+      ref.invalidate(budgetMonthGroupsProvider);
     }
   }
 
-  Future<Envelope> deleteEnvelope({
+  /// Deletes an envelope. When its history must survive, the caller passes
+  /// [reassignToEnvelopeId]; the server refuses otherwise.
+  Future<void> deleteEnvelope({
     required String envelopeId,
-    required String categoryId,
-    required String budgetId,
+    String? reassignToEnvelopeId,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
-      final deleted = await client.envelope.delete(
+      await client.envelope.delete(
         UuidValue.fromString(envelopeId),
+        reassignToEnvelopeId: reassignToEnvelopeId == null
+            ? null
+            : UuidValue.fromString(reassignToEnvelopeId),
       );
       if (ref.mounted) {
         ref
-          ..invalidate(envelopeListProvider(categoryId))
-          ..invalidate(budgetSummaryProvider(budgetId));
+          ..invalidate(budgetMonthGroupsProvider)
+          ..invalidate(budgetMonthProvider);
         state = const AsyncValue.data(null);
       }
-      return deleted;
-    } on Exception catch (e, st) {
-      if (ref.mounted) {
-        state = AsyncValue.error(e, st);
-      }
-      rethrow;
-    }
-  }
-
-  /// Recreates a previously deleted envelope for undo support.
-  Future<Envelope> undoDeleteEnvelope({
-    required Envelope deletedEnvelope,
-    required String categoryId,
-    required String budgetId,
-  }) async {
-    state = const AsyncValue.loading();
-    final client = ref.read(serverpodClientProvider);
-    try {
-      final restored = await client.envelope.create(
-        deletedEnvelope.name,
-        UuidValue.fromString(categoryId),
-        deletedEnvelope.budgetedAmountCents,
-        deletedEnvelope.currencyCode,
-      );
-      if (ref.mounted) {
-        ref
-          ..invalidate(envelopeListProvider(categoryId))
-          ..invalidate(budgetSummaryProvider(budgetId));
-        state = const AsyncValue.data(null);
-      }
-      return restored;
     } on Exception catch (e, st) {
       if (ref.mounted) {
         state = AsyncValue.error(e, st);

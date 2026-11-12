@@ -40,10 +40,10 @@ final class UsTaxRules implements TaxRulePack {
   TaxYear taxYearFor(DateTime date) => taxYear(date.year);
 
   @override
-  List<TaxCategory> categoriesFor(TaxEntityKind kind) => switch (kind) {
-    TaxEntityKind.individual => usIndividualCategories,
-    TaxEntityKind.soleTrader => usScheduleCCategories,
-    TaxEntityKind.company => usCompanyCategories,
+  List<TaxCategory> categoriesFor(EntityKind kind) => switch (kind) {
+    EntityKind.individual => usIndividualCategories,
+    EntityKind.soleTrader => usScheduleCCategories,
+    EntityKind.company => usCompanyCategories,
   };
 
   @override
@@ -54,13 +54,13 @@ final class UsTaxRules implements TaxRulePack {
     _requireUsInput(input);
     final table = _tableFor(input.year.startYear);
     return switch (input.profile.entityKind) {
-      TaxEntityKind.individual => _individualReport(
+      EntityKind.individual => _individualReport(
         input,
         table,
         _filingStatus(input.profile),
       ),
-      TaxEntityKind.soleTrader => _soleTraderReport(input),
-      TaxEntityKind.company => _companyReport(input),
+      EntityKind.soleTrader => _soleTraderReport(input),
+      EntityKind.company => _companyReport(input),
     };
   }
 
@@ -69,13 +69,13 @@ final class UsTaxRules implements TaxRulePack {
     _requireUsInput(input);
     final table = _tableFor(input.year.startYear);
     return switch (input.profile.entityKind) {
-      TaxEntityKind.individual => _individualOpportunities(
+      EntityKind.individual => _individualOpportunities(
         input,
         report,
         table,
       ),
-      TaxEntityKind.company => _companyOpportunities(report),
-      TaxEntityKind.soleTrader => const [],
+      EntityKind.company => _companyOpportunities(report),
+      EntityKind.soleTrader => const [],
     };
   }
 
@@ -111,7 +111,7 @@ final class UsTaxRules implements TaxRulePack {
     ),
   };
 
-  _CategoryTotals _totalsFor(TaxInput input, TaxEntityKind kind) {
+  _CategoryTotals _totalsFor(TaxInput input, EntityKind kind) {
     final known = {for (final category in categoriesFor(kind)) category.code};
     final amounts = <String, int>{};
     final counts = <String, int>{};
@@ -154,7 +154,7 @@ final class UsTaxRules implements TaxRulePack {
       };
 
   _ScheduleCComputation _scheduleCComputation(TaxInput input) {
-    final totals = _totalsFor(input, TaxEntityKind.soleTrader);
+    final totals = _totalsFor(input, EntityKind.soleTrader);
     final amounts = Map<String, int>.of(totals.amounts);
     final rawHomeOffice = amounts['us.sch_c.home_office'] ?? 0;
     // The $1,500 cap applies to the simplified method only; the regular
@@ -197,7 +197,7 @@ final class UsTaxRules implements TaxRulePack {
   }
 
   _CompanyComputation _companyComputation(TaxInput input) {
-    final totals = _totalsFor(input, TaxEntityKind.company);
+    final totals = _totalsFor(input, EntityKind.company);
     final grossReceipts = totals['us.co.gross_receipts'];
     final returns = totals['us.co.returns_and_allowances'];
     final costOfGoodsSold = totals['us.co.cost_of_goods_sold'];
@@ -250,7 +250,7 @@ final class UsTaxRules implements TaxRulePack {
     };
     final status = profile.filingStatus;
     final year = input.year.startYear;
-    final totals = _totalsFor(input, TaxEntityKind.individual);
+    final totals = _totalsFor(input, EntityKind.individual);
     var linkedBusinessProfit = 0;
     var linkedBusinessWages = 0;
     var linkedBusinessUbia = 0;
@@ -258,7 +258,7 @@ final class UsTaxRules implements TaxRulePack {
     var linkedBusinessCount = 0;
     var linkedUncategorized = 0;
     for (final linked in input.linked) {
-      if (linked.profile.entityKind != TaxEntityKind.soleTrader ||
+      if (linked.profile.entityKind != EntityKind.soleTrader ||
           linked.profile.jurisdiction != TaxJurisdiction.us ||
           linked.year.startYear != input.year.startYear) {
         continue;
@@ -951,7 +951,7 @@ final class UsTaxRules implements TaxRulePack {
     ];
     return TaxReport(
       year: input.year,
-      entityKind: TaxEntityKind.individual,
+      entityKind: EntityKind.individual,
       lines: lines,
       liabilities: [
         if (computation.incomeTax > 0)
@@ -1054,7 +1054,7 @@ final class UsTaxRules implements TaxRulePack {
     ];
     return TaxReport(
       year: input.year,
-      entityKind: TaxEntityKind.soleTrader,
+      entityKind: EntityKind.soleTrader,
       lines: lines,
       liabilities: const [],
       alreadyPaidMinor: 0,
@@ -1118,7 +1118,7 @@ final class UsTaxRules implements TaxRulePack {
     ];
     return TaxReport(
       year: input.year,
-      entityKind: TaxEntityKind.company,
+      entityKind: EntityKind.company,
       lines: lines,
       liabilities: [
         if (computation.tax > 0)

@@ -39,8 +39,8 @@ class AgentMcpHandler {
   static const String allowedOriginsPassword = 'mcpAllowedOrigins';
 
   static const String instructions =
-      "These tools read the user's budgets and tax reports. Changes are "
-      'proposals the user applies in the OpenBudget app. Answers are '
+      "These tools read the user's entities, plans and tax reports. Changes "
+      'are proposals the user applies in the OpenBudget app. Answers are '
       'guidance, not regulated financial or tax advice.';
 
   final AgentToolRegistry registry;
@@ -198,6 +198,17 @@ class AgentMcpHandler {
       }
       return _error(200, id, -32602, 'Unknown tool "$toolName"');
     }
+
+    // The tools and every service they call read the caller's identity from
+    // the session. A valid access token stands in for its owner's session,
+    // so the MCP path sees exactly the authority the in-app assistant has.
+    session.updateAuthenticated(
+      AuthenticationInfo(
+        token.userId.toString(),
+        const {},
+        authId: 'agent-access-token:${token.id}',
+      ),
+    );
 
     final text = await registry.call(
       AgentToolContext(

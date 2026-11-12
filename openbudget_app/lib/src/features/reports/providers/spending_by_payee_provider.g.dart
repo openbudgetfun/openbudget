@@ -8,9 +8,14 @@ part of 'spending_by_payee_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Spending grouped by payee for one month, in base minor units, from one
+/// `report.spending` call with [ReportGrouping.payee].
 
 @ProviderFor(spendingByPayee)
 final spendingByPayeeProvider = SpendingByPayeeFamily._();
+
+/// Spending grouped by payee for one month, in base minor units, from one
+/// `report.spending` call with [ReportGrouping.payee].
 
 final class SpendingByPayeeProvider
     extends
@@ -22,9 +27,11 @@ final class SpendingByPayeeProvider
     with
         $FutureModifier<PayeeSpendingReport>,
         $FutureProvider<PayeeSpendingReport> {
+  /// Spending grouped by payee for one month, in base minor units, from one
+  /// `report.spending` call with [ReportGrouping.payee].
   SpendingByPayeeProvider._({
     required SpendingByPayeeFamily super.from,
-    required (String, int, int) super.argument,
+    required (String, int) super.argument,
   }) : super(
          retry: null,
          name: r'spendingByPayeeProvider',
@@ -51,8 +58,8 @@ final class SpendingByPayeeProvider
 
   @override
   FutureOr<PayeeSpendingReport> create(Ref ref) {
-    final argument = this.argument as (String, int, int);
-    return spendingByPayee(ref, argument.$1, argument.$2, argument.$3);
+    final argument = this.argument as (String, int);
+    return spendingByPayee(ref, argument.$1, argument.$2);
   }
 
   @override
@@ -66,13 +73,16 @@ final class SpendingByPayeeProvider
   }
 }
 
-String _$spendingByPayeeHash() => r'69e031091260249c680a0482ad09581e3aaf69bd';
+String _$spendingByPayeeHash() => r'594b2c919c7093e03ff8d7450df813d7336bb009';
+
+/// Spending grouped by payee for one month, in base minor units, from one
+/// `report.spending` call with [ReportGrouping.payee].
 
 final class SpendingByPayeeFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<PayeeSpendingReport>,
-          (String, int, int)
+          (String, int)
         > {
   SpendingByPayeeFamily._()
     : super(
@@ -83,8 +93,11 @@ final class SpendingByPayeeFamily extends $Family
         isAutoDispose: true,
       );
 
-  SpendingByPayeeProvider call(String budgetId, int year, int month) =>
-      SpendingByPayeeProvider._(argument: (budgetId, year, month), from: this);
+  /// Spending grouped by payee for one month, in base minor units, from one
+  /// `report.spending` call with [ReportGrouping.payee].
+
+  SpendingByPayeeProvider call(String entityId, int month) =>
+      SpendingByPayeeProvider._(argument: (entityId, month), from: this);
 
   @override
   String toString() => r'spendingByPayeeProvider';

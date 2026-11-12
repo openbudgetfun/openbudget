@@ -1,0 +1,13 @@
+### One envelope's amount in a budget template.
+class: BudgetTemplateLine
+table: budget_template_line
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  templateId: UuidValue, relation(parent=budget_template, onDelete=Cascade)
+  envelopeId: UuidValue, relation(parent=envelope, onDelete=Cascade)
+  ### Base-currency minor units.
+  allocatedMinor: int
+indexes:
+  budget_template_line_unique_idx:
+    fields: templateId, envelopeId
+    unique: true

@@ -1,0 +1,22 @@
+### Cached price of one on-chain asset.
+class: AssetPrice
+serverOnly: true
+table: asset_price
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  network: WalletNetwork
+  assetId: String
+  symbol: String?
+  ### ISO 4217 code of unitPrice (USD today).
+  currencyCode: String
+  ### Price of one whole token, exact decimal string.
+  unitPrice: String
+  source: PriceSource
+  fetchedAt: DateTime
+  expiresAt: DateTime
+indexes:
+  asset_price_network_asset_unique_idx:
+    fields: network, assetId
+    unique: true
+  asset_price_expires_idx:
+    fields: expiresAt

@@ -9,32 +9,33 @@ import 'package:openbudget_app/src/features/budget/providers/selected_month_prov
 import 'package:openbudget_app/src/features/budget/screens/auto_assign_dialog.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// The plan's month header: month navigation, Ready to Assign with a
+/// breakdown sheet, the month's totals and the assign actions. Every figure
+/// comes from the server's [BudgetMonthSummary].
 class BudgetHeader extends HookConsumerWidget {
   const BudgetHeader({
-    required this.readyToAssignCents,
+    required this.summary,
     required this.currencyCode,
-    required this.budgetId,
-    required this.year,
+    required this.entityId,
     required this.month,
-    this.totalOverspentCents = 0,
-    this.totalIncomeCents = 0,
-    this.totalBudgetedCents = 0,
-    this.totalActivityCents = 0,
+    this.totalOverspentMinor = 0,
     this.onCopyLastMonth,
     super.key,
   });
 
-  final int readyToAssignCents;
+  final BudgetMonthSummary summary;
   final String currencyCode;
-  final String budgetId;
-  final int year;
+  final String entityId;
+
+  /// The month being shown, as yyyymm.
   final int month;
-  final int totalOverspentCents;
-  final int totalIncomeCents;
-  final int totalBudgetedCents;
-  final int totalActivityCents;
+
+  /// This month's overspent total, computed from the envelope groups.
+  final int totalOverspentMinor;
   final VoidCallback? onCopyLastMonth;
 
   @override
@@ -42,11 +43,14 @@ class BudgetHeader extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final ageOfMoneyAsync = ref.watch(ageOfMoneyProvider(budgetId));
     final hideAmounts = ref.watch(hideAmountsProvider);
+    final ageOfMoney = ref.watch(ageOfMoneyProvider(entityId));
+    final year = month ~/ 100;
+    final calendarMonth = month % 100;
     final now = DateTime.now();
-    final isCurrentMonth = year == now.year && month == now.month;
-    final isOverspent = readyToAssignCents < 0;
+    final isCurrentMonth = month == MonthKey.fromDate(now);
+    final readyToAssign = summary.readyToAssignMinor;
+    final isOverspent = readyToAssign < 0;
     final materialLocalizations = MaterialLocalizations.of(context);
 
     return ObCard(
@@ -77,7 +81,7 @@ class BudgetHeader extends HookConsumerWidget {
                   ),
                   tooltip: materialLocalizations.previousMonthTooltip,
                   onPressed: () => ref
-                      .read(selectedMonthProvider(budgetId).notifier)
+                      .read(selectedMonthProvider(entityId).notifier)
                       .goToPreviousMonth(),
                   constraints: const BoxConstraints(
                     minWidth: 48,
@@ -89,8 +93,8 @@ class BudgetHeader extends HookConsumerWidget {
                     onTap: isCurrentMonth
                         ? null
                         : () => ref
-                              .read(selectedMonthProvider(budgetId).notifier)
-                              .setMonth(now.year, now.month),
+                              .read(selectedMonthProvider(entityId).notifier)
+                              .setMonth(MonthKey.fromDate(now)),
                     onLongPress: () => _showMonthPicker(context, ref, l10n),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -102,7 +106,7 @@ class BudgetHeader extends HookConsumerWidget {
                           Semantics(
                             header: true,
                             child: Text(
-                              '${_localizedMonth(l10n, month)} $year',
+                              '${_localizedMonth(l10n, calendarMonth)} $year',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: palette.ink,
@@ -135,7 +139,7 @@ class BudgetHeader extends HookConsumerWidget {
                   ),
                   tooltip: materialLocalizations.nextMonthTooltip,
                   onPressed: () => ref
-                      .read(selectedMonthProvider(budgetId).notifier)
+                      .read(selectedMonthProvider(entityId).notifier)
                       .goToNextMonth(),
                   constraints: const BoxConstraints(
                     minWidth: 48,
@@ -163,20 +167,48 @@ class BudgetHeader extends HookConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                ObAmount(
-                  hideAmounts
-                      ? hiddenAmountPlaceholder
-                      : formatCentsForCode(readyToAssignCents, currencyCode),
-                  highlighted: !isOverspent,
-                  tone: isOverspent ? ObTone.overspent : ObTone.neutral,
-                  style: theme.textTheme.headlineMedium,
+                InkWell(
+                  onTap: () => _showBreakdownSheet(context, hideAmounts),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: ObAmount(
+                          hideAmounts
+                              ? hiddenAmountPlaceholder
+                              : formatMinorForCode(readyToAssign, currencyCode),
+                          highlighted: !isOverspent,
+                          tone: isOverspent ? ObTone.overspent : ObTone.neutral,
+                          style: theme.textTheme.headlineMedium,
+                        ),
+                      ),
+                      const SizedBox(width: SpacingTokens.xs),
+                      SkribbleIcon(
+                        data: OpenBudgetIcons.chevronRight,
+                        size: 18,
+                        color: palette.mutedInk,
+                      ),
+                    ],
+                  ),
                 ),
+                Semantics(
+                  button: true,
+                  child: Text(
+                    l10n.budgetBreakdownHint,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: palette.mutedInk,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: SpacingTokens.sm),
+                _AgeOfMoneyStat(ageOfMoney: ageOfMoney),
               ],
             ),
           ),
-          if (totalIncomeCents != 0 ||
-              totalBudgetedCents != 0 ||
-              totalActivityCents != 0) ...[
+          if (summary.incomeMinor != 0 ||
+              summary.allocatedMinor != 0 ||
+              summary.activityMinor != 0) ...[
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: SpacingTokens.md,
@@ -189,7 +221,10 @@ class BudgetHeader extends HookConsumerWidget {
                       label: l10n.budgetTotalIncome,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCentsForCode(totalIncomeCents, currencyCode),
+                          : formatMinorForCode(
+                              summary.incomeMinor,
+                              currencyCode,
+                            ),
                       tone: ObTone.funded,
                     ),
                   ),
@@ -198,8 +233,8 @@ class BudgetHeader extends HookConsumerWidget {
                       label: l10n.budgetTotalBudgeted,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCentsForCode(
-                              totalBudgetedCents,
+                          : formatMinorForCode(
+                              summary.allocatedMinor,
                               currencyCode,
                             ),
                     ),
@@ -209,11 +244,11 @@ class BudgetHeader extends HookConsumerWidget {
                       label: l10n.budgetTotalActivity,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCentsForCode(
-                              -totalActivityCents,
+                          : formatMinorForCode(
+                              -summary.activityMinor,
                               currencyCode,
                             ),
-                      tone: totalActivityCents > 0
+                      tone: summary.activityMinor > 0
                           ? ObTone.overspent
                           : ObTone.funded,
                     ),
@@ -222,7 +257,7 @@ class BudgetHeader extends HookConsumerWidget {
               ),
             ),
           ],
-          if (totalOverspentCents > 0)
+          if (totalOverspentMinor > 0)
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 SpacingTokens.md,
@@ -253,8 +288,8 @@ class BudgetHeader extends HookConsumerWidget {
                         l10n.budgetOverspentWarning(
                           hideAmounts
                               ? hiddenAmountPlaceholder
-                              : formatCentsForCode(
-                                  totalOverspentCents,
+                              : formatMinorForCode(
+                                  totalOverspentMinor,
                                   currencyCode,
                                 ),
                         ),
@@ -279,7 +314,7 @@ class BudgetHeader extends HookConsumerWidget {
               spacing: SpacingTokens.sm,
               runSpacing: SpacingTokens.xs,
               children: [
-                if (readyToAssignCents > 0)
+                if (readyToAssign > 0)
                   FilledButton.icon(
                     onPressed: () => _showAutoAssignDialog(context),
                     icon: SkribbleIcon(
@@ -302,34 +337,98 @@ class BudgetHeader extends HookConsumerWidget {
               ],
             ),
           ),
-          if (ageOfMoneyAsync.hasValue && ageOfMoneyAsync.value != null) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                SpacingTokens.md,
-                0,
-                SpacingTokens.md,
-                SpacingTokens.md,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SkribbleIcon(
-                    data: OpenBudgetIcons.ageOfMoney,
-                    size: 16,
-                    color: palette.mutedInk,
-                  ),
-                  const SizedBox(width: SpacingTokens.xs),
-                  Text(
-                    l10n.ageOfMoneyLabel(ageOfMoneyAsync.value!),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: palette.mutedInk,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
         ],
+      ),
+    );
+  }
+
+  /// The Ready to Assign breakdown: every field of the month summary.
+  /// "Exchange-rate difference" only appears when it is non-zero.
+  void _showBreakdownSheet(BuildContext context, bool hideAmounts) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    String amount(int minor) => hideAmounts
+        ? hiddenAmountPlaceholder
+        : formatMinorForCode(minor, currencyCode);
+
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        showDragHandle: true,
+        builder: (sheetContext) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              0,
+              SpacingTokens.md,
+              SpacingTokens.md,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.budgetBreakdownTitle,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: palette.ink,
+                  ),
+                ),
+                const SizedBox(height: SpacingTokens.sm),
+                _BreakdownRow(
+                  label: l10n.budgetTotalIncome,
+                  value: amount(summary.incomeMinor),
+                  tone: ObTone.funded,
+                ),
+                _BreakdownRow(
+                  label: l10n.budgetBreakdownUncategorised,
+                  value: amount(-summary.uncategorizedMinor),
+                  tone: summary.uncategorizedMinor != 0
+                      ? ObTone.underfunded
+                      : ObTone.neutral,
+                ),
+                if (summary.fxDifferenceMinor != 0)
+                  _BreakdownRow(
+                    label: l10n.budgetBreakdownFxDifference,
+                    value: amount(summary.fxDifferenceMinor),
+                  ),
+                _BreakdownRow(
+                  label: l10n.budgetTotalBudgeted,
+                  value: amount(-summary.allocatedMinor),
+                ),
+                _BreakdownRow(
+                  label: l10n.budgetTotalActivity,
+                  value: amount(-summary.activityMinor),
+                ),
+                _BreakdownRow(
+                  label: l10n.budgetBreakdownOverspentLastMonth,
+                  value: amount(-summary.overspentLastMonthMinor),
+                  tone: summary.overspentLastMonthMinor > 0
+                      ? ObTone.overspent
+                      : ObTone.neutral,
+                ),
+                _BreakdownRow(
+                  label: l10n.budgetBreakdownAssignedInFuture,
+                  value: amount(-summary.assignedInFutureMinor),
+                ),
+                const Divider(),
+                _BreakdownRow(
+                  label: l10n.budgetBreakdownAvailable,
+                  value: amount(summary.availableMinor),
+                ),
+                _BreakdownRow(
+                  label: l10n.budgetReadyToAssign,
+                  value: amount(summary.readyToAssignMinor),
+                  tone: summary.readyToAssignMinor < 0
+                      ? ObTone.overspent
+                      : ObTone.funded,
+                  emphasized: true,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -355,7 +454,7 @@ class BudgetHeader extends HookConsumerWidget {
       showDialog<void>(
         context: context,
         builder: (_) =>
-            AutoAssignDialog(budgetId: budgetId, currencyCode: currencyCode),
+            AutoAssignDialog(entityId: entityId, currencyCode: currencyCode),
       ),
     );
   }
@@ -370,15 +469,13 @@ class BudgetHeader extends HookConsumerWidget {
       showDialog<void>(
         context: context,
         builder: (ctx) => _MonthPickerDialog(
-          currentYear: year,
           currentMonth: month,
-          todayYear: now.year,
-          todayMonth: now.month,
+          todayMonth: MonthKey.fromDate(now),
           l10n: l10n,
-          onSelect: (selectedYear, selectedMonth) {
+          onSelect: (selectedMonth) {
             ref
-                .read(selectedMonthProvider(budgetId).notifier)
-                .setMonth(selectedYear, selectedMonth);
+                .read(selectedMonthProvider(entityId).notifier)
+                .setMonth(selectedMonth);
             Navigator.of(ctx).pop();
           },
         ),
@@ -387,29 +484,70 @@ class BudgetHeader extends HookConsumerWidget {
   }
 }
 
+/// The age of money stat. Null from the server means there is not enough
+/// history for a figure yet, which the header says plainly.
+class _AgeOfMoneyStat extends HookWidget {
+  const _AgeOfMoneyStat({required this.ageOfMoney});
+
+  final AsyncValue<int?> ageOfMoney;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    if (ageOfMoney.isLoading || ageOfMoney.hasError) {
+      return const SizedBox.shrink();
+    }
+
+    final days = ageOfMoney.value;
+    final color = days == null ? palette.mutedInk : palette.brand;
+    final label = days == null
+        ? l10n.budgetAgeOfMoneyEmpty
+        : l10n.ageOfMoneyLabel(days);
+
+    return Tooltip(
+      message: l10n.reportsAgeOfMoneyHint,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SkribbleIcon(
+            data: OpenBudgetIcons.schedule,
+            size: 14,
+            color: color,
+          ),
+          const SizedBox(width: SpacingTokens.xs),
+          Flexible(
+            child: Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(color: color),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _MonthPickerDialog extends HookWidget {
   const _MonthPickerDialog({
-    required this.currentYear,
     required this.currentMonth,
-    required this.todayYear,
     required this.todayMonth,
     required this.l10n,
     required this.onSelect,
   });
 
-  final int currentYear;
   final int currentMonth;
-  final int todayYear;
   final int todayMonth;
   final AppLocalizations l10n;
-  final void Function(int year, int month) onSelect;
+  final void Function(int month) onSelect;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final palette = theme.ob;
     final materialLocalizations = MaterialLocalizations.of(context);
-    final displayYear = useState(currentYear);
+    final displayYear = useState(currentMonth ~/ 100);
 
     final months = [
       l10n.budgetMonthJanuary,
@@ -475,11 +613,11 @@ class _MonthPickerDialog extends HookWidget {
               ),
               itemCount: 12,
               itemBuilder: (ctx, index) {
-                final m = index + 1;
-                final isSelected =
-                    displayYear.value == currentYear && m == currentMonth;
-                final isToday =
-                    displayYear.value == todayYear && m == todayMonth;
+                final m = MonthKey.fromDate(
+                  DateTime.utc(displayYear.value, index + 1),
+                );
+                final isSelected = m == currentMonth;
+                final isToday = m == todayMonth;
 
                 return Semantics(
                   selected: isSelected,
@@ -488,7 +626,7 @@ class _MonthPickerDialog extends HookWidget {
                     type: MaterialType.transparency,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(8),
-                      onTap: () => onSelect(displayYear.value, m),
+                      onTap: () => onSelect(m),
                       child: DecoratedBox(
                         decoration: ObRoughDecoration(
                           color: isSelected || isToday
@@ -568,6 +706,49 @@ class _SummaryColumn extends HookWidget {
           style: theme.textTheme.bodyMedium,
         ),
       ],
+    );
+  }
+}
+
+class _BreakdownRow extends HookWidget {
+  const _BreakdownRow({
+    required this.label,
+    required this.value,
+    this.tone = ObTone.neutral,
+    this.emphasized = false,
+  });
+
+  final String label;
+  final String value;
+  final ObTone tone;
+  final bool emphasized;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: emphasized ? palette.ink : palette.mutedInk,
+                fontWeight: emphasized ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ),
+          ObAmount(
+            value,
+            tone: tone,
+            style: emphasized
+                ? theme.textTheme.titleMedium
+                : theme.textTheme.bodyMedium,
+          ),
+        ],
+      ),
     );
   }
 }

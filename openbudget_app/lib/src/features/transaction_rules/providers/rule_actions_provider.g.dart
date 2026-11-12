@@ -36,7 +36,7 @@ final class RuleActionsProvider
   RuleActions create() => RuleActions();
 }
 
-String _$ruleActionsHash() => r'edcc1bab959e624a9d3da021c2733ebb5c76b3d2';
+String _$ruleActionsHash() => r'7265b975e180269168a84aa3219b6ffd90577dbb';
 
 /// Provides mutation operations for transaction rules.
 

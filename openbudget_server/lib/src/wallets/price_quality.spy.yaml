@@ -1,0 +1,12 @@
+### How trustworthy a holding's price is right now.
+enum: PriceQuality
+serialized: byName
+values:
+  ### Fresh from a provider.
+  - live
+  ### Computed rather than quoted.
+  - derived
+  ### A cached price used because the provider failed.
+  - cached
+  ### No price; the holding is left out of the valuation.
+  - unpriced

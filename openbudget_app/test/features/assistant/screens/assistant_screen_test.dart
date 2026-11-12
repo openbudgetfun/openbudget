@@ -32,7 +32,7 @@ Future<ProviderContainer> _pumpAssistant(
   addTearDown(container.dispose);
 
   await tester.pumpApp(
-    const AssistantScreen(budgetId: testBudgetId),
+    const AssistantScreen(entityId: testBudgetId),
     container: container,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
@@ -78,7 +78,7 @@ void main() {
     final controller = StreamController<AgentEvent>();
     addTearDown(controller.close);
     final api = FakeAssistantApi(
-      chatStream: (budgetId, conversationId, message) => controller.stream,
+      chatStream: (entityId, conversationId, message) => controller.stream,
     );
     await _pumpAssistant(tester, api);
 

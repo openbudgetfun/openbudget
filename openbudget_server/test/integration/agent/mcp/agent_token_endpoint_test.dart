@@ -10,16 +10,14 @@ import '../../test_tools/serverpod_test_tools.dart';
 
 var _userCounter = 0;
 
-({TestSessionBuilder session, UuidValue userId}) _newUser(
+/// Tokens reference `serverpod_auth_core_user`, so each user gets a real row.
+Future<({TestSessionBuilder session, UuidValue userId})> _newUser(
   TestSessionBuilder base,
 ) {
   final counter = ++_userCounter;
   final id =
       '40000000-0000-4000-a000-${counter.toRadixString(16).padLeft(12, '0')}';
-  return (
-    session: createAuthenticatedSession(base, userIdentifier: id),
-    userId: UuidValue.fromString(id),
-  );
+  return createAuthenticatedUser(base, userIdentifier: id);
 }
 
 void main() {
@@ -28,8 +26,8 @@ void main() {
     late UuidValue userId;
     late Session rawSession;
 
-    setUp(() {
-      final user = _newUser(sessionBuilder);
+    setUp(() async {
+      final user = await _newUser(sessionBuilder);
       authedSession = user.session;
       userId = user.userId;
       rawSession = sessionBuilder.build();
@@ -149,7 +147,7 @@ void main() {
           'Codex',
           true,
         );
-        final other = _newUser(sessionBuilder);
+        final other = await _newUser(sessionBuilder);
 
         final views = await endpoints.agentToken.listAccessTokens(
           authedSession,
@@ -201,7 +199,7 @@ void main() {
           'Claude Code',
           true,
         );
-        final other = _newUser(sessionBuilder);
+        final other = await _newUser(sessionBuilder);
 
         await expectLater(
           endpoints.agentToken.revokeAccessToken(

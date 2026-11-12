@@ -8,84 +8,14 @@ part of 'envelope_goal_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-
-@ProviderFor(envelopeGoal)
-final envelopeGoalProvider = EnvelopeGoalFamily._();
-
-final class EnvelopeGoalProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<EnvelopeGoal?>,
-          EnvelopeGoal?,
-          FutureOr<EnvelopeGoal?>
-        >
-    with $FutureModifier<EnvelopeGoal?>, $FutureProvider<EnvelopeGoal?> {
-  EnvelopeGoalProvider._({
-    required EnvelopeGoalFamily super.from,
-    required String super.argument,
-  }) : super(
-         retry: null,
-         name: r'envelopeGoalProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$envelopeGoalHash();
-
-  @override
-  String toString() {
-    return r'envelopeGoalProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  $FutureProviderElement<EnvelopeGoal?> $createElement(
-    $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
-
-  @override
-  FutureOr<EnvelopeGoal?> create(Ref ref) {
-    final argument = this.argument as String;
-    return envelopeGoal(ref, argument);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is EnvelopeGoalProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
-}
-
-String _$envelopeGoalHash() => r'c0c0da344c879f218e3a14efaa013e05e7688857';
-
-final class EnvelopeGoalFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<EnvelopeGoal?>, String> {
-  EnvelopeGoalFamily._()
-    : super(
-        retry: null,
-        name: r'envelopeGoalProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  EnvelopeGoalProvider call(String envelopeId) =>
-      EnvelopeGoalProvider._(argument: envelopeId, from: this);
-
-  @override
-  String toString() => r'envelopeGoalProvider';
-}
+/// Every goal of the entity; the month view carries per-envelope goals for
+/// display.
 
 @ProviderFor(envelopeGoals)
 final envelopeGoalsProvider = EnvelopeGoalsFamily._();
+
+/// Every goal of the entity; the month view carries per-envelope goals for
+/// display.
 
 final class EnvelopeGoalsProvider
     extends
@@ -97,9 +27,11 @@ final class EnvelopeGoalsProvider
     with
         $FutureModifier<List<EnvelopeGoal>>,
         $FutureProvider<List<EnvelopeGoal>> {
+  /// Every goal of the entity; the month view carries per-envelope goals for
+  /// display.
   EnvelopeGoalsProvider._({
     required EnvelopeGoalsFamily super.from,
-    required List<String> super.argument,
+    required String super.argument,
   }) : super(
          retry: null,
          name: r'envelopeGoalsProvider',
@@ -126,7 +58,7 @@ final class EnvelopeGoalsProvider
 
   @override
   FutureOr<List<EnvelopeGoal>> create(Ref ref) {
-    final argument = this.argument as List<String>;
+    final argument = this.argument as String;
     return envelopeGoals(ref, argument);
   }
 
@@ -141,10 +73,13 @@ final class EnvelopeGoalsProvider
   }
 }
 
-String _$envelopeGoalsHash() => r'fe1f9df02e1f7e52b9ab120b9bab7bf9eff50c07';
+String _$envelopeGoalsHash() => r'b1aa26f94d261dac8e420f9b054776c889c5499f';
+
+/// Every goal of the entity; the month view carries per-envelope goals for
+/// display.
 
 final class EnvelopeGoalsFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<List<EnvelopeGoal>>, List<String>> {
+    with $FunctionalFamilyOverride<FutureOr<List<EnvelopeGoal>>, String> {
   EnvelopeGoalsFamily._()
     : super(
         retry: null,
@@ -154,8 +89,11 @@ final class EnvelopeGoalsFamily extends $Family
         isAutoDispose: true,
       );
 
-  EnvelopeGoalsProvider call(List<String> envelopeIds) =>
-      EnvelopeGoalsProvider._(argument: envelopeIds, from: this);
+  /// Every goal of the entity; the month view carries per-envelope goals for
+  /// display.
+
+  EnvelopeGoalsProvider call(String entityId) =>
+      EnvelopeGoalsProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'envelopeGoalsProvider';
@@ -194,7 +132,7 @@ final class EnvelopeGoalActionsProvider
 }
 
 String _$envelopeGoalActionsHash() =>
-    r'696a2b4c84d3bab2d606c5ea4d55e84ad94809c0';
+    r'758f30af9566d9eae4d52cad97235aa3d7fa99cd';
 
 abstract class _$EnvelopeGoalActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

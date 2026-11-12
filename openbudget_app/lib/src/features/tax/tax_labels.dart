@@ -13,11 +13,11 @@ String taxJurisdictionLabel(
 };
 
 /// The kind of taxpayer shown for a tax entity.
-String taxEntityKindLabel(AppLocalizations l10n, TaxEntityKind kind) =>
+String taxEntityKindLabel(AppLocalizations l10n, EntityKind kind) =>
     switch (kind) {
-      TaxEntityKind.individual => l10n.taxEntityIndividual,
-      TaxEntityKind.soleTrader => l10n.taxEntitySoleTrader,
-      TaxEntityKind.company => l10n.taxEntityCompany,
+      EntityKind.individual => l10n.taxEntityIndividual,
+      EntityKind.soleTrader => l10n.taxEntitySoleTrader,
+      EntityKind.company => l10n.taxEntityCompany,
     };
 
 /// The group heading for a catalog category kind.

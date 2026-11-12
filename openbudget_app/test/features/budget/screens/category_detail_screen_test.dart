@@ -2,90 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/category_detail_screen.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000100';
+import '../../../fixtures/budget_month.dart';
+
 const _categoryId = '00000000-0000-0000-0000-000000000101';
 const _envelopeId = '00000000-0000-0000-0000-000000000102';
 
-BudgetSummary _makeSummary() {
-  final budgetUuid = UuidValue.fromString(_budgetId);
-  final categoryUuid = UuidValue.fromString(_categoryId);
-  final envelopeUuid = UuidValue.fromString(_envelopeId);
-  final ownerUuid = UuidValue.fromString(
-    '00000000-0000-0000-0000-000000000103',
-  );
-
-  final envelope = Envelope(
-    id: envelopeUuid,
-    name: 'Utilities',
-    categoryId: categoryUuid,
-    budgetedAmountCents: 6000,
-    spentAmountCents: 0,
-    currencyCode: 'USD',
-    sortOrder: 0,
-    note: 'Auto-pay every month',
-  );
-
-  return BudgetSummary(
-    budget: Budget(
-      id: budgetUuid,
-      name: 'Family Plan',
-      currencyCode: 'USD',
-      ownerId: ownerUuid,
-    ),
-    categories: [
-      CategoryWithEnvelopes(
-        category: Category(
-          id: categoryUuid,
-          name: 'Bills',
-          budgetId: budgetUuid,
-          sortOrder: 0,
-        ),
-        envelopes: [envelope],
-        monthlyEnvelopes: [
-          MonthlyEnvelopeData(
-            envelope: envelope,
-            allocatedCents: 6000,
-            spentCents: 0,
-            availableCents: 6000,
-            carryoverCents: 0,
-          ),
-        ],
-        totalBudgetedCents: 6000,
-        totalSpentCents: 0,
-        totalAvailableCents: 6000,
+BudgetMonthView _makeMonthView() => testMonthView(
+  categories: [testCategory(id: _categoryId, name: 'Bills')],
+  envelopes: [
+    testEnvelopeRow(
+      envelopeId: _envelopeId,
+      categoryId: _categoryId,
+      envelopeName: 'Utilities',
+      allocatedMinor: 6000,
+      goal: EnvelopeGoal(
+        entityId: UuidValue.fromString(fixtureEntityId),
+        envelopeId: UuidValue.fromString(_envelopeId),
+        kind: EnvelopeGoalKind.monthlyFunding,
+        amountMinor: 6000,
       ),
-    ],
-    totalIncomeCents: 20000,
-    totalBudgetedCents: 6000,
-    readyToAssignCents: 14000,
-    year: 2026,
-    month: 2,
-  );
-}
+      note: 'Auto-pay every month',
+    ),
+  ],
+);
 
 void main() {
   testWidgets('renders full-screen category detail sections', (tester) async {
-    final goal = EnvelopeGoal(
-      envelopeId: UuidValue.fromString(_envelopeId),
-      goalType: 'monthly_funding',
-      targetAmountCents: 6000,
-      monthlyFundingCents: 6000,
-    );
-
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          budgetMonthlySummaryProvider.overrideWith(
-            (ref, _) async => _makeSummary(),
-          ),
-          budgetGoalsProvider.overrideWith(
-            (ref, _) async => {_envelopeId: goal},
+          budgetMonthProvider(fixtureEntityId).overrideWith(
+            (ref) async => _makeMonthView(),
           ),
         ],
         child: MaterialApp(
@@ -93,7 +45,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const CategoryDetailScreen(
-            budgetId: _budgetId,
+            entityId: fixtureEntityId,
             categoryId: _categoryId,
             envelopeId: _envelopeId,
           ),

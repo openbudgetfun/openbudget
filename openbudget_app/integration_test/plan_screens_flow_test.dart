@@ -5,16 +5,18 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/category_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/credit_card_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/envelope_activity_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/recent_moves_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/review_queue_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/category_detail_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/recent_moves_screen.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
-import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_post_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_app/src/features/recurring/providers/recurring_actions_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -22,301 +24,366 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
 import 'common/patrol_helpers.dart';
+import 'common/test_data.dart';
 import 'helpers/screenshot_capture.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000901';
-const _categoryId = '00000000-0000-0000-0000-000000000902';
-const _categoryTwoId = '00000000-0000-0000-0000-000000000908';
-const _utilitiesEnvelopeId = '00000000-0000-0000-0000-000000000903';
-const _storageEnvelopeId = '00000000-0000-0000-0000-000000000905';
-const _groceriesEnvelopeId = '00000000-0000-0000-0000-000000000909';
-const _accountId = '00000000-0000-0000-0000-000000000906';
+const String _entityId = TestData.gbpEntityId;
+const String _categoryId = '00000000-0000-0000-0000-000000000902';
+const String _categoryTwoId = '00000000-0000-0000-0000-000000000908';
+const String _utilitiesEnvelopeId = '00000000-0000-0000-0000-000000000903';
+const String _storageEnvelopeId = '00000000-0000-0000-0000-000000000905';
+const String _groceriesEnvelopeId = '00000000-0000-0000-0000-000000000909';
+const String _accountId = '00000000-0000-0000-0000-000000000906';
 
-BudgetSummary _makeSummary() {
-  final budgetUuid = UuidValue.fromString(_budgetId);
-  final categoryUuid = UuidValue.fromString(_categoryId);
-  final utilitiesEnvelopeUuid = UuidValue.fromString(_utilitiesEnvelopeId);
-  final storageEnvelopeUuid = UuidValue.fromString(_storageEnvelopeId);
-  final ownerUuid = UuidValue.fromString(
-    '00000000-0000-0000-0000-000000000904',
-  );
+const int _utilitiesAllocatedMinor = 6000;
 
-  final utilitiesEnvelope = Envelope(
-    id: utilitiesEnvelopeUuid,
-    name: 'Utilities',
-    categoryId: categoryUuid,
-    budgetedAmountCents: 6000,
-    spentAmountCents: 0,
+final UuidValue _entityUuid = UuidValue.fromString(_entityId);
+final UuidValue _categoryUuid = UuidValue.fromString(_categoryId);
+final UuidValue _utilitiesEnvelopeUuid = UuidValue.fromString(
+  _utilitiesEnvelopeId,
+);
+final UuidValue _storageEnvelopeUuid = UuidValue.fromString(
+  _storageEnvelopeId,
+);
+
+Category _billsCategory(String name) => Category(
+  id: _categoryUuid,
+  name: name,
+  entityId: _entityUuid,
+  sortOrder: 0,
+);
+
+Envelope _utilitiesEnvelope({int sortOrder = 0}) => Envelope(
+  id: _utilitiesEnvelopeUuid,
+  name: 'Utilities',
+  entityId: _entityUuid,
+  categoryId: _categoryUuid,
+  sortOrder: sortOrder,
+  note: 'Auto-pay every month',
+);
+
+Envelope _storageEnvelope() => Envelope(
+  id: _storageEnvelopeUuid,
+  name: 'Self storage',
+  entityId: _entityUuid,
+  categoryId: _categoryUuid,
+  sortOrder: 1,
+);
+
+EnvelopeMonthView _view(
+  Envelope envelope, {
+  int allocatedMinor = 0,
+  int activityMinor = 0,
+  int availableMinor = 0,
+}) => EnvelopeMonthView(
+  envelope: envelope,
+  carryoverMinor: 0,
+  allocatedMinor: allocatedMinor,
+  activityMinor: activityMinor,
+  availableMinor: availableMinor,
+  goalUnderfundedMinor: 0,
+);
+
+BudgetMonthSummary _summary({
+  required int incomeMinor,
+  required int allocatedMinor,
+  required int activityMinor,
+  required int readyToAssignMinor,
+  required int availableMinor,
+}) => BudgetMonthSummary(
+  month: 202602,
+  incomeMinor: incomeMinor,
+  uncategorizedMinor: 0,
+  fxDifferenceMinor: 0,
+  allocatedMinor: allocatedMinor,
+  activityMinor: activityMinor,
+  overspentLastMonthMinor: 0,
+  assignedInFutureMinor: 0,
+  readyToAssignMinor: readyToAssignMinor,
+  availableMinor: availableMinor,
+);
+
+BudgetMonthView _makeMonthView() {
+  final utilities = _utilitiesEnvelope();
+  final storage = _storageEnvelope();
+  return BudgetMonthView(
+    entityId: _entityUuid,
+    month: 202602,
     currencyCode: 'USD',
-    sortOrder: 0,
-    note: 'Auto-pay every month',
-  );
-  final storageEnvelope = Envelope(
-    id: storageEnvelopeUuid,
-    name: 'Self storage',
-    categoryId: categoryUuid,
-    budgetedAmountCents: 0,
-    spentAmountCents: 0,
-    currencyCode: 'USD',
-    sortOrder: 1,
-  );
-
-  return BudgetSummary(
-    budget: Budget(
-      id: budgetUuid,
-      name: 'Family Plan',
-      currencyCode: 'USD',
-      ownerId: ownerUuid,
+    summary: _summary(
+      incomeMinor: 20000,
+      allocatedMinor: _utilitiesAllocatedMinor,
+      activityMinor: 0,
+      readyToAssignMinor: 14000,
+      availableMinor: _utilitiesAllocatedMinor,
     ),
-    categories: [
-      CategoryWithEnvelopes(
-        category: Category(
-          id: categoryUuid,
-          name: 'Bills',
-          budgetId: budgetUuid,
-          sortOrder: 0,
-        ),
-        envelopes: [utilitiesEnvelope, storageEnvelope],
-        monthlyEnvelopes: [
-          MonthlyEnvelopeData(
-            envelope: utilitiesEnvelope,
-            allocatedCents: 6000,
-            spentCents: 0,
-            availableCents: 6000,
-            carryoverCents: 0,
-          ),
-          MonthlyEnvelopeData(
-            envelope: storageEnvelope,
-            allocatedCents: 0,
-            spentCents: 0,
-            availableCents: 0,
-            carryoverCents: 0,
-          ),
-        ],
-        totalBudgetedCents: 6000,
-        totalSpentCents: 0,
-        totalAvailableCents: 6000,
+    categories: [_billsCategory('Bills')],
+    envelopes: [
+      _view(
+        utilities,
+        allocatedMinor: _utilitiesAllocatedMinor,
+        availableMinor: _utilitiesAllocatedMinor,
       ),
+      _view(storage),
     ],
-    totalIncomeCents: 20000,
-    totalBudgetedCents: 6000,
-    readyToAssignCents: 14000,
-    year: 2026,
-    month: 2,
   );
 }
 
-BudgetSummary _makeOverspentSummary() {
-  final budgetUuid = UuidValue.fromString(_budgetId);
-  final categoryUuid = UuidValue.fromString(_categoryId);
-  final utilitiesEnvelopeUuid = UuidValue.fromString(_utilitiesEnvelopeId);
-  final storageEnvelopeUuid = UuidValue.fromString(_storageEnvelopeId);
-  final ownerUuid = UuidValue.fromString(
-    '00000000-0000-0000-0000-000000000904',
-  );
-
-  final utilitiesEnvelope = Envelope(
-    id: utilitiesEnvelopeUuid,
-    name: 'Utilities',
-    categoryId: categoryUuid,
-    budgetedAmountCents: 0,
-    spentAmountCents: 6000,
+BudgetMonthView _makeOverspentMonthView() {
+  final utilities = _utilitiesEnvelope();
+  final storage = _storageEnvelope();
+  return BudgetMonthView(
+    entityId: _entityUuid,
+    month: 202602,
     currencyCode: 'USD',
-    sortOrder: 0,
-    note: 'Auto-pay every month',
-  );
-  final storageEnvelope = Envelope(
-    id: storageEnvelopeUuid,
-    name: 'Self storage',
-    categoryId: categoryUuid,
-    budgetedAmountCents: 0,
-    spentAmountCents: 0,
-    currencyCode: 'USD',
-    sortOrder: 1,
-  );
-
-  return BudgetSummary(
-    budget: Budget(
-      id: budgetUuid,
-      name: 'Family Plan',
-      currencyCode: 'USD',
-      ownerId: ownerUuid,
+    summary: _summary(
+      incomeMinor: 20000,
+      allocatedMinor: 0,
+      activityMinor: _utilitiesAllocatedMinor,
+      readyToAssignMinor: 20000,
+      availableMinor: -_utilitiesAllocatedMinor,
     ),
-    categories: [
-      CategoryWithEnvelopes(
-        category: Category(
-          id: categoryUuid,
-          name: 'Bills',
-          budgetId: budgetUuid,
-          sortOrder: 0,
-        ),
-        envelopes: [utilitiesEnvelope, storageEnvelope],
-        monthlyEnvelopes: [
-          MonthlyEnvelopeData(
-            envelope: utilitiesEnvelope,
-            allocatedCents: 0,
-            spentCents: 6000,
-            availableCents: -6000,
-            carryoverCents: 0,
-          ),
-          MonthlyEnvelopeData(
-            envelope: storageEnvelope,
-            allocatedCents: 0,
-            spentCents: 0,
-            availableCents: 0,
-            carryoverCents: 0,
-          ),
-        ],
-        totalBudgetedCents: 0,
-        totalSpentCents: 6000,
-        totalAvailableCents: -6000,
+    categories: [_billsCategory('Bills')],
+    envelopes: [
+      _view(
+        utilities,
+        activityMinor: _utilitiesAllocatedMinor,
+        availableMinor: -_utilitiesAllocatedMinor,
       ),
+      _view(storage),
     ],
-    totalIncomeCents: 20000,
-    totalBudgetedCents: 0,
-    readyToAssignCents: 20000,
-    year: 2026,
-    month: 2,
   );
 }
 
-BudgetSummary _makeReorderSummary() {
-  final budgetUuid = UuidValue.fromString(_budgetId);
-  final billsCategoryUuid = UuidValue.fromString(_categoryId);
-  final groceriesCategoryUuid = UuidValue.fromString(_categoryTwoId);
-  final utilitiesEnvelopeUuid = UuidValue.fromString(_utilitiesEnvelopeId);
-  final groceriesEnvelopeUuid = UuidValue.fromString(_groceriesEnvelopeId);
-  final ownerUuid = UuidValue.fromString(
-    '00000000-0000-0000-0000-000000000904',
+/// Two top-level groups, for the reorder flow.
+BudgetMonthView _makeReorderMonthView() {
+  final bills = _billsCategory('Housing');
+  final utilities = _utilitiesEnvelope();
+  final groceriesCategory = Category(
+    id: UuidValue.fromString(_categoryTwoId),
+    name: 'Groceries Group',
+    entityId: _entityUuid,
+    sortOrder: 1,
   );
-
-  final utilitiesEnvelope = Envelope(
-    id: utilitiesEnvelopeUuid,
-    name: 'Utilities',
-    categoryId: billsCategoryUuid,
-    budgetedAmountCents: 6000,
-    spentAmountCents: 0,
-    currencyCode: 'USD',
-    sortOrder: 0,
-  );
-  final groceriesEnvelope = Envelope(
-    id: groceriesEnvelopeUuid,
+  final food = Envelope(
+    id: UuidValue.fromString(_groceriesEnvelopeId),
     name: 'Food',
-    categoryId: groceriesCategoryUuid,
-    budgetedAmountCents: 3000,
-    spentAmountCents: 0,
-    currencyCode: 'USD',
+    entityId: _entityUuid,
+    categoryId: groceriesCategory.id!,
     sortOrder: 0,
   );
 
-  return BudgetSummary(
-    budget: Budget(
-      id: budgetUuid,
-      name: 'Family Plan',
-      currencyCode: 'USD',
-      ownerId: ownerUuid,
+  return BudgetMonthView(
+    entityId: _entityUuid,
+    month: 202602,
+    currencyCode: 'USD',
+    summary: _summary(
+      incomeMinor: 20000,
+      allocatedMinor: 9000,
+      activityMinor: 0,
+      readyToAssignMinor: 11000,
+      availableMinor: 9000,
     ),
-    categories: [
-      CategoryWithEnvelopes(
-        category: Category(
-          id: billsCategoryUuid,
-          name: 'Housing',
-          budgetId: budgetUuid,
-          sortOrder: 0,
-        ),
-        envelopes: [utilitiesEnvelope],
-        monthlyEnvelopes: [
-          MonthlyEnvelopeData(
-            envelope: utilitiesEnvelope,
-            allocatedCents: 6000,
-            spentCents: 0,
-            availableCents: 6000,
-            carryoverCents: 0,
-          ),
-        ],
-        totalBudgetedCents: 6000,
-        totalSpentCents: 0,
-        totalAvailableCents: 6000,
+    categories: [bills, groceriesCategory],
+    envelopes: [
+      _view(
+        utilities,
+        allocatedMinor: _utilitiesAllocatedMinor,
+        availableMinor: _utilitiesAllocatedMinor,
       ),
-      CategoryWithEnvelopes(
-        category: Category(
-          id: groceriesCategoryUuid,
-          name: 'Groceries Group',
-          budgetId: budgetUuid,
-          sortOrder: 1,
-        ),
-        envelopes: [groceriesEnvelope],
-        monthlyEnvelopes: [
-          MonthlyEnvelopeData(
-            envelope: groceriesEnvelope,
-            allocatedCents: 3000,
-            spentCents: 0,
-            availableCents: 3000,
-            carryoverCents: 0,
-          ),
-        ],
-        totalBudgetedCents: 3000,
-        totalSpentCents: 0,
-        totalAvailableCents: 3000,
-      ),
+      _view(food, allocatedMinor: 3000, availableMinor: 3000),
     ],
-    totalIncomeCents: 20000,
-    totalBudgetedCents: 9000,
-    readyToAssignCents: 11000,
-    year: 2026,
-    month: 2,
   );
 }
 
-List<Transaction> _makeMonthlyTransactions() => [
-  Transaction(
-    id: UuidValue.fromString('00000000-0000-0000-0000-000000000907'),
-    description: 'Landlord',
-    amountCents: -10000,
-    currencyCode: 'USD',
-    budgetId: UuidValue.fromString(_budgetId),
-    accountId: UuidValue.fromString(_accountId),
-    envelopeId: UuidValue.fromString(_utilitiesEnvelopeId),
-    transactionDate: DateTime(2026, 2, 22),
-    cleared: false,
-    reconciled: false,
-  ),
-];
+List<CategoryMonthGroup> _groupsOf(BudgetMonthView view) {
+  final byCategory = <UuidValue, CategoryMonthGroup>{};
+  for (final envelope in view.envelopes) {
+    final category = view.categories.firstWhere(
+      (category) => category.id == envelope.envelope.categoryId,
+    );
+    final group = byCategory.putIfAbsent(
+      category.id!,
+      () => CategoryMonthGroup(category: category, envelopes: []),
+    );
+    group.envelopes.add(envelope);
+  }
+  return byCategory.values.toList();
+}
+
+TransactionView _makeMonthlyTransaction() {
+  const transactionId = '00000000-0000-0000-0000-000000000907';
+  return TransactionView(
+    transaction: Transaction(
+      id: UuidValue.fromString(transactionId),
+      entityId: _entityUuid,
+      accountId: UuidValue.fromString(_accountId),
+      date: DateTime(2026, 2, 22),
+      amountMinor: -10000,
+      baseAmountMinor: -10000,
+      fxRateDate: DateTime(2026, 2, 22),
+      description: 'Landlord',
+    ),
+    lines: [
+      TransactionLine(
+        id: UuidValue.fromString('00000000-0000-0000-0000-000000000910'),
+        transactionId: UuidValue.fromString(transactionId),
+        amountMinor: -10000,
+        baseAmountMinor: -10000,
+      ),
+    ],
+    accountCurrencyCode: 'USD',
+    accountName: 'Daily USD',
+  );
+}
 
 class _FakeCategoryActions extends CategoryActions {
   List<String> reorderedCategoryIds = [];
-  String? reorderedBudgetId;
+  String? reorderedEntityId;
 
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
   @override
   Future<void> reorderCategories({
-    required String budgetId,
+    required String entityId,
     required List<String> categoryIds,
   }) async {
     reorderedCategoryIds = List.of(categoryIds);
-    reorderedBudgetId = budgetId;
+    reorderedEntityId = entityId;
   }
 }
 
 class _FakeTransactionActions extends TransactionActions {
   List<String> clearedTransactionIds = [];
-  String? clearedBudgetId;
+  String? clearedEntityId;
 
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
   @override
-  Future<int> bulkToggleCleared({
+  Future<int> setStatus({
     required List<String> transactionIds,
-    required String budgetId,
+    required TransactionStatus status,
+    required String entityId,
   }) async {
     clearedTransactionIds = List.of(transactionIds);
-    clearedBudgetId = budgetId;
+    clearedEntityId = entityId;
     return transactionIds.length;
   }
 }
+
+ProviderContainer _planContainer({
+  required BudgetMonthView monthView,
+  List<TransactionView> reviewQueue = const [],
+  CategoryActions? categoryActions,
+  TransactionActions? transactionActions,
+}) {
+  final groups = _groupsOf(monthView);
+  final container = ProviderContainer(
+    overrides: [
+      entityDetailProvider.overrideWith(
+        (ref, id) async => TestData.usdEntity(),
+      ),
+      if (categoryActions != null)
+        categoryActionsProvider.overrideWith(() => categoryActions),
+      if (transactionActions != null)
+        transactionActionsProvider.overrideWith(() => transactionActions),
+      budgetMonthProvider.overrideWith((ref, entityId) async {
+        ref.watch(selectedYyyymmProvider(entityId));
+        return monthView;
+      }),
+      budgetMonthGroupsProvider.overrideWith((ref, entityId) async {
+        ref.watch(selectedYyyymmProvider(entityId));
+        return groups;
+      }),
+      budgetGoalsProvider.overrideWith((ref, entityId) async => {}),
+      creditCardPaymentsProvider.overrideWith(
+        (ref, entityId) async => const [],
+      ),
+      recurringDueCountProvider.overrideWith((ref, entityId) async => 0),
+      reviewQueueProvider.overrideWith((ref, entityId) async => reviewQueue),
+      // The envelope activity sheet and the header's age-of-money stat read
+      // the server otherwise, which would leave a pending connection at
+      // teardown.
+      envelopeActivityProvider.overrideWith2(
+        (_) => _FakeEnvelopeActivity(),
+      ),
+      ageOfMoneyProvider.overrideWith((ref, entityId) async => null),
+    ],
+  );
+  addTearDown(container.dispose);
+  return container;
+}
+
+/// An empty envelope activity page, so the sheets never touch the network.
+class _FakeEnvelopeActivity extends EnvelopeActivity {
+  @override
+  Future<EnvelopeActivityState> build(
+    String entityId,
+    String envelopeId,
+  ) async => const EnvelopeActivityState(items: []);
+}
+
+Widget _buildApp(
+  ProviderContainer container, {
+  List<GoRoute> extraRoutes = const [],
+}) {
+  final router = GoRouter(
+    initialLocation: '/budgets/$_entityId/plan',
+    routes: [
+      GoRoute(
+        name: homeRoute,
+        path: homePath,
+        builder: (_, _) => const Scaffold(body: Text('Home')),
+      ),
+      GoRoute(
+        name: planRoute,
+        path: '/budgets/:entityId/plan',
+        builder: (context, state) =>
+            BudgetDetailScreen(entityId: state.pathParameters['entityId']!),
+        routes: extraRoutes,
+      ),
+    ],
+  );
+
+  return UncontrolledProviderScope(
+    container: container,
+    child: MaterialApp.router(
+      theme: ThemeData.light(useMaterial3: true),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      routerConfig: router,
+    ),
+  );
+}
+
+GoRoute _recentMovesRoutes() => GoRoute(
+  name: recentMovesRoute,
+  path: 'recent-moves',
+  builder: (context, state) =>
+      RecentMovesScreen(entityId: state.pathParameters['entityId']!),
+  routes: [
+    GoRoute(
+      name: envelopeMovesRoute,
+      path: ':envelopeId',
+      builder: (context, state) => EnvelopeMovesScreen(
+        entityId: state.pathParameters['entityId']!,
+        envelopeId: state.pathParameters['envelopeId']!,
+      ),
+    ),
+  ],
+);
+
+GoRoute _categoryDetailRoute() => GoRoute(
+  name: categoryDetailRoute,
+  path: 'category/:categoryId/envelope/:envelopeId',
+  builder: (context, state) => CategoryDetailScreen(
+    entityId: state.pathParameters['entityId']!,
+    categoryId: state.pathParameters['categoryId']!,
+    envelopeId: state.pathParameters['envelopeId']!,
+  ),
+);
 
 void main() {
   patrolWidgetTest('opens recent moves and category detail from plan', (
@@ -324,76 +391,19 @@ void main() {
   ) async {
     final tester = $.tester;
     final transactionActions = _FakeTransactionActions();
-    final container = ProviderContainer(
-      overrides: [
-        ageOfMoneyProvider.overrideWith((ref, budgetId) async => null),
-        transactionActionsProvider.overrideWith(() => transactionActions),
-        budgetMonthlySummaryProvider.overrideWith(
-          (ref, _) async => _makeSummary(),
-        ),
-        budgetGoalsProvider.overrideWith((ref, _) async => {}),
-        creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
-        monthlyTransactionsProvider.overrideWith(
-          (ref, _) async => _makeMonthlyTransactions(),
-        ),
-        recurringDueCountProvider.overrideWith((ref, _) async => 0),
-      ],
-    );
-    addTearDown(container.dispose);
-
-    final router = GoRouter(
-      initialLocation: '/budgets/$_budgetId/plan',
-      routes: [
-        GoRoute(
-          name: homeRoute,
-          path: homePath,
-          builder: (_, _) => const Scaffold(body: Text('Home')),
-        ),
-        GoRoute(
-          name: planRoute,
-          path: '/budgets/:id/plan',
-          builder: (context, state) =>
-              BudgetDetailScreen(budgetId: state.pathParameters['id']!),
-          routes: [
-            GoRoute(
-              name: recentMovesRoute,
-              path: 'recent-moves',
-              builder: (context, state) =>
-                  RecentMovesScreen(budgetId: state.pathParameters['id']!),
-              routes: [
-                GoRoute(
-                  name: envelopeMovesRoute,
-                  path: ':envelopeId',
-                  builder: (context, state) => EnvelopeMovesScreen(
-                    budgetId: state.pathParameters['id']!,
-                    envelopeId: state.pathParameters['envelopeId']!,
-                  ),
-                ),
-              ],
-            ),
-            GoRoute(
-              name: categoryDetailRoute,
-              path: 'category/:categoryId/envelope/:envelopeId',
-              builder: (context, state) => CategoryDetailScreen(
-                budgetId: state.pathParameters['id']!,
-                categoryId: state.pathParameters['categoryId']!,
-                envelopeId: state.pathParameters['envelopeId']!,
-              ),
-            ),
-          ],
-        ),
-      ],
+    final container = _planContainer(
+      monthView: _makeMonthView(),
+      reviewQueue: [_makeMonthlyTransaction()],
+      transactionActions: transactionActions,
     );
 
     await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp.router(
-          theme: ThemeData.light(useMaterial3: true),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          routerConfig: router,
-        ),
+      _buildApp(
+        container,
+        extraRoutes: [
+          _recentMovesRoutes(),
+          _categoryDetailRoute(),
+        ],
       ),
     );
     await tester.pumpAndSettle();
@@ -402,17 +412,17 @@ void main() {
     container
         .read(recentMovesProvider.notifier)
         .recordAssigned(
-          budgetId: _budgetId,
+          entityId: _entityId,
           envelopeId: _utilitiesEnvelopeId,
-          amountCents: 6000,
+          amountMinor: _utilitiesAllocatedMinor,
         );
     container
         .read(recentMovesProvider.notifier)
         .recordMove(
-          budgetId: _budgetId,
+          entityId: _entityId,
           fromEnvelopeId: _storageEnvelopeId,
           toEnvelopeId: _utilitiesEnvelopeId,
-          amountCents: 3000,
+          amountMinor: 3000,
         );
     await tester.pumpAndSettle();
     await captureIntegrationScreenshot(tester, 'plan-screen');
@@ -431,9 +441,9 @@ void main() {
     expect(find.text('1 Selected'), findsOneWidget);
     await tester.tap(find.text('Approve'));
     await tester.pumpAndSettle();
-    expect(transactionActions.clearedBudgetId, _budgetId);
+    expect(transactionActions.clearedEntityId, _entityId);
     expect(transactionActions.clearedTransactionIds, [
-      _makeMonthlyTransactions().single.id.toString(),
+      _makeMonthlyTransaction().transaction.id.toString(),
     ]);
     expect(find.text('No Transactions'), findsOneWidget);
     expect(find.text("You're All Done!"), findsOneWidget);
@@ -476,10 +486,10 @@ void main() {
     container
         .read(recentMovesProvider.notifier)
         .recordMove(
-          budgetId: _budgetId,
+          entityId: _entityId,
           fromEnvelopeId: _storageEnvelopeId,
           toEnvelopeId: _utilitiesEnvelopeId,
-          amountCents: 3000,
+          amountMinor: 3000,
         );
     await tester.pumpAndSettle();
 
@@ -560,13 +570,14 @@ void main() {
     );
     expect(saveTargetButton.onPressed, isNull);
 
-    await tester.tap(find.widgetWithText(BudgetAmountField, 'I need'));
+    // The amount field opens the keypad sheet; enter 2800 and confirm.
+    await tester.tap(find.widgetWithText(BudgetAmountField, 'Amount'));
     await tester.pumpAndSettle();
     for (final digit in ['2', '8', '0', '0']) {
       await tester.tap(find.byKey(Key('budget-keypad-digit-$digit')));
       await tester.pump();
     }
-    await tester.tap(find.byKey(const Key('budget-keypad-equals')));
+    await tester.tap(find.byKey(const Key('budget-keypad-done')));
     await tester.pumpAndSettle();
 
     saveTargetButton = tester.widget<FilledButton>(
@@ -585,43 +596,9 @@ void main() {
     $,
   ) async {
     final tester = $.tester;
-    final container = ProviderContainer(
-      overrides: [
-        ageOfMoneyProvider.overrideWith((ref, budgetId) async => null),
-        budgetMonthlySummaryProvider.overrideWith(
-          (ref, _) async => _makeOverspentSummary(),
-        ),
-        budgetGoalsProvider.overrideWith((ref, _) async => {}),
-        creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
-        monthlyTransactionsProvider.overrideWith((ref, _) async => const []),
-        recurringDueCountProvider.overrideWith((ref, _) async => 0),
-      ],
-    );
-    addTearDown(container.dispose);
+    final container = _planContainer(monthView: _makeOverspentMonthView());
 
-    final router = GoRouter(
-      initialLocation: '/budgets/$_budgetId/plan',
-      routes: [
-        GoRoute(
-          name: planRoute,
-          path: '/budgets/:id/plan',
-          builder: (context, state) =>
-              BudgetDetailScreen(budgetId: state.pathParameters['id']!),
-        ),
-      ],
-    );
-
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp.router(
-          theme: ThemeData.light(useMaterial3: true),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          routerConfig: router,
-        ),
-      ),
-    );
+    await tester.pumpWidget(_buildApp(container));
     await tester.pumpAndSettle();
 
     expect(find.text('Cover 1 overspent category'), findsOneWidget);
@@ -644,69 +621,30 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.binding.setSurfaceSize(const Size(1024, 768));
 
-    final container = ProviderContainer(
-      overrides: [
-        ageOfMoneyProvider.overrideWith((ref, budgetId) async => null),
-        budgetMonthlySummaryProvider.overrideWith(
-          (ref, _) async => _makeSummary(),
-        ),
-        budgetGoalsProvider.overrideWith((ref, _) async => {}),
-        creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
-        monthlyTransactionsProvider.overrideWith(
-          (ref, _) async => _makeMonthlyTransactions(),
-        ),
-        recurringDueCountProvider.overrideWith((ref, _) async => 0),
-      ],
-    );
-    addTearDown(container.dispose);
-
-    final router = GoRouter(
-      initialLocation: '/budgets/$_budgetId/plan',
-      routes: [
-        GoRoute(
-          name: planRoute,
-          path: '/budgets/:id/plan',
-          builder: (context, state) =>
-              BudgetDetailScreen(budgetId: state.pathParameters['id']!),
-          routes: [
-            GoRoute(
-              name: recentMovesRoute,
-              path: 'recent-moves',
-              builder: (context, state) =>
-                  RecentMovesScreen(budgetId: state.pathParameters['id']!),
-            ),
-          ],
-        ),
-      ],
+    final container = _planContainer(
+      monthView: _makeMonthView(),
+      reviewQueue: [_makeMonthlyTransaction()],
     );
 
     await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp.router(
-          theme: ThemeData.light(useMaterial3: true),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          routerConfig: router,
-        ),
-      ),
+      _buildApp(container, extraRoutes: [_recentMovesRoutes()]),
     );
     await tester.pumpAndSettle();
 
     container
         .read(recentMovesProvider.notifier)
         .recordAssigned(
-          budgetId: _budgetId,
+          entityId: _entityId,
           envelopeId: _utilitiesEnvelopeId,
-          amountCents: 6000,
+          amountMinor: _utilitiesAllocatedMinor,
         );
     container
         .read(recentMovesProvider.notifier)
         .recordMove(
-          budgetId: _budgetId,
+          entityId: _entityId,
           fromEnvelopeId: _storageEnvelopeId,
           toEnvelopeId: _utilitiesEnvelopeId,
-          amountCents: 3000,
+          amountMinor: 3000,
         );
     await tester.pumpAndSettle();
 
@@ -740,44 +678,12 @@ void main() {
   ) async {
     final tester = $.tester;
     final categoryActions = _FakeCategoryActions();
-    final container = ProviderContainer(
-      overrides: [
-        categoryActionsProvider.overrideWith(() => categoryActions),
-        ageOfMoneyProvider.overrideWith((ref, budgetId) async => null),
-        budgetMonthlySummaryProvider.overrideWith(
-          (ref, _) async => _makeReorderSummary(),
-        ),
-        budgetGoalsProvider.overrideWith((ref, _) async => {}),
-        creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
-        monthlyTransactionsProvider.overrideWith((ref, _) async => const []),
-        recurringDueCountProvider.overrideWith((ref, _) async => 0),
-      ],
-    );
-    addTearDown(container.dispose);
-
-    final router = GoRouter(
-      initialLocation: '/budgets/$_budgetId/plan',
-      routes: [
-        GoRoute(
-          name: planRoute,
-          path: '/budgets/:id/plan',
-          builder: (context, state) =>
-              BudgetDetailScreen(budgetId: state.pathParameters['id']!),
-        ),
-      ],
+    final container = _planContainer(
+      monthView: _makeReorderMonthView(),
+      categoryActions: categoryActions,
     );
 
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp.router(
-          theme: ThemeData.light(useMaterial3: true),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          routerConfig: router,
-        ),
-      ),
-    );
+    await tester.pumpWidget(_buildApp(container));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('budget-plan-menu')));
@@ -813,11 +719,11 @@ void main() {
     await tester.tap(find.widgetWithText(TextButton, 'Done'));
     await tester.pumpAndSettle();
 
-    expect(categoryActions.reorderedBudgetId, _budgetId);
+    expect(categoryActions.reorderedEntityId, _entityId);
     expect(
       categoryActions.reorderedCategoryIds,
-      _makeReorderSummary().categories.reversed
-          .map((category) => category.category.id.toString())
+      _groupsOf(_makeReorderMonthView()).reversed
+          .map((group) => group.category.id.toString())
           .toList(),
     );
     expect(find.byKey(const Key('budget-plan-menu')), findsOneWidget);

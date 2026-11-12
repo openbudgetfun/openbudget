@@ -1,13 +1,15 @@
 import 'dart:io';
 
+import 'package:openbudget_server/src/accounts/balance_verify_future_call.dart';
 import 'package:openbudget_server/src/agent/mcp/agent_mcp_route.dart';
 import 'package:openbudget_server/src/auth/apple_oauth_callback_route.dart';
 import 'package:openbudget_server/src/auth/email_sender.dart';
 import 'package:openbudget_server/src/auth/idp_settings.dart';
-import 'package:openbudget_server/src/fx_rates/fx_rate_service.dart';
+import 'package:openbudget_server/src/fx_rates/fx_service.dart';
 import 'package:openbudget_server/src/generated/serverpod.dart';
 import 'package:openbudget_server/src/institutions/institution_service.dart';
 import 'package:openbudget_server/src/logging/server_logging.dart';
+import 'package:openbudget_server/src/recurring_transactions/recurring_post_future_call.dart';
 import 'package:openbudget_server/src/web/routes/app_config_route.dart';
 import 'package:openbudget_server/src/web/routes/billing_webhook_routes.dart';
 import 'package:openbudget_server/src/web/routes/root.dart';
@@ -148,7 +150,7 @@ Future<void> run(List<String> args) async {
     );
   }
 
-  FxRateService.configure(
+  FxService.configure(
     apiKey: _readPassword(pod, 'currencyApiKey'),
     baseUrl: _readPassword(pod, 'currencyApiBaseUrl'),
   );
@@ -159,8 +161,24 @@ Future<void> run(List<String> args) async {
   // Ensure institution catalog seed data exists for account linking/search.
   await _seedInstitutions(pod);
 
-  // Keep persisted FX rates fresh for display-currency conversion.
-  FxRateService.startBackgroundRefresh(pod);
+  // Refresh today's daily FX rows every hour.
+  const fxRefreshIdentifier = 'fx-refresh-hourly';
+  await pod.futureCalls.cancel(fxRefreshIdentifier);
+  await pod.futureCalls
+      .callRecurring(identifier: fxRefreshIdentifier)
+      .every(const Duration(hours: 1))
+      .fxRefresh
+      .refresh();
+
+  // Repair cached balance drift at the next 03:00 UTC boundary.
+  await pod.futureCalls.cancel('balance-verify-nightly');
+  await pod.futureCalls
+      .callAtTime(
+        BalanceVerifyFutureCall.nextRun(DateTime.now()),
+        identifier: 'balance-verify-nightly',
+      )
+      .balanceVerify
+      .verify();
 
   // Charge due Solana subscriptions once an hour.
   const collectorIdentifier = 'solana-billing-collector';
@@ -170,6 +188,16 @@ Future<void> run(List<String> args) async {
       .every(const Duration(hours: 1))
       .solanaBillingCollector
       .collect();
+
+  // Post due recurring transactions across every entity once an hour. The
+  // stable identifier removes a stale schedule before replacing it, and the
+  // generated dispatch name survives restarts with the future-call table.
+  await pod.futureCalls.cancel(RecurringPostFutureCall.identifier);
+  await pod.futureCalls
+      .callRecurring(identifier: RecurringPostFutureCall.identifier)
+      .every(RecurringPostFutureCall.interval)
+      .recurringPost
+      .postDue();
 }
 
 String? _readPassword(Serverpod pod, String key) {

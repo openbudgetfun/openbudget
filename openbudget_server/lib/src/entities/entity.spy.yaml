@@ -1,0 +1,41 @@
+### A person, household or business whose money OpenBudget keeps: the root
+### that owns accounts, transactions, the envelope plan and the books.
+###
+### One entity is one set of books in one base currency.
+class: Entity
+table: entity
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ### The signed-in user who owns the entity.
+  ownerId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Restrict)
+  name: String
+  ### Fixed after creation.
+  kind: EntityKind
+  ### ISO 3166-1 alpha-2 country of residence or incorporation, upper case.
+  ### Picks the tax rule pack and the chart-of-accounts template.
+  countryCode: String
+  ### ISO 4217 base (functional) currency. Envelopes, reports, tax and the
+  ### books are kept in it. Fixed once the entity has a transaction.
+  baseCurrencyCode: String
+  ### IANA time zone, such as `Europe/London`. Defines "today" and which
+  ### calendar date an instant belongs to.
+  timeZone: String
+  accountingMode: AccountingMode, default=envelope
+  ### Month (1-12) the financial year ends in.
+  fiscalYearEndMonth: int
+  ### Day of fiscalYearEndMonth the financial year ends on.
+  fiscalYearEndDay: int
+  ### Whether the entity counts towards the owner's combined net worth.
+  includeInNetWorth: bool, default=true
+  ### For a sole trader or company: the owner's personal entity that the
+  ### business's profit, drawings and dividends feed.
+  linkedPersonalEntityId: UuidValue?, relation(parent=entity, onDelete=SetNull)
+  sortOrder: int, default=0
+  archivedAt: DateTime?
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  entity_owner_idx:
+    fields: ownerId, sortOrder
+  entity_linked_personal_idx:
+    fields: linkedPersonalEntityId

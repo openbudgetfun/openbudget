@@ -1,8 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
+import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auto_assign_provider.g.dart';
@@ -11,111 +9,75 @@ class AutoAssignItem extends Equatable {
   const AutoAssignItem({
     required this.envelopeId,
     required this.envelopeName,
-    required this.currentAllocatedCents,
-    required this.proposedAllocatedCents,
-    required this.addedCents,
+    required this.currentAllocatedMinor,
+    required this.proposedAllocatedMinor,
+    required this.addedMinor,
   });
 
   final String envelopeId;
   final String envelopeName;
-  final int currentAllocatedCents;
-  final int proposedAllocatedCents;
-  final int addedCents;
+  final int currentAllocatedMinor;
+  final int proposedAllocatedMinor;
+  final int addedMinor;
 
   @override
   List<Object?> get props => [
     envelopeId,
     envelopeName,
-    currentAllocatedCents,
-    proposedAllocatedCents,
-    addedCents,
+    currentAllocatedMinor,
+    proposedAllocatedMinor,
+    addedMinor,
   ];
 }
 
 class AutoAssignProposal extends Equatable {
   const AutoAssignProposal({
     required this.items,
-    required this.totalToAssignCents,
-    required this.totalAssignedCents,
+    required this.totalToAssignMinor,
+    required this.totalAssignedMinor,
   });
 
   final List<AutoAssignItem> items;
-  final int totalToAssignCents;
-  final int totalAssignedCents;
+  final int totalToAssignMinor;
+  final int totalAssignedMinor;
 
   @override
-  List<Object?> get props => [items, totalToAssignCents, totalAssignedCents];
+  List<Object?> get props => [items, totalToAssignMinor, totalAssignedMinor];
 }
 
-/// Computes an auto-assign proposal that distributes Ready to Assign money
-/// across underfunded envelopes based on their goals.
+/// Computes an auto-assign proposal from the month view alone: Ready to
+/// Assign money goes to underfunded envelopes, in envelope order. Nothing
+/// is written until [AutoAssignActions.execute] sends one `setAllocations`.
 @riverpod
-Future<AutoAssignProposal> autoAssignProposal(Ref ref, String budgetId) async {
-  final summary = await ref.watch(
-    budgetMonthlySummaryProvider(budgetId).future,
-  );
-  final goals = await ref.watch(budgetGoalsProvider(budgetId).future);
+Future<AutoAssignProposal> autoAssignProposal(Ref ref, String entityId) async {
+  final view = await ref.watch(budgetMonthProvider(entityId).future);
 
-  final readyToAssign = summary.readyToAssignCents;
-  if (readyToAssign <= 0 || goals.isEmpty) {
+  final readyToAssign = view.summary.readyToAssignMinor;
+  if (readyToAssign <= 0) {
     return const AutoAssignProposal(
       items: [],
-      totalToAssignCents: 0,
-      totalAssignedCents: 0,
+      totalToAssignMinor: 0,
+      totalAssignedMinor: 0,
     );
   }
 
-  // Build list of underfunded envelopes with their needed amounts.
-  final underfunded =
-      <({String envelopeId, String name, int needed, int current})>[];
-
-  for (final cat in summary.categories) {
-    for (final envData in cat.monthlyEnvelopes) {
-      final envelopeId = envData.envelope.id?.toString() ?? '';
-      final goal = goals[envelopeId];
-      if (goal == null) continue;
-
-      final needed = computeUnderfundedCents(
-        goal: goal,
-        budgetedCents: envData.allocatedCents,
-        availableCents: envData.availableCents,
-      );
-
-      if (needed > 0) {
-        underfunded.add((
-          envelopeId: envelopeId,
-          name: envData.envelope.name,
-          needed: needed,
-          current: envData.allocatedCents,
-        ));
-      }
-    }
-  }
-
-  if (underfunded.isEmpty) {
-    return AutoAssignProposal(
-      items: const [],
-      totalToAssignCents: readyToAssign,
-      totalAssignedCents: 0,
-    );
-  }
-
-  // Distribute money: fund each envelope up to its needed amount until we
-  // run out of Ready to Assign money.
   var remaining = readyToAssign;
   final items = <AutoAssignItem>[];
 
-  for (final entry in underfunded) {
+  for (final envelope in view.envelopes) {
     if (remaining <= 0) break;
+    final needed = envelope.goalUnderfundedMinor;
+    if (needed <= 0) continue;
 
-    final toAdd = remaining < entry.needed ? remaining : entry.needed;
+    final toAdd = remaining < needed ? remaining : needed;
+    final envelopeId = envelope.envelope.id?.toString() ?? '';
     items.add(
       AutoAssignItem(
-        envelopeId: entry.envelopeId,
-        envelopeName: entry.name,
-        currentAllocatedCents: entry.current,
-        proposedAllocatedCents: entry.current + toAdd,
-        addedCents: toAdd,
+        envelopeId: envelopeId,
+        envelopeName: envelope.envelope.name,
+        currentAllocatedMinor: envelope.allocatedMinor,
+        proposedAllocatedMinor: envelope.allocatedMinor + toAdd,
+        addedMinor: toAdd,
       ),
     );
     remaining -= toAdd;
@@ -123,13 +85,13 @@ Future<AutoAssignProposal> autoAssignProposal(Ref ref, String budgetId) async {
 
   final totalAssigned = items.fold<int>(
     0,
-    (sum, item) => sum + item.addedCents,
+    (sum, item) => sum + item.addedMinor,
   );
 
   return AutoAssignProposal(
     items: items,
-    totalToAssignCents: readyToAssign,
-    totalAssignedCents: totalAssigned,
+    totalToAssignMinor: readyToAssign,
+    totalAssignedMinor: totalAssigned,
   );
 }
 
@@ -138,35 +100,29 @@ class AutoAssignActions extends _$AutoAssignActions {
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
-  /// Executes the auto-assign proposal by upserting allocations for each item.
-  Future<int> execute({
-    required String budgetId,
+  /// Applies the proposal as one `setAllocations` call and returns the new
+  /// month view.
+  Future<BudgetMonthView?> execute({
+    required String entityId,
     required List<AutoAssignItem> items,
   }) async {
     state = const AsyncValue.loading();
     try {
-      final selectedMonth = ref.read(selectedMonthProvider(budgetId));
-      final year = selectedMonth.year;
-      final month = selectedMonth.month;
-      final actions = ref.read(monthlyAllocationActionsProvider.notifier);
-
-      var count = 0;
-      for (final item in items) {
-        await actions.upsertAllocation(
-          envelopeId: item.envelopeId,
-          budgetId: budgetId,
-          year: year,
-          month: month,
-          allocatedCents: item.proposedAllocatedCents,
-        );
-        count++;
-      }
-
-      if (ref.mounted) {
-        ref.invalidate(budgetMonthlySummaryProvider(budgetId));
-        state = const AsyncValue.data(null);
-      }
-      return count;
+      final view = await ref
+          .read(budgetMonthActionsProvider.notifier)
+          .setAllocations(
+            entityId: entityId,
+            allocations: items
+                .map(
+                  (item) => AllocationInput(
+                    envelopeId: UuidValue.fromString(item.envelopeId),
+                    allocatedMinor: item.proposedAllocatedMinor,
+                  ),
+                )
+                .toList(),
+          );
+      if (ref.mounted) state = const AsyncValue.data(null);
+      return view;
     } on Exception catch (e, st) {
       if (ref.mounted) {
         state = AsyncValue.error(e, st);

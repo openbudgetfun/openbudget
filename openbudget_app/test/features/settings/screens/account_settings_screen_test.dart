@@ -8,23 +8,25 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  const budgetId = 'test-budget-id';
+  const entityId = 'test-budget-id';
 
   Widget buildSubject() {
     final router = GoRouter(
-      initialLocation: '/budgets/$budgetId/more/settings/account-settings',
+      initialLocation: '/budgets/$entityId/more/settings/account-settings',
       routes: [
         GoRoute(
           name: accountSettingsRoute,
           path: accountSettingsPath,
-          builder: (context, state) =>
-              AccountSettingsScreen(budgetId: state.pathParameters['id']!),
+          builder: (context, state) => AccountSettingsScreen(
+            entityId: state.pathParameters['entityId']!,
+          ),
           routes: [
             GoRoute(
               name: deleteAccountRoute,
               path: 'delete',
-              builder: (context, state) =>
-                  DeleteAccountScreen(budgetId: state.pathParameters['id']!),
+              builder: (context, state) => DeleteAccountScreen(
+                entityId: state.pathParameters['entityId']!,
+              ),
             ),
           ],
         ),

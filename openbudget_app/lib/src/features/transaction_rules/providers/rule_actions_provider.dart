@@ -13,19 +13,19 @@ class RuleActions extends _$RuleActions {
 
   /// Creates a new transaction rule.
   Future<TransactionRule> createRule({
-    required String budgetId,
+    required String entityId,
     required String payeeId,
     required String targetEnvelopeId,
   }) async {
     final client = ref.read(serverpodClientProvider);
     try {
       final rule = await client.transactionRule.create(
-        UuidValue.fromString(budgetId),
+        UuidValue.fromString(entityId),
         UuidValue.fromString(payeeId),
         UuidValue.fromString(targetEnvelopeId),
       );
       if (ref.mounted) {
-        ref.invalidate(ruleListProvider(budgetId));
+        ref.invalidate(ruleListProvider(entityId));
       }
       return rule;
     } on Exception catch (e, st) {
@@ -40,7 +40,7 @@ class RuleActions extends _$RuleActions {
   Future<TransactionRule> toggleRule({
     required String ruleId,
     required bool enabled,
-    required String budgetId,
+    required String entityId,
   }) async {
     final client = ref.read(serverpodClientProvider);
     try {
@@ -49,7 +49,7 @@ class RuleActions extends _$RuleActions {
         enabled: enabled,
       );
       if (ref.mounted) {
-        ref.invalidate(ruleListProvider(budgetId));
+        ref.invalidate(ruleListProvider(entityId));
       }
       return rule;
     } on Exception catch (e, st) {
@@ -63,7 +63,7 @@ class RuleActions extends _$RuleActions {
   /// Deletes a transaction rule.
   Future<void> deleteRule({
     required String ruleId,
-    required String budgetId,
+    required String entityId,
   }) async {
     final client = ref.read(serverpodClientProvider);
     try {
@@ -71,7 +71,7 @@ class RuleActions extends _$RuleActions {
         UuidValue.fromString(ruleId),
       );
       if (ref.mounted) {
-        ref.invalidate(ruleListProvider(budgetId));
+        ref.invalidate(ruleListProvider(entityId));
       }
     } on Exception catch (e, st) {
       if (ref.mounted) {

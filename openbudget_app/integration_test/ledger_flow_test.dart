@@ -3,7 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_repository.dart';
 import 'package:openbudget_app/src/features/ledger/screens/books_screen.dart';
 import 'package:openbudget_app/src/features/ledger/screens/journal_detail_screen.dart';
@@ -12,49 +13,82 @@ import 'package:openbudget_app/src/features/more/screens/more_screen.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_repository.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
 import 'common/patrol_helpers.dart';
 import 'common/test_data.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000901';
-final _budgetUuid = UuidValue.fromString(_budgetId);
-final _ownerUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000902',
-);
+const String _entityId = TestData.companyEntityId;
+final UuidValue _entityUuid = UuidValue.fromString(_entityId);
+final UuidValue _ownerUuid = UuidValue.fromString(TestData.ownerId);
 
-const _bankAccountId = '00000000-0000-0000-0000-000000000911';
-const _salesAccountId = '00000000-0000-0000-0000-000000000912';
+const String _bankAccountId = '00000000-0000-0000-0000-000000000911';
+const String _salesAccountId = '00000000-0000-0000-0000-000000000912';
 
-var _accountingMode = 'envelope';
+/// Flipped by the fake [LedgerRepository.enableLedger], so the entity the
+/// More screen reads switches to ledger books mid-flow.
+// Flipped by the fake enableLedger, so the entity the More screen reads
+// switches to ledger books mid-flow.
+AccountingMode _accountingMode = AccountingMode.envelope;
 
-Budget _makeBudget() => Budget(
-  id: _budgetUuid,
-  name: TestData.companyBudgetName,
-  currencyCode: 'GBP',
-  ownerId: _ownerUuid,
+Entity _makeEntity() => Entity(
+  id: _entityUuid,
+  name: TestData.companyEntityName,
+  kind: EntityKind.company,
+  countryCode: 'GB',
+  baseCurrencyCode: 'GBP',
+  timeZone: 'Europe/London',
   accountingMode: _accountingMode,
+  fiscalYearEndMonth: 4,
+  fiscalYearEndDay: 5,
+  ownerId: _ownerUuid,
   createdAt: DateTime.utc(2026),
 );
 
-LedgerAccount _account(String id, String code, String name, String type) =>
-    LedgerAccount(
-      id: UuidValue.fromString(id),
-      budgetId: _budgetUuid,
-      code: code,
-      name: name,
-      type: type,
-      createdAt: DateTime.utc(2026),
-    );
+/// The month view the journal editor reads its functional currency from.
+BudgetMonthView _makeMonthView() => BudgetMonthView(
+  entityId: _entityUuid,
+  month: 202611,
+  currencyCode: 'GBP',
+  summary: BudgetMonthSummary(
+    month: 202611,
+    incomeMinor: 0,
+    uncategorizedMinor: 0,
+    fxDifferenceMinor: 0,
+    allocatedMinor: 0,
+    activityMinor: 0,
+    overspentLastMonthMinor: 0,
+    assignedInFutureMinor: 0,
+    readyToAssignMinor: 0,
+    availableMinor: 0,
+  ),
+  categories: const [],
+  envelopes: const [],
+);
+
+LedgerAccount _account(
+  String id,
+  String code,
+  String name,
+  LedgerAccountType type,
+) => LedgerAccount(
+  id: UuidValue.fromString(id),
+  entityId: _entityUuid,
+  code: code,
+  name: name,
+  type: type,
+  createdAt: DateTime.utc(2026),
+);
 
 /// A fake books backend: stores drafts, lines and postings in memory and
 /// computes the trial balance from its posted journals, so the flow sees
 /// the entries it made.
 class FakeBooksRepository implements LedgerRepository {
   final accounts = <LedgerAccount>[
-    _account(_bankAccountId, '1000', 'Bank', 'asset'),
-    _account(_salesAccountId, '4000', 'Sales', 'income'),
+    _account(_bankAccountId, '1000', 'Bank', LedgerAccountType.asset),
+    _account(_salesAccountId, '4000', 'Sales', LedgerAccountType.income),
   ];
   final journals = <Journal>[];
   final linesByJournal = <String, List<JournalLineInput>>{};
@@ -67,24 +101,24 @@ class FakeBooksRepository implements LedgerRepository {
   int nextJournalNumber = 1;
 
   @override
-  Future<Budget> enableLedger(String budgetId) async {
-    _accountingMode = 'ledger';
-    return _makeBudget();
+  Future<Entity> enableLedger(String entityId) async {
+    _accountingMode = AccountingMode.ledger;
+    return _makeEntity();
   }
 
   @override
   Future<List<LedgerAccount>> listAccounts(
-    String budgetId, {
+    String entityId, {
     required bool includeArchived,
   }) async => accounts;
 
   @override
   Future<LedgerAccount> createAccount({
-    required String budgetId,
+    required String entityId,
     required String code,
     required String name,
-    required String type,
-    String? systemRole,
+    required LedgerAccountType type,
+    LedgerSystemRole? systemRole,
     String? currencyCode,
     String? taxCategoryCode,
   }) => throw UnimplementedError();
@@ -95,11 +129,11 @@ class FakeBooksRepository implements LedgerRepository {
 
   @override
   Future<Journal> saveDraftJournal({
-    required String budgetId,
+    required String entityId,
     required DateTime date,
     required List<JournalLineInput> lines,
     required String reference,
-    required String source,
+    required JournalSource source,
     String? journalId,
     String? narration,
   }) async {
@@ -120,11 +154,11 @@ class FakeBooksRepository implements LedgerRepository {
       id: UuidValue.fromString(
         '00000000-0000-0000-0000-0000000009${nextJournalNumber.toString().padLeft(2, '0')}',
       ),
-      budgetId: _budgetUuid,
+      entityId: _entityUuid,
       date: date,
       reference: reference,
       narration: narration,
-      status: 'draft',
+      status: JournalStatus.draft,
       createdAt: DateTime.utc(2026),
     );
     nextJournalNumber++;
@@ -142,7 +176,7 @@ class FakeBooksRepository implements LedgerRepository {
   @override
   Future<Journal> postJournal(String journalId) async =>
       journals.firstWhere((j) => j.id?.toString() == journalId)
-        ..status = 'posted'
+        ..status = JournalStatus.posted
         ..postedAt = DateTime.utc(2026, 11, 6, 9);
 
   @override
@@ -151,15 +185,15 @@ class FakeBooksRepository implements LedgerRepository {
     required DateTime date,
   }) async {
     journals.firstWhere((j) => j.id?.toString() == journalId).status =
-        'reversed';
+        JournalStatus.reversed;
     final reversal = Journal(
       id: UuidValue.fromString(
         '00000000-0000-0000-0000-0000000009${nextJournalNumber.toString().padLeft(2, '0')}',
       ),
-      budgetId: _budgetUuid,
+      entityId: _entityUuid,
       date: date,
       reference: 'JB-2026-000${nextJournalNumber + 1}',
-      status: 'posted',
+      status: JournalStatus.posted,
       reversalOfJournalId: UuidValue.fromString(journalId),
       createdAt: DateTime.utc(2026, 11, 6),
     );
@@ -173,11 +207,11 @@ class FakeBooksRepository implements LedgerRepository {
           currencyCode: line.currencyCode,
           debitMinor: line.creditMinor,
           creditMinor: line.debitMinor,
-          functionalDebitMinor: line.functionalCreditMinor,
-          functionalCreditMinor: line.functionalDebitMinor,
-          exchangeRate: line.exchangeRate,
-          rateDate: date,
-          rateSource: 'manual',
+          baseDebitMinor: line.baseCreditMinor,
+          baseCreditMinor: line.baseDebitMinor,
+          fxRate: line.fxRate,
+          fxRateDate: date,
+          fxRateSource: FxRateSource.manual,
         ),
     ];
     return reversal;
@@ -185,7 +219,7 @@ class FakeBooksRepository implements LedgerRepository {
 
   @override
   Future<List<Journal>> listJournals(
-    String budgetId, {
+    String entityId, {
     DateTime? fromDate,
     DateTime? toDate,
   }) async => journals;
@@ -205,30 +239,29 @@ class FakeBooksRepository implements LedgerRepository {
         debitMinor: line.debitMinor,
         creditMinor: line.creditMinor,
         currencyCode: line.currencyCode,
-        functionalDebitMinor: line.functionalDebitMinor,
-        functionalCreditMinor: line.functionalCreditMinor,
-        exchangeRate: line.exchangeRate,
-        rateDate: line.rateDate,
-        rateSource: line.rateSource,
+        fxRateDate: line.fxRateDate ?? DateTime.utc(2026),
+        baseDebitMinor: line.baseDebitMinor,
+        baseCreditMinor: line.baseCreditMinor,
+        fxRate: line.fxRate,
       ),
   ];
 
   @override
   Future<LedgerPeriodLock> setLockDate(
-    String budgetId,
+    String entityId,
     DateTime lockDate,
   ) async => lock = LedgerPeriodLock(
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000904'),
-    budgetId: _budgetUuid,
+    entityId: _entityUuid,
     lockDate: lockDate,
     setBy: _ownerUuid,
   );
 
   @override
-  Future<LedgerPeriodLock?> getLockDate(String budgetId) async => lock;
+  Future<LedgerPeriodLock?> getLockDate(String entityId) async => lock;
 
   @override
-  Future<TrialBalanceView> trialBalance(String budgetId, DateTime asOf) async {
+  Future<TrialBalanceView> trialBalance(String entityId, DateTime asOf) async {
     final debitByAccount = <String, int>{};
     final creditByAccount = <String, int>{};
     var totalDebit = 0;
@@ -237,7 +270,8 @@ class FakeBooksRepository implements LedgerRepository {
     for (final journal in journals) {
       // Posted journals keep their lines while reversed; the reversal's own
       // posted lines undo them.
-      if (journal.status != 'posted' && journal.status != 'reversed') {
+      if (journal.status != JournalStatus.posted &&
+          journal.status != JournalStatus.reversed) {
         continue;
       }
       if (journal.date.isAfter(asOf)) continue;
@@ -260,6 +294,7 @@ class FakeBooksRepository implements LedgerRepository {
     final rows = [
       for (final code in debitByAccount.keys.toList()..sort())
         TrialBalanceRowView(
+          ledgerAccountId: accounts.firstWhere((a) => a.code == code).id!,
           accountCode: code,
           accountName: accounts.firstWhere((a) => a.code == code).name,
           accountType: accounts.firstWhere((a) => a.code == code).type,
@@ -269,7 +304,7 @@ class FakeBooksRepository implements LedgerRepository {
         ),
     ];
     return TrialBalanceView(
-      budgetId: _budgetUuid,
+      entityId: _entityUuid,
       currencyCode: 'GBP',
       asOf: asOf,
       rows: rows,
@@ -279,31 +314,22 @@ class FakeBooksRepository implements LedgerRepository {
   }
 }
 
-/// The tax fake only answers the profile lookup that gates the Books entry.
+/// The books tile gates on the entity alone now; the fake answers the
+/// lookups the screens make while the flow runs.
 class FakeCompanyTaxRepository implements TaxRepository {
   @override
-  Future<TaxProfileRecord?> getProfile(String budgetId) async =>
-      TaxProfileRecord(
-        id: UuidValue.fromString('00000000-0000-0000-0000-000000000903'),
-        budgetId: _budgetUuid,
-        jurisdiction: 'GB',
-        entityKind: 'company',
-        profileJson: '{"entityKind":"company"}',
-        createdAt: DateTime.utc(2026),
-        updatedAt: DateTime.utc(2026, 6),
-      );
+  Future<TaxProfileRecord?> getProfile(String entityId) async => null;
 
   @override
   Future<TaxProfileRecord> saveProfile({
-    required String budgetId,
+    required String entityId,
     required String jurisdiction,
     required String entityKind,
     required String profileJson,
-    String? linkedBudgetId,
   }) => throw UnimplementedError();
 
   @override
-  Future<List<TaxCategoryView>> listCategories(String budgetId) =>
+  Future<List<TaxCategoryView>> listCategories(String entityId) =>
       throw UnimplementedError();
 
   @override
@@ -313,45 +339,46 @@ class FakeCompanyTaxRepository implements TaxRepository {
   }) => throw UnimplementedError();
 
   @override
-  Future<Transaction> setTransactionTax({
-    required String transactionId,
+  Future<TransactionView> setLineTax({
+    required String transactionLineId,
     String? code,
     int? businessUsePercent,
-    int? salesTaxCents,
+    int? salesTaxMinor,
   }) => throw UnimplementedError();
 
   @override
-  Future<TaxReportView> getReport(String budgetId, int startYear) =>
+  Future<TaxReportView> getReport(String entityId, int startYear) =>
       throw UnimplementedError();
 }
 
 Widget _buildApp(FakeBooksRepository books) {
   final router = GoRouter(
-    initialLocation: morePath.replaceFirst(':id', _budgetId),
+    initialLocation: morePath.replaceFirst(':entityId', _entityId),
     routes: [
       GoRoute(
         name: moreRoute,
         path: morePath,
         builder: (context, state) =>
-            MoreScreen(budgetId: state.pathParameters['id']!),
+            MoreScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: booksRoute,
         path: booksPath,
         builder: (context, state) =>
-            BooksScreen(budgetId: state.pathParameters['id']!),
+            BooksScreen(entityId: state.pathParameters['entityId']!),
         routes: [
           GoRoute(
             name: journalNewRoute,
             path: 'journals/new',
-            builder: (context, state) =>
-                JournalEditorScreen(budgetId: state.pathParameters['id']!),
+            builder: (context, state) => JournalEditorScreen(
+              entityId: state.pathParameters['entityId']!,
+            ),
           ),
           GoRoute(
             name: journalEditRoute,
             path: 'journals/:journalId/edit',
             builder: (context, state) => JournalEditorScreen(
-              budgetId: state.pathParameters['id']!,
+              entityId: state.pathParameters['entityId']!,
               journalId: state.pathParameters['journalId'],
             ),
           ),
@@ -359,7 +386,7 @@ Widget _buildApp(FakeBooksRepository books) {
             name: journalDetailRoute,
             path: 'journals/:journalId',
             builder: (context, state) => JournalDetailScreen(
-              budgetId: state.pathParameters['id']!,
+              entityId: state.pathParameters['entityId']!,
               journalId: state.pathParameters['journalId']!,
             ),
           ),
@@ -370,7 +397,10 @@ Widget _buildApp(FakeBooksRepository books) {
 
   return ProviderScope(
     overrides: [
-      budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
+      entityDetailProvider.overrideWith((ref, id) async => _makeEntity()),
+      budgetMonthProvider.overrideWith(
+        (ref, entityId) async => _makeMonthView(),
+      ),
       taxRepositoryProvider.overrideWithValue(FakeCompanyTaxRepository()),
       ledgerRepositoryProvider.overrideWithValue(books),
     ],
@@ -386,7 +416,7 @@ Widget _buildApp(FakeBooksRepository books) {
 
 void main() {
   patrolWidgetTest(
-    'enables books on a company budget, posts a journal, sees the trial '
+    'enables books on a company entity, posts a journal, sees the trial '
     'balance and reverses the journal',
     ($) async {
       final tester = $.tester;
@@ -427,10 +457,7 @@ void main() {
       await tester.tap(editor.postConfirmButton);
       await tester.pumpAndSettle();
 
-      expect(
-        books.journals.single.status,
-        TestData.postedLabel.toLowerCase(),
-      );
+      expect(books.journals.single.status, JournalStatus.posted);
 
       // The posted journal shows in the trial balance.
       await booksTab.openTrialBalance();
@@ -466,14 +493,17 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(detail.reversedChip, findsOneWidget);
-      expect(
-        books.journals.first.status,
-        TestData.postedLabel.toLowerCase(),
+      // The fake keeps the reversal entry in front; name both journals by
+      // their role so the assertion does not depend on list order.
+      final original = books.journals.singleWhere(
+        (j) => j.reversalOfJournalId == null,
       );
-      expect(
-        books.journals.first.reversalOfJournalId?.toString(),
-        books.journals.last.id?.toString(),
+      final reversal = books.journals.singleWhere(
+        (j) => j.reversalOfJournalId != null,
       );
+      expect(original.status, JournalStatus.reversed);
+      expect(reversal.status, JournalStatus.posted);
+      expect(reversal.reversalOfJournalId?.toString(), original.id?.toString());
 
       // A saved draft reopens with its stored lines and re-save replaces
       // the same draft instead of creating a second one.

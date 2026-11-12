@@ -72,6 +72,12 @@ enum CurrencyCode {
   /// Mexican Peso
   mxn('MXN', 'Mexican Peso', r'MX$', 2),
 
+  /// Kuwaiti Dinar
+  kwd('KWD', 'Kuwaiti Dinar', 'KWD ', 3),
+
+  /// Bahraini Dinar
+  bhd('BHD', 'Bahraini Dinar', 'BHD ', 3),
+
   /// Bitcoin
   btc('BTC', 'Bitcoin', '\u20BF', 8);
 

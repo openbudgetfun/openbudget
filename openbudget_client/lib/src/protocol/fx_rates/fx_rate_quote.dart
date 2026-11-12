@@ -12,7 +12,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// Currency exchange rate pair used in API responses.
+/// One currency's rate against the snapshot base.
 abstract class FxRateQuote
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   FxRateQuote._({
@@ -22,26 +22,27 @@ abstract class FxRateQuote
 
   factory FxRateQuote({
     required String currencyCode,
-    required double rate,
+    required String rate,
   }) = _FxRateQuoteImpl;
 
   factory FxRateQuote.fromJson(Map<String, dynamic> jsonSerialization) {
     return FxRateQuote(
       currencyCode: jsonSerialization['currencyCode'] as String,
-      rate: (jsonSerialization['rate'] as num).toDouble(),
+      rate: jsonSerialization['rate'] as String,
     );
   }
 
   String currencyCode;
 
-  double rate;
+  /// Units of currencyCode per one unit of the base, exact decimal string.
+  String rate;
 
   /// Returns a shallow copy of this [FxRateQuote]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
   FxRateQuote copyWith({
     String? currencyCode,
-    double? rate,
+    String? rate,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -70,7 +71,7 @@ abstract class FxRateQuote
 class _FxRateQuoteImpl extends FxRateQuote {
   _FxRateQuoteImpl({
     required String currencyCode,
-    required double rate,
+    required String rate,
   }) : super._(
          currencyCode: currencyCode,
          rate: rate,
@@ -82,7 +83,7 @@ class _FxRateQuoteImpl extends FxRateQuote {
   @override
   FxRateQuote copyWith({
     String? currencyCode,
-    double? rate,
+    String? rate,
   }) {
     return FxRateQuote(
       currencyCode: currencyCode ?? this.currencyCode,

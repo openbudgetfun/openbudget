@@ -8,12 +8,21 @@ part of 'account_actions_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Create, edit, close and delete actions for accounts, plus valuations for
+/// track-by-value accounts. Opening balances and dates become an opening
+/// transaction or a first valuation on the server.
 
 @ProviderFor(AccountActions)
 final accountActionsProvider = AccountActionsProvider._();
 
+/// Create, edit, close and delete actions for accounts, plus valuations for
+/// track-by-value accounts. Opening balances and dates become an opening
+/// transaction or a first valuation on the server.
 final class AccountActionsProvider
     extends $AsyncNotifierProvider<AccountActions, void> {
+  /// Create, edit, close and delete actions for accounts, plus valuations for
+  /// track-by-value accounts. Opening balances and dates become an opening
+  /// transaction or a first valuation on the server.
   AccountActionsProvider._()
     : super(
         from: null,
@@ -33,7 +42,11 @@ final class AccountActionsProvider
   AccountActions create() => AccountActions();
 }
 
-String _$accountActionsHash() => r'7986829d32c0a6235aa15450ce9bdf7825f9c2d2';
+String _$accountActionsHash() => r'68c2fd282ad921862189755ca08b058399820244';
+
+/// Create, edit, close and delete actions for accounts, plus valuations for
+/// track-by-value accounts. Opening balances and dates become an opening
+/// transaction or a first valuation on the server.
 
 abstract class _$AccountActions extends $AsyncNotifier<void> {
   FutureOr<void> build();

@@ -8,14 +8,16 @@ part of 'budget_goals_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Fetches all envelope goals for a budget and returns them as a map
-/// keyed by envelope ID string for quick lookup.
+/// All envelope goals of the entity, keyed by envelope id. The month view
+/// already carries each envelope's goal; this covers screens that edit
+/// goals across envelopes.
 
 @ProviderFor(budgetGoals)
 final budgetGoalsProvider = BudgetGoalsFamily._();
 
-/// Fetches all envelope goals for a budget and returns them as a map
-/// keyed by envelope ID string for quick lookup.
+/// All envelope goals of the entity, keyed by envelope id. The month view
+/// already carries each envelope's goal; this covers screens that edit
+/// goals across envelopes.
 
 final class BudgetGoalsProvider
     extends
@@ -27,8 +29,9 @@ final class BudgetGoalsProvider
     with
         $FutureModifier<Map<String, EnvelopeGoal>>,
         $FutureProvider<Map<String, EnvelopeGoal>> {
-  /// Fetches all envelope goals for a budget and returns them as a map
-  /// keyed by envelope ID string for quick lookup.
+  /// All envelope goals of the entity, keyed by envelope id. The month view
+  /// already carries each envelope's goal; this covers screens that edit
+  /// goals across envelopes.
   BudgetGoalsProvider._({
     required BudgetGoalsFamily super.from,
     required String super.argument,
@@ -73,10 +76,11 @@ final class BudgetGoalsProvider
   }
 }
 
-String _$budgetGoalsHash() => r'b5ac89cdc7c29235195212d8f82d8d38118c9bbf';
+String _$budgetGoalsHash() => r'0d8be0a3f5ac03f63b7299d3cc9d6cbc89c97503';
 
-/// Fetches all envelope goals for a budget and returns them as a map
-/// keyed by envelope ID string for quick lookup.
+/// All envelope goals of the entity, keyed by envelope id. The month view
+/// already carries each envelope's goal; this covers screens that edit
+/// goals across envelopes.
 
 final class BudgetGoalsFamily extends $Family
     with
@@ -90,11 +94,12 @@ final class BudgetGoalsFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Fetches all envelope goals for a budget and returns them as a map
-  /// keyed by envelope ID string for quick lookup.
+  /// All envelope goals of the entity, keyed by envelope id. The month view
+  /// already carries each envelope's goal; this covers screens that edit
+  /// goals across envelopes.
 
-  BudgetGoalsProvider call(String budgetId) =>
-      BudgetGoalsProvider._(argument: budgetId, from: this);
+  BudgetGoalsProvider call(String entityId) =>
+      BudgetGoalsProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'budgetGoalsProvider';

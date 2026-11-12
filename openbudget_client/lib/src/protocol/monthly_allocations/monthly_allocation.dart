@@ -12,17 +12,16 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// Per-month allocation for an envelope, enabling monthly budget cycles.
+/// Money assigned to an envelope for one month. The only stored figure of
+/// the envelope plan; activity, carryover and available are derived.
 abstract class MonthlyAllocation
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   MonthlyAllocation._({
     this.id,
+    required this.entityId,
     required this.envelopeId,
-    required this.budgetId,
-    required this.year,
     required this.month,
-    required this.allocatedCents,
-    required this.carryoverCents,
+    required this.allocatedMinor,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : createdAt = createdAt ?? DateTime.now(),
@@ -30,12 +29,10 @@ abstract class MonthlyAllocation
 
   factory MonthlyAllocation({
     _isc.UuidValue? id,
+    required _isc.UuidValue entityId,
     required _isc.UuidValue envelopeId,
-    required _isc.UuidValue budgetId,
-    required int year,
     required int month,
-    required int allocatedCents,
-    required int carryoverCents,
+    required int allocatedMinor,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _MonthlyAllocationImpl;
@@ -45,16 +42,14 @@ abstract class MonthlyAllocation
       id: jsonSerialization['id'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      entityId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
+      ),
       envelopeId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['envelopeId'],
       ),
-      budgetId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
-      ),
-      year: jsonSerialization['year'] as int,
       month: jsonSerialization['month'] as int,
-      allocatedCents: jsonSerialization['allocatedCents'] as int,
-      carryoverCents: jsonSerialization['carryoverCents'] as int,
+      allocatedMinor: jsonSerialization['allocatedMinor'] as int,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -69,21 +64,16 @@ abstract class MonthlyAllocation
   /// the id will be null.
   _isc.UuidValue? id;
 
+  _isc.UuidValue entityId;
+
   _isc.UuidValue envelopeId;
 
-  _isc.UuidValue budgetId;
-
-  /// The year of the budget month (e.g. 2026).
-  int year;
-
-  /// The month of the budget month (1-12).
+  /// Budget month as yyyymm, such as 202611.
   int month;
 
-  /// Amount allocated to this envelope for this month, in integer cents.
-  int allocatedCents;
-
-  /// Amount carried over from the previous month, in integer cents.
-  int carryoverCents;
+  /// Assigned amount in base-currency minor units. Negative when more was
+  /// moved out than was assigned this month. Never 0: a zero deletes the row.
+  int allocatedMinor;
 
   DateTime createdAt;
 
@@ -94,12 +84,10 @@ abstract class MonthlyAllocation
   @_isc.useResult
   MonthlyAllocation copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? entityId,
     _isc.UuidValue? envelopeId,
-    _isc.UuidValue? budgetId,
-    int? year,
     int? month,
-    int? allocatedCents,
-    int? carryoverCents,
+    int? allocatedMinor,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -108,12 +96,10 @@ abstract class MonthlyAllocation
     return {
       '__className__': 'MonthlyAllocation',
       if (id != null) 'id': id?.toJson(),
+      'entityId': entityId.toJson(),
       'envelopeId': envelopeId.toJson(),
-      'budgetId': budgetId.toJson(),
-      'year': year,
       'month': month,
-      'allocatedCents': allocatedCents,
-      'carryoverCents': carryoverCents,
+      'allocatedMinor': allocatedMinor,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -124,12 +110,10 @@ abstract class MonthlyAllocation
     return {
       '__className__': 'MonthlyAllocation',
       if (id != null) 'id': id?.toJson(),
+      'entityId': entityId.toJson(),
       'envelopeId': envelopeId.toJson(),
-      'budgetId': budgetId.toJson(),
-      'year': year,
       'month': month,
-      'allocatedCents': allocatedCents,
-      'carryoverCents': carryoverCents,
+      'allocatedMinor': allocatedMinor,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -144,22 +128,18 @@ abstract class MonthlyAllocation
 class _MonthlyAllocationImpl extends MonthlyAllocation {
   _MonthlyAllocationImpl({
     _isc.UuidValue? id,
+    required _isc.UuidValue entityId,
     required _isc.UuidValue envelopeId,
-    required _isc.UuidValue budgetId,
-    required int year,
     required int month,
-    required int allocatedCents,
-    required int carryoverCents,
+    required int allocatedMinor,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
          id: id,
+         entityId: entityId,
          envelopeId: envelopeId,
-         budgetId: budgetId,
-         year: year,
          month: month,
-         allocatedCents: allocatedCents,
-         carryoverCents: carryoverCents,
+         allocatedMinor: allocatedMinor,
          createdAt: createdAt,
          updatedAt: updatedAt,
        );
@@ -170,23 +150,19 @@ class _MonthlyAllocationImpl extends MonthlyAllocation {
   @override
   MonthlyAllocation copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? entityId,
     _isc.UuidValue? envelopeId,
-    _isc.UuidValue? budgetId,
-    int? year,
     int? month,
-    int? allocatedCents,
-    int? carryoverCents,
+    int? allocatedMinor,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return MonthlyAllocation(
       id: id is _isc.UndefinedSentinel ? this.id : id,
+      entityId: entityId ?? this.entityId,
       envelopeId: envelopeId ?? this.envelopeId,
-      budgetId: budgetId ?? this.budgetId,
-      year: year ?? this.year,
       month: month ?? this.month,
-      allocatedCents: allocatedCents ?? this.allocatedCents,
-      carryoverCents: carryoverCents ?? this.carryoverCents,
+      allocatedMinor: allocatedMinor ?? this.allocatedMinor,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

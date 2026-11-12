@@ -35,9 +35,9 @@ void main() {
   });
 
   group('category catalog', () {
-    final individual = ngRules.categoriesFor(TaxEntityKind.individual);
-    final soleTrader = ngRules.categoriesFor(TaxEntityKind.soleTrader);
-    final company = ngRules.categoriesFor(TaxEntityKind.company);
+    final individual = ngRules.categoriesFor(EntityKind.individual);
+    final soleTrader = ngRules.categoriesFor(EntityKind.soleTrader);
+    final company = ngRules.categoriesFor(EntityKind.company);
     final all = [...individual, ...soleTrader, ...company];
 
     test('uses the entity prefix', () {
@@ -127,7 +127,7 @@ void main() {
       expect(
         () => ngRules.report(
           TaxInput(
-            profile: const GbTaxProfile(entityKind: TaxEntityKind.individual),
+            profile: const GbTaxProfile(entityKind: EntityKind.individual),
             year: ngRules.taxYear(2026),
             entries: const [],
           ),

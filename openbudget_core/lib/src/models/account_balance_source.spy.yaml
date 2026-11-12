@@ -1,0 +1,9 @@
+### Where an account's balance comes from.
+enum: AccountBalanceSource
+serialized: byName
+values:
+  ### The sum of the account's transaction amounts.
+  - transactions
+  ### The latest account valuation, for things that are priced rather than
+  ### transacted.
+  - valuations

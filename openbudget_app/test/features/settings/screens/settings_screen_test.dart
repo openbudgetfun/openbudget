@@ -4,22 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
-final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000001');
+import '../../../fixtures/budget_month.dart';
 
-Budget _makeBudget({String name = 'My Budget', String currencyCode = 'USD'}) =>
-    Budget(name: name, currencyCode: currencyCode, ownerId: _ownerUuid);
+const _entityId = 'test-budget-id';
+Entity _makeBudget({String name = 'My Budget', String currencyCode = 'USD'}) =>
+    testEntity(name: name, baseCurrencyCode: currencyCode);
 
 Widget _materialShell() => MaterialApp(
   theme: OpenBudgetTheme.light,
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
-  home: const SettingsScreen(budgetId: _budgetId),
+  home: const SettingsScreen(entityId: _entityId),
 );
 
 void main() {
@@ -37,8 +37,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            budgetDetailProvider.overrideWith(
-              (ref, budgetId) => throw Exception('Could not load settings'),
+            entityDetailProvider.overrideWith(
+              (ref, entityId) => throw Exception('Could not load settings'),
             ),
           ],
           child: _materialShell(),
@@ -53,8 +53,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            budgetDetailProvider.overrideWith(
-              (ref, budgetId) async => _makeBudget(name: 'Family Plan'),
+            entityDetailProvider.overrideWith(
+              (ref, entityId) async => _makeBudget(name: 'Family Plan'),
             ),
           ],
           child: _materialShell(),
@@ -87,8 +87,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            budgetDetailProvider.overrideWith(
-              (ref, budgetId) async => _makeBudget(),
+            entityDetailProvider.overrideWith(
+              (ref, entityId) async => _makeBudget(),
             ),
           ],
           child: _materialShell(),

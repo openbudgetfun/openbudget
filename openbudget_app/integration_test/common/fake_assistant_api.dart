@@ -29,13 +29,13 @@ class FakeAssistantApi implements AssistantApi {
 
   @override
   Stream<AgentEvent> chat({
-    required String budgetId,
+    required String entityId,
     required String message,
     String? conversationId,
   }) => Stream.fromIterable(events);
 
   @override
-  Future<List<AgentConversation>> listConversations(String budgetId) async =>
+  Future<List<AgentConversation>> listConversations(String entityId) async =>
       [];
 
   @override
@@ -66,7 +66,7 @@ class FakeAssistantApi implements AssistantApi {
 
   @override
   Future<List<AgentProposal>> listProposals(
-    String budgetId, {
+    String entityId, {
     bool pendingOnly = true,
   }) async => [
     for (final proposal in proposals)
@@ -134,7 +134,7 @@ List<AgentEvent> _defaultEvents() {
 AgentProposal _pendingProposal() => AgentProposal(
   id: UuidValue.fromString(TestData.assistantProposalId),
   userId: UuidValue.fromString(TestData.assistantUserId),
-  budgetId: UuidValue.fromString(TestData.assistantBudgetId),
+  entityId: UuidValue.fromString(TestData.assistantEntityId),
   conversationId: UuidValue.fromString(TestData.assistantConversationId),
   kind: AgentProposalKind.moveMoney,
   payloadJson: '{}',

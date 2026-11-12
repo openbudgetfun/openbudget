@@ -8,12 +8,24 @@ part of 'transaction_actions_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Every transaction write goes through `transaction.*` and relies on
+/// `EntityChangedEvent` for refreshes; the local invalidations keep tests
+/// and offline flows correct too. The server computes base amounts, FX
+/// sources and balances; the app never converts.
 
 @ProviderFor(TransactionActions)
 final transactionActionsProvider = TransactionActionsProvider._();
 
+/// Every transaction write goes through `transaction.*` and relies on
+/// `EntityChangedEvent` for refreshes; the local invalidations keep tests
+/// and offline flows correct too. The server computes base amounts, FX
+/// sources and balances; the app never converts.
 final class TransactionActionsProvider
     extends $NotifierProvider<TransactionActions, AsyncValue<void>> {
+  /// Every transaction write goes through `transaction.*` and relies on
+  /// `EntityChangedEvent` for refreshes; the local invalidations keep tests
+  /// and offline flows correct too. The server computes base amounts, FX
+  /// sources and balances; the app never converts.
   TransactionActionsProvider._()
     : super(
         from: null,
@@ -42,7 +54,12 @@ final class TransactionActionsProvider
 }
 
 String _$transactionActionsHash() =>
-    r'34956ed4033f6e964a3d72e2068352c893bfb805';
+    r'3b61747049264b9c15174ccf70f849fd87b3dc10';
+
+/// Every transaction write goes through `transaction.*` and relies on
+/// `EntityChangedEvent` for refreshes; the local invalidations keep tests
+/// and offline flows correct too. The server computes base amounts, FX
+/// sources and balances; the app never converts.
 
 abstract class _$TransactionActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

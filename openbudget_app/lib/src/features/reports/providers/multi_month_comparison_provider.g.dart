@@ -8,14 +8,22 @@ part of 'multi_month_comparison_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Fetches budget data for [monthCount] consecutive months ending at the
-/// current month and returns a comparison structure.
+/// Compares the last [monthCount] months for each envelope that moved.
+///
+/// One `report.spending` call with [ReportGrouping.envelope] and `byMonth`
+/// supplies every month of activity; `report.monthSummaries` supplies the
+/// month headers and totals. Envelope and category metadata comes from the
+/// entity's whole lists, never from a month view.
 
 @ProviderFor(multiMonthComparison)
 final multiMonthComparisonProvider = MultiMonthComparisonFamily._();
 
-/// Fetches budget data for [monthCount] consecutive months ending at the
-/// current month and returns a comparison structure.
+/// Compares the last [monthCount] months for each envelope that moved.
+///
+/// One `report.spending` call with [ReportGrouping.envelope] and `byMonth`
+/// supplies every month of activity; `report.monthSummaries` supplies the
+/// month headers and totals. Envelope and category metadata comes from the
+/// entity's whole lists, never from a month view.
 
 final class MultiMonthComparisonProvider
     extends
@@ -27,8 +35,12 @@ final class MultiMonthComparisonProvider
     with
         $FutureModifier<MultiMonthComparison>,
         $FutureProvider<MultiMonthComparison> {
-  /// Fetches budget data for [monthCount] consecutive months ending at the
-  /// current month and returns a comparison structure.
+  /// Compares the last [monthCount] months for each envelope that moved.
+  ///
+  /// One `report.spending` call with [ReportGrouping.envelope] and `byMonth`
+  /// supplies every month of activity; `report.monthSummaries` supplies the
+  /// month headers and totals. Envelope and category metadata comes from the
+  /// entity's whole lists, never from a month view.
   MultiMonthComparisonProvider._({
     required MultiMonthComparisonFamily super.from,
     required (String, {int monthCount}) super.argument,
@@ -78,10 +90,14 @@ final class MultiMonthComparisonProvider
 }
 
 String _$multiMonthComparisonHash() =>
-    r'179d987ca68a2ed999aafdf16a218c9284c53d90';
+    r'7a1180d2bdeaf39f7a88dc53e0cdcb4e03300b9e';
 
-/// Fetches budget data for [monthCount] consecutive months ending at the
-/// current month and returns a comparison structure.
+/// Compares the last [monthCount] months for each envelope that moved.
+///
+/// One `report.spending` call with [ReportGrouping.envelope] and `byMonth`
+/// supplies every month of activity; `report.monthSummaries` supplies the
+/// month headers and totals. Envelope and category metadata comes from the
+/// entity's whole lists, never from a month view.
 
 final class MultiMonthComparisonFamily extends $Family
     with
@@ -98,12 +114,16 @@ final class MultiMonthComparisonFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Fetches budget data for [monthCount] consecutive months ending at the
-  /// current month and returns a comparison structure.
+  /// Compares the last [monthCount] months for each envelope that moved.
+  ///
+  /// One `report.spending` call with [ReportGrouping.envelope] and `byMonth`
+  /// supplies every month of activity; `report.monthSummaries` supplies the
+  /// month headers and totals. Envelope and category metadata comes from the
+  /// entity's whole lists, never from a month view.
 
-  MultiMonthComparisonProvider call(String budgetId, {int monthCount = 3}) =>
+  MultiMonthComparisonProvider call(String entityId, {int monthCount = 3}) =>
       MultiMonthComparisonProvider._(
-        argument: (budgetId, monthCount: monthCount),
+        argument: (entityId, monthCount: monthCount),
         from: this,
       );
 

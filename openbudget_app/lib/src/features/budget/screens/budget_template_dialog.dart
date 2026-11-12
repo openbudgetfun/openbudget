@@ -7,16 +7,16 @@ import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class BudgetTemplateDialog extends HookConsumerWidget {
-  const BudgetTemplateDialog({required this.budgetId, super.key});
+  const BudgetTemplateDialog({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final templatesAsync = ref.watch(budgetTemplateListProvider(budgetId));
+    final templatesAsync = ref.watch(budgetTemplateListProvider(entityId));
     final nameController = useTextEditingController();
     final isSaving = useState(false);
 
@@ -140,7 +140,7 @@ class BudgetTemplateDialog extends HookConsumerWidget {
     try {
       await ref
           .read(budgetTemplateActionsProvider.notifier)
-          .saveFromCurrentMonth(budgetId: budgetId, name: name);
+          .saveFromCurrentMonth(entityId: entityId, name: name);
       nameController.clear();
       if (!context.mounted) return;
       showAppToast(
@@ -171,7 +171,7 @@ class BudgetTemplateDialog extends HookConsumerWidget {
     try {
       await ref
           .read(budgetTemplateActionsProvider.notifier)
-          .applyTemplate(templateId: templateId, budgetId: budgetId);
+          .applyTemplate(templateId: templateId, entityId: entityId);
       if (!context.mounted) return;
       showAppToast(
         context,
@@ -199,7 +199,7 @@ class BudgetTemplateDialog extends HookConsumerWidget {
     try {
       await ref
           .read(budgetTemplateActionsProvider.notifier)
-          .deleteTemplate(templateId: templateId, budgetId: budgetId);
+          .deleteTemplate(templateId: templateId);
       if (!context.mounted) return;
       showAppToast(
         context,

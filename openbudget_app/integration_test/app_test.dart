@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/main.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
-import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_summary_provider.dart';
 import 'package:patrol/patrol.dart';
 
 Future<void> _pumpApp(
@@ -14,7 +14,7 @@ Future<void> _pumpApp(
   final container = ProviderContainer(
     overrides: [
       authProvider.overrideWithValue(authState),
-      budgetListProvider.overrideWith((ref) async => const []),
+      entitySummariesProvider.overrideWith((ref) async => const []),
     ],
   );
   addTearDown(container.dispose);

@@ -5,25 +5,31 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/agent_access/providers/agent_token_api.dart';
 import 'package:openbudget_app/src/features/agent_access/screens/agent_access_screen.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 
 import '../support/fakes.dart';
 
-const _budgetId = 'agent-access-entry-budget';
+const _entityId = 'agent-access-entry-budget';
 final _ownerId = UuidValue.fromString('00000000-0000-0000-0000-000000000b09');
 
 void main() {
   testWidgets('settings opens agent access from its row', (tester) async {
     final container = ProviderContainer(
       overrides: [
-        budgetDetailProvider.overrideWith(
-          (ref, id) async => Budget(
+        entityDetailProvider.overrideWith(
+          (ref, id) async => Entity(
             name: 'Family Plan',
-            currencyCode: 'USD',
+            kind: EntityKind.individual,
+            countryCode: 'US',
+            baseCurrencyCode: 'USD',
+            timeZone: 'UTC',
+            fiscalYearEndMonth: 1,
+            fiscalYearEndDay: 1,
             ownerId: _ownerId,
           ),
         ),
@@ -33,7 +39,7 @@ void main() {
     addTearDown(container.dispose);
 
     final router = GoRouter(
-      initialLocation: '/budgets/$_budgetId/more/settings',
+      initialLocation: '/budgets/$_entityId/more/settings',
       routes: [
         GoRoute(
           name: agentAccessRoute,
@@ -44,7 +50,7 @@ void main() {
           name: settingsRoute,
           path: settingsPath,
           builder: (context, state) =>
-              SettingsScreen(budgetId: state.pathParameters['id']!),
+              SettingsScreen(entityId: state.pathParameters['entityId']!),
         ),
       ],
     );

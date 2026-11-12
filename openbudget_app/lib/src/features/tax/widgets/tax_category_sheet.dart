@@ -19,13 +19,13 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 typedef TaxSelection = ({
   String? code,
   int? businessUsePercent,
-  int? salesTaxCents,
+  int? salesTaxMinor,
 });
 
 /// Opens the category picker for an envelope's default tax category.
 Future<TaxSelection?> showEnvelopeTaxCategorySheet(
   BuildContext context, {
-  required String budgetId,
+  required String entityId,
   required String envelopeId,
   required String subject,
   String? currentCode,
@@ -34,7 +34,7 @@ Future<TaxSelection?> showEnvelopeTaxCategorySheet(
   isScrollControlled: true,
   showDragHandle: true,
   builder: (_) => _TaxCategorySheet(
-    budgetId: budgetId,
+    entityId: entityId,
     subject: subject,
     envelopeId: envelopeId,
     currentCode: currentCode,
@@ -45,57 +45,57 @@ Future<TaxSelection?> showEnvelopeTaxCategorySheet(
 /// transaction.
 Future<TaxSelection?> showTransactionTaxCategorySheet(
   BuildContext context, {
-  required String budgetId,
-  required String transactionId,
+  required String entityId,
+  required String transactionLineId,
   required String subject,
   required String currencyCode,
   String? currentCode,
   int? businessUsePercent,
-  int? salesTaxCents,
+  int? salesTaxMinor,
 }) => showModalBottomSheet<TaxSelection>(
   context: context,
   isScrollControlled: true,
   showDragHandle: true,
   builder: (_) => _TaxCategorySheet(
-    budgetId: budgetId,
+    entityId: entityId,
     subject: subject,
-    transactionId: transactionId,
+    transactionLineId: transactionLineId,
     currencyCode: currencyCode,
     currentCode: currentCode,
     businessUsePercent: businessUsePercent,
-    salesTaxCents: salesTaxCents,
+    salesTaxMinor: salesTaxMinor,
   ),
 );
 
 class _TaxCategorySheet extends HookConsumerWidget {
   const _TaxCategorySheet({
-    required this.budgetId,
+    required this.entityId,
     required this.subject,
     this.envelopeId,
-    this.transactionId,
+    this.transactionLineId,
     this.currencyCode,
     this.currentCode,
     this.businessUsePercent,
-    this.salesTaxCents,
+    this.salesTaxMinor,
   });
 
-  final String budgetId;
+  final String entityId;
   final String subject;
   final String? envelopeId;
-  final String? transactionId;
+  final String? transactionLineId;
   final String? currencyCode;
   final String? currentCode;
   final int? businessUsePercent;
-  final int? salesTaxCents;
+  final int? salesTaxMinor;
 
-  bool get _isTransaction => transactionId != null;
+  bool get _isTransaction => transactionLineId != null;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final categoriesAsync = ref.watch(taxCategoriesProvider(budgetId));
+    final categoriesAsync = ref.watch(taxCategoriesProvider(entityId));
     final searchController = useTextEditingController();
     final search = useState('');
     final selectedCode = useState<String?>(currentCode);
@@ -110,9 +110,9 @@ class _TaxCategorySheet extends HookConsumerWidget {
     final currency = currencyCode ?? '';
     final currencyDecimals = currencyDecimalsForCode(currency);
     final salesTaxController = useTextEditingController(
-      text: salesTaxCents == null
+      text: salesTaxMinor == null
           ? ''
-          : formatMinorUnits(salesTaxCents!, currencyDecimals),
+          : formatMinorUnits(salesTaxMinor!, currencyDecimals),
     );
     final salesTaxError = useState<String?>(null);
     final saveError = useState<String?>(null);
@@ -143,24 +143,24 @@ class _TaxCategorySheet extends HookConsumerWidget {
         final actions = ref.read(taxActionsProvider.notifier);
         if (envelopeId case final id?) {
           await actions.setEnvelopeTaxCategory(
-            budgetId: budgetId,
+            entityId: entityId,
             envelopeId: id,
             code: selectedCode.value,
           );
-        } else if (transactionId case final id?) {
-          await actions.setTransactionTax(
-            budgetId: budgetId,
-            transactionId: id,
+        } else if (transactionLineId case final id?) {
+          await actions.setLineTax(
+            entityId: entityId,
+            transactionLineId: id,
             code: selectedCode.value,
             businessUsePercent: businessUse.value,
-            salesTaxCents: parsedSalesTax,
+            salesTaxMinor: parsedSalesTax,
           );
         }
         if (!context.mounted) return;
         Navigator.of(context).pop<TaxSelection>((
           code: selectedCode.value,
           businessUsePercent: _isTransaction ? businessUse.value : null,
-          salesTaxCents: parsedSalesTax,
+          salesTaxMinor: parsedSalesTax,
         ));
       } on Exception catch (error) {
         isSaving.value = false;
@@ -240,7 +240,7 @@ class _TaxCategorySheet extends HookConsumerWidget {
                                   unawaited(
                                     context.pushNamed(
                                       taxProfileRoute,
-                                      pathParameters: {'id': budgetId},
+                                      pathParameters: {'entityId': entityId},
                                     ),
                                   );
                                 },
@@ -255,7 +255,7 @@ class _TaxCategorySheet extends HookConsumerWidget {
                               action: ObStateAction(
                                 label: l10n.taxCategoryLoadRetry,
                                 onPressed: () => ref.invalidate(
-                                  taxCategoriesProvider(budgetId),
+                                  taxCategoriesProvider(entityId),
                                 ),
                               ),
                             ),

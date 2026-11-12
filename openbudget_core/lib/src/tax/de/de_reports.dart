@@ -160,9 +160,9 @@ TaxReport deReport(TaxInput input, DeTaxTable table) {
     );
   }
   return switch (profile.entityKind) {
-    TaxEntityKind.individual => _individualReport(input, profile, table),
-    TaxEntityKind.soleTrader => _soleTraderReport(input, profile, table),
-    TaxEntityKind.company => _companyReport(input, profile, table),
+    EntityKind.individual => _individualReport(input, profile, table),
+    EntityKind.soleTrader => _soleTraderReport(input, profile, table),
+    EntityKind.company => _companyReport(input, profile, table),
   };
 }
 
@@ -290,7 +290,7 @@ DeIndividualAssessment deIndividual(TaxInput input, DeTaxTable table) {
   for (final linked in input.linked) {
     final linkedProfile = linked.profile;
     if (linkedProfile is DeTaxProfile &&
-        linkedProfile.entityKind == TaxEntityKind.soleTrader &&
+        linkedProfile.entityKind == EntityKind.soleTrader &&
         linkedProfile.einkunftsArt == DeEinkunftsArt.gewerblich) {
       // Only a Gewerbebetrieb pays Gewerbesteuer and earns the § 35 credit;
       // a Freiberufler files Anlage S and owes none.
@@ -299,7 +299,7 @@ DeIndividualAssessment deIndividual(TaxInput input, DeTaxTable table) {
       tradeTaxMessbetrag += business.messbetragMinor;
       tradeTaxPaidByBusinesses += business.tradeTaxMinor;
     } else if (linkedProfile is DeTaxProfile &&
-        linkedProfile.entityKind == TaxEntityKind.soleTrader) {
+        linkedProfile.entityKind == EntityKind.soleTrader) {
       businessProfit += deEuer(linked, table).profitMinor;
     }
   }

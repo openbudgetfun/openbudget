@@ -12,6 +12,7 @@ import 'package:solana_kit/solana_kit.dart';
 import 'package:solana_kit_subscriptions/solana_kit_subscriptions.dart';
 import 'package:test/test.dart';
 
+import '../helpers/auth_helper.dart';
 import '../test_tools/serverpod_test_tools.dart';
 import 'fake_solana_billing_chain.dart';
 
@@ -56,6 +57,19 @@ void main() {
   }
 
   withServerpod('Given SolanaBillingService', (sessionBuilder, endpoints) {
+    setUp(
+      () => ensureAuthUsers(sessionBuilder, [
+        for (var index = 1; index <= 9; index++)
+          '30000000-0000-4000-a000-${index.toString().padLeft(12, '0')}',
+        '30000000-0000-4000-a000-0000000000f1',
+        '30000000-0000-4000-a000-0000000000f2',
+        '30000000-0000-4000-a000-000000000101',
+        '30000000-0000-4000-a000-000000000102',
+        '30000000-0000-4000-a000-000000000103',
+        '30000000-0000-4000-a000-000000000104',
+        '30000000-0000-4000-a000-000000000105',
+      ]),
+    );
     test('then a challenge is stored with a ten minute lifetime', () async {
       final userId = UuidValue.fromString(
         '30000000-0000-4000-a000-000000000001',
@@ -459,6 +473,16 @@ void main() {
   });
 
   withServerpod('Given SolanaBillingCollector', (sessionBuilder, endpoints) {
+    setUp(
+      () => ensureAuthUsers(sessionBuilder, [
+        '30000000-0000-4000-a000-000000000101',
+        '30000000-0000-4000-a000-000000000102',
+        '30000000-0000-4000-a000-000000000103',
+        '30000000-0000-4000-a000-000000000104',
+        '30000000-0000-4000-a000-000000000105',
+      ]),
+    );
+
     Future<Entitlement> seed({
       required UuidValue userId,
       required String externalId,

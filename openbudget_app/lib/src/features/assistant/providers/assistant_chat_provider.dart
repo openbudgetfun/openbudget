@@ -21,7 +21,7 @@ class AssistantChat extends _$AssistantChat {
   StreamSubscription<AgentEvent>? _subscription;
 
   @override
-  AssistantChatState build(String budgetId) {
+  AssistantChatState build(String entityId) {
     ref.onDispose(_cancelStream);
     return const AssistantChatState();
   }
@@ -44,7 +44,7 @@ class AssistantChat extends _$AssistantChat {
     try {
       final api = ref.read(assistantApiProvider);
       final messages = await api.getMessages(id);
-      final proposals = await api.listProposals(budgetId, pendingOnly: false);
+      final proposals = await api.listProposals(entityId, pendingOnly: false);
       if (!ref.mounted) return;
 
       final items = <AssistantTimelineItem>[
@@ -101,7 +101,7 @@ class AssistantChat extends _$AssistantChat {
       stream = ref
           .read(assistantApiProvider)
           .chat(
-            budgetId: budgetId,
+            entityId: entityId,
             conversationId: state.conversationId,
             message: trimmed,
           );
@@ -195,7 +195,7 @@ class AssistantChat extends _$AssistantChat {
             createdAt: proposal.createdAt,
           ),
         );
-        ref.invalidate(assistantProposalsProvider(budgetId));
+        ref.invalidate(assistantProposalsProvider(entityId));
       case AgentEventKind.usage:
         ref.invalidate(assistantUsageProvider);
       case AgentEventKind.done:
@@ -216,8 +216,8 @@ class AssistantChat extends _$AssistantChat {
 
   void _refreshAfterTurn() {
     ref
-      ..invalidate(assistantConversationsProvider(budgetId))
-      ..invalidate(assistantProposalsProvider(budgetId))
+      ..invalidate(assistantConversationsProvider(entityId))
+      ..invalidate(assistantProposalsProvider(entityId))
       ..invalidate(assistantUsageProvider);
   }
 

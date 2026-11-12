@@ -14,32 +14,43 @@ import 'dart:async' as _ida;
 
 import 'package:serverpod/serverpod.dart' as _is;
 
-/// Plaid item connection persisted for syncing linked bank accounts.
+import '../common/sync_status.dart' as _ijl385hj;
+
+/// A Plaid item linked to an entity, for syncing its bank accounts.
 abstract class PlaidConnection
     implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   PlaidConnection._({
     this.id,
-    required this.budgetId,
+    required this.entityId,
     required this.plaidItemId,
-    required this.accessToken,
+    this.accessTokenCiphertext,
+    this.accessTokenNonce,
+    this.plaidInstitutionId,
     this.institutionName,
-    this.institutionId,
+    this.transactionsCursor,
+    _ijl385hj.SyncStatus? syncStatus,
+    this.lastSyncedAt,
+    this.lastSyncError,
     DateTime? createdAt,
     DateTime? updatedAt,
-    this.lastSyncedAt,
-  }) : createdAt = createdAt ?? DateTime.now(),
+  }) : syncStatus = syncStatus ?? _ijl385hj.SyncStatus.pending,
+       createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
   factory PlaidConnection({
     _is.UuidValue? id,
-    required _is.UuidValue budgetId,
+    required _is.UuidValue entityId,
     required String plaidItemId,
-    required String accessToken,
+    String? accessTokenCiphertext,
+    String? accessTokenNonce,
+    String? plaidInstitutionId,
     String? institutionName,
-    String? institutionId,
+    String? transactionsCursor,
+    _ijl385hj.SyncStatus? syncStatus,
+    DateTime? lastSyncedAt,
+    String? lastSyncError,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? lastSyncedAt,
   }) = _PlaidConnectionImpl;
 
   factory PlaidConnection.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -47,24 +58,33 @@ abstract class PlaidConnection
       id: jsonSerialization['id'] == null
           ? null
           : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _is.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _is.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
       plaidItemId: jsonSerialization['plaidItemId'] as String,
-      accessToken: jsonSerialization['accessToken'] as String,
+      accessTokenCiphertext:
+          jsonSerialization['accessTokenCiphertext'] as String?,
+      accessTokenNonce: jsonSerialization['accessTokenNonce'] as String?,
+      plaidInstitutionId: jsonSerialization['plaidInstitutionId'] as String?,
       institutionName: jsonSerialization['institutionName'] as String?,
-      institutionId: jsonSerialization['institutionId'] as String?,
+      transactionsCursor: jsonSerialization['transactionsCursor'] as String?,
+      syncStatus: jsonSerialization['syncStatus'] == null
+          ? null
+          : _ijl385hj.SyncStatus.fromJson(
+              (jsonSerialization['syncStatus'] as String),
+            ),
+      lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
+          ? null
+          : _is.DateTimeJsonExtension.fromJson(
+              jsonSerialization['lastSyncedAt'],
+            ),
+      lastSyncError: jsonSerialization['lastSyncError'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
-      lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
-          ? null
-          : _is.DateTimeJsonExtension.fromJson(
-              jsonSerialization['lastSyncedAt'],
-            ),
     );
   }
 
@@ -75,21 +95,32 @@ abstract class PlaidConnection
   @override
   _is.UuidValue? id;
 
-  _is.UuidValue budgetId;
+  _is.UuidValue entityId;
 
   String plaidItemId;
 
-  String accessToken;
+  /// Base64 AES-256-GCM ciphertext of the access token, with its MAC tag.
+  String? accessTokenCiphertext;
+
+  /// Base64 nonce for accessTokenCiphertext.
+  String? accessTokenNonce;
+
+  String? plaidInstitutionId;
 
   String? institutionName;
 
-  String? institutionId;
+  /// Cursor for Plaid /transactions/sync; null until the first sync.
+  String? transactionsCursor;
+
+  _ijl385hj.SyncStatus syncStatus;
+
+  DateTime? lastSyncedAt;
+
+  String? lastSyncError;
 
   DateTime createdAt;
 
   DateTime updatedAt;
-
-  DateTime? lastSyncedAt;
 
   @override
   _is.Table<_is.UuidValue?> get table => t;
@@ -99,28 +130,37 @@ abstract class PlaidConnection
   @_is.useResult
   PlaidConnection copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    _is.UuidValue? budgetId,
+    _is.UuidValue? entityId,
     String? plaidItemId,
-    String? accessToken,
+    String? accessTokenCiphertext,
+    String? accessTokenNonce,
+    String? plaidInstitutionId,
     String? institutionName,
-    String? institutionId,
+    String? transactionsCursor,
+    _ijl385hj.SyncStatus? syncStatus,
+    DateTime? lastSyncedAt = const _is.$UndefinedDateTime(),
+    String? lastSyncError,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? lastSyncedAt = const _is.$UndefinedDateTime(),
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'PlaidConnection',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'plaidItemId': plaidItemId,
-      'accessToken': accessToken,
+      if (accessTokenCiphertext != null)
+        'accessTokenCiphertext': accessTokenCiphertext,
+      if (accessTokenNonce != null) 'accessTokenNonce': accessTokenNonce,
+      if (plaidInstitutionId != null) 'plaidInstitutionId': plaidInstitutionId,
       if (institutionName != null) 'institutionName': institutionName,
-      if (institutionId != null) 'institutionId': institutionId,
+      if (transactionsCursor != null) 'transactionsCursor': transactionsCursor,
+      'syncStatus': syncStatus.toJson(),
+      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
+      if (lastSyncError != null) 'lastSyncError': lastSyncError,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
-      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
     };
   }
 
@@ -129,14 +169,15 @@ abstract class PlaidConnection
     return {
       '__className__': 'PlaidConnection',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'plaidItemId': plaidItemId,
-      'accessToken': accessToken,
+      if (plaidInstitutionId != null) 'plaidInstitutionId': plaidInstitutionId,
       if (institutionName != null) 'institutionName': institutionName,
-      if (institutionId != null) 'institutionId': institutionId,
+      'syncStatus': syncStatus.toJson(),
+      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
+      if (lastSyncError != null) 'lastSyncError': lastSyncError,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
-      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
     };
   }
 
@@ -173,24 +214,32 @@ class _Undefined {}
 class _PlaidConnectionImpl extends PlaidConnection {
   _PlaidConnectionImpl({
     _is.UuidValue? id,
-    required _is.UuidValue budgetId,
+    required _is.UuidValue entityId,
     required String plaidItemId,
-    required String accessToken,
+    String? accessTokenCiphertext,
+    String? accessTokenNonce,
+    String? plaidInstitutionId,
     String? institutionName,
-    String? institutionId,
+    String? transactionsCursor,
+    _ijl385hj.SyncStatus? syncStatus,
+    DateTime? lastSyncedAt,
+    String? lastSyncError,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? lastSyncedAt,
   }) : super._(
          id: id,
-         budgetId: budgetId,
+         entityId: entityId,
          plaidItemId: plaidItemId,
-         accessToken: accessToken,
+         accessTokenCiphertext: accessTokenCiphertext,
+         accessTokenNonce: accessTokenNonce,
+         plaidInstitutionId: plaidInstitutionId,
          institutionName: institutionName,
-         institutionId: institutionId,
+         transactionsCursor: transactionsCursor,
+         syncStatus: syncStatus,
+         lastSyncedAt: lastSyncedAt,
+         lastSyncError: lastSyncError,
          createdAt: createdAt,
          updatedAt: updatedAt,
-         lastSyncedAt: lastSyncedAt,
        );
 
   /// Returns a shallow copy of this [PlaidConnection]
@@ -199,31 +248,47 @@ class _PlaidConnectionImpl extends PlaidConnection {
   @override
   PlaidConnection copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    _is.UuidValue? budgetId,
+    _is.UuidValue? entityId,
     String? plaidItemId,
-    String? accessToken,
+    Object? accessTokenCiphertext = _Undefined,
+    Object? accessTokenNonce = _Undefined,
+    Object? plaidInstitutionId = _Undefined,
     Object? institutionName = _Undefined,
-    Object? institutionId = _Undefined,
+    Object? transactionsCursor = _Undefined,
+    _ijl385hj.SyncStatus? syncStatus,
+    DateTime? lastSyncedAt = const _is.$UndefinedDateTime(),
+    Object? lastSyncError = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? lastSyncedAt = const _is.$UndefinedDateTime(),
   }) {
     return PlaidConnection(
       id: id is _is.UndefinedSentinel ? this.id : id,
-      budgetId: budgetId ?? this.budgetId,
+      entityId: entityId ?? this.entityId,
       plaidItemId: plaidItemId ?? this.plaidItemId,
-      accessToken: accessToken ?? this.accessToken,
+      accessTokenCiphertext: accessTokenCiphertext is String?
+          ? accessTokenCiphertext
+          : this.accessTokenCiphertext,
+      accessTokenNonce: accessTokenNonce is String?
+          ? accessTokenNonce
+          : this.accessTokenNonce,
+      plaidInstitutionId: plaidInstitutionId is String?
+          ? plaidInstitutionId
+          : this.plaidInstitutionId,
       institutionName: institutionName is String?
           ? institutionName
           : this.institutionName,
-      institutionId: institutionId is String?
-          ? institutionId
-          : this.institutionId,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      transactionsCursor: transactionsCursor is String?
+          ? transactionsCursor
+          : this.transactionsCursor,
+      syncStatus: syncStatus ?? this.syncStatus,
       lastSyncedAt: lastSyncedAt is _is.UndefinedSentinel
           ? this.lastSyncedAt
           : lastSyncedAt,
+      lastSyncError: lastSyncError is String?
+          ? lastSyncError
+          : this.lastSyncError,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }
@@ -231,9 +296,9 @@ class _PlaidConnectionImpl extends PlaidConnection {
 class PlaidConnectionUpdateTable extends _is.UpdateTable<PlaidConnectionTable> {
   PlaidConnectionUpdateTable(super.table);
 
-  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> entityId(_is.UuidValue value) =>
       _is.ColumnValue(
-        table.budgetId,
+        table.entityId,
         value,
       );
 
@@ -242,10 +307,23 @@ class PlaidConnectionUpdateTable extends _is.UpdateTable<PlaidConnectionTable> {
     value,
   );
 
-  _is.ColumnValue<String, String> accessToken(String value) => _is.ColumnValue(
-    table.accessToken,
-    value,
-  );
+  _is.ColumnValue<String, String> accessTokenCiphertext(String? value) =>
+      _is.ColumnValue(
+        table.accessTokenCiphertext,
+        value,
+      );
+
+  _is.ColumnValue<String, String> accessTokenNonce(String? value) =>
+      _is.ColumnValue(
+        table.accessTokenNonce,
+        value,
+      );
+
+  _is.ColumnValue<String, String> plaidInstitutionId(String? value) =>
+      _is.ColumnValue(
+        table.plaidInstitutionId,
+        value,
+      );
 
   _is.ColumnValue<String, String> institutionName(String? value) =>
       _is.ColumnValue(
@@ -253,9 +331,28 @@ class PlaidConnectionUpdateTable extends _is.UpdateTable<PlaidConnectionTable> {
         value,
       );
 
-  _is.ColumnValue<String, String> institutionId(String? value) =>
+  _is.ColumnValue<String, String> transactionsCursor(String? value) =>
       _is.ColumnValue(
-        table.institutionId,
+        table.transactionsCursor,
+        value,
+      );
+
+  _is.ColumnValue<_ijl385hj.SyncStatus, _ijl385hj.SyncStatus> syncStatus(
+    _ijl385hj.SyncStatus value,
+  ) => _is.ColumnValue(
+    table.syncStatus,
+    value,
+  );
+
+  _is.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
+      _is.ColumnValue(
+        table.lastSyncedAt,
+        value,
+      );
+
+  _is.ColumnValue<String, String> lastSyncError(String? value) =>
+      _is.ColumnValue(
+        table.lastSyncError,
         value,
       );
 
@@ -270,36 +367,52 @@ class PlaidConnectionUpdateTable extends _is.UpdateTable<PlaidConnectionTable> {
         table.updatedAt,
         value,
       );
-
-  _is.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
-      _is.ColumnValue(
-        table.lastSyncedAt,
-        value,
-      );
 }
 
 class PlaidConnectionTable extends _is.Table<_is.UuidValue?> {
   PlaidConnectionTable({super.tableRelation})
     : super(tableName: 'plaid_connection') {
     updateTable = PlaidConnectionUpdateTable(this);
-    budgetId = _is.ColumnUuid(
-      'budgetId',
+    entityId = _is.ColumnUuid(
+      'entityId',
       this,
     );
     plaidItemId = _is.ColumnString(
       'plaidItemId',
       this,
     );
-    accessToken = _is.ColumnString(
-      'accessToken',
+    accessTokenCiphertext = _is.ColumnString(
+      'accessTokenCiphertext',
+      this,
+    );
+    accessTokenNonce = _is.ColumnString(
+      'accessTokenNonce',
+      this,
+    );
+    plaidInstitutionId = _is.ColumnString(
+      'plaidInstitutionId',
       this,
     );
     institutionName = _is.ColumnString(
       'institutionName',
       this,
     );
-    institutionId = _is.ColumnString(
-      'institutionId',
+    transactionsCursor = _is.ColumnString(
+      'transactionsCursor',
+      this,
+    );
+    syncStatus = _is.ColumnEnum(
+      'syncStatus',
+      this,
+      _is.EnumSerialization.byName,
+      hasDefault: true,
+    );
+    lastSyncedAt = _is.ColumnDateTime(
+      'lastSyncedAt',
+      this,
+    );
+    lastSyncError = _is.ColumnString(
+      'lastSyncError',
       this,
     );
     createdAt = _is.ColumnDateTime(
@@ -312,41 +425,52 @@ class PlaidConnectionTable extends _is.Table<_is.UuidValue?> {
       this,
       hasDefault: true,
     );
-    lastSyncedAt = _is.ColumnDateTime(
-      'lastSyncedAt',
-      this,
-    );
   }
 
   late final PlaidConnectionUpdateTable updateTable;
 
-  late final _is.ColumnUuid budgetId;
+  late final _is.ColumnUuid entityId;
 
   late final _is.ColumnString plaidItemId;
 
-  late final _is.ColumnString accessToken;
+  /// Base64 AES-256-GCM ciphertext of the access token, with its MAC tag.
+  late final _is.ColumnString accessTokenCiphertext;
+
+  /// Base64 nonce for accessTokenCiphertext.
+  late final _is.ColumnString accessTokenNonce;
+
+  late final _is.ColumnString plaidInstitutionId;
 
   late final _is.ColumnString institutionName;
 
-  late final _is.ColumnString institutionId;
+  /// Cursor for Plaid /transactions/sync; null until the first sync.
+  late final _is.ColumnString transactionsCursor;
+
+  late final _is.ColumnEnum<_ijl385hj.SyncStatus> syncStatus;
+
+  late final _is.ColumnDateTime lastSyncedAt;
+
+  late final _is.ColumnString lastSyncError;
 
   late final _is.ColumnDateTime createdAt;
 
   late final _is.ColumnDateTime updatedAt;
 
-  late final _is.ColumnDateTime lastSyncedAt;
-
   @override
   List<_is.Column> get columns => [
     id,
-    budgetId,
+    entityId,
     plaidItemId,
-    accessToken,
+    accessTokenCiphertext,
+    accessTokenNonce,
+    plaidInstitutionId,
     institutionName,
-    institutionId,
+    transactionsCursor,
+    syncStatus,
+    lastSyncedAt,
+    lastSyncError,
     createdAt,
     updatedAt,
-    lastSyncedAt,
   ];
 }
 

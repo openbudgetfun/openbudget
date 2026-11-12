@@ -1,169 +1,109 @@
-// UuidValue is needed for constructing test model data.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
-import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
-import 'package:openbudget_app/src/features/transaction_rules/providers/rule_list_provider.dart';
 import 'package:openbudget_app/src/features/transaction_rules/screens/rule_list_screen.dart';
+import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
-final _budgetUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000010',
-);
-final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000001');
-final _payeeUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000020');
-final _envelopeUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000030',
-);
-final _categoryUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000040',
-);
+import '../../../fixtures/budget_month.dart';
+import '../../../fixtures/transactions.dart';
+import '../../../support/fake_endpoint_client.dart';
 
-Budget _makeBudget() =>
-    Budget(name: 'Test Budget', currencyCode: 'USD', ownerId: _ownerUuid);
+const String _entityId = fixtureEntityId;
+const String _secondRuleId = '00000000-0000-0000-0000-0000000000f0f2';
 
-Payee _makePayee({String name = 'Test Payee', UuidValue? id}) =>
-    Payee(id: id ?? _payeeUuid, name: name, budgetId: _budgetUuid);
-
-TransactionRule _makeRule({
-  UuidValue? id,
-  UuidValue? payeeId,
-  UuidValue? targetEnvelopeId,
-  bool enabled = true,
-}) => TransactionRule(
-  id: id,
-  budgetId: _budgetUuid,
-  payeeId: payeeId ?? _payeeUuid,
-  targetEnvelopeId: targetEnvelopeId ?? _envelopeUuid,
-  enabled: enabled,
+GoRouter _router() => GoRouter(
+  initialLocation: transactionRulesPath.replaceFirst(':entityId', _entityId),
+  routes: [
+    GoRoute(
+      name: moreRoute,
+      path: morePath,
+      builder: (_, _) => const Scaffold(body: Text('More Route')),
+    ),
+    GoRoute(
+      name: transactionRulesRoute,
+      path: transactionRulesPath,
+      builder: (context, state) =>
+          RuleListScreen(entityId: state.pathParameters['entityId']!),
+    ),
+  ],
 );
 
-Envelope _makeEnvelope({String name = 'Groceries', UuidValue? id}) => Envelope(
-  id: id ?? _envelopeUuid,
-  name: name,
-  budgetedAmountCents: 0,
-  spentAmountCents: 0,
-  currencyCode: 'USD',
-  categoryId: _categoryUuid,
-  sortOrder: 0,
-);
+class _Harness {
+  _Harness(this.client);
 
-Category _makeCategory({String name = 'Food'}) => Category(
-  id: _categoryUuid,
-  name: name,
-  budgetId: _budgetUuid,
-  sortOrder: 0,
-  isHidden: false,
-);
+  final FakeEndpointClient client;
+}
 
-BudgetSummary _makeEmptySummary() => BudgetSummary(
-  budget: _makeBudget(),
-  categories: const [],
-  totalIncomeCents: 0,
-  totalBudgetedCents: 0,
-  readyToAssignCents: 0,
-  year: 2026,
-  month: 2,
-);
-
-BudgetSummary _makeSummaryWithEnvelope({
-  String categoryName = 'Food',
-  String envelopeName = 'Groceries',
-}) {
-  final envelope = _makeEnvelope(name: envelopeName);
-  final category = _makeCategory(name: categoryName);
-
-  return BudgetSummary(
-    budget: _makeBudget(),
-    categories: [
-      CategoryWithEnvelopes(
-        category: category,
-        envelopes: [envelope],
-        monthlyEnvelopes: const [],
-        totalBudgetedCents: 0,
-        totalSpentCents: 0,
-        totalAvailableCents: 0,
+Future<_Harness> _pumpRules(
+  WidgetTester tester, {
+  List<TransactionRule>? rules,
+  List<Payee>? payees,
+  bool failToLoad = false,
+}) async {
+  final client = FakeEndpointClient()
+    ..handle('transactionRule', 'list', (_) {
+      if (failToLoad) throw StateError('offline');
+      return rules ?? [testRule()];
+    })
+    ..handle('payee', 'list', (_) => payees ?? [testPayee()])
+    ..handle('budget', 'getMonth', (_) => testMonthView())
+    ..handle('transactionRule', 'update', (_) => testRule())
+    ..handle('transactionRule', 'delete', (_) => testRule())
+    ..handle(
+      'transactionRule',
+      'create',
+      (_) => testRule(
+        id: '00000000-0000-0000-0000-0000000000f0f9',
       ),
-    ],
-    totalIncomeCents: 0,
-    totalBudgetedCents: 0,
-    readyToAssignCents: 0,
-    year: 2026,
-    month: 2,
+    );
+  final container = ProviderContainer(
+    retry: (_, _) => null,
+    overrides: [serverpodClientProvider.overrideWithValue(client)],
   );
+  addTearDown(container.dispose);
+  await tester.pumpApp(
+    const SizedBox.shrink(),
+    container: container,
+    router: _router(),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+  );
+  await tester.pumpAndSettle();
+  return _Harness(client);
 }
 
 void main() {
   group('RuleListScreen', () {
-    testWidgets('renders loading indicator while rules load', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
-          ),
-        ),
+    testWidgets('renders the loading panel while rules load', (tester) async {
+      await tester.pumpApp(
+        const RuleListScreen(entityId: _entityId),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
       );
       await tester.pump();
 
-      expect(find.byType(ObLoadingPanel), findsOneWidget);
+      expect(find.text('Loading rules'), findsOneWidget);
     });
 
-    testWidgets('renders error state when rules fail to load', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            ruleListProvider.overrideWith(
-              (ref, budgetId) =>
-                  throw Exception('Could not load transaction rules'),
-            ),
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+    testWidgets('renders the problem panel when rules fail to load', (
+      tester,
+    ) async {
+      await _pumpRules(tester, failToLoad: true);
 
       expect(find.text('Could not load transaction rules'), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
     });
 
-    testWidgets('renders empty state with add button prompt', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            ruleListProvider.overrideWith(
-              (ref, budgetId) async => <TransactionRule>[],
-            ),
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+    testWidgets('renders the empty state with its add prompt', (tester) async {
+      await _pumpRules(tester, rules: const []);
 
+      expect(find.byKey(ruleListEmptyKey), findsOneWidget);
       expect(find.text('No Rules Yet'), findsOneWidget);
       expect(
         find.text(
@@ -171,347 +111,144 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.byKey(ruleListEmptyKey), findsOneWidget);
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is WiredDoodle && w.kind == WiredDoodleKind.sparkle,
-        ),
-        findsOneWidget,
-      );
     });
 
-    testWidgets('renders FAB add button', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            ruleListProvider.overrideWith(
-              (ref, budgetId) async => <TransactionRule>[],
-            ),
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byType(FloatingActionButton), findsOneWidget);
-    });
-
-    testWidgets('add rule action opens hand-drawn payee and envelope fields', (
+    testWidgets('shows the title, the back action and the FAB', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            ruleListProvider.overrideWith(
-              (ref, budgetId) async => <TransactionRule>[],
-            ),
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await _pumpRules(tester);
 
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(AlertDialog), findsOneWidget);
-      expect(find.byType(ObDropdown<String>), findsNWidgets(2));
-      expect(find.byType(ObFilledButton), findsOneWidget);
-    });
-
-    testWidgets('renders rule list with payee names', (tester) async {
-      final payee = _makePayee(name: 'Amazon');
-      final rule = _makeRule(
-        id: UuidValue.fromString('00000000-0000-0000-0000-000000000050'),
-        payeeId: payee.id,
-      );
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            ruleListProvider.overrideWith((ref, budgetId) async => [rule]),
-            payeeListProvider.overrideWith((ref, budgetId) async => [payee]),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Amazon'), findsOneWidget);
-    });
-
-    testWidgets('renders rule list with envelope names', (tester) async {
-      final payee = _makePayee(name: 'Costco');
-      final rule = _makeRule(
-        id: UuidValue.fromString('00000000-0000-0000-0000-000000000060'),
-        payeeId: payee.id,
-        targetEnvelopeId: _envelopeUuid,
-      );
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            ruleListProvider.overrideWith((ref, budgetId) async => [rule]),
-            payeeListProvider.overrideWith((ref, budgetId) async => [payee]),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeSummaryWithEnvelope(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('Groceries'), findsOneWidget);
-    });
-
-    testWidgets('renders app bar with transaction rules title', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            ruleListProvider.overrideWith(
-              (ref, budgetId) async => <TransactionRule>[],
-            ),
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Transaction Rules'), findsOneWidget);
-    });
-
-    testWidgets('renders hand-drawn back action to More', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            ruleListProvider.overrideWith(
-              (ref, budgetId) async => <TransactionRule>[],
-            ),
-            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
+      expect(find.text('Transaction Rules'), findsWidgets);
       expect(find.byTooltip('Back'), findsOneWidget);
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.back,
-        ),
-        findsOneWidget,
-      );
+      expect(find.byTooltip('Add Rule'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      expect(find.text('More Route'), findsOneWidget);
     });
 
-    testWidgets('renders toggle switch for each rule', (tester) async {
-      final payee1 = _makePayee(
-        name: 'Netflix',
-        id: UuidValue.fromString('00000000-0000-0000-0000-000000000070'),
-      );
-      final payee2 = _makePayee(
-        name: 'Spotify',
-        id: UuidValue.fromString('00000000-0000-0000-0000-000000000071'),
-      );
-      final rules = [
-        _makeRule(
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000080'),
-          payeeId: payee1.id,
-        ),
-        _makeRule(
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000081'),
-          payeeId: payee2.id,
-          enabled: false,
-        ),
-      ];
+    testWidgets('lists payee and envelope names', (tester) async {
+      await _pumpRules(tester);
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            ruleListProvider.overrideWith((ref, budgetId) async => rules),
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => [payee1, payee2],
-            ),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byType(Switch), findsWidgets);
-    });
-
-    testWidgets('renders disabled label for inactive rule', (tester) async {
-      final payee = _makePayee(name: 'Hulu');
-      final rule = _makeRule(
-        id: UuidValue.fromString('00000000-0000-0000-0000-000000000090'),
-        payeeId: payee.id,
-        enabled: false,
-      );
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            ruleListProvider.overrideWith((ref, budgetId) async => [rule]),
-            payeeListProvider.overrideWith((ref, budgetId) async => [payee]),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Disabled'), findsWidgets);
-    });
-
-    testWidgets('renders summary card and filter chips', (tester) async {
-      final payee = _makePayee(name: 'Amazon');
-      final rules = [
-        _makeRule(
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000101'),
-          payeeId: payee.id,
-        ),
-        _makeRule(
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000102'),
-          payeeId: payee.id,
-          enabled: false,
-        ),
-      ];
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            ruleListProvider.overrideWith((ref, budgetId) async => rules),
-            payeeListProvider.overrideWith((ref, budgetId) async => [payee]),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
+      expect(find.text('Tesco'), findsOneWidget);
+      expect(find.text('Living / Groceries'), findsOneWidget);
       expect(find.text('Enabled'), findsWidgets);
-      expect(find.text('Disabled'), findsWidgets);
-      expect(find.widgetWithText(ChoiceChip, 'All'), findsOneWidget);
     });
 
-    testWidgets('filters by disabled rules chip', (tester) async {
-      final payeeEnabled = _makePayee(
-        name: 'Enabled Payee',
-        id: UuidValue.fromString('00000000-0000-0000-0000-000000000111'),
-      );
-      final payeeDisabled = _makePayee(
-        name: 'Disabled Payee',
-        id: UuidValue.fromString('00000000-0000-0000-0000-000000000112'),
-      );
-      final rules = [
-        _makeRule(
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000121'),
-          payeeId: payeeEnabled.id,
-        ),
-        _makeRule(
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000122'),
-          payeeId: payeeDisabled.id,
-          enabled: false,
-        ),
-      ];
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            ruleListProvider.overrideWith((ref, budgetId) async => rules),
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => [payeeEnabled, payeeDisabled],
-            ),
-            budgetSummaryProvider.overrideWith(
-              (ref, budgetId) async => _makeEmptySummary(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RuleListScreen(budgetId: _budgetId),
+    testWidgets('falls back to unknown payee and envelope', (tester) async {
+      await _pumpRules(
+        tester,
+        rules: [
+          testRule(
+            payeeId: '00000000-0000-0000-0000-0000000000f0f8',
+            envelopeId: '00000000-0000-0000-0000-0000000000f0f7',
           ),
-        ),
+        ],
+        payees: [testPayee()],
       );
+
+      expect(find.text('Unknown payee'), findsOneWidget);
+      expect(find.text('Unknown envelope'), findsOneWidget);
+    });
+
+    testWidgets('toggles a rule through update', (tester) async {
+      final harness = await _pumpRules(tester);
+
+      await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
+
+      final call = harness.client.callsTo('transactionRule', 'update').single;
+      expect(call.args['ruleId'].toString(), fixtureRuleId);
+      expect(call.args['enabled'], isFalse);
+    });
+
+    testWidgets('shows the disabled label for an inactive rule', (
+      tester,
+    ) async {
+      await _pumpRules(
+        tester,
+        rules: [
+          testRule(enabled: false),
+          testRule(id: _secondRuleId),
+        ],
+      );
+
+      expect(find.text('Disabled'), findsWidgets);
+    });
+
+    testWidgets('shows the summary card and filters by disabled', (
+      tester,
+    ) async {
+      await _pumpRules(
+        tester,
+        rules: [
+          testRule(enabled: false),
+          testRule(id: _secondRuleId),
+        ],
+      );
+
+      expect(find.text('2 total'), findsOneWidget);
+      expect(find.widgetWithText(ChoiceChip, 'Enabled'), findsOneWidget);
+      expect(find.widgetWithText(ChoiceChip, 'Disabled'), findsOneWidget);
 
       await tester.tap(find.widgetWithText(ChoiceChip, 'Disabled'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Disabled Payee'), findsOneWidget);
-      expect(find.text('Enabled Payee'), findsNothing);
+      expect(find.text('Tesco'), findsOneWidget);
+      expect(find.byType(Switch), findsOneWidget);
+    });
+
+    testWidgets('the add dialog creates a rule for a payee and envelope', (
+      tester,
+    ) async {
+      final harness = await _pumpRules(tester);
+
+      await tester.tap(find.byTooltip('Add Rule'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('When payee is'), findsOneWidget);
+      expect(find.text('Assign to envelope'), findsOneWidget);
+
+      await tester.tap(find.text('When payee is'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tesco').last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Assign to envelope'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Living / Groceries').last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(ObFilledButton, 'Save'));
+      await tester.pumpAndSettle();
+
+      final call = harness.client.callsTo('transactionRule', 'create').single;
+      expect(call.args['payeeId'].toString(), fixturePayeeId);
+      expect(call.args['envelopeId'].toString(), fixtureEnvelopeId);
+      expect(find.text('Rule created'), findsOneWidget);
+    });
+
+    testWidgets('deletes a rule after confirmation', (tester) async {
+      final harness = await _pumpRules(tester);
+
+      await tester.tap(find.byTooltip('Delete').first);
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Are you sure you want to delete this?'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+      await tester.pumpAndSettle();
+
+      expect(
+        harness.client
+            .callsTo('transactionRule', 'delete')
+            .single
+            .args['ruleId']
+            .toString(),
+        fixtureRuleId,
+      );
     });
   });
 }

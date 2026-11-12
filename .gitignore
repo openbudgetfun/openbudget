@@ -93,4 +93,4 @@ local.properties
 
 # Deep-research notes behind the .claude/skills domain skills (kept local)
 research_notes/
-reports/
+/reports/

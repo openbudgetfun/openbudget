@@ -10,7 +10,7 @@ class RecentMoveEvent {
     required this.occurredAt,
     required this.type,
     required this.toEnvelopeId,
-    required this.amountCents,
+    required this.amountMinor,
     this.fromEnvelopeId,
   });
 
@@ -18,7 +18,7 @@ class RecentMoveEvent {
   final RecentMoveType type;
   final String toEnvelopeId;
   final String? fromEnvelopeId;
-  final int amountCents;
+  final int amountMinor;
 }
 
 class RecentMovesNotifier extends Notifier<Map<String, List<RecentMoveEvent>>> {
@@ -28,47 +28,47 @@ class RecentMovesNotifier extends Notifier<Map<String, List<RecentMoveEvent>>> {
   Map<String, List<RecentMoveEvent>> build() => {};
 
   void recordMove({
-    required String budgetId,
+    required String entityId,
     required String fromEnvelopeId,
     required String toEnvelopeId,
-    required int amountCents,
+    required int amountMinor,
   }) {
-    if (amountCents <= 0) {
+    if (amountMinor <= 0) {
       return;
     }
     _insert(
-      budgetId: budgetId,
+      entityId: entityId,
       event: RecentMoveEvent(
         occurredAt: DateTime.now(),
         type: RecentMoveType.moved,
         fromEnvelopeId: fromEnvelopeId,
         toEnvelopeId: toEnvelopeId,
-        amountCents: amountCents,
+        amountMinor: amountMinor,
       ),
     );
   }
 
   void recordAssigned({
-    required String budgetId,
+    required String entityId,
     required String envelopeId,
-    required int amountCents,
+    required int amountMinor,
   }) {
-    if (amountCents <= 0) {
+    if (amountMinor <= 0) {
       return;
     }
     _insert(
-      budgetId: budgetId,
+      entityId: entityId,
       event: RecentMoveEvent(
         occurredAt: DateTime.now(),
         type: RecentMoveType.assigned,
         toEnvelopeId: envelopeId,
-        amountCents: amountCents,
+        amountMinor: amountMinor,
       ),
     );
   }
 
-  bool undoLast({required String budgetId}) {
-    final current = state[budgetId];
+  bool undoLast({required String entityId}) {
+    final current = state[entityId];
     if (current == null || current.isEmpty) {
       return false;
     }
@@ -78,19 +78,19 @@ class RecentMovesNotifier extends Notifier<Map<String, List<RecentMoveEvent>>> {
         : const <RecentMoveEvent>[];
     final next = Map<String, List<RecentMoveEvent>>.from(state);
     if (remaining.isEmpty) {
-      next.remove(budgetId);
+      next.remove(entityId);
     } else {
-      next[budgetId] = remaining;
+      next[entityId] = remaining;
     }
     state = next;
     return true;
   }
 
-  void _insert({required String budgetId, required RecentMoveEvent event}) {
-    final current = state[budgetId] ?? const <RecentMoveEvent>[];
+  void _insert({required String entityId, required RecentMoveEvent event}) {
+    final current = state[entityId] ?? const <RecentMoveEvent>[];
     state = {
       ...state,
-      budgetId: [event, ...current].take(_maxEvents).toList(),
+      entityId: [event, ...current].take(_maxEvents).toList(),
     };
   }
 }
@@ -103,18 +103,18 @@ final recentMovesProvider =
 final ProviderFamily<List<RecentMoveEvent>, String>
 recentMovesForBudgetProvider = Provider.family<List<RecentMoveEvent>, String>((
   ref,
-  budgetId,
+  entityId,
 ) {
   final allEvents = ref.watch(recentMovesProvider);
-  return allEvents[budgetId] ?? const <RecentMoveEvent>[];
+  return allEvents[entityId] ?? const <RecentMoveEvent>[];
 });
 
 class RecentMovesIntroNotifier extends Notifier<Set<String>> {
   @override
   Set<String> build() => {};
 
-  void markSeen(String budgetId) {
-    state = {...state, budgetId};
+  void markSeen(String entityId) {
+    state = {...state, entityId};
   }
 }
 
@@ -126,8 +126,8 @@ final recentMovesIntroSeenSetProvider =
 final ProviderFamily<bool, String> recentMovesIntroSeenProvider =
     Provider.family<bool, String>((
       ref,
-      budgetId,
+      entityId,
     ) {
       final seen = ref.watch(recentMovesIntroSeenSetProvider);
-      return seen.contains(budgetId);
+      return seen.contains(entityId);
     });

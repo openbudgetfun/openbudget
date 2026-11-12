@@ -3,46 +3,36 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_group_names.dart';
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_figures.dart';
-import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-/// The Reflect tab: three hand-drawn statements about the month.
+/// The Reflect tab: hand-drawn statements about the month and the totals.
 class ReportsScreen extends HookConsumerWidget {
-  const ReportsScreen({required this.budgetId, super.key});
+  const ReportsScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final now = DateTime.now();
-    final selectedYear = useState(now.year);
-    final selectedMonth = useState(now.month);
+    final selectedMonth = useState(MonthKey.fromDate(DateTime.now()));
 
     final reportAsync = ref.watch(
-      spendingReportProvider(budgetId, selectedYear.value, selectedMonth.value),
+      spendingReportProvider(entityId, selectedMonth.value),
     );
-    final netWorthAsync = ref.watch(netWorthProvider(budgetId));
-    final ageOfMoneyAsync = ref.watch(ageOfMoneyProvider(budgetId));
-    final converter = ref
-        .watch(displayCurrencyConverterProvider(budgetId))
-        .asData
-        ?.value;
-    final monthLabel = reportMonthLabel(
-      l10n,
-      selectedMonth.value,
-      selectedYear.value,
-    );
+    final netWorthAsync = ref.watch(netWorthProvider);
+    final monthLabel = reportYyyymmLabel(l10n, selectedMonth.value);
 
     return Scaffold(
       backgroundColor: palette.canvas,
@@ -60,7 +50,7 @@ class ReportsScreen extends HookConsumerWidget {
             icon: OpenBudgetIcons.pieChart,
             onTap: () => context.pushNamed(
               spendingByPayeeRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
             child: reportAsync.when(
               loading: () => ObLoadingPanel(label: l10n.reportsLoading),
@@ -68,7 +58,6 @@ class ReportsScreen extends HookConsumerWidget {
               data: (report) => _SpendingBreakdownPreview(
                 report: report,
                 monthLabel: monthLabel,
-                converter: converter,
               ),
             ),
           ),
@@ -78,34 +67,34 @@ class ReportsScreen extends HookConsumerWidget {
             icon: OpenBudgetIcons.scale,
             onTap: () => context.pushNamed(
               netWorthRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
             child: netWorthAsync.when(
               loading: () => ObLoadingPanel(label: l10n.reportsLoading),
               error: (error, _) => _PreviewProblem(error: error),
-              data: (data) =>
-                  _NetWorthPreview(data: data, converter: converter),
+              data: (data) => _NetWorthPreview(data: data),
             ),
           ),
-          const SizedBox(height: SpacingTokens.md),
-          _ReflectCard(
-            title: l10n.reportsAgeOfMoneyTitle,
-            icon: OpenBudgetIcons.ageOfMoney,
-            onTap: () => context.pushNamed(
+          const SizedBox(height: SpacingTokens.sm),
+          ObOutlinedButton(
+            onPressed: () => context.pushNamed(
               spendingTrendsRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
-            child: ageOfMoneyAsync.when(
-              loading: () => ObLoadingPanel(label: l10n.reportsLoading),
-              error: (error, _) => _PreviewProblem(error: error),
-              data: (days) => _AgeOfMoneyPreview(days: days),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SkribbleIcon(data: OpenBudgetIcons.barChart, size: 18),
+                const SizedBox(width: SpacingTokens.sm),
+                Text(l10n.spendingTrendsTitle),
+              ],
             ),
           ),
           const SizedBox(height: SpacingTokens.sm),
           ObOutlinedButton(
             onPressed: () => context.pushNamed(
               multiMonthComparisonRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -194,12 +183,10 @@ class _SpendingBreakdownPreview extends HookWidget {
   const _SpendingBreakdownPreview({
     required this.report,
     required this.monthLabel,
-    required this.converter,
   });
 
   final SpendingReport report;
   final String monthLabel;
-  final DisplayCurrencyConverter? converter;
 
   @override
   Widget build(BuildContext context) {
@@ -210,24 +197,19 @@ class _SpendingBreakdownPreview extends HookWidget {
     final sortedEntries = report.categorySpending.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final categories = sortedEntries.take(6).toList();
-    final sourceCurrency = report.currencyCode;
+    final currencyCode = report.currencyCode;
     final listedTotal = categories.fold<int>(
       0,
       (sum, item) => sum + item.value,
     );
     final otherTotal = report.totalExpenses - listedTotal;
 
-    String format(int cents) =>
-        converter?.formatAmount(
-          amountCents: cents,
-          currencyCode: sourceCurrency,
-        ) ??
-        formatCentsForCode(cents, sourceCurrency);
+    String format(int minor) => formatMinorForCode(minor, currencyCode);
 
     final segments = [
       for (final (index, entry) in categories.indexed)
         ReportChartDatum(
-          label: entry.key,
+          label: reportGroupLabel(l10n, entry.key),
           amountLabel: format(entry.value),
           value: entry.value,
           color: series[index % series.length],
@@ -289,61 +271,30 @@ class _SpendingBreakdownPreview extends HookWidget {
   }
 }
 
-/// Net worth with its two drawn columns.
+/// Net worth with its two drawn columns, in the reporting currency the
+/// server already converted for us.
 class _NetWorthPreview extends HookWidget {
-  const _NetWorthPreview({required this.data, required this.converter});
+  const _NetWorthPreview({required this.data});
 
-  final NetWorthData data;
-  final DisplayCurrencyConverter? converter;
+  final NetWorthView data;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final netWorthByCurrency = {
-      for (final breakdown in data.currencyBreakdown)
-        breakdown.currency: breakdown.netWorth,
-    };
-    final assetsByCurrency = {
-      for (final breakdown in data.currencyBreakdown)
-        breakdown.currency: breakdown.totalAssets,
-    };
-    final liabilitiesByCurrency = {
-      for (final breakdown in data.currencyBreakdown)
-        breakdown.currency: breakdown.totalLiabilities,
-    };
-    final convertedNetWorth = converter?.convertTotalsToDisplay(
-      netWorthByCurrency,
-    );
-    final convertedAssets = converter?.convertTotalsToDisplay(assetsByCurrency);
-    final convertedLiabilities = converter?.convertTotalsToDisplay(
-      liabilitiesByCurrency,
-    );
-
-    final useConverted =
-        convertedNetWorth != null &&
-        convertedAssets != null &&
-        convertedLiabilities != null;
-    final primary = data.currencyBreakdown.firstOrNull;
-    final currency = useConverted
-        ? converter!.displayCurrency!.code
-        : (primary?.currency ?? '');
-    final assets = useConverted ? convertedAssets : (primary?.totalAssets ?? 0);
-    final liabilities = useConverted
-        ? convertedLiabilities
-        : (primary?.totalLiabilities ?? 0);
-    final netWorth = useConverted
-        ? convertedNetWorth
-        : (primary?.netWorth ?? 0);
+    final currencyCode = data.currencyCode;
+    final assets = data.assetsMinor;
+    final liabilities = data.liabilitiesMinor;
+    final netWorth = data.netWorthMinor;
     final series = reportSeriesColors(theme);
-    final assetsLabel = formatCentsForCode(assets, currency);
-    final liabilitiesLabel = formatCentsForCode(liabilities, currency);
+    final assetsLabel = formatMinorForCode(assets, currencyCode);
+    final liabilitiesLabel = formatMinorForCode(liabilities, currencyCode);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ObAmount(
-          formatCentsForCode(netWorth, currency),
+          formatMinorForCode(netWorth, currencyCode),
           tone: netWorth >= 0 ? ObTone.funded : ObTone.overspent,
           style: theme.textTheme.headlineMedium,
         ),
@@ -402,41 +353,6 @@ class _NetWorthPreview extends HookWidget {
               (l10n.netWorthLiabilities, liabilitiesLabel),
             ],
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// How long the money already in the budget lasts.
-class _AgeOfMoneyPreview extends HookWidget {
-  const _AgeOfMoneyPreview({required this.days});
-
-  final int? days;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final palette = theme.ob;
-    final daysValue = days;
-    if (daysValue == null) {
-      return ObStatePanel.empty(
-        title: l10n.reportsAgeOfMoneyTitle,
-        message: l10n.reportsEmptySubtitle,
-      );
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.reportsDays(daysValue),
-          style: theme.textTheme.headlineMedium?.copyWith(color: palette.ink),
-        ),
-        const SizedBox(height: SpacingTokens.xs),
-        Text(
-          l10n.reportsAgeOfMoneyHint,
-          style: theme.textTheme.bodySmall?.copyWith(color: palette.mutedInk),
         ),
       ],
     );

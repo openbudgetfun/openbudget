@@ -15,7 +15,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AppIconScreen(budgetId: 'test-budget-id'),
+            home: const AppIconScreen(entityId: 'test-budget-id'),
           ),
         ),
       );
@@ -38,7 +38,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AppIconScreen(budgetId: 'test-budget-id'),
+            home: const AppIconScreen(entityId: 'test-budget-id'),
           ),
         ),
       );
@@ -61,7 +61,7 @@ void main() {
             themeMode: ThemeMode.dark,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AppIconScreen(budgetId: 'test-budget-id'),
+            home: const AppIconScreen(entityId: 'test-budget-id'),
           ),
         ),
       );

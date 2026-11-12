@@ -7,17 +7,15 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
-import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/plaid_account_link_provider.dart';
-import 'package:openbudget_app/src/features/accounts/providers/wallet_actions_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/wallet_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
-import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 
@@ -62,9 +60,9 @@ String _resolveLocationCode() {
 }
 
 class AddAccountScreen extends HookConsumerWidget {
-  const AddAccountScreen({required this.budgetId, super.key});
+  const AddAccountScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -78,7 +76,11 @@ class AddAccountScreen extends HookConsumerWidget {
     final walletLabelController = useTextEditingController();
     final isSubmitting = useState(false);
     final selectedTypeKey = useState<String?>(null);
-    final walletOnBudget = useState(false);
+    final selectedCurrency = useState<CurrencyCode?>(null);
+    final trackByValue = useState(false);
+    final openingToday = useState(true);
+    final onBudget = useState(true);
+    final openingDate = useState<DateTime?>(null);
     final successAccountLabel = useState<String>(l10n.accountTypeOther);
     final showSearchingOverlay = useState(false);
     final selectedInstitution = useState<Institution?>(null);
@@ -92,11 +94,10 @@ class AddAccountScreen extends HookConsumerWidget {
     final accountTypeScrollController = useScrollController(
       keepScrollOffset: false,
     );
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final entityAsync = ref.watch(entityDetailProvider(entityId));
     final institutionCatalogAsync = ref.watch(
       institutionCatalogProvider(locationCode),
     );
-    final myAccountsAsync = ref.watch(myReusableAccountsProvider(budgetId));
 
     final typeSections = _accountTypeSections(l10n);
     final accountTypes = [
@@ -108,6 +109,18 @@ class AddAccountScreen extends HookConsumerWidget {
             (type) => type.key == selectedTypeKey.value,
             orElse: () => accountTypes.first,
           );
+    final baseCurrency = CurrencyCode.tryParse(
+      entityAsync.value?.baseCurrencyCode ?? '',
+    );
+    final accountCurrency = selectedCurrency.value ?? baseCurrency;
+    final isLiabilityKind = selectedType?.kind.isLiability ?? false;
+    final sourceChoices = selectedType?.kind.allowedBalanceSources ?? const {};
+    final canChooseSource = sourceChoices.length > 1;
+    final balanceSource = canChooseSource
+        ? (trackByValue.value
+              ? AccountBalanceSource.valuations
+              : AccountBalanceSource.transactions)
+        : (sourceChoices.firstOrNull ?? AccountBalanceSource.transactions);
 
     useListenable(nameController);
     useListenable(balanceController);
@@ -167,15 +180,13 @@ class AddAccountScreen extends HookConsumerWidget {
       ],
     );
 
-    final balanceDecimals = currencyDecimalsForCode(
-      budgetAsync.value?.currencyCode ?? '',
-    );
+    final balanceDecimals = accountCurrency?.decimals ?? 2;
     final balanceValue = parseMoneyInput(
       balanceController.text,
       decimals: balanceDecimals,
       allowNegative: true,
     );
-    final isWalletType = selectedType?.key == 'cryptoWallet';
+    final isWalletType = selectedType?.kind == AccountKind.crypto;
     final canSubmit =
         selectedType != null &&
         nameController.text.trim().isNotEmpty &&
@@ -185,42 +196,6 @@ class AddAccountScreen extends HookConsumerWidget {
     final canSubmitWallet = walletAddressController.text.trim().isNotEmpty;
     final institutionCatalog =
         institutionCatalogAsync.asData?.value ?? const <Institution>[];
-    final myAccounts = myAccountsAsync.asData?.value ?? const <Account>[];
-
-    Future<Set<String>?> fetchAccountIds({bool forceRefresh = false}) async {
-      try {
-        if (forceRefresh) {
-          ref.invalidate(accountListProvider(budgetId));
-        }
-        final accounts = await ref.read(accountListProvider(budgetId).future);
-        return accounts
-            .map((item) => item.id?.toString())
-            .whereType<String>()
-            .toSet();
-      } on Object {
-        return null;
-      }
-    }
-
-    Future<bool> wasAccountCreatedDespiteError(Set<String>? existingIds) async {
-      if (existingIds == null) return false;
-      const retryDelays = <Duration>[
-        Duration.zero,
-        Duration(milliseconds: 120),
-        Duration(milliseconds: 280),
-      ];
-      for (final delay in retryDelays) {
-        if (delay > Duration.zero) {
-          await Future<void>.delayed(delay);
-        }
-        final latestAccountIds = await fetchAccountIds(forceRefresh: true);
-        if (latestAccountIds != null &&
-            latestAccountIds.difference(existingIds).isNotEmpty) {
-          return true;
-        }
-      }
-      return false;
-    }
 
     Future<void> startLinkedBankFlow(Institution institution) async {
       final institutionName = institution.name.trim();
@@ -237,13 +212,16 @@ class AddAccountScreen extends HookConsumerWidget {
           final imported = await ref
               .read(plaidAccountLinkProvider.notifier)
               .importSandboxAccounts(
-                budgetId: budgetId,
+                entityId: entityId,
                 plaidInstitutionId: institution.plaidInstitutionId,
               );
 
           if (!context.mounted) return;
-          if (imported.isNotEmpty) {
-            context.goNamed(accountListRoute, pathParameters: {'id': budgetId});
+          if (imported.plaidItemId.isNotEmpty) {
+            context.goNamed(
+              accountListRoute,
+              pathParameters: {'entityId': entityId},
+            );
             return;
           }
         } on Exception catch (_) {
@@ -265,7 +243,7 @@ class AddAccountScreen extends HookConsumerWidget {
       try {
         final linkToken = await ref
             .read(plaidAccountLinkProvider.notifier)
-            .createLinkToken(budgetId: budgetId);
+            .createLinkToken(entityId: entityId);
         final publicToken = await _runPlaidLink(linkToken: linkToken);
         if (!context.mounted) return;
 
@@ -281,10 +259,10 @@ class AddAccountScreen extends HookConsumerWidget {
 
         final imported = await ref
             .read(plaidAccountLinkProvider.notifier)
-            .exchangePublicToken(budgetId: budgetId, publicToken: publicToken);
+            .exchangePublicToken(entityId: entityId, publicToken: publicToken);
         if (!context.mounted) return;
 
-        if (imported.isEmpty) {
+        if (imported.plaidItemId.isEmpty) {
           step.value = _AddAccountStep.unlinkedAccount;
           showAppToast(
             context,
@@ -294,7 +272,10 @@ class AddAccountScreen extends HookConsumerWidget {
           return;
         }
 
-        context.goNamed(accountListRoute, pathParameters: {'id': budgetId});
+        context.goNamed(
+          accountListRoute,
+          pathParameters: {'entityId': entityId},
+        );
       } on Exception catch (_) {
         if (!context.mounted) return;
         step.value = _AddAccountStep.unlinkedAccount;
@@ -311,31 +292,22 @@ class AddAccountScreen extends HookConsumerWidget {
     Future<void> submitSolanaWallet() async {
       if (!canSubmitWallet || isSubmitting.value) return;
       isSubmitting.value = true;
-      final existingAccountIds = await fetchAccountIds();
       try {
         await ref
             .read(walletActionsProvider.notifier)
-            .connectSolanaWallet(
-              budgetId: budgetId,
+            .connect(
+              entityId: entityId,
+              network: WalletNetwork.solanaMainnet,
               address: walletAddressController.text.trim(),
               label: walletLabelController.text.trim().isEmpty
                   ? null
                   : walletLabelController.text.trim(),
-              onBudget: walletOnBudget.value,
             );
         if (!context.mounted) return;
         successAccountLabel.value = l10n.accountTypeCryptoWallet;
         step.value = _AddAccountStep.success;
-      } on Object catch (_) {
-        final createdDespiteError = await wasAccountCreatedDespiteError(
-          existingAccountIds,
-        );
+      } on Exception catch (_) {
         if (!context.mounted) return;
-        if (createdDespiteError) {
-          successAccountLabel.value = l10n.accountTypeCryptoWallet;
-          step.value = _AddAccountStep.success;
-          return;
-        }
         showAppToast(
           context,
           message: l10n.accountCreateError,
@@ -348,55 +320,42 @@ class AddAccountScreen extends HookConsumerWidget {
 
     Future<void> submitUnlinkedAccount() async {
       if (!canSubmit || isSubmitting.value) return;
+      final chosenTypeKey = selectedTypeKey.value;
+      if (chosenTypeKey == null || chosenTypeKey.isEmpty) return;
       final chosenType = selectedType;
-      final budget = budgetAsync.value;
-      if (budget == null) return;
 
       isSubmitting.value = true;
 
-      final parsedBalance = isWalletType ? 0 : balanceValue;
-      if (parsedBalance == null) {
-        isSubmitting.value = false;
-        return;
-      }
+      final parsedBalance = balanceValue ?? 0;
+      final openingMinor = isLiabilityKind
+          ? -parsedBalance.abs()
+          : parsedBalance;
+      final chosenDate = openingDate.value;
+      final date = openingToday.value || chosenDate == null
+          ? null
+          : DateTime.utc(chosenDate.year, chosenDate.month, chosenDate.day);
 
-      var balanceCents = parsedBalance;
-      if (chosenType.isDebt && balanceCents > 0) {
-        balanceCents = -balanceCents;
-      }
-
-      final existingAccountIds = await fetchAccountIds();
       try {
         await ref
             .read(accountActionsProvider.notifier)
             .createAccount(
+              entityId: entityId,
               name: nameController.text.trim(),
-              accountType: chosenType.serverType,
-              balanceCents: balanceCents,
-              currencyCode: normalizeCurrencyCode(budget.currencyCode),
-              budgetId: budgetId,
-              onBudget: chosenType.onBudgetDefault,
-              sortOrder: 0,
-              walletAddress: isWalletType
-                  ? walletAddressController.text.trim()
-                  : null,
+              kind: chosenType.kind,
+              currencyCode: accountCurrency?.code ?? '',
+              balanceSource: balanceSource,
+              onBudget: chosenType.kind.canBeOnBudget && onBudget.value,
+              openingBalanceMinor: openingMinor == 0 ? null : openingMinor,
+              openingDate: date,
               institutionId: selectedInstitution.value?.id?.toString(),
             );
         if (!context.mounted) return;
         isSubmitting.value = false;
         successAccountLabel.value = chosenType.label;
         step.value = _AddAccountStep.success;
-      } on Object catch (_) {
-        final createdDespiteError = await wasAccountCreatedDespiteError(
-          existingAccountIds,
-        );
+      } on Exception catch (_) {
         if (!context.mounted) return;
         isSubmitting.value = false;
-        if (createdDespiteError) {
-          successAccountLabel.value = chosenType.label;
-          step.value = _AddAccountStep.success;
-          return;
-        }
         showAppToast(
           context,
           message: l10n.accountCreateError,
@@ -450,7 +409,7 @@ class AddAccountScreen extends HookConsumerWidget {
               tooltip: l10n.accountsCloseAction,
               onPressed: () => context.goNamed(
                 accountListRoute,
-                pathParameters: {'id': budgetId},
+                pathParameters: {'entityId': entityId},
               ),
             ),
           ],
@@ -472,39 +431,8 @@ class AddAccountScreen extends HookConsumerWidget {
                   searchController: searchController,
                   searchQuery: searchController.text,
                   institutions: institutionCatalog,
-                  myAccounts: myAccounts,
-                  isLoadingInstitutions:
-                      institutionCatalogAsync.isLoading ||
-                      myAccountsAsync.isLoading,
+                  isLoadingInstitutions: institutionCatalogAsync.isLoading,
                   onInstitutionTap: startLinkedBankFlow,
-                  onMyAccountTap: (account) async {
-                    final accountId = account.id?.toString();
-                    if (accountId == null || isSubmitting.value) return;
-                    final messenger = ScaffoldMessenger.of(context);
-                    isSubmitting.value = true;
-                    showSearchingOverlay.value = true;
-                    try {
-                      await ref
-                          .read(accountActionsProvider.notifier)
-                          .addMineToBudget(
-                            sourceAccountId: accountId,
-                            budgetId: budgetId,
-                          );
-                      if (!context.mounted) return;
-                      successAccountLabel.value = account.name;
-                      step.value = _AddAccountStep.success;
-                    } on Exception catch (_) {
-                      if (!context.mounted) return;
-                      messenger.showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.accountsAddExistingError),
-                        ),
-                      );
-                    } finally {
-                      isSubmitting.value = false;
-                      showSearchingOverlay.value = false;
-                    }
-                  },
                   onConnectSolana: () =>
                       step.value = _AddAccountStep.walletConnection,
                   onAddUnlinked: () {
@@ -518,8 +446,6 @@ class AddAccountScreen extends HookConsumerWidget {
                 child: _WalletConnectStep(
                   walletAddressController: walletAddressController,
                   walletLabelController: walletLabelController,
-                  onBudget: walletOnBudget.value,
-                  onBudgetChanged: (value) => walletOnBudget.value = value,
                 ),
               ),
               _AddAccountStep.unlinkedAccount => _StepFrame(
@@ -529,12 +455,29 @@ class AddAccountScreen extends HookConsumerWidget {
                   nameController: nameController,
                   balanceController: balanceController,
                   currencyDecimals: balanceDecimals,
+                  currencyCode: accountCurrency?.code ?? '',
+                  canPickCurrency: true,
+                  onPickCurrency: () async {
+                    final picked = await _selectCurrency(
+                      context,
+                      accountCurrency,
+                    );
+                    if (picked != null) selectedCurrency.value = picked;
+                  },
                   walletAddressController: walletAddressController,
                   showWalletAddress: isWalletType,
                   selectedTypeLabel:
                       selectedType?.label ??
                       l10n.addAccountSelectTypePlaceholder,
                   hasSelectedType: selectedType != null,
+                  canBeOnBudget: selectedType?.kind.canBeOnBudget ?? false,
+                  onBudget: onBudget.value,
+                  onBudgetChanged: (value) => onBudget.value = value,
+                  canChooseSource: canChooseSource,
+                  trackByValue: trackByValue.value,
+                  onTrackByValueChanged: (value) => trackByValue.value = value,
+                  openingToday: openingToday.value,
+                  onOpeningTodayChanged: (value) => openingToday.value = value,
                   selectedInstitutionName: selectedInstitution.value?.name,
                   onChooseType: () => step.value = _AddAccountStep.accountType,
                 ),
@@ -558,13 +501,12 @@ class AddAccountScreen extends HookConsumerWidget {
                   balanceController.clear();
                   walletAddressController.clear();
                   walletLabelController.clear();
-                  walletOnBudget.value = false;
                   selectedInstitution.value = null;
                   step.value = _AddAccountStep.unlinkedAccount;
                 },
                 onDone: () => context.goNamed(
                   accountListRoute,
-                  pathParameters: {'id': budgetId},
+                  pathParameters: {'entityId': entityId},
                 ),
               ),
             },
@@ -651,6 +593,32 @@ class AddAccountScreen extends HookConsumerWidget {
       ),
     );
   }
+
+  Future<CurrencyCode?> _selectCurrency(
+    BuildContext context,
+    CurrencyCode? current,
+  ) => showModalBottomSheet<CurrencyCode>(
+    context: context,
+    showDragHandle: true,
+    builder: (context) => SafeArea(
+      child: ListView.separated(
+        shrinkWrap: true,
+        itemCount: CurrencyCode.values.length,
+        separatorBuilder: (_, _) => const Divider(height: 1),
+        itemBuilder: (context, index) {
+          final currency = CurrencyCode.values[index];
+          return ListTile(
+            title: Text('${currency.displayName} (${currency.code})'),
+            selected: currency == current,
+            trailing: currency == current
+                ? const SkribbleIcon(data: OpenBudgetIcons.check)
+                : null,
+            onTap: () => Navigator.of(context).pop(currency),
+          );
+        },
+      ),
+    ),
+  );
 
   Future<String?> _runPlaidLink({required String linkToken}) async {
     final completer = Completer<String?>();
@@ -782,10 +750,8 @@ class _BankSearchStep extends HookWidget {
     required this.searchController,
     required this.searchQuery,
     required this.institutions,
-    required this.myAccounts,
     required this.isLoadingInstitutions,
     required this.onInstitutionTap,
-    required this.onMyAccountTap,
     required this.onConnectSolana,
     required this.onAddUnlinked,
   });
@@ -794,10 +760,8 @@ class _BankSearchStep extends HookWidget {
   final TextEditingController searchController;
   final String searchQuery;
   final List<Institution> institutions;
-  final List<Account> myAccounts;
   final bool isLoadingInstitutions;
   final Future<void> Function(Institution institution) onInstitutionTap;
-  final Future<void> Function(Account account) onMyAccountTap;
   final VoidCallback onConnectSolana;
   final VoidCallback onAddUnlinked;
 
@@ -815,14 +779,6 @@ class _BankSearchStep extends HookWidget {
                     (institution.website ?? '').toLowerCase().contains(
                       normalizedQuery,
                     ),
-              )
-              .toList(growable: false);
-    final filteredMyAccounts = normalizedQuery.isEmpty
-        ? myAccounts.take(6).toList(growable: false)
-        : myAccounts
-              .where(
-                (account) =>
-                    account.name.toLowerCase().contains(normalizedQuery),
               )
               .toList(growable: false);
     final sectionTitle = normalizedQuery.isEmpty
@@ -902,20 +858,6 @@ class _BankSearchStep extends HookWidget {
               );
             },
           ),
-        if (filteredMyAccounts.isNotEmpty) ...[
-          const SizedBox(height: SpacingTokens.md),
-          ObSectionHeader(
-            title: l10n.accountsMyAccounts,
-            padding: EdgeInsets.zero,
-          ),
-          const SizedBox(height: SpacingTokens.sm),
-          ...filteredMyAccounts.map(
-            (account) => _MyAccountTile(
-              account: account,
-              onTap: () => onMyAccountTap(account),
-            ),
-          ),
-        ],
         const SizedBox(height: SpacingTokens.md),
         Row(
           children: [
@@ -977,56 +919,14 @@ class _InstitutionTile extends HookWidget {
   );
 }
 
-class _MyAccountTile extends HookWidget {
-  const _MyAccountTile({required this.account, required this.onTap});
-
-  final Account account;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final palette = theme.ob;
-    return ObCard(
-      margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
-      child: ListTile(
-        onTap: onTap,
-        leading: SkribbleIcon(
-          data: OpenBudgetIcons.bookmark,
-          color: palette.hue(ObTone.brand),
-        ),
-        title: Text(
-          account.name,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: palette.ink,
-          ),
-        ),
-        subtitle: Text(
-          l10n.accountsAddExistingAccountHint,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: palette.mutedInk,
-          ),
-        ),
-        trailing: const SkribbleIcon(data: OpenBudgetIcons.addLink, size: 20),
-      ),
-    );
-  }
-}
-
 class _WalletConnectStep extends HookWidget {
   const _WalletConnectStep({
     required this.walletAddressController,
     required this.walletLabelController,
-    required this.onBudget,
-    required this.onBudgetChanged,
   });
 
   final TextEditingController walletAddressController;
   final TextEditingController walletLabelController;
-  final bool onBudget;
-  final ValueChanged<bool> onBudgetChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -1080,13 +980,6 @@ class _WalletConnectStep extends HookWidget {
               hintText: l10n.addAccountWalletLabelHint,
             ),
           ),
-          const SizedBox(height: SpacingTokens.md),
-          SwitchListTile(
-            title: Text(l10n.addAccountWalletIncludeInBudgetTotals),
-            value: onBudget,
-            onChanged: onBudgetChanged,
-            contentPadding: EdgeInsets.zero,
-          ),
         ],
       ),
     );
@@ -1099,10 +992,21 @@ class _UnlinkedAccountStep extends HookWidget {
     required this.nameController,
     required this.balanceController,
     required this.currencyDecimals,
+    required this.currencyCode,
+    required this.canPickCurrency,
+    required this.onPickCurrency,
     required this.walletAddressController,
     required this.showWalletAddress,
     required this.selectedTypeLabel,
     required this.hasSelectedType,
+    required this.canBeOnBudget,
+    required this.onBudget,
+    required this.onBudgetChanged,
+    required this.canChooseSource,
+    required this.trackByValue,
+    required this.onTrackByValueChanged,
+    required this.openingToday,
+    required this.onOpeningTodayChanged,
     required this.selectedInstitutionName,
     required this.onChooseType,
   });
@@ -1111,10 +1015,21 @@ class _UnlinkedAccountStep extends HookWidget {
   final TextEditingController nameController;
   final TextEditingController balanceController;
   final int currencyDecimals;
+  final String currencyCode;
+  final bool canPickCurrency;
+  final VoidCallback onPickCurrency;
   final TextEditingController walletAddressController;
   final bool showWalletAddress;
   final String selectedTypeLabel;
   final bool hasSelectedType;
+  final bool canBeOnBudget;
+  final bool onBudget;
+  final ValueChanged<bool> onBudgetChanged;
+  final bool canChooseSource;
+  final bool trackByValue;
+  final ValueChanged<bool> onTrackByValueChanged;
+  final bool openingToday;
+  final ValueChanged<bool> onOpeningTodayChanged;
   final String? selectedInstitutionName;
   final VoidCallback onChooseType;
 
@@ -1266,6 +1181,59 @@ class _UnlinkedAccountStep extends HookWidget {
               ),
             ),
           ] else ...[
+            if (canPickCurrency) ...[
+              Text(l10n.addAccountCurrencyQuestion, style: headingStyle),
+              const SizedBox(height: SpacingTokens.xs),
+              ObCard(
+                child: ListTile(
+                  onTap: onPickCurrency,
+                  title: Text(
+                    currencyCode.isEmpty
+                        ? l10n.addAccountSelectCurrencyPlaceholder
+                        : currencyCode,
+                    style: formValueStyle?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  trailing: const SkribbleIcon(
+                    data: OpenBudgetIcons.chevronRight,
+                    size: 20,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.sm,
+                  ),
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.md),
+            ],
+            if (canBeOnBudget)
+              SwitchListTile(
+                title: Text(l10n.addAccountOnBudgetQuestion),
+                subtitle: Text(l10n.addAccountOnBudgetHint),
+                value: onBudget,
+                onChanged: onBudgetChanged,
+                contentPadding: EdgeInsets.zero,
+              ),
+            if (canChooseSource) ...[
+              Text(l10n.addAccountTrackByQuestion, style: headingStyle),
+              const SizedBox(height: SpacingTokens.xs),
+              SegmentedButton<bool>(
+                segments: [
+                  ButtonSegment(
+                    value: false,
+                    label: Text(l10n.addAccountTrackByTransactions),
+                  ),
+                  ButtonSegment(
+                    value: true,
+                    label: Text(l10n.addAccountTrackByValue),
+                  ),
+                ],
+                selected: {trackByValue},
+                onSelectionChanged: (values) =>
+                    onTrackByValueChanged(values.first),
+              ),
+            ],
+            const SizedBox(height: SpacingTokens.md),
             Text(l10n.addAccountBalanceQuestion, style: headingStyle),
             const SizedBox(height: SpacingTokens.xs),
             TextField(
@@ -1280,7 +1248,15 @@ class _UnlinkedAccountStep extends HookWidget {
               decoration: InputDecoration(
                 hintText: l10n.addAccountBalanceExample,
                 errorText: balanceError,
+                prefixText: currencyCode.isEmpty ? null : '$currencyCode ',
               ),
+            ),
+            const SizedBox(height: SpacingTokens.xs),
+            SwitchListTile(
+              title: Text(l10n.addAccountOpeningToday),
+              value: openingToday,
+              onChanged: onOpeningTodayChanged,
+              contentPadding: EdgeInsets.zero,
             ),
           ],
         ],
@@ -1355,11 +1331,13 @@ class _AccountTypeStep extends HookWidget {
   static WiredSvgIconData _iconForType(String type) => switch (type) {
     'savings' => OpenBudgetIcons.savings,
     'cash' => OpenBudgetIcons.cash,
-    'creditCard' || 'lineOfCredit' => OpenBudgetIcons.creditCard,
+    'creditCard' => OpenBudgetIcons.creditCard,
+    'loan' || 'otherLiability' => OpenBudgetIcons.scale,
     'mortgage' => OpenBudgetIcons.home,
-    'asset' => OpenBudgetIcons.trendingUp,
-    'liability' => OpenBudgetIcons.scale,
-    'cryptoWallet' => OpenBudgetIcons.solana,
+    'investment' => OpenBudgetIcons.trendingUp,
+    'property' => OpenBudgetIcons.home,
+    'vehicle' => OpenBudgetIcons.transport,
+    'crypto' => OpenBudgetIcons.solana,
     'checking' => OpenBudgetIcons.bank,
     _ => OpenBudgetIcons.receipt,
   };
@@ -1405,16 +1383,12 @@ class _AccountTypeOption {
   const _AccountTypeOption({
     required this.key,
     required this.label,
-    required this.serverType,
-    required this.onBudgetDefault,
-    required this.isDebt,
+    required this.kind,
   });
 
   final String key;
   final String label;
-  final String serverType;
-  final bool onBudgetDefault;
-  final bool isDebt;
+  final AccountKind kind;
 }
 
 @immutable
@@ -1438,23 +1412,17 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) => [
       _AccountTypeOption(
         key: 'checking',
         label: l10n.accountTypeChecking,
-        serverType: 'checking',
-        onBudgetDefault: true,
-        isDebt: false,
+        kind: AccountKind.checking,
       ),
       _AccountTypeOption(
         key: 'savings',
         label: l10n.accountTypeSavings,
-        serverType: 'savings',
-        onBudgetDefault: true,
-        isDebt: false,
+        kind: AccountKind.savings,
       ),
       _AccountTypeOption(
         key: 'cash',
         label: l10n.accountTypeCash,
-        serverType: 'cash',
-        onBudgetDefault: true,
-        isDebt: false,
+        kind: AccountKind.cash,
       ),
     ],
   ),
@@ -1465,64 +1433,22 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) => [
       _AccountTypeOption(
         key: 'creditCard',
         label: l10n.accountTypeCreditCard,
-        serverType: 'creditCard',
-        onBudgetDefault: true,
-        isDebt: true,
+        kind: AccountKind.creditCard,
       ),
       _AccountTypeOption(
-        key: 'lineOfCredit',
-        label: l10n.addAccountTypeLineOfCredit,
-        serverType: 'other',
-        onBudgetDefault: true,
-        isDebt: true,
+        key: 'loan',
+        label: l10n.addAccountTypePersonalLoan,
+        kind: AccountKind.loan,
       ),
-    ],
-  ),
-  _AccountTypeSection(
-    title: l10n.addAccountSectionMortgagesAndLoans,
-    subtitle: l10n.addAccountSectionMortgagesAndLoansHint,
-    options: [
       _AccountTypeOption(
         key: 'mortgage',
         label: l10n.addAccountTypeMortgage,
-        serverType: 'other',
-        onBudgetDefault: false,
-        isDebt: true,
+        kind: AccountKind.mortgage,
       ),
       _AccountTypeOption(
-        key: 'autoLoan',
-        label: l10n.addAccountTypeAutoLoan,
-        serverType: 'other',
-        onBudgetDefault: false,
-        isDebt: true,
-      ),
-      _AccountTypeOption(
-        key: 'studentLoan',
-        label: l10n.addAccountTypeStudentLoan,
-        serverType: 'other',
-        onBudgetDefault: false,
-        isDebt: true,
-      ),
-      _AccountTypeOption(
-        key: 'personalLoan',
-        label: l10n.addAccountTypePersonalLoan,
-        serverType: 'other',
-        onBudgetDefault: false,
-        isDebt: true,
-      ),
-      _AccountTypeOption(
-        key: 'medicalDebt',
-        label: l10n.addAccountTypeMedicalDebt,
-        serverType: 'other',
-        onBudgetDefault: false,
-        isDebt: true,
-      ),
-      _AccountTypeOption(
-        key: 'otherDebt',
+        key: 'otherLiability',
         label: l10n.addAccountTypeOtherDebt,
-        serverType: 'other',
-        onBudgetDefault: false,
-        isDebt: true,
+        kind: AccountKind.otherLiability,
       ),
     ],
   ),
@@ -1531,31 +1457,29 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) => [
     subtitle: l10n.addAccountSectionTrackingAccountsHint,
     options: [
       _AccountTypeOption(
-        key: 'asset',
+        key: 'investment',
         label: l10n.addAccountTypeAssetExample,
-        serverType: 'investment',
-        onBudgetDefault: false,
-        isDebt: false,
+        kind: AccountKind.investment,
       ),
       _AccountTypeOption(
-        key: 'liability',
-        label: l10n.addAccountTypeLiability,
-        serverType: 'other',
-        onBudgetDefault: false,
-        isDebt: true,
+        key: 'property',
+        label: l10n.addAccountTypeProperty,
+        kind: AccountKind.property,
       ),
-    ],
-  ),
-  _AccountTypeSection(
-    title: l10n.addAccountSectionDigitalAssets,
-    subtitle: l10n.addAccountSectionDigitalAssetsHint,
-    options: [
       _AccountTypeOption(
-        key: 'cryptoWallet',
+        key: 'vehicle',
+        label: l10n.addAccountTypeVehicle,
+        kind: AccountKind.vehicle,
+      ),
+      _AccountTypeOption(
+        key: 'crypto',
         label: l10n.addAccountTypeSolanaWallet,
-        serverType: 'cryptoWallet',
-        onBudgetDefault: false,
-        isDebt: false,
+        kind: AccountKind.crypto,
+      ),
+      _AccountTypeOption(
+        key: 'otherAsset',
+        label: l10n.addAccountTypeOtherAsset,
+        kind: AccountKind.otherAsset,
       ),
     ],
   ),

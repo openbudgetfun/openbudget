@@ -1,0 +1,20 @@
+### The stable internal role of a structural ledger account. At most one
+### account per role per entity; system accounts cannot be archived.
+enum: LedgerSystemRole
+serialized: byName
+values:
+  - bank
+  - accountsReceivable
+  - accountsPayable
+  - vatControl
+  - payrollLiabilities
+  - directorsLoan
+  - retainedEarnings
+  - openingBalanceEquity
+  - suspense
+  - rounding
+  - realisedFx
+  - unrealisedFx
+  - ownerDrawings
+  ### Clears the two legs of a transfer between the entity's own accounts.
+  - bankClearing

@@ -1,7 +1,13 @@
 /// Shared Dart-only models and utilities for OpenBudget.
 library;
 
+export 'src/accounts/account_kind_rules.dart';
+export 'src/budgeting/envelope_fold.dart';
+export 'src/budgeting/goal_math.dart';
+export 'src/budgeting/month_key.dart';
+export 'src/budgeting/recurrence.dart';
 export 'src/constants/currencies.dart';
+export 'src/generated/protocol.dart';
 export 'src/ledger/chart_of_accounts.dart';
 export 'src/ledger/exchange_rate.dart';
 export 'src/ledger/journal_draft.dart';
@@ -13,7 +19,9 @@ export 'src/logging/log_entry.dart';
 export 'src/logging/log_formatter.dart';
 export 'src/logging/ob_logger.dart';
 export 'src/money/minor_units.dart';
+export 'src/money/split.dart';
 export 'src/tax/de/de_tax_rules.dart';
+export 'src/tax/fiscal_year.dart';
 export 'src/tax/gb/gb.dart';
 export 'src/tax/ng/ng_tax_rules.dart';
 export 'src/tax/tax_model.dart';
@@ -21,3 +29,5 @@ export 'src/tax/tax_profile.dart';
 export 'src/tax/tax_rule_pack.dart';
 export 'src/tax/tax_rules.dart';
 export 'src/tax/us/us_tax_rules.dart';
+export 'src/time/civil_date.dart';
+export 'src/time/default_time_zone.dart';

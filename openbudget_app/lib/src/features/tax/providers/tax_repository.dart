@@ -9,31 +9,30 @@ part 'tax_repository.g.dart';
 /// The app depends on this interface rather than the generated client so
 /// tests can supply a fake API without a running server.
 abstract interface class TaxRepository {
-  Future<TaxProfileRecord?> getProfile(String budgetId);
+  Future<TaxProfileRecord?> getProfile(String entityId);
 
   Future<TaxProfileRecord> saveProfile({
-    required String budgetId,
+    required String entityId,
     required String jurisdiction,
     required String entityKind,
     required String profileJson,
-    String? linkedBudgetId,
   });
 
-  Future<List<TaxCategoryView>> listCategories(String budgetId);
+  Future<List<TaxCategoryView>> listCategories(String entityId);
 
   Future<Envelope> setEnvelopeTaxCategory({
     required String envelopeId,
     String? code,
   });
 
-  Future<Transaction> setTransactionTax({
-    required String transactionId,
+  Future<TransactionView> setLineTax({
+    required String transactionLineId,
     String? code,
     int? businessUsePercent,
-    int? salesTaxCents,
+    int? salesTaxMinor,
   });
 
-  Future<TaxReportView> getReport(String budgetId, int startYear);
+  Future<TaxReportView> getReport(String entityId, int startYear);
 }
 
 /// The production [TaxRepository], backed by the Serverpod client.
@@ -43,29 +42,25 @@ class ServerpodTaxRepository implements TaxRepository {
   final Client _client;
 
   @override
-  Future<TaxProfileRecord?> getProfile(String budgetId) =>
-      _client.tax.getProfile(UuidValue.fromString(budgetId));
+  Future<TaxProfileRecord?> getProfile(String entityId) =>
+      _client.tax.getProfile(UuidValue.fromString(entityId));
 
   @override
   Future<TaxProfileRecord> saveProfile({
-    required String budgetId,
+    required String entityId,
     required String jurisdiction,
     required String entityKind,
     required String profileJson,
-    String? linkedBudgetId,
   }) => _client.tax.saveProfile(
-    UuidValue.fromString(budgetId),
+    UuidValue.fromString(entityId),
     jurisdiction,
     entityKind,
     profileJson,
-    linkedBudgetId: linkedBudgetId == null
-        ? null
-        : UuidValue.fromString(linkedBudgetId),
   );
 
   @override
-  Future<List<TaxCategoryView>> listCategories(String budgetId) =>
-      _client.tax.listCategories(UuidValue.fromString(budgetId));
+  Future<List<TaxCategoryView>> listCategories(String entityId) =>
+      _client.tax.listCategories(UuidValue.fromString(entityId));
 
   @override
   Future<Envelope> setEnvelopeTaxCategory({
@@ -77,22 +72,22 @@ class ServerpodTaxRepository implements TaxRepository {
   );
 
   @override
-  Future<Transaction> setTransactionTax({
-    required String transactionId,
+  Future<TransactionView> setLineTax({
+    required String transactionLineId,
     String? code,
     int? businessUsePercent,
-    int? salesTaxCents,
-  }) => _client.tax.setTransactionTax(
-    UuidValue.fromString(transactionId),
-    code: code,
+    int? salesTaxMinor,
+  }) => _client.tax.setLineTax(
+    UuidValue.fromString(transactionLineId),
+    taxCategoryCode: code,
     businessUsePercent: businessUsePercent,
-    salesTaxCents: salesTaxCents,
+    salesTaxMinor: salesTaxMinor,
   );
 
   @override
-  Future<TaxReportView> getReport(String budgetId, int startYear) =>
+  Future<TaxReportView> getReport(String entityId, int startYear) =>
       _client.tax.getReport(
-        UuidValue.fromString(budgetId),
+        UuidValue.fromString(entityId),
         startYear: startYear,
       );
 }
