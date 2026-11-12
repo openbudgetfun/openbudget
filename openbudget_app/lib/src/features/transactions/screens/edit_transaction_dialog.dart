@@ -102,6 +102,29 @@ class EditTransactionDialog extends HookConsumerWidget {
       }
     }
 
+    // The stored selection stays selected while its list is still loading
+    // (or when the envelope or payee has since been deleted).
+    final storedPayeeId = selectedPayeeId.value;
+    if (storedPayeeId != null &&
+        !payeeItems.any((item) => item.value == storedPayeeId)) {
+      payeeItems.add(
+        DropdownMenuItem<String>(
+          value: storedPayeeId,
+          child: Text(l10n.transactionsUnknownPayee),
+        ),
+      );
+    }
+    final storedEnvelopeId = selectedEnvelopeId.value;
+    if (storedEnvelopeId != null &&
+        !envelopeItems.any((item) => item.value == storedEnvelopeId)) {
+      envelopeItems.add(
+        DropdownMenuItem<String>(
+          value: storedEnvelopeId,
+          child: Text(l10n.transactionsUnknownEnvelope),
+        ),
+      );
+    }
+
     return AlertDialog(
       title: Text(l10n.transactionEditTitle),
       content: SingleChildScrollView(

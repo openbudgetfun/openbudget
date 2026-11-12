@@ -92,7 +92,10 @@ class AddExpenseScreen extends HookConsumerWidget {
         : amountMinor -
               lines.value.fold<int>(0, (sum, line) => sum + line.amountMinor);
     final linesSumExact =
-        lines.value.isEmpty || (amountMinor != null && remainingMinor == 0);
+        lines.value.isEmpty ||
+        (amountMinor != null &&
+            remainingMinor == 0 &&
+            !lines.value.any((line) => line.hasError));
 
     Future<void> checkDuplicates() async {
       if (defaultAccountId.isEmpty || amountMinor == null || amountMinor <= 0) {
@@ -141,7 +144,10 @@ class AddExpenseScreen extends HookConsumerWidget {
           envelopeItems.add(
             DropdownMenuItem<String>(
               value: id,
-              child: Text('${group.category.name} / ${envelope.envelope.name}'),
+              child: Text(
+                '${group.category.name} / ${envelope.envelope.name}',
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           );
         }
@@ -238,8 +244,8 @@ class AddExpenseScreen extends HookConsumerWidget {
                         },
                         child: TextField(
                           controller: amountController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
+                          keyboardType: TextInputType.numberWithOptions(
+                            decimal: amountDecimals > 0,
                           ),
                           textAlign: TextAlign.center,
                           style:
@@ -597,10 +603,18 @@ class AddExpenseScreen extends HookConsumerWidget {
 
 /// One line of the split.
 class _ExpenseLine {
-  const _ExpenseLine({required this.amountMinor, this.envelopeId = ''});
+  const _ExpenseLine({
+    required this.amountMinor,
+    this.envelopeId = '',
+    this.hasError = false,
+  });
 
   final int amountMinor;
   final String envelopeId;
+
+  /// True while the typed text is not an exact amount; the line keeps its
+  /// last valid value and the form refuses to save.
+  final bool hasError;
 }
 
 /// The lines editor: shows every line, adds and removes them, and exposes
@@ -677,23 +691,26 @@ class _LinesEditor extends HookWidget {
                         lines[i].amountMinor,
                         decimals,
                       ),
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
+                      keyboardType: TextInputType.numberWithOptions(
+                        decimal: decimals > 0,
                       ),
                       decoration: InputDecoration(
                         labelText: l10n.linesEditorLineAmount(i + 1),
                         prefixText: '$currencyCode ',
+                        errorText: lines[i].hasError
+                            ? l10n.amountInvalidFormat(decimals)
+                            : null,
                       ),
                       onChanged: (text) {
                         final value = parseMoneyInput(
                           text,
                           decimals: decimals,
                         );
-                        if (value == null) return;
                         final updated = [...lines];
                         updated[i] = _ExpenseLine(
-                          amountMinor: value,
+                          amountMinor: value ?? updated[i].amountMinor,
                           envelopeId: updated[i].envelopeId,
+                          hasError: value == null && text.trim().isNotEmpty,
                         );
                         onChanged(updated);
                       },
@@ -706,6 +723,7 @@ class _LinesEditor extends HookWidget {
                       initialValue: lines[i].envelopeId.isEmpty
                           ? ''
                           : lines[i].envelopeId,
+                      isExpanded: true,
                       items: envelopeItems,
                       decoration: InputDecoration(
                         labelText: l10n.transactionUnassigned,
@@ -791,11 +809,14 @@ class _ModeChip extends HookWidget {
               children: [
                 SkribbleIcon(data: icon, size: 16, color: foreground),
                 const SizedBox(width: SpacingTokens.xs),
-                Text(
-                  label,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: foreground,
-                    fontWeight: FontWeight.w700,
+                Flexible(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: foreground,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],

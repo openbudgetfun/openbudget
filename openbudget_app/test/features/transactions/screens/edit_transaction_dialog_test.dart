@@ -2,96 +2,73 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/edit_transaction_dialog.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _entityId = '00000000-0000-0000-0000-000000000001';
-final _budgetUuid = UuidValue.fromString(_entityId);
+import '../../../fixtures/budget_month.dart';
+import '../../../fixtures/transactions.dart';
 
-class _RecordingTransactionActions extends TransactionActions {
-  int? updatedAmountMinor;
+const String _entityId = fixtureEntityId;
+
+class _RecordingActions extends TransactionActions {
+  TransactionInput? updated;
+  String? updatedId;
 
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
   @override
-  Future<Transaction> updateTransaction({
+  Future<TransactionView> update({
     required String transactionId,
+    required TransactionInput input,
     required String entityId,
-    String? description,
-    int? amountMinor,
-    String? envelopeId,
-    String? payeeId,
-    DateTime? transactionDate,
-    String? memo,
   }) async {
-    updatedAmountMinor = amountMinor;
-    return Transaction(
-      description: description ?? '',
-      amountMinor: amountMinor ?? 0,
-      currencyCode: 'USD',
-      entityId: _budgetUuid,
-      transactionDate: transactionDate ?? DateTime(2026),
+    updated = input;
+    updatedId = transactionId;
+    return testTransactionView(
+      transaction: testTransaction(amountMinor: input.amountMinor),
     );
   }
 }
 
-Transaction _makeTransaction({int amountMinor = -1234}) => Transaction(
-  id: UuidValue.fromString('00000000-0000-0000-0000-000000000010'),
-  description: 'Coffee',
-  amountMinor: amountMinor,
-  currencyCode: 'USD',
-  entityId: _budgetUuid,
-  transactionDate: DateTime(2026, 2),
-);
-
-Widget _buildSubject({
-  required Transaction transaction,
-  required TransactionActions actions,
-}) => ProviderScope(
-  overrides: [
-    transactionActionsProvider.overrideWith(() => actions),
-    payeeListProvider.overrideWith((ref, entityId) async => const <Payee>[]),
-    budgetSummaryProvider.overrideWith(
-      (ref, entityId) async => BudgetSummary(
-        budget: Budget(
-          id: _budgetUuid,
-          name: 'Budget',
-          currencyCode: 'USD',
-          ownerId: UuidValue.fromString(
-            '00000000-0000-0000-0000-000000000099',
-          ),
-          createdAt: DateTime(2026),
-        ),
-        categories: const [],
-        totalIncomeMinor: 0,
-        totalBudgetedMinor: 0,
-        readyToAssignMinor: 0,
-        year: 2026,
-        month: 2,
-      ),
+Future<_RecordingActions> _pumpDialog(
+  WidgetTester tester, {
+  required TransactionView view,
+  List<Payee> payees = const [],
+}) async {
+  final actions = _RecordingActions();
+  final container = ProviderContainer(
+    retry: (_, _) => null,
+    overrides: [
+      payeeListProvider.overrideWith((ref, entityId) async => payees),
+      budgetMonthProvider.overrideWith((ref, id) async => testMonthView()),
+      transactionActionsProvider.overrideWith(() => actions),
+    ],
+  );
+  addTearDown(container.dispose);
+  await tester.pumpApp(
+    Scaffold(
+      body: EditTransactionDialog(view: view, entityId: _entityId),
     ),
-  ],
-  child: MaterialApp(
-    theme: OpenBudgetTheme.light,
+    container: container,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
-    home: Scaffold(
-      body: EditTransactionDialog(
-        transaction: transaction,
-        entityId: _entityId,
-        currencyCode: 'USD',
-      ),
-    ),
-  ),
-);
+  );
+  await tester.pumpAndSettle();
+  return actions;
+}
 
-Future<void> _save(WidgetTester tester) async {
-  await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+Finder _field(String label) => find.widgetWithText(TextField, label);
+
+Future<void> _tapSave(WidgetTester tester) async {
+  await tester.ensureVisible(find.widgetWithText(ObFilledButton, 'Save'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.widgetWithText(ObFilledButton, 'Save'));
   await tester.pumpAndSettle();
 }
 
@@ -99,70 +76,206 @@ void main() {
   testWidgets('shows the stored amount without floating point drift', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      _buildSubject(
-        transaction: _makeTransaction(),
-        actions: _RecordingTransactionActions(),
-      ),
+    await _pumpDialog(
+      tester,
+      view: testTransactionView(transaction: testTransaction()),
     );
-    await tester.pumpAndSettle();
 
-    expect(find.text('12.34'), findsOneWidget);
+    expect(find.text('Edit Transaction'), findsOneWidget);
+    expect(_field('Amount'), findsOneWidget);
+    final amount = tester.widget<TextField>(_field('Amount'));
+    expect(amount.controller!.text, '12.34');
   });
 
-  testWidgets('saves 12.34 as 1234 minor units', (tester) async {
-    final actions = _RecordingTransactionActions();
-    await tester.pumpWidget(
-      _buildSubject(transaction: _makeTransaction(), actions: actions),
+  testWidgets('saves 12.34 as -1234 minor units on the transaction', (
+    tester,
+  ) async {
+    final actions = await _pumpDialog(
+      tester,
+      view: testTransactionView(
+        transaction: testTransaction(),
+        payeeName: 'Tesco',
+      ),
+      payees: [testPayee()],
     );
-    await tester.pumpAndSettle();
 
-    await tester.enterText(find.widgetWithText(TextField, 'Amount'), '12.34');
+    await tester.enterText(_field('Amount'), '12.34');
     await tester.pumpAndSettle();
-    await _save(tester);
+    await _tapSave(tester);
 
-    expect(actions.updatedAmountMinor, -1234);
+    expect(actions.updatedId, fixtureTransactionId);
+    expect(actions.updated!.amountMinor, -1234);
+    expect(actions.updated!.description, 'Groceries');
+    expect(actions.updated!.fxRate, '1');
+    expect(
+      actions.updated!.lines.single.envelopeId.toString(),
+      fixtureEnvelopeId,
+    );
   });
 
   testWidgets('refuses an over-precise amount instead of rounding it', (
     tester,
   ) async {
-    final actions = _RecordingTransactionActions();
-    await tester.pumpWidget(
-      _buildSubject(transaction: _makeTransaction(), actions: actions),
+    final actions = await _pumpDialog(
+      tester,
+      view: testTransactionView(transaction: testTransaction()),
     );
-    await tester.pumpAndSettle();
 
-    await tester.enterText(find.widgetWithText(TextField, 'Amount'), '12.345');
+    await tester.enterText(_field('Amount'), '12.345');
     await tester.pumpAndSettle();
 
     expect(
       find.text('Enter a valid amount with at most 2 decimal places'),
       findsOneWidget,
     );
+    await _tapSave(tester);
 
-    await _save(tester);
-
-    expect(actions.updatedAmountMinor, isNull);
+    expect(actions.updated, isNull);
   });
 
   testWidgets('refuses a negative amount', (tester) async {
-    final actions = _RecordingTransactionActions();
-    await tester.pumpWidget(
-      _buildSubject(transaction: _makeTransaction(), actions: actions),
+    final actions = await _pumpDialog(
+      tester,
+      view: testTransactionView(transaction: testTransaction()),
+    );
+
+    await tester.enterText(_field('Amount'), '-12.34');
+    await tester.pumpAndSettle();
+    await _tapSave(tester);
+
+    expect(actions.updated, isNull);
+  });
+
+  testWidgets('an income transaction has no envelope picker and stays income', (
+    tester,
+  ) async {
+    final actions = await _pumpDialog(
+      tester,
+      view: testTransactionView(
+        transaction: testTransaction(amountMinor: 1234),
+      ),
+    );
+
+    expect(find.text('Envelope'), findsNothing);
+    await tester.enterText(_field('Amount'), '12.34');
+    await tester.pumpAndSettle();
+    await _tapSave(tester);
+
+    expect(actions.updated!.amountMinor, 1234);
+  });
+
+  testWidgets('a split transaction hides the single-envelope picker', (
+    tester,
+  ) async {
+    final header = testTransaction();
+    await _pumpDialog(
+      tester,
+      view: testTransactionView(
+        transaction: header,
+        lines: [
+          testLine(
+            transaction: header,
+            id: '00000000-0000-0000-0000-0000000000f201',
+            amountMinor: -617,
+          ),
+          testLine(
+            transaction: header,
+            id: '00000000-0000-0000-0000-0000000000f202',
+            amountMinor: -617,
+            envelopeId: fixtureEnvelopeId2,
+          ),
+        ],
+      ),
+    );
+
+    expect(find.text('Envelope'), findsNothing);
+    expect(find.text('Tax category'), findsNWidgets(2));
+    expect(find.text('Not set'), findsNWidgets(2));
+  });
+
+  testWidgets('assigns the chosen envelope to the single line', (tester) async {
+    final header = testTransaction();
+    final actions = await _pumpDialog(
+      tester,
+      view: testTransactionView(
+        transaction: header,
+        lines: [testLine(transaction: header)],
+      ),
+    );
+
+    await tester.tap(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is ObDropdown<String> && widget.labelText == 'Envelope',
+      ),
     );
     await tester.pumpAndSettle();
-
-    await tester.enterText(find.widgetWithText(TextField, 'Amount'), '-12.34');
+    await tester.tap(find.text('Living / Groceries').last);
     await tester.pumpAndSettle();
+    await _tapSave(tester);
 
     expect(
-      find.text('Enter a valid amount with at most 2 decimal places'),
-      findsOneWidget,
+      actions.updated!.lines.single.envelopeId.toString(),
+      fixtureEnvelopeId,
+    );
+  });
+
+  testWidgets('shows the stored payee in the payee picker', (tester) async {
+    await _pumpDialog(
+      tester,
+      view: testTransactionView(
+        transaction: testTransaction(payeeId: fixturePayeeId),
+        payeeName: 'Tesco',
+      ),
+      payees: [testPayee()],
     );
 
-    await _save(tester);
+    expect(find.text('Tesco'), findsOneWidget);
+  });
 
-    expect(actions.updatedAmountMinor, isNull);
+  testWidgets('cancel closes the dialog without updating', (tester) async {
+    final actions = _RecordingActions();
+    final container = ProviderContainer(
+      retry: (_, _) => null,
+      overrides: [
+        payeeListProvider.overrideWith((ref, entityId) async => const []),
+        budgetMonthProvider.overrideWith((ref, id) async => testMonthView()),
+        transactionActionsProvider.overrideWith(() => actions),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpApp(
+      Builder(
+        builder: (context) => Scaffold(
+          body: Center(
+            child: TextButton(
+              onPressed: () => showDialog<void>(
+                context: context,
+                builder: (_) => EditTransactionDialog(
+                  view: testTransactionView(
+                    transaction: testTransaction(),
+                  ),
+                  entityId: _entityId,
+                ),
+              ),
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      ),
+      container: container,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    expect(find.byType(EditTransactionDialog), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(ObTextButton, 'Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(actions.updated, isNull);
+    expect(find.byType(EditTransactionDialog), findsNothing);
+    expect(find.text('Open'), findsOneWidget);
   });
 }

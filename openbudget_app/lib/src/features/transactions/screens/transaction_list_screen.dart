@@ -1560,8 +1560,14 @@ class _TransactionTile extends HookConsumerWidget {
           color: palette.onAction,
         ),
       ),
-      confirmDismiss: (_) => _confirmDelete(context, l10n),
-      onDismissed: (_) => _deleteTransaction(context, ref, l10n),
+      // The row stays until the refreshed page no longer contains it, so a
+      // failed delete never leaves a dismissed widget in the tree.
+      confirmDismiss: (_) async {
+        final confirmed = await _confirmDelete(context, l10n);
+        if (confirmed != true || !context.mounted) return false;
+        await _deleteTransaction(context, ref, l10n);
+        return false;
+      },
       child: card,
     );
   }

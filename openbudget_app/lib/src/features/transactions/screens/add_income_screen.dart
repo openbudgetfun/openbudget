@@ -45,20 +45,27 @@ class AddIncomeScreen extends HookConsumerWidget {
     final allAccounts = accounts
         .where((a) => a.closedAt == null)
         .toList(growable: false);
-    final defaultAccountId = useState(
-      onBudgetAccounts.firstOrNull?.id?.toString() ??
+    final selectedAccountId = useState<String?>(null);
+
+    // The account defaults to the first on-budget account, then follows the
+    // picker once the accounts have loaded.
+    final defaultAccountId = useMemoized(
+      () =>
+          selectedAccountId.value ??
+          onBudgetAccounts.firstOrNull?.id?.toString() ??
           allAccounts.firstOrNull?.id?.toString() ??
           '',
+      [selectedAccountId.value, accountsAsync],
     );
     final selectedAccount = allAccounts
-        .where((a) => a.id?.toString() == defaultAccountId.value)
+        .where((a) => a.id?.toString() == defaultAccountId)
         .firstOrNull;
     final budgetCurrency = selectedAccount?.currencyCode ?? baseCurrency;
 
     useValueListenable(amountController);
 
     Future<void> checkDuplicates() async {
-      if (defaultAccountId.value.isEmpty) return;
+      if (defaultAccountId.isEmpty) return;
       final amountMinor = parseMoneyInput(
         amountController.text,
         decimals: currencyDecimalsForCode(budgetCurrency),
@@ -70,7 +77,7 @@ class AddIncomeScreen extends HookConsumerWidget {
       try {
         final duplicates = await ref.read(
           duplicateCheckProvider(
-            defaultAccountId.value,
+            defaultAccountId,
             amountMinor,
             selectedDate.value,
           ).future,
@@ -176,8 +183,8 @@ class AddIncomeScreen extends HookConsumerWidget {
                         },
                         child: TextField(
                           controller: amountController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
+                          keyboardType: TextInputType.numberWithOptions(
+                            decimal: amountDecimals > 0,
                           ),
                           textAlign: TextAlign.center,
                           style:
@@ -265,8 +272,8 @@ class AddIncomeScreen extends HookConsumerWidget {
                       const SizedBox(height: SpacingTokens.sm),
                       _AccountPickerRow(
                         accounts: allAccounts,
-                        selectedAccountId: defaultAccountId.value,
-                        onChanged: (value) => defaultAccountId.value = value,
+                        selectedAccountId: defaultAccountId,
+                        onChanged: (value) => selectedAccountId.value = value,
                       ),
                       const SizedBox(height: SpacingTokens.sm),
                       ListTile(
@@ -354,7 +361,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                       : () async {
                           final description = descriptionController.text.trim();
                           final amountText = amountController.text.trim();
-                          if (defaultAccountId.value.isEmpty) return;
+                          if (defaultAccountId.isEmpty) return;
                           final amountMinor = parseMoneyInput(
                             amountText,
                             decimals: currencyDecimalsForCode(budgetCurrency),
@@ -375,7 +382,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                                   entityId: entityId,
                                   input: TransactionInput(
                                     accountId: UuidValue.fromString(
-                                      defaultAccountId.value,
+                                      defaultAccountId,
                                     ),
                                     date: DateTime.utc(
                                       selectedDate.value.year,

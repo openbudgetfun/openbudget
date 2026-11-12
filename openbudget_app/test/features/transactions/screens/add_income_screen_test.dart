@@ -3,459 +3,291 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
+import 'package:openbudget_app/src/features/transactions/providers/duplicate_check_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_income_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-class _RecordingIncomeActions extends TransactionActions {
-  int? incomeAmountMinor;
-  String? incomeCurrencyCode;
+import '../../../fixtures/budget_month.dart';
+import '../../../fixtures/transactions.dart';
+
+const String _entityId = fixtureEntityId;
+const String _jpyAccountId = '00000000-0000-0000-0000-0000000000f0b1';
+
+class _RecordingActions extends TransactionActions {
+  TransactionInput? created;
 
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
   @override
-  Future<Transaction> addIncome({
-    required String description,
-    required int amountMinor,
-    required String currencyCode,
+  Future<TransactionView> create({
+    required TransactionInput input,
     required String entityId,
-    required DateTime date,
-    String? memo,
   }) async {
-    incomeAmountMinor = amountMinor;
-    incomeCurrencyCode = currencyCode;
-    return Transaction(
-      description: description,
-      amountMinor: amountMinor,
-      currencyCode: currencyCode,
-      entityId: UuidValue.fromString(
-        '00000000-0000-0000-0000-000000000001',
+    created = input;
+    return testTransactionView(
+      transaction: testTransaction(
+        accountId: input.accountId.toString(),
+        amountMinor: input.amountMinor,
       ),
-      transactionDate: date,
     );
   }
 }
 
-void main() {
-  const entityId = 'test-budget-1';
-
-  Budget makeBudget({String currencyCode = 'USD'}) => Budget(
-    id: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
-    name: 'My Budget',
-    currencyCode: currencyCode,
-    ownerId: UuidValue.fromString('00000000-0000-0000-0000-000000000099'),
-    createdAt: DateTime(2026),
-  );
-
-  List<Payee> makePayees() => [
-    Payee(
-      id: UuidValue.fromString('00000000-0000-0000-0000-000000000010'),
-      name: 'Employer Inc',
-      entityId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
+GoRouter _router() => GoRouter(
+  initialLocation: addIncomePath.replaceFirst(':entityId', _entityId),
+  routes: [
+    GoRoute(
+      name: planRoute,
+      path: planPath,
+      builder: (_, _) => const Scaffold(body: Text('Plan Route')),
     ),
-    Payee(
-      id: UuidValue.fromString('00000000-0000-0000-0000-000000000011'),
-      name: 'Freelance Client',
-      entityId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
+    GoRoute(
+      name: addExpenseRoute,
+      path: addExpensePath,
+      builder: (_, _) => const Scaffold(body: Text('Add Expense Route')),
     ),
-  ];
+    GoRoute(
+      name: addIncomeRoute,
+      path: addIncomePath,
+      builder: (context, state) =>
+          AddIncomeScreen(entityId: state.pathParameters['entityId']!),
+    ),
+  ],
+);
 
-  Widget buildSubject({
-    Budget? budget,
-    List<Payee>? payees,
-    TransactionActions? actions,
-  }) => ProviderScope(
+Future<_RecordingActions> _pumpIncome(
+  WidgetTester tester, {
+  List<Account>? accounts,
+  List<Payee>? payees,
+  bool routed = false,
+}) async {
+  final actions = _RecordingActions();
+  final container = ProviderContainer(
+    retry: (_, _) => null,
     overrides: [
-      if (actions != null)
-        transactionActionsProvider.overrideWith(() => actions),
-      budgetDetailProvider.overrideWith(
-        (ref, id) async => budget ?? makeBudget(),
+      entityDetailProvider.overrideWith((ref, id) async => testEntity()),
+      accountListProvider.overrideWith(
+        (ref, id) async => accounts ?? [testAccount()],
       ),
-      payeeListProvider.overrideWith((ref, id) async => payees ?? makePayees()),
+      payeeListProvider.overrideWith((ref, id) async => payees ?? const []),
+      budgetMonthProvider.overrideWith((ref, id) async => testMonthView()),
+      duplicateCheckProvider.overrideWith(
+        (ref, args) async => const <TransactionView>[],
+      ),
+      transactionActionsProvider.overrideWith(() => actions),
     ],
-    child: MaterialApp(
-      theme: OpenBudgetTheme.light,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: const AddIncomeScreen(entityId: entityId),
-    ),
   );
+  addTearDown(container.dispose);
+  await tester.pumpApp(
+    routed
+        ? const SizedBox.shrink()
+        : const AddIncomeScreen(entityId: _entityId),
+    container: container,
+    router: routed ? _router() : null,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+  );
+  await tester.pumpAndSettle();
+  return actions;
+}
 
-  Widget buildRoutedSubject({
-    Budget? budget,
-    List<Payee>? payees,
-    TransactionActions? actions,
-  }) {
-    final router = GoRouter(
-      initialLocation: '/budgets/$entityId/income/add',
-      routes: [
-        GoRoute(
-          name: planRoute,
-          path: planPath,
-          builder: (_, _) =>
-              const Scaffold(body: Center(child: Text('Plan Route'))),
-        ),
-        GoRoute(
-          name: addIncomeRoute,
-          path: addIncomePath,
-          builder: (context, state) =>
-              AddIncomeScreen(entityId: state.pathParameters['entityId']!),
-        ),
-        GoRoute(
-          name: addExpenseRoute,
-          path: addExpensePath,
-          builder: (_, _) =>
-              const Scaffold(body: Center(child: Text('Add Expense Route'))),
-        ),
-      ],
-    );
+Finder _field(String label) => find.widgetWithText(TextField, label);
 
-    return ProviderScope(
-      overrides: [
-        if (actions != null)
-          transactionActionsProvider.overrideWith(() => actions),
-        budgetDetailProvider.overrideWith(
-          (ref, id) async => budget ?? makeBudget(),
-        ),
-        payeeListProvider.overrideWith(
-          (ref, id) async => payees ?? makePayees(),
-        ),
-      ],
-      child: MaterialApp.router(
-        theme: OpenBudgetTheme.light,
+Future<void> _tapSave(WidgetTester tester) async {
+  await tester.ensureVisible(find.text('Save Transaction'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Save Transaction'));
+  await tester.pumpAndSettle();
+}
+
+void main() {
+  group('AddIncomeScreen', () {
+    testWidgets('renders a scaffold while the accounts load', (tester) async {
+      await tester.pumpApp(
+        const AddIncomeScreen(entityId: _entityId),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        routerConfig: router,
-      ),
-    );
-  }
-
-  group('AddIncomeScreen', () {
-    testWidgets('renders loading state initially', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const AddIncomeScreen(entityId: entityId),
-          ),
-        ),
       );
       await tester.pump();
 
-      // The scaffold renders even while providers load.
       expect(find.byType(Scaffold), findsOneWidget);
     });
 
-    testWidgets('shows Add Income title', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+    testWidgets('shows the income mode and the transaction title', (
+      tester,
+    ) async {
+      await _pumpIncome(tester);
 
-      // Title in app bar + title text inside card.
+      expect(find.text('Add Transaction'), findsOneWidget);
       expect(find.text('Add Income'), findsNWidgets(2));
-    });
-
-    testWidgets('shows description text field', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Description'), findsOneWidget);
       expect(
         find.byWidgetPredicate(
-          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.document,
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.inflow,
         ),
         findsOneWidget,
       );
-    });
-
-    testWidgets('shows amount text field', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Amount'), findsOneWidget);
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.money,
-        ),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('shows date picker with today date', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.calendar,
-        ),
-        findsOneWidget,
-      );
-
-      // Verify a date string is shown (formatted as YYYY-MM-DD).
-      final now = DateTime.now();
-      final expectedDate =
-          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-      expect(find.text(expectedDate), findsOneWidget);
-    });
-
-    testWidgets('shows payee dropdown with No Payee option', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Payee'), findsOneWidget);
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.person,
-        ),
-        findsOneWidget,
-      );
-      // The default selected item shows 'No Payee'.
-      expect(find.text('No Payee'), findsOneWidget);
-    });
-
-    testWidgets('shows memo text field with hint', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Memo'), findsOneWidget);
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.note,
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('Add a note (optional)'), findsOneWidget);
-    });
-
-    testWidgets('shows save button', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Save Transaction'), findsOneWidget);
-      expect(find.byType(FilledButton), findsOneWidget);
-    });
-
-    testWidgets('shows income icon', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.inflow,
-        ),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('shows cancel button', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
       expect(find.widgetWithText(TextButton, 'Cancel'), findsOneWidget);
     });
 
-    testWidgets('renders payee dropdown items when payees available', (
+    testWidgets('shows the description, amount, payee and memo fields', (
       tester,
     ) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+      await _pumpIncome(tester, payees: [testPayee()]);
 
-      // Tap the payee dropdown to open it.
-      await tester.tap(find.text('No Payee'));
-      await tester.pumpAndSettle();
-
-      // Dropdown should show payee options.
-      expect(find.text('Employer Inc'), findsOneWidget);
-      expect(find.text('Freelance Client'), findsOneWidget);
+      expect(_field('Description'), findsOneWidget);
+      expect(_field('Amount'), findsOneWidget);
+      expect(_field('Memo'), findsOneWidget);
+      expect(find.text('Add a note (optional)'), findsOneWidget);
+      expect(find.text('Payee'), findsOneWidget);
+      expect(find.text('No Payee'), findsOneWidget);
+      expect(find.text('Category'), findsOneWidget);
+      expect(find.text('Ready to Assign'), findsOneWidget);
+      expect(find.text('Current account (GBP)'), findsOneWidget);
     });
 
-    testWidgets('renders empty payee dropdown when no payees', (tester) async {
-      await tester.pumpWidget(buildSubject(payees: []));
+    testWidgets('shows today in the date row and opens a date picker', (
+      tester,
+    ) async {
+      await _pumpIncome(tester);
+      final now = DateTime.now();
+      final today =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}'
+          '-${now.day.toString().padLeft(2, '0')}';
+      expect(find.text(today), findsOneWidget);
+
+      await tester.tap(find.text(today));
       await tester.pumpAndSettle();
 
-      // Tap the payee dropdown.
-      await tester.tap(find.text('No Payee'));
-      await tester.pumpAndSettle();
-
-      // Only the 'No Payee' option should be present (shown twice: selected +
-      // dropdown item).
-      expect(find.text('No Payee'), findsNWidgets(2));
-      expect(find.text('Employer Inc'), findsNothing);
-    });
-
-    testWidgets('tapping date opens date picker dialog', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      // Tap the date ListTile.
-      await tester.tap(
-        find.byWidgetPredicate(
-          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.calendar,
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // DatePicker dialog should appear.
       expect(find.byType(DatePickerDialog), findsOneWidget);
     });
 
-    testWidgets('can enter description text', (tester) async {
-      await tester.pumpWidget(buildSubject());
+    testWidgets('lists the payees in the payee dropdown', (tester) async {
+      await _pumpIncome(
+        tester,
+        payees: [
+          testPayee(),
+          testPayee(id: fixtureSecondPayeeId, name: 'Coffee Shop'),
+        ],
+      );
+
+      await tester.tap(find.text('No Payee'));
       await tester.pumpAndSettle();
 
-      // Find description text field and enter text.
-      final descField = find.widgetWithText(TextField, 'Description');
-      await tester.enterText(descField, 'Monthly Salary');
-      await tester.pumpAndSettle();
-
-      expect(find.text('Monthly Salary'), findsOneWidget);
+      expect(find.text('Tesco'), findsOneWidget);
+      expect(find.text('Coffee Shop'), findsOneWidget);
     });
 
-    testWidgets('can enter amount text', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+    testWidgets('saves 12.34 as +1234 minor units', (tester) async {
+      final actions = await _pumpIncome(tester, routed: true);
 
-      final amountField = find.widgetWithText(TextField, 'Amount');
-      await tester.enterText(amountField, '5000');
+      await tester.enterText(_field('Description'), 'Salary');
+      await tester.enterText(_field('Amount'), '12.34');
       await tester.pumpAndSettle();
+      await _tapSave(tester);
 
-      expect(find.text('5000'), findsOneWidget);
-    });
-
-    testWidgets('saves 12.34 as 1234 minor units', (tester) async {
-      final actions = _RecordingIncomeActions();
-      await tester.pumpWidget(buildRoutedSubject(actions: actions));
-      await tester.pumpAndSettle();
-
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Description'),
-        'Salary',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Amount'),
-        '12.34',
-      );
-      await tester.pumpAndSettle();
-
-      await tester.ensureVisible(find.text('Save Transaction'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Save Transaction'));
-      await tester.pumpAndSettle();
-
-      expect(actions.incomeAmountMinor, 1234);
-      expect(actions.incomeCurrencyCode, 'USD');
+      expect(actions.created!.amountMinor, 1234);
+      expect(actions.created!.accountId.toString(), fixtureAccountId);
+      expect(actions.created!.lines, isEmpty);
+      expect(find.text('Plan Route'), findsOneWidget);
     });
 
     testWidgets('refuses an over-precise amount instead of rounding it', (
       tester,
     ) async {
-      final actions = _RecordingIncomeActions();
-      await tester.pumpWidget(buildRoutedSubject(actions: actions));
-      await tester.pumpAndSettle();
+      final actions = await _pumpIncome(tester, routed: true);
 
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Description'),
-        'Salary',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Amount'),
-        '12.345',
-      );
+      await tester.enterText(_field('Description'), 'Salary');
+      await tester.enterText(_field('Amount'), '12.345');
       await tester.pumpAndSettle();
 
       expect(
         find.text('Enter a valid amount with at most 2 decimal places'),
         findsOneWidget,
       );
+      await _tapSave(tester);
 
-      await tester.ensureVisible(find.text('Save Transaction'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Save Transaction'));
-      await tester.pumpAndSettle();
-
-      expect(actions.incomeAmountMinor, isNull);
+      expect(actions.created, isNull);
     });
 
     testWidgets('refuses a negative income amount', (tester) async {
-      final actions = _RecordingIncomeActions();
-      await tester.pumpWidget(buildRoutedSubject(actions: actions));
-      await tester.pumpAndSettle();
+      final actions = await _pumpIncome(tester, routed: true);
 
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Description'),
-        'Salary',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Amount'),
-        '-12.34',
-      );
+      await tester.enterText(_field('Description'), 'Salary');
+      await tester.enterText(_field('Amount'), '-12.34');
       await tester.pumpAndSettle();
+      await _tapSave(tester);
 
-      expect(
-        find.text('Enter a valid amount with at most 2 decimal places'),
-        findsOneWidget,
-      );
-
-      await tester.ensureVisible(find.text('Save Transaction'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Save Transaction'));
-      await tester.pumpAndSettle();
-
-      expect(actions.incomeAmountMinor, isNull);
+      expect(actions.created, isNull);
     });
 
-    testWidgets('shows amount hint in budget currency', (tester) async {
-      await tester.pumpWidget(
-        buildSubject(budget: makeBudget(currencyCode: 'JPY')),
+    testWidgets('shows the amount hint in a zero-decimal currency', (
+      tester,
+    ) async {
+      await _pumpIncome(
+        tester,
+        accounts: [
+          testAccount(id: _jpyAccountId, currencyCode: 'JPY'),
+        ],
       );
-      await tester.pumpAndSettle();
 
       expect(find.textContaining('¥0'), findsAtLeast(1));
     });
 
-    testWidgets('can enter memo text', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      final memoField = find.widgetWithText(TextField, 'Memo');
-      await tester.enterText(memoField, 'Regular monthly payment');
-      await tester.pumpAndSettle();
-
-      expect(find.text('Regular monthly payment'), findsOneWidget);
-    });
-
-    testWidgets('form fields have correct keyboard types', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      // Amount field should have number keyboard.
-      final amountField = tester.widget<TextField>(
-        find.widgetWithText(TextField, 'Amount'),
-      );
-      expect(amountField.keyboardType, isNotNull);
-      expect(amountField.keyboardType.decimal, isTrue);
-    });
-
-    testWidgets('amount field is wrapped in Focus for blur detection', (
+    testWidgets('a zero-decimal amount field refuses a decimal point', (
       tester,
     ) async {
-      await tester.pumpWidget(buildSubject());
+      final actions = await _pumpIncome(
+        tester,
+        accounts: [
+          testAccount(id: _jpyAccountId, currencyCode: 'JPY'),
+        ],
+        routed: true,
+      );
+
+      await tester.enterText(_field('Description'), 'Bonus');
+      await tester.enterText(_field('Amount'), '1500.5');
       await tester.pumpAndSettle();
 
-      // The Focus widget wrapping the amount field exists.
-      expect(find.byType(Focus), findsWidgets);
+      expect(
+        find.text('Enter a valid amount with at most 0 decimal places'),
+        findsOneWidget,
+      );
+      await _tapSave(tester);
+      expect(actions.created, isNull);
+
+      await tester.enterText(_field('Amount'), '1500');
+      await tester.pumpAndSettle();
+      await _tapSave(tester);
+
+      expect(actions.created!.amountMinor, 1500);
     });
 
-    testWidgets('cancel navigates back to plan route', (tester) async {
-      await tester.pumpWidget(buildRoutedSubject());
-      await tester.pumpAndSettle();
+    testWidgets('a zero-decimal currency offers no decimal key', (
+      tester,
+    ) async {
+      await _pumpIncome(
+        tester,
+        accounts: [
+          testAccount(id: _jpyAccountId, currencyCode: 'JPY'),
+        ],
+      );
+
+      final amount = tester.widget<TextField>(_field('Amount'));
+      expect(amount.keyboardType.decimal, isFalse);
+    });
+
+    testWidgets('cancel goes back to the plan', (tester) async {
+      await _pumpIncome(tester, routed: true);
 
       await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
       await tester.pumpAndSettle();
@@ -463,13 +295,10 @@ void main() {
       expect(find.text('Plan Route'), findsOneWidget);
     });
 
-    testWidgets('tapping Add Expense mode navigates to add expense route', (
-      tester,
-    ) async {
-      await tester.pumpWidget(buildRoutedSubject());
-      await tester.pumpAndSettle();
+    testWidgets('the expense chip swaps to the expense form', (tester) async {
+      await _pumpIncome(tester, routed: true);
 
-      await tester.tap(find.text('Add Expense').first);
+      await tester.tap(find.text('Add Expense'));
       await tester.pumpAndSettle();
 
       expect(find.text('Add Expense Route'), findsOneWidget);
