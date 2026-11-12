@@ -12,5 +12,5 @@ the currency out of the totals and lists it instead of pretending a 1:1 rate.
 
 History rebuilds balances from live transactions and valuations at up to 400
 day, week or month points, with one batched fact query per source and one FX
-query for the whole range. `ReportEndpoint` exposes only `netWorth` and
-`netWorthHistory`; the remaining report methods land with their own service.
+query for the whole range. `ReportEndpoint` also serves spending, month summaries and age of money,
+and `entity.listSummaries` gives the home screen every entity in one call.
