@@ -215,6 +215,7 @@ class ManualRateSheet extends HookConsumerWidget {
           ],
           const SizedBox(height: SpacingTokens.md),
           TextField(
+            key: const Key('manual-rate-field'),
             controller: rateController,
             autofocus: true,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -226,6 +227,7 @@ class ManualRateSheet extends HookConsumerWidget {
           ),
           const SizedBox(height: SpacingTokens.md),
           FilledButton(
+            key: const Key('manual-rate-use-button'),
             onPressed: () {
               final text = rateController.text.trim();
               final rate = ExactDecimal.tryParse(text);

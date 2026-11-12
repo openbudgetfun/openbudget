@@ -109,6 +109,7 @@ class CreateEntityScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: SpacingTokens.lg),
                     TextField(
+                      key: const Key('create-entity-name-field'),
                       controller: nameController,
                       enabled: !isSubmitting.value,
                       textInputAction: TextInputAction.next,
@@ -227,6 +228,7 @@ class CreateEntityScreen extends HookConsumerWidget {
                     ],
                     const SizedBox(height: SpacingTokens.lg),
                     FilledButton(
+                      key: const Key('create-entity-create-button'),
                       onPressed: isSubmitting.value
                           ? null
                           : () async {

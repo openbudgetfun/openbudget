@@ -5,18 +5,15 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/agent_access/providers/agent_token_api.dart';
 import 'package:openbudget_app/src/features/agent_access/screens/agent_access_screen.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 import 'package:patrol/patrol.dart';
 
 import 'common/fake_agent_token_api.dart';
 import 'common/patrol_helpers.dart';
 import 'common/test_data.dart';
-
-final _ownerId = UuidValue.fromString('00000000-0000-0000-0000-000000000f07');
 
 void main() {
   patrolWidgetTest(
@@ -32,12 +29,8 @@ void main() {
       final api = FakeAgentTokenApi();
       final container = ProviderContainer(
         overrides: [
-          budgetDetailProvider.overrideWith(
-            (ref, id) async => Budget(
-              name: "Alex's Plan",
-              currencyCode: 'USD',
-              ownerId: _ownerId,
-            ),
+          entityDetailProvider.overrideWith(
+            (ref, id) async => TestData.gbpEntity(name: "Alex's Plan"),
           ),
           agentTokenApiProvider.overrideWithValue(api),
         ],
@@ -46,7 +39,7 @@ void main() {
 
       final router = GoRouter(
         initialLocation:
-            '/budgets/${TestData.agentAccessBudgetId}/more/settings',
+            '/budgets/${TestData.gbpEntityId}/more/settings',
         routes: [
           GoRoute(
             name: agentAccessRoute,

@@ -1,11 +1,9 @@
-// UuidValue is needed for constructing test model data.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/ui_preferences_store.dart';
 import 'package:openbudget_app/src/features/settings/screens/account_settings_screen.dart';
@@ -17,16 +15,11 @@ import 'package:openbudget_app/src/features/settings/screens/plan_settings_scree
 import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
 
-const _entityId = 'test-budget-id';
-final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000311');
+import 'common/test_data.dart';
 
-Budget _makeBudget({
-  String name = "Alex's Plan",
-  String currencyCode = 'USD',
-}) => Budget(name: name, currencyCode: currencyCode, ownerId: _ownerUuid);
+const String _entityId = TestData.gbpEntityId;
 
 void main() {
   patrolWidgetTest(
@@ -36,7 +29,9 @@ void main() {
       final store = InMemoryUiPreferencesStore();
       final container = ProviderContainer(
         overrides: [
-          budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
+          entityDetailProvider.overrideWith(
+            (ref, id) async => TestData.gbpEntity(name: "Alex's Plan"),
+          ),
           uiPreferencesStoreProvider.overrideWithValue(store),
         ],
       );

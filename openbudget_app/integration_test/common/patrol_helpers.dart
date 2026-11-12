@@ -683,6 +683,129 @@ Finder _iconFinder(WiredSvgIconData data) => find.byWidgetPredicate(
   (widget) => widget is SkribbleIcon && widget.data == data,
 );
 
+/// Page object for the create entity screen.
+class CreateEntityPage {
+  CreateEntityPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get title => find.text('Create your books');
+  Finder get nameField => find.byKey(const Key('create-entity-name-field'));
+  Finder get kindPersonal => find.text('Personal');
+  Finder get kindSoleTrader => find.text('Sole trader');
+  Finder get kindCompany => find.text('Company');
+  Finder get countryRow => find.text('United Kingdom');
+  Finder get createButton => find.byKey(
+    const Key('create-entity-create-button'),
+  );
+
+  /// Fills the name and submits with the pre-selected defaults (a personal
+  /// GB entity in GBP).
+  Future<String> create({String name = 'My First Budget'}) async {
+    await tester.enterText(nameField, name);
+    await tester.tap(createButton);
+    // Wait for the async create + the redirect into the add account screen.
+    await waitForFinder(tester, find.text('Add Account'));
+    await tester.pumpAndSettle();
+    return name;
+  }
+}
+
+/// Page object for the net worth screen.
+class NetWorthPage {
+  NetWorthPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get title => find.text('Net Worth').first;
+  Finder get headline => find.byKey(const Key('net-worth-headline'));
+  Finder get currencyChip => find.byKey(
+    const Key('net-worth-currency-chip'),
+  );
+  Finder get staleBadge => find.byKey(const Key('net-worth-stale-badge'));
+  Finder get trustLine => find.textContaining('Rates from');
+  Finder get tabByEntity => find.byKey(const Key('net-worth-tab-by-entity'));
+  Finder get tabByCurrency =>
+      find.byKey(const Key('net-worth-tab-by-currency'));
+  Finder get tabByAccount => find.byKey(const Key('net-worth-tab-by-account'));
+
+  /// "1 USD = 0.79 GBP · Nov 8" — the rate line behind a converted figure.
+  Finder rateLine(String from, String to) =>
+      find.textContaining('1 $from = ');
+
+  Finder currencyRow(String currencyCode) => find.text(currencyCode).first;
+
+  /// Opens the currency picker sheet and picks [code].
+  Future<void> switchReportingCurrency(String code) async {
+    await scrollIntoView(tester, currencyChip);
+    await tester.tap(currencyChip);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text(code).last,
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text(code).last);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> showByCurrency() =>
+      scrollAndTap(tester, tabByCurrency);
+
+  Future<void> showByAccount() => scrollAndTap(tester, tabByAccount);
+}
+
+/// Page object for the cross-currency transfer form.
+class TransferPage {
+  TransferPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get title => find.text('Transfer').first;
+  Finder get fromPicker => find.byKey(const Key('transfer-from-picker'));
+  Finder get toPicker => find.byKey(const Key('transfer-to-picker'));
+  Finder get sentField => find.byKey(const Key('transfer-sent-amount-field'));
+  Finder get receivedField => find.byKey(
+    const Key('transfer-received-amount-field'),
+  );
+  Finder get amountField => find.byKey(const Key('transfer-amount-field'));
+  Finder get impliedRate => find.byKey(const Key('transfer-implied-rate'));
+  Finder get useTodayRate => find.text("Use today's rate");
+  Finder get submitButton => find.byKey(
+    const Key('transfer-submit-button'),
+  );
+
+  /// Picks an account on either picker by its "Name (CUR)" item text.
+  Future<void> pickAccount({required String from, String? to}) async {
+    await tester.tap(fromPicker);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(from).last);
+    await tester.pumpAndSettle();
+    if (to != null) {
+      await tester.tap(toPicker);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(to).last);
+      await tester.pumpAndSettle();
+    }
+  }
+
+  Future<void> enterSent(String text) async {
+    await tester.enterText(sentField, text);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> enterReceived(String text) async {
+    await tester.enterText(receivedField, text);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> submit() async {
+    await scrollIntoView(tester, submitButton);
+    await tester.tap(submitButton);
+    await tester.pumpAndSettle();
+  }
+}
+
 /// Page object for the tax overview.
 class TaxOverviewPage {
   TaxOverviewPage(this.tester);
@@ -708,9 +831,10 @@ class TaxProfilePage {
   final WidgetTester tester;
 
   Finder get title => find.text('Tax profile').first;
-  Finder get countryField =>
-      find.byType(DropdownButtonFormField<TaxJurisdiction>);
-  Finder get entityField => find.byType(DropdownButtonFormField<TaxEntityKind>);
+
+  /// The jurisdiction comes from the entity now; the kind dropdown is the
+  /// only entity-level control left on the form.
+  Finder get entityField => find.byType(DropdownButtonFormField<EntityKind>);
   Finder get scottishTaxpayerToggle => find.text('Scottish taxpayer');
   Finder get studentLoanField => find.byType(DropdownButtonFormField<String>);
   Finder get annualRentField => find.byType(TextField).first;
@@ -724,6 +848,32 @@ class TaxProfilePage {
     );
     await tester.pumpAndSettle();
     await tester.tap(saveButton);
+    await tester.pumpAndSettle();
+  }
+}
+
+/// Page object for the expense form's FX affordances: the live rate line
+/// under the amount field and the manual-rate sheet it opens.
+class ExpenseFxPage {
+  ExpenseFxPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get fxLine => find.byKey(const Key('expense-fx-line'));
+  Finder get setRateButton => find.text('Set rate').first;
+  Finder get manualRateSheet => find.text('Use your own rate').first;
+  Finder get manualRateField => find.byKey(const Key('manual-rate-field'));
+  Finder get manualRateUseButton => find.byKey(
+    const Key('manual-rate-use-button'),
+  );
+
+  /// Opens the manual-rate sheet and enters [rate].
+  Future<void> setManualRate(String rate) async {
+    await tester.tap(setRateButton);
+    await tester.pumpAndSettle();
+    await tester.enterText(manualRateField, rate);
+    await tester.pumpAndSettle();
+    await tester.tap(manualRateUseButton);
     await tester.pumpAndSettle();
   }
 }

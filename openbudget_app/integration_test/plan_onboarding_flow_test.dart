@@ -3,134 +3,142 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/credit_card_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/review_queue_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.dart';
-import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_post_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_actions_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/screens/create_entity_screen.dart';
+import 'package:openbudget_app/src/features/recurring/providers/recurring_actions_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:patrol/patrol.dart';
 
-const _entityId = '00000000-0000-0000-0000-000000000991';
+import 'common/patrol_helpers.dart';
+import 'common/test_data.dart';
 
-BudgetSummary _makeSummary({
-  required int totalIncomeMinor,
-  required int totalBudgetedMinor,
-  required int readyToAssignMinor,
-}) {
-  final budgetUuid = UuidValue.fromString(_entityId);
-  final ownerUuid = UuidValue.fromString(
-    '00000000-0000-0000-0000-000000000992',
-  );
-  return BudgetSummary(
-    budget: Budget(
-      id: budgetUuid,
-      name: 'Family Plan',
-      currencyCode: 'USD',
-      ownerId: ownerUuid,
-    ),
-    categories: const [],
-    totalIncomeMinor: totalIncomeMinor,
-    totalBudgetedMinor: totalBudgetedMinor,
+const String _entityId = TestData.gbpEntityId;
+final UuidValue _entityUuid = UuidValue.fromString(_entityId);
+
+/// The month view the plan screen reads: an empty plan with nothing
+/// assigned.
+BudgetMonthView _makeMonthView({required int readyToAssignMinor}) {
+  final summary = BudgetMonthSummary(
+    month: 202602,
+    incomeMinor: readyToAssignMinor,
+    uncategorizedMinor: 0,
+    fxDifferenceMinor: 0,
+    allocatedMinor: 0,
+    activityMinor: 0,
+    overspentLastMonthMinor: 0,
+    assignedInFutureMinor: 0,
     readyToAssignMinor: readyToAssignMinor,
-    year: 2026,
-    month: 2,
+    availableMinor: readyToAssignMinor,
+  );
+  return BudgetMonthView(
+    entityId: _entityUuid,
+    month: 202602,
+    currencyCode: 'GBP',
+    summary: summary,
+    categories: const [],
+    envelopes: const [],
   );
 }
 
-void main() {
-  patrolWidgetTest('add accounts onboarding CTA routes to add account screen', (
-    $,
-  ) async {
-    final tester = $.tester;
-    final container = ProviderContainer(
-      overrides: [
-        ageOfMoneyProvider.overrideWith((ref, entityId) async => null),
-        monthlyTransactionsProvider.overrideWith((ref, _) async => const []),
-        budgetMonthlySummaryProvider.overrideWith(
-          (ref, _) async => _makeSummary(
-            totalIncomeMinor: 0,
-            totalBudgetedMinor: 0,
-            readyToAssignMinor: 0,
-          ),
-        ),
-        budgetGoalsProvider.overrideWith((ref, _) async => {}),
-        creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
-        recurringDueCountProvider.overrideWith((ref, _) async => 0),
-      ],
-    );
-    addTearDown(container.dispose);
+/// A fake entity creator that returns a fixed id, so the create screen
+/// routes into the add account step without a server.
+class _FakeEntityActions extends EntityActions {
+  int createCalls = 0;
 
-    final router = GoRouter(
-      initialLocation: '/budgets/$_entityId/plan',
-      routes: [
-        GoRoute(
-          name: planRoute,
-          path: '/budgets/:id/plan',
-          builder: (context, state) =>
-              BudgetDetailScreen(entityId: state.pathParameters['entityId']!),
-        ),
-        GoRoute(
-          name: addAccountRoute,
-          path: addAccountPath,
-          builder: (_, _) =>
-              const Scaffold(body: Center(child: Text('Add Account Screen'))),
-        ),
-      ],
-    );
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
 
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp.router(
-          theme: ThemeData.light(useMaterial3: true),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          routerConfig: router,
-        ),
+  @override
+  Future<String> create({
+    required String name,
+    required EntityKind kind,
+    required String countryCode,
+    required String baseCurrencyCode,
+    required String timeZone,
+    int? fiscalYearEndMonth,
+    int? fiscalYearEndDay,
+  }) async {
+    createCalls++;
+    return _entityId;
+  }
+}
+
+Widget _buildPlanApp(ProviderContainer container) {
+  final router = GoRouter(
+    initialLocation: '/budgets/$_entityId/plan',
+    routes: [
+      GoRoute(
+        name: planRoute,
+        path: '/budgets/:entityId/plan',
+        builder: (context, state) =>
+            BudgetDetailScreen(entityId: state.pathParameters['entityId']!),
       ),
-    );
-    await tester.pumpAndSettle();
+      GoRoute(
+        name: addAccountRoute,
+        path: addAccountPath,
+        builder: (_, _) =>
+            const Scaffold(body: Center(child: Text('Add Account Screen'))),
+      ),
+    ],
+  );
 
-    expect(find.text('Add Accounts'), findsOneWidget);
-    await tester.tap(find.text('Add Accounts'));
-    await tester.pumpAndSettle();
-    expect(find.text('Add Account Screen'), findsOneWidget);
-  });
+  return UncontrolledProviderScope(
+    container: container,
+    child: MaterialApp.router(
+      theme: ThemeData.light(useMaterial3: true),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      routerConfig: router,
+    ),
+  );
+}
 
+ProviderContainer _planContainer({required int readyToAssignMinor}) {
+  final container = ProviderContainer(
+    overrides: [
+      entityDetailProvider.overrideWith(
+        (ref, id) async => TestData.gbpEntity(),
+      ),
+      budgetMonthProvider.overrideWith(
+        (ref, entityId) async =>
+            _makeMonthView(readyToAssignMinor: readyToAssignMinor),
+      ),
+      budgetMonthGroupsProvider.overrideWith((ref, entityId) async => const []),
+      budgetGoalsProvider.overrideWith((ref, entityId) async => {}),
+      creditCardPaymentsProvider.overrideWith((ref, entityId) async => const []),
+      recurringDueCountProvider.overrideWith((ref, entityId) async => 0),
+      reviewQueueProvider.overrideWith((ref, entityId) async => const []),
+    ],
+  );
+  addTearDown(container.dispose);
+  return container;
+}
+
+void main() {
   patrolWidgetTest(
-    'assign money onboarding secondary CTA routes to add account screen',
+    'onboarding starts at create entity and lands on add account',
     ($) async {
       final tester = $.tester;
+      final actions = _FakeEntityActions();
       final container = ProviderContainer(
-        overrides: [
-          ageOfMoneyProvider.overrideWith((ref, entityId) async => null),
-          monthlyTransactionsProvider.overrideWith((ref, _) async => const []),
-          budgetMonthlySummaryProvider.overrideWith(
-            (ref, _) async => _makeSummary(
-              totalIncomeMinor: 5000000,
-              totalBudgetedMinor: 0,
-              readyToAssignMinor: 5000000,
-            ),
-          ),
-          budgetGoalsProvider.overrideWith((ref, _) async => {}),
-          creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
-          recurringDueCountProvider.overrideWith((ref, _) async => 0),
-        ],
+        overrides: [entityActionsProvider.overrideWith(() => actions)],
       );
       addTearDown(container.dispose);
 
       final router = GoRouter(
-        initialLocation: '/budgets/$_entityId/plan',
+        initialLocation: createEntityPath,
         routes: [
           GoRoute(
-            name: planRoute,
-            path: '/budgets/:id/plan',
-            builder: (context, state) =>
-                BudgetDetailScreen(entityId: state.pathParameters['entityId']!),
+            path: createEntityPath,
+            builder: (_, _) => const CreateEntityScreen(),
           ),
           GoRoute(
             name: addAccountRoute,
@@ -151,6 +159,38 @@ void main() {
             routerConfig: router,
           ),
         ),
+      );
+      await tester.pumpAndSettle();
+
+      final createPage = CreateEntityPage(tester);
+      expect(createPage.title, findsOneWidget);
+      await createPage.create();
+
+      expect(actions.createCalls, 1);
+      expect(find.text('Add Account Screen'), findsOneWidget);
+    },
+  );
+
+  patrolWidgetTest(
+    'add accounts onboarding CTA routes to add account screen',
+    ($) async {
+      final tester = $.tester;
+      await tester.pumpWidget(_buildPlanApp(_planContainer(readyToAssignMinor: 0)));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add Accounts'), findsOneWidget);
+      await tester.tap(find.text('Add Accounts'));
+      await tester.pumpAndSettle();
+      expect(find.text('Add Account Screen'), findsOneWidget);
+    },
+  );
+
+  patrolWidgetTest(
+    'assign money onboarding secondary CTA routes to add account screen',
+    ($) async {
+      final tester = $.tester;
+      await tester.pumpWidget(
+        _buildPlanApp(_planContainer(readyToAssignMinor: 5000000)),
       );
       await tester.pumpAndSettle();
 

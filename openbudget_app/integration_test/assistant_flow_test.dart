@@ -7,12 +7,11 @@ import 'package:openbudget_app/src/features/assistant/providers/assistant_api_pr
 import 'package:openbudget_app/src/features/assistant/providers/assistant_usage_provider.dart';
 import 'package:openbudget_app/src/features/assistant/screens/assistant_proposals_screen.dart';
 import 'package:openbudget_app/src/features/assistant/screens/assistant_screen.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/more/screens/more_screen.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 import 'package:patrol/patrol.dart';
 
@@ -20,32 +19,20 @@ import 'common/fake_assistant_api.dart';
 import 'common/patrol_helpers.dart';
 import 'common/test_data.dart';
 
-/// The budget MoreScreen's entry tiles read while this flow is mounted.
-///
-/// MoreScreen stays real here, so its books entry reads the budget and tax
-/// profile. Answering those from a fixture keeps the flow on the fake
-/// assistant backend instead of the live Serverpod client.
-Budget _assistantBudget() => Budget(
-  id: UuidValue.fromString(TestData.assistantBudgetId),
-  name: TestData.budgetName,
-  currencyCode: 'GBP',
-  ownerId: UuidValue.fromString(TestData.assistantUserId),
-  accountingMode: 'envelope',
-  createdAt: DateTime.utc(2026),
-);
-
 void main() {
   patrolWidgetTest('More -> Assistant -> ask -> apply a proposal', ($) async {
     final tester = $.tester;
     final api = FakeAssistantApi();
-    const entityId = TestData.assistantBudgetId;
+    const entityId = TestData.assistantEntityId;
 
     final container = ProviderContainer(
       overrides: [
         assistantApiProvider.overrideWith((ref) => api),
         assistantUsageProvider.overrideWith((ref) async => api.usage),
-        budgetDetailProvider.overrideWith(
-          (ref, id) async => _assistantBudget(),
+        entityDetailProvider.overrideWith(
+          (ref, id) async => TestData.gbpEntity(
+            id: entityId,
+          ),
         ),
         taxProfileProvider.overrideWith((ref, id) async => null),
       ],

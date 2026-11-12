@@ -6,22 +6,19 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/main.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
-import 'package:openbudget_app/src/features/budget/screens/create_budget_screen.dart';
-import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_list_provider.dart';
+import 'package:openbudget_app/src/features/home/screens/create_entity_screen.dart';
 import 'package:openbudget_app/src/routing/app_router.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:patrol/patrol.dart';
 
 void main() {
-  patrolWidgetTest('create budget screen renders onboarding layout', ($) async {
+  patrolWidgetTest('create entity screen renders onboarding layout', ($) async {
     final tester = $.tester;
     final router = GoRouter(
-      initialLocation: createBudgetPath,
+      initialLocation: createEntityPath,
       routes: [
-        GoRoute(
-          path: createBudgetPath,
-          builder: (_, _) => const CreateBudgetScreen(),
-        ),
+        GoRoute(path: createEntityPath, builder: (_, _) => const CreateEntityScreen()),
       ],
     );
 
@@ -37,20 +34,25 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome, new OpenBudgeter!'), findsOneWidget);
+    expect(find.text('Create your books'), findsOneWidget);
+    expect(find.text('What are these books for?'), findsOneWidget);
+    expect(find.text('Country'), findsOneWidget);
+    expect(find.text('United Kingdom'), findsOneWidget);
     expect(find.text('Plan Currency'), findsOneWidget);
-    expect(find.text('US Dollar'), findsOneWidget);
+    expect(find.text('British Pound (GBP)'), findsOneWidget);
+    expect(find.text('Time zone'), findsOneWidget);
+    expect(find.text('Europe/London'), findsOneWidget);
     expect(find.byType(FilledButton), findsOneWidget);
   });
 
   patrolWidgetTest(
-    'unauthenticated user is redirected to login from create budget',
+    'unauthenticated user is redirected to login from create entity',
     ($) async {
       final tester = $.tester;
       final container = ProviderContainer(
         overrides: [
           authProvider.overrideWithValue(const Unauthenticated()),
-          budgetListProvider.overrideWith((ref) async => const []),
+          entityListProvider.overrideWith((ref) async => const []),
         ],
       );
       addTearDown(container.dispose);
@@ -64,7 +66,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      router.go(createBudgetPath);
+      router.go(createEntityPath);
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('login-openbudget-mark')), findsOneWidget);

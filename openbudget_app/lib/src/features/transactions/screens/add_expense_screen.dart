@@ -289,6 +289,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                         ),
                       if (isForeign && amountMinor != null && amountMinor > 0)
                         FxRateLine(
+                          key: const Key('expense-fx-line'),
                           fromCurrencyCode: accountCurrency,
                           toCurrencyCode: baseCurrency,
                           date: selectedDate.value,

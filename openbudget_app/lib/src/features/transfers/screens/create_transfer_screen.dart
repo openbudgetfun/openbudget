@@ -204,6 +204,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _AccountPicker(
+                    key: const Key('transfer-from-picker'),
                     label: l10n.transferFrom,
                     accounts: allAccounts,
                     selectedAccountId: fromAccountId.value,
@@ -212,6 +213,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: SpacingTokens.sm),
                   _AccountPicker(
+                    key: const Key('transfer-to-picker'),
                     label: l10n.transferTo,
                     accounts: allAccounts,
                     selectedAccountId: toAccountId.value,
@@ -226,6 +228,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                       children: [
                         if (!isCrossCurrency)
                           TextField(
+                            key: const Key('transfer-amount-field'),
                             controller: fromAmountController,
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
@@ -238,6 +241,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                           )
                         else ...[
                           TextField(
+                            key: const Key('transfer-sent-amount-field'),
                             controller: fromAmountController,
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
@@ -250,6 +254,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                           ),
                           const SizedBox(height: SpacingTokens.sm),
                           TextField(
+                            key: const Key('transfer-received-amount-field'),
                             controller: toAmountController,
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
@@ -262,6 +267,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                           ),
                           if (fromMinor != null && fromMinor > 0)
                             FxRateLine(
+                              key: const Key('transfer-implied-rate'),
                               fromCurrencyCode: fromAccount.currencyCode,
                               toCurrencyCode: toAccount.currencyCode,
                               date: selectedDate.value,
@@ -336,6 +342,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: SpacingTokens.md),
                   ObFilledButton(
+                    key: const Key('transfer-submit-button'),
                     onPressed: canSubmit && !isSubmitting.value ? submit : null,
                     child: Text(l10n.transferButton),
                   ),
@@ -377,6 +384,7 @@ class _AccountPicker extends HookWidget {
     required this.selectedAccountId,
     required this.excludeAccountId,
     required this.onChanged,
+    super.key,
   });
 
   final String label;

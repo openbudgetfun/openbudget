@@ -134,7 +134,7 @@ List<AgentEvent> _defaultEvents() {
 AgentProposal _pendingProposal() => AgentProposal(
   id: UuidValue.fromString(TestData.assistantProposalId),
   userId: UuidValue.fromString(TestData.assistantUserId),
-  entityId: UuidValue.fromString(TestData.assistantBudgetId),
+  entityId: UuidValue.fromString(TestData.assistantEntityId),
   conversationId: UuidValue.fromString(TestData.assistantConversationId),
   kind: AgentProposalKind.moveMoney,
   payloadJson: '{}',

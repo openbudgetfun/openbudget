@@ -118,6 +118,7 @@ class _NetWorthHeadline extends HookConsumerWidget {
     final reportingCurrency = ref.watch(reportingCurrencyProvider).value ?? '';
 
     return ObCard(
+      key: const Key('net-worth-headline'),
       raised: true,
       padding: const EdgeInsets.all(SpacingTokens.lg),
       child: Column(
@@ -206,6 +207,7 @@ class _ReportingCurrencyChip extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final palette = Theme.of(context).ob;
     return InkWell(
+      key: const Key('net-worth-currency-chip'),
       onTap: () => unawaited(_pickCurrency(context, ref)),
       borderRadius: BorderRadius.circular(8),
       child: Container(
@@ -314,6 +316,7 @@ class _TrustLine extends HookWidget {
           ),
           if (view.hasStaleRates)
             ObToneChip(
+              key: const Key('net-worth-stale-badge'),
               label: l10n.fxRateStale,
               tone: ObTone.underfunded,
               icon: SkribbleIcon(
@@ -673,6 +676,7 @@ class _BreakdownTabs extends HookWidget {
         children: [
           Expanded(
             child: _TabButton(
+              key: const Key('net-worth-tab-by-entity'),
               label: l10n.netWorthTabByEntity,
               selected: selected == _NetWorthTab.byEntity,
               onTap: () => onSelected(_NetWorthTab.byEntity),
@@ -680,6 +684,7 @@ class _BreakdownTabs extends HookWidget {
           ),
           Expanded(
             child: _TabButton(
+              key: const Key('net-worth-tab-by-currency'),
               label: l10n.netWorthTabByCurrency,
               selected: selected == _NetWorthTab.byCurrency,
               onTap: () => onSelected(_NetWorthTab.byCurrency),
@@ -687,6 +692,7 @@ class _BreakdownTabs extends HookWidget {
           ),
           Expanded(
             child: _TabButton(
+              key: const Key('net-worth-tab-by-account'),
               label: l10n.netWorthTabByAccount,
               selected: selected == _NetWorthTab.byAccount,
               onTap: () => onSelected(_NetWorthTab.byAccount),
@@ -703,6 +709,7 @@ class _TabButton extends HookWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    super.key,
   });
 
   final String label;
