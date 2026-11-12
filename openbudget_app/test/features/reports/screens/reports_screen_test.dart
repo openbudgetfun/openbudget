@@ -1,29 +1,22 @@
-// UuidValue is needed for constructing test model data.
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
 import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
-import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _entityId = 'test-budget-id';
-final _budgetUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000901',
-);
+import '../../../fixtures/budget_month.dart';
+
+const String _entityId = fixtureEntityId;
 
 SpendingReport _makeReport({
   int totalIncome = 0,
   int totalExpenses = 0,
-  int transactionCount = 0,
   Map<String, int>? categorySpending,
   String currencyCode = 'USD',
 }) {
@@ -32,70 +25,36 @@ SpendingReport _makeReport({
     totalIncome: totalIncome,
     totalExpenses: totalExpenses,
     netIncome: totalIncome - totalExpenses,
-    transactionCount: transactionCount,
     categorySpending: spending,
     currencyCode: currencyCode,
+    month: 202611,
   );
 }
 
-NetWorthData _makeNetWorthData() {
-  final checking = Account(
-    id: UuidValue.fromString('00000000-0000-0000-0000-000000000902'),
-    name: 'Checking',
-    accountType: 'checking',
-    balanceMinor: 5222000,
-    currencyCode: 'USD',
-    entityId: _budgetUuid,
-    onBudget: true,
-    sortOrder: 0,
-    isClosed: false,
-  );
-  final creditCard = Account(
-    id: UuidValue.fromString('00000000-0000-0000-0000-000000000903'),
-    name: 'Credit Card',
-    accountType: 'creditCard',
-    balanceMinor: -125,
-    currencyCode: 'USD',
-    entityId: _budgetUuid,
-    onBudget: true,
-    sortOrder: 1,
-    isClosed: false,
-  );
-  return NetWorthData(
-    totalAssets: 5222000,
-    totalLiabilities: -125,
-    netWorth: 5221875,
-    assetAccounts: [checking],
-    liabilityAccounts: [creditCard],
-    currencyCode: 'USD',
-    currencyBreakdown: [
-      CurrencyNetWorthData(
-        currency: 'USD',
-        totalAssets: 5222000,
-        totalLiabilities: -125,
-        assetAccounts: [checking],
-        liabilityAccounts: [creditCard],
-      ),
-    ],
-  );
-}
+NetWorthView _makeNetWorth() => NetWorthView(
+  currencyCode: 'USD',
+  asOf: DateTime.utc(2026, 11, 5),
+  assetsMinor: 5222000,
+  liabilitiesMinor: -125,
+  netWorthMinor: 5221875,
+  isComplete: true,
+  missingCurrencyCodes: const [],
+  hasStaleRates: false,
+  currencies: const [],
+  entities: const [],
+  accounts: const [],
+);
 
 Widget _buildSubject({
-  required Future<SpendingReport> Function(Ref ref, (String, int, int) args)
+  required Future<SpendingReport> Function(Ref ref, (String, int) args)
   spendingBuilder,
-  Future<NetWorthData> Function(Ref ref, String entityId)? netWorthBuilder,
-  Future<int?> Function(Ref ref, String entityId)? ageBuilder,
-  Future<DisplayCurrencyConverter> Function(Ref ref, String entityId)?
-  converterBuilder,
+  Future<NetWorthView> Function(Ref ref)? netWorthBuilder,
 }) => ProviderScope(
   overrides: [
     spendingReportProvider.overrideWith(spendingBuilder),
     netWorthProvider.overrideWith(
-      netWorthBuilder ?? (ref, _) async => _makeNetWorthData(),
+      netWorthBuilder ?? (ref) async => _makeNetWorth(),
     ),
-    ageOfMoneyProvider.overrideWith(ageBuilder ?? (ref, _) async => 2),
-    if (converterBuilder != null)
-      displayCurrencyConverterProvider.overrideWith(converterBuilder),
   ],
   child: MaterialApp(
     theme: OpenBudgetTheme.light,
@@ -114,8 +73,6 @@ void main() {
       await tester.pumpWidget(
         _buildSubject(
           spendingBuilder: (ref, args) => completer.future,
-          netWorthBuilder: (ref, _) => Future.value(_makeNetWorthData()),
-          ageBuilder: (ref, _) => Future.value(2),
         ),
       );
       await tester.pump();
@@ -129,7 +86,6 @@ void main() {
           spendingBuilder: (ref, args) async => _makeReport(
             totalIncome: 800000,
             totalExpenses: 222000,
-            transactionCount: 8,
             categorySpending: {
               'Rent': 120000,
               'Utilities': 60000,
@@ -152,7 +108,6 @@ void main() {
         _buildSubject(
           spendingBuilder: (ref, args) async => _makeReport(
             totalExpenses: 145000,
-            transactionCount: 5,
             categorySpending: {
               'Rent': 100000,
               'Utilities': 30000,
@@ -180,77 +135,27 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Could not load report data'), findsWidgets);
-      expect(
-        find.textContaining('Exception: Could not load report data'),
-        findsOneWidget,
-      );
     });
 
-    testWidgets('renders age of money preview with days', (tester) async {
-      await tester.pumpWidget(
-        _buildSubject(
-          spendingBuilder: (ref, args) async => _makeReport(),
-          ageBuilder: (ref, _) async => 7,
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.scrollUntilVisible(
-        find.text('7 days'),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-      expect(find.text('7 days'), findsOneWidget);
-    });
-
-    testWidgets(
-      'renders converted report values when display currency is set',
-      (tester) async {
-        await tester.pumpWidget(
-          _buildSubject(
-            spendingBuilder: (ref, args) async => _makeReport(
-              totalIncome: 800000,
-              totalExpenses: 222000,
-              transactionCount: 8,
-              categorySpending: const {'Rent': 120000},
-            ),
-            converterBuilder: (ref, entityId) async =>
-                const DisplayCurrencyConverter(
-                  displayCurrency: CurrencyCode.gbp,
-                  baseCurrencyCode: 'USD',
-                  ratesByCode: {'USD': 1.0, 'GBP': 0.7},
-                ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        expect(find.textContaining('\u00A31,554.00'), findsWidgets);
-        expect(find.textContaining('\u00A336,553.13'), findsWidgets);
-      },
-    );
-
-    testWidgets('falls back to native report values when rates are missing', (
+    testWidgets('shows the trends and comparison entry points', (
       tester,
     ) async {
       await tester.pumpWidget(
         _buildSubject(
-          spendingBuilder: (ref, args) async => _makeReport(
-            totalIncome: 800000,
-            totalExpenses: 222000,
-            transactionCount: 8,
-            categorySpending: const {'Rent': 120000},
-          ),
-          converterBuilder: (ref, entityId) async =>
-              const DisplayCurrencyConverter(
-                displayCurrency: CurrencyCode.gbp,
-                baseCurrencyCode: 'USD',
-                ratesByCode: {'USD': 1.0},
-              ),
+          spendingBuilder: (ref, args) async => _makeReport(),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining(r'$2,220.00'), findsWidgets);
+      // The entry points sit below the two preview cards.
+      await tester.drag(find.byType(ListView), const Offset(0, -400));
+      await tester.pump();
+      expect(find.text('Spending Trends'), findsOneWidget);
+      expect(find.text('Budget Comparison'), findsOneWidget);
     });
+
+    // Age of money moved to the plan header and display-currency
+    // conversion is server-side now: the previews here always render the
+    // base-currency figures straight from the report.
   });
 }
