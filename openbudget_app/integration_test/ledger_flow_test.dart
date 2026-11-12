@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_repository.dart';
 import 'package:openbudget_app/src/features/ledger/screens/books_screen.dart';
@@ -44,6 +45,27 @@ Entity _makeEntity() => Entity(
   fiscalYearEndDay: 5,
   ownerId: _ownerUuid,
   createdAt: DateTime.utc(2026),
+);
+
+/// The month view the journal editor reads its functional currency from.
+BudgetMonthView _makeMonthView() => BudgetMonthView(
+  entityId: _entityUuid,
+  month: 202611,
+  currencyCode: 'GBP',
+  summary: BudgetMonthSummary(
+    month: 202611,
+    incomeMinor: 0,
+    uncategorizedMinor: 0,
+    fxDifferenceMinor: 0,
+    allocatedMinor: 0,
+    activityMinor: 0,
+    overspentLastMonthMinor: 0,
+    assignedInFutureMinor: 0,
+    readyToAssignMinor: 0,
+    availableMinor: 0,
+  ),
+  categories: const [],
+  envelopes: const [],
 );
 
 LedgerAccount _account(
@@ -376,6 +398,9 @@ Widget _buildApp(FakeBooksRepository books) {
   return ProviderScope(
     overrides: [
       entityDetailProvider.overrideWith((ref, id) async => _makeEntity()),
+      budgetMonthProvider.overrideWith(
+        (ref, entityId) async => _makeMonthView(),
+      ),
       taxRepositoryProvider.overrideWithValue(FakeCompanyTaxRepository()),
       ledgerRepositoryProvider.overrideWithValue(books),
     ],
@@ -468,11 +493,17 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(detail.reversedChip, findsOneWidget);
-      expect(books.journals.first.status, JournalStatus.reversed);
-      expect(
-        books.journals.first.reversalOfJournalId?.toString(),
-        books.journals.last.id?.toString(),
+      // The fake keeps the reversal entry in front; name both journals by
+      // their role so the assertion does not depend on list order.
+      final original = books.journals.singleWhere(
+        (j) => j.reversalOfJournalId == null,
       );
+      final reversal = books.journals.singleWhere(
+        (j) => j.reversalOfJournalId != null,
+      );
+      expect(original.status, JournalStatus.reversed);
+      expect(reversal.status, JournalStatus.posted);
+      expect(reversal.reversalOfJournalId?.toString(), original.id?.toString());
 
       // A saved draft reopens with its stored lines and re-save replaces
       // the same draft instead of creating a second one.
