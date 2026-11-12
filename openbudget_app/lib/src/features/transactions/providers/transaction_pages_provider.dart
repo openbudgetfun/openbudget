@@ -43,19 +43,17 @@ class TransactionFilter extends Equatable {
     DateTime? fromDate,
     DateTime? toDate,
     bool clearDates = false,
-  }) {
-    return TransactionFilter(
-      accountId: clearAccountId ? null : accountId ?? this.accountId,
-      envelopeId: clearEnvelopeId ? null : envelopeId ?? this.envelopeId,
-      payeeId: clearPayeeId ? null : payeeId ?? this.payeeId,
-      status: status == _unset ? this.status : status as TransactionStatus?,
-      uncategorizedOnly: uncategorizedOnly,
-      search: search ?? this.search,
-      fromDate: clearDates ? null : fromDate ?? this.fromDate,
-      toDate: clearDates ? null : toDate ?? this.toDate,
-      limit: limit,
-    );
-  }
+  }) => TransactionFilter(
+    accountId: clearAccountId ? null : accountId ?? this.accountId,
+    envelopeId: clearEnvelopeId ? null : envelopeId ?? this.envelopeId,
+    payeeId: clearPayeeId ? null : payeeId ?? this.payeeId,
+    status: status == _unset ? this.status : status as TransactionStatus?,
+    uncategorizedOnly: uncategorizedOnly,
+    search: search ?? this.search,
+    fromDate: clearDates ? null : fromDate ?? this.fromDate,
+    toDate: clearDates ? null : toDate ?? this.toDate,
+    limit: limit,
+  );
 
   TransactionQuery query(String entityId) => TransactionQuery(
     entityId: UuidValue.fromString(entityId),
@@ -108,14 +106,12 @@ class TransactionPageState extends Equatable {
     List<TransactionView>? items,
     String? nextCursor,
     bool? isLoadingMore,
-  }) {
-    return TransactionPageState(
-      filter: filter,
-      items: items ?? this.items,
-      nextCursor: nextCursor ?? this.nextCursor,
-      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-    );
-  }
+  }) => TransactionPageState(
+    filter: filter,
+    items: items ?? this.items,
+    nextCursor: nextCursor ?? this.nextCursor,
+    isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+  );
 
   @override
   List<Object?> get props => [filter, items, nextCursor, isLoadingMore];

@@ -2721,6 +2721,14 @@
     }
   },
   "transactionKindTransfer": "Transfer",
+  "transactionBaseEquivalent": "≈ {amount} in base currency",
+  "@transactionBaseEquivalent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "loadMoreButton": "Load more",
   "creditCardOwes": "Owes {amount}",
   "@creditCardOwes": {

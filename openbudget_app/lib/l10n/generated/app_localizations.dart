@@ -9462,6 +9462,12 @@ abstract class AppLocalizations {
   /// **'Transfer'**
   String get transactionKindTransfer;
 
+  /// No description provided for @transactionBaseEquivalent.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {amount} in base currency'**
+  String transactionBaseEquivalent(String amount);
+
   /// No description provided for @loadMoreButton.
   ///
   /// In en, this message translates to:

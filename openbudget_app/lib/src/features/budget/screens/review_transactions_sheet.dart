@@ -431,31 +431,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
   static TransactionInput _inputWithEnvelope(
     TransactionView view,
     String envelopeId,
-  ) {
-    final transaction = view.transaction;
-    final envelopeUuid = UuidValue.fromString(envelopeId);
-    return TransactionInput(
-      accountId: transaction.accountId,
-      date: transaction.date,
-      amountMinor: transaction.amountMinor,
-      fxRate: transaction.fxRate,
-      payeeId: transaction.payeeId,
-      description: transaction.description,
-      memo: transaction.memo,
-      status: transaction.status,
-      flag: transaction.flag,
-      lines: view.lines
-          .map(
-            (line) => TransactionLineInput(
-              amountMinor: line.amountMinor,
-              envelopeId: envelopeUuid,
-              taxCategoryCode: line.taxCategoryCode,
-              memo: line.memo,
-            ),
-          )
-          .toList(),
-    );
-  }
+  ) => transactionInputWithEnvelope(view, envelopeId);
 
   Future<_EnvelopeChoice?> _showEnvelopePicker(
     BuildContext context, {

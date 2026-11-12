@@ -7,11 +7,11 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/add_transaction_sheet.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
+import 'package:openbudget_app/src/features/transactions/providers/transaction_pages_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/edit_transaction_dialog.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
@@ -19,7 +19,7 @@ import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-enum TransactionFilter { all, income, expense }
+enum TransactionTypeFilter { all, income, expense }
 
 enum TransactionStatusFilter { all, cleared, uncleared, reconciled }
 
@@ -28,6 +28,10 @@ enum TransactionSort { dateDesc, dateAsc, amountDesc, amountAsc, description }
 /// The key on the empty state shown when the ledger has no rows to draw.
 const transactionListEmptyKey = Key('transaction-list-empty');
 
+/// The transaction list: pages `transaction.list(TransactionQuery)` with
+/// server-side search, status and date filters, and client-side type and
+/// flag filters over the loaded pages. Rows show the account's currency,
+/// plus the base amount when the server converted.
 class TransactionListScreen extends HookConsumerWidget {
   const TransactionListScreen({required this.entityId, super.key});
 
@@ -37,25 +41,67 @@ class TransactionListScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
-    final transactionsAsync = ref.watch(transactionListProvider(entityId));
+    final pagesAsync = ref.watch(transactionPagesProvider(entityId));
     final theme = Theme.of(context);
 
     final searchController = useTextEditingController();
     final searchQuery = useState('');
-    final filter = useState(TransactionFilter.all);
+    final typeFilter = useState(TransactionTypeFilter.all);
     final dateRangeStart = useState<DateTime?>(null);
     final dateRangeEnd = useState<DateTime?>(null);
     final sortOrder = useState(TransactionSort.dateDesc);
-    final flagFilter = useState<String?>(null);
+    final flagFilter = useState<TransactionFlag?>(null);
     final statusFilter = useState(TransactionStatusFilter.all);
     final selectionMode = useState(false);
     final selectedIds = useState(<String>{});
+    final applyDebounce = useRef<Timer?>(null);
 
     useEffect(() {
       void listener() => searchQuery.value = searchController.text;
       searchController.addListener(listener);
       return () => searchController.removeListener(listener);
     }, [searchController]);
+
+    // Push search, status and dates to the server through TransactionQuery;
+    // a change re-queries from the first page.
+    Future<void> applyServerFilters({
+      String? search,
+      TransactionStatusFilter? status,
+      DateTime? from,
+      DateTime? to,
+      bool clearDates = false,
+    }) async {
+      applyDebounce.value?.cancel();
+      final completer = Completer<void>();
+      applyDebounce.value = Timer(const Duration(milliseconds: 300), () {
+        final current = ref.read(transactionPagesProvider(entityId)).value;
+        final base =
+            current?.filter ?? const TransactionFilter();
+        unawaited(
+          ref
+              .read(transactionPagesProvider(entityId).notifier)
+              .apply(
+                base.copyWith(
+                  search: search,
+                  status: switch (status ?? statusFilter.value) {
+                    TransactionStatusFilter.cleared =>
+                      TransactionStatus.cleared,
+                    TransactionStatusFilter.uncleared =>
+                      TransactionStatus.uncleared,
+                    TransactionStatusFilter.reconciled =>
+                      TransactionStatus.reconciled,
+                    TransactionStatusFilter.all => null,
+                  },
+                  fromDate: clearDates ? null : from,
+                  toDate: clearDates ? null : to,
+                  clearDates: clearDates,
+                ),
+              )
+              .whenComplete(completer.complete),
+        );
+      });
+      return completer.future;
+    }
 
     return Scaffold(
       appBar: selectionMode.value
@@ -75,10 +121,12 @@ class TransactionListScreen extends HookConsumerWidget {
                   tooltip: l10n.bulkSelectAll,
                   onPressed: () {
                     final allIds =
-                        transactionsAsync.whenOrNull(
-                          data: (txs) => txs
-                              .where((tx) => tx.parentTransactionId == null)
-                              .map((tx) => tx.id?.toString() ?? '')
+                        pagesAsync.whenOrNull(
+                          data: (page) => page.items
+                              .map(
+                                (view) =>
+                                    view.transaction.id?.toString() ?? '',
+                              )
                               .where((id) => id.isNotEmpty)
                               .toSet(),
                         ) ??
@@ -104,8 +152,8 @@ class TransactionListScreen extends HookConsumerWidget {
               ),
               title: Text(l10n.transactionListTitle),
               actions: [
-                transactionsAsync.whenOrNull(
-                      data: (txs) => txs.isNotEmpty
+                pagesAsync.whenOrNull(
+                      data: (page) => page.items.isNotEmpty
                           ? Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -129,7 +177,8 @@ class TransactionListScreen extends HookConsumerWidget {
                                     data: OpenBudgetIcons.copy,
                                   ),
                                   tooltip: l10n.transactionExportCsv,
-                                  onPressed: () => _exportToCsv(context, txs),
+                                  onPressed: () =>
+                                      _exportToCsv(context, page.items),
                                 ),
                               ],
                             )
@@ -138,7 +187,7 @@ class TransactionListScreen extends HookConsumerWidget {
                     const SizedBox.shrink(),
               ],
             ),
-      body: transactionsAsync.when(
+      body: pagesAsync.when(
         loading: () => Center(
           child: ObLoadingPanel(label: l10n.transactionsLoading),
         ),
@@ -151,15 +200,17 @@ class TransactionListScreen extends HookConsumerWidget {
               action: ObStateAction(
                 label: l10n.homeRetry,
                 onPressed: () =>
-                    ref.invalidate(transactionListProvider(entityId)),
+                    ref.invalidate(transactionPagesProvider(entityId)),
               ),
             ),
           ),
         ),
-        data: (transactions) {
+        data: (pageState) {
+          final transactions = pageState.items;
+
           // Build payee, envelope, and account name lookup maps.
           final payeeAsync = ref.watch(payeeListProvider(entityId));
-          final summaryAsync = ref.watch(budgetSummaryProvider(entityId));
+          final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
           final accountsAsync = ref.watch(accountListProvider(entityId));
           final payeeMap = <String, String>{};
           if (payeeAsync.hasValue) {
@@ -169,11 +220,11 @@ class TransactionListScreen extends HookConsumerWidget {
             }
           }
           final envelopeMap = <String, String>{};
-          if (summaryAsync.hasValue && summaryAsync.value != null) {
-            for (final cat in summaryAsync.value!.categories) {
-              for (final env in cat.envelopes) {
-                final id = env.id?.toString();
-                if (id != null) envelopeMap[id] = env.name;
+          if (groupsAsync.hasValue) {
+            for (final group in groupsAsync.value!) {
+              for (final envelopeView in group.envelopes) {
+                final id = envelopeView.envelope.id?.toString();
+                if (id != null) envelopeMap[id] = envelopeView.envelope.name;
               }
             }
           }
@@ -185,59 +236,50 @@ class TransactionListScreen extends HookConsumerWidget {
             }
           }
 
-          // Filter out child split transactions (they have parentTransactionId).
-          final childParentIds = transactions
-              .where((tx) => tx.parentTransactionId != null)
-              .map((tx) => tx.parentTransactionId.toString())
-              .toSet();
-          final topLevel = transactions
-              .where((tx) => tx.parentTransactionId == null)
-              .toList();
-          final sorted = List.of(topLevel)
+          final sorted = List.of(transactions)
             ..sort(
               (a, b) => switch (sortOrder.value) {
-                TransactionSort.dateDesc => b.transactionDate.compareTo(
-                  a.transactionDate,
+                TransactionSort.dateDesc => b.transaction.date.compareTo(
+                  a.transaction.date,
                 ),
-                TransactionSort.dateAsc => a.transactionDate.compareTo(
-                  b.transactionDate,
+                TransactionSort.dateAsc => a.transaction.date.compareTo(
+                  b.transaction.date,
                 ),
-                TransactionSort.amountDesc => b.amountMinor.abs().compareTo(
-                  a.amountMinor.abs(),
-                ),
-                TransactionSort.amountAsc => a.amountMinor.abs().compareTo(
-                  b.amountMinor.abs(),
-                ),
+                TransactionSort.amountDesc => b.transaction.amountMinor.abs()
+                    .compareTo(a.transaction.amountMinor.abs()),
+                TransactionSort.amountAsc => a.transaction.amountMinor.abs()
+                    .compareTo(b.transaction.amountMinor.abs()),
                 TransactionSort.description =>
-                  a.description.toLowerCase().compareTo(
-                    b.description.toLowerCase(),
+                  a.transaction.description.toLowerCase().compareTo(
+                    b.transaction.description.toLowerCase(),
                   ),
               },
             );
 
           final query = searchQuery.value.toLowerCase();
-          final filtered = sorted.where((tx) {
-            if (filter.value == TransactionFilter.income &&
+          final filtered = sorted.where((view) {
+            final tx = view.transaction;
+            if (typeFilter.value == TransactionTypeFilter.income &&
                 tx.amountMinor <= 0) {
               return false;
             }
-            if (filter.value == TransactionFilter.expense &&
+            if (typeFilter.value == TransactionTypeFilter.expense &&
                 tx.amountMinor >= 0) {
               return false;
             }
-            if (flagFilter.value != null && tx.flagColor != flagFilter.value) {
+            if (flagFilter.value != null && tx.flag != flagFilter.value) {
               return false;
             }
             if (statusFilter.value == TransactionStatusFilter.cleared &&
-                !tx.cleared) {
+                tx.status != TransactionStatus.cleared) {
               return false;
             }
             if (statusFilter.value == TransactionStatusFilter.uncleared &&
-                (tx.cleared || tx.reconciled)) {
+                tx.status != TransactionStatus.uncleared) {
               return false;
             }
             if (statusFilter.value == TransactionStatusFilter.reconciled &&
-                !tx.reconciled) {
+                tx.status != TransactionStatus.reconciled) {
               return false;
             }
             if (query.isNotEmpty &&
@@ -247,17 +289,17 @@ class TransactionListScreen extends HookConsumerWidget {
             }
             if (dateRangeStart.value != null) {
               final txDate = DateTime(
-                tx.transactionDate.year,
-                tx.transactionDate.month,
-                tx.transactionDate.day,
+                tx.date.year,
+                tx.date.month,
+                tx.date.day,
               );
               if (txDate.isBefore(dateRangeStart.value!)) return false;
             }
             if (dateRangeEnd.value != null) {
               final txDate = DateTime(
-                tx.transactionDate.year,
-                tx.transactionDate.month,
-                tx.transactionDate.day,
+                tx.date.year,
+                tx.date.month,
+                tx.date.day,
               );
               if (txDate.isAfter(dateRangeEnd.value!)) return false;
             }
@@ -290,6 +332,8 @@ class TransactionListScreen extends HookConsumerWidget {
                           },
                         )
                       : null,
+                  onChanged: (value) =>
+                      unawaited(applyServerFilters(search: value)),
                 ),
               ),
               Padding(
@@ -308,25 +352,28 @@ class TransactionListScreen extends HookConsumerWidget {
                           _FilterChip(
                             label: l10n.transactionFilterAll,
                             icon: OpenBudgetIcons.list,
-                            selected: filter.value == TransactionFilter.all,
-                            onSelected: () =>
-                                filter.value = TransactionFilter.all,
+                            selected:
+                                typeFilter.value == TransactionTypeFilter.all,
+                            onSelected: () => typeFilter.value =
+                                TransactionTypeFilter.all,
                           ),
                           const SizedBox(width: SpacingTokens.sm),
                           _FilterChip(
                             label: l10n.transactionFilterIncome,
                             icon: OpenBudgetIcons.inflow,
-                            selected: filter.value == TransactionFilter.income,
-                            onSelected: () =>
-                                filter.value = TransactionFilter.income,
+                            selected: typeFilter.value ==
+                                TransactionTypeFilter.income,
+                            onSelected: () => typeFilter.value =
+                                TransactionTypeFilter.income,
                           ),
                           const SizedBox(width: SpacingTokens.sm),
                           _FilterChip(
                             label: l10n.transactionFilterExpense,
                             icon: OpenBudgetIcons.outflow,
-                            selected: filter.value == TransactionFilter.expense,
-                            onSelected: () =>
-                                filter.value = TransactionFilter.expense,
+                            selected: typeFilter.value ==
+                                TransactionTypeFilter.expense,
+                            onSelected: () => typeFilter.value =
+                                TransactionTypeFilter.expense,
                           ),
                           const SizedBox(width: SpacingTokens.sm),
                           _FilterChip(
@@ -352,6 +399,9 @@ class TransactionListScreen extends HookConsumerWidget {
                               onPressed: () {
                                 dateRangeStart.value = null;
                                 dateRangeEnd.value = null;
+                                unawaited(
+                                  applyServerFilters(clearDates: true),
+                                );
                               },
                             ),
                           const SizedBox(width: SpacingTokens.sm),
@@ -362,7 +412,10 @@ class TransactionListScreen extends HookConsumerWidget {
                           const SizedBox(width: SpacingTokens.sm),
                           _StatusFilterChip(
                             value: statusFilter.value,
-                            onSelected: (v) => statusFilter.value = v,
+                            onSelected: (v) {
+                              statusFilter.value = v;
+                              unawaited(applyServerFilters(status: v));
+                            },
                           ),
                         ],
                       ),
@@ -401,14 +454,22 @@ class TransactionListScreen extends HookConsumerWidget {
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: () async =>
-                        ref.invalidate(transactionListProvider(entityId)),
+                        ref.invalidate(transactionPagesProvider(entityId)),
                     child: _GroupedTransactionList(
                       transactions: filtered,
-                      childParentIds: childParentIds,
                       entityId: entityId,
+                      baseCurrencyCode: ref
+                          .watch(budgetMonthProvider(entityId))
+                          .value
+                          ?.currencyCode,
                       payeeMap: payeeMap,
                       envelopeMap: envelopeMap,
                       accountMap: accountMap,
+                      hasMore: pageState.hasMore,
+                      isLoadingMore: pageState.isLoadingMore,
+                      onLoadMore: () => ref
+                          .read(transactionPagesProvider(entityId).notifier)
+                          .loadMore(),
                       selectionMode: selectionMode.value,
                       selectedIds: selectedIds.value,
                       onToggleSelection: (id) {
@@ -505,7 +566,7 @@ class TransactionListScreen extends HookConsumerWidget {
                         onPressed: () => _bulkMarkCleared(
                           context,
                           ref,
-                          transactionsAsync,
+                          pagesAsync,
                           selectedIds.value,
                           selectionMode,
                           selectedIds,
@@ -546,16 +607,17 @@ class TransactionListScreen extends HookConsumerWidget {
     ValueNotifier<Set<String>> selectedIds,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final summaryAsync = ref.read(budgetSummaryProvider(entityId));
-    if (!summaryAsync.hasValue) return;
+    final groupsAsync = ref.read(budgetMonthGroupsProvider(entityId));
+    if (!groupsAsync.hasValue) return;
 
-    final summary = summaryAsync.value!;
     final envelopeItems = <(String, String)>[];
-    for (final catEnv in summary.categories) {
-      for (final envelope in catEnv.envelopes) {
-        final id = envelope.id?.toString() ?? '';
+    for (final group in groupsAsync.value!) {
+      for (final envelopeView in group.envelopes) {
+        final id = envelopeView.envelope.id?.toString() ?? '';
         if (id.isNotEmpty) {
-          envelopeItems.add((id, '${catEnv.category.name} / ${envelope.name}'));
+          envelopeItems.add(
+            (id, '${group.category.name} / ${envelopeView.envelope.name}'),
+          );
         }
       }
     }
@@ -598,19 +660,29 @@ class TransactionListScreen extends HookConsumerWidget {
     if (selectedEnvelope == null || !context.mounted) return;
 
     try {
-      final count = await ref
-          .read(transactionActionsProvider.notifier)
-          .bulkAssignEnvelope(
-            transactionIds: ids.toList(),
-            envelopeId: selectedEnvelope,
-            entityId: entityId,
-          );
+      final actions = ref.read(transactionActionsProvider.notifier);
+      final views = ref
+          .read(transactionPagesProvider(entityId))
+          .value
+          ?.items
+          .where((view) {
+            final id = view.transaction.id?.toString() ?? '';
+            return id.isNotEmpty && ids.contains(id);
+          })
+          .toList() ?? const <TransactionView>[];
+      for (final view in views) {
+        await actions.update(
+          transactionId: view.transaction.id?.toString() ?? '',
+          entityId: entityId,
+          input: transactionInputWithEnvelope(view, selectedEnvelope),
+        );
+      }
       selectionMode.value = false;
       selectedIds.value = {};
       if (context.mounted) {
         showAppToast(
           context,
-          message: l10n.bulkAssignSuccess(count),
+          message: l10n.bulkAssignSuccess(views.length),
           variant: AppToastVariant.success,
         );
       }
@@ -672,7 +744,7 @@ class TransactionListScreen extends HookConsumerWidget {
                             ids,
                             selectionMode,
                             selectedIds,
-                            flagColor: value,
+                            flag: value,
                           ),
                         );
                       },
@@ -710,17 +782,13 @@ class TransactionListScreen extends HookConsumerWidget {
     Set<String> ids,
     ValueNotifier<bool> selectionMode,
     ValueNotifier<Set<String>> selectedIds, {
-    String? flagColor,
+    TransactionFlag? flag,
   }) async {
     final l10n = AppLocalizations.of(context);
     try {
       final count = await ref
           .read(transactionActionsProvider.notifier)
-          .bulkSetFlag(
-            transactionIds: ids.toList(),
-            entityId: entityId,
-            flagColor: flagColor,
-          );
+          .setFlag(transactionIds: ids.toList(), entityId: entityId, flag: flag);
       selectionMode.value = false;
       selectedIds.value = {};
       if (context.mounted) {
@@ -744,66 +812,42 @@ class TransactionListScreen extends HookConsumerWidget {
   Future<void> _bulkMarkCleared(
     BuildContext context,
     WidgetRef ref,
-    AsyncValue<List<Transaction>> transactionsAsync,
+    AsyncValue<TransactionPageState> pagesAsync,
     Set<String> ids,
     ValueNotifier<bool> selectionMode,
     ValueNotifier<Set<String>> selectedIds,
   ) async {
     final l10n = AppLocalizations.of(context);
 
-    // Only toggle uncleared, non-reconciled transactions to "cleared".
-    final unclearedIds = <String>[];
-    if (transactionsAsync.hasValue) {
-      for (final tx in transactionsAsync.value!) {
-        final txId = tx.id?.toString() ?? '';
-        if (ids.contains(txId) && !tx.cleared && !tx.reconciled) {
-          unclearedIds.add(txId);
-        }
-      }
+    // Only touch uncleared, non-reconciled transactions; when everything
+    // selected is already cleared, send them back to uncleared.
+    final byId = <String, TransactionStatus>{
+      for (final view
+          in pagesAsync.value?.items ?? const <TransactionView>[])
+        if (view.transaction.id != null)
+          view.transaction.id!.toString(): view.transaction.status,
+    };
+    final targetIds = <String>[];
+    var anyCleared = false;
+    for (final id in ids) {
+      final status = byId[id];
+      if (status == null || status == TransactionStatus.reconciled) continue;
+      if (status == TransactionStatus.cleared) anyCleared = true;
+      targetIds.add(id);
     }
-
-    if (unclearedIds.isEmpty) {
-      // All selected are already cleared — toggle them to uncleared instead.
-      final clearedIds = <String>[];
-      if (transactionsAsync.hasValue) {
-        for (final tx in transactionsAsync.value!) {
-          final txId = tx.id?.toString() ?? '';
-          if (ids.contains(txId) && tx.cleared && !tx.reconciled) {
-            clearedIds.add(txId);
-          }
-        }
-      }
-      if (clearedIds.isEmpty) return;
-
-      try {
-        final count = await ref
-            .read(transactionActionsProvider.notifier)
-            .bulkToggleCleared(transactionIds: clearedIds, entityId: entityId);
-        selectionMode.value = false;
-        selectedIds.value = {};
-        if (context.mounted) {
-          showAppToast(
-            context,
-            message: l10n.bulkClearSuccess(count),
-            variant: AppToastVariant.success,
-          );
-        }
-      } on Exception catch (_) {
-        if (context.mounted) {
-          showAppToast(
-            context,
-            message: l10n.bulkClearError,
-            variant: AppToastVariant.error,
-          );
-        }
-      }
-      return;
-    }
+    if (targetIds.isEmpty) return;
+    final nextStatus = anyCleared
+        ? TransactionStatus.uncleared
+        : TransactionStatus.cleared;
 
     try {
       final count = await ref
           .read(transactionActionsProvider.notifier)
-          .bulkToggleCleared(transactionIds: unclearedIds, entityId: entityId);
+          .setStatus(
+            transactionIds: targetIds,
+            status: nextStatus,
+            entityId: entityId,
+          );
       selectionMode.value = false;
       selectedIds.value = {};
       if (context.mounted) {
@@ -858,7 +902,7 @@ class TransactionListScreen extends HookConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     try {
-      final count = await ref
+      await ref
           .read(transactionActionsProvider.notifier)
           .bulkDelete(transactionIds: ids.toList(), entityId: entityId);
       selectionMode.value = false;
@@ -866,7 +910,7 @@ class TransactionListScreen extends HookConsumerWidget {
       if (context.mounted) {
         showAppToast(
           context,
-          message: l10n.bulkDeleteSuccess(count),
+          message: l10n.bulkDeleteSuccess(ids.length),
           variant: AppToastVariant.success,
         );
       }
@@ -881,32 +925,37 @@ class TransactionListScreen extends HookConsumerWidget {
     }
   }
 
-  void _exportToCsv(BuildContext context, List<Transaction> transactions) {
+  void _exportToCsv(BuildContext context, List<TransactionView> views) {
     final l10n = AppLocalizations.of(context);
     final buffer = StringBuffer()
       ..writeln('Date,Description,Amount,Memo,Status');
 
-    final topLevel =
-        transactions.where((tx) => tx.parentTransactionId == null).toList()
-          ..sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
+    final sorted = List.of(views)
+      ..sort(
+        (a, b) => b.transaction.date.compareTo(a.transaction.date),
+      );
 
-    for (final tx in topLevel) {
-      final date = _formatDateIso(tx.transactionDate);
-      final desc = _escapeCsv(tx.description);
-      final amount = formatMinorForCode(tx.amountMinor, tx.currencyCode);
+    for (final view in sorted) {
+      final tx = view.transaction;
+      final date = _formatDateIso(tx.date);
+      final desc = _escapeCsv(view.payeeName ?? tx.description);
+      final amount = formatMinorForCode(
+        tx.amountMinor,
+        view.accountCurrencyCode,
+      );
       final memo = _escapeCsv(tx.memo ?? '');
-      final status = tx.reconciled
-          ? 'Reconciled'
-          : tx.cleared
-          ? 'Cleared'
-          : 'Uncleared';
+      final status = switch (tx.status) {
+        TransactionStatus.reconciled => 'Reconciled',
+        TransactionStatus.cleared => 'Cleared',
+        TransactionStatus.uncleared => 'Uncleared',
+      };
       buffer.writeln('$date,$desc,$amount,$memo,$status');
     }
 
     unawaited(Clipboard.setData(ClipboardData(text: buffer.toString())));
     showAppToast(
       context,
-      message: l10n.transactionExportSuccess(topLevel.length),
+      message: l10n.transactionExportSuccess(sorted.length),
       variant: AppToastVariant.success,
     );
   }
@@ -925,12 +974,12 @@ class TransactionListScreen extends HookConsumerWidget {
     BuildContext context,
     ValueNotifier<DateTime?> dateRangeStart,
     ValueNotifier<DateTime?> dateRangeEnd,
-    List<Transaction> transactions,
+    List<TransactionView> views,
   ) async {
     final now = DateTime.now();
-    final earliest = transactions.isNotEmpty
-        ? transactions
-              .map((tx) => tx.transactionDate)
+    final earliest = views.isNotEmpty
+        ? views
+              .map((view) => view.transaction.date)
               .reduce((a, b) => a.isBefore(b) ? a : b)
         : DateTime(now.year - 1);
 
@@ -1022,23 +1071,23 @@ class TransactionListScreen extends HookConsumerWidget {
   }
 }
 
-List<(String, String, ObTone)> _flagOptions(AppLocalizations l10n) => [
-  ('red', l10n.transactionFlagRed, ObTone.overspent),
-  ('orange', l10n.transactionFlagOrange, ObTone.underfunded),
-  ('yellow', l10n.transactionFlagYellow, ObTone.underfunded),
-  ('green', l10n.transactionFlagGreen, ObTone.funded),
-  ('blue', l10n.transactionFlagBlue, ObTone.brand),
-  ('purple', l10n.transactionFlagPurple, ObTone.review),
+List<(TransactionFlag, String, ObTone)> _flagOptions(AppLocalizations l10n) => [
+  (TransactionFlag.red, l10n.transactionFlagRed, ObTone.overspent),
+  (TransactionFlag.orange, l10n.transactionFlagOrange, ObTone.underfunded),
+  (TransactionFlag.yellow, l10n.transactionFlagYellow, ObTone.underfunded),
+  (TransactionFlag.green, l10n.transactionFlagGreen, ObTone.funded),
+  (TransactionFlag.blue, l10n.transactionFlagBlue, ObTone.brand),
+  (TransactionFlag.purple, l10n.transactionFlagPurple, ObTone.review),
 ];
 
-String? _flagLabel(String? flagColor, AppLocalizations l10n) =>
-    switch (flagColor) {
-      'red' => l10n.transactionFlagRed,
-      'orange' => l10n.transactionFlagOrange,
-      'yellow' => l10n.transactionFlagYellow,
-      'green' => l10n.transactionFlagGreen,
-      'blue' => l10n.transactionFlagBlue,
-      'purple' => l10n.transactionFlagPurple,
+String? _flagLabel(TransactionFlag? flag, AppLocalizations l10n) =>
+    switch (flag) {
+      TransactionFlag.red => l10n.transactionFlagRed,
+      TransactionFlag.orange => l10n.transactionFlagOrange,
+      TransactionFlag.yellow => l10n.transactionFlagYellow,
+      TransactionFlag.green => l10n.transactionFlagGreen,
+      TransactionFlag.blue => l10n.transactionFlagBlue,
+      TransactionFlag.purple => l10n.transactionFlagPurple,
       _ => null,
     };
 
@@ -1074,8 +1123,8 @@ class _FilterChip extends HookWidget {
 class _FlagFilterChip extends HookWidget {
   const _FlagFilterChip({required this.selectedFlag, required this.onSelected});
 
-  final String? selectedFlag;
-  final ValueChanged<String?> onSelected;
+  final TransactionFlag? selectedFlag;
+  final ValueChanged<TransactionFlag?> onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -1246,35 +1295,38 @@ class _StatusFilterChip extends HookWidget {
   }
 }
 
-ObTone? _flagToneFromString(String? flagColor) => switch (flagColor) {
-  'red' => ObTone.overspent,
-  'orange' => ObTone.underfunded,
-  'yellow' => ObTone.underfunded,
-  'green' => ObTone.funded,
-  'blue' => ObTone.brand,
-  'purple' => ObTone.review,
+ObTone? _flagToneFromString(TransactionFlag? flag) => switch (flag) {
+  TransactionFlag.red => ObTone.overspent,
+  TransactionFlag.orange => ObTone.underfunded,
+  TransactionFlag.yellow => ObTone.underfunded,
+  TransactionFlag.green => ObTone.funded,
+  TransactionFlag.blue => ObTone.brand,
+  TransactionFlag.purple => ObTone.review,
   _ => null,
 };
 
 class _TransactionTile extends HookConsumerWidget {
   const _TransactionTile({
-    required this.transaction,
+    required this.view,
     required this.entityId,
-    this.isSplit = false,
     this.payeeName,
     this.envelopeName,
     this.accountName,
+    this.baseCurrencyCode,
     this.selectionMode = false,
     this.isSelected = false,
     this.onToggleSelection,
   });
 
-  final Transaction transaction;
+  final TransactionView view;
   final String entityId;
-  final bool isSplit;
   final String? payeeName;
   final String? envelopeName;
   final String? accountName;
+
+  /// The entity's base currency; shown as a converted line when it differs
+  /// from the account's. The conversion itself came from the server.
+  final String? baseCurrencyCode;
   final bool selectionMode;
   final bool isSelected;
   final VoidCallback? onToggleSelection;
@@ -1284,32 +1336,37 @@ class _TransactionTile extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
+    final transaction = view.transaction;
     final isIncome = transaction.amountMinor > 0;
     final tone = isIncome ? ObTone.funded : ObTone.neutral;
 
-    final statusIcon = transaction.reconciled
-        ? OpenBudgetIcons.lock
-        : transaction.cleared
-        ? OpenBudgetIcons.checkCircle
-        : OpenBudgetIcons.circle;
-    final statusColor = transaction.reconciled
-        ? palette.brand
-        : transaction.cleared
-        ? palette.funded
-        : palette.mutedInk;
-    final statusTone = transaction.reconciled
-        ? ObTone.brand
-        : transaction.cleared
-        ? ObTone.funded
-        : ObTone.neutral;
-    final statusLabel = transaction.reconciled
-        ? l10n.transactionReconciled
-        : transaction.cleared
-        ? l10n.transactionCleared
-        : l10n.transactionUncleared;
+    final statusIcon = switch (transaction.status) {
+      TransactionStatus.reconciled => OpenBudgetIcons.lock,
+      TransactionStatus.cleared => OpenBudgetIcons.checkCircle,
+      TransactionStatus.uncleared => OpenBudgetIcons.circle,
+    };
+    final statusColor = switch (transaction.status) {
+      TransactionStatus.reconciled => palette.brand,
+      TransactionStatus.cleared => palette.funded,
+      TransactionStatus.uncleared => palette.mutedInk,
+    };
+    final statusTone = switch (transaction.status) {
+      TransactionStatus.reconciled => ObTone.brand,
+      TransactionStatus.cleared => ObTone.funded,
+      TransactionStatus.uncleared => ObTone.neutral,
+    };
+    final statusLabel = switch (transaction.status) {
+      TransactionStatus.reconciled => l10n.transactionReconciled,
+      TransactionStatus.cleared => l10n.transactionCleared,
+      TransactionStatus.uncleared => l10n.transactionUncleared,
+    };
 
-    final flagTone = _flagToneFromString(transaction.flagColor);
-    final flagLabel = _flagLabel(transaction.flagColor, l10n);
+    final flagTone = _flagToneFromString(transaction.flag);
+    final flagLabel = _flagLabel(transaction.flag, l10n);
+    final showConverted =
+        baseCurrencyCode != null &&
+        baseCurrencyCode!.isNotEmpty &&
+        baseCurrencyCode != view.accountCurrencyCode;
 
     final card = GestureDetector(
       onLongPress: selectionMode
@@ -1340,9 +1397,9 @@ class _TransactionTile extends HookConsumerWidget {
                   message: statusLabel,
                   child: InkWell(
                     customBorder: const CircleBorder(),
-                    onTap: transaction.reconciled
+                    onTap: transaction.status == TransactionStatus.reconciled
                         ? null
-                        : () => _toggleCleared(context, ref, l10n),
+                        : () => _toggleStatus(context, ref, l10n),
                     child: SizedBox(
                       width: 48,
                       height: 48,
@@ -1387,7 +1444,7 @@ class _TransactionTile extends HookConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      transaction.description,
+                      view.payeeName ?? transaction.description,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: palette.ink,
                         fontWeight: FontWeight.w600,
@@ -1402,20 +1459,6 @@ class _TransactionTile extends HookConsumerWidget {
                         spacing: SpacingTokens.xs,
                         runSpacing: SpacingTokens.xs,
                         children: [
-                          if (isSplit)
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                maxWidth: 180,
-                              ),
-                              child: ObToneChip(
-                                label: l10n.splitLabel,
-                                tone: ObTone.review,
-                                icon: const SkribbleIcon(
-                                  data: OpenBudgetIcons.split,
-                                  size: 14,
-                                ),
-                              ),
-                            ),
                           if (!isIncome && (envelopeName?.isEmpty ?? true))
                             ConstrainedBox(
                               constraints: const BoxConstraints(
@@ -1454,13 +1497,33 @@ class _TransactionTile extends HookConsumerWidget {
               const SizedBox(width: SpacingTokens.sm),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 132),
-                child: ObAmount(
-                  formatMinorForCode(
-                    transaction.amountMinor,
-                    transaction.currencyCode,
-                  ),
-                  tone: tone,
-                  style: theme.textTheme.titleMedium,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ObAmount(
+                      formatMinorForCode(
+                        transaction.amountMinor,
+                        view.accountCurrencyCode,
+                      ),
+                      tone: tone,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    if (showConverted)
+                      Text(
+                        l10n.transactionBaseEquivalent(
+                          formatMinorForCode(
+                            transaction.baseAmountMinor,
+                            baseCurrencyCode!,
+                          ),
+                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: palette.mutedInk,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
                 ),
               ),
             ],
@@ -1495,7 +1558,8 @@ class _TransactionTile extends HookConsumerWidget {
   }
 
   Widget _buildMeta(ThemeData theme, ObPalette palette) {
-    final hasMemo = transaction.memo != null && transaction.memo!.isNotEmpty;
+    final hasMemo = view.transaction.memo != null &&
+        view.transaction.memo!.isNotEmpty;
     final hasEnvelope = envelopeName != null && envelopeName!.isNotEmpty;
     final hasAccount = accountName != null && accountName!.isNotEmpty;
     final hasPayee = payeeName != null && payeeName!.isNotEmpty;
@@ -1532,7 +1596,7 @@ class _TransactionTile extends HookConsumerWidget {
           ),
         if (hasMemo)
           Text(
-            transaction.memo!,
+            view.transaction.memo!,
             style: theme.textTheme.bodySmall?.copyWith(
               color: palette.mutedInk,
               fontStyle: FontStyle.italic,
@@ -1544,16 +1608,21 @@ class _TransactionTile extends HookConsumerWidget {
     );
   }
 
-  Future<void> _toggleCleared(
+  Future<void> _toggleStatus(
     BuildContext context,
     WidgetRef ref,
     AppLocalizations l10n,
   ) async {
+    final transaction = view.transaction;
+    final nextStatus = transaction.status == TransactionStatus.cleared
+        ? TransactionStatus.uncleared
+        : TransactionStatus.cleared;
     try {
       await ref
           .read(transactionActionsProvider.notifier)
-          .toggleCleared(
-            transactionId: transaction.id?.toString() ?? '',
+          .setStatus(
+            transactionIds: [transaction.id?.toString() ?? ''],
+            status: nextStatus,
             entityId: entityId,
           );
     } on Exception catch (_) {
@@ -1577,7 +1646,7 @@ class _TransactionTile extends HookConsumerWidget {
       builder: (ctx) => AlertDialog(
         title: Text(l10n.deleteConfirmTitle),
         content: Text(
-          '${l10n.deleteConfirmMessage}\n\n"${transaction.description}"',
+          '${l10n.deleteConfirmMessage}\n\n"${view.transaction.description}"',
         ),
         actions: [
           ObTextButton(
@@ -1603,10 +1672,10 @@ class _TransactionTile extends HookConsumerWidget {
     AppLocalizations l10n,
   ) async {
     try {
-      final deleted = await ref
+      await ref
           .read(transactionActionsProvider.notifier)
-          .deleteTransaction(
-            transactionId: transaction.id?.toString() ?? '',
+          .delete(
+            transactionId: view.transaction.id?.toString() ?? '',
             entityId: entityId,
           );
       if (context.mounted) {
@@ -1614,8 +1683,6 @@ class _TransactionTile extends HookConsumerWidget {
           context,
           message: l10n.deleteSuccess,
           variant: AppToastVariant.success,
-          actionLabel: l10n.undoAction,
-          onAction: () => _undoDelete(context, ref, deleted, l10n),
         );
       }
     } on Exception catch (_) {
@@ -1623,37 +1690,6 @@ class _TransactionTile extends HookConsumerWidget {
         showAppToast(
           context,
           message: l10n.deleteError,
-          variant: AppToastVariant.error,
-        );
-      }
-    }
-  }
-
-  Future<void> _undoDelete(
-    BuildContext context,
-    WidgetRef ref,
-    Transaction deleted,
-    AppLocalizations l10n,
-  ) async {
-    try {
-      await ref
-          .read(transactionActionsProvider.notifier)
-          .undoDeleteTransaction(
-            deletedTransaction: deleted,
-            entityId: entityId,
-          );
-      if (context.mounted) {
-        showAppToast(
-          context,
-          message: l10n.undoDeleteSuccess,
-          variant: AppToastVariant.success,
-        );
-      }
-    } on Exception catch (_) {
-      if (context.mounted) {
-        showAppToast(
-          context,
-          message: l10n.undoDeleteError,
           variant: AppToastVariant.error,
         );
       }
@@ -1690,17 +1726,17 @@ class _TransactionTile extends HookConsumerWidget {
                     _FlagChip(
                       label: label,
                       tone: tone,
-                      selected: transaction.flagColor == value,
+                      selected: view.transaction.flag == value,
                       onTap: () {
                         Navigator.of(ctx).pop();
                         unawaited(
-                          _setFlag(context, ref, l10n, flagColor: value),
+                          _setFlag(context, ref, l10n, flag: value),
                         );
                       },
                     ),
                 ],
               ),
-              if (transaction.flagColor != null) ...[
+              if (view.transaction.flag != null) ...[
                 const Divider(),
                 ListTile(
                   leading: const SkribbleIcon(data: OpenBudgetIcons.flag),
@@ -1723,15 +1759,15 @@ class _TransactionTile extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     AppLocalizations l10n, {
-    String? flagColor,
+    TransactionFlag? flag,
   }) async {
     try {
       await ref
           .read(transactionActionsProvider.notifier)
           .setFlag(
-            transactionId: transaction.id?.toString() ?? '',
+            transactionIds: [view.transaction.id?.toString() ?? ''],
             entityId: entityId,
-            flagColor: flagColor,
+            flag: flag,
           );
     } on Exception catch (_) {
       if (context.mounted) {
@@ -1749,9 +1785,8 @@ class _TransactionTile extends HookConsumerWidget {
       showDialog<void>(
         context: context,
         builder: (_) => EditTransactionDialog(
-          transaction: transaction,
+          view: view,
           entityId: entityId,
-          currencyCode: transaction.currencyCode,
         ),
       ),
     );
@@ -1790,22 +1825,30 @@ class _FlagChip extends HookWidget {
 class _GroupedTransactionList extends HookWidget {
   const _GroupedTransactionList({
     required this.transactions,
-    required this.childParentIds,
     required this.entityId,
+    this.baseCurrencyCode,
     this.payeeMap = const {},
     this.envelopeMap = const {},
     this.accountMap = const {},
+    this.hasMore = false,
+    this.isLoadingMore = false,
+    this.onLoadMore,
     this.selectionMode = false,
     this.selectedIds = const {},
     this.onToggleSelection,
   });
 
-  final List<Transaction> transactions;
-  final Set<String> childParentIds;
+  final List<TransactionView> transactions;
   final String entityId;
+
+  /// The entity's base currency, for the converted line on foreign rows.
+  final String? baseCurrencyCode;
   final Map<String, String> payeeMap;
   final Map<String, String> envelopeMap;
   final Map<String, String> accountMap;
+  final bool hasMore;
+  final bool isLoadingMore;
+  final VoidCallback? onLoadMore;
   final bool selectionMode;
   final Set<String> selectedIds;
   final ValueChanged<String>? onToggleSelection;
@@ -1813,10 +1856,10 @@ class _GroupedTransactionList extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final groups = useMemoized(() {
-      final map = <String, List<Transaction>>{};
-      for (final tx in transactions) {
-        final key = _dateKey(tx.transactionDate);
-        (map[key] ??= []).add(tx);
+      final map = <String, List<TransactionView>>{};
+      for (final view in transactions) {
+        final key = _dateKey(view.transaction.date);
+        (map[key] ??= []).add(view);
       }
       return map;
     }, [transactions]);
@@ -1825,11 +1868,14 @@ class _GroupedTransactionList extends HookWidget {
     final items = <_ListItem>[];
 
     for (final key in dateKeys) {
-      final txList = groups[key]!;
-      items.add(_ListItem.header(date: txList.first.transactionDate));
-      for (final tx in txList) {
-        items.add(_ListItem.transaction(transaction: tx));
+      final viewList = groups[key]!;
+      items.add(_ListItem.header(date: viewList.first.transaction.date));
+      for (final view in viewList) {
+        items.add(_ListItem.transaction(view: view));
       }
+    }
+    if (hasMore) {
+      items.add(_ListItem.loadMore());
     }
 
     return ListView.builder(
@@ -1840,25 +1886,42 @@ class _GroupedTransactionList extends HookWidget {
         if (item.isHeader) {
           return _DateHeader(date: item.date!);
         }
-        final tx = item.transaction!;
+        if (item.isLoadMore) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
+            child: Center(
+              child: OutlinedButton(
+                onPressed: isLoadingMore ? null : onLoadMore,
+                child: Text(
+                  AppLocalizations.of(context).loadMoreButton,
+                ),
+              ),
+            ),
+          );
+        }
+        final view = item.view!;
+        final tx = view.transaction;
         final txId = tx.id?.toString() ?? '';
-        final isSplit = childParentIds.contains(txId);
-        final payeeName = tx.payeeId != null
+        final payeeName = view.payeeName ?? (tx.payeeId != null
             ? payeeMap[tx.payeeId.toString()]
+            : null);
+        final lineEnvelopeId = view.lines
+            .map((line) => line.envelopeId?.toString())
+            .firstWhere(
+              (id) => id != null && id.isNotEmpty,
+              orElse: () => null,
+            );
+        final envelopeName = lineEnvelopeId != null
+            ? envelopeMap[lineEnvelopeId]
             : null;
-        final envelopeName = tx.envelopeId != null
-            ? envelopeMap[tx.envelopeId.toString()]
-            : null;
-        final accountName = tx.accountId != null
-            ? accountMap[tx.accountId.toString()]
-            : null;
+        final accountName = accountMap[tx.accountId.toString()];
         return _TransactionTile(
-          transaction: tx,
+          view: view,
           entityId: entityId,
-          isSplit: isSplit,
           payeeName: payeeName,
           envelopeName: envelopeName,
           accountName: accountName,
+          baseCurrencyCode: baseCurrencyCode,
           selectionMode: selectionMode,
           isSelected: selectedIds.contains(txId),
           onToggleSelection: txId.isNotEmpty
@@ -1874,15 +1937,26 @@ class _GroupedTransactionList extends HookWidget {
 }
 
 class _ListItem {
-  _ListItem.header({required this.date}) : isHeader = true, transaction = null;
+  _ListItem.header({required this.date})
+    : isHeader = true,
+      view = null,
+      isLoadMore = false;
 
-  _ListItem.transaction({required this.transaction})
+  _ListItem.transaction({required this.view})
     : isHeader = false,
-      date = null;
+      date = null,
+      isLoadMore = false;
+
+  _ListItem.loadMore()
+    : isHeader = false,
+      date = null,
+      view = null,
+      isLoadMore = true;
 
   final bool isHeader;
+  final bool isLoadMore;
   final DateTime? date;
-  final Transaction? transaction;
+  final TransactionView? view;
 }
 
 class _DateHeader extends HookWidget {

@@ -5516,6 +5516,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionKindTransfer => 'Transfer';
 
   @override
+  String transactionBaseEquivalent(String amount) {
+    return '≈ $amount in base currency';
+  }
+
+  @override
   String get loadMoreButton => 'Load more';
 
   @override
