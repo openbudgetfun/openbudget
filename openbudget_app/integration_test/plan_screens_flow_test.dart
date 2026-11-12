@@ -358,8 +358,9 @@ void main() {
             GoRoute(
               name: recentMovesRoute,
               path: 'recent-moves',
-              builder: (context, state) =>
-                  RecentMovesScreen(entityId: state.pathParameters['entityId']!),
+              builder: (context, state) => RecentMovesScreen(
+                entityId: state.pathParameters['entityId']!,
+              ),
               routes: [
                 GoRoute(
                   name: envelopeMovesRoute,
@@ -672,8 +673,9 @@ void main() {
             GoRoute(
               name: recentMovesRoute,
               path: 'recent-moves',
-              builder: (context, state) =>
-                  RecentMovesScreen(entityId: state.pathParameters['entityId']!),
+              builder: (context, state) => RecentMovesScreen(
+                entityId: state.pathParameters['entityId']!,
+              ),
             ),
           ],
         ),

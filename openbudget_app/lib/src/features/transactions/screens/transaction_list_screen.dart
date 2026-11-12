@@ -75,8 +75,7 @@ class TransactionListScreen extends HookConsumerWidget {
       final completer = Completer<void>();
       applyDebounce.value = Timer(const Duration(milliseconds: 300), () {
         final current = ref.read(transactionPagesProvider(entityId)).value;
-        final base =
-            current?.filter ?? const TransactionFilter();
+        final base = current?.filter ?? const TransactionFilter();
         unawaited(
           ref
               .read(transactionPagesProvider(entityId).notifier)
@@ -124,8 +123,7 @@ class TransactionListScreen extends HookConsumerWidget {
                         pagesAsync.whenOrNull(
                           data: (page) => page.items
                               .map(
-                                (view) =>
-                                    view.transaction.id?.toString() ?? '',
+                                (view) => view.transaction.id?.toString() ?? '',
                               )
                               .where((id) => id.isNotEmpty)
                               .toSet(),
@@ -245,10 +243,14 @@ class TransactionListScreen extends HookConsumerWidget {
                 TransactionSort.dateAsc => a.transaction.date.compareTo(
                   b.transaction.date,
                 ),
-                TransactionSort.amountDesc => b.transaction.amountMinor.abs()
-                    .compareTo(a.transaction.amountMinor.abs()),
-                TransactionSort.amountAsc => a.transaction.amountMinor.abs()
-                    .compareTo(b.transaction.amountMinor.abs()),
+                TransactionSort.amountDesc =>
+                  b.transaction.amountMinor.abs().compareTo(
+                    a.transaction.amountMinor.abs(),
+                  ),
+                TransactionSort.amountAsc =>
+                  a.transaction.amountMinor.abs().compareTo(
+                    b.transaction.amountMinor.abs(),
+                  ),
                 TransactionSort.description =>
                   a.transaction.description.toLowerCase().compareTo(
                     b.transaction.description.toLowerCase(),
@@ -354,23 +356,25 @@ class TransactionListScreen extends HookConsumerWidget {
                             icon: OpenBudgetIcons.list,
                             selected:
                                 typeFilter.value == TransactionTypeFilter.all,
-                            onSelected: () => typeFilter.value =
-                                TransactionTypeFilter.all,
+                            onSelected: () =>
+                                typeFilter.value = TransactionTypeFilter.all,
                           ),
                           const SizedBox(width: SpacingTokens.sm),
                           _FilterChip(
                             label: l10n.transactionFilterIncome,
                             icon: OpenBudgetIcons.inflow,
-                            selected: typeFilter.value ==
+                            selected:
+                                typeFilter.value ==
                                 TransactionTypeFilter.income,
-                            onSelected: () => typeFilter.value =
-                                TransactionTypeFilter.income,
+                            onSelected: () =>
+                                typeFilter.value = TransactionTypeFilter.income,
                           ),
                           const SizedBox(width: SpacingTokens.sm),
                           _FilterChip(
                             label: l10n.transactionFilterExpense,
                             icon: OpenBudgetIcons.outflow,
-                            selected: typeFilter.value ==
+                            selected:
+                                typeFilter.value ==
                                 TransactionTypeFilter.expense,
                             onSelected: () => typeFilter.value =
                                 TransactionTypeFilter.expense,
@@ -500,7 +504,10 @@ class TransactionListScreen extends HookConsumerWidget {
           if (!context.mounted || action == null) return;
           switch (action) {
             case AddTransactionAction.income:
-              context.goNamed(addIncomeRoute, pathParameters: {'entityId': entityId});
+              context.goNamed(
+                addIncomeRoute,
+                pathParameters: {'entityId': entityId},
+              );
             case AddTransactionAction.expense:
               context.goNamed(
                 addExpenseRoute,
@@ -661,15 +668,14 @@ class TransactionListScreen extends HookConsumerWidget {
 
     try {
       final actions = ref.read(transactionActionsProvider.notifier);
-      final views = ref
-          .read(transactionPagesProvider(entityId))
-          .value
-          ?.items
-          .where((view) {
+      final views =
+          ref.read(transactionPagesProvider(entityId)).value?.items.where((
+            view,
+          ) {
             final id = view.transaction.id?.toString() ?? '';
             return id.isNotEmpty && ids.contains(id);
-          })
-          .toList() ?? const <TransactionView>[];
+          }).toList() ??
+          const <TransactionView>[];
       for (final view in views) {
         await actions.update(
           transactionId: view.transaction.id?.toString() ?? '',
@@ -788,7 +794,11 @@ class TransactionListScreen extends HookConsumerWidget {
     try {
       final count = await ref
           .read(transactionActionsProvider.notifier)
-          .setFlag(transactionIds: ids.toList(), entityId: entityId, flag: flag);
+          .setFlag(
+            transactionIds: ids.toList(),
+            entityId: entityId,
+            flag: flag,
+          );
       selectionMode.value = false;
       selectedIds.value = {};
       if (context.mounted) {
@@ -822,8 +832,7 @@ class TransactionListScreen extends HookConsumerWidget {
     // Only touch uncleared, non-reconciled transactions; when everything
     // selected is already cleared, send them back to uncleared.
     final byId = <String, TransactionStatus>{
-      for (final view
-          in pagesAsync.value?.items ?? const <TransactionView>[])
+      for (final view in pagesAsync.value?.items ?? const <TransactionView>[])
         if (view.transaction.id != null)
           view.transaction.id!.toString(): view.transaction.status,
     };
@@ -1558,8 +1567,8 @@ class _TransactionTile extends HookConsumerWidget {
   }
 
   Widget _buildMeta(ThemeData theme, ObPalette palette) {
-    final hasMemo = view.transaction.memo != null &&
-        view.transaction.memo!.isNotEmpty;
+    final hasMemo =
+        view.transaction.memo != null && view.transaction.memo!.isNotEmpty;
     final hasEnvelope = envelopeName != null && envelopeName!.isNotEmpty;
     final hasAccount = accountName != null && accountName!.isNotEmpty;
     final hasPayee = payeeName != null && payeeName!.isNotEmpty;
@@ -1902,9 +1911,9 @@ class _GroupedTransactionList extends HookWidget {
         final view = item.view!;
         final tx = view.transaction;
         final txId = tx.id?.toString() ?? '';
-        final payeeName = view.payeeName ?? (tx.payeeId != null
-            ? payeeMap[tx.payeeId.toString()]
-            : null);
+        final payeeName =
+            view.payeeName ??
+            (tx.payeeId != null ? payeeMap[tx.payeeId.toString()] : null);
         final lineEnvelopeId = view.lines
             .map((line) => line.envelopeId?.toString())
             .firstWhere(

@@ -92,13 +92,10 @@ class AddExpenseScreen extends HookConsumerWidget {
         : amountMinor -
               lines.value.fold<int>(0, (sum, line) => sum + line.amountMinor);
     final linesSumExact =
-        lines.value.isEmpty ||
-        (amountMinor != null && remainingMinor == 0);
+        lines.value.isEmpty || (amountMinor != null && remainingMinor == 0);
 
     Future<void> checkDuplicates() async {
-      if (defaultAccountId.isEmpty ||
-          amountMinor == null ||
-          amountMinor <= 0) {
+      if (defaultAccountId.isEmpty || amountMinor == null || amountMinor <= 0) {
         duplicateCount.value = 0;
         return;
       }
@@ -178,8 +175,10 @@ class AddExpenseScreen extends HookConsumerWidget {
         leading: Align(
           alignment: Alignment.centerLeft,
           child: TextButton(
-            onPressed: () =>
-                context.goNamed(planRoute, pathParameters: {'entityId': entityId}),
+            onPressed: () => context.goNamed(
+              planRoute,
+              pathParameters: {'entityId': entityId},
+            ),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -442,7 +441,9 @@ class AddExpenseScreen extends HookConsumerWidget {
                   envelopeItems: envelopeItems,
                   onChanged: (updated) => lines.value = updated,
                 ),
-                if (lines.value.isNotEmpty && remainingMinor != null && remainingMinor != 0)
+                if (lines.value.isNotEmpty &&
+                    remainingMinor != null &&
+                    remainingMinor != 0)
                   Padding(
                     padding: const EdgeInsets.only(top: SpacingTokens.xs),
                     child: Text(
@@ -484,7 +485,8 @@ class AddExpenseScreen extends HookConsumerWidget {
                   ),
                 const SizedBox(height: SpacingTokens.md),
                 ObFilledButton(
-                  onPressed: isSubmitting.value ||
+                  onPressed:
+                      isSubmitting.value ||
                           defaultAccountId.isEmpty ||
                           amountMinor == null ||
                           amountMinor <= 0 ||
@@ -498,8 +500,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                           final router = GoRouter.of(context);
                           try {
                             final memoText = memoController.text.trim();
-                            final lineInputs = lines.value
-                                    .isEmpty
+                            final lineInputs = lines.value.isEmpty
                                 ? <TransactionLineInput>[
                                     if (selectedEnvelopeId.value != null)
                                       TransactionLineInput(
@@ -513,8 +514,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                                       .map(
                                         (line) => TransactionLineInput(
                                           amountMinor: -line.amountMinor,
-                                          envelopeId:
-                                              line.envelopeId.isEmpty
+                                          envelopeId: line.envelopeId.isEmpty
                                               ? null
                                               : UuidValue.fromString(
                                                   line.envelopeId,
@@ -733,7 +733,10 @@ class _LinesEditor extends HookWidget {
               ),
             ),
           TextButton.icon(
-            onPressed: () => onChanged(<_ExpenseLine>[...lines, const _ExpenseLine(amountMinor: 0)]),
+            onPressed: () => onChanged(<_ExpenseLine>[
+              ...lines,
+              const _ExpenseLine(amountMinor: 0),
+            ]),
             icon: const SkribbleIcon(data: OpenBudgetIcons.add),
             label: Text(l10n.linesEditorAddLine),
           ),

@@ -34,7 +34,9 @@ class CreateEntityScreen extends HookConsumerWidget {
     final selectedCountry = useState(_leadCountries.first);
     final selectedCurrency = useState(_leadCountries.first.currency);
     final selectedTimeZone = useState(defaultTimeZone('GB'));
-    final fiscalYearEnd = useState(defaultFiscalYearEnd('GB', EntityKind.individual));
+    final fiscalYearEnd = useState(
+      defaultFiscalYearEnd('GB', EntityKind.individual),
+    );
     final isSubmitting = useState(false);
     final theme = Theme.of(context);
     final palette = theme.ob;
@@ -44,7 +46,9 @@ class CreateEntityScreen extends HookConsumerWidget {
                 : SystemUiOverlayStyle.light)
             .copyWith(statusBarColor: palette.canvas);
 
-    void pickCountry(({String code, String name, CurrencyCode currency}) country) {
+    void pickCountry(
+      ({String code, String name, CurrencyCode currency}) country,
+    ) {
       selectedCountry.value = country;
       selectedCurrency.value = country.currency;
       selectedTimeZone.value = defaultTimeZone(country.code);
@@ -141,8 +145,7 @@ class CreateEntityScreen extends HookConsumerWidget {
                         ),
                       ],
                       selected: {selectedKind.value},
-                      onSelectionChanged: (kinds) =>
-                          pickKind(kinds.first),
+                      onSelectionChanged: (kinds) => pickKind(kinds.first),
                     ),
                     const SizedBox(height: SpacingTokens.md),
                     _EntityPickerRow(
@@ -187,7 +190,9 @@ class CreateEntityScreen extends HookConsumerWidget {
                                 selectedCountry.value.code,
                                 selectedTimeZone.value,
                               );
-                              if (picked != null) selectedTimeZone.value = picked;
+                              if (picked != null) {
+                                selectedTimeZone.value = picked;
+                              }
                             },
                     ),
                     if (showFiscalYear) ...[

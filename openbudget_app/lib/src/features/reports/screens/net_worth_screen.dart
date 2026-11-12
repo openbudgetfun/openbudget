@@ -46,7 +46,8 @@ class NetWorthScreen extends HookConsumerWidget {
         ),
       ),
       body: viewAsync.when(
-        loading: () => Center(child: ObLoadingPanel(label: l10n.reportsLoading)),
+        loading: () =>
+            Center(child: ObLoadingPanel(label: l10n.reportsLoading)),
         error: (error, _) => ListView(
           padding: const EdgeInsets.all(SpacingTokens.md),
           children: [
@@ -76,9 +77,12 @@ class NetWorthScreen extends HookConsumerWidget {
               _IncompleteCurrenciesCard(view: view),
             ],
             const SizedBox(height: SpacingTokens.md),
-            _HistoryCard(range: historyRange.value, onRangeChanged: (range) {
-              historyRange.value = range;
-            }),
+            _HistoryCard(
+              range: historyRange.value,
+              onRangeChanged: (range) {
+                historyRange.value = range;
+              },
+            ),
             const SizedBox(height: SpacingTokens.md),
             _BreakdownTabs(
               selected: breakdownTab.value,
@@ -564,9 +568,7 @@ class _HistoryLinePainter extends CustomPainter {
     Offset pointAt(int index) {
       final x = leftPad + drawableWidth * index / (points.length - 1);
       final y =
-          topPad +
-          drawableHeight *
-              (1 - (values[index] - minValue) / span);
+          topPad + drawableHeight * (1 - (values[index] - minValue) / span);
       return Offset(x, y);
     }
 
@@ -1071,10 +1073,9 @@ class _ByAccountTab extends HookWidget {
                                 Flexible(
                                   child: Text(
                                     accountKindLabel(row.kind, l10n),
-                                    style: theme.textTheme.bodySmall
-                                        ?.copyWith(
-                                          color: palette.mutedInk,
-                                        ),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: palette.mutedInk,
+                                    ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -1139,7 +1140,8 @@ class _ByAccountTab extends HookWidget {
         if (assets.isNotEmpty) group(l10n.netWorthAssets, assets),
         if (assets.isNotEmpty && liabilities.isNotEmpty)
           const SizedBox(height: SpacingTokens.md),
-        if (liabilities.isNotEmpty) group(l10n.netWorthLiabilities, liabilities),
+        if (liabilities.isNotEmpty)
+          group(l10n.netWorthLiabilities, liabilities),
       ],
     );
   }

@@ -79,7 +79,9 @@ class RecurringActions extends _$RecurringActions {
         amountMinor: amountMinor,
         frequency: frequency,
         nextDate: nextOccurrence,
-        envelopeId: envelopeId == null ? null : UuidValue.fromString(envelopeId),
+        envelopeId: envelopeId == null
+            ? null
+            : UuidValue.fromString(envelopeId),
         clearEnvelope: clearEnvelope,
         payeeId: payeeId == null ? null : UuidValue.fromString(payeeId),
         clearPayee: clearPayee,

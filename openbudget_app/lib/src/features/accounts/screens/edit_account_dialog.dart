@@ -375,7 +375,6 @@ class EditAccountDialog extends HookConsumerWidget {
       }
     }
   }
-
 }
 
 class _SectionLabel extends HookWidget {

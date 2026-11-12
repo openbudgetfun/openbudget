@@ -27,7 +27,11 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 /// accounts, a value history for track-by-value accounts, and holdings for
 /// wallet accounts. Every converted figure is the server's.
 class AccountDetailScreen extends HookConsumerWidget {
-  const AccountDetailScreen({required this.entityId, required this.accountId, super.key});
+  const AccountDetailScreen({
+    required this.entityId,
+    required this.accountId,
+    super.key,
+  });
 
   final String entityId;
   final String accountId;
@@ -91,7 +95,8 @@ class AccountDetailScreen extends HookConsumerWidget {
               ? ObTone.overspent
               : ObTone.neutral;
           final balances = balancesAsync.value;
-          final isValuation = account.balanceSource == AccountBalanceSource.valuations;
+          final isValuation =
+              account.balanceSource == AccountBalanceSource.valuations;
           final isClosed = account.closedAt != null;
 
           return ListView(
@@ -111,7 +116,10 @@ class AccountDetailScreen extends HookConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ObAmount(
-                          formatMinorForCode(account.balanceMinor, currencyCode),
+                          formatMinorForCode(
+                            account.balanceMinor,
+                            currencyCode,
+                          ),
                           tone: balanceTone,
                           style: theme.textTheme.headlineSmall,
                         ),
@@ -150,7 +158,8 @@ class AccountDetailScreen extends HookConsumerWidget {
                         ],
                       ),
                     ],
-                    if (!isValuation && balances?.reportedBalanceMinor != null) ...[
+                    if (!isValuation &&
+                        balances?.reportedBalanceMinor != null) ...[
                       const SizedBox(height: SpacingTokens.xs),
                       Text(
                         l10n.accountDetailReportedBalance(
@@ -189,7 +198,9 @@ class AccountDetailScreen extends HookConsumerWidget {
                                 account: account,
                                 balances: balances,
                               ),
-                        icon: const SkribbleIcon(data: OpenBudgetIcons.checkAll),
+                        icon: const SkribbleIcon(
+                          data: OpenBudgetIcons.checkAll,
+                        ),
                         label: Text(l10n.accountDetailReconcile),
                       ),
                   ],
@@ -356,8 +367,11 @@ class AccountDetailScreen extends HookConsumerWidget {
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (sheetContext) =>
-          _ValuationSheet(account: account, accountId: accountId, entityId: entityId),
+      builder: (sheetContext) => _ValuationSheet(
+        account: account,
+        accountId: accountId,
+        entityId: entityId,
+      ),
     );
   }
 }
@@ -738,7 +752,8 @@ class _WalletHoldingsSection extends HookWidget {
         for (final holding in list)
           _HoldingTile(
             holding: holding,
-            priceCurrencyCode: holding.priceCurrencyCode ?? fallbackCurrencyCode,
+            priceCurrencyCode:
+                holding.priceCurrencyCode ?? fallbackCurrencyCode,
           ),
       ],
     );

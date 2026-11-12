@@ -49,7 +49,10 @@ class EnvelopeActivity extends _$EnvelopeActivity {
   ) async {
     final month = ref.watch(selectedMonthProvider(entityId));
     final page = await _load(envelopeId, month, null);
-    return EnvelopeActivityState(items: page.items, nextCursor: page.nextCursor);
+    return EnvelopeActivityState(
+      items: page.items,
+      nextCursor: page.nextCursor,
+    );
   }
 
   /// Loads the next page and appends it.

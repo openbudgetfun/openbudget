@@ -53,7 +53,9 @@ List<ImportRow> parseCsvText(String csv, String currencyCode) {
       .toList();
   if (lines.length < 2) return const [];
 
-  final header = _splitCsvLine(lines.first).map((h) => h.toLowerCase()).toList();
+  final header = _splitCsvLine(lines.first)
+      .map((h) => h.toLowerCase())
+      .toList();
   var dateCol = header.indexWhere((h) => h.contains('date'));
   var descCol = header.indexWhere(
     (h) =>

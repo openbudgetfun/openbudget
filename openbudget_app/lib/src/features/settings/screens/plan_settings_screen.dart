@@ -34,8 +34,10 @@ class PlanSettingsScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         leading: TextButton(
-          onPressed: () =>
-              context.goNamed(settingsRoute, pathParameters: {'entityId': entityId}),
+          onPressed: () => context.goNamed(
+            settingsRoute,
+            pathParameters: {'entityId': entityId},
+          ),
           child: Text(l10n.dialogCancel),
         ),
         leadingWidth: 92,
@@ -113,8 +115,7 @@ class PlanSettingsScreen extends HookConsumerWidget {
                           entity.fiscalYearEndDay,
                           entity.fiscalYearEndMonth,
                         ),
-                        onTap: () =>
-                            _selectFiscalYearEnd(context, ref, entity),
+                        onTap: () => _selectFiscalYearEnd(context, ref, entity),
                       ),
                     ],
                     const Divider(height: 1),

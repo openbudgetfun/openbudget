@@ -300,8 +300,8 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                             !_isSameDay(previous, transaction);
 
                         final envelopeName = view.transferPeer != null
-                              ? l10n.transactionKindTransfer
-                              : l10n.reviewTransactionsUncategorized;
+                            ? l10n.transactionKindTransfer
+                            : l10n.reviewTransactionsUncategorized;
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -471,7 +471,6 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
     );
   }
 }
-
 
 class _ReviewToolbar extends HookWidget {
   const _ReviewToolbar({

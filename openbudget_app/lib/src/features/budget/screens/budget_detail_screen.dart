@@ -137,10 +137,10 @@ class BudgetDetailScreen extends HookConsumerWidget {
                         ? hiddenAmountPlaceholder
                         : formatMinorForCode(
                             parseBudgetAmountInputToMinor(
-                              input: sheetInput,
-                              currencyCode: currencyCode,
-                            ) ??
-                            selection.monthEnvelope.allocatedMinor,
+                                  input: sheetInput,
+                                  currencyCode: currencyCode,
+                                ) ??
+                                selection.monthEnvelope.allocatedMinor,
                             currencyCode,
                           ),
                     onAutoAssign: () {
@@ -607,7 +607,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
                         onEditEnvelope: (envelope) {
                           final envelopeId = envelope.id?.toString() ?? '';
                           final monthEnvelope = group.envelopes.firstWhere(
-                            (view) => view.envelope.id?.toString() == envelopeId,
+                            (view) =>
+                                view.envelope.id?.toString() == envelopeId,
                           );
                           _showEditEnvelopeDialog(
                             context,
@@ -636,11 +637,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                           if (categoryId.isEmpty || envelopeId.isEmpty) {
                             return;
                           }
-                          if (selectedEditor
-                                  .value
-                                  ?.monthEnvelope
-                                  .envelope
-                                  .id
+                          if (selectedEditor.value?.monthEnvelope.envelope.id
                                   ?.toString() ==
                               envelopeId) {
                             selectedEditor.value = null;
@@ -692,8 +689,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                                 await ref
                                     .read(envelopeActionsProvider.notifier)
                                     .toggleHidden(
-                                      envelopeId:
-                                          envelope.id?.toString() ?? '',
+                                      envelopeId: envelope.id?.toString() ?? '',
                                       entityId: entityId,
                                       isHidden: isHidden,
                                     );
@@ -741,7 +737,12 @@ class BudgetDetailScreen extends HookConsumerWidget {
         final visibleEnvelopes = group.envelopes
             .where((view) => !view.envelope.isHidden)
             .toList();
-        visible.add(CategoryMonthGroup(category: group.category, envelopes: visibleEnvelopes));
+        visible.add(
+          CategoryMonthGroup(
+            category: group.category,
+            envelopes: visibleEnvelopes,
+          ),
+        );
       }
       result = visible;
     }
@@ -760,8 +761,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
       // Filter matching envelopes.
       final matchingEnvelopes = group.envelopes
           .where(
-            (view) =>
-                view.envelope.name.toLowerCase().contains(lowerQuery),
+            (view) => view.envelope.name.toLowerCase().contains(lowerQuery),
           )
           .toList();
 
@@ -2396,8 +2396,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                   allocations: [
                     AllocationInput(
                       envelopeId: UuidValue.fromString(item.envelopeId),
-                      allocatedMinor:
-                          item.allocatedMinor + item.overspentMinor,
+                      allocatedMinor: item.allocatedMinor + item.overspentMinor,
                     ),
                   ],
                 );

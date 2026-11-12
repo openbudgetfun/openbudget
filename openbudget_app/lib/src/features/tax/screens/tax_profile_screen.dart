@@ -320,7 +320,8 @@ class _TaxProfileForm extends HookConsumerWidget {
             .read(taxActionsProvider.notifier)
             .saveProfile(
               entityId: entityId,
-              jurisdiction: entity?.countryCode ?? profile.jurisdiction.countryCode,
+              jurisdiction:
+                  entity?.countryCode ?? profile.jurisdiction.countryCode,
               entityKind: entity?.kind.name ?? profile.entityKind.name,
               profileJson: jsonEncode(profile.toJson()),
             );
@@ -980,7 +981,6 @@ int? _wholeCount(String text) {
   if (normalized.isEmpty) return 0;
   return int.tryParse(normalized);
 }
-
 
 GbStudentLoanPlan _studentLoanPlan(String name) {
   for (final plan in GbStudentLoanPlan.values) {

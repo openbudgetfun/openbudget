@@ -40,8 +40,10 @@ class PayeeListScreen extends HookConsumerWidget {
         leading: IconButton(
           icon: const SkribbleIcon(data: OpenBudgetIcons.back),
           tooltip: l10n.transactionsBack,
-          onPressed: () =>
-              context.goNamed(moreRoute, pathParameters: {'entityId': entityId}),
+          onPressed: () => context.goNamed(
+            moreRoute,
+            pathParameters: {'entityId': entityId},
+          ),
         ),
         title: Text(l10n.payeeListTitle),
         actions: [

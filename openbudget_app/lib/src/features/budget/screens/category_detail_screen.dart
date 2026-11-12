@@ -72,10 +72,13 @@ class CategoryDetailScreen extends HookConsumerWidget {
           ),
         ),
         data: (monthEnvelope) {
-          final currencyCode = ref.watch(
-            budgetMonthCurrencyProvider(entityId),
-          ).value ??
-          '';
+          final currencyCode =
+              ref
+                  .watch(
+                    budgetMonthCurrencyProvider(entityId),
+                  )
+                  .value ??
+              '';
           final goal = monthEnvelope.goal;
           final carryover = monthEnvelope.carryoverMinor;
           final assigned = monthEnvelope.allocatedMinor;

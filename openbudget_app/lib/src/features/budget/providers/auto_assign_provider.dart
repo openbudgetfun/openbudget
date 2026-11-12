@@ -83,7 +83,10 @@ Future<AutoAssignProposal> autoAssignProposal(Ref ref, String entityId) async {
     remaining -= toAdd;
   }
 
-  final totalAssigned = items.fold<int>(0, (sum, item) => sum + item.addedMinor);
+  final totalAssigned = items.fold<int>(
+    0,
+    (sum, item) => sum + item.addedMinor,
+  );
 
   return AutoAssignProposal(
     items: items,

@@ -53,8 +53,7 @@ class AddIncomeScreen extends HookConsumerWidget {
     final selectedAccount = allAccounts
         .where((a) => a.id?.toString() == defaultAccountId.value)
         .firstOrNull;
-    final budgetCurrency =
-        selectedAccount?.currencyCode ?? baseCurrency;
+    final budgetCurrency = selectedAccount?.currencyCode ?? baseCurrency;
 
     useValueListenable(amountController);
 
@@ -114,8 +113,10 @@ class AddIncomeScreen extends HookConsumerWidget {
         leading: Align(
           alignment: Alignment.centerLeft,
           child: TextButton(
-            onPressed: () =>
-                context.goNamed(planRoute, pathParameters: {'entityId': entityId}),
+            onPressed: () => context.goNamed(
+              planRoute,
+              pathParameters: {'entityId': entityId},
+            ),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -556,7 +557,11 @@ class _AccountPickerRow extends HookWidget {
     final palette = theme.ob;
     return Row(
       children: [
-        SkribbleIcon(data: OpenBudgetIcons.bank, size: 20, color: palette.brand),
+        SkribbleIcon(
+          data: OpenBudgetIcons.bank,
+          size: 20,
+          color: palette.brand,
+        ),
         const SizedBox(width: SpacingTokens.sm),
         Expanded(
           child: ObDropdown<String>(

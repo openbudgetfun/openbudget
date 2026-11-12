@@ -88,9 +88,11 @@ class SetGoalDialog extends HookConsumerWidget {
               Flexible(
                 child: Text(
                   monthEnvelope.envelope.name,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                  style:
+                      Theme.of(
+                            context,
+                          ).textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w700),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -249,7 +251,12 @@ class SetGoalDialog extends HookConsumerWidget {
                   child: OutlinedButton(
                     onPressed: isSubmitting.value
                         ? null
-                        : () => _deleteGoal(context, ref, existingGoal, isSubmitting),
+                        : () => _deleteGoal(
+                            context,
+                            ref,
+                            existingGoal,
+                            isSubmitting,
+                          ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: palette.overspent,
                     ),

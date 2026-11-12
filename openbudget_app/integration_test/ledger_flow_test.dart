@@ -344,8 +344,9 @@ Widget _buildApp(FakeBooksRepository books) {
           GoRoute(
             name: journalNewRoute,
             path: 'journals/new',
-            builder: (context, state) =>
-                JournalEditorScreen(entityId: state.pathParameters['entityId']!),
+            builder: (context, state) => JournalEditorScreen(
+              entityId: state.pathParameters['entityId']!,
+            ),
           ),
           GoRoute(
             name: journalEditRoute,

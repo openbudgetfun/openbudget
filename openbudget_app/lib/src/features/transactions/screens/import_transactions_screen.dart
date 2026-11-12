@@ -42,8 +42,10 @@ class ImportTransactionsScreen extends HookConsumerWidget {
         leading: IconButton(
           icon: const SkribbleIcon(data: OpenBudgetIcons.back),
           tooltip: l10n.transactionsBack,
-          onPressed: () =>
-              context.goNamed(moreRoute, pathParameters: {'entityId': entityId}),
+          onPressed: () => context.goNamed(
+            moreRoute,
+            pathParameters: {'entityId': entityId},
+          ),
         ),
         title: Text(l10n.importTitle),
       ),
@@ -72,8 +74,7 @@ class ImportTransactionsScreen extends HookConsumerWidget {
                             ),
                         ],
                         labelText: l10n.importTargetAccount,
-                        onChanged: (value) =>
-                            selectedAccountId.value = value,
+                        onChanged: (value) => selectedAccountId.value = value,
                       ),
                       const SizedBox(height: SpacingTokens.md),
                       Center(
@@ -214,7 +215,8 @@ class ImportTransactionsScreen extends HookConsumerWidget {
                         ],
                         const SizedBox(height: SpacingTokens.md),
                         ObFilledButton(
-                          onPressed: isSubmitting.value ||
+                          onPressed:
+                              isSubmitting.value ||
                                   selectedAccountId.value == null ||
                                   selectedAccountId.value!.isEmpty
                               ? null
@@ -289,7 +291,10 @@ class ImportTransactionsScreen extends HookConsumerWidget {
             ? AppToastVariant.success
             : AppToastVariant.warning,
       );
-      router.goNamed(transactionListRoute, pathParameters: {'entityId': entityId});
+      router.goNamed(
+        transactionListRoute,
+        pathParameters: {'entityId': entityId},
+      );
     } on Exception catch (_) {
       isSubmitting.value = false;
       if (!context.mounted) return;

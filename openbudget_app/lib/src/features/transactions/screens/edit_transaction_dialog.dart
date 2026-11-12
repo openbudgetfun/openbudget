@@ -240,7 +240,9 @@ class EditTransactionDialog extends HookConsumerWidget {
             final navigator = Navigator.of(context);
             try {
               final lines = view.lines.isEmpty
-                  ? <TransactionLineInput>[TransactionLineInput(amountMinor: signedAmount)]
+                  ? <TransactionLineInput>[
+                      TransactionLineInput(amountMinor: signedAmount),
+                    ]
                   : [
                       for (final line in view.lines)
                         TransactionLineInput(

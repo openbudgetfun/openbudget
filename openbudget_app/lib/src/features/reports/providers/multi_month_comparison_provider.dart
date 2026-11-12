@@ -87,8 +87,11 @@ Future<MultiMonthComparison> multiMonthComparison(
   int monthCount = 3,
 }) async {
   final views = await ref.watch(
-    monthFiguresProvider(entityId, MonthKey.fromDate(DateTime.now()), monthCount)
-        .future,
+    monthFiguresProvider(
+      entityId,
+      MonthKey.fromDate(DateTime.now()),
+      monthCount,
+    ).future,
   );
 
   final monthKeys = views.map((view) => view.month).toList();

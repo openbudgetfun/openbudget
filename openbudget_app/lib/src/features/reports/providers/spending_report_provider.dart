@@ -122,7 +122,6 @@ class SpendingReport {
   final int? month;
 
   /// The (year, month) pair screens use for their titles.
-  ({int year, int month})? get yearMonth => month == null
-      ? null
-      : (year: month! ~/ 100, month: month! % 100);
+  ({int year, int month})? get yearMonth =>
+      month == null ? null : (year: month! ~/ 100, month: month! % 100);
 }

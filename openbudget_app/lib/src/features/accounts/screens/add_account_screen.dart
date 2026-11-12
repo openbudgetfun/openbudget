@@ -218,7 +218,10 @@ class AddAccountScreen extends HookConsumerWidget {
 
           if (!context.mounted) return;
           if (imported.plaidItemId.isNotEmpty) {
-            context.goNamed(accountListRoute, pathParameters: {'entityId': entityId});
+            context.goNamed(
+              accountListRoute,
+              pathParameters: {'entityId': entityId},
+            );
             return;
           }
         } on Exception catch (_) {
@@ -269,7 +272,10 @@ class AddAccountScreen extends HookConsumerWidget {
           return;
         }
 
-        context.goNamed(accountListRoute, pathParameters: {'entityId': entityId});
+        context.goNamed(
+          accountListRoute,
+          pathParameters: {'entityId': entityId},
+        );
       } on Exception catch (_) {
         if (!context.mounted) return;
         step.value = _AddAccountStep.unlinkedAccount;
@@ -321,7 +327,9 @@ class AddAccountScreen extends HookConsumerWidget {
       isSubmitting.value = true;
 
       final parsedBalance = balanceValue ?? 0;
-      final openingMinor = isLiabilityKind ? -parsedBalance.abs() : parsedBalance;
+      final openingMinor = isLiabilityKind
+          ? -parsedBalance.abs()
+          : parsedBalance;
       final chosenDate = openingDate.value;
       final date = openingToday.value || chosenDate == null
           ? null
@@ -467,11 +475,9 @@ class AddAccountScreen extends HookConsumerWidget {
                   onBudgetChanged: (value) => onBudget.value = value,
                   canChooseSource: canChooseSource,
                   trackByValue: trackByValue.value,
-                  onTrackByValueChanged: (value) =>
-                      trackByValue.value = value,
+                  onTrackByValueChanged: (value) => trackByValue.value = value,
                   openingToday: openingToday.value,
-                  onOpeningTodayChanged: (value) =>
-                      openingToday.value = value,
+                  onOpeningTodayChanged: (value) => openingToday.value = value,
                   selectedInstitutionName: selectedInstitution.value?.name,
                   onChooseType: () => step.value = _AddAccountStep.accountType,
                 ),

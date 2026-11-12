@@ -89,8 +89,9 @@ Widget _buildApp({String? initialLocation}) {
               onPressed: () => showModalBottomSheet<void>(
                 context: context,
                 isScrollControlled: true,
-                builder: (_) =>
-                    AddTransactionSheet(entityId: state.pathParameters['entityId']!),
+                builder: (_) => AddTransactionSheet(
+                  entityId: state.pathParameters['entityId']!,
+                ),
               ),
               child: const Text('Open Add Sheet'),
             ),
@@ -150,8 +151,9 @@ Widget _buildTransferFlowApp({
               onPressed: () => showModalBottomSheet<void>(
                 context: context,
                 isScrollControlled: true,
-                builder: (_) =>
-                    AddTransactionSheet(entityId: state.pathParameters['entityId']!),
+                builder: (_) => AddTransactionSheet(
+                  entityId: state.pathParameters['entityId']!,
+                ),
               ),
               child: const Text('Open Add Sheet'),
             ),

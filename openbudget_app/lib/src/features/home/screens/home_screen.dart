@@ -175,7 +175,9 @@ class _DeleteEntityDialog extends HookWidget {
           child: Text(l10n.dialogCancel),
         ),
         FilledButton(
-          onPressed: canDelete.value ? () => Navigator.of(context).pop(true) : null,
+          onPressed: canDelete.value
+              ? () => Navigator.of(context).pop(true)
+              : null,
           style: FilledButton.styleFrom(
             backgroundColor: palette.overspentWash,
             foregroundColor: palette.overspent,
@@ -419,7 +421,10 @@ class _CombinedNetWorthCard extends HookConsumerWidget {
                     children: [
                       Text(
                         l10n.netWorthAssetsLabel(
-                          formatMinorForCode(view.assetsMinor, view.currencyCode),
+                          formatMinorForCode(
+                            view.assetsMinor,
+                            view.currencyCode,
+                          ),
                         ),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: palette.mutedInk,

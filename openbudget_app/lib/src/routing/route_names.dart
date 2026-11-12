@@ -89,7 +89,8 @@ const settingsPath = '/budgets/:entityId/more/settings';
 const accountSettingsRoute = 'accountSettings';
 const accountSettingsPath = '/budgets/:entityId/more/settings/account-settings';
 const deleteAccountRoute = 'deleteAccount';
-const deleteAccountPath = '/budgets/:entityId/more/settings/account-settings/delete';
+const deleteAccountPath =
+    '/budgets/:entityId/more/settings/account-settings/delete';
 const planSettingsRoute = 'planSettings';
 const planSettingsPath = '/budgets/:entityId/more/settings/plan';
 const currencySettingsRoute = 'currencySettings';
@@ -105,4 +106,5 @@ const assistantPath = '/budgets/:entityId/assistant';
 const assistantProposalsRoute = 'assistantProposals';
 const assistantProposalsPath = '/budgets/:entityId/assistant/proposals';
 const assistantProviderRoute = 'assistantProvider';
-const assistantProviderPath = '/budgets/:entityId/more/settings/assistant-provider';
+const assistantProviderPath =
+    '/budgets/:entityId/more/settings/assistant-provider';

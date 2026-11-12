@@ -94,7 +94,8 @@ class RecurringListScreen extends HookConsumerWidget {
           final accountsAsync = ref.watch(accountListProvider(entityId));
           final currencyByAccount = {
             for (final account in accountsAsync.value ?? const <Account>[])
-              if (account.id != null) account.id!.toString(): account.currencyCode,
+              if (account.id != null)
+                account.id!.toString(): account.currencyCode,
           };
           String currencyOf(RecurringTransaction item) =>
               currencyByAccount[item.accountId.toString()] ?? budgetCurrency;

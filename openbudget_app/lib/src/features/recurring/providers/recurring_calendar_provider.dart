@@ -99,20 +99,24 @@ List<DateTime> _generateOccurrences(
   return results;
 }
 
-DateTime _addFrequency(DateTime date, RecurrenceFrequency frequency) =>
-    switch (frequency) {
-      RecurrenceFrequency.daily => date.add(const Duration(days: 1)),
-      RecurrenceFrequency.weekly => date.add(const Duration(days: 7)),
-      RecurrenceFrequency.biweekly => date.add(const Duration(days: 14)),
-      RecurrenceFrequency.monthly => DateTime(date.year, date.month + 1, date.day),
-      RecurrenceFrequency.yearly => DateTime(date.year + 1, date.month, date.day),
-    };
+DateTime _addFrequency(
+  DateTime date,
+  RecurrenceFrequency frequency,
+) => switch (frequency) {
+  RecurrenceFrequency.daily => date.add(const Duration(days: 1)),
+  RecurrenceFrequency.weekly => date.add(const Duration(days: 7)),
+  RecurrenceFrequency.biweekly => date.add(const Duration(days: 14)),
+  RecurrenceFrequency.monthly => DateTime(date.year, date.month + 1, date.day),
+  RecurrenceFrequency.yearly => DateTime(date.year + 1, date.month, date.day),
+};
 
-DateTime _subtractFrequency(DateTime date, RecurrenceFrequency frequency) =>
-    switch (frequency) {
-      RecurrenceFrequency.daily => date.subtract(const Duration(days: 1)),
-      RecurrenceFrequency.weekly => date.subtract(const Duration(days: 7)),
-      RecurrenceFrequency.biweekly => date.subtract(const Duration(days: 14)),
-      RecurrenceFrequency.monthly => DateTime(date.year, date.month - 1, date.day),
-      RecurrenceFrequency.yearly => DateTime(date.year - 1, date.month, date.day),
-    };
+DateTime _subtractFrequency(
+  DateTime date,
+  RecurrenceFrequency frequency,
+) => switch (frequency) {
+  RecurrenceFrequency.daily => date.subtract(const Duration(days: 1)),
+  RecurrenceFrequency.weekly => date.subtract(const Duration(days: 7)),
+  RecurrenceFrequency.biweekly => date.subtract(const Duration(days: 14)),
+  RecurrenceFrequency.monthly => DateTime(date.year, date.month - 1, date.day),
+  RecurrenceFrequency.yearly => DateTime(date.year - 1, date.month, date.day),
+};

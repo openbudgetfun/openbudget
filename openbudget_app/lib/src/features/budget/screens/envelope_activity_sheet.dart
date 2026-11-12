@@ -246,8 +246,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                   padding: const EdgeInsets.symmetric(
                     horizontal: SpacingTokens.md,
                   ),
-                  itemCount:
-                      transactions.length + (pageState.hasMore ? 1 : 0),
+                  itemCount: transactions.length + (pageState.hasMore ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index >= transactions.length) {
                       return Padding(
@@ -256,8 +255,8 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                         ),
                         child: Center(
                           child: OutlinedButton(
-                            onPressed: transactionsAsync.value?.isLoadingMore ==
-                                    true
+                            onPressed:
+                                transactionsAsync.value?.isLoadingMore == true
                                 ? null
                                 : () => unawaited(
                                     ref
@@ -298,8 +297,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  view.payeeName ??
-                                      transaction.description,
+                                  view.payeeName ?? transaction.description,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: palette.ink,
                                   ),

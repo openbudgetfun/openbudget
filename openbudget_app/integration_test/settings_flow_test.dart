@@ -59,8 +59,9 @@ void main() {
               GoRoute(
                 name: planSettingsRoute,
                 path: 'plan',
-                builder: (context, state) =>
-                    PlanSettingsScreen(entityId: state.pathParameters['entityId']!),
+                builder: (context, state) => PlanSettingsScreen(
+                  entityId: state.pathParameters['entityId']!,
+                ),
                 routes: [
                   GoRoute(
                     name: currencySettingsRoute,
@@ -96,8 +97,9 @@ void main() {
               GoRoute(
                 name: displayOptionsRoute,
                 path: 'display',
-                builder: (context, state) =>
-                    DisplayOptionsScreen(entityId: state.pathParameters['entityId']!),
+                builder: (context, state) => DisplayOptionsScreen(
+                  entityId: state.pathParameters['entityId']!,
+                ),
               ),
             ],
           ),

@@ -73,7 +73,9 @@ class CurrencySettingsScreen extends HookConsumerWidget {
                     _SettingsTile(
                       title: l10n.settingsReportingCurrency,
                       value: selectedCurrency == null
-                          ? normalizeCurrencyCode(settings.reportingCurrencyCode)
+                          ? normalizeCurrencyCode(
+                              settings.reportingCurrencyCode,
+                            )
                           : '${selectedCurrency.displayName} - ${selectedCurrency.code}',
                       isNavigation: true,
                       onTap: () =>

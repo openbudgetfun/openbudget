@@ -66,8 +66,8 @@ class CreateTransferScreen extends HookConsumerWidget {
         (fromAccount.onBudget &&
             (!toAccount.onBudget ||
                 toAccount.entityId != fromAccount.entityId));
-    final sameAccount = fromAccountId.value != null &&
-        fromAccountId.value == toAccountId.value;
+    final sameAccount =
+        fromAccountId.value != null && fromAccountId.value == toAccountId.value;
 
     final fromDecimals = currencyDecimalsForCode(
       fromAccount?.currencyCode ?? '',
@@ -99,7 +99,8 @@ class CreateTransferScreen extends HookConsumerWidget {
         !sameAccount &&
         fromMinor != null &&
         fromMinor > 0 &&
-        toMinor != null && toMinor > 0;
+        toMinor != null &&
+        toMinor > 0;
 
     Future<void> useMarketRate() async {
       // "Use today's rate": quote the market rate and fill Received. The
@@ -194,183 +195,174 @@ class CreateTransferScreen extends HookConsumerWidget {
             child: ObStatePanel.problem(title: l10n.accountLoadError),
           ),
         ),
-        data: (_) =>
-          Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(SpacingTokens.md),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _AccountPicker(
-                      label: l10n.transferFrom,
-                      accounts: allAccounts,
-                      selectedAccountId: fromAccountId.value,
-                      excludeAccountId: toAccountId.value,
-                      onChanged: (value) => fromAccountId.value = value,
-                    ),
-                    const SizedBox(height: SpacingTokens.sm),
-                    _AccountPicker(
-                      label: l10n.transferTo,
-                      accounts: allAccounts,
-                      selectedAccountId: toAccountId.value,
-                      excludeAccountId: fromAccountId.value,
-                      onChanged: (value) => toAccountId.value = value,
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                    ObCard(
-                      padding: const EdgeInsets.all(SpacingTokens.md),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (!isCrossCurrency)
-                            TextField(
-                              controller: fromAmountController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              decoration: InputDecoration(
-                                labelText: l10n.transferAmountLabel,
-                                errorText: fromError,
-                                prefixText:
-                                    '${fromAccount!.currencyCode} ',
-                              ),
-                            )
-                          else ...[
-                            TextField(
-                              controller: fromAmountController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              decoration: InputDecoration(
-                                labelText: l10n.transferSentLabel,
-                                errorText: fromError,
-                                prefixText: '${fromAccount.currencyCode} ',
-                              ),
-                            ),
-                            const SizedBox(height: SpacingTokens.sm),
-                            TextField(
-                              controller: toAmountController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              decoration: InputDecoration(
-                                labelText: l10n.transferReceivedLabel,
-                                errorText: toError,
-                                prefixText: '${toAccount.currencyCode} ',
-                              ),
-                            ),
-                            if (fromMinor != null && fromMinor > 0)
-                              FxRateLine(
-                                fromCurrencyCode: fromAccount.currencyCode,
-                                toCurrencyCode: toAccount.currencyCode,
-                                date: selectedDate.value,
-                                amountMinor: fromMinor,
-                                onSetRate: useMarketRate,
-                              ),
-                            TextButton(
-                              onPressed: useMarketRate,
-                              child: Text(l10n.transferUseTodayRate),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: SpacingTokens.sm),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const SkribbleIcon(data: OpenBudgetIcons.calendar),
-                      title: Text(l10n.transactionDateLabel),
-                      subtitle: Text(
-                        '${selectedDate.value.year}-'
-                        '${selectedDate.value.month.toString().padLeft(2, '0')}-'
-                        '${selectedDate.value.day.toString().padLeft(2, '0')}',
-                      ),
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: selectedDate.value,
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                        );
-                        if (picked != null) {
-                          selectedDate.value = DateTime.utc(
-                            picked.year,
-                            picked.month,
-                            picked.day,
-                          );
-                        }
-                      },
-                    ),
-                    if (leavesThePlan) ...[
-                      const SizedBox(height: SpacingTokens.sm),
-                      ObDropdown<String>(
-                        value: selectedEnvelopeId.value ?? '',
-                        items: [
-                          DropdownMenuItem<String>(
-                            value: '',
-                            child: Text(l10n.transactionUnassigned),
-                          ),
-                          if (groupsAsync.hasValue)
-                            for (final group in groupsAsync.value!)
-                              for (final envelope in group.envelopes)
-                                DropdownMenuItem<String>(
-                                  value:
-                                      envelope.envelope.id?.toString() ?? '',
-                                  child: Text(
-                                    '${group.category.name} / '
-                                    '${envelope.envelope.name}',
-                                  ),
-                                ),
-                        ],
-                        labelText: l10n.transferEnvelopeLeavesPlan,
-                        onChanged: (value) =>
-                            selectedEnvelopeId.value = value,
-                      ),
-                    ],
-                    const SizedBox(height: SpacingTokens.md),
-                    ObTextField(
-                      controller: descController,
-                      labelText: l10n.transactionDescriptionLabel,
-                      prefixIcon: const ObFieldIcon(
-                        data: OpenBudgetIcons.document,
-                      ),
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                    ObFilledButton(
-                      onPressed: canSubmit && !isSubmitting.value
-                          ? submit
-                          : null,
-                      child: Text(l10n.transferButton),
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                    Row(
+        data: (_) => Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(SpacingTokens.md),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _AccountPicker(
+                    label: l10n.transferFrom,
+                    accounts: allAccounts,
+                    selectedAccountId: fromAccountId.value,
+                    excludeAccountId: toAccountId.value,
+                    onChanged: (value) => fromAccountId.value = value,
+                  ),
+                  const SizedBox(height: SpacingTokens.sm),
+                  _AccountPicker(
+                    label: l10n.transferTo,
+                    accounts: allAccounts,
+                    selectedAccountId: toAccountId.value,
+                    excludeAccountId: fromAccountId.value,
+                    onChanged: (value) => toAccountId.value = value,
+                  ),
+                  const SizedBox(height: SpacingTokens.md),
+                  ObCard(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        SkribbleIcon(
-                          data: OpenBudgetIcons.info,
-                          size: 14,
-                          color: palette.mutedInk,
-                        ),
-                        const SizedBox(width: SpacingTokens.xs),
-                        Expanded(
-                          child: Text(
-                            l10n.transferCrossEntityHint,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: palette.mutedInk,
+                        if (!isCrossCurrency)
+                          TextField(
+                            controller: fromAmountController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            decoration: InputDecoration(
+                              labelText: l10n.transferAmountLabel,
+                              errorText: fromError,
+                              prefixText: '${fromAccount!.currencyCode} ',
+                            ),
+                          )
+                        else ...[
+                          TextField(
+                            controller: fromAmountController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            decoration: InputDecoration(
+                              labelText: l10n.transferSentLabel,
+                              errorText: fromError,
+                              prefixText: '${fromAccount.currencyCode} ',
                             ),
                           ),
-                        ),
+                          const SizedBox(height: SpacingTokens.sm),
+                          TextField(
+                            controller: toAmountController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            decoration: InputDecoration(
+                              labelText: l10n.transferReceivedLabel,
+                              errorText: toError,
+                              prefixText: '${toAccount.currencyCode} ',
+                            ),
+                          ),
+                          if (fromMinor != null && fromMinor > 0)
+                            FxRateLine(
+                              fromCurrencyCode: fromAccount.currencyCode,
+                              toCurrencyCode: toAccount.currencyCode,
+                              date: selectedDate.value,
+                              amountMinor: fromMinor,
+                              onSetRate: useMarketRate,
+                            ),
+                          TextButton(
+                            onPressed: useMarketRate,
+                            child: Text(l10n.transferUseTodayRate),
+                          ),
+                        ],
                       ],
                     ),
+                  ),
+                  const SizedBox(height: SpacingTokens.sm),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const SkribbleIcon(data: OpenBudgetIcons.calendar),
+                    title: Text(l10n.transactionDateLabel),
+                    subtitle: Text(
+                      '${selectedDate.value.year}-'
+                      '${selectedDate.value.month.toString().padLeft(2, '0')}-'
+                      '${selectedDate.value.day.toString().padLeft(2, '0')}',
+                    ),
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: selectedDate.value,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null) {
+                        selectedDate.value = DateTime.utc(
+                          picked.year,
+                          picked.month,
+                          picked.day,
+                        );
+                      }
+                    },
+                  ),
+                  if (leavesThePlan) ...[
+                    const SizedBox(height: SpacingTokens.sm),
+                    ObDropdown<String>(
+                      value: selectedEnvelopeId.value ?? '',
+                      items: [
+                        DropdownMenuItem<String>(
+                          value: '',
+                          child: Text(l10n.transactionUnassigned),
+                        ),
+                        if (groupsAsync.hasValue)
+                          for (final group in groupsAsync.value!)
+                            for (final envelope in group.envelopes)
+                              DropdownMenuItem<String>(
+                                value: envelope.envelope.id?.toString() ?? '',
+                                child: Text(
+                                  '${group.category.name} / '
+                                  '${envelope.envelope.name}',
+                                ),
+                              ),
+                      ],
+                      labelText: l10n.transferEnvelopeLeavesPlan,
+                      onChanged: (value) => selectedEnvelopeId.value = value,
+                    ),
                   ],
-                ),
+                  const SizedBox(height: SpacingTokens.md),
+                  ObTextField(
+                    controller: descController,
+                    labelText: l10n.transactionDescriptionLabel,
+                    prefixIcon: const ObFieldIcon(
+                      data: OpenBudgetIcons.document,
+                    ),
+                  ),
+                  const SizedBox(height: SpacingTokens.md),
+                  ObFilledButton(
+                    onPressed: canSubmit && !isSubmitting.value ? submit : null,
+                    child: Text(l10n.transferButton),
+                  ),
+                  const SizedBox(height: SpacingTokens.md),
+                  Row(
+                    children: [
+                      SkribbleIcon(
+                        data: OpenBudgetIcons.info,
+                        size: 14,
+                        color: palette.mutedInk,
+                      ),
+                      const SizedBox(width: SpacingTokens.xs),
+                      Expanded(
+                        child: Text(
+                          l10n.transferCrossEntityHint,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: palette.mutedInk,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
+        ),
       ),
     );
   }

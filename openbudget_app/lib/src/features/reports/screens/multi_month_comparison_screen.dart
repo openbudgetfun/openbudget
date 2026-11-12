@@ -53,7 +53,6 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
           ],
         ),
         data: (comparison) {
-
           if (comparison.categories.isEmpty) {
             return ListView(
               padding: const EdgeInsets.all(SpacingTokens.md),
@@ -261,7 +260,10 @@ class _ComparisonTable extends HookWidget {
 
   String _monthColumnLabel(AppLocalizations l10n, MonthColumn month) {
     final name = reportYyyymmAxisLabel(l10n, month.month);
-    final year = (monthKeyParts(month.month).year % 100).toString().padLeft(2, '0');
+    final year = (monthKeyParts(month.month).year % 100).toString().padLeft(
+      2,
+      '0',
+    );
     return "$name '$year";
   }
 }

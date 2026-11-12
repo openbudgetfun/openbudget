@@ -758,9 +758,7 @@ class _EditPlanCategoryCard extends HookWidget {
             final targetMinor = goal?.amountMinor;
 
             yield InkWell(
-              onTap: reordering
-                  ? null
-                  : () => onOpenTarget(monthEnvelope),
+              onTap: reordering ? null : () => onOpenTarget(monthEnvelope),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: SpacingTokens.md,
@@ -893,8 +891,10 @@ class _EditPlanAppBar extends HookWidget implements PreferredSizeWidget {
       ),
       actions: [
         TextButton(
-          onPressed: () =>
-              context.goNamed(planRoute, pathParameters: {'entityId': entityId}),
+          onPressed: () => context.goNamed(
+            planRoute,
+            pathParameters: {'entityId': entityId},
+          ),
           child: Text(l10n.dialogNext),
         ),
         const SizedBox(width: SpacingTokens.xs),

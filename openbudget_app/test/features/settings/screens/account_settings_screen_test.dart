@@ -17,14 +17,16 @@ void main() {
         GoRoute(
           name: accountSettingsRoute,
           path: accountSettingsPath,
-          builder: (context, state) =>
-              AccountSettingsScreen(entityId: state.pathParameters['entityId']!),
+          builder: (context, state) => AccountSettingsScreen(
+            entityId: state.pathParameters['entityId']!,
+          ),
           routes: [
             GoRoute(
               name: deleteAccountRoute,
               path: 'delete',
-              builder: (context, state) =>
-                  DeleteAccountScreen(entityId: state.pathParameters['entityId']!),
+              builder: (context, state) => DeleteAccountScreen(
+                entityId: state.pathParameters['entityId']!,
+              ),
             ),
           ],
         ),

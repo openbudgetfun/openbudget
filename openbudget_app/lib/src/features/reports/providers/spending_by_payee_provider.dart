@@ -74,16 +74,17 @@ Future<PayeeSpendingReport> spendingByPayee(
     if (cursor == null) break;
   }
 
-  final entries = payeeMap.entries
-      .map(
-        (e) => PayeeSpendingEntry(
-          payeeName: e.key,
-          totalMinor: e.value.totalMinor,
-          transactionCount: e.value.count,
-        ),
-      )
-      .toList()
-    ..sort((a, b) => b.totalMinor.compareTo(a.totalMinor));
+  final entries =
+      payeeMap.entries
+          .map(
+            (e) => PayeeSpendingEntry(
+              payeeName: e.key,
+              totalMinor: e.value.totalMinor,
+              transactionCount: e.value.count,
+            ),
+          )
+          .toList()
+        ..sort((a, b) => b.totalMinor.compareTo(a.totalMinor));
 
   return PayeeSpendingReport(
     entries: entries,

@@ -236,7 +236,8 @@ class EditEnvelopeDialog extends HookConsumerWidget {
         children: [
           for (final view in candidates)
             SimpleDialogOption(
-              onPressed: () => Navigator.of(ctx).pop(view.envelope.id.toString()),
+              onPressed: () =>
+                  Navigator.of(ctx).pop(view.envelope.id.toString()),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
                 child: Text(view.envelope.name),

@@ -30,5 +30,6 @@ class SelectedMonth extends _$SelectedMonth {
   DateTime get firstDate => MonthKey.toFirstDate(state);
 
   /// The month's label data as (year, month) for header widgets.
-  ({int year, int month}) get yearMonth => (year: state ~/ 100, month: state % 100);
+  ({int year, int month}) get yearMonth =>
+      (year: state ~/ 100, month: state % 100);
 }

@@ -30,7 +30,8 @@ class CategoryMonthGroup {
 
   int get activityMinor => envelopes.fold(0, (sum, e) => sum + e.activityMinor);
 
-  int get availableMinor => envelopes.fold(0, (sum, e) => sum + e.availableMinor);
+  int get availableMinor =>
+      envelopes.fold(0, (sum, e) => sum + e.availableMinor);
 
   bool get isOverspent => envelopes.any((e) => e.availableMinor < 0);
 }
@@ -119,11 +120,14 @@ class BudgetMonthActions extends _$BudgetMonthActions {
     final month = ref.read(selectedMonthProvider(entityId));
     return _run(
       entityId,
-      () => ref.read(serverpodClientProvider).budget.setAllocations(
-        UuidValue.fromString(entityId),
-        month,
-        allocations,
-      ),
+      () => ref
+          .read(serverpodClientProvider)
+          .budget
+          .setAllocations(
+            UuidValue.fromString(entityId),
+            month,
+            allocations,
+          ),
     );
   }
 
@@ -137,15 +141,18 @@ class BudgetMonthActions extends _$BudgetMonthActions {
     final month = ref.read(selectedMonthProvider(entityId));
     return _run(
       entityId,
-      () => ref.read(serverpodClientProvider).budget.moveMoney(
-        UuidValue.fromString(entityId),
-        month,
-        fromEnvelopeId == null
-            ? null
-            : UuidValue.fromString(fromEnvelopeId),
-        toEnvelopeId == null ? null : UuidValue.fromString(toEnvelopeId),
-        amountMinor,
-      ),
+      () => ref
+          .read(serverpodClientProvider)
+          .budget
+          .moveMoney(
+            UuidValue.fromString(entityId),
+            month,
+            fromEnvelopeId == null
+                ? null
+                : UuidValue.fromString(fromEnvelopeId),
+            toEnvelopeId == null ? null : UuidValue.fromString(toEnvelopeId),
+            amountMinor,
+          ),
     );
   }
 

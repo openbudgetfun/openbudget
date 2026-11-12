@@ -48,7 +48,6 @@ class CategoryTrendsScreen extends HookConsumerWidget {
             );
           }
 
-
           return ListView(
             padding: const EdgeInsets.fromLTRB(
               SpacingTokens.md,

@@ -153,8 +153,9 @@ void main() {
             GoRoute(
               name: displayOptionsRoute,
               path: 'display',
-              builder: (context, state) =>
-                  DisplayOptionsScreen(entityId: state.pathParameters['entityId']!),
+              builder: (context, state) => DisplayOptionsScreen(
+                entityId: state.pathParameters['entityId']!,
+              ),
             ),
           ],
         ),

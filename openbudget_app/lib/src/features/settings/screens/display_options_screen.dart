@@ -151,8 +151,6 @@ class DisplayOptionsScreen extends HookConsumerWidget {
       ),
     );
   }
-
-
 }
 
 class _BalanceStyleTile extends HookWidget {

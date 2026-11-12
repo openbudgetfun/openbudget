@@ -36,8 +36,10 @@ class SettingsScreen extends HookConsumerWidget {
         title: Text(l10n.settingsTitle),
         actions: [
           TextButton(
-            onPressed: () =>
-                context.goNamed(moreRoute, pathParameters: {'entityId': entityId}),
+            onPressed: () => context.goNamed(
+              moreRoute,
+              pathParameters: {'entityId': entityId},
+            ),
             child: Text(
               l10n.dialogDone,
               style: theme.textTheme.titleMedium,
