@@ -121,18 +121,18 @@ void main() {
       expect(input.toAmountMinor, 7900);
       expect(input.useMarketRate, isFalse);
 
-      // Both balances moved: the USD account paid out $100, the GBP account
-      // received the £79 the implied rate produced.
-      expect(
-        accounts.named(TestData.usdCheckingAccountName).balanceMinor,
-        10000,
-      );
+      // Both balances moved: the GBP account paid out £100 and the USD
+      // account received the $79 the implied rate produced.
       expect(
         accounts.named(TestData.checkingAccountName).balanceMinor,
-        107900,
+        90000,
       );
-      expect(find.text('£1,079.00'), findsOneWidget);
-      expect(find.text(r'$100.00'), findsOneWidget);
+      expect(
+        accounts.named(TestData.usdCheckingAccountName).balanceMinor,
+        27900,
+      );
+      expect(find.text('£900.00'), findsOneWidget);
+      expect(find.text(r'$279.00'), findsOneWidget);
     },
   );
 }

@@ -166,7 +166,9 @@ void main() {
 
       final createPage = CreateEntityPage(tester);
       expect(createPage.title, findsOneWidget);
-      await createPage.create();
+      await createPage.create(
+        navigatesTo: find.text('Add Account Screen'),
+      );
 
       expect(actions.createCalls, 1);
       expect(find.text('Add Account Screen'), findsOneWidget);

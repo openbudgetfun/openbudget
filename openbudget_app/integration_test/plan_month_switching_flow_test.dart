@@ -25,7 +25,9 @@ int _previousMonth(int yyyymm) =>
     yyyymm % 100 == 1 ? yyyymm - 100 + 11 : yyyymm - 1;
 
 /// The month view the header reads; Ready to Assign is £[calendar month]
-/// × £100 so the switch is visible in the formatted figure.
+/// × £100 so the switch is visible in the formatted figure. The month also
+/// carries an allocation, which marks onboarding as finished so the header
+/// is visible.
 BudgetMonthView _makeMonthView(int yyyymm) {
   final readyToAssignMinor = (yyyymm % 100) * 10000;
   final view = BudgetMonthView(
@@ -37,7 +39,7 @@ BudgetMonthView _makeMonthView(int yyyymm) {
       incomeMinor: readyToAssignMinor,
       uncategorizedMinor: 0,
       fxDifferenceMinor: 0,
-      allocatedMinor: 0,
+      allocatedMinor: 10000,
       activityMinor: 0,
       overspentLastMonthMinor: 0,
       assignedInFutureMinor: 0,
