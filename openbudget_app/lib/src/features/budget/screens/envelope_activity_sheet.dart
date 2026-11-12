@@ -5,9 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/envelope_activity_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/move_money_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart';
@@ -16,57 +14,58 @@ import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// One envelope's month detail: figures from the month view, activity from
+/// `transaction.list` paged by [EnvelopeActivity].
 class EnvelopeActivitySheet extends HookConsumerWidget {
   const EnvelopeActivitySheet({
-    required this.envelope,
+    required this.monthEnvelope,
     required this.entityId,
     required this.currencyCode,
-    required this.categories,
     required this.categoryId,
-    required this.year,
     required this.month,
-    this.monthlyData,
-    this.goal,
     super.key,
   });
 
-  final Envelope envelope;
+  final EnvelopeMonthView monthEnvelope;
   final String entityId;
   final String currencyCode;
-  final List<CategoryWithEnvelopes> categories;
+
+  /// The envelope's category, for the edit dialog.
   final String categoryId;
-  final int year;
+
+  /// The month being shown, as yyyymm.
   final int month;
-  final MonthlyEnvelopeData? monthlyData;
-  final EnvelopeGoal? goal;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final selectedMonth = ref.watch(selectedMonthProvider(entityId));
     final hideAmounts = ref.watch(hideAmountsProvider);
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
+    final envelope = monthEnvelope.envelope;
+    final envelopeId = envelope.id?.toString() ?? '';
     final transactionsAsync = ref.watch(
-      monthlyTransactionsProvider(
-        entityId,
-        selectedMonth.year,
-        selectedMonth.month,
-      ),
+      envelopeActivityProvider(entityId, envelopeId),
     );
 
-    final carryover = monthlyData?.carryoverMinor ?? 0;
-    final budgeted =
-        monthlyData?.allocatedMinor ?? envelope.budgetedAmountMinor;
-    final spent = monthlyData?.spentMinor ?? envelope.spentAmountMinor;
-    final available = monthlyData?.availableMinor ?? (budgeted - spent);
+    final carryover = monthEnvelope.carryoverMinor;
+    final allocated = monthEnvelope.allocatedMinor;
+    final activity = monthEnvelope.activityMinor.abs();
+    final available = monthEnvelope.availableMinor;
     final availableTone = available > 0
         ? ObTone.funded
         : available < 0
         ? ObTone.overspent
         : ObTone.neutral;
     final isOverspent = available < 0;
+    final goal = monthEnvelope.goal;
+    final presentation = goalPresentation(monthEnvelope: monthEnvelope);
+    final fraction = goal != null
+        ? presentation.progress
+        : allocated <= 0
+        ? 0.0
+        : (activity / allocated).clamp(0.0, 1.0);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
@@ -101,21 +100,9 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                     Row(
                       children: [
                         ObEnvelopeGauge(
-                          fraction: _fundingFraction(
-                            goal: goal,
-                            budgetedMinor: budgeted,
-                            spentMinor: spent,
-                            availableMinor: available,
-                          ),
+                          fraction: fraction,
                           semanticLabel: l10n.budgetEnvelopeProgress(
-                            (_fundingFraction(
-                                      goal: goal,
-                                      budgetedMinor: budgeted,
-                                      spentMinor: spent,
-                                      availableMinor: available,
-                                    ) *
-                                    100)
-                                .round(),
+                            (fraction * 100).round(),
                           ),
                           overspent: isOverspent,
                           seed: 4,
@@ -154,8 +141,8 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                     const SizedBox(height: SpacingTokens.md),
                     _BalanceGrid(
                       carryover: carryover,
-                      assigned: budgeted,
-                      activity: spent,
+                      assigned: allocated,
+                      activity: activity,
                       available: available,
                       currencyCode: currencyCode,
                       availableTone: availableTone,
@@ -164,9 +151,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                     if (goal != null) ...[
                       const SizedBox(height: SpacingTokens.md),
                       _GoalSummary(
-                        goal: goal!,
-                        budgetedMinor: budgeted,
-                        availableMinor: available,
+                        monthEnvelope: monthEnvelope,
                         currencyCode: currencyCode,
                         hideAmounts: hideAmounts,
                         hideProgressBars: hideProgressBars,
@@ -224,16 +209,8 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                   title: l10n.transactionLoadError,
                 ),
               ),
-              data: (allTransactions) {
-                final envelopeId = envelope.id?.toString();
-                final transactions =
-                    allTransactions
-                        .where((t) => t.envelopeId?.toString() == envelopeId)
-                        .toList()
-                      ..sort(
-                        (a, b) =>
-                            b.transactionDate.compareTo(a.transactionDate),
-                      );
+              data: (pageState) {
+                final transactions = pageState.items;
 
                 if (transactions.isEmpty) {
                   return Center(
@@ -269,10 +246,37 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                   padding: const EdgeInsets.symmetric(
                     horizontal: SpacingTokens.md,
                   ),
-                  itemCount: transactions.length,
+                  itemCount:
+                      transactions.length + (pageState.hasMore ? 1 : 0),
                   itemBuilder: (context, index) {
-                    final tx = transactions[index];
-                    final isIncome = tx.amountMinor > 0;
+                    if (index >= transactions.length) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: SpacingTokens.sm,
+                        ),
+                        child: Center(
+                          child: OutlinedButton(
+                            onPressed: transactionsAsync.value?.isLoadingMore ==
+                                    true
+                                ? null
+                                : () => unawaited(
+                                    ref
+                                        .read(
+                                          envelopeActivityProvider(
+                                            entityId,
+                                            envelopeId,
+                                          ).notifier,
+                                        )
+                                        .loadMore(),
+                                  ),
+                            child: Text(l10n.loadMoreButton),
+                          ),
+                        ),
+                      );
+                    }
+                    final view = transactions[index];
+                    final transaction = view.transaction;
+                    final isIncome = transaction.amountMinor > 0;
                     final tone = isIncome ? ObTone.funded : ObTone.overspent;
 
                     return Padding(
@@ -294,14 +298,15 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  tx.description,
+                                  view.payeeName ??
+                                      transaction.description,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: palette.ink,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
-                                  _formatDate(tx.transactionDate),
+                                  _formatDate(transaction.date),
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: palette.mutedInk,
                                   ),
@@ -313,8 +318,8 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                             hideAmounts
                                 ? hiddenAmountPlaceholder
                                 : formatMinorForCode(
-                                    tx.amountMinor,
-                                    currencyCode,
+                                    transaction.amountMinor,
+                                    view.accountCurrencyCode,
                                   ),
                             tone: tone,
                             style: theme.textTheme.bodyMedium,
@@ -332,32 +337,13 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
     );
   }
 
-  double _fundingFraction({
-    required EnvelopeGoal? goal,
-    required int budgetedMinor,
-    required int spentMinor,
-    required int availableMinor,
-  }) {
-    if (goal != null) {
-      return computeFundingProgress(
-        goal: goal,
-        budgetedMinor: budgetedMinor,
-        availableMinor: availableMinor,
-      );
-    }
-    if (budgetedMinor <= 0) return 0;
-    return spentMinor / budgetedMinor;
-  }
-
   void _showMoveMoney(BuildContext context) {
     unawaited(
       showDialog<void>(
         context: context,
         builder: (_) => MoveMoneyDialog(
           entityId: entityId,
-          year: year,
-          month: month,
-          categories: categories,
+          currencyCode: currencyCode,
         ),
       ),
     );
@@ -368,11 +354,10 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
       showDialog<void>(
         context: context,
         builder: (_) => SetGoalDialog(
-          envelopeId: envelope.id?.toString() ?? '',
+          monthEnvelope: monthEnvelope,
           entityId: entityId,
           currencyCode: currencyCode,
-          existingGoal: goal,
-          envelopeName: envelope.name,
+          month: month,
         ),
       ),
     );
@@ -383,11 +368,10 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
       showDialog<void>(
         context: context,
         builder: (_) => EditEnvelopeDialog(
-          envelope: envelope,
+          monthEnvelope: monthEnvelope,
           categoryId: categoryId,
           entityId: entityId,
           currencyCode: currencyCode,
-          year: year,
           month: month,
         ),
       ),
@@ -421,9 +405,9 @@ class _BalanceGrid extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    String amount(int cents) => hideAmounts
+    String amount(int minor) => hideAmounts
         ? hiddenAmountPlaceholder
-        : formatMinorForCode(cents, currencyCode);
+        : formatMinorForCode(minor, currencyCode);
 
     return ObCard(
       tone: ObTone.neutral,
@@ -503,17 +487,13 @@ class _BalanceGridCell extends HookWidget {
 
 class _GoalSummary extends HookWidget {
   const _GoalSummary({
-    required this.goal,
-    required this.budgetedMinor,
-    required this.availableMinor,
+    required this.monthEnvelope,
     required this.currencyCode,
     required this.hideAmounts,
     required this.hideProgressBars,
   });
 
-  final EnvelopeGoal goal;
-  final int budgetedMinor;
-  final int availableMinor;
+  final EnvelopeMonthView monthEnvelope;
   final String currencyCode;
   final bool hideAmounts;
   final bool hideProgressBars;
@@ -523,16 +503,10 @@ class _GoalSummary extends HookWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final progress = computeFundingProgress(
-      goal: goal,
-      budgetedMinor: budgetedMinor,
-      availableMinor: availableMinor,
-    );
-    final underfunded = computeUnderfundedMinor(
-      goal: goal,
-      budgetedMinor: budgetedMinor,
-      availableMinor: availableMinor,
-    );
+    final goal = monthEnvelope.goal!;
+    final presentation = goalPresentation(monthEnvelope: monthEnvelope);
+    final progress = presentation.progress;
+    final underfunded = presentation.underfundedMinor;
 
     final goalTone = progress >= 1.0
         ? ObTone.funded
@@ -542,17 +516,12 @@ class _GoalSummary extends HookWidget {
 
     final formattedAmount = hideAmounts
         ? hiddenAmountPlaceholder
-        : formatMinorForCode(goal.targetAmountMinor, currencyCode);
-    final goalLabel = switch (goal.goalType) {
-      'monthly_funding' => l10n.budgetGoalMonthly(
-        hideAmounts
-            ? hiddenAmountPlaceholder
-            : formatMinorForCode(
-                goal.monthlyFundingMinor ?? goal.targetAmountMinor,
-                currencyCode,
-              ),
+        : formatMinorForCode(goal.amountMinor, currencyCode);
+    final goalLabel = switch (goal.kind) {
+      EnvelopeGoalKind.monthlyFunding => l10n.budgetGoalMonthly(
+        formattedAmount,
       ),
-      'target_by_date' => l10n.budgetGoalTargetBy(
+      EnvelopeGoalKind.targetByDate => l10n.budgetGoalTargetBy(
         formattedAmount,
         goal.targetDate == null
             ? ''

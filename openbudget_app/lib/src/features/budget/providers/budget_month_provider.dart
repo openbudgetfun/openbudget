@@ -75,6 +75,36 @@ Future<List<Envelope>> envelopeList(Ref ref, String entityId) async {
   return client.envelope.list(UuidValue.fromString(entityId));
 }
 
+/// One envelope's row of the month view. Throws when the envelope has no
+/// row this month, which the category detail screen reports as "not found".
+@riverpod
+Future<EnvelopeMonthView> budgetMonthEnvelope(
+  Ref ref,
+  String entityId,
+  String envelopeId,
+) async {
+  final view = await ref.watch(budgetMonthProvider(entityId).future);
+  final matches = view.envelopes
+      .where((row) => row.envelope.id?.toString() == envelopeId)
+      .toList();
+  if (matches.isEmpty) {
+    throw StateError('Envelope $envelopeId is not part of this month view');
+  }
+  return matches.first;
+}
+
+/// The month view's currency code.
+@riverpod
+Future<String> budgetMonthCurrency(Ref ref, String entityId) async {
+  final view = await ref.watch(budgetMonthProvider(entityId).future);
+  return view.currencyCode;
+}
+
+/// The selected month as yyyymm, for dialogs that need the month.
+@riverpod
+int selectedYyyymm(Ref ref, String entityId) =>
+    ref.watch(selectedMonthProvider(entityId));
+
 /// Writes allocations and moves. Every write returns the fresh
 /// month view, which replaces the cached one immediately.
 @riverpod

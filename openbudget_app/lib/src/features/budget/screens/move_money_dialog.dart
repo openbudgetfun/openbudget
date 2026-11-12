@@ -13,13 +13,11 @@ class MoveMoneyDialog extends HookConsumerWidget {
   const MoveMoneyDialog({
     required this.entityId,
     required this.currencyCode,
-    required this.groups,
     super.key,
   });
 
   final String entityId;
   final String currencyCode;
-  final List<CategoryMonthGroup> groups;
 
   /// The dropdown sentinel for Ready to Assign, which `moveMoney` takes as
   /// a null envelope id.
@@ -28,12 +26,14 @@ class MoveMoneyDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
     final amountInput = useState('');
     final fromEnvelopeId = useState<String?>(null);
     final toEnvelopeId = useState<String?>(null);
     final isSubmitting = useState(false);
 
     // Ready to Assign first, then every envelope under its category label.
+    final groups = groupsAsync.value ?? const <CategoryMonthGroup>[];
     final envelopeItems = <DropdownMenuItem<String>>[
       DropdownMenuItem(
         value: _readyToAssign,

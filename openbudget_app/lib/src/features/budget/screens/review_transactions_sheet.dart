@@ -5,20 +5,19 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/review_queue_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// The month's review queue: uncategorised transactions to approve, assign
+/// or delete, from `transaction.list` with `uncategorizedOnly`.
 Future<void> showReviewTransactionsSheet(
   BuildContext context, {
   required String entityId,
-  required int year,
-  required int month,
 }) => showModalBottomSheet<void>(
   context: context,
   isScrollControlled: true,
@@ -26,59 +25,44 @@ Future<void> showReviewTransactionsSheet(
   barrierColor: Theme.of(context).ob.firmPen.withAlpha(210),
   builder: (context) => FractionallySizedBox(
     heightFactor: 0.95,
-    child: ReviewTransactionsSheet(
-      entityId: entityId,
-      year: year,
-      month: month,
-    ),
+    child: ReviewTransactionsSheet(entityId: entityId),
   ),
 );
 
 class ReviewTransactionsSheet extends HookConsumerWidget {
-  const ReviewTransactionsSheet({
-    required this.entityId,
-    required this.year,
-    required this.month,
-    super.key,
-  });
+  const ReviewTransactionsSheet({required this.entityId, super.key});
 
   final String entityId;
-  final int year;
-  final int month;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final transactionsAsync = ref.watch(
-      monthlyTransactionsProvider(entityId, year, month),
-    );
-    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(entityId));
+    final queueAsync = ref.watch(reviewQueueProvider(entityId));
+    final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
 
-    final queue = useState<List<Transaction>>(<Transaction>[]);
+    final queue = useState<List<TransactionView>>(<TransactionView>[]);
     final initialized = useState(false);
     final selectedIds = useState<Set<String>>(<String>{});
 
     useEffect(() {
-      if (!transactionsAsync.hasValue || initialized.value) return null;
-      queue.value = _toReviewQueue(transactionsAsync.value!);
+      if (!queueAsync.hasValue || initialized.value) return null;
+      queue.value = List.of(queueAsync.value!);
       initialized.value = true;
       return null;
-    }, [transactionsAsync, initialized.value]);
+    }, [queueAsync, initialized.value]);
 
     final envelopeChoices = <_EnvelopeChoice>[];
-    final envelopeNameById = <String, String>{};
-    if (summaryAsync.hasValue) {
-      for (final category in summaryAsync.value!.categories) {
-        for (final envelope in category.envelopes) {
-          final envelopeId = envelope.id?.toString();
+    if (groupsAsync.hasValue) {
+      for (final group in groupsAsync.value!) {
+        for (final view in group.envelopes) {
+          final envelopeId = view.envelope.id?.toString();
           if (envelopeId == null || envelopeId.isEmpty) continue;
-          envelopeNameById[envelopeId] = envelope.name;
           envelopeChoices.add(
             _EnvelopeChoice(
               id: envelopeId,
-              name: envelope.name,
-              categoryName: category.category.name,
+              name: view.envelope.name,
+              categoryName: group.category.name,
             ),
           );
         }
@@ -86,22 +70,22 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
     }
 
     final selectedCount = selectedIds.value.length;
-    final selectedAmountMinor = queue.value
-        .where((transaction) {
-          final transactionId = transaction.id?.toString();
-          return transactionId != null &&
-              selectedIds.value.contains(transactionId);
-        })
-        .fold<int>(0, (total, transaction) => total + transaction.amountMinor);
+
+    void invalidateSources() {
+      ref
+        ..invalidate(reviewQueueProvider(entityId))
+        ..invalidate(budgetMonthProvider(entityId))
+        ..invalidate(budgetMonthGroupsProvider(entityId));
+    }
 
     Future<void> approveSelected() async {
       final ids = selectedIds.value.toList(growable: false);
       if (ids.isEmpty) return;
       queue.value = queue.value
-          .where((transaction) {
-            final transactionId = transaction.id?.toString();
-            if (transactionId == null) return true;
-            return !selectedIds.value.contains(transactionId);
+          .where((view) {
+            final transactionId = view.transaction.id?.toString();
+            return transactionId == null ||
+                !selectedIds.value.contains(transactionId);
           })
           .toList(growable: false);
       selectedIds.value = <String>{};
@@ -109,15 +93,15 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
       try {
         await ref
             .read(transactionActionsProvider.notifier)
-            .bulkToggleCleared(transactionIds: ids, entityId: entityId);
+            .setStatus(
+              transactionIds: ids,
+              status: TransactionStatus.cleared,
+              entityId: entityId,
+            );
       } on Exception {
         // Keep optimistic UI even if network is unavailable in test harnesses.
       } finally {
-        if (context.mounted) {
-          ref
-            ..invalidate(monthlyTransactionsProvider(entityId, year, month))
-            ..invalidate(budgetMonthlySummaryProvider(entityId));
-        }
+        if (context.mounted) invalidateSources();
       }
     }
 
@@ -133,13 +117,19 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
       if (selectedEnvelope == null) return;
 
       try {
-        await ref
-            .read(transactionActionsProvider.notifier)
-            .bulkAssignEnvelope(
-              transactionIds: ids,
-              envelopeId: selectedEnvelope.id,
-              entityId: entityId,
-            );
+        final actions = ref.read(transactionActionsProvider.notifier);
+        for (final view in queue.value) {
+          final transactionId = view.transaction.id?.toString();
+          if (transactionId == null ||
+              !selectedIds.value.contains(transactionId)) {
+            continue;
+          }
+          await actions.update(
+            transactionId: transactionId,
+            entityId: entityId,
+            input: _inputWithEnvelope(view, selectedEnvelope.id),
+          );
+        }
       } on Exception {
         if (!context.mounted) return;
         showAppToast(
@@ -150,9 +140,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
       } finally {
         if (context.mounted) {
           selectedIds.value = <String>{};
-          ref
-            ..invalidate(monthlyTransactionsProvider(entityId, year, month))
-            ..invalidate(budgetMonthlySummaryProvider(entityId));
+          invalidateSources();
         }
       }
     }
@@ -161,10 +149,10 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
       final ids = selectedIds.value.toList(growable: false);
       if (ids.isEmpty) return;
       queue.value = queue.value
-          .where((transaction) {
-            final transactionId = transaction.id?.toString();
-            if (transactionId == null) return true;
-            return !selectedIds.value.contains(transactionId);
+          .where((view) {
+            final transactionId = view.transaction.id?.toString();
+            return transactionId == null ||
+                !selectedIds.value.contains(transactionId);
           })
           .toList(growable: false);
       selectedIds.value = <String>{};
@@ -176,11 +164,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
       } on Exception {
         // Keep optimistic UI even if network is unavailable in test harnesses.
       } finally {
-        if (context.mounted) {
-          ref
-            ..invalidate(monthlyTransactionsProvider(entityId, year, month))
-            ..invalidate(budgetMonthlySummaryProvider(entityId));
-        }
+        if (context.mounted) invalidateSources();
       }
     }
 
@@ -223,10 +207,6 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
         : queue.value.length == 1
         ? l10n.reviewTransactionsSingleNewTransaction
         : l10n.reviewTransactionsNewTransactions(queue.value.length);
-
-    final currencyCode = _currencyFromSummary(
-      summaryAsync.hasValue ? summaryAsync.value : null,
-    );
 
     final palette = theme.ob;
 
@@ -288,7 +268,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
             ),
             const Divider(height: 1),
             Expanded(
-              child: !initialized.value && transactionsAsync.isLoading
+              child: !initialized.value && queueAsync.isLoading
                   ? Center(child: ObLoadingPanel(label: l10n.loadingTitle))
                   : queue.value.isEmpty
                   ? Center(
@@ -306,23 +286,22 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                       padding: const EdgeInsets.only(bottom: SpacingTokens.md),
                       itemCount: queue.value.length,
                       itemBuilder: (context, index) {
-                        final transaction = queue.value[index];
+                        final view = queue.value[index];
+                        final transaction = view.transaction;
                         final transactionId = transaction.id?.toString();
                         final isSelected =
                             transactionId != null &&
                             selectedIds.value.contains(transactionId);
                         final previous = index > 0
-                            ? queue.value[index - 1]
+                            ? queue.value[index - 1].transaction
                             : null;
                         final showHeader =
                             previous == null ||
                             !_isSameDay(previous, transaction);
 
-                        final envelopeName = transaction.envelopeId == null
-                            ? l10n.reviewTransactionsUncategorized
-                            : envelopeNameById[transaction.envelopeId
-                                      .toString()] ??
-                                  l10n.reviewTransactionsUncategorized;
+                        final envelopeName = view.transferPeer != null
+                              ? l10n.transactionKindTransfer
+                              : l10n.reviewTransactionsUncategorized;
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -336,9 +315,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                                   SpacingTokens.xs,
                                 ),
                                 child: Text(
-                                  DateFormat.yMMMMd().format(
-                                    transaction.transactionDate,
-                                  ),
+                                  DateFormat.yMMMMd().format(transaction.date),
                                   style: theme.textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: palette.ink,
@@ -389,7 +366,8 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              transaction.description,
+                                              view.payeeName ??
+                                                  transaction.description,
                                               style: theme.textTheme.titleMedium
                                                   ?.copyWith(
                                                     fontWeight: FontWeight.w700,
@@ -398,7 +376,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                                             ),
                                             const SizedBox(height: 2),
                                             Text(
-                                              envelopeName,
+                                              '$envelopeName · ${view.accountName}',
                                               style: theme.textTheme.bodyMedium
                                                   ?.copyWith(
                                                     color: palette.mutedInk,
@@ -411,7 +389,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                                       ObAmount(
                                         formatMinorForCode(
                                           transaction.amountMinor,
-                                          currencyCode,
+                                          view.accountCurrencyCode,
                                         ),
                                         tone: transaction.amountMinor >= 0
                                             ? ObTone.funded
@@ -431,10 +409,6 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
             if (selectedCount > 0)
               _ReviewToolbar(
                 selectedCount: selectedCount,
-                selectedAmount: formatMinorForCode(
-                  selectedAmountMinor,
-                  currencyCode,
-                ),
                 onCancel: () => selectedIds.value = <String>{},
                 onApprove: approveSelected,
                 onCategorize: categorizeSelected,
@@ -447,24 +421,41 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
     );
   }
 
-  static String _currencyFromSummary(BudgetSummary? summary) =>
-      normalizeCurrencyCode(summary?.budget.currencyCode ?? '');
-
-  static List<Transaction> _toReviewQueue(List<Transaction> transactions) {
-    final queue =
-        transactions
-            .where(
-              (transaction) => !transaction.cleared && !transaction.reconciled,
-            )
-            .toList(growable: false)
-          ..sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
-    return queue;
-  }
-
   static bool _isSameDay(Transaction a, Transaction b) =>
-      a.transactionDate.year == b.transactionDate.year &&
-      a.transactionDate.month == b.transactionDate.month &&
-      a.transactionDate.day == b.transactionDate.day;
+      a.date.year == b.date.year &&
+      a.date.month == b.date.month &&
+      a.date.day == b.date.day;
+
+  /// Rebuilds the input with the chosen envelope on every line, keeping
+  /// each line's amount, tax code and memo.
+  static TransactionInput _inputWithEnvelope(
+    TransactionView view,
+    String envelopeId,
+  ) {
+    final transaction = view.transaction;
+    final envelopeUuid = UuidValue.fromString(envelopeId);
+    return TransactionInput(
+      accountId: transaction.accountId,
+      date: transaction.date,
+      amountMinor: transaction.amountMinor,
+      fxRate: transaction.fxRate,
+      payeeId: transaction.payeeId,
+      description: transaction.description,
+      memo: transaction.memo,
+      status: transaction.status,
+      flag: transaction.flag,
+      lines: view.lines
+          .map(
+            (line) => TransactionLineInput(
+              amountMinor: line.amountMinor,
+              envelopeId: envelopeUuid,
+              taxCategoryCode: line.taxCategoryCode,
+              memo: line.memo,
+            ),
+          )
+          .toList(),
+    );
+  }
 
   Future<_EnvelopeChoice?> _showEnvelopePicker(
     BuildContext context, {
@@ -505,10 +496,10 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
   }
 }
 
+
 class _ReviewToolbar extends HookWidget {
   const _ReviewToolbar({
     required this.selectedCount,
-    required this.selectedAmount,
     required this.onCancel,
     required this.onApprove,
     required this.onCategorize,
@@ -517,7 +508,6 @@ class _ReviewToolbar extends HookWidget {
   });
 
   final int selectedCount;
-  final String selectedAmount;
   final VoidCallback onCancel;
   final Future<void> Function() onApprove;
   final Future<void> Function() onCategorize;
@@ -547,10 +537,7 @@ class _ReviewToolbar extends HookWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                l10n.reviewTransactionsSelectedAmount(
-                  selectedCount,
-                  selectedAmount,
-                ),
+                l10n.reviewTransactionsSelectedCount(selectedCount),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: palette.mutedInk,
                   fontWeight: FontWeight.w600,

@@ -356,6 +356,269 @@ final class EnvelopeListFamily extends $Family
   String toString() => r'envelopeListProvider';
 }
 
+/// One envelope's row of the month view. Throws when the envelope has no
+/// row this month, which the category detail screen reports as "not found".
+
+@ProviderFor(budgetMonthEnvelope)
+final budgetMonthEnvelopeProvider = BudgetMonthEnvelopeFamily._();
+
+/// One envelope's row of the month view. Throws when the envelope has no
+/// row this month, which the category detail screen reports as "not found".
+
+final class BudgetMonthEnvelopeProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<EnvelopeMonthView>,
+          EnvelopeMonthView,
+          FutureOr<EnvelopeMonthView>
+        >
+    with
+        $FutureModifier<EnvelopeMonthView>,
+        $FutureProvider<EnvelopeMonthView> {
+  /// One envelope's row of the month view. Throws when the envelope has no
+  /// row this month, which the category detail screen reports as "not found".
+  BudgetMonthEnvelopeProvider._({
+    required BudgetMonthEnvelopeFamily super.from,
+    required (String, String) super.argument,
+  }) : super(
+         retry: null,
+         name: r'budgetMonthEnvelopeProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$budgetMonthEnvelopeHash();
+
+  @override
+  String toString() {
+    return r'budgetMonthEnvelopeProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<EnvelopeMonthView> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<EnvelopeMonthView> create(Ref ref) {
+    final argument = this.argument as (String, String);
+    return budgetMonthEnvelope(ref, argument.$1, argument.$2);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is BudgetMonthEnvelopeProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$budgetMonthEnvelopeHash() =>
+    r'f6c2d1ea12e4ba88b331f5d3d292b294cf47c648';
+
+/// One envelope's row of the month view. Throws when the envelope has no
+/// row this month, which the category detail screen reports as "not found".
+
+final class BudgetMonthEnvelopeFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<EnvelopeMonthView>,
+          (String, String)
+        > {
+  BudgetMonthEnvelopeFamily._()
+    : super(
+        retry: null,
+        name: r'budgetMonthEnvelopeProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// One envelope's row of the month view. Throws when the envelope has no
+  /// row this month, which the category detail screen reports as "not found".
+
+  BudgetMonthEnvelopeProvider call(String entityId, String envelopeId) =>
+      BudgetMonthEnvelopeProvider._(
+        argument: (entityId, envelopeId),
+        from: this,
+      );
+
+  @override
+  String toString() => r'budgetMonthEnvelopeProvider';
+}
+
+/// The month view's currency code.
+
+@ProviderFor(budgetMonthCurrency)
+final budgetMonthCurrencyProvider = BudgetMonthCurrencyFamily._();
+
+/// The month view's currency code.
+
+final class BudgetMonthCurrencyProvider
+    extends $FunctionalProvider<AsyncValue<String>, String, FutureOr<String>>
+    with $FutureModifier<String>, $FutureProvider<String> {
+  /// The month view's currency code.
+  BudgetMonthCurrencyProvider._({
+    required BudgetMonthCurrencyFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'budgetMonthCurrencyProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$budgetMonthCurrencyHash();
+
+  @override
+  String toString() {
+    return r'budgetMonthCurrencyProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<String> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<String> create(Ref ref) {
+    final argument = this.argument as String;
+    return budgetMonthCurrency(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is BudgetMonthCurrencyProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$budgetMonthCurrencyHash() =>
+    r'c570e4828aafc6ae4bfa2512f9e07fd6bab96250';
+
+/// The month view's currency code.
+
+final class BudgetMonthCurrencyFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<String>, String> {
+  BudgetMonthCurrencyFamily._()
+    : super(
+        retry: null,
+        name: r'budgetMonthCurrencyProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The month view's currency code.
+
+  BudgetMonthCurrencyProvider call(String entityId) =>
+      BudgetMonthCurrencyProvider._(argument: entityId, from: this);
+
+  @override
+  String toString() => r'budgetMonthCurrencyProvider';
+}
+
+/// The selected month as yyyymm, for dialogs that need the month.
+
+@ProviderFor(selectedYyyymm)
+final selectedYyyymmProvider = SelectedYyyymmFamily._();
+
+/// The selected month as yyyymm, for dialogs that need the month.
+
+final class SelectedYyyymmProvider extends $FunctionalProvider<int, int, int>
+    with $Provider<int> {
+  /// The selected month as yyyymm, for dialogs that need the month.
+  SelectedYyyymmProvider._({
+    required SelectedYyyymmFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'selectedYyyymmProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedYyyymmHash();
+
+  @override
+  String toString() {
+    return r'selectedYyyymmProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  int create(Ref ref) {
+    final argument = this.argument as String;
+    return selectedYyyymm(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SelectedYyyymmProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$selectedYyyymmHash() => r'fbcfaa0e5abca6d5b3b161bb8c4a3a8b92f29445';
+
+/// The selected month as yyyymm, for dialogs that need the month.
+
+final class SelectedYyyymmFamily extends $Family
+    with $FunctionalFamilyOverride<int, String> {
+  SelectedYyyymmFamily._()
+    : super(
+        retry: null,
+        name: r'selectedYyyymmProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The selected month as yyyymm, for dialogs that need the month.
+
+  SelectedYyyymmProvider call(String entityId) =>
+      SelectedYyyymmProvider._(argument: entityId, from: this);
+
+  @override
+  String toString() => r'selectedYyyymmProvider';
+}
+
 /// Writes allocations and moves. Every write returns the fresh
 /// month view, which replaces the cached one immediately.
 

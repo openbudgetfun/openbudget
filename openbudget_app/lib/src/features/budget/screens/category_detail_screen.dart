@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/quick_budget_dialog.dart';
@@ -17,6 +17,8 @@ import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// One envelope's detail: balance, goal, notes and lifecycle actions. All
+/// figures come from the server's month view for the selected month.
 class CategoryDetailScreen extends HookConsumerWidget {
   const CategoryDetailScreen({
     required this.entityId,
@@ -34,8 +36,9 @@ class CategoryDetailScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(entityId));
-    final goalsAsync = ref.watch(budgetGoalsProvider(entityId));
+    final monthEnvelopeAsync = ref.watch(
+      budgetMonthEnvelopeProvider(entityId, envelopeId),
+    );
     final hideAmounts = ref.watch(hideAmountsProvider);
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
     final isSnoozed = useState(false);
@@ -59,7 +62,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
           ),
         ],
       ),
-      body: summaryAsync.when(
+      body: monthEnvelopeAsync.when(
         loading: () => Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
         error: (_, _) => Padding(
           padding: const EdgeInsets.all(SpacingTokens.md),
@@ -68,62 +71,29 @@ class CategoryDetailScreen extends HookConsumerWidget {
             message: l10n.budgetLoadError,
           ),
         ),
-        data: (summary) {
-          final currencyCode = summary.budget.currencyCode;
-
-          Envelope? envelope;
-          MonthlyEnvelopeData? monthlyData;
-
-          for (final group in summary.categories) {
-            if (group.category.id?.toString() != categoryId) {
-              continue;
-            }
-            for (var index = 0; index < group.envelopes.length; index++) {
-              final current = group.envelopes[index];
-              if (current.id?.toString() == envelopeId) {
-                envelope = current;
-                if (index < group.monthlyEnvelopes.length) {
-                  monthlyData = group.monthlyEnvelopes[index];
-                }
-                break;
-              }
-            }
-          }
-
-          if (envelope == null) {
-            return Padding(
-              padding: const EdgeInsets.all(SpacingTokens.md),
-              child: ObStatePanel.empty(
-                title: l10n.budgetSearchNoResults,
-                message: l10n.budgetSearchHint,
-                doodle: WiredDoodleKind.cloud,
-                tone: ObTone.neutral,
-              ),
-            );
-          }
-          final selectedEnvelope = envelope;
-
-          final goal = goalsAsync.whenOrNull(
-            data: (goals) => goals[envelopeId],
-          );
-          final carryover = monthlyData?.carryoverMinor ?? 0;
-          final assigned =
-              monthlyData?.allocatedMinor ??
-              selectedEnvelope.budgetedAmountMinor;
-          final spent =
-              monthlyData?.spentMinor ?? selectedEnvelope.spentAmountMinor;
-          final available = monthlyData?.availableMinor ?? (assigned - spent);
+        data: (monthEnvelope) {
+          final currencyCode = ref.watch(
+            budgetMonthCurrencyProvider(entityId),
+          ).value ??
+          '';
+          final goal = monthEnvelope.goal;
+          final carryover = monthEnvelope.carryoverMinor;
+          final assigned = monthEnvelope.allocatedMinor;
+          final spent = monthEnvelope.activityMinor.abs();
+          final available = monthEnvelope.availableMinor;
           final availableTone = available > 0
               ? ObTone.funded
               : available < 0
               ? ObTone.overspent
               : ObTone.neutral;
+          final envelope = monthEnvelope.envelope;
+          final month = ref.watch(selectedYyyymmProvider(entityId));
 
           return ListView(
             padding: const EdgeInsets.all(SpacingTokens.md),
             children: [
               Text(
-                selectedEnvelope.name,
+                envelope.name,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: palette.ink,
@@ -175,8 +145,9 @@ class CategoryDetailScreen extends HookConsumerWidget {
                     child: FilledButton.icon(
                       onPressed: () => _showSetGoalDialog(
                         context,
-                        selectedEnvelope,
+                        monthEnvelope,
                         currencyCode,
+                        month,
                       ),
                       icon: SkribbleIcon(
                         data: OpenBudgetIcons.flag,
@@ -192,24 +163,21 @@ class CategoryDetailScreen extends HookConsumerWidget {
                 )
               else ...[
                 _GoalCard(
-                  goal: goal,
-                  budgetedMinor: assigned,
-                  availableMinor: available,
+                  monthEnvelope: monthEnvelope,
                   currencyCode: currencyCode,
                   hideAmounts: hideAmounts,
                   hideProgressBars: hideProgressBars,
                   onAssign: () => _showQuickBudgetDialog(
                     context,
-                    selectedEnvelope,
+                    envelope,
                     currencyCode,
-                    summary.year,
-                    summary.month,
+                    month,
                   ),
                   onEditGoal: () => _showSetGoalDialog(
                     context,
-                    selectedEnvelope,
+                    monthEnvelope,
                     currencyCode,
-                    goal,
+                    month,
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.sm),
@@ -233,11 +201,11 @@ class CategoryDetailScreen extends HookConsumerWidget {
               _Card(
                 child: ListTile(
                   title: Text(
-                    (selectedEnvelope.note?.isNotEmpty ?? false)
-                        ? selectedEnvelope.note!
+                    (envelope.note?.isNotEmpty ?? false)
+                        ? envelope.note!
                         : l10n.envelopeNoteHint,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: (selectedEnvelope.note?.isNotEmpty ?? false)
+                      color: (envelope.note?.isNotEmpty ?? false)
                           ? palette.ink
                           : palette.mutedInk,
                     ),
@@ -250,10 +218,9 @@ class CategoryDetailScreen extends HookConsumerWidget {
                     tooltip: l10n.editEnvelopeTitle,
                     onPressed: () => _showEditEnvelopeDialog(
                       context,
-                      selectedEnvelope,
+                      monthEnvelope,
                       currencyCode,
-                      summary.year,
-                      summary.month,
+                      month,
                     ),
                   ),
                 ),
@@ -262,17 +229,16 @@ class CategoryDetailScreen extends HookConsumerWidget {
               _Card(
                 child: EnvelopeTaxCategoryRow(
                   entityId: entityId,
-                  envelope: selectedEnvelope,
+                  envelope: envelope,
                 ),
               ),
               const SizedBox(height: SpacingTokens.lg),
               FilledButton.tonal(
                 onPressed: () => _showEditEnvelopeDialog(
                   context,
-                  selectedEnvelope,
+                  monthEnvelope,
                   currencyCode,
-                  summary.year,
-                  summary.month,
+                  month,
                 ),
                 child: Text(l10n.categoryDetailEditEnvelope),
               ),
@@ -283,13 +249,12 @@ class CategoryDetailScreen extends HookConsumerWidget {
                       .read(envelopeActionsProvider.notifier)
                       .toggleHidden(
                         envelopeId: envelopeId,
-                        categoryId: categoryId,
                         entityId: entityId,
-                        isHidden: !(selectedEnvelope.isHidden ?? false),
+                        isHidden: !envelope.isHidden,
                       );
                 },
                 child: Text(
-                  (selectedEnvelope.isHidden ?? false)
+                  envelope.isHidden
                       ? l10n.categoryDetailUnhideEnvelope
                       : l10n.categoryDetailHideEnvelope,
                 ),
@@ -314,7 +279,6 @@ class CategoryDetailScreen extends HookConsumerWidget {
     BuildContext context,
     Envelope envelope,
     String currencyCode,
-    int year,
     int month,
   ) {
     unawaited(
@@ -325,7 +289,6 @@ class CategoryDetailScreen extends HookConsumerWidget {
           envelopeId: envelope.id?.toString() ?? '',
           envelopeName: envelope.name,
           currencyCode: currencyCode,
-          year: year,
           month: month,
         ),
       ),
@@ -334,19 +297,18 @@ class CategoryDetailScreen extends HookConsumerWidget {
 
   void _showSetGoalDialog(
     BuildContext context,
-    Envelope envelope,
-    String currencyCode, [
-    EnvelopeGoal? existingGoal,
-  ]) {
+    EnvelopeMonthView monthEnvelope,
+    String currencyCode,
+    int month,
+  ) {
     unawaited(
       showDialog<void>(
         context: context,
         builder: (_) => SetGoalDialog(
-          envelopeId: envelope.id?.toString() ?? '',
+          monthEnvelope: monthEnvelope,
           entityId: entityId,
           currencyCode: currencyCode,
-          existingGoal: existingGoal,
-          envelopeName: envelope.name,
+          month: month,
         ),
       ),
     );
@@ -354,20 +316,18 @@ class CategoryDetailScreen extends HookConsumerWidget {
 
   void _showEditEnvelopeDialog(
     BuildContext context,
-    Envelope envelope,
+    EnvelopeMonthView monthEnvelope,
     String currencyCode,
-    int year,
     int month,
   ) {
     unawaited(
       showDialog<void>(
         context: context,
         builder: (_) => EditEnvelopeDialog(
-          envelope: envelope,
+          monthEnvelope: monthEnvelope,
           categoryId: categoryId,
           entityId: entityId,
           currencyCode: currencyCode,
-          year: year,
           month: month,
         ),
       ),
@@ -393,11 +353,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
                 Navigator.of(dialogContext).pop();
                 await ref
                     .read(envelopeActionsProvider.notifier)
-                    .deleteEnvelope(
-                      envelopeId: envelopeId,
-                      categoryId: categoryId,
-                      entityId: entityId,
-                    );
+                    .deleteEnvelope(envelopeId: envelopeId);
                 if (context.mounted) {
                   context.pop();
                 }
@@ -415,11 +371,13 @@ class CategoryDetailScreen extends HookConsumerWidget {
   }
 }
 
+/// The one envelope's row of the month view, or null when it is hidden
+/// this month (it has no allocation row until it is budgeted).
+/// The one envelope's row of the month view, or null when it is hidden
+/// this month (it has no allocation row until it is budgeted).
 class _GoalCard extends HookWidget {
   const _GoalCard({
-    required this.goal,
-    required this.budgetedMinor,
-    required this.availableMinor,
+    required this.monthEnvelope,
     required this.currencyCode,
     required this.hideAmounts,
     required this.hideProgressBars,
@@ -427,9 +385,7 @@ class _GoalCard extends HookWidget {
     required this.onEditGoal,
   });
 
-  final EnvelopeGoal goal;
-  final int budgetedMinor;
-  final int availableMinor;
+  final EnvelopeMonthView monthEnvelope;
   final String currencyCode;
   final bool hideAmounts;
   final bool hideProgressBars;
@@ -441,19 +397,13 @@ class _GoalCard extends HookWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final progress = computeFundingProgress(
-      goal: goal,
-      budgetedMinor: budgetedMinor,
-      availableMinor: availableMinor,
-    );
-    final underfunded = computeUnderfundedMinor(
-      goal: goal,
-      budgetedMinor: budgetedMinor,
-      availableMinor: availableMinor,
-    );
-    final amountToAssignThisMonth = switch (goal.goalType) {
-      'monthly_funding' => goal.monthlyFundingMinor ?? goal.targetAmountMinor,
-      _ => budgetedMinor + underfunded,
+    final goal = monthEnvelope.goal!;
+    final presentation = goalPresentation(monthEnvelope: monthEnvelope);
+    final progress = presentation.progress;
+    final underfunded = presentation.underfundedMinor;
+    final amountToAssignThisMonth = switch (goal.kind) {
+      EnvelopeGoalKind.monthlyFunding => goal.amountMinor,
+      _ => monthEnvelope.allocatedMinor + underfunded,
     };
 
     final isComplete = underfunded <= 0;
@@ -524,7 +474,10 @@ class _GoalCard extends HookWidget {
               label: l10n.categoryDetailAssignedSoFar,
               value: hideAmounts
                   ? hiddenAmountPlaceholder
-                  : formatMinorForCode(budgetedMinor, currencyCode),
+                  : formatMinorForCode(
+                      monthEnvelope.allocatedMinor,
+                      currencyCode,
+                    ),
             ),
             _DetailRow(
               label: l10n.categoryDetailToGo,

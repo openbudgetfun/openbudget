@@ -5,7 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/recent_moves_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
@@ -24,7 +24,8 @@ class RecentMovesScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final selectedTab = useState(_RecentMovesTab.all);
-    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(entityId));
+    final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
+    final viewAsync = ref.watch(budgetMonthProvider(entityId));
     final allEvents = ref.watch(recentMovesForBudgetProvider(entityId));
     final introSeen = ref.watch(recentMovesIntroSeenProvider(entityId));
     final hideAmounts = ref.watch(hideAmountsProvider);
@@ -74,7 +75,7 @@ class RecentMovesScreen extends HookConsumerWidget {
           ),
         ],
       ),
-      body: summaryAsync.when(
+      body: groupsAsync.when(
         loading: () => Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
         error: (_, _) => Padding(
           padding: const EdgeInsets.all(SpacingTokens.md),
@@ -83,10 +84,9 @@ class RecentMovesScreen extends HookConsumerWidget {
             message: l10n.reportsLoadError,
           ),
         ),
-        data: (summary) {
-          final currencyCode = summary.budget.currencyCode;
-
-          final envelopeNames = _buildEnvelopeNameMap(summary.categories);
+        data: (groups) {
+          final currencyCode = viewAsync.value?.currencyCode ?? '';
+          final envelopeNames = _buildEnvelopeNameMap(groups);
           final events = _filteredEvents(selectedTab.value, allEvents);
 
           return Column(
@@ -115,7 +115,7 @@ class RecentMovesScreen extends HookConsumerWidget {
                         onEnvelopeTap: (envelopeId) => context.pushNamed(
                           envelopeMovesRoute,
                           pathParameters: {
-                            'id': entityId,
+                            'entityId': entityId,
                             'envelopeId': envelopeId,
                           },
                         ),
@@ -146,15 +146,13 @@ class RecentMovesScreen extends HookConsumerWidget {
   int _sortByOccurredAt(RecentMoveEvent a, RecentMoveEvent b) =>
       b.occurredAt.compareTo(a.occurredAt);
 
-  Map<String, String> _buildEnvelopeNameMap(
-    List<CategoryWithEnvelopes> groups,
-  ) {
+  Map<String, String> _buildEnvelopeNameMap(List<CategoryMonthGroup> groups) {
     final map = <String, String>{};
     for (final group in groups) {
-      for (final envelope in group.envelopes) {
-        final id = envelope.id?.toString();
+      for (final view in group.envelopes) {
+        final id = view.envelope.id?.toString();
         if (id != null && id.isNotEmpty) {
-          map[id] = envelope.name;
+          map[id] = view.envelope.name;
         }
       }
     }
@@ -241,7 +239,8 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(entityId));
+    final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
+    final viewAsync = ref.watch(budgetMonthProvider(entityId));
     final allEvents = ref.watch(recentMovesForBudgetProvider(entityId));
     final hideAmounts = ref.watch(hideAmountsProvider);
 
@@ -278,7 +277,7 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
           ),
         ],
       ),
-      body: summaryAsync.when(
+      body: groupsAsync.when(
         loading: () => Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
         error: (_, _) => Padding(
           padding: const EdgeInsets.all(SpacingTokens.md),
@@ -287,14 +286,14 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
             message: l10n.reportsLoadError,
           ),
         ),
-        data: (summary) {
-          final currencyCode = summary.budget.currencyCode;
+        data: (groups) {
+          final currencyCode = viewAsync.value?.currencyCode ?? '';
           final envelopeNames = <String, String>{};
-          for (final group in summary.categories) {
-            for (final envelope in group.envelopes) {
-              final id = envelope.id?.toString();
+          for (final group in groups) {
+            for (final view in group.envelopes) {
+              final id = view.envelope.id?.toString();
               if (id != null && id.isNotEmpty) {
-                envelopeNames[id] = envelope.name;
+                envelopeNames[id] = view.envelope.name;
               }
             }
           }
