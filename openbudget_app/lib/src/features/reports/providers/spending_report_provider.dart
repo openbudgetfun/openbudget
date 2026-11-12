@@ -1,6 +1,7 @@
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/month_figures_provider.dart';
 import 'package:openbudget_app/src/features/reports/utils/month_range.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_group_names.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -52,11 +53,10 @@ Future<SpendingReport> _spendingReport(
     if (row.outflowMinor >= 0) continue;
     final spentMinor = row.outflowMinor.abs();
     totalExpenses += spentMinor;
-    // Lines with no envelope are uncategorised spending. They stay in the
-    // total, but "No category" is not a label the app translates, so the
-    // chart shows them under its own "Other categories" row instead.
-    if (row.groupId == null) continue;
-    categorySpending[row.name] = (categorySpending[row.name] ?? 0) + spentMinor;
+    // Lines with no envelope are uncategorised spending. They get one
+    // stable row so the rows add up to the total.
+    final name = row.groupId == null ? reportUncategorisedGroup : row.name;
+    categorySpending[name] = (categorySpending[name] ?? 0) + spentMinor;
   }
 
   final totalIncome = summaries.fold<int>(

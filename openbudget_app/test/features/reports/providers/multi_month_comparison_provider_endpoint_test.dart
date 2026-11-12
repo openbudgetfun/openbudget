@@ -27,7 +27,7 @@ void main() {
           'report',
           'monthSummaries',
           (_) => [
-            testMonthSummary(month: endMonth, activityMinor: -12000),
+            testMonthSummary(month: endMonth, activityMinor: 81000),
             testMonthSummary(month: previousMonth, activityMinor: -5000),
           ],
         )
@@ -104,7 +104,8 @@ void main() {
           previousMonth,
         ],
       );
-      expect(comparison.months.first.totalActivityMinor, -12000);
+      expect(comparison.months.first.totalActivityMinor, 81000);
+      expect(comparison.uncategorisedMonthlyActivityMinor, {endMonth: 90000});
       expect(
         [for (final c in comparison.categories) c.category.name],
         [
@@ -127,6 +128,19 @@ void main() {
       final fun = comparison.categories.last;
       expect(fun.envelopes.single.envelope.name, 'Cinema');
       expect(fun.monthlyActivityMinor, {endMonth: -2000});
+
+      // The category rows plus the uncategorised row add up to each
+      // month's total.
+      for (final month in comparison.months) {
+        final rowSum =
+            comparison.categories.fold<int>(
+              0,
+              (sum, category) =>
+                  sum + (category.monthlyActivityMinor[month.month] ?? 0),
+            ) +
+            (comparison.uncategorisedMonthlyActivityMinor[month.month] ?? 0);
+        expect(rowSum, month.totalActivityMinor);
+      }
 
       final call = client.callsTo('report', 'spending').single;
       expect(call.args['fromMonth'], monthRangeStart(endMonth, 2));

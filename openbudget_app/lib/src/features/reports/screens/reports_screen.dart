@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_group_names.dart';
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_figures.dart';
@@ -208,7 +209,7 @@ class _SpendingBreakdownPreview extends HookWidget {
     final segments = [
       for (final (index, entry) in categories.indexed)
         ReportChartDatum(
-          label: entry.key,
+          label: reportGroupLabel(l10n, entry.key),
           amountLabel: format(entry.value),
           value: entry.value,
           color: series[index % series.length],

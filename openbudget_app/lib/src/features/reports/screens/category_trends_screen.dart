@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/category_trends_provider.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_group_names.dart';
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
@@ -103,12 +104,13 @@ class _CategoryTrendCard extends HookWidget {
       (max, v) => v > max ? v : max,
     );
     String format(int minor) => formatMinorForCode(minor, currencyCode);
+    final categoryName = reportGroupLabel(l10n, category.categoryName);
 
     return Semantics(
       container: true,
       label: reportChartSummary(
         l10n,
-        title: category.categoryName,
+        title: categoryName,
         entries: [
           for (final (index, month) in months.indexed)
             (
@@ -127,7 +129,7 @@ class _CategoryTrendCard extends HookWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      category.categoryName,
+                      categoryName,
                       style: theme.textTheme.titleSmall,
                       overflow: TextOverflow.ellipsis,
                     ),

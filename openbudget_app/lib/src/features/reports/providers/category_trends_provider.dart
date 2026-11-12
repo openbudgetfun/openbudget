@@ -1,6 +1,7 @@
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/month_figures_provider.dart';
 import 'package:openbudget_app/src/features/reports/utils/month_range.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_group_names.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -35,11 +36,10 @@ Future<CategoryTrendsData> categoryTrends(
   final spentByCategory = <String, Map<int, int>>{};
   for (final row in rows) {
     final month = row.month;
-    if (month == null || row.groupId == null || row.outflowMinor >= 0) {
-      continue;
-    }
+    if (month == null || row.outflowMinor >= 0) continue;
+    final name = row.groupId == null ? reportUncategorisedGroup : row.name;
     spentByCategory
-        .putIfAbsent(row.name, () => {})
+        .putIfAbsent(name, () => {})
         .update(
           month,
           (spent) => spent + row.outflowMinor.abs(),

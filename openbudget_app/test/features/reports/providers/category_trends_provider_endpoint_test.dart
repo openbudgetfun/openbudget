@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/src/features/reports/providers/category_trends_provider.dart';
 import 'package:openbudget_app/src/features/reports/utils/month_range.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_group_names.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -75,13 +76,25 @@ void main() {
       [for (final line in trends.categories) line.categoryName],
       [
         'Groceries',
+        reportUncategorisedGroup,
         'Rent',
       ],
     );
     final groceries = trends.categories.first;
     expect(groceries.monthlyMinor, [100000, 200000]);
     expect(groceries.totalMinor, 300000);
+    final uncategorised = trends.categories[1];
+    expect(uncategorised.monthlyMinor, [90000, 0]);
+    expect(uncategorised.totalMinor, 90000);
     expect(trends.categories.last.monthlyMinor, [50000, 0]);
+    // Every spent unit sits in exactly one row.
+    expect(
+      trends.categories.fold<int>(
+        0,
+        (sum, line) => sum + line.monthlyMinor.first,
+      ),
+      240000,
+    );
     final call = client.callsTo('report', 'spending').single;
     expect(call.args['fromMonth'], startMonth);
     expect(call.args['toMonth'], endMonth);

@@ -7,6 +7,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
 import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_group_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -121,6 +122,28 @@ void main() {
       expect(find.text('Rent'), findsOneWidget);
       expect(find.text('Utilities'), findsOneWidget);
       expect(find.text('Groceries'), findsOneWidget);
+    });
+
+    testWidgets('renders uncategorised spending as its own translated row', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildSubject(
+          spendingBuilder: (ref, args) async => _makeReport(
+            totalExpenses: 145000,
+            categorySpending: {
+              'Rent': 100000,
+              reportUncategorisedGroup: 45000,
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Uncategorised'), findsOneWidget);
+      expect(find.text(reportUncategorisedGroup), findsNothing);
+      expect(find.text(r'$1,450.00'), findsWidgets);
+      expect(find.text(r'$450.00'), findsOneWidget);
     });
 
     testWidgets('renders spending error text when report fails', (

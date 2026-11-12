@@ -1,4 +1,5 @@
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_group_names.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -51,7 +52,8 @@ Future<PayeeSpendingReport> spendingByPayee(
     for (final row in rows)
       if (row.outflowMinor < 0)
         PayeeSpendingEntry(
-          payeeName: row.name,
+          // A row with no payee is spending the entity never attributed.
+          payeeName: row.groupId == null ? reportUncategorisedGroup : row.name,
           totalMinor: row.outflowMinor.abs(),
           transactionCount: row.transactionCount,
         ),

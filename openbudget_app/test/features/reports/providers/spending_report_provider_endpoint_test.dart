@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_group_names.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 
@@ -49,7 +50,16 @@ void main() {
     expect(report.totalIncome, 500000);
     expect(report.totalExpenses, 150000);
     expect(report.netIncome, 350000);
-    expect(report.categorySpending, {'Groceries': 80000, 'Rent': 40000});
+    expect(report.categorySpending, {
+      'Groceries': 80000,
+      'Rent': 40000,
+      reportUncategorisedGroup: 30000,
+    });
+    // The rows add up to the report total.
+    expect(
+      report.categorySpending.values.fold<int>(0, (sum, minor) => sum + minor),
+      report.totalExpenses,
+    );
     final call = client.callsTo('report', 'spending').single;
     expect(call.args['fromMonth'], 202511);
     expect(call.args['toMonth'], 202511);
@@ -103,6 +113,10 @@ void main() {
     expect(report.totalExpenses, 120000);
     expect(report.netIncome, 480000);
     expect(report.categorySpending, {'Groceries': 100000, 'Rent': 20000});
+    expect(
+      report.categorySpending.values.fold<int>(0, (sum, minor) => sum + minor),
+      report.totalExpenses,
+    );
     final call = client.callsTo('report', 'spending').single;
     expect(call.args['fromMonth'], 202509);
     expect(call.args['toMonth'], 202511);

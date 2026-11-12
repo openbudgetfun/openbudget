@@ -61,14 +61,25 @@ class MultiMonthComparison extends Equatable {
     required this.currencyCode,
     required this.months,
     required this.categories,
+    this.uncategorisedMonthlyActivityMinor = const {},
   });
 
   final String currencyCode;
   final List<MonthColumn> months;
   final List<CategoryComparison> categories;
 
+  /// Activity in envelopes the server returned without one, keyed by
+  /// yyyymm. It has no category to sit under, so the table draws it as its
+  /// own row and the rows still add up to the month totals.
+  final Map<int, int> uncategorisedMonthlyActivityMinor;
+
   @override
-  List<Object?> get props => [currencyCode, months, categories];
+  List<Object?> get props => [
+    currencyCode,
+    months,
+    categories,
+    uncategorisedMonthlyActivityMinor,
+  ];
 }
 
 /// Compares the last [monthCount] months for each envelope that moved.
@@ -101,16 +112,26 @@ Future<MultiMonthComparison> multiMonthComparison(
   );
 
   final activityByEnvelope = <String, Map<int, int>>{};
+  final uncategorised = <int, int>{};
   for (final row in rows) {
-    final groupId = row.groupId;
     final month = row.month;
-    if (groupId == null || month == null) continue;
+    if (month == null) continue;
+    final activity = row.outflowMinor + row.inflowMinor;
+    final groupId = row.groupId;
+    if (groupId == null) {
+      uncategorised.update(
+        month,
+        (total) => total + activity,
+        ifAbsent: () => activity,
+      );
+      continue;
+    }
     activityByEnvelope
         .putIfAbsent(groupId.toString(), () => {})
         .update(
           month,
-          (activity) => activity + row.outflowMinor + row.inflowMinor,
-          ifAbsent: () => row.outflowMinor + row.inflowMinor,
+          (total) => total + activity,
+          ifAbsent: () => activity,
         );
   }
 
@@ -160,6 +181,7 @@ Future<MultiMonthComparison> multiMonthComparison(
 
   return MultiMonthComparison(
     currencyCode: entity.baseCurrencyCode,
+    uncategorisedMonthlyActivityMinor: uncategorised,
     months: [
       for (final summary in summaries)
         MonthColumn(

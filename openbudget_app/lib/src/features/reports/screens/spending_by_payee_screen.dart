@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_group_names.dart';
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
@@ -91,7 +92,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
           final segments = [
             for (final (index, entry) in topEntries.indexed)
               ReportChartDatum(
-                label: entry.key,
+                label: reportGroupLabel(l10n, entry.key),
                 amountLabel: format(entry.value),
                 value: entry.value,
                 color: series[index],
@@ -235,7 +236,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                     children: [
                       for (final (index, entry) in sortedEntries.indexed) ...[
                         _CategoryRow(
-                          categoryName: entry.key,
+                          categoryName: reportGroupLabel(l10n, entry.key),
                           amountMinor: entry.value,
                           totalMinor: totalSpent,
                           currencyCode: currencyCode,

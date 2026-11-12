@@ -53,7 +53,8 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
           ],
         ),
         data: (comparison) {
-          if (comparison.categories.isEmpty) {
+          if (comparison.categories.isEmpty &&
+              comparison.uncategorisedMonthlyActivityMinor.isEmpty) {
             return ListView(
               padding: const EdgeInsets.all(SpacingTokens.md),
               children: [
@@ -250,6 +251,45 @@ class _ComparisonTable extends HookWidget {
                       ],
                     ),
                   ),
+              ],
+              if (comparison.uncategorisedMonthlyActivityMinor.isNotEmpty) ...[
+                if (comparison.categories.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: SpacingTokens.sm,
+                    ),
+                    child: Divider(height: 1, color: palette.line),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.sm,
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: _categoryColumnWidth,
+                        child: Text(
+                          l10n.reportsUncategorised,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall,
+                        ),
+                      ),
+                      for (final key in monthKeys)
+                        SizedBox(
+                          width: _monthColumnWidth,
+                          child: ObAmount(
+                            format(
+                              comparison
+                                      .uncategorisedMonthlyActivityMinor[key] ??
+                                  0,
+                            ),
+                            style: theme.textTheme.bodyMedium,
+                            textAlign: TextAlign.end,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ],
             ],
           ),
