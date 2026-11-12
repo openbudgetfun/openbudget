@@ -1,112 +1,153 @@
-// UuidValue is needed for constructing test model data.
-
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_detail_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
-import 'package:openbudget_app/src/features/accounts/providers/account_transactions_provider.dart';
-import 'package:openbudget_app/src/features/accounts/providers/solana_wallet_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/wallet_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
-import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
+import 'package:openbudget_app/src/features/transactions/providers/transaction_pages_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _entityId = 'test-budget-id';
-const _accountId = '00000000-0000-0000-0000-000000000111';
-final _budgetUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000010',
-);
-final _accountUuid = UuidValue.fromString(_accountId);
-final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000099');
-final _walletUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000abc',
-);
+import '../../../fixtures/budget_month.dart';
 
-Budget _makeBudget() => Budget(
-  id: _budgetUuid,
-  name: 'OpenBudget',
-  currencyCode: 'USD',
-  ownerId: _ownerUuid,
-  createdAt: DateTime(2026),
-);
+const String _entityId = fixtureEntityId;
+const String _accountId = fixtureAccountId;
+const String _walletId = '00000000-0000-0000-0000-0000000000abc1';
 
-Account _makeAccount({
+Entity _entity() => testEntity(baseCurrencyCode: 'USD');
+
+Account _account({
   String name = 'Daily',
-  String accountType = 'checking',
+  AccountKind kind = AccountKind.checking,
   int balanceMinor = 5202000,
+  String currencyCode = 'USD',
   bool onBudget = true,
-  bool isClosed = false,
-}) => Account(
-  id: _accountUuid,
+  AccountBalanceSource balanceSource = AccountBalanceSource.transactions,
+  DateTime? closedAt,
+}) => testAccount(
   name: name,
-  accountType: accountType,
+  kind: kind,
+  currencyCode: currencyCode,
   balanceMinor: balanceMinor,
-  currencyCode: 'USD',
-  entityId: _budgetUuid,
   onBudget: onBudget,
-  sortOrder: 0,
-  isClosed: isClosed,
+  balanceSource: balanceSource,
+  closedAt: closedAt,
 );
 
-Transaction _makeTransaction({
+AccountBalancesView _balances({
+  int balanceMinor = 5202000,
+  int clearedMinor = 5000000,
+  int unclearedMinor = 202000,
+  int? reportedBalanceMinor = 5199000,
+}) => AccountBalancesView(
+  accountId: UuidValue.fromString(_accountId),
+  currencyCode: 'USD',
+  balanceMinor: balanceMinor,
+  clearedMinor: clearedMinor,
+  unclearedMinor: unclearedMinor,
+  reportedBalanceMinor: reportedBalanceMinor,
+);
+
+TransactionView _view({
   required String id,
   required String description,
   required int amountMinor,
-  DateTime? transactionDate,
-  String? memo,
-  bool cleared = false,
-  bool reconciled = false,
-}) => Transaction(
-  id: UuidValue.fromString(id),
-  description: description,
-  amountMinor: amountMinor,
-  currencyCode: 'USD',
-  entityId: _budgetUuid,
-  accountId: _accountUuid,
-  transactionDate: transactionDate ?? DateTime(2026, 9, 3),
-  memo: memo,
-  cleared: cleared,
-  reconciled: reconciled,
+  TransactionStatus status = TransactionStatus.uncleared,
+  int baseAmountMinor = -1,
+  String accountCurrencyCode = 'USD',
+  String accountName = 'Daily',
+}) => TransactionView(
+  transaction: Transaction(
+    id: UuidValue.fromString(id),
+    entityId: UuidValue.fromString(_entityId),
+    accountId: UuidValue.fromString(_accountId),
+    date: DateTime.utc(2026, 9, 3),
+    amountMinor: amountMinor,
+    baseAmountMinor: baseAmountMinor == -1 ? amountMinor : baseAmountMinor,
+    fxRateDate: DateTime.utc(2026, 9, 3),
+    description: description,
+    status: status,
+  ),
+  lines: [
+    TransactionLine(
+      transactionId: UuidValue.fromString(id),
+      amountMinor: amountMinor,
+      baseAmountMinor: baseAmountMinor == -1 ? amountMinor : baseAmountMinor,
+    ),
+  ],
+  accountCurrencyCode: accountCurrencyCode,
+  accountName: accountName,
 );
 
-BudgetSummary _makeSummary() => BudgetSummary(
-  budget: _makeBudget(),
-  categories: const [],
-  totalIncomeMinor: 0,
-  totalBudgetedMinor: 0,
-  readyToAssignMinor: 0,
-  year: 2026,
-  month: 9,
+TransactionPageState _pageState(
+  List<TransactionView> items, {
+  String? nextCursor,
+}) => TransactionPageState(
+  filter: const TransactionFilter(accountId: _accountId),
+  items: items,
+  nextCursor: nextCursor,
 );
 
-class _RecordingAccountTransactionActions extends AccountTransactionActions {
-  int? statementBalanceMinor;
+/// A paged provider that always answers with the fixture page.
+class _FakeTransactionPages extends TransactionPages {
+  _FakeTransactionPages(this.items, {this.nextCursor});
+
+  final List<TransactionView> items;
+  final String? nextCursor;
 
   @override
-  FutureOr<void> build() {}
-
-  @override
-  Future<List<int>> reconcileWithBalance({
-    required String accountId,
-    required String entityId,
-    required int statementBalanceMinor,
-  }) async {
-    this.statementBalanceMinor = statementBalanceMinor;
-    return [1, 0];
-  }
+  Future<TransactionPageState> build(String entityId) async =>
+      _pageState(items, nextCursor: nextCursor);
 }
+
+Wallet _wallet() => Wallet(
+  id: UuidValue.fromString(_walletId),
+  entityId: UuidValue.fromString(_entityId),
+  accountId: UuidValue.fromString(_accountId),
+  network: WalletNetwork.solanaMainnet,
+  address: '8f5PsYfTEvtwFw8szw8RKtAHY8fE6hzJHjxbM6j6YV1z',
+  label: 'Main Wallet',
+  syncStatus: SyncStatus.synced,
+  lastSyncedAt: DateTime.utc(2026, 9, 5, 10, 30),
+);
+
+WalletHolding _holding({
+  String symbol = 'SOL',
+  BigInt? quantityRaw,
+  int decimals = 9,
+  int valueMinor = 28000,
+  int? costBasisMinor = 25000,
+  int? realizedPnlMinor = 3000,
+  String priceCurrencyCode = 'USD',
+}) => WalletHolding(
+  walletId: UuidValue.fromString(_walletId),
+  assetId: 'So11111111111111111111111111111111111111112',
+  symbol: symbol,
+  decimals: decimals,
+  quantityRaw: quantityRaw ?? BigInt.from(1500000000),
+  priceCurrencyCode: priceCurrencyCode,
+  valueMinor: valueMinor,
+  costBasisMinor: costBasisMinor,
+  realizedPnlMinor: realizedPnlMinor,
+);
 
 Widget _buildSubject({
-  List<Transaction>? transactions,
   Account? account,
-  AccountTransactionActions? actions,
+  AccountBalancesView? balances,
+  List<TransactionView>? transactions,
+  bool hasMore = false,
+  Wallet? wallet,
+  List<WalletHolding>? holdings,
+  List<AccountValuation>? valuations,
 }) {
+  final resolvedAccount = account ?? _account();
   final router = GoRouter(
     initialLocation: '/budgets/$_entityId/accounts/$_accountId',
     routes: [
@@ -129,34 +170,38 @@ Widget _buildSubject({
 
   return ProviderScope(
     overrides: [
-      if (actions != null)
-        accountTransactionActionsProvider.overrideWith(() => actions),
+      entityDetailProvider.overrideWith((ref, id) async => _entity()),
+      accountDetailProvider.overrideWith((ref, id) async => resolvedAccount),
+      accountBalancesProvider.overrideWith(
+        (ref, id) async => balances ?? _balances(),
+      ),
+      accountValuationsProvider.overrideWith(
+        (ref, id) async => valuations ?? const [],
+      ),
       accountListProvider.overrideWith(
-        (ref, entityId) async => [account ?? _makeAccount()],
+        (ref, entityId) async => [resolvedAccount],
       ),
-      accountTransactionsProvider.overrideWith(
-        (ref, args) async =>
-            transactions ??
-            [
-              _makeTransaction(
-                id: '00000000-0000-0000-0000-000000000211',
-                description: 'Rent',
-                amountMinor: -280000,
-                memo: 'September rent',
-              ),
-              _makeTransaction(
-                id: '00000000-0000-0000-0000-000000000212',
-                description: 'Payroll',
-                amountMinor: 300000,
-                transactionDate: DateTime(2026, 9, 2),
-                reconciled: true,
-              ),
-            ],
+      transactionPagesProvider.overrideWith2(
+        (entityId) => _FakeTransactionPages(
+          transactions ?? const [],
+          nextCursor: hasMore ? 'cursor-1' : null,
+        ),
       ),
-      payeeListProvider.overrideWith((ref, entityId) async => const []),
-      budgetSummaryProvider.overrideWith(
-        (ref, entityId) async => _makeSummary(),
+      netWorthForEntitiesProvider.overrideWith(
+        (ref, ids) async => _netWorth(),
       ),
+      walletForAccountProvider.overrideWith((ref, id) async => wallet),
+      if (wallet != null) ...[
+        walletHoldingsProvider.overrideWith(
+          (ref, id) async => holdings ?? const [],
+        ),
+        walletTransactionsProvider.overrideWith(
+          (ref, id) async => const [],
+        ),
+        walletTaxYearSummariesProvider.overrideWith(
+          (ref, id) async => const [],
+        ),
+      ],
     ],
     child: MaterialApp.router(
       theme: OpenBudgetTheme.light,
@@ -167,630 +212,327 @@ Widget _buildSubject({
   );
 }
 
-Widget _buildWalletSubject({
-  SolanaWallet? wallet,
-  List<SolanaWalletHolding>? holdings,
-  List<SolanaWalletTransaction>? walletTransactions,
-  List<SolanaWalletTaxYearSummary>? taxYearSummaries,
-}) {
-  final router = GoRouter(
-    initialLocation: '/budgets/$_entityId/accounts/$_accountId',
-    routes: [
-      GoRoute(
-        name: accountListRoute,
-        path: accountListPath,
-        builder: (_, _) =>
-            const Scaffold(body: Center(child: Text('Accounts Route'))),
-      ),
-      GoRoute(
-        name: accountDetailRoute,
-        path: accountDetailPath,
-        builder: (context, state) => AccountDetailScreen(
-          entityId: state.pathParameters['entityId']!,
-          accountId: state.pathParameters['accountId']!,
-        ),
-      ),
-    ],
-  );
-
-  final testWallet =
-      wallet ??
-      SolanaWallet(
-        id: _walletUuid,
-        accountId: _accountUuid,
-        entityId: _budgetUuid,
-        address: '8f5PsYfTEvtwFw8szw8RKtAHY8fE6hzJHjxbM6j6YV1z',
-        cluster: 'mainnet',
-        syncStatus: 'success',
-        lastSyncedAt: DateTime(2026, 9, 5, 10, 30),
-      );
-
-  final testHoldings =
-      holdings ??
-      [
-        SolanaWalletHolding(
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000ac1'),
-          walletId: _walletUuid,
-          entityId: _budgetUuid,
-          assetId: 'So11111111111111111111111111111111111111112',
-          symbol: 'SOL',
-          decimals: 9,
-          balanceRaw: '1500000000',
-          balanceUi: '1.5',
-          isNft: false,
-          totalValue: 280,
-          estimatedCostBasis: 250,
-          estimatedUnrealizedPnl: 30,
-          estimatedUnrealizedPnlPercent: 12,
-          estimatedRealizedPnl: 8,
-          pnlCurrency: 'USD',
-          tokenProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-        ),
-        SolanaWalletHolding(
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000ac2'),
-          walletId: _walletUuid,
-          entityId: _budgetUuid,
-          assetId: 'DustToken1111111111111111111111111111111111',
-          symbol: 'DUST',
-          decimals: 6,
-          balanceRaw: '100',
-          balanceUi: '0.0001',
-          isNft: false,
-          totalValue: 0.0005,
-          tokenProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-        ),
-      ];
-
-  final testWalletTransactions =
-      walletTransactions ??
-      [
-        SolanaWalletTransaction(
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000ad1'),
-          walletId: _walletUuid,
-          entityId: _budgetUuid,
-          signature: 'sig-jup-1',
-          slot: 100,
-          occurredAt: DateTime(2026, 9, 4, 13),
-          description: 'Jupiter swap',
-          txType: 'SWAP',
-          source: 'JUPITER',
-          category: 'Swaps',
-          rawJson: '{}',
-        ),
-        SolanaWalletTransaction(
-          id: UuidValue.fromString('00000000-0000-0000-0000-000000000ad2'),
-          walletId: _walletUuid,
-          entityId: _budgetUuid,
-          signature: 'sig-transfer-1',
-          slot: 101,
-          occurredAt: DateTime(2026, 9, 5, 9, 15),
-          description: 'Transfer to friend',
-          txType: 'TRANSFER',
-          source: 'SYSTEM_PROGRAM',
-          estimatedCostBasis: 10,
-          estimatedProceeds: 18,
-          estimatedRealizedPnl: 8,
-          pnlCurrency: 'USD',
-          taxYear: 2026,
-          tagsCsv: 'personal',
-          rawJson: '{}',
-        ),
-      ];
-
-  final testTaxYearSummaries =
-      taxYearSummaries ??
-      [
-        SolanaWalletTaxYearSummary(
-          walletId: _walletUuid,
-          taxYear: 2026,
-          transactionCount: 1,
-          estimatedRealizedPnl: 8,
-          estimatedProceeds: 18,
-          estimatedCostBasis: 10,
-          pnlCurrency: 'USD',
-        ),
-      ];
-
-  return ProviderScope(
-    overrides: [
-      accountListProvider.overrideWith(
-        (ref, entityId) async => [
-          _makeAccount(
-            name: 'Main Wallet',
-            accountType: 'cryptoWallet',
-            onBudget: false,
-            balanceMinor: 28000,
-          ),
-        ],
-      ),
-      accountTransactionsProvider.overrideWith((ref, args) async => const []),
-      payeeListProvider.overrideWith((ref, entityId) async => const []),
-      budgetSummaryProvider.overrideWith(
-        (ref, entityId) async => _makeSummary(),
-      ),
-      accountSolanaWalletProvider.overrideWith((ref, args) async => testWallet),
-      solanaWalletHoldingsProvider.overrideWith(
-        (ref, args) async => testHoldings,
-      ),
-      solanaWalletTransactionsProvider.overrideWith(
-        (ref, args) async => testWalletTransactions,
-      ),
-      solanaWalletTaxYearSummariesProvider.overrideWith(
-        (ref, args) async => testTaxYearSummaries,
-      ),
-    ],
-    child: MaterialApp.router(
-      theme: OpenBudgetTheme.light,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      routerConfig: router,
-    ),
-  );
-}
-
-Future<void> _scrollToText(
-  WidgetTester tester,
-  String text, {
-  double delta = 300,
-}) async {
-  final scrollable = find
-      .byWidgetPredicate(
-        (widget) =>
-            widget is Scrollable && widget.axisDirection == AxisDirection.down,
-      )
-      .last;
-  await tester.scrollUntilVisible(
-    find.text(text),
-    delta,
-    scrollable: scrollable,
-  );
-  await tester.pumpAndSettle();
-}
+NetWorthView _netWorth() => NetWorthView(
+  currencyCode: 'USD',
+  asOf: DateTime.utc(2026, 9, 5),
+  assetsMinor: 5202000,
+  liabilitiesMinor: 0,
+  netWorthMinor: 5202000,
+  isComplete: true,
+  missingCurrencyCodes: const [],
+  hasStaleRates: false,
+  currencies: const [],
+  entities: const [],
+  accounts: const [],
+);
 
 void main() {
   group('AccountDetailScreen', () {
-    testWidgets('renders account and transaction content', (tester) async {
-      await tester.pumpWidget(_buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Daily'), findsOneWidget);
-      expect(find.text('Rent'), findsOneWidget);
-      expect(find.text('September rent'), findsOneWidget);
-      expect(find.text('Payroll'), findsOneWidget);
-    });
-
-    testWidgets('back button navigates to account list route', (tester) async {
-      await tester.pumpWidget(_buildSubject());
-      await tester.pumpAndSettle();
-
-      await tester.tap(_skribbleIcon(OpenBudgetIcons.back));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Accounts Route'), findsOneWidget);
-    });
-
-    testWidgets('menu toggle hides reconciled rows', (tester) async {
-      await tester.pumpWidget(_buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Payroll'), findsOneWidget);
-
-      await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Hide Reconciled'), warnIfMissed: false);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Payroll'), findsNothing);
-      expect(find.text('Rent'), findsOneWidget);
-    });
-
-    testWidgets('uncleared shortcut filters to uncleared transactions', (
+    testWidgets('renders the balance, split, and reported line', (
       tester,
     ) async {
+      await tester.pumpWidget(_buildSubject());
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Daily'), findsOneWidget);
+      expect(find.text(r'$52,020.00'), findsOneWidget);
+      expect(find.text(r'Cleared $50,000.00'), findsOneWidget);
+      expect(find.text(r'Uncleared $2,020.00'), findsOneWidget);
+      expect(find.text(r'Bank says $51,990.00'), findsOneWidget);
+    });
+
+    testWidgets('shows the server-converted equivalent for a foreign account', (
+      tester,
+    ) async {
+      // The conversion comes from the net worth view's account rows, not
+      // from any client-side FX math.
+      final account = _account(currencyCode: 'EUR', balanceMinor: 40000);
+      final container = ProviderContainer(
+        overrides: [
+          walletForAccountProvider.overrideWith((ref, id) async => null),
+          entityDetailProvider.overrideWith((ref, id) async => _entity()),
+          accountDetailProvider.overrideWith((ref, id) async => account),
+          accountBalancesProvider.overrideWith(
+            (ref, id) async => _balances(
+              balanceMinor: 40000,
+              clearedMinor: 40000,
+              unclearedMinor: 0,
+              reportedBalanceMinor: null,
+            ),
+          ),
+          accountValuationsProvider.overrideWith((ref, id) async => const []),
+          accountListProvider.overrideWith((ref, entityId) async => [account]),
+          transactionPagesProvider.overrideWith2(
+            (entityId) => _FakeTransactionPages(const []),
+          ),
+          netWorthForEntitiesProvider.overrideWith(
+            (ref, ids) async => NetWorthView(
+              currencyCode: 'USD',
+              asOf: DateTime.utc(2026, 9, 5),
+              assetsMinor: 43160,
+              liabilitiesMinor: 0,
+              netWorthMinor: 43160,
+              isComplete: true,
+              missingCurrencyCodes: const [],
+              hasStaleRates: false,
+              currencies: const [],
+              entities: const [],
+              accounts: [
+                NetWorthAccountRow(
+                  accountId: UuidValue.fromString(_accountId),
+                  entityId: UuidValue.fromString(_entityId),
+                  name: 'Daily',
+                  kind: AccountKind.checking,
+                  isLiability: false,
+                  currencyCode: 'EUR',
+                  balanceMinor: 40000,
+                  convertedMinor: 43160,
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(
+            theme: OpenBudgetTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: GoRouter(
+              initialLocation: '/budgets/$_entityId/accounts/$_accountId',
+              routes: [
+                GoRoute(
+                  name: accountDetailRoute,
+                  path: accountDetailPath,
+                  builder: (context, state) => AccountDetailScreen(
+                    entityId: state.pathParameters['entityId']!,
+                    accountId: state.pathParameters['accountId']!,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.textContaining('in base currency'), findsOneWidget);
+      expect(find.text(r'≈ $431.60 in base currency'), findsOneWidget);
+    });
+
+    testWidgets('renders transaction rows for the paged list', (tester) async {
       await tester.pumpWidget(
         _buildSubject(
           transactions: [
-            _makeTransaction(
+            _view(
               id: '00000000-0000-0000-0000-000000000211',
               description: 'Rent',
               amountMinor: -280000,
             ),
-            _makeTransaction(
+            _view(
               id: '00000000-0000-0000-0000-000000000212',
-              description: 'Gym',
-              amountMinor: -8000,
-              cleared: true,
+              description: 'Payroll',
+              amountMinor: 300000,
+              status: TransactionStatus.cleared,
             ),
           ],
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump();
 
       expect(find.text('Rent'), findsOneWidget);
-      expect(find.text('Gym'), findsOneWidget);
-
-      await tester.tap(find.textContaining('uncleared transactions'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Rent'), findsOneWidget);
-      expect(find.text('Gym'), findsNothing);
+      expect(find.text('Payroll'), findsOneWidget);
     });
 
-    testWidgets('reconcile menu opens balance match prompt', (tester) async {
-      await tester.pumpWidget(_buildSubject());
-      await tester.pumpAndSettle();
-
-      await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Reconcile'));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.textContaining('Does this match your bank balance'),
-        findsOneWidget,
-      );
-      expect(find.text('Yes'), findsOneWidget);
-      expect(find.text('No'), findsOneWidget);
-      expect(find.text('Cancel'), findsOneWidget);
-    });
-
-    testWidgets('edit account opens full-screen form fields', (tester) async {
-      await tester.pumpWidget(_buildSubject());
-      await tester.pumpAndSettle();
-
-      await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Edit Account'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Account Nickname'), findsOneWidget);
-      expect(find.text('Account Notes'), findsOneWidget);
-      expect(find.text('Working Balance'), findsWidgets);
-      expect(find.text('Link an Account (Unavailable)'), findsOneWidget);
-    });
-
-    testWidgets('loan account renders overview and activity tabs', (
-      tester,
-    ) async {
+    testWidgets('offers load more when a next page exists', (tester) async {
       await tester.pumpWidget(
         _buildSubject(
-          account: _makeAccount(
-            name: 'Loan',
-            accountType: 'other',
-            balanceMinor: -125,
-            onBudget: false,
-          ),
           transactions: [
-            _makeTransaction(
-              id: '00000000-0000-0000-0000-000000000311',
-              description: 'Payment from Daily',
-              amountMinor: 50000,
+            _view(
+              id: '00000000-0000-0000-0000-000000000211',
+              description: 'Rent',
+              amountMinor: -280000,
             ),
-            _makeTransaction(
-              id: '00000000-0000-0000-0000-000000000312',
-              description: 'Initial Balance',
-              amountMinor: -50000,
-              transactionDate: DateTime(2026, 9),
+          ],
+          hasMore: true,
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      await tester.scrollUntilVisible(
+        find.text('Load more'),
+        300,
+        scrollable: find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is Scrollable &&
+                  widget.axisDirection == AxisDirection.down,
+            )
+            .last,
+      );
+      await tester.pump();
+      expect(find.text('Load more'), findsOneWidget);
+    });
+
+    testWidgets('shows the closed badge and reopen action', (tester) async {
+      await tester.pumpWidget(
+        _buildSubject(account: _account(closedAt: DateTime.utc(2026, 8))),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      // The badge sits just under the balance card; a small drag suffices.
+      await tester.drag(find.byType(ListView), const Offset(0, -200));
+      await tester.pump();
+      expect(find.text('Closed'), findsOneWidget);
+      expect(find.text('Reopen Account'), findsOneWidget);
+    });
+
+    testWidgets('valuation accounts show their value history', (tester) async {
+      await tester.pumpWidget(
+        _buildSubject(
+          account: _account(
+            name: 'Flat',
+            kind: AccountKind.property,
+            balanceSource: AccountBalanceSource.valuations,
+            balanceMinor: 420000000,
+          ),
+          balances: _balances(
+            balanceMinor: 420000000,
+            clearedMinor: 420000000,
+            unclearedMinor: 0,
+            reportedBalanceMinor: null,
+          ),
+          valuations: [
+            AccountValuation(
+              accountId: UuidValue.fromString(_accountId),
+              valuationDate: DateTime.utc(2026, 8, 31),
+              valueMinor: 420000000,
+              source: ValuationSource.manual,
+            ),
+            AccountValuation(
+              accountId: UuidValue.fromString(_accountId),
+              valuationDate: DateTime.utc(2026, 5, 31),
+              valueMinor: 400000000,
+              source: ValuationSource.manual,
             ),
           ],
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump();
 
-      expect(find.text('Overview'), findsOneWidget);
-      expect(find.text('Activity'), findsOneWidget);
-      await _scrollToText(tester, 'Loan Payoff Overview');
-      expect(find.text('Loan Payoff Overview'), findsOneWidget);
-      await _scrollToText(tester, 'Create Target');
-      expect(find.text('Create Target'), findsOneWidget);
-
-      await tester.tap(find.text('Create Target'));
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField).last, '400');
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Edit Target'), findsOneWidget);
-      expect(find.text(r'$400.00'), findsWidgets);
-
-      await tester.tap(find.text('Activity'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Payment from Daily'), findsOneWidget);
-      expect(find.text('Payments'), findsOneWidget);
-    });
-    testWidgets('solana wallet dashboard renders with filters', (tester) async {
-      final binding = tester.binding;
-      await binding.setSurfaceSize(const Size(1200, 2200));
-      addTearDown(() => binding.setSurfaceSize(null));
-
-      await tester.pumpWidget(_buildWalletSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Main Wallet'), findsWidgets);
-      await _scrollToText(tester, 'Holdings', delta: 200);
-      expect(find.text('Holdings'), findsOneWidget);
-      await _scrollToText(tester, r'Hide dust assets (< $0.01)');
-      expect(find.text(r'Hide dust assets (< $0.01)'), findsOneWidget);
-      await _scrollToText(tester, 'SOL', delta: 200);
-      expect(find.text('SOL'), findsOneWidget);
-      expect(find.text('DUST'), findsNothing);
-      await _scrollToText(tester, 'Transaction History');
-      expect(find.text('Jupiter swap'), findsOneWidget);
-      expect(find.text('Transfer to friend'), findsOneWidget);
-      expect(find.text('Transaction History'), findsOneWidget);
-      expect(find.textContaining('P&L +'), findsWidgets);
-      expect(find.text('Tax 2026'), findsWidgets);
-      expect(find.textContaining('Basis'), findsWidgets);
-    });
-
-    testWidgets('dust filter can reveal tiny-value holdings', (tester) async {
-      final binding = tester.binding;
-      await binding.setSurfaceSize(const Size(1200, 2200));
-      addTearDown(() => binding.setSurfaceSize(null));
-
-      await tester.pumpWidget(_buildWalletSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('DUST'), findsNothing);
-
-      await _scrollToText(tester, r'Hide dust assets (< $0.01)');
-      final dustChip = find.widgetWithText(
-        FilterChip,
-        r'Hide dust assets (< $0.01)',
-      );
-      await tester.ensureVisible(dustChip);
-      await tester.tap(dustChip);
-      await tester.pumpAndSettle();
-
-      expect(find.text('DUST'), findsOneWidget);
-    });
-
-    testWidgets('wallet transaction search and category filter work', (
-      tester,
-    ) async {
-      await tester.pumpWidget(_buildWalletSubject());
-      await tester.pumpAndSettle();
-
-      final searchField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextField &&
-            widget.decoration?.hintText ==
-                'Search description, category, tags, memo',
-      );
-      final scrollables = find.byType(Scrollable);
-      expect(scrollables, findsWidgets);
       await tester.scrollUntilVisible(
-        searchField,
+        find.text('Value history'),
         300,
-        scrollable: scrollables.last,
+        scrollable: find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is Scrollable &&
+                  widget.axisDirection == AxisDirection.down,
+            )
+            .last,
       );
-      await tester.enterText(searchField, 'jupiter');
-      await tester.pumpAndSettle();
-      expect(find.text('Jupiter swap'), findsOneWidget);
-      expect(find.text('Transfer to friend'), findsNothing);
-
-      await tester.enterText(searchField, '');
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Needs category'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Jupiter swap'), findsNothing);
-      expect(find.text('Transfer to friend'), findsOneWidget);
-    });
-    testWidgets('uncategorized wallet transactions show suggested category', (
-      tester,
-    ) async {
-      await tester.pumpWidget(_buildWalletSubject());
-      await tester.pumpAndSettle();
-
-      await _scrollToText(tester, 'Transfer to friend');
-
-      expect(find.text('Suggested: Transfers'), findsOneWidget);
+      await tester.pump();
+      expect(find.text('Value history'), findsOneWidget);
+      expect(find.text('Update value'), findsOneWidget);
+      expect(find.text(r'$4,200,000.00'), findsWidgets);
+      expect(find.textContaining('Valued'), findsWidgets);
     });
 
-    testWidgets('wallet metadata editor pre-fills suggested category', (
+    testWidgets('wallet accounts show holdings with value and P&L', (
       tester,
     ) async {
-      final binding = tester.binding;
-      await binding.setSurfaceSize(const Size(1200, 2200));
-      addTearDown(() => binding.setSurfaceSize(null));
-
-      await tester.pumpWidget(_buildWalletSubject());
-      await tester.pumpAndSettle();
-
-      await _scrollToText(tester, 'Transfer to friend');
-      final transferCard = find.ancestor(
-        of: find.text('Transfer to friend'),
-        matching: find.byType(Card),
+      await tester.pumpWidget(
+        _buildSubject(
+          account: _account(
+            name: 'Main Wallet',
+            kind: AccountKind.crypto,
+            balanceMinor: 28000,
+            onBudget: false,
+          ),
+          balances: _balances(
+            balanceMinor: 28000,
+            clearedMinor: 28000,
+            unclearedMinor: 0,
+            reportedBalanceMinor: null,
+          ),
+          wallet: _wallet(),
+          holdings: [_holding()],
+        ),
       );
-      final editButton = find.descendant(
-        of: transferCard.first,
-        matching: find.byTooltip('Edit metadata'),
-      );
-      final scrollables = find.byType(Scrollable);
-      expect(scrollables, findsWidgets);
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
       await tester.scrollUntilVisible(
-        editButton,
-        200,
-        scrollable: scrollables.last,
+        find.text('Holdings'),
+        300,
+        scrollable: find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is Scrollable &&
+                  widget.axisDirection == AxisDirection.down,
+            )
+            .last,
       );
-      await tester.tap(editButton);
-      await tester.pumpAndSettle();
-      expect(find.byType(AlertDialog), findsOneWidget);
-
-      final suggestedCategoryField = find.byWidgetPredicate(
-        (widget) =>
-            widget is TextField &&
-            widget.decoration?.labelText == 'Category' &&
-            widget.controller?.text == 'Transfers',
-      );
-      expect(suggestedCategoryField, findsOneWidget);
-      expect(
-        find.descendant(
-          of: find.byType(AlertDialog),
-          matching: find.text('Suggested: Transfers'),
-        ),
-        findsOneWidget,
-      );
-
-      await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      expect(find.text('Holdings'), findsOneWidget);
+      expect(find.text('SOL'), findsOneWidget);
+      // 9 decimals: 1500000000 raw = 1.5 SOL.
+      expect(find.text('Quantity 1.5'), findsOneWidget);
+      expect(find.text(r'Value $280.00'), findsOneWidget);
+      expect(find.text(r'P&L $30.00'), findsOneWidget);
     });
 
-    Future<void> openReconcileDialog(WidgetTester tester) async {
-      await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Reconcile'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('No'));
-      await tester.pumpAndSettle();
-    }
+    group('reconcile sheet', () {
+      Future<void> openSheet(WidgetTester tester) async {
+        await tester.tap(find.text('Reconcile'));
+        await tester.pump();
+        await tester.pump();
+      }
 
-    Finder reconcileField() => find.descendant(
-      of: find.byType(AlertDialog),
-      matching: find.byType(TextField),
-    );
-
-    testWidgets('reconcile saves 12.34 as 1234 minor units', (tester) async {
-      final actions = _RecordingAccountTransactionActions();
-      await tester.pumpWidget(_buildSubject(actions: actions));
-      await tester.pumpAndSettle();
-      await openReconcileDialog(tester);
-
-      await tester.enterText(reconcileField(), '12.34');
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Reconcile'));
-      await tester.pumpAndSettle();
-
-      expect(actions.statementBalanceMinor, 1234);
-    });
-
-    testWidgets('reconcile refuses an over-precise balance', (tester) async {
-      final actions = _RecordingAccountTransactionActions();
-      await tester.pumpWidget(_buildSubject(actions: actions));
-      await tester.pumpAndSettle();
-      await openReconcileDialog(tester);
-
-      await tester.enterText(reconcileField(), '12.345');
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('Enter a valid amount with at most 2 decimal places'),
-        findsOneWidget,
+      Finder statementField() => find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byType(TextField),
       );
 
-      final saveButton = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Reconcile'),
-      );
-      expect(saveButton.onPressed, isNull);
-      expect(actions.statementBalanceMinor, isNull);
-    });
+      testWidgets('pre-fills the bank reported balance', (tester) async {
+        await tester.pumpWidget(_buildSubject());
+        await tester.pump();
+        await tester.pump();
 
-    testWidgets('reconcile accepts a negative statement balance', (
-      tester,
-    ) async {
-      final actions = _RecordingAccountTransactionActions();
-      await tester.pumpWidget(_buildSubject(actions: actions));
-      await tester.pumpAndSettle();
-      await openReconcileDialog(tester);
+        await openSheet(tester);
 
-      await tester.enterText(reconcileField(), '-12.34');
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Reconcile'));
-      await tester.pumpAndSettle();
+        expect(find.text('Reconcile Daily'), findsOneWidget);
+        final field = tester.widget<TextField>(statementField());
+        expect(field.controller?.text, '51990.00');
+      });
 
-      expect(actions.statementBalanceMinor, -1234);
-    });
+      testWidgets('shows a live difference against the balance', (
+        tester,
+      ) async {
+        await tester.pumpWidget(_buildSubject());
+        await tester.pump();
+        await tester.pump();
 
-    Future<void> openLoanTargetDialog(WidgetTester tester) async {
-      await tester.ensureVisible(find.text('Create Target'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Create Target'));
-      await tester.pumpAndSettle();
-    }
+        await openSheet(tester);
+        // The sheet diffs against the cleared balance ($50,000.00).
+        await tester.enterText(statementField(), '50000.00');
+        await tester.pump();
+        await tester.pump();
 
-    testWidgets('loan target saves 12.34 as 1234 minor units', (tester) async {
-      await tester.pumpWidget(
-        _buildSubject(
-          account: _makeAccount(
-            name: 'Car Loan',
-            accountType: 'other',
-            balanceMinor: -500000,
-            onBudget: false,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      await openLoanTargetDialog(tester);
-
-      await tester.enterText(reconcileField(), '12.34');
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
-      await tester.pumpAndSettle();
-
-      expect(find.text(r'$12.34'), findsWidgets);
-    });
-
-    testWidgets('loan target refuses an over-precise amount', (tester) async {
-      await tester.pumpWidget(
-        _buildSubject(
-          account: _makeAccount(
-            name: 'Car Loan',
-            accountType: 'other',
-            balanceMinor: -500000,
-            onBudget: false,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      await openLoanTargetDialog(tester);
-
-      await tester.enterText(reconcileField(), '12.345');
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('Enter a valid amount with at most 2 decimal places'),
-        findsOneWidget,
-      );
-
-      final saveButton = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Save'),
-      );
-      expect(saveButton.onPressed, isNull);
-    });
-
-    testWidgets('loan target refuses a negative amount', (tester) async {
-      await tester.pumpWidget(
-        _buildSubject(
-          account: _makeAccount(
-            name: 'Car Loan',
-            accountType: 'other',
-            balanceMinor: -500000,
-            onBudget: false,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      await openLoanTargetDialog(tester);
-
-      await tester.enterText(reconcileField(), '-12.34');
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('Enter a valid amount with at most 2 decimal places'),
-        findsOneWidget,
-      );
-
-      final saveButton = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Save'),
-      );
-      expect(saveButton.onPressed, isNull);
+        expect(find.textContaining('Difference'), findsOneWidget);
+        expect(find.textContaining(r'$0.00'), findsOneWidget);
+      });
     });
   });
 }
-
-Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
-  (widget) => widget is SkribbleIcon && widget.data == data,
-);

@@ -5,6 +5,28 @@ const fixtureEntityId = '00000000-0000-0000-0000-0000000000f001';
 const fixtureCategoryId = '00000000-0000-0000-0000-0000000000f002';
 const fixtureEnvelopeId = '00000000-0000-0000-0000-0000000000f003';
 const fixtureAccountId = '00000000-0000-0000-0000-0000000000f004';
+const fixtureOwnerId = '00000000-0000-0000-0000-0000000000f005';
+
+Entity testEntity({
+  String id = fixtureEntityId,
+  String name = 'Test Entity',
+  EntityKind kind = EntityKind.individual,
+  String countryCode = 'GB',
+  String baseCurrencyCode = 'GBP',
+  AccountingMode accountingMode = AccountingMode.envelope,
+}) => Entity(
+  id: UuidValue.fromString(id),
+  name: name,
+  kind: kind,
+  countryCode: countryCode,
+  baseCurrencyCode: baseCurrencyCode,
+  timeZone: 'Europe/London',
+  accountingMode: accountingMode,
+  fiscalYearEndMonth: 4,
+  fiscalYearEndDay: 5,
+  ownerId: UuidValue.fromString(fixtureOwnerId),
+  createdAt: DateTime.utc(2026),
+);
 
 BudgetMonthSummary testMonthSummary({
   int month = 202611,
@@ -126,6 +148,7 @@ Account testAccount({
   int balanceMinor = 100000,
   bool onBudget = true,
   AccountBalanceSource balanceSource = AccountBalanceSource.transactions,
+  DateTime? closedAt,
 }) => Account(
   id: UuidValue.fromString(id),
   entityId: UuidValue.fromString(entityId),
@@ -135,4 +158,5 @@ Account testAccount({
   balanceSource: balanceSource,
   balanceMinor: balanceMinor,
   onBudget: onBudget,
+  closedAt: closedAt,
 );

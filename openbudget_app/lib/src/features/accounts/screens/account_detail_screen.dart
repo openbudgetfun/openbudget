@@ -14,7 +14,6 @@ import 'package:openbudget_app/src/features/reports/providers/net_worth_provider
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_pages_provider.dart';
 import 'package:openbudget_app/src/features/transactions/widgets/transaction_row.dart';
-import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/utils/money_input.dart';
@@ -48,7 +47,10 @@ class AccountDetailScreen extends HookConsumerWidget {
     final pagesAsync = ref.watch(transactionPagesProvider(entityId));
     final walletAsync = ref.watch(walletForAccountProvider(accountId));
     final walletId = walletAsync.value?.id?.toString();
-    final netWorthAsync = ref.watch(netWorthForEntitiesProvider({entityId}));
+    // One stable Set instance per entity: a fresh equal set would make
+    // the family re-query on every rebuild and never settle.
+    final entityIds = useMemoized(() => {entityId}, [entityId]);
+    final netWorthAsync = ref.watch(netWorthForEntitiesProvider(entityIds));
     final convertedMinor = useMemoized(() {
       final view = netWorthAsync.value;
       for (final row in view?.accounts ?? const <NetWorthAccountRow>[]) {
@@ -497,6 +499,10 @@ class _ReconcileSheet extends HookConsumerWidget {
     final createAdjustment = useState(true);
     final isSubmitting = useState(false);
 
+    // The controller alone does not rebuild the hook widget; without this
+    // the difference line stays at the pre-filled value's difference.
+    useListenable(statementController);
+
     final statementMinor = parseMoneyInput(
       statementController.text,
       decimals: decimals,
@@ -706,7 +712,7 @@ class _ValuationSheet extends HookConsumerWidget {
 }
 
 /// Holdings of the account's wallet, loaded directly from `client.wallet`.
-class _WalletHoldingsSection extends HookWidget {
+class _WalletHoldingsSection extends ConsumerWidget {
   const _WalletHoldingsSection({
     required this.walletId,
     required this.fallbackCurrencyCode,
@@ -716,31 +722,16 @@ class _WalletHoldingsSection extends HookWidget {
   final String fallbackCurrencyCode;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final holdings = useState<List<WalletHolding>?>(null);
-
-    useEffect(() {
-      var cancelled = false;
-      Future<void> load() async {
-        final container = ProviderScope.containerOf(context);
-        final client = container.read(serverpodClientProvider);
-        try {
-          final list = await client.wallet.listHoldings(
-            UuidValue.fromString(walletId),
-          );
-          if (!cancelled) holdings.value = list;
-        } on Exception {
-          if (!cancelled) holdings.value = const [];
-        }
-      }
-
-      unawaited(load());
-      return () => cancelled = true;
-    }, [walletId]);
-
-    final list = holdings.value;
-    if (list == null || list.isEmpty) return const SizedBox.shrink();
+    // The cached provider, not a hand-rolled client call: reading the
+    // client from a hook's init state crashes with "Cannot listen to
+    // inherited widgets inside HookState.initState", and the provider is
+    // what the test overrides.
+    final holdingsAsync = ref.watch(walletHoldingsProvider(walletId));
+    final list = holdingsAsync.value ?? const <WalletHolding>[];
+    if (holdingsAsync.hasValue && list.isEmpty) return const SizedBox.shrink();
+    if (!holdingsAsync.hasValue) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

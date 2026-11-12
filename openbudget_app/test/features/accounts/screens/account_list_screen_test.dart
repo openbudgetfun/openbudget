@@ -1,43 +1,62 @@
-// UuidValue is needed for constructing test model data.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/plaid_account_link_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_list_screen.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _entityId = 'test-budget-id';
-final _budgetUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000010',
-);
+import '../../../fixtures/budget_month.dart';
+
+const String _entityId = fixtureEntityId;
 
 Account _makeAccount({
-  UuidValue? id,
   String name = 'Checking',
-  String accountType = 'checking',
+  AccountKind kind = AccountKind.checking,
   int balanceMinor = 100000,
   String currencyCode = 'USD',
   bool onBudget = true,
   bool isClosed = false,
   int sortOrder = 0,
-}) => Account(
-  id: id,
+}) => testAccount(
   name: name,
-  accountType: accountType,
+  kind: kind,
   balanceMinor: balanceMinor,
   currencyCode: currencyCode,
-  entityId: _budgetUuid,
   onBudget: onBudget,
-  sortOrder: sortOrder,
-  isClosed: isClosed,
+  closedAt: isClosed ? DateTime.utc(2026, 8) : null,
 );
 
-Widget _buildRoutedSubject({required List<Account> accounts}) {
+NetWorthView _netWorth({
+  int assetsMinor = 100000,
+  int liabilitiesMinor = 0,
+  List<NetWorthAccountRow> accounts = const [],
+}) => NetWorthView(
+  currencyCode: 'USD',
+  asOf: DateTime.utc(2026, 9, 5),
+  assetsMinor: assetsMinor,
+  liabilitiesMinor: liabilitiesMinor,
+  netWorthMinor: assetsMinor - liabilitiesMinor,
+  isComplete: true,
+  missingCurrencyCodes: const [],
+  hasStaleRates: false,
+  currencies: const [],
+  entities: const [],
+  accounts: accounts,
+);
+
+Widget _buildSubject({
+  required List<Account> accounts,
+  NetWorthView? netWorth,
+  bool routed = false,
+}) {
   final router = GoRouter(
     initialLocation: '/budgets/$_entityId/accounts',
     routes: [
@@ -85,7 +104,12 @@ Widget _buildRoutedSubject({required List<Account> accounts}) {
 
   return ProviderScope(
     overrides: [
+      entityDetailProvider.overrideWith((ref, id) async => testEntity()),
       accountListProvider.overrideWith((ref, entityId) async => accounts),
+      plaidConnectionsProvider.overrideWith((ref, entityId) async => const []),
+      netWorthForEntitiesProvider.overrideWith(
+        (ref, ids) async => netWorth ?? _netWorth(),
+      ),
     ],
     child: MaterialApp.router(
       theme: OpenBudgetTheme.light,
@@ -141,21 +165,7 @@ void main() {
     });
 
     testWidgets('renders empty state with add account button', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            accountListProvider.overrideWith(
-              (ref, entityId) async => <Account>[],
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(entityId: _entityId),
-          ),
-        ),
-      );
+      await tester.pumpWidget(_buildSubject(accounts: const []));
       await tester.pumpAndSettle();
 
       expect(find.text('No Accounts Yet'), findsOneWidget);
@@ -170,21 +180,7 @@ void main() {
     testWidgets('renders app bar with title and quick action buttons', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            accountListProvider.overrideWith(
-              (ref, entityId) async => <Account>[],
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(entityId: _entityId),
-          ),
-        ),
-      );
+      await tester.pumpWidget(_buildSubject(accounts: const []));
       await tester.pumpAndSettle();
 
       expect(find.text('Accounts'), findsOneWidget);
@@ -198,86 +194,68 @@ void main() {
       );
     });
 
-    testWidgets('renders on-budget accounts section', (tester) async {
+    testWidgets('groups accounts into assets and liabilities', (tester) async {
       final accounts = [
         _makeAccount(name: 'Main Checking', balanceMinor: 250000),
         _makeAccount(
           name: 'Emergency Fund',
-          accountType: 'savings',
+          kind: AccountKind.savings,
           balanceMinor: 500000,
+          sortOrder: 1,
+        ),
+        _makeAccount(
+          name: 'Credit Card',
+          kind: AccountKind.creditCard,
+          balanceMinor: -150000,
+          sortOrder: 2,
         ),
       ];
 
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            accountListProvider.overrideWith((ref, entityId) async => accounts),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(entityId: _entityId),
+        _buildSubject(
+          accounts: accounts,
+          netWorth: _netWorth(
+            assetsMinor: 750000,
+            liabilitiesMinor: 150000,
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Budget Accounts'), findsOneWidget);
+      // The totals card and the group headers share these labels.
+      expect(find.text('Assets'), findsWidgets);
       expect(find.text('Main Checking'), findsOneWidget);
       expect(find.text('Emergency Fund'), findsOneWidget);
+      // The liabilities section starts below the fold; the net worth
+      // card also lists the account, so the row appears twice.
+      await tester.drag(find.byType(ListView), const Offset(0, -300));
+      await tester.pump();
+      expect(find.text('Liabilities'), findsWidgets);
+      expect(find.text('Credit Card'), findsNWidgets(2));
     });
 
-    testWidgets('renders off-budget accounts section', (tester) async {
+    testWidgets('renders closed accounts folded at the end', (tester) async {
       final accounts = [
-        _makeAccount(
-          name: 'Brokerage',
-          accountType: 'investment',
-          balanceMinor: 1500000,
-          onBudget: false,
-        ),
+        _makeAccount(name: 'Old Checking', isClosed: true),
+        _makeAccount(name: 'Daily', sortOrder: 1),
       ];
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            accountListProvider.overrideWith((ref, entityId) async => accounts),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(entityId: _entityId),
-          ),
-        ),
-      );
+      await tester.pumpWidget(_buildSubject(accounts: accounts));
       await tester.pumpAndSettle();
 
-      expect(find.text('Tracking Accounts'), findsOneWidget);
-      expect(find.text('Brokerage'), findsOneWidget);
-    });
-
-    testWidgets('renders closed accounts section', (tester) async {
-      final accounts = [_makeAccount(name: 'Old Checking', isClosed: true)];
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            accountListProvider.overrideWith((ref, entityId) async => accounts),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(entityId: _entityId),
-          ),
-        ),
+      await tester.scrollUntilVisible(
+        find.text('Closed Accounts'),
+        200,
+        scrollable: find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is Scrollable &&
+                  widget.axisDirection == AxisDirection.down,
+            )
+            .first,
       );
-      await tester.pumpAndSettle();
-
       expect(find.text('Closed Accounts'), findsOneWidget);
       expect(find.text('Old Checking'), findsOneWidget);
-      expect(_skribbleIcon(OpenBudgetIcons.lock), findsOneWidget);
     });
 
     testWidgets('renders net worth card with assets and liabilities', (
@@ -287,176 +265,69 @@ void main() {
         _makeAccount(name: 'Bank', balanceMinor: 500000),
         _makeAccount(
           name: 'Credit Card',
-          accountType: 'creditCard',
+          kind: AccountKind.creditCard,
           balanceMinor: -150000,
+          sortOrder: 1,
         ),
       ];
 
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            accountListProvider.overrideWith((ref, entityId) async => accounts),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(entityId: _entityId),
+        _buildSubject(
+          accounts: accounts,
+          netWorth: _netWorth(
+            assetsMinor: 500000,
+            liabilitiesMinor: 150000,
           ),
         ),
       );
       await tester.pumpAndSettle();
 
       expect(find.text('Net Worth'), findsOneWidget);
-      expect(find.text('Assets'), findsOneWidget);
-      expect(find.text('Liabilities'), findsOneWidget);
+      // The totals card and the group headers both use these labels.
+      expect(find.text('Assets'), findsWidgets);
+      expect(find.text('Liabilities'), findsWidgets);
     });
 
-    testWidgets('renders account type labels correctly', (tester) async {
-      final accounts = [
-        _makeAccount(name: 'My Checking'),
-        _makeAccount(name: 'My Savings', accountType: 'savings', sortOrder: 1),
-        _makeAccount(
-          name: 'My Credit Card',
-          accountType: 'creditCard',
-          balanceMinor: -50000,
-          sortOrder: 2,
-        ),
-      ];
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            accountListProvider.overrideWith((ref, entityId) async => accounts),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(entityId: _entityId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Checking'), findsOneWidget);
-      expect(find.text('Savings'), findsOneWidget);
-      await tester.scrollUntilVisible(
-        find.text('Credit Card'),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('Credit Card'), findsOneWidget);
-    });
-
-    testWidgets('renders all three sections when mixed accounts exist', (
+    testWidgets('shows the base equivalent for a foreign account row', (
       tester,
     ) async {
       final accounts = [
-        _makeAccount(name: 'On Budget Account'),
-        _makeAccount(name: 'Off Budget Account', onBudget: false, sortOrder: 1),
-        _makeAccount(name: 'Closed Account', isClosed: true, sortOrder: 2),
+        _makeAccount(name: 'EUR Checking', currencyCode: 'EUR'),
       ];
 
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            accountListProvider.overrideWith((ref, entityId) async => accounts),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(entityId: _entityId),
+        _buildSubject(
+          accounts: accounts,
+          netWorth: _netWorth(
+            assetsMinor: 43160,
+            accounts: [
+              NetWorthAccountRow(
+                accountId: UuidValue.fromString(fixtureAccountId),
+                entityId: UuidValue.fromString(_entityId),
+                name: 'EUR Checking',
+                kind: AccountKind.checking,
+                isLiability: false,
+                currencyCode: 'EUR',
+                balanceMinor: 100000,
+                convertedMinor: 43160,
+              ),
+            ],
           ),
         ),
       );
       await tester.pumpAndSettle();
+      await tester.pump();
 
-      expect(find.text('Budget Accounts'), findsOneWidget);
-      expect(find.text('Tracking Accounts'), findsOneWidget);
-      await tester.scrollUntilVisible(
-        find.text('Closed Accounts'),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('Closed Accounts'), findsOneWidget);
-      expect(find.text('On Budget Account'), findsOneWidget);
-      expect(find.text('Off Budget Account'), findsOneWidget);
-      expect(find.text('Closed Account'), findsOneWidget);
-    });
-
-    testWidgets('renders multi-currency totals in headers and net worth', (
-      tester,
-    ) async {
-      final accounts = [
-        _makeAccount(name: 'USD Checking'),
-        _makeAccount(
-          name: 'EUR Checking',
-          balanceMinor: 200000,
-          currencyCode: 'EUR',
-          sortOrder: 1,
-        ),
-      ];
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            accountListProvider.overrideWith((ref, entityId) async => accounts),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(entityId: _entityId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('USD'), findsWidgets);
-      expect(find.textContaining('EUR'), findsWidgets);
-      expect(find.text('USD Checking'), findsOneWidget);
-      await tester.scrollUntilVisible(
-        find.text('EUR Checking'),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
       expect(find.text('EUR Checking'), findsOneWidget);
+      // The net worth card renders the converted total for the row.
+      expect(find.textContaining('in base currency'), findsOneWidget);
     });
 
-    testWidgets('notification banner can be dismissed', (tester) async {
+    testWidgets('in-list add account button appears under the accounts', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        _buildRoutedSubject(accounts: [_makeAccount(name: 'Daily')]),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Notifications'), findsOneWidget);
-
-      await tester.tap(_skribbleIcon(OpenBudgetIcons.close).first);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Notifications'), findsNothing);
-    });
-
-    testWidgets('always shows in-list add account button', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            accountListProvider.overrideWith(
-              (ref, entityId) async => [_makeAccount()],
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const AccountListScreen(entityId: _entityId),
-          ),
-        ),
+        _buildSubject(accounts: [_makeAccount()]),
       );
       await tester.pumpAndSettle();
 
@@ -469,7 +340,7 @@ void main() {
     testWidgets('empty-state Add Account button navigates to add account', (
       tester,
     ) async {
-      await tester.pumpWidget(_buildRoutedSubject(accounts: const []));
+      await tester.pumpWidget(_buildSubject(accounts: const [], routed: true));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Add Account'));
@@ -482,7 +353,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        _buildRoutedSubject(accounts: [_makeAccount(name: 'Daily')]),
+        _buildSubject(accounts: [_makeAccount(name: 'Daily')]),
       );
       await tester.pumpAndSettle();
 
@@ -494,7 +365,7 @@ void main() {
 
     testWidgets('transfer action navigates to transfer route', (tester) async {
       await tester.pumpWidget(
-        _buildRoutedSubject(accounts: [_makeAccount(name: 'Daily')]),
+        _buildSubject(accounts: [_makeAccount(name: 'Daily')]),
       );
       await tester.pumpAndSettle();
 
@@ -508,7 +379,7 @@ void main() {
 
     testWidgets('settings action navigates to settings route', (tester) async {
       await tester.pumpWidget(
-        _buildRoutedSubject(accounts: [_makeAccount(name: 'Daily')]),
+        _buildSubject(accounts: [_makeAccount(name: 'Daily')]),
       );
       await tester.pumpAndSettle();
 
@@ -520,29 +391,14 @@ void main() {
       expect(find.text('Settings Route'), findsOneWidget);
     });
 
-    testWidgets('all transactions row navigates to transactions route', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        _buildRoutedSubject(accounts: [_makeAccount(name: 'Daily')]),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('All transactions'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Transactions Route'), findsOneWidget);
-    });
-
     testWidgets('tapping account row navigates to account detail route', (
       tester,
     ) async {
-      final accountId = UuidValue.fromString(
-        '00000000-0000-0000-0000-000000000111',
-      );
       await tester.pumpWidget(
-        _buildRoutedSubject(
-          accounts: [_makeAccount(name: 'Daily Account', id: accountId)],
+        _buildSubject(
+          accounts: [
+            _makeAccount(name: 'Daily Account'),
+          ],
         ),
       );
       await tester.pumpAndSettle();
@@ -550,11 +406,7 @@ void main() {
       await tester.tap(find.text('Daily Account'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Account Detail $accountId'), findsOneWidget);
+      expect(find.text('Account Detail $fixtureAccountId'), findsOneWidget);
     });
   });
 }
-
-Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
-  (widget) => widget is SkribbleIcon && widget.data == data,
-);

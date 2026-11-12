@@ -27,8 +27,12 @@ class AccountListScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final accounts = ref.watch(accountListProvider(entityId));
+    // The family must see one stable Set instance per entity, or the
+    // provider re-queries every rebuild (riverpod treats a fresh equal
+    // set as a changed argument).
+    final entityIds = useMemoized(() => {entityId}, [entityId]);
     final netWorthAsync = ref.watch(
-      netWorthForEntitiesProvider({entityId}),
+      netWorthForEntitiesProvider(entityIds),
     );
     final convertedById = useMemoized(() {
       final view = netWorthAsync.value;
