@@ -408,8 +408,17 @@ class JournalEditorPage {
 
   Finder get title => find.text('New journal').first;
   Finder get editTitle => find.text('Edit draft').first;
-  Finder get referenceField => find.byKey(const Key('journal-reference-field'));
-  Finder get narrationField => find.byKey(const Key('journal-narration-field'));
+
+  /// The text inputs live inside [ObTextField] wrappers, so the finders
+  /// descend to the [EditableText] the tester can drive.
+  Finder get referenceField => find.descendant(
+    of: find.byKey(const Key('journal-reference-field')),
+    matching: find.byType(EditableText),
+  );
+  Finder get narrationField => find.descendant(
+    of: find.byKey(const Key('journal-narration-field')),
+    matching: find.byType(EditableText),
+  );
   Finder get addLineButton => find.byKey(const Key('journal-add-line'));
   Finder get balancedChip => find.byKey(const Key('journal-balanced-chip'));
   Finder get totalsCard => find.byKey(const Key('journal-totals'));
@@ -421,33 +430,22 @@ class JournalEditorPage {
 
   Finder lineAccount(int index) =>
       find.byKey(Key('journal-line-account-$index'));
-  Finder lineAmount(int index) => find.byKey(Key('journal-line-amount-$index'));
+  Finder lineAmount(int index) => find.descendant(
+    of: find.byKey(Key('journal-line-amount-$index')),
+    matching: find.byType(EditableText),
+  );
   Finder lineCredit(int index) => find.descendant(
     of: find.byKey(Key('journal-line-side-$index')),
     matching: find.text('Credit'),
   );
 
   /// The amount currently typed into line [index]'s field.
-  String lineAmountValue(int index) => tester
-      .widget<EditableText>(
-        find.descendant(
-          of: lineAmount(index),
-          matching: find.byType(EditableText),
-        ),
-      )
-      .controller
-      .text;
+  String lineAmountValue(int index) =>
+      tester.widget<EditableText>(lineAmount(index)).controller.text;
 
   /// The reference currently typed into the reference field.
-  String referenceValue() => tester
-      .widget<EditableText>(
-        find.descendant(
-          of: referenceField,
-          matching: find.byType(EditableText),
-        ),
-      )
-      .controller
-      .text;
+  String referenceValue() =>
+      tester.widget<EditableText>(referenceField).controller.text;
 
   Future<void> setReference(String text) async {
     await tester.enterText(referenceField, text);

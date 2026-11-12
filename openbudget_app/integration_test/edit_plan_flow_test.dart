@@ -159,13 +159,14 @@ void main() {
       final editPlanPage = EditPlanPage(tester);
       await editPlanPage.openFirstAddTarget();
       expect(editPlanPage.saveTargetButton, findsOneWidget);
-      await tester.tap(find.widgetWithText(BudgetAmountField, 'I need'));
+      // The amount field opens the keypad sheet; enter 2800 and confirm.
+      await tester.tap(find.widgetWithText(BudgetAmountField, 'Amount'));
       await tester.pumpAndSettle();
       for (final digit in ['2', '8', '0', '0']) {
         await tester.tap(find.byKey(Key('budget-keypad-digit-$digit')));
         await tester.pump();
       }
-      await tester.tap(find.byKey(const Key('budget-keypad-equals')));
+      await tester.tap(find.byKey(const Key('budget-keypad-done')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
