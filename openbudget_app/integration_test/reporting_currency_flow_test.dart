@@ -71,10 +71,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Currency'), findsOneWidget);
-    expect(find.text('Reporting Currency'), findsOneWidget);
-    expect(find.text('USD'), findsOneWidget);
+    expect(find.text('Reporting currency'), findsOneWidget);
+    expect(find.text('US Dollar - USD'), findsOneWidget);
 
-    await tester.tap(find.text('Reporting Currency'));
+    await tester.tap(find.text('Reporting currency'));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
       find.text('British Pound (GBP)'),
@@ -85,7 +85,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(savedCurrency, 'GBP');
-    expect(find.textContaining('Reporting currency set to'), findsOneWidget);
+    expect(find.textContaining('Plan currency updated to'), findsOneWidget);
   });
 
   patrolWidgetTest(
@@ -140,8 +140,8 @@ void main() {
 
       final netWorth = NetWorthPage(tester);
       expect(netWorth.headline, findsOneWidget);
-      // USD reporting: the total is the native sum, no conversion line.
-      expect(find.text(r'$329.00'), findsOneWidget);
+      // USD reporting: the converted total comes from the server view.
+      expect(find.text(r'$4,161.50'), findsWidgets);
 
       await netWorth.switchReportingCurrency('GBP');
       await tester.pumpAndSettle();
@@ -149,7 +149,7 @@ void main() {
       expect(reportingCurrency, 'GBP');
       // GBP reporting re-renders the converted headline and, on the By
       // currency tab, the rate line that produced it.
-      expect(find.text('£179.00'), findsOneWidget);
+      expect(find.text('£3,290.00'), findsWidgets);
       await netWorth.showByCurrency();
       await tester.pumpAndSettle();
       expect(
@@ -160,24 +160,26 @@ void main() {
   );
 }
 
-/// The same books reported in USD: the GBP account is converted instead.
+/// The same books reported in USD: the USD account stays native and the
+/// GBP account is converted at the fixture's USD-per-GBP rate.
 NetWorthView _usdView() {
   const rate = '1.2646';
-  const gbpConverted = 3162;
+  const gbpConverted = 316150; // 250000 GBP minor at 1.2646 USD per GBP.
+  const totalMinor = 100000 + gbpConverted;
   return NetWorthView(
     currencyCode: 'USD',
     asOf: DateTime.utc(2026, 11, 8),
-    assetsMinor: 10000 + gbpConverted,
+    assetsMinor: totalMinor,
     liabilitiesMinor: 0,
-    netWorthMinor: 10000 + gbpConverted,
+    netWorthMinor: totalMinor,
     isComplete: true,
     missingCurrencyCodes: const [],
     hasStaleRates: false,
     currencies: [
       NetWorthCurrencyRow(
         currencyCode: 'USD',
-        nativeMinor: 10000,
-        convertedMinor: 10000,
+        nativeMinor: 100000,
+        convertedMinor: 100000,
         fxRate: '1',
         fxRateDate: DateTime.utc(2026, 11, 8),
         isStale: false,
@@ -198,9 +200,9 @@ NetWorthView _usdView() {
         entityId: UuidValue.fromString(TestData.gbpEntityId),
         name: TestData.entityName,
         kind: EntityKind.individual,
-        assetsMinor: 10000 + gbpConverted,
+        assetsMinor: totalMinor,
         liabilitiesMinor: 0,
-        netWorthMinor: 10000 + gbpConverted,
+        netWorthMinor: totalMinor,
         isComplete: true,
       ),
     ],
