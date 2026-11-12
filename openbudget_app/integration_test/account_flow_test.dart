@@ -7,28 +7,27 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
-import 'package:openbudget_app/src/features/accounts/providers/account_transactions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/plaid_account_link_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_list_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
-import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
+import 'package:openbudget_app/src/features/transactions/providers/transaction_pages_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
 import 'common/patrol_helpers.dart';
+import 'common/test_data.dart';
 import 'helpers/screenshot_capture.dart';
 
-const _entityId = 'test-budget-id';
-final _budgetUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000010',
-);
+const String _entityId = TestData.gbpEntityId;
+final UuidValue _entityUuid = UuidValue.fromString(_entityId);
 
 final _testInstitutions = <Institution>[
   Institution(slug: 'chase', name: 'Chase', website: 'chase.com'),
@@ -65,58 +64,66 @@ Account _makeAccount({
   required int balanceMinor,
   required String currencyCode,
   UuidValue? id,
-  String accountType = 'checking',
+  AccountKind kind = AccountKind.checking,
   bool onBudget = true,
   bool isClosed = false,
 }) => Account(
   id: id,
   name: name,
-  accountType: accountType,
+  kind: kind,
+  balanceSource: AccountBalanceSource.transactions,
   balanceMinor: balanceMinor,
   currencyCode: currencyCode,
-  entityId: _budgetUuid,
+  entityId: _entityUuid,
   onBudget: onBudget,
   sortOrder: 0,
-  isClosed: isClosed,
+  closedAt: isClosed ? DateTime.utc(2026, 10) : null,
 );
 
-Budget _makeBudget({String currencyCode = 'USD'}) => Budget(
-  id: _budgetUuid,
-  name: 'OpenBudget',
-  currencyCode: currencyCode,
-  ownerId: UuidValue.fromString('00000000-0000-0000-0000-000000000099'),
-  createdAt: DateTime(2026),
-);
-
-BudgetSummary _makeSummary({String currencyCode = 'USD'}) => BudgetSummary(
-  budget: _makeBudget(currencyCode: currencyCode),
-  categories: const [],
-  totalIncomeMinor: 0,
-  totalBudgetedMinor: 0,
-  readyToAssignMinor: 0,
-  year: 2026,
-  month: 9,
-);
-
-Transaction _makeTransaction({
+TransactionView _makeTransactionView({
   required String id,
   required UuidValue accountId,
   required String description,
   required int amountMinor,
   bool cleared = false,
-  bool reconciled = false,
-  DateTime? transactionDate,
-}) => Transaction(
-  id: UuidValue.fromString(id),
-  description: description,
-  amountMinor: amountMinor,
-  currencyCode: 'USD',
-  entityId: _budgetUuid,
-  accountId: accountId,
-  transactionDate: transactionDate ?? DateTime(2026, 9, 3),
-  cleared: cleared,
-  reconciled: reconciled,
-);
+  DateTime? date,
+}) {
+  final transaction = Transaction(
+    id: UuidValue.fromString(id),
+    entityId: _entityUuid,
+    accountId: accountId,
+    date: date ?? DateTime(2026, 9, 3),
+    amountMinor: amountMinor,
+    baseAmountMinor: amountMinor,
+    fxRateDate: date ?? DateTime(2026, 9, 3),
+    description: description,
+    status: cleared ? TransactionStatus.cleared : TransactionStatus.uncleared,
+  );
+  return TransactionView(
+    transaction: transaction,
+    lines: [
+      TransactionLine(
+        id: UuidValue.fromString('$id-1'.replaceRange(0, 1, 'a')),
+        transactionId: transaction.id!,
+        amountMinor: amountMinor,
+        baseAmountMinor: amountMinor,
+      ),
+    ],
+    accountCurrencyCode: 'USD',
+    accountName: 'Daily USD',
+  );
+}
+
+/// The paged account transactions, served from memory.
+class _FakeTransactionPages extends TransactionPages {
+  _FakeTransactionPages(this.items);
+
+  final List<TransactionView> items;
+
+  @override
+  Future<TransactionPageState> build(String entityId) async =>
+      TransactionPageState(filter: const TransactionFilter(), items: items);
+}
 
 class _FakeAccountActions extends AccountActions {
   @override
@@ -125,24 +132,26 @@ class _FakeAccountActions extends AccountActions {
   @override
   Future<Account> createAccount({
     required String name,
-    required String accountType,
-    required int balanceMinor,
+    required AccountKind kind,
     required String currencyCode,
     required String entityId,
-    required bool onBudget,
-    required int sortOrder,
-    String? walletAddress,
+    AccountBalanceSource? balanceSource,
     String? institutionId,
+    String? note,
+    bool? onBudget,
+    int? openingBalanceMinor,
+    DateTime? openingDate,
   }) async => Account(
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000777'),
     name: name,
-    accountType: accountType,
-    balanceMinor: balanceMinor,
+    kind: kind,
+    balanceSource:
+        balanceSource ?? AccountBalanceSource.transactions,
+    balanceMinor: openingBalanceMinor ?? 0,
     currencyCode: currencyCode,
-    entityId: _budgetUuid,
-    onBudget: onBudget,
-    sortOrder: sortOrder,
-    isClosed: false,
+    entityId: _entityUuid,
+    onBudget: onBudget ?? true,
+    sortOrder: 0,
   );
 }
 
@@ -151,35 +160,34 @@ class _UnavailablePlaidAccountLink extends PlaidAccountLink {
   FutureOr<void> build() {}
 
   @override
-  Future<List<Account>> importSandboxAccounts({
+  Future<PlaidConnection> importSandboxAccounts({
     required String entityId,
     String? plaidInstitutionId,
-  }) async => throw Exception('Bank linking is unavailable in this fixture.');
+  }) => throw Exception('Bank linking is unavailable in this fixture.');
 }
 
 Widget _buildApp({
   required List<Account> accounts,
-  List<Transaction> accountTransactions = const [],
-  String budgetCurrencyCode = 'USD',
+  List<TransactionView> accountTransactions = const [],
 }) {
   final router = GoRouter(
     initialLocation: '/budgets/$_entityId/accounts',
     routes: [
       GoRoute(
         name: accountListRoute,
-        path: '/budgets/:id/accounts',
+        path: '/budgets/:entityId/accounts',
         builder: (context, state) =>
             AccountListScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: addAccountRoute,
-        path: '/budgets/:id/accounts/add',
+        path: '/budgets/:entityId/accounts/add',
         builder: (context, state) =>
             AddAccountScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: accountDetailRoute,
-        path: '/budgets/:id/accounts/:accountId',
+        path: '/budgets/:entityId/accounts/:accountId',
         builder: (context, state) => AccountDetailScreen(
           entityId: state.pathParameters['entityId']!,
           accountId: state.pathParameters['accountId']!,
@@ -190,22 +198,21 @@ Widget _buildApp({
 
   return ProviderScope(
     overrides: [
-      fxLatestRatesProvider.overrideWith((ref) async => null),
+      entityDetailProvider.overrideWith(
+        (ref, id) async => TestData.usdEntity(),
+      ),
       accountActionsProvider.overrideWith(_FakeAccountActions.new),
       plaidAccountLinkProvider.overrideWith(_UnavailablePlaidAccountLink.new),
-      myReusableAccountsProvider.overrideWith(
-        (ref, entityId) async => const [],
-      ),
       accountListProvider.overrideWith((ref, entityId) async => accounts),
-      accountTransactionsProvider.overrideWith(
-        (ref, args) async => accountTransactions,
+      transactionPagesProvider.overrideWith2(
+        (entityId) => _FakeTransactionPages(accountTransactions),
       ),
       payeeListProvider.overrideWith((ref, entityId) async => const []),
-      budgetSummaryProvider.overrideWith(
-        (ref, entityId) async => _makeSummary(currencyCode: budgetCurrencyCode),
+      netWorthForEntitiesProvider.overrideWith(
+        (ref, entityIds) async => TestData.gbpNetWorthWithUsd(),
       ),
-      budgetDetailProvider.overrideWith(
-        (ref, entityId) async => _makeBudget(currencyCode: budgetCurrencyCode),
+      plaidConnectionsProvider.overrideWith(
+        (ref, entityId) async => const [],
       ),
       institutionCatalogProvider.overrideWith(
         (ref, locationCode) async => _testInstitutions,
@@ -783,14 +790,11 @@ void main() {
           ),
         ],
         accountTransactions: [
-          Transaction(
-            id: UuidValue.fromString('00000000-0000-0000-0000-000000000211'),
+          _makeTransactionView(
+            id: '00000000-0000-0000-0000-000000000211',
+            accountId: accountId,
             description: 'Rent',
             amountMinor: -280000,
-            currencyCode: 'USD',
-            entityId: _budgetUuid,
-            accountId: accountId,
-            transactionDate: DateTime(2026, 9, 3),
           ),
         ],
       ),
@@ -824,19 +828,19 @@ void main() {
             ),
           ],
           accountTransactions: [
-            _makeTransaction(
+            _makeTransactionView(
               id: '00000000-0000-0000-0000-000000000211',
               accountId: accountId,
               description: 'Self storage',
               amountMinor: -3000,
             ),
-            _makeTransaction(
+            _makeTransactionView(
               id: '00000000-0000-0000-0000-000000000212',
               accountId: accountId,
               description: 'Starting Balance',
               amountMinor: 5000000,
-              reconciled: true,
-              transactionDate: DateTime(2026, 9, 2),
+              cleared: true,
+              date: DateTime(2026, 9, 2),
             ),
           ],
         ),
@@ -879,7 +883,7 @@ void main() {
           ),
         ],
         accountTransactions: [
-          _makeTransaction(
+          _makeTransactionView(
             id: '00000000-0000-0000-0000-000000000512',
             accountId: accountId,
             description: 'Gym',
@@ -958,7 +962,7 @@ void main() {
           ),
         ],
         accountTransactions: [
-          _makeTransaction(
+          _makeTransactionView(
             id: '00000000-0000-0000-0000-000000000311',
             accountId: accountId,
             description: 'Rent',
@@ -1007,14 +1011,14 @@ void main() {
           ),
         ],
         accountTransactions: [
-          _makeTransaction(
+          _makeTransactionView(
             id: '00000000-0000-0000-0000-000000000611',
             accountId: accountId,
             description: 'Landlord',
             amountMinor: -10000,
             cleared: true,
           ),
-          _makeTransaction(
+          _makeTransactionView(
             id: '00000000-0000-0000-0000-000000000612',
             accountId: accountId,
             description: 'Supermarket',
@@ -1072,26 +1076,26 @@ void main() {
           _makeAccount(
             id: accountId,
             name: 'Loan',
-            accountType: 'other',
+            kind: AccountKind.otherLiability,
             balanceMinor: -125,
             currencyCode: 'USD',
             onBudget: false,
           ),
         ],
         accountTransactions: [
-          _makeTransaction(
+          _makeTransactionView(
             id: '00000000-0000-0000-0000-000000000411',
             accountId: accountId,
             description: 'Payment from Daily',
             amountMinor: 50000,
-            transactionDate: DateTime(2026, 9, 4),
+            date: DateTime(2026, 9, 4),
           ),
-          _makeTransaction(
+          _makeTransactionView(
             id: '00000000-0000-0000-0000-000000000412',
             accountId: accountId,
             description: 'Initial Balance',
             amountMinor: -50000,
-            transactionDate: DateTime(2026, 9, 3),
+            date: DateTime(2026, 9, 3),
           ),
         ],
       ),
@@ -1125,6 +1129,10 @@ void main() {
     expect(find.text('Payments'), findsOneWidget);
   });
 }
+
+Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
+  (widget) => widget is SkribbleIcon && widget.data == data,
+);
 
 Future<void> _tapWhenVisible(WidgetTester tester, Finder finder) async {
   for (var attempt = 0; attempt < 10; attempt++) {
@@ -1263,8 +1271,4 @@ Future<void> _captureAddAccountStepScreenshot(
   tester,
   name,
   captureTarget: find.byKey(addAccountScreenCaptureBoundaryKey),
-);
-
-Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
-  (widget) => widget is SkribbleIcon && widget.data == data,
 );
