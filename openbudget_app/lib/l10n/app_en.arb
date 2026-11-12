@@ -724,6 +724,7 @@
   "reportsLoadError": "Could not load report data",
   "reportsNetIncome": "Net Income",
   "reportsSpendingByCategory": "Spending by Category",
+  "reportsUncategorised": "Uncategorised",
   "reportsTitle": "Reports",
   "reportsTransactions": "Transactions",
   "settingsAccountSection": "Account",

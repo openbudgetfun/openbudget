@@ -1563,6 +1563,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportsSpendingByCategory => 'Spending by Category';
 
   @override
+  String get reportsUncategorised => 'Uncategorised';
+
+  @override
   String get reportsTitle => 'Reports';
 
   @override

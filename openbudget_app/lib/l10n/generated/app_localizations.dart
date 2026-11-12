@@ -2614,6 +2614,12 @@ abstract class AppLocalizations {
   /// **'Spending by Category'**
   String get reportsSpendingByCategory;
 
+  /// No description provided for @reportsUncategorised.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorised'**
+  String get reportsUncategorised;
+
   /// No description provided for @reportsTitle.
   ///
   /// In en, this message translates to:
