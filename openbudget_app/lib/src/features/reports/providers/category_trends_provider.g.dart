@@ -79,7 +79,7 @@ final class CategoryTrendsProvider
   }
 }
 
-String _$categoryTrendsHash() => r'9dbad5d35f613e8cd57c1ed9ffbe48417eb9f1ba';
+String _$categoryTrendsHash() => r'5bc7f61b2c299f9e64c34497188753e2820f0b9e';
 
 /// Spending per category for each of the last [months] months, pivoted so
 /// each category carries a time series. One `report.spending` call with
