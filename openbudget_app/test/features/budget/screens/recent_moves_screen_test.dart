@@ -2,85 +2,59 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/recent_moves_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/recent_moves_screen.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
+
+import '../../../fixtures/budget_month.dart';
 
 const _entityId = '00000000-0000-0000-0000-000000000111';
 const _categoryId = '00000000-0000-0000-0000-000000000222';
 const _envelopeGroceriesId = '00000000-0000-0000-0000-000000000333';
 const _envelopeClothingId = '00000000-0000-0000-0000-000000000444';
 
-BudgetSummary _makeSummary() {
-  final ownerId = UuidValue.fromString('00000000-0000-0000-0000-000000000555');
-  final entityId = UuidValue.fromString(_entityId);
-  final categoryUuid = UuidValue.fromString(_categoryId);
-
-  final groceries = Envelope(
-    id: UuidValue.fromString(_envelopeGroceriesId),
-    name: 'Groceries',
-    categoryId: categoryUuid,
-    budgetedAmountMinor: 120000,
-    spentAmountMinor: 40000,
-    currencyCode: 'USD',
-    sortOrder: 0,
-  );
-  final clothing = Envelope(
-    id: UuidValue.fromString(_envelopeClothingId),
-    name: 'Clothing',
-    categoryId: categoryUuid,
-    budgetedAmountMinor: 40000,
-    spentAmountMinor: 10000,
-    currencyCode: 'USD',
-    sortOrder: 1,
-  );
-
-  return BudgetSummary(
-    budget: Budget(
-      id: entityId,
-      name: 'Family Plan',
-      currencyCode: 'USD',
-      ownerId: ownerId,
+BudgetMonthView _makeMonthView() => testMonthView(
+  entityId: _entityId,
+  categories: [testCategory(id: _categoryId, name: 'Needs')],
+  envelopes: [
+    testEnvelopeRow(
+      envelopeId: _envelopeGroceriesId,
+      categoryId: _categoryId,
+      envelopeName: 'Groceries',
+      allocatedMinor: 120000,
+      activityMinor: -40000,
     ),
-    categories: [
-      CategoryWithEnvelopes(
-        category: Category(
-          id: categoryUuid,
-          name: 'Needs',
-          entityId: entityId,
-          sortOrder: 0,
-        ),
-        envelopes: [groceries, clothing],
-        monthlyEnvelopes: [
-          MonthlyEnvelopeData(
-            envelope: groceries,
-            allocatedMinor: 120000,
-            spentMinor: 40000,
-            availableMinor: 80000,
-            carryoverMinor: 0,
-          ),
-          MonthlyEnvelopeData(
-            envelope: clothing,
-            allocatedMinor: 40000,
-            spentMinor: 10000,
-            availableMinor: 30000,
-            carryoverMinor: 0,
-          ),
-        ],
-        totalBudgetedMinor: 160000,
-        totalSpentMinor: 50000,
-        totalAvailableMinor: 110000,
+    testEnvelopeRow(
+      envelopeId: _envelopeClothingId,
+      categoryId: _categoryId,
+      envelopeName: 'Clothing',
+      allocatedMinor: 40000,
+      activityMinor: -10000,
+    ),
+  ],
+);
+
+Widget _buildSubject({
+  required ProviderContainer container,
+  required Widget home,
+}) =>
+    UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        theme: OpenBudgetTheme.light,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: home,
       ),
-    ],
-    totalIncomeMinor: 250000,
-    totalBudgetedMinor: 160000,
-    readyToAssignMinor: 90000,
-    year: 2026,
-    month: 2,
-  );
+    );
+
+Future<void> _dismissCoachmarkIfVisible(WidgetTester tester) async {
+  final gotIt = find.text('Got It!');
+  if (gotIt.evaluate().isEmpty) return;
+  await tester.tap(gotIt);
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -90,23 +64,17 @@ void main() {
     ) async {
       final container = ProviderContainer(
         overrides: [
-          budgetMonthlySummaryProvider.overrideWith(
-            (ref, _) async => _makeSummary(),
+          budgetMonthProvider(_entityId).overrideWith(
+            (ref) async => _makeMonthView(),
           ),
-          budgetGoalsProvider.overrideWith((ref, _) async => {}),
         ],
       );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
-        UncontrolledProviderScope(
+        _buildSubject(
           container: container,
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const RecentMovesScreen(entityId: _entityId),
-          ),
+          home: const RecentMovesScreen(entityId: _entityId),
         ),
       );
       await tester.pumpAndSettle();
@@ -151,10 +119,9 @@ void main() {
     testWidgets('shows envelope-specific move history', (tester) async {
       final container = ProviderContainer(
         overrides: [
-          budgetMonthlySummaryProvider.overrideWith(
-            (ref, _) async => _makeSummary(),
+          budgetMonthProvider(_entityId).overrideWith(
+            (ref) async => _makeMonthView(),
           ),
-          budgetGoalsProvider.overrideWith((ref, _) async => {}),
         ],
       );
       addTearDown(container.dispose);
@@ -176,16 +143,11 @@ void main() {
           );
 
       await tester.pumpWidget(
-        UncontrolledProviderScope(
+        _buildSubject(
           container: container,
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const EnvelopeMovesScreen(
-              entityId: _entityId,
-              envelopeId: _envelopeGroceriesId,
-            ),
+          home: const EnvelopeMovesScreen(
+            entityId: _entityId,
+            envelopeId: _envelopeGroceriesId,
           ),
         ),
       );
@@ -210,11 +172,4 @@ void main() {
       );
     });
   });
-}
-
-Future<void> _dismissCoachmarkIfVisible(WidgetTester tester) async {
-  final gotIt = find.text('Got It!');
-  if (gotIt.evaluate().isEmpty) return;
-  await tester.tap(gotIt);
-  await tester.pumpAndSettle();
 }
