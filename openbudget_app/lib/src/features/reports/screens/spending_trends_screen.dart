@@ -6,11 +6,11 @@ import 'package:openbudget_app/src/features/reports/providers/spending_trends_pr
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_figures.dart';
-import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-/// Income and spending month by month, as a drawn ledger.
+/// Income and spending month by month, as a drawn ledger. Figures come
+/// from the server's month views in the entity's base currency.
 class SpendingTrendsScreen extends HookConsumerWidget {
   const SpendingTrendsScreen({required this.entityId, super.key});
 
@@ -20,10 +20,6 @@ class SpendingTrendsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final trendsAsync = ref.watch(spendingTrendsProvider(entityId));
-    final converter = ref
-        .watch(displayCurrencyConverterProvider(entityId))
-        .asData
-        ?.value;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.spendingTrendsTitle)),
@@ -40,9 +36,9 @@ class SpendingTrendsScreen extends HookConsumerWidget {
           ],
         ),
         data: (data) {
-          final sourceCurrency = data.currencyCode;
-
-          if (data.months.every((m) => m.transactionCount == 0)) {
+          if (data.months.every(
+            (m) => m.totalIncome == 0 && m.totalExpenses == 0,
+          )) {
             return ListView(
               padding: const EdgeInsets.all(SpacingTokens.md),
               children: [
@@ -70,30 +66,20 @@ class SpendingTrendsScreen extends HookConsumerWidget {
                     Expanded(
                       child: ReportFigure(
                         label: l10n.spendingTrendsAvgIncome,
-                        amount:
-                            converter?.formatAmount(
-                              amountMinor: data.averageIncome,
-                              currencyCode: sourceCurrency,
-                            ) ??
-                            formatMinorForCode(
-                              data.averageIncome,
-                              sourceCurrency,
-                            ),
+                        amount: formatMinorForCode(
+                          data.averageIncome,
+                          data.currencyCode,
+                        ),
                         tone: ObTone.funded,
                       ),
                     ),
                     Expanded(
                       child: ReportFigure(
                         label: l10n.spendingTrendsAvgExpenses,
-                        amount:
-                            converter?.formatAmount(
-                              amountMinor: data.averageExpenses,
-                              currencyCode: sourceCurrency,
-                            ) ??
-                            formatMinorForCode(
-                              data.averageExpenses,
-                              sourceCurrency,
-                            ),
+                        amount: formatMinorForCode(
+                          data.averageExpenses,
+                          data.currencyCode,
+                        ),
                         tone: ObTone.overspent,
                         alignEnd: true,
                       ),
@@ -112,8 +98,7 @@ class SpendingTrendsScreen extends HookConsumerWidget {
               ),
               _MonthlyChart(
                 months: data.months,
-                sourceCurrency: sourceCurrency,
-                converter: converter,
+                currencyCode: data.currencyCode,
               ),
               ObSectionHeader(
                 title: l10n.spendingTrendsBreakdown,
@@ -129,8 +114,7 @@ class SpendingTrendsScreen extends HookConsumerWidget {
                   padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
                   child: _MonthSummaryTile(
                     month: month,
-                    sourceCurrency: sourceCurrency,
-                    converter: converter,
+                    currencyCode: data.currencyCode,
                   ),
                 ),
             ],
@@ -142,31 +126,21 @@ class SpendingTrendsScreen extends HookConsumerWidget {
 }
 
 class _MonthlyChart extends HookWidget {
-  const _MonthlyChart({
-    required this.months,
-    required this.sourceCurrency,
-    required this.converter,
-  });
+  const _MonthlyChart({required this.months, required this.currencyCode});
 
   final List<MonthlyTrend> months;
-  final String sourceCurrency;
-  final DisplayCurrencyConverter? converter;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final series = reportSeriesColors(theme);
-    String format(int cents) =>
-        converter?.formatAmount(
-          amountMinor: cents,
-          currencyCode: sourceCurrency,
-        ) ??
-        formatMinorForCode(cents, sourceCurrency);
+    String format(int minor) => formatMinorForCode(minor, currencyCode);
     final columns = [
       for (final month in months)
         ReportChartColumn(
-          label: reportMonthAxisLabel(l10n, month.month),
+          label: reportYyyymmAxisLabel(l10n, month.month),
           values: [
             ReportChartDatum(
               label: l10n.reportsIncome,
@@ -197,7 +171,7 @@ class _MonthlyChart extends HookWidget {
               entries: [
                 for (final month in months)
                   (
-                    reportMonthLabel(l10n, month.month, month.year),
+                    reportYyyymmLabel(l10n, month.month),
                     '${l10n.reportsIncome} ${format(month.totalIncome)}, '
                         '${l10n.reportsExpenses} ${format(month.totalExpenses)}',
                   ),
@@ -230,13 +204,11 @@ class _MonthlyChart extends HookWidget {
 class _MonthSummaryTile extends HookWidget {
   const _MonthSummaryTile({
     required this.month,
-    required this.sourceCurrency,
-    required this.converter,
+    required this.currencyCode,
   });
 
   final MonthlyTrend month;
-  final String sourceCurrency;
-  final DisplayCurrencyConverter? converter;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context) {
@@ -244,12 +216,7 @@ class _MonthSummaryTile extends HookWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
     final netTone = month.netIncome >= 0 ? ObTone.funded : ObTone.overspent;
-    String format(int cents) =>
-        converter?.formatAmount(
-          amountMinor: cents,
-          currencyCode: sourceCurrency,
-        ) ??
-        formatMinorForCode(cents, sourceCurrency);
+    String format(int minor) => formatMinorForCode(minor, currencyCode);
 
     return ObCard(
       padding: const EdgeInsets.all(SpacingTokens.md),
@@ -262,11 +229,11 @@ class _MonthSummaryTile extends HookWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      reportMonthName(l10n, month.month),
+                      reportYyyymmLabel(l10n, month.month),
                       style: theme.textTheme.titleSmall,
                     ),
                     Text(
-                      month.year.toString(),
+                      monthKeyParts(month.month).year.toString(),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: palette.mutedInk,
                       ),

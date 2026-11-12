@@ -1,5 +1,20 @@
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 
+/// Splits an int yyyymm month into its year and calendar month.
+({int year, int calendarMonth}) monthKeyParts(int yyyymm) =>
+    (year: yyyymm ~/ 100, calendarMonth: yyyymm % 100);
+
+/// The month's name in the active locale, followed by its year, from a
+/// yyyymm int.
+String reportYyyymmLabel(AppLocalizations l10n, int yyyymm) {
+  final (year, calendarMonth) = monthKeyParts(yyyymm);
+  return reportMonthLabel(l10n, calendarMonth, year);
+}
+
+/// The month's short axis label from a yyyymm int.
+String reportYyyymmAxisLabel(AppLocalizations l10n, int yyyymm) =>
+    reportMonthAxisLabel(l10n, monthKeyParts(yyyymm).calendarMonth);
+
 /// The month's name in the active locale, followed by its year.
 String reportMonthLabel(AppLocalizations l10n, int month, int year) =>
     '${reportMonthName(l10n, month)} $year';

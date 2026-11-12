@@ -5,7 +5,6 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/category_trends_provider.dart';
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
-import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -19,10 +18,6 @@ class CategoryTrendsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final trendsAsync = ref.watch(categoryTrendsProvider(entityId));
-    final converter = ref
-        .watch(displayCurrencyConverterProvider(entityId))
-        .asData
-        ?.value;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.categoryTrendsTitle)),
@@ -53,7 +48,6 @@ class CategoryTrendsScreen extends HookConsumerWidget {
             );
           }
 
-          final sourceCurrency = data.currencyCode;
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(
@@ -79,8 +73,7 @@ class CategoryTrendsScreen extends HookConsumerWidget {
                   child: _CategoryTrendCard(
                     category: category,
                     months: data.months,
-                    sourceCurrency: sourceCurrency,
-                    converter: converter,
+                    currencyCode: data.currencyCode,
                   ),
                 ),
             ],
@@ -95,14 +88,12 @@ class _CategoryTrendCard extends HookWidget {
   const _CategoryTrendCard({
     required this.category,
     required this.months,
-    required this.sourceCurrency,
-    required this.converter,
+    required this.currencyCode,
   });
 
   final CategoryTrendLine category;
-  final List<MonthLabel> months;
-  final String sourceCurrency;
-  final DisplayCurrencyConverter? converter;
+  final List<int> months;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context) {
@@ -112,12 +103,7 @@ class _CategoryTrendCard extends HookWidget {
       0,
       (max, v) => v > max ? v : max,
     );
-    String format(int cents) =>
-        converter?.formatAmount(
-          amountMinor: cents,
-          currencyCode: sourceCurrency,
-        ) ??
-        formatMinorForCode(cents, sourceCurrency);
+    String format(int minor) => formatMinorForCode(minor, currencyCode);
 
     return Semantics(
       container: true,
@@ -127,7 +113,7 @@ class _CategoryTrendCard extends HookWidget {
         entries: [
           for (final (index, month) in months.indexed)
             (
-              reportMonthLabel(l10n, month.month, month.year),
+              reportYyyymmLabel(l10n, month),
               format(category.monthlyMinor[index]),
             ),
         ],
@@ -162,7 +148,7 @@ class _CategoryTrendCard extends HookWidget {
                     SizedBox(
                       width: 44,
                       child: Text(
-                        reportMonthAxisLabel(l10n, month.month),
+                        reportYyyymmAxisLabel(l10n, month),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.ob.mutedInk,
                         ),

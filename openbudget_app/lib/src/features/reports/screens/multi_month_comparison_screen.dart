@@ -4,7 +4,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/multi_month_comparison_provider.dart';
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
-import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -18,10 +17,6 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final monthCount = useState(3);
-    final converter = ref
-        .watch(displayCurrencyConverterProvider(entityId))
-        .asData
-        ?.value;
 
     final comparisonAsync = ref.watch(
       multiMonthComparisonProvider(entityId, monthCount: monthCount.value),
@@ -58,7 +53,6 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
           ],
         ),
         data: (comparison) {
-          final sourceCurrency = comparison.budget.currencyCode;
 
           if (comparison.categories.isEmpty) {
             return ListView(
@@ -75,8 +69,7 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
 
           return _ComparisonTable(
             comparison: comparison,
-            sourceCurrency: sourceCurrency,
-            converter: converter,
+            currencyCode: comparison.currencyCode,
           );
         },
       ),
@@ -90,13 +83,11 @@ const double _monthColumnWidth = 112;
 class _ComparisonTable extends HookWidget {
   const _ComparisonTable({
     required this.comparison,
-    required this.sourceCurrency,
-    required this.converter,
+    required this.currencyCode,
   });
 
   final MultiMonthComparison comparison;
-  final String sourceCurrency;
-  final DisplayCurrencyConverter? converter;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context) {
@@ -105,13 +96,8 @@ class _ComparisonTable extends HookWidget {
     final palette = theme.ob;
     final scrollController = useScrollController();
     final months = comparison.months;
-    final monthKeys = months.map((m) => '${m.year}-${m.month}').toList();
-    String format(int cents) =>
-        converter?.formatAmount(
-          amountMinor: cents,
-          currencyCode: sourceCurrency,
-        ) ??
-        formatMinorForCode(cents, sourceCurrency);
+    final monthKeys = months.map((m) => m.month).toList();
+    String format(int minor) => formatMinorForCode(minor, currencyCode);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(SpacingTokens.md),
@@ -184,7 +170,7 @@ class _ComparisonTable extends HookWidget {
                         SizedBox(
                           width: _monthColumnWidth,
                           child: ObAmount(
-                            format(month.totalSpentMinor),
+                            format(month.totalActivityMinor.abs()),
                             style: theme.textTheme.bodyMedium,
                             textAlign: TextAlign.end,
                           ),
@@ -274,8 +260,8 @@ class _ComparisonTable extends HookWidget {
   }
 
   String _monthColumnLabel(AppLocalizations l10n, MonthColumn month) {
-    final name = reportMonthAxisLabel(l10n, month.month);
-    final year = (month.year % 100).toString().padLeft(2, '0');
+    final name = reportYyyymmAxisLabel(l10n, month.month);
+    final year = (monthKeyParts(month.month).year % 100).toString().padLeft(2, '0');
     return "$name '$year";
   }
 }
