@@ -15,7 +15,7 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 
-import '../../../fixtures/budget_month.dart';
+import '../../../fixtures/budget_month.dart' hide testEntity;
 import '../ledger_test_data.dart';
 
 GoRouter _router({String? journalId}) => GoRouter(
