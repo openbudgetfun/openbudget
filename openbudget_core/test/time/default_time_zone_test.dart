@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:openbudget_core/openbudget_core.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('defaultTimeZone', () {
