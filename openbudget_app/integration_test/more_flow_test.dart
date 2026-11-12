@@ -3,8 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/more/screens/more_screen.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
@@ -15,66 +16,22 @@ import 'package:openbudget_app/src/features/transaction_rules/screens/rule_list_
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:patrol/patrol.dart';
 
-const _entityId = 'test-budget-id';
-final _budgetUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000201',
+import 'common/test_data.dart';
+
+const String _entityId = TestData.gbpEntityId;
+final UuidValue _entityUuid = UuidValue.fromString(_entityId);
+final UuidValue _payeeUuid = UuidValue.fromString(
+  '00000000-0000-0000-0000-000000000203',
 );
-final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000202');
-final _payeeUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000203');
-final _envelopeUuid = UuidValue.fromString(
+final UuidValue _envelopeUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000204',
 );
-final _categoryUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000205',
+final UuidValue _accountUuid = UuidValue.fromString(
+  '00000000-0000-0000-0000-000000000206',
 );
-
-Budget _makeBudget() => Budget(
-  id: _budgetUuid,
-  name: 'OpenBudget',
-  currencyCode: 'USD',
-  ownerId: _ownerUuid,
-  createdAt: DateTime(2026),
-);
-
-BudgetSummary _makeSummary() {
-  final category = Category(
-    id: _categoryUuid,
-    name: 'Bills',
-    entityId: _budgetUuid,
-    sortOrder: 0,
-    isHidden: false,
-  );
-  final envelope = Envelope(
-    id: _envelopeUuid,
-    name: 'Rent',
-    budgetedAmountMinor: 0,
-    spentAmountMinor: 0,
-    currencyCode: 'USD',
-    categoryId: _categoryUuid,
-    sortOrder: 0,
-  );
-
-  return BudgetSummary(
-    budget: _makeBudget(),
-    categories: [
-      CategoryWithEnvelopes(
-        category: category,
-        envelopes: [envelope],
-        monthlyEnvelopes: const [],
-        totalBudgetedMinor: 0,
-        totalSpentMinor: 0,
-        totalAvailableMinor: 0,
-      ),
-    ],
-    totalIncomeMinor: 0,
-    totalBudgetedMinor: 0,
-    readyToAssignMinor: 0,
-    year: 2026,
-    month: 9,
-  );
-}
 
 Widget _buildApp() {
   final router = GoRouter(
@@ -123,39 +80,43 @@ Widget _buildApp() {
 
   final recurring = [
     RecurringTransaction(
-      id: UuidValue.fromString('00000000-0000-0000-0000-000000000206'),
+      id: UuidValue.fromString('00000000-0000-0000-0000-000000000207'),
+      entityId: _entityUuid,
+      accountId: _accountUuid,
       description: 'Rent',
       amountMinor: -250000,
-      currencyCode: 'USD',
-      entityId: _budgetUuid,
-      frequency: 'monthly',
-      nextOccurrence: DateTime(2026, 9),
+      frequency: RecurrenceFrequency.monthly,
+      nextDate: DateTime(2026, 9),
       isActive: true,
     ),
   ];
 
   final rules = [
     TransactionRule(
-      id: UuidValue.fromString('00000000-0000-0000-0000-000000000207'),
-      entityId: _budgetUuid,
+      id: UuidValue.fromString('00000000-0000-0000-0000-000000000208'),
+      entityId: _entityUuid,
       payeeId: _payeeUuid,
-      targetEnvelopeId: _envelopeUuid,
+      envelopeId: _envelopeUuid,
       enabled: true,
     ),
   ];
 
   return ProviderScope(
     overrides: [
-      budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
+      entityDetailProvider.overrideWith(
+        (ref, id) async => TestData.usdEntity(),
+      ),
       taxProfileProvider.overrideWith((ref, id) async => null),
-      budgetSummaryProvider.overrideWith((ref, id) async => _makeSummary()),
       payeeListProvider.overrideWith(
         (ref, id) async => [
-          Payee(id: _payeeUuid, name: 'Landlord', entityId: _budgetUuid),
+          Payee(id: _payeeUuid, name: 'Landlord', entityId: _entityUuid),
         ],
       ),
       recurringListProvider.overrideWith((ref, id) async => recurring),
       ruleListProvider.overrideWith((ref, id) async => rules),
+      budgetMonthCurrencyProvider.overrideWith((ref, id) async => 'USD'),
+      budgetMonthGroupsProvider.overrideWith((ref, id) async => const []),
+      accountListProvider.overrideWith((ref, id) async => const []),
     ],
     child: MaterialApp.router(
       theme: ThemeData.light(useMaterial3: true),

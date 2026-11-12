@@ -3,112 +3,87 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
 import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/spending_by_payee_screen.dart';
-import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
-import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
+import 'common/test_data.dart';
 import 'helpers/screenshot_capture.dart';
 
-const _entityId = 'test-budget-id';
-final _budgetUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000601',
-);
+const String _entityId = TestData.gbpEntityId;
 
-SpendingReport _makeReportForMonth(int year, int month) => switch ((
-  year,
-  month,
-)) {
-  (2026, 2) => const SpendingReport(
+/// One month of spending, keyed by the requested yyyymm; months outside the
+/// four fixture months come back empty, matching the server's no-data
+/// answer.
+SpendingReport _reportForMonth(int endMonth) => switch (endMonth) {
+  202602 => const SpendingReport(
     totalIncome: 800000,
     totalExpenses: 222000,
     netIncome: 578000,
-    transactionCount: 9,
     categorySpending: {'Rent': 120000, 'Clothing': 80000, 'Utilities': 22000},
     currencyCode: 'USD',
+    month: 202602,
   ),
-  (2026, 1) => const SpendingReport(
+  202601 => const SpendingReport(
     totalIncome: 800000,
     totalExpenses: 162000,
     netIncome: 638000,
-    transactionCount: 8,
     categorySpending: {'Rent': 90000, 'Clothing': 50000, 'Utilities': 22000},
     currencyCode: 'USD',
+    month: 202601,
   ),
-  (2025, 12) => const SpendingReport(
+  202512 => const SpendingReport(
     totalIncome: 800000,
     totalExpenses: 282000,
     netIncome: 518000,
-    transactionCount: 10,
     categorySpending: {'Rent': 150000, 'Clothing': 100000, 'Utilities': 32000},
     currencyCode: 'USD',
+    month: 202512,
   ),
-  (2025, 11) => const SpendingReport(
+  202511 => const SpendingReport(
     totalIncome: 730000,
     totalExpenses: 152000,
     netIncome: 578000,
-    transactionCount: 8,
     categorySpending: {'Rent': 80000, 'Clothing': 50000, 'Utilities': 22000},
     currencyCode: 'USD',
+    month: 202511,
   ),
-  _ => const SpendingReport(
+  _ => SpendingReport(
     totalIncome: 0,
     totalExpenses: 0,
     netIncome: 0,
-    transactionCount: 0,
-    categorySpending: {},
+    categorySpending: const {},
     currencyCode: 'USD',
+    month: endMonth,
   ),
 };
 
-NetWorthData _makeNetWorthData() {
-  final checking = Account(
-    id: UuidValue.fromString('00000000-0000-0000-0000-000000000602'),
-    name: 'Daily',
-    accountType: 'checking',
-    balanceMinor: 5222000,
+/// The combined preset range: sums of the fixture months the range covers.
+SpendingReport _reportForRange(int endMonth, int monthCount) {
+  var income = 0;
+  var expenses = 0;
+  final categorySpending = <String, int>{};
+  for (var offset = 0; offset < monthCount; offset++) {
+    final report = _reportForMonth(endMonth - offset);
+    income += report.totalIncome;
+    expenses += report.totalExpenses;
+    report.categorySpending.forEach((category, minor) {
+      categorySpending[category] = (categorySpending[category] ?? 0) + minor;
+    });
+  }
+  return SpendingReport(
+    totalIncome: income,
+    totalExpenses: expenses,
+    netIncome: income - expenses,
+    categorySpending: categorySpending,
     currencyCode: 'USD',
-    entityId: _budgetUuid,
-    onBudget: true,
-    sortOrder: 0,
-    isClosed: false,
-  );
-  final creditCard = Account(
-    id: UuidValue.fromString('00000000-0000-0000-0000-000000000603'),
-    name: 'Credit Card',
-    accountType: 'creditCard',
-    balanceMinor: -125,
-    currencyCode: 'USD',
-    entityId: _budgetUuid,
-    onBudget: true,
-    sortOrder: 1,
-    isClosed: false,
-  );
-  return NetWorthData(
-    totalAssets: 5222000,
-    totalLiabilities: -125,
-    netWorth: 5221875,
-    assetAccounts: [checking],
-    liabilityAccounts: [creditCard],
-    currencyCode: 'USD',
-    currencyBreakdown: [
-      CurrencyNetWorthData(
-        currency: 'USD',
-        totalAssets: 5222000,
-        totalLiabilities: -125,
-        assetAccounts: [checking],
-        liabilityAccounts: [creditCard],
-      ),
-    ],
   );
 }
 
@@ -118,13 +93,13 @@ Widget _buildApp({ThemeMode themeMode = ThemeMode.light}) {
     routes: [
       GoRoute(
         name: reportsRoute,
-        path: '/budgets/:id/reflect',
+        path: '/budgets/:entityId/reflect',
         builder: (context, state) =>
             ReportsScreen(entityId: state.pathParameters['entityId']!),
       ),
       GoRoute(
         name: spendingByPayeeRoute,
-        path: '/budgets/:id/reflect/payees',
+        path: '/budgets/:entityId/reflect/payees',
         builder: (context, state) => SpendingByPayeeScreen(
           entityId: state.pathParameters['entityId']!,
           initialYear: 2026,
@@ -133,7 +108,7 @@ Widget _buildApp({ThemeMode themeMode = ThemeMode.light}) {
       ),
       GoRoute(
         name: netWorthRoute,
-        path: '/budgets/:id/reflect/net-worth',
+        path: '/budgets/:entityId/reflect/net-worth',
         builder: (context, state) =>
             NetWorthScreen(entityId: state.pathParameters['entityId']!),
       ),
@@ -142,20 +117,20 @@ Widget _buildApp({ThemeMode themeMode = ThemeMode.light}) {
 
   return ProviderScope(
     overrides: [
-      displayCurrencyConverterProvider.overrideWith(
-        (ref, entityId) async => const DisplayCurrencyConverter(
-          displayCurrency: CurrencyCode.usd,
-          baseCurrencyCode: null,
-          ratesByCode: {},
-        ),
+      entityDetailProvider.overrideWith(
+        (ref, id) async => TestData.usdEntity(),
       ),
-      spendingReportProvider.overrideWith(
-        (ref, args) async => _makeReportForMonth(args.$2, args.$3),
-      ),
+      spendingReportProvider.overrideWith((ref, args) async {
+        final (entityId, endMonth) = args;
+        return _reportForMonth(endMonth);
+      }),
+      spendingReportPresetProvider.overrideWith((ref, args) async {
+        final (entityId, endMonth, monthCount) = args;
+        return _reportForRange(endMonth, monthCount);
+      }),
       netWorthProvider.overrideWith(
-        (ref, entityId) async => _makeNetWorthData(),
+        (ref) async => TestData.gbpNetWorthWithUsd(),
       ),
-      ageOfMoneyProvider.overrideWith((ref, entityId) async => 2),
     ],
     child: MaterialApp.router(
       theme: OpenBudgetTheme.light,
