@@ -35,7 +35,9 @@ Future<CategoryTrendsData> categoryTrends(
   final spentByCategory = <String, Map<int, int>>{};
   for (final row in rows) {
     final month = row.month;
-    if (month == null || row.outflowMinor >= 0) continue;
+    if (month == null || row.groupId == null || row.outflowMinor >= 0) {
+      continue;
+    }
     spentByCategory
         .putIfAbsent(row.name, () => {})
         .update(

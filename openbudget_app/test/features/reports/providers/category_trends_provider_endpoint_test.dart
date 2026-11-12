@@ -9,6 +9,8 @@ import 'package:openbudget_core/openbudget_core.dart';
 import '../../../support/fake_endpoint_client.dart';
 
 const _entityId = '00000000-0000-0000-0000-000000000001';
+const _groceriesId = '00000000-0000-0000-0000-000000000010';
+const _rentId = '00000000-0000-0000-0000-000000000011';
 
 void main() {
   test('pivots byMonth spending into one series per category', () async {
@@ -29,19 +31,27 @@ void main() {
         'spending',
         (_) => [
           testSpendingRow(
+            groupId: _groceriesId,
             name: 'Groceries',
             month: endMonth,
             outflowMinor: -100000,
           ),
           testSpendingRow(
+            groupId: _groceriesId,
             name: 'Groceries',
             month: startMonth,
             outflowMinor: -200000,
           ),
           testSpendingRow(
+            groupId: _rentId,
             name: 'Rent',
             month: endMonth,
             outflowMinor: -50000,
+          ),
+          testSpendingRow(
+            name: 'No category',
+            month: endMonth,
+            outflowMinor: -90000,
           ),
           testSpendingRow(
             name: 'Refund',

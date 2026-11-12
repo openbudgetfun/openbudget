@@ -51,8 +51,12 @@ Future<SpendingReport> _spendingReport(
   for (final row in rows) {
     if (row.outflowMinor >= 0) continue;
     final spentMinor = row.outflowMinor.abs();
-    categorySpending[row.name] = (categorySpending[row.name] ?? 0) + spentMinor;
     totalExpenses += spentMinor;
+    // Lines with no envelope are uncategorised spending. They stay in the
+    // total, but "No category" is not a label the app translates, so the
+    // chart shows them under its own "Other categories" row instead.
+    if (row.groupId == null) continue;
+    categorySpending[row.name] = (categorySpending[row.name] ?? 0) + spentMinor;
   }
 
   final totalIncome = summaries.fold<int>(

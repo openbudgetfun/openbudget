@@ -7,6 +7,8 @@ import 'package:openbudget_client/openbudget_client.dart';
 import '../../../support/fake_endpoint_client.dart';
 
 const _entityId = '00000000-0000-0000-0000-000000000001';
+const _groceriesId = '00000000-0000-0000-0000-000000000010';
+const _rentId = '00000000-0000-0000-0000-000000000011';
 
 void main() {
   test('one month: category rows and the month summary', () async {
@@ -19,8 +21,16 @@ void main() {
         ),
       ],
       rows: [
-        testSpendingRow(name: 'Groceries', outflowMinor: -80000),
-        testSpendingRow(name: 'Rent', outflowMinor: -40000),
+        testSpendingRow(
+          groupId: _groceriesId,
+          name: 'Groceries',
+          outflowMinor: -80000,
+        ),
+        testSpendingRow(
+          groupId: _rentId,
+          name: 'Rent',
+          outflowMinor: -40000,
+        ),
         testSpendingRow(name: 'Refunds', inflowMinor: 5000),
         testSpendingRow(name: 'No category', outflowMinor: -30000),
       ],
@@ -39,11 +49,7 @@ void main() {
     expect(report.totalIncome, 500000);
     expect(report.totalExpenses, 150000);
     expect(report.netIncome, 350000);
-    expect(report.categorySpending, {
-      'Groceries': 80000,
-      'Rent': 40000,
-      'No category': 30000,
-    });
+    expect(report.categorySpending, {'Groceries': 80000, 'Rent': 40000});
     final call = client.callsTo('report', 'spending').single;
     expect(call.args['fromMonth'], 202511);
     expect(call.args['toMonth'], 202511);
@@ -71,8 +77,16 @@ void main() {
         ),
       ],
       rows: [
-        testSpendingRow(name: 'Groceries', outflowMinor: -100000),
-        testSpendingRow(name: 'Rent', outflowMinor: -20000),
+        testSpendingRow(
+          groupId: _groceriesId,
+          name: 'Groceries',
+          outflowMinor: -100000,
+        ),
+        testSpendingRow(
+          groupId: _rentId,
+          name: 'Rent',
+          outflowMinor: -20000,
+        ),
       ],
     );
     final container = ProviderContainer(
