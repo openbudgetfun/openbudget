@@ -62,6 +62,27 @@ TransactionView _makeTransaction({
 
 /// The paged list backed by an in-memory page, with server-side style
 /// filtering applied locally so the flow never builds a client.
+/// The month view the grouped list reads its base currency from.
+BudgetMonthView _makeMonthView() => BudgetMonthView(
+  entityId: UuidValue.fromString(_entityId),
+  month: 202611,
+  currencyCode: 'USD',
+  summary: BudgetMonthSummary(
+    month: 202611,
+    incomeMinor: 0,
+    uncategorizedMinor: 0,
+    fxDifferenceMinor: 0,
+    allocatedMinor: 0,
+    activityMinor: 0,
+    overspentLastMonthMinor: 0,
+    assignedInFutureMinor: 0,
+    readyToAssignMinor: 0,
+    availableMinor: 0,
+  ),
+  categories: const [],
+  envelopes: const [],
+);
+
 class _FakeTransactionPages extends TransactionPages {
   _FakeTransactionPages(this.items);
 
@@ -268,6 +289,11 @@ Widget _buildTransactionListApp({
       entityDetailProvider.overrideWith(
         (ref, id) async => TestData.usdEntity(),
       ),
+      // The grouped list reads the month view's currency; the real provider
+      // would leave a pending server connection behind.
+      budgetMonthProvider.overrideWith(
+        (ref, entityId) async => _makeMonthView(),
+      ),
       payeeListProvider.overrideWith((ref, id) async => const []),
       budgetMonthGroupsProvider.overrideWith((ref, id) async => const []),
       accountListProvider.overrideWith((ref, id) async => const []),
@@ -347,10 +373,11 @@ void main() {
       await tester.pumpWidget(
         _buildTransferFlowApp(
           accounts: [
-            TestData.checkingAccount(name: 'Checking'),
+            TestData.checkingAccount(name: 'Checking', currencyCode: 'USD'),
             TestData.checkingAccount(
               id: '00000000-0000-0000-0000-000000000602',
               name: 'Savings',
+              currencyCode: 'USD',
             ),
             TestData.checkingAccount(
               id: '00000000-0000-0000-0000-000000000603',
@@ -368,24 +395,27 @@ void main() {
           .byType(DropdownButtonFormField<String>)
           .at(1);
 
+      // Pick Checking for the destination.
       await tester.tap(destinationDropdown);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Checking (USD)').last);
       await tester.pumpAndSettle();
 
+      // The source picker excludes the destination's account entirely, so
+      // the same account cannot be selected on both sides.
       await tester.tap(sourceDropdown);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Checking (USD)').last);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Checking (USD)'), findsOneWidget);
-
-      await tester.tap(destinationDropdown);
-      await tester.pumpAndSettle();
-
       expect(find.text('Checking (USD)'), findsOneWidget);
       expect(find.text('Savings (USD)'), findsOneWidget);
-      expect(find.text('Euro Wallet (EUR)'), findsNothing);
+      expect(find.text('Euro Wallet (EUR)'), findsOneWidget);
+
+      // Pick Savings as the source; the destination picker excludes it too.
+      await tester.tap(find.text('Savings (USD)').last);
+      await tester.pumpAndSettle();
+      await tester.tap(destinationDropdown);
+      await tester.pumpAndSettle();
+      expect(find.text('Savings (USD)'), findsOneWidget);
+      expect(find.text('Euro Wallet (EUR)'), findsOneWidget);
     },
   );
 
