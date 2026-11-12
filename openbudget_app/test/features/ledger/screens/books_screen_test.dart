@@ -7,6 +7,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_repository.dart';
 import 'package:openbudget_app/src/features/ledger/screens/books_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 
 import '../ledger_test_data.dart';
@@ -16,7 +17,7 @@ GoRouter _router() => GoRouter(
   routes: [
     GoRoute(
       name: booksRoute,
-      path: '/budgets/:id/books',
+      path: '/budgets/:entityId/books',
       builder: (context, state) =>
           BooksScreen(entityId: state.pathParameters['entityId']!),
       routes: [
@@ -188,7 +189,7 @@ void main() {
                 trialRow(
                   code: '4000',
                   name: 'Sales',
-                  type: 'income',
+                  type: LedgerAccountType.income,
                   debitMinor: 0,
                   creditMinor: 5000,
                 ),

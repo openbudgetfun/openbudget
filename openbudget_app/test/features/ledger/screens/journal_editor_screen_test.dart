@@ -6,13 +6,16 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_repository.dart';
 import 'package:openbudget_app/src/features/ledger/screens/journal_editor_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 
+import '../../../fixtures/budget_month.dart';
 import '../ledger_test_data.dart';
 
 GoRouter _router({String? journalId}) => GoRouter(
@@ -26,7 +29,7 @@ GoRouter _router({String? journalId}) => GoRouter(
             onPressed: () => context.pushNamed(
               journalId == null ? journalNewRoute : journalEditRoute,
               pathParameters: {
-                'id': testBudgetId,
+                'entityId': testEntityId,
                 'journalId': ?journalId,
               },
             ),
@@ -37,7 +40,7 @@ GoRouter _router({String? journalId}) => GoRouter(
     ),
     GoRoute(
       name: booksRoute,
-      path: '/budgets/:id/books',
+      path: '/budgets/:entityId/books',
       builder: (_, _) => const Scaffold(body: Text('Books stub')),
     ),
     GoRoute(
@@ -66,7 +69,10 @@ Future<void> _pumpEditor(
   final container = ProviderContainer(
     overrides: [
       ledgerRepositoryProvider.overrideWithValue(repository),
-      budgetDetailProvider.overrideWith((ref, id) async => testBudget()),
+      entityDetailProvider.overrideWith((ref, id) async => testEntity()),
+      budgetMonthProvider.overrideWith(
+        (ref, id) async => testMonthView(),
+      ),
     ],
   );
   addTearDown(container.dispose);
@@ -317,13 +323,15 @@ void main() {
       final saved = repository.savedDrafts.single;
       expect(saved.reference, 'JB-2026-0099');
       expect(saved.narration, 'Client invoice');
-      expect(saved.source, 'manual');
+      expect(saved.source, JournalSource.manual);
       expect(saved.lines, hasLength(2));
       expect(saved.lines.first.debitMinor, 5000);
       expect(saved.lines.first.creditMinor, 0);
       expect(saved.lines.first.currencyCode, 'GBP');
-      expect(saved.lines.first.exchangeRate, '1');
-      expect(saved.lines.first.functionalDebitMinor, 5000);
+      // The generated input defaults a missing rate to the identity rate,
+      // which is correct for base-currency lines.
+      expect(saved.lines.first.fxRate, '1');
+      expect(saved.lines.first.baseDebitMinor, 5000);
       expect(saved.lines.last.creditMinor, 5000);
       expect(repository.postedJournals, isEmpty);
     });

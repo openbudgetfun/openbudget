@@ -275,7 +275,7 @@ class _JournalsTab extends HookConsumerWidget {
                     onTap: () => context.pushNamed(
                       journalDetailRoute,
                       pathParameters: {
-                        'id': entityId,
+                        'entityId': entityId,
                         'journalId': journal.id!.toString(),
                       },
                     ),

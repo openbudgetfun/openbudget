@@ -2,8 +2,12 @@ import 'dart:async';
 
 import 'package:openbudget_app/src/features/ledger/providers/ledger_repository.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 
-const testBudgetId = '00000000-0000-0000-0000-0000000000b001';
+const testEntityId = '00000000-0000-0000-0000-0000000000b001';
+
+/// Kept for the screens that still spell the id `testBudgetId`.
+const String testBudgetId = testEntityId;
 const testOwnerId = '00000000-0000-0000-0000-0000000000b002';
 
 const bankAccountId = '00000000-0000-0000-0000-0000000000b101';
@@ -17,29 +21,33 @@ const postedJournalId = '00000000-0000-0000-0000-0000000000c002';
 const reversedJournalId = '00000000-0000-0000-0000-0000000000c003';
 const reversalJournalId = '00000000-0000-0000-0000-0000000000c004';
 
-Budget testBudget({
-  String id = testBudgetId,
+Entity testEntity({
+  String id = testEntityId,
   String name = 'Studio Budget',
-  String currencyCode = 'GBP',
-  String accountingMode = 'envelope',
-}) => Budget(
+  String baseCurrencyCode = 'GBP',
+  AccountingMode accountingMode = AccountingMode.envelope,
+  EntityKind kind = EntityKind.soleTrader,
+}) => Entity(
   id: UuidValue.fromString(id),
   name: name,
-  currencyCode: currencyCode,
-  ownerId: UuidValue.fromString(testOwnerId),
+  kind: kind,
+  countryCode: 'GB',
+  baseCurrencyCode: baseCurrencyCode,
+  timeZone: 'Europe/London',
   accountingMode: accountingMode,
+  fiscalYearEndMonth: 4,
+  fiscalYearEndDay: 5,
+  ownerId: UuidValue.fromString(testOwnerId),
   createdAt: DateTime.utc(2026),
 );
 
 TaxProfileRecord businessTaxProfile({
-  String entityKind = 'soleTrader',
-  String entityId = testBudgetId,
+  EntityKind entityKind = EntityKind.soleTrader,
+  String entityId = testEntityId,
 }) => TaxProfileRecord(
   id: UuidValue.fromString('00000000-0000-0000-0000-0000000000b003'),
   entityId: UuidValue.fromString(entityId),
-  jurisdiction: 'GB',
-  entityKind: entityKind,
-  profileJson: '{"entityKind":"$entityKind"}',
+  profileJson: '{"jurisdiction":"GB","entityKind":"${entityKind.name}"}',
   createdAt: DateTime.utc(2026),
   updatedAt: DateTime.utc(2026, 6),
 );
@@ -48,15 +56,15 @@ LedgerAccount ledgerAccount({
   String id = bankAccountId,
   String code = '1000',
   String name = 'Bank',
-  String type = 'asset',
+  LedgerAccountType type = LedgerAccountType.asset,
   bool archived = false,
 }) => LedgerAccount(
   id: UuidValue.fromString(id),
-  entityId: UuidValue.fromString(testBudgetId),
+  entityId: UuidValue.fromString(testEntityId),
   code: code,
   name: name,
   type: type,
-  archived: archived,
+  archivedAt: archived ? DateTime.utc(2026, 8) : null,
   createdAt: DateTime.utc(2026),
 );
 
@@ -66,19 +74,19 @@ List<LedgerAccount> testChartOfAccounts() => [
     id: salesAccountId,
     code: '4000',
     name: 'Sales',
-    type: 'income',
+    type: LedgerAccountType.income,
   ),
   ledgerAccount(
     id: officeCostsAccountId,
     code: '5000',
     name: 'Office costs',
-    type: 'expense',
+    type: LedgerAccountType.expense,
   ),
   ledgerAccount(
     id: payablesAccountId,
     code: '2100',
     name: 'Payables',
-    type: 'liability',
+    type: LedgerAccountType.liability,
   ),
   ledgerAccount(
     id: archivedAccountId,
@@ -87,21 +95,22 @@ List<LedgerAccount> testChartOfAccounts() => [
     archived: true,
   ),
 ];
+
 Journal journal({
   String id = postedJournalId,
-  String status = 'posted',
+  JournalStatus status = JournalStatus.posted,
   String reference = 'JB-2026-0001',
   String? narration = 'Client invoice',
   DateTime? date,
   String? reversalOfJournalId,
 }) => Journal(
   id: UuidValue.fromString(id),
-  entityId: UuidValue.fromString(testBudgetId),
+  entityId: UuidValue.fromString(testEntityId),
   date: date ?? DateTime.utc(2026, 5, 14),
   reference: reference,
   narration: narration,
   status: status,
-  postedAt: status == 'draft' ? null : DateTime.utc(2026, 5, 14, 9),
+  postedAt: status == JournalStatus.draft ? null : DateTime.utc(2026, 5, 14, 9),
   reversalOfJournalId: reversalOfJournalId == null
       ? null
       : UuidValue.fromString(reversalOfJournalId),
@@ -118,14 +127,14 @@ List<Journal> testJournals() => [
   ),
   journal(
     id: reversedJournalId,
-    status: 'reversed',
+    status: JournalStatus.reversed,
     reference: 'JB-2026-0003',
     narration: 'Mistaken entry',
   ),
   journal(),
   journal(
     id: draftJournalId,
-    status: 'draft',
+    status: JournalStatus.draft,
     reference: 'JB-2026-0002',
     narration: 'Not finished',
   ),
@@ -140,11 +149,9 @@ JournalLineInput testLineInput({
   currencyCode: 'GBP',
   debitMinor: debit ? amount : 0,
   creditMinor: debit ? 0 : amount,
-  functionalDebitMinor: debit ? amount : 0,
-  functionalCreditMinor: debit ? 0 : amount,
-  exchangeRate: '1',
-  rateDate: DateTime(2026, 5, 14),
-  rateSource: 'manual',
+  baseDebitMinor: debit ? amount : 0,
+  baseCreditMinor: debit ? 0 : amount,
+  fxRateDate: DateTime(2026, 5, 14),
 );
 
 JournalLine journalLine({
@@ -162,11 +169,9 @@ JournalLine journalLine({
   debitMinor: debitMinor,
   creditMinor: creditMinor,
   currencyCode: currencyCode,
-  functionalDebitMinor: debitMinor,
-  functionalCreditMinor: creditMinor,
-  exchangeRate: '1',
-  rateDate: DateTime.utc(2026, 5, 14),
-  rateSource: 'manual',
+  baseDebitMinor: debitMinor,
+  baseCreditMinor: creditMinor,
+  fxRateDate: DateTime.utc(2026, 5, 14),
 );
 
 /// The balanced £50.00 pair the test journals were posted with.
@@ -184,10 +189,12 @@ List<JournalLine> testJournalLines({String journalId = postedJournalId}) => [
 TrialBalanceRowView trialRow({
   String code = '1000',
   String name = 'Bank',
-  String type = 'asset',
+  LedgerAccountType type = LedgerAccountType.asset,
   int debitMinor = 5000,
   int creditMinor = 0,
+  String accountId = bankAccountId,
 }) => TrialBalanceRowView(
+  ledgerAccountId: UuidValue.fromString(accountId),
   accountCode: code,
   accountName: name,
   accountType: type,
@@ -203,7 +210,7 @@ TrialBalanceView trialBalanceView({
   String currencyCode = 'GBP',
   DateTime? asOf,
 }) => TrialBalanceView(
-  entityId: UuidValue.fromString(testBudgetId),
+  entityId: UuidValue.fromString(testEntityId),
   currencyCode: currencyCode,
   asOf: asOf ?? DateTime.utc(2026, 11, 5),
   rows:
@@ -213,9 +220,10 @@ TrialBalanceView trialBalanceView({
         trialRow(
           code: '4000',
           name: 'Sales',
-          type: 'income',
+          type: LedgerAccountType.income,
           debitMinor: 0,
           creditMinor: 5000,
+          accountId: salesAccountId,
         ),
       ],
   totalDebitMinor: totalDebitMinor,
@@ -224,7 +232,7 @@ TrialBalanceView trialBalanceView({
 
 LedgerPeriodLock testLock({DateTime? lockDate}) => LedgerPeriodLock(
   id: UuidValue.fromString('00000000-0000-0000-0000-0000000000c010'),
-  entityId: UuidValue.fromString(testBudgetId),
+  entityId: UuidValue.fromString(testEntityId),
   lockDate: lockDate ?? DateTime.utc(2026, 10, 31),
   setBy: UuidValue.fromString(testOwnerId),
 );
@@ -269,7 +277,7 @@ class FakeLedgerRepository implements LedgerRepository {
   /// exactly when the lines arrive.
   Completer<List<JournalLine>>? linesCompleter;
 
-  final List<String> enabledBudgets = [];
+  final List<String> enabledEntities = [];
   final List<String> archivedAccounts = [];
   final List<
     ({
@@ -279,7 +287,7 @@ class FakeLedgerRepository implements LedgerRepository {
       String? journalId,
       String reference,
       String? narration,
-      String source,
+      JournalSource source,
     })
   >
   savedDrafts = [];
@@ -301,11 +309,11 @@ class FakeLedgerRepository implements LedgerRepository {
   }) {
     final stored = Journal(
       id: UuidValue.fromString(journalId),
-      entityId: UuidValue.fromString(testBudgetId),
+      entityId: UuidValue.fromString(testEntityId),
       date: DateTime.utc(2026, 5, 14),
       reference: reference,
       narration: narration,
-      status: 'draft',
+      status: JournalStatus.draft,
       createdAt: DateTime.utc(2026, 5, 14),
     );
     journals = [...?journals, stored];
@@ -313,10 +321,10 @@ class FakeLedgerRepository implements LedgerRepository {
   }
 
   @override
-  Future<Budget> enableLedger(String entityId) async {
+  Future<Entity> enableLedger(String entityId) async {
     if (enableError != null) throw enableError!;
-    enabledBudgets.add(entityId);
-    return testBudget(accountingMode: 'ledger');
+    enabledEntities.add(entityId);
+    return testEntity(accountingMode: AccountingMode.ledger);
   }
 
   @override
@@ -334,8 +342,8 @@ class FakeLedgerRepository implements LedgerRepository {
     required String entityId,
     required String code,
     required String name,
-    required String type,
-    String? systemRole,
+    required LedgerAccountType type,
+    LedgerSystemRole? systemRole,
     String? currencyCode,
     String? taxCategoryCode,
   }) => throw UnimplementedError();
@@ -352,7 +360,7 @@ class FakeLedgerRepository implements LedgerRepository {
     required DateTime date,
     required List<JournalLineInput> lines,
     required String reference,
-    required String source,
+    required JournalSource source,
     String? journalId,
     String? narration,
   }) async {
@@ -394,7 +402,10 @@ class FakeLedgerRepository implements LedgerRepository {
     journals = [
       for (final j in journals ?? testJournals())
         if (j.id?.toString() == journalId)
-          j.copyWith(status: 'posted', postedAt: DateTime.utc(2026, 5, 14, 9))
+          j.copyWith(
+            status: JournalStatus.posted,
+            postedAt: DateTime.utc(2026, 5, 14, 9),
+          )
         else
           j,
     ];
@@ -411,7 +422,7 @@ class FakeLedgerRepository implements LedgerRepository {
     journals = [
       for (final j in journals ?? testJournals())
         if (j.id?.toString() == journalId)
-          j.copyWith(status: 'reversed')
+          j.copyWith(status: JournalStatus.reversed)
         else
           j,
     ];
@@ -419,10 +430,10 @@ class FakeLedgerRepository implements LedgerRepository {
       id: UuidValue.fromString(
         '00000000-0000-0000-0000-0000000000e$_nextJournalNumber',
       ),
-      entityId: UuidValue.fromString(testBudgetId),
+      entityId: UuidValue.fromString(testEntityId),
       date: date,
       reference: 'JB-2026-000$_nextJournalNumber',
-      status: 'posted',
+      status: JournalStatus.posted,
       reversalOfJournalId: UuidValue.fromString(journalId),
       createdAt: DateTime.utc(2026, 5, 15),
     );

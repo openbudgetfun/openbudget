@@ -30,7 +30,10 @@ Future<void> _pumpDetail(
             child: FilledButton(
               onPressed: () => context.pushNamed(
                 journalDetailRoute,
-                pathParameters: {'id': testBudgetId, 'journalId': journalId},
+                pathParameters: {
+                  'entityId': testEntityId,
+                  'journalId': journalId,
+                },
               ),
               child: const Text('Open detail'),
             ),
@@ -39,7 +42,7 @@ Future<void> _pumpDetail(
       ),
       GoRoute(
         name: booksRoute,
-        path: '/budgets/:id/books',
+        path: '/budgets/:entityId/books',
         builder: (_, _) => const Scaffold(body: Text('Books stub')),
       ),
       GoRoute(

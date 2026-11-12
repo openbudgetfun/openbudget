@@ -1,9 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_actions_provider.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_providers.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_repository.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 
 import '../ledger_test_data.dart';
 
@@ -11,8 +12,8 @@ ProviderContainer _containerWith(LedgerRepository repository) {
   final container = ProviderContainer(
     overrides: [
       ledgerRepositoryProvider.overrideWithValue(repository),
-      budgetDetailProvider.overrideWith(
-        (ref, id) async => testBudget(),
+      entityDetailProvider.overrideWith(
+        (ref, id) async => testEntity(),
       ),
     ],
   );
@@ -59,7 +60,7 @@ void main() {
 
       expect(journals, hasLength(4));
       expect(journals.first.reference, 'JB-2026-0004');
-      expect(journals.first.status, 'posted');
+      expect(journals.first.status, JournalStatus.posted);
     });
   });
 
@@ -172,12 +173,12 @@ void main() {
       final fake = FakeLedgerRepository();
       final container = _containerWith(fake);
 
-      final budget = await container
+      final entity = await container
           .read(ledgerActionsProvider.notifier)
           .enableLedger(entityId: testBudgetId);
 
-      expect(budget.accountingMode, 'ledger');
-      expect(fake.enabledBudgets, [testBudgetId]);
+      expect(entity.accountingMode, AccountingMode.ledger);
+      expect(fake.enabledEntities, [testBudgetId]);
       expect(
         container.read(ledgerActionsProvider),
         const AsyncValue<void>.data(null),
@@ -216,11 +217,11 @@ void main() {
             narration: 'Client invoice',
           );
 
-      expect(journal.status, 'draft');
+      expect(journal.status, JournalStatus.draft);
       expect(fake.savedDrafts, hasLength(1));
       final saved = fake.savedDrafts.single;
       expect(saved.entityId, testBudgetId);
-      expect(saved.source, 'manual');
+      expect(saved.source, JournalSource.manual);
       expect(saved.reference, 'JB-2026-0009');
       expect(saved.narration, 'Client invoice');
       expect(saved.lines, hasLength(2));
@@ -261,7 +262,7 @@ void main() {
           );
 
       expect(fake.postedJournals, [draftJournalId]);
-      expect(journal.status, 'posted');
+      expect(journal.status, JournalStatus.posted);
     });
 
     test('reverseJournal mirrors the original and marks it reversed', () async {
@@ -281,7 +282,7 @@ void main() {
         journalId: postedJournalId,
         date: date,
       ));
-      expect(reversal.status, 'posted');
+      expect(reversal.status, JournalStatus.posted);
       expect(reversal.reversalOfJournalId?.toString(), postedJournalId);
       final left = await container.read(
         ledgerJournalsProvider(testBudgetId).future,
@@ -289,7 +290,7 @@ void main() {
       final original = left.firstWhere(
         (j) => j.id?.toString() == postedJournalId,
       );
-      expect(original.status, 'reversed');
+      expect(original.status, JournalStatus.reversed);
     });
 
     test('setLockDate forwards the chosen date', () async {

@@ -215,7 +215,7 @@ class JournalDetailScreen extends HookConsumerWidget {
                             onPressed: () => context.pushNamed(
                               journalEditRoute,
                               pathParameters: {
-                                'id': entityId,
+                                'entityId': entityId,
                                 'journalId': journalId,
                               },
                             ),
