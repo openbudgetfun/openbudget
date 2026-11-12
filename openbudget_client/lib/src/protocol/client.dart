@@ -43,6 +43,8 @@ import 'package:openbudget_client/src/protocol/billing/solana_plan_view.dart'
     as _ij0nbz0v;
 import 'package:openbudget_client/src/protocol/budget/allocation_input.dart'
     as _inutgv28;
+import 'package:openbudget_client/src/protocol/budget/budget_month_summary.dart'
+    as _i52laypj;
 import 'package:openbudget_client/src/protocol/budget/budget_month_view.dart'
     as _i6xxh8m1;
 import 'package:openbudget_client/src/protocol/budget_templates/budget_template.dart'
@@ -55,6 +57,8 @@ import 'package:openbudget_client/src/protocol/entities/entity.dart'
     as _i2ulk6h5;
 import 'package:openbudget_client/src/protocol/entities/entity_changed_event.dart'
     as _irhjjor1;
+import 'package:openbudget_client/src/protocol/entities/entity_summary_view.dart'
+    as _ib1vbiwb;
 import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal.dart'
     as _ibdhi9gv;
 import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal_kind.dart'
@@ -90,6 +94,10 @@ import 'package:openbudget_client/src/protocol/reports/net_worth_history_view.da
     as _iynyr02m;
 import 'package:openbudget_client/src/protocol/reports/net_worth_view.dart'
     as _ilmu26ji;
+import 'package:openbudget_client/src/protocol/reports/report_grouping.dart'
+    as _igx41vni;
+import 'package:openbudget_client/src/protocol/reports/spending_row.dart'
+    as _ia9y0al9;
 import 'package:openbudget_client/src/protocol/settings/user_settings.dart'
     as _ivxpuwvx;
 import 'package:openbudget_client/src/protocol/tax/tax_category_view.dart'
@@ -1090,6 +1098,14 @@ class EndpointEntity extends _isc.EndpointRef {
         {'includeArchived': includeArchived},
       );
 
+  /// One headline row per active entity the caller owns.
+  _ida.Future<List<_ib1vbiwb.EntitySummaryView>> listSummaries() =>
+      caller.callServerEndpoint<List<_ib1vbiwb.EntitySummaryView>>(
+        'entity',
+        'listSummaries',
+        {},
+      );
+
   /// Loads one owned entity.
   _ida.Future<_i2ulk6h5.Entity> get(_isc.UuidValue entityId) =>
       caller.callServerEndpoint<_i2ulk6h5.Entity>(
@@ -1884,8 +1900,9 @@ class EndpointRecurringTransaction extends _isc.EndpointRef {
       );
 }
 
-/// Read-only reporting surface. This unit exposes net worth only; spending,
-/// month summaries and age of money arrive with their own service.
+/// Read-only reporting surface for net worth, spending, month summaries and
+/// age of money. Every method requires a signed-in caller and delegates the
+/// ownership boundary to its service.
 /// {@category Endpoint}
 class EndpointReport extends _isc.EndpointRef {
   EndpointReport(_isc.EndpointCaller caller) : super(caller);
@@ -1926,6 +1943,48 @@ class EndpointReport extends _isc.EndpointRef {
       'currencyCode': currencyCode,
     },
   );
+
+  /// One group's spending and income over a month range.
+  _ida.Future<List<_ia9y0al9.SpendingRow>> spending(
+    _isc.UuidValue entityId,
+    int fromMonth,
+    int toMonth,
+    _igx41vni.ReportGrouping grouping,
+    bool byMonth,
+  ) => caller.callServerEndpoint<List<_ia9y0al9.SpendingRow>>(
+    'report',
+    'spending',
+    {
+      'entityId': entityId,
+      'fromMonth': fromMonth,
+      'toMonth': toMonth,
+      'grouping': grouping,
+      'byMonth': byMonth,
+    },
+  );
+
+  /// The section 6.4 summary for every month from [fromMonth] to [toMonth].
+  _ida.Future<List<_i52laypj.BudgetMonthSummary>> monthSummaries(
+    _isc.UuidValue entityId,
+    int fromMonth,
+    int toMonth,
+  ) => caller.callServerEndpoint<List<_i52laypj.BudgetMonthSummary>>(
+    'report',
+    'monthSummaries',
+    {
+      'entityId': entityId,
+      'fromMonth': fromMonth,
+      'toMonth': toMonth,
+    },
+  );
+
+  /// The mean age in days of the last ten outflows' money, or null.
+  _ida.Future<int?> ageOfMoney(_isc.UuidValue entityId) =>
+      caller.callServerEndpoint<int?>(
+        'report',
+        'ageOfMoney',
+        {'entityId': entityId},
+      );
 }
 
 /// User preferences independent of the selected entity.

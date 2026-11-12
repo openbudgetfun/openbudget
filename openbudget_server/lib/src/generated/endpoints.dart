@@ -20,6 +20,8 @@ import 'package:openbudget_server/src/generated/ledger/journal_line_input.dart'
     as _in0sxdux;
 import 'package:openbudget_server/src/generated/reports/net_worth_granularity.dart'
     as _iwv93n42;
+import 'package:openbudget_server/src/generated/reports/report_grouping.dart'
+    as _i3o6dj87;
 import 'package:openbudget_server/src/generated/transactions/import_row.dart'
     as _iyod81ld;
 import 'package:openbudget_server/src/generated/transactions/transaction_flag.dart'
@@ -1802,6 +1804,16 @@ class Endpoints extends _is.EndpointDispatch {
                 includeArchived: params['includeArchived'],
               ),
         ),
+        'listSummaries': _is.MethodConnector(
+          name: 'listSummaries',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['entity'] as _ib6f7fzy.EntityEndpoint)
+                  .listSummaries(session),
+        ),
         'get': _is.MethodConnector(
           name: 'get',
           params: {
@@ -3441,6 +3453,99 @@ class Endpoints extends _is.EndpointDispatch {
                     params['granularity'],
                     entityIds: params['entityIds'],
                     currencyCode: params['currencyCode'],
+                  ),
+        ),
+        'spending': _is.MethodConnector(
+          name: 'spending',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'fromMonth': _is.ParameterDescription(
+              name: 'fromMonth',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'toMonth': _is.ParameterDescription(
+              name: 'toMonth',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'grouping': _is.ParameterDescription(
+              name: 'grouping',
+              type: _is.getType<_i3o6dj87.ReportGrouping>(),
+              nullable: false,
+            ),
+            'byMonth': _is.ParameterDescription(
+              name: 'byMonth',
+              type: _is.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['report'] as _iqte9uvc.ReportEndpoint).spending(
+                    session,
+                    params['entityId'],
+                    params['fromMonth'],
+                    params['toMonth'],
+                    params['grouping'],
+                    params['byMonth'],
+                  ),
+        ),
+        'monthSummaries': _is.MethodConnector(
+          name: 'monthSummaries',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'fromMonth': _is.ParameterDescription(
+              name: 'fromMonth',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'toMonth': _is.ParameterDescription(
+              name: 'toMonth',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['report'] as _iqte9uvc.ReportEndpoint)
+                  .monthSummaries(
+                    session,
+                    params['entityId'],
+                    params['fromMonth'],
+                    params['toMonth'],
+                  ),
+        ),
+        'ageOfMoney': _is.MethodConnector(
+          name: 'ageOfMoney',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['report'] as _iqte9uvc.ReportEndpoint).ageOfMoney(
+                    session,
+                    params['entityId'],
                   ),
         ),
       },

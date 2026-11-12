@@ -45,6 +45,8 @@ import 'package:openbudget_server/src/generated/billing/solana_plan_view.dart'
     as _i7ligxlm;
 import 'package:openbudget_server/src/generated/budget/allocation_input.dart'
     as _inwbkajl;
+import 'package:openbudget_server/src/generated/budget/budget_month_summary.dart'
+    as _ipz3w5am;
 import 'package:openbudget_server/src/generated/budget/budget_month_view.dart'
     as _iumjg9vv;
 import 'package:openbudget_server/src/generated/budget_templates/budget_template.dart'
@@ -57,6 +59,8 @@ import 'package:openbudget_server/src/generated/entities/entity.dart'
     as _if2ry2np;
 import 'package:openbudget_server/src/generated/entities/entity_changed_event.dart'
     as _i6lrvoev;
+import 'package:openbudget_server/src/generated/entities/entity_summary_view.dart'
+    as _im3neacv;
 import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dart'
     as _iuyjld9f;
 import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal_kind.dart'
@@ -95,6 +99,10 @@ import 'package:openbudget_server/src/generated/reports/net_worth_history_view.d
     as _igxf0nr4;
 import 'package:openbudget_server/src/generated/reports/net_worth_view.dart'
     as _idgd1o7p;
+import 'package:openbudget_server/src/generated/reports/report_grouping.dart'
+    as _i3o6dj87;
+import 'package:openbudget_server/src/generated/reports/spending_row.dart'
+    as _ijvd4zl8;
 import 'package:openbudget_server/src/generated/settings/user_settings.dart'
     as _ijkobaqo;
 import 'package:openbudget_server/src/generated/tax/tax_category_view.dart'
@@ -2604,6 +2612,34 @@ class _EntityEndpoint {
     });
   }
 
+  _ida.Future<List<_im3neacv.EntitySummaryView>> listSummaries(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'entity',
+            method: 'listSummaries',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'entity',
+          methodName: 'listSummaries',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<List<_im3neacv.EntitySummaryView>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _ida.Future<_if2ry2np.Entity> get(
     _ist.TestSessionBuilder sessionBuilder,
     _is.UuidValue entityId,
@@ -4586,6 +4622,109 @@ class _ReportEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _ida.Future<_igxf0nr4.NetWorthHistoryView>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_ijvd4zl8.SpendingRow>> spending(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue entityId,
+    int fromMonth,
+    int toMonth,
+    _i3o6dj87.ReportGrouping grouping,
+    bool byMonth,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'report',
+            method: 'spending',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'report',
+          methodName: 'spending',
+          parameters: _ist.testObjectToJson({
+            'entityId': entityId,
+            'fromMonth': fromMonth,
+            'toMonth': toMonth,
+            'grouping': grouping,
+            'byMonth': byMonth,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<List<_ijvd4zl8.SpendingRow>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_ipz3w5am.BudgetMonthSummary>> monthSummaries(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue entityId,
+    int fromMonth,
+    int toMonth,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'report',
+            method: 'monthSummaries',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'report',
+          methodName: 'monthSummaries',
+          parameters: _ist.testObjectToJson({
+            'entityId': entityId,
+            'fromMonth': fromMonth,
+            'toMonth': toMonth,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<List<_ipz3w5am.BudgetMonthSummary>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<int?> ageOfMoney(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue entityId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'report',
+            method: 'ageOfMoney',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'report',
+          methodName: 'ageOfMoney',
+          parameters: _ist.testObjectToJson({'entityId': entityId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<int?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

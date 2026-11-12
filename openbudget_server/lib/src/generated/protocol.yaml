@@ -73,6 +73,7 @@ category:
 entity:
   - create:
   - list:
+  - listSummaries:
   - get:
   - update:
   - archive:
@@ -140,6 +141,9 @@ recurringTransaction:
 report:
   - netWorth:
   - netWorthHistory:
+  - spending:
+  - monthSummaries:
+  - ageOfMoney:
 settings:
   - get:
   - setReportingCurrency:

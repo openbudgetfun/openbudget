@@ -28,6 +28,8 @@ import 'package:openbudget_server/src/generated/audit/audit_event.dart'
     as _ictk02ka;
 import 'package:openbudget_server/src/generated/budget/allocation_input.dart'
     as _inwbkajl;
+import 'package:openbudget_server/src/generated/budget/budget_month_summary.dart'
+    as _ipz3w5am;
 import 'package:openbudget_server/src/generated/budget_templates/budget_template.dart'
     as _ihbdj8p6;
 import 'package:openbudget_server/src/generated/budget_templates/budget_template_line.dart'
@@ -36,6 +38,8 @@ import 'package:openbudget_server/src/generated/categories/category.dart'
     as _iwlneq7u;
 import 'package:openbudget_server/src/generated/entities/entity.dart'
     as _if2ry2np;
+import 'package:openbudget_server/src/generated/entities/entity_summary_view.dart'
+    as _im3neacv;
 import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dart'
     as _iuyjld9f;
 import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
@@ -55,6 +59,8 @@ import 'package:openbudget_server/src/generated/plaid/plaid_connection.dart'
     as _iyqk0wcc;
 import 'package:openbudget_server/src/generated/recurring_transactions/recurring_transaction.dart'
     as _i6lbncsb;
+import 'package:openbudget_server/src/generated/reports/spending_row.dart'
+    as _ijvd4zl8;
 import 'package:openbudget_server/src/generated/tax/tax_category_view.dart'
     as _i687t6y5;
 import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
@@ -597,6 +603,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_iz4ekkcc.BudgetTemplateLine>>,
           _is.getType<List<_iwlneq7u.Category>>,
           _is.getType<List<_if2ry2np.Entity>>,
+          _is.getType<List<_im3neacv.EntitySummaryView>>,
           _is.getType<List<_iuyjld9f.EnvelopeGoal>>,
           _is.getType<List<_igwnqatb.Envelope>>,
           _is.getType<List<_izagyfe8.Institution>>,
@@ -609,6 +616,8 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_iyqk0wcc.PlaidConnection>>,
           _is.getType<List<_i6lbncsb.RecurringTransaction>>,
           _is.getType<List<_is.UuidValue>?>,
+          _is.getType<List<_ijvd4zl8.SpendingRow>>,
+          _is.getType<List<_ipz3w5am.BudgetMonthSummary>>,
           _is.getType<List<_i687t6y5.TaxCategoryView>>,
           _is.getType<List<_i4wqhpw2.TransactionRule>>,
           _is.getType<List<_iw07wj0h.TransactionView>>,
@@ -6404,6 +6413,12 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
+    if (t == List<_im3neacv.EntitySummaryView>) {
+      return (data as List)
+              .map((e) => deserialize<_im3neacv.EntitySummaryView>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_iuyjld9f.EnvelopeGoal>) {
       return (data as List)
               .map((e) => deserialize<_iuyjld9f.EnvelopeGoal>(e))
@@ -6474,6 +6489,18 @@ class Protocol extends _is.DatabaseSerializationManager
                     .map((e) => deserialize<_is.UuidValue>(e))
                     .toList()
               : null)
+          as T;
+    }
+    if (t == List<_ijvd4zl8.SpendingRow>) {
+      return (data as List)
+              .map((e) => deserialize<_ijvd4zl8.SpendingRow>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ipz3w5am.BudgetMonthSummary>) {
+      return (data as List)
+              .map((e) => deserialize<_ipz3w5am.BudgetMonthSummary>(e))
+              .toList()
           as T;
     }
     if (t == List<_i687t6y5.TaxCategoryView>) {
