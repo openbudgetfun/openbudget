@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/credit_card_provider.dart';
@@ -73,6 +74,9 @@ void main() {
         ),
         recurringDueCountProvider.overrideWith((ref, entityId) async => 0),
         reviewQueueProvider.overrideWith((ref, entityId) async => const []),
+        // The header's age-of-money stat reads the server otherwise, which
+        // would leave a pending connection at teardown.
+        ageOfMoneyProvider.overrideWith((ref, entityId) async => null),
       ],
     );
     addTearDown(container.dispose);

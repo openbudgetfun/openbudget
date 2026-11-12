@@ -234,7 +234,7 @@ abstract final class TestData {
   static const taxDisclaimer =
       'Guidance only, not tax advice. Check figures with a qualified adviser '
       'before filing.';
-  static const taxYearLabel = 'Tax year 2026/27';
+  static const taxYearLabel = 'Tax year 2026';
 
   // Books (double-entry ledger)
   static const booksEnableTitle = 'Enable double-entry books';

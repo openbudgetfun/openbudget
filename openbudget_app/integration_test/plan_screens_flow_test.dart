@@ -3,10 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/category_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/credit_card_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/envelope_activity_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/recent_moves_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/review_queue_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.dart';
@@ -301,10 +303,26 @@ ProviderContainer _planContainer({
       ),
       recurringDueCountProvider.overrideWith((ref, entityId) async => 0),
       reviewQueueProvider.overrideWith((ref, entityId) async => reviewQueue),
+      // The envelope activity sheet and the header's age-of-money stat read
+      // the server otherwise, which would leave a pending connection at
+      // teardown.
+      envelopeActivityProvider.overrideWith2(
+        (_) => _FakeEnvelopeActivity(),
+      ),
+      ageOfMoneyProvider.overrideWith((ref, entityId) async => null),
     ],
   );
   addTearDown(container.dispose);
   return container;
+}
+
+/// An empty envelope activity page, so the sheets never touch the network.
+class _FakeEnvelopeActivity extends EnvelopeActivity {
+  @override
+  Future<EnvelopeActivityState> build(
+    String entityId,
+    String envelopeId,
+  ) async => const EnvelopeActivityState(items: []);
 }
 
 Widget _buildApp(
@@ -552,13 +570,14 @@ void main() {
     );
     expect(saveTargetButton.onPressed, isNull);
 
-    await tester.tap(find.widgetWithText(BudgetAmountField, 'I need'));
+    // The amount field opens the keypad sheet; enter 2800 and confirm.
+    await tester.tap(find.widgetWithText(BudgetAmountField, 'Amount'));
     await tester.pumpAndSettle();
     for (final digit in ['2', '8', '0', '0']) {
       await tester.tap(find.byKey(Key('budget-keypad-digit-$digit')));
       await tester.pump();
     }
-    await tester.tap(find.byKey(const Key('budget-keypad-equals')));
+    await tester.tap(find.byKey(const Key('budget-keypad-done')));
     await tester.pumpAndSettle();
 
     saveTargetButton = tester.widget<FilledButton>(
@@ -582,8 +601,8 @@ void main() {
     await tester.pumpWidget(_buildApp(container));
     await tester.pumpAndSettle();
 
-    expect(find.text('Cover 1 overspent Category'), findsOneWidget);
-    await tester.tap(find.text('Cover 1 overspent Category'));
+    expect(find.text('Cover 1 overspent category'), findsOneWidget);
+    await tester.tap(find.text('Cover 1 overspent category'));
     await tester.pumpAndSettle();
 
     expect(find.text('Cover Overspending'), findsOneWidget);
@@ -592,7 +611,7 @@ void main() {
 
     await tester.tap(find.text('Done'));
     await tester.pumpAndSettle();
-    expect(find.text('Cover 1 overspent Category'), findsOneWidget);
+    expect(find.text('Cover 1 overspent category'), findsOneWidget);
   });
 
   patrolWidgetTest('desktop recent moves flow opens and switches tabs', (
