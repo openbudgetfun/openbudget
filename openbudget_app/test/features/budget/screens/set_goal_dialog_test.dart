@@ -8,15 +8,14 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 import '../../../fixtures/budget_month.dart';
 
-EnvelopeMonthView _rowWithGoal({required int amountMinor}) =>
-    testEnvelopeRow(
-      goal: EnvelopeGoal(
-        entityId: UuidValue.fromString(fixtureEntityId),
-        envelopeId: UuidValue.fromString(fixtureEnvelopeId),
-        kind: EnvelopeGoalKind.monthlyFunding,
-        amountMinor: amountMinor,
-      ),
-    );
+EnvelopeMonthView _rowWithGoal({required int amountMinor}) => testEnvelopeRow(
+  goal: EnvelopeGoal(
+    entityId: UuidValue.fromString(fixtureEntityId),
+    envelopeId: UuidValue.fromString(fixtureEnvelopeId),
+    kind: EnvelopeGoalKind.monthlyFunding,
+    amountMinor: amountMinor,
+  ),
+);
 
 Widget _buildSubject({
   required String currencyCode,
@@ -47,7 +46,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Set aside another \$1,200.00'), findsOneWidget);
+    expect(find.text(r'Set aside another $1,200.00'), findsOneWidget);
     // The editable field carries the parsed amount with currency decimals.
     expect(find.text('1200.00'), findsOneWidget);
   });

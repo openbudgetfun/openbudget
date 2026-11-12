@@ -22,7 +22,6 @@ BudgetMonthView _makeMonthView() => testMonthView(
     testEnvelopeRow(
       envelopeId: _envelopeGroceriesId,
       categoryId: _categoryId,
-      envelopeName: 'Groceries',
       allocatedMinor: 120000,
       activityMinor: -40000,
     ),
@@ -39,16 +38,15 @@ BudgetMonthView _makeMonthView() => testMonthView(
 Widget _buildSubject({
   required ProviderContainer container,
   required Widget home,
-}) =>
-    UncontrolledProviderScope(
-      container: container,
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: home,
-      ),
-    );
+}) => UncontrolledProviderScope(
+  container: container,
+  child: MaterialApp(
+    theme: OpenBudgetTheme.light,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: home,
+  ),
+);
 
 Future<void> _dismissCoachmarkIfVisible(WidgetTester tester) async {
   final gotIt = find.text('Got It!');
