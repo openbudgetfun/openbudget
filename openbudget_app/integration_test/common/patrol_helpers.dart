@@ -256,35 +256,18 @@ class AccountDetailPage {
 
   final WidgetTester tester;
 
-  Finder get moreButton => _skribbleIcon(OpenBudgetIcons.more);
-  Finder get editAccountMenuItem => find.text('Edit Account');
+  /// The app-bar edit action; hidden while the account is closed.
+  Finder get editButton => find.byTooltip('Edit Account');
+  Finder get reconcileButton => find.widgetWithText(FilledButton, 'Reconcile');
 
-  Future<void> openOverflowMenu() async {
-    await tester.tap(moreButton);
+  Future<void> editViaAppBar() async {
+    await tester.tap(editButton);
     await tester.pumpAndSettle();
   }
 
-  Future<void> openEditAccount() async {
-    await openOverflowMenu();
-    await tester.tap(editAccountMenuItem);
-    await tester.pumpAndSettle();
+  Future<void> openReconcileSheet() async {
+    await scrollAndTap(tester, reconcileButton);
   }
-}
-
-/// Page object for the full-screen edit account form.
-class EditAccountFormPage {
-  EditAccountFormPage(this.tester);
-
-  final WidgetTester tester;
-
-  Finder get closeAccountButton => find.text('Close Account');
-
-  /// Scrolls the form until the close action is built and visible.
-  ///
-  /// The restyle added enough sections above it that the button starts past the
-  /// lazy list's cache extent at 800x600.
-  Future<void> scrollToCloseAccount() =>
-      scrollIntoView(tester, closeAccountButton);
 }
 
 /// Page object for the add transaction bottom sheet.
@@ -700,13 +683,18 @@ class CreateEntityPage {
   );
 
   /// Fills the name and submits with the pre-selected defaults (a personal
-  /// GB entity in GBP).
-  Future<String> create({String name = 'My First Budget'}) async {
+  /// GB entity in GBP). [navigatesTo] is the first thing the flow waits for
+  /// on the screen the create redirects to; the real add account screen
+  /// shows "Add Accounts" in its app bar.
+  Future<String> create({
+    String name = 'My First Budget',
+    Finder? navigatesTo,
+  }) async {
     await tester.enterText(nameField, name);
     // The create button sits below the fold on the 800x600 surface.
     await scrollAndTap(tester, createButton);
-    // Wait for the async create + the redirect into the add account screen.
-    await waitForFinder(tester, find.text('Add Accounts'));
+    // Wait for the async create + the redirect into the next screen.
+    await waitForFinder(tester, navigatesTo ?? find.text('Add Accounts'));
     await tester.pumpAndSettle();
     return name;
   }

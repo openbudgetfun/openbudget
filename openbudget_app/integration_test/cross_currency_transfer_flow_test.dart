@@ -98,10 +98,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // Entering Sent only leaves Received empty; the implied rate line is
-      // visible against the quoted market rate.
+      // visible against the quoted market rate, quoted from the source
+      // currency.
       expect(page.impliedRate, findsOneWidget);
-      expect(find.textContaining('1 USD = 0.79 GBP'), findsOneWidget);
-      expect(find.textContaining('Nov 8'), findsOneWidget);
+      expect(find.textContaining('1 GBP = 0.79 USD'), findsOneWidget);
+      expect(find.textContaining('8 Nov'), findsOneWidget);
 
       await page.enterReceived('79.00');
       await tester.pumpAndSettle();

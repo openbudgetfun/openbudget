@@ -6,9 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_detail_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/plaid_account_link_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/wallet_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_list_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
@@ -19,7 +21,6 @@ import 'package:openbudget_app/src/features/transactions/providers/transaction_p
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
 import 'common/patrol_helpers.dart';
@@ -172,25 +173,29 @@ Widget _buildApp({
   final router = GoRouter(
     initialLocation: '/budgets/$_entityId/accounts',
     routes: [
+      // The detail and add screens are children of the list route, mirroring
+      // the app router, so the detail screen can pop back to the list.
       GoRoute(
         name: accountListRoute,
         path: '/budgets/:entityId/accounts',
         builder: (context, state) =>
             AccountListScreen(entityId: state.pathParameters['entityId']!),
-      ),
-      GoRoute(
-        name: addAccountRoute,
-        path: '/budgets/:entityId/accounts/add',
-        builder: (context, state) =>
-            AddAccountScreen(entityId: state.pathParameters['entityId']!),
-      ),
-      GoRoute(
-        name: accountDetailRoute,
-        path: '/budgets/:entityId/accounts/:accountId',
-        builder: (context, state) => AccountDetailScreen(
-          entityId: state.pathParameters['entityId']!,
-          accountId: state.pathParameters['accountId']!,
-        ),
+        routes: [
+          GoRoute(
+            name: addAccountRoute,
+            path: 'add',
+            builder: (context, state) =>
+                AddAccountScreen(entityId: state.pathParameters['entityId']!),
+          ),
+          GoRoute(
+            name: accountDetailRoute,
+            path: ':accountId',
+            builder: (context, state) => AccountDetailScreen(
+              entityId: state.pathParameters['entityId']!,
+              accountId: state.pathParameters['accountId']!,
+            ),
+          ),
+        ],
       ),
     ],
   );
@@ -199,6 +204,39 @@ Widget _buildApp({
     overrides: [
       entityDetailProvider.overrideWith(
         (ref, id) async => TestData.usdEntity(),
+      ),
+      accountDetailProvider.overrideWith(
+        (ref, accountId) async => accounts.firstWhere(
+          (account) => account.id?.toString() == accountId,
+        ),
+      ),
+      accountBalancesProvider.overrideWith((ref, accountId) async {
+        final account = accounts.firstWhere(
+          (account) => account.id?.toString() == accountId,
+        );
+        var clearedMinor = 0;
+        var unclearedMinor = 0;
+        for (final view in accountTransactions) {
+          if (view.transaction.accountId != account.id) continue;
+          if (view.transaction.status == TransactionStatus.uncleared) {
+            unclearedMinor += view.transaction.amountMinor;
+          } else {
+            clearedMinor += view.transaction.amountMinor;
+          }
+        }
+        return AccountBalancesView(
+          accountId: account.id ?? _entityUuid,
+          currencyCode: account.currencyCode,
+          balanceMinor: account.balanceMinor,
+          clearedMinor: clearedMinor,
+          unclearedMinor: unclearedMinor,
+        );
+      }),
+      accountValuationsProvider.overrideWith(
+        (ref, accountId) async => const [],
+      ),
+      walletForAccountProvider.overrideWith(
+        (ref, accountId) async => null,
       ),
       accountActionsProvider.overrideWith(_FakeAccountActions.new),
       plaidAccountLinkProvider.overrideWith(_UnavailablePlaidAccountLink.new),
@@ -613,7 +651,8 @@ void main() {
     );
     expect(
       find.text(
-        "Accounts that have an outstanding balance you're currently paying off, and aren't spending from.",
+        "Accounts that hold money you don't plan to spend soon, such as "
+        'investments or loans.',
       ),
       findsOneWidget,
     );
@@ -802,15 +841,16 @@ void main() {
 
     await tester.tap(find.text('Daily USD'));
     await tester.pumpAndSettle();
+    await scrollIntoView(tester, find.text('Rent'));
     expect(find.text('Rent'), findsOneWidget);
 
-    await tester.tap(_skribbleIcon(OpenBudgetIcons.back));
+    await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.text('Daily USD'), findsOneWidget);
   });
 
   patrolWidgetTest(
-    'account detail overflow menu toggles reconciled visibility',
+    'account detail lists cleared and uncleared transactions together',
     ($) async {
       final tester = $.tester;
       final accountId = UuidValue.fromString(
@@ -848,23 +888,16 @@ void main() {
 
       await tester.tap(find.text('Daily USD'));
       await tester.pumpAndSettle();
+      // The redesigned detail screen keeps every transaction in one list,
+      // cleared ones included, so both rows render.
+      await scrollIntoView(tester, find.text('Starting Balance'));
       expect(find.text('Starting Balance'), findsOneWidget);
-
-      await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Hide Reconciled'), warnIfMissed: false);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Starting Balance'), findsNothing);
-      expect(find.text('Self storage'), findsOneWidget);
-
-      await tester.tap(find.textContaining('uncleared transactions'));
-      await tester.pumpAndSettle();
+      await scrollIntoView(tester, find.text('Self storage'));
       expect(find.text('Self storage'), findsOneWidget);
     },
   );
 
-  patrolWidgetTest('account detail edit flow opens full-screen account form', (
+  patrolWidgetTest('account detail edit action opens the add account screen', (
     $,
   ) async {
     final tester = $.tester;
@@ -896,18 +929,17 @@ void main() {
     await tester.tap(find.text('Daily USD'));
     await tester.pumpAndSettle();
 
-    await AccountDetailPage(tester).openEditAccount();
+    // The redesigned detail screen opens the account screens straight from
+    // the app bar edit action instead of a full-screen edit form.
+    await AccountDetailPage(tester).editViaAppBar();
+    await tester.pumpAndSettle();
 
-    expect(find.text('Account Nickname'), findsOneWidget);
-    expect(find.text('Account Notes'), findsOneWidget);
-    expect(find.text('Working Balance'), findsWidgets);
-    expect(find.text('Link an Account (Unavailable)'), findsOneWidget);
-    await EditAccountFormPage(tester).scrollToCloseAccount();
-    expect(find.text('Close Account'), findsOneWidget);
+    expect(find.text('Add Accounts'), findsOneWidget);
+    expect(find.text('Search for your bank'), findsOneWidget);
   });
 
   patrolWidgetTest(
-    'closed account edit dialog exposes delete and reopen actions',
+    'closed account detail exposes the reopen action without editing',
     ($) async {
       final tester = $.tester;
       final accountId = UuidValue.fromString(
@@ -932,20 +964,17 @@ void main() {
       await tester.tap(find.text('Loan'));
       await tester.pumpAndSettle();
 
-      await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Edit Account'));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('Delete Permanently', skipOffstage: false),
-        findsOneWidget,
-      );
-      expect(find.text('Reopen Account', skipOffstage: false), findsOneWidget);
+      // Closed accounts surface a Closed badge with an inline reopen action
+      // and no app-bar edit button.
+      expect(find.text('Closed'), findsOneWidget);
+      expect(find.text('Reopen Account'), findsOneWidget);
+      expect(AccountDetailPage(tester).editButton, findsNothing);
     },
   );
 
-  patrolWidgetTest('reconcile action opens balance match prompt', ($) async {
+  patrolWidgetTest('reconcile action opens the statement balance sheet', (
+    $,
+  ) async {
     final tester = $.tester;
     final accountId = UuidValue.fromString(
       '00000000-0000-0000-0000-000000000114',
@@ -976,21 +1005,21 @@ void main() {
     await tester.tap(find.text('Daily USD'));
     await tester.pumpAndSettle();
 
-    await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Reconcile'));
-    await tester.pumpAndSettle();
+    await AccountDetailPage(tester).openReconcileSheet();
 
+    final sheet = find.byType(BottomSheet);
+    expect(sheet, findsOneWidget);
     expect(
-      find.textContaining('Does this match your bank balance'),
+      find.descendant(of: sheet, matching: find.text('Reconcile Daily USD')),
       findsOneWidget,
     );
-    expect(find.text('Yes'), findsOneWidget);
-    expect(find.text('No'), findsOneWidget);
-    expect(find.text('Cancel'), findsOneWidget);
+    expect(
+      find.descendant(of: sheet, matching: find.text('Statement balance')),
+      findsOneWidget,
+    );
   });
 
-  patrolWidgetTest('desktop account menu supports reconcile and edit flows', (
+  patrolWidgetTest('desktop account detail supports reconcile and edit flows', (
     $,
   ) async {
     final tester = $.tester;
@@ -1032,13 +1061,11 @@ void main() {
     await tester.tap(find.text('Daily USD'));
     await tester.pumpAndSettle();
 
-    await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Reconcile'));
-    await tester.pumpAndSettle();
-
+    await AccountDetailPage(tester).openReconcileSheet();
+    final sheet = find.byType(BottomSheet);
+    expect(sheet, findsOneWidget);
     expect(
-      find.textContaining('Does this match your bank balance'),
+      find.descendant(of: sheet, matching: find.text('Reconcile Daily USD')),
       findsOneWidget,
     );
     await captureIntegrationScreenshot(
@@ -1046,25 +1073,23 @@ void main() {
       'accounts-reconcile-dialog-desktop-screen',
     );
 
-    await tester.tap(find.text('Cancel'));
+    // Drag the sheet away, then take the app-bar edit action.
+    await tester.drag(find.text('Reconcile Daily USD'), const Offset(0, 480));
     await tester.pumpAndSettle();
+    expect(find.text('Reconcile Daily USD'), findsNothing);
 
-    await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
+    await AccountDetailPage(tester).editViaAppBar();
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Edit Account'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Edit Account'), findsOneWidget);
-    expect(find.text('Account Nickname'), findsOneWidget);
-    expect(find.text('Account Notes'), findsOneWidget);
-    expect(find.text('Working Balance'), findsWidgets);
+    expect(find.text('Add Accounts'), findsOneWidget);
     await captureIntegrationScreenshot(
       tester,
       'accounts-edit-account-desktop-screen',
     );
   });
 
-  patrolWidgetTest('loan account shows overview and activity tabs', ($) async {
+  patrolWidgetTest('loan account shows its balance and payment history', (
+    $,
+  ) async {
     final tester = $.tester;
     final accountId = UuidValue.fromString(
       '00000000-0000-0000-0000-000000000115',
@@ -1104,34 +1129,15 @@ void main() {
     await tester.tap(find.text('Loan'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Overview'), findsOneWidget);
-    expect(find.text('Activity'), findsOneWidget);
-    expect(find.text('Loan Payoff Overview'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Create Target'),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Create Target'));
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField).last, '600');
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
-    await tester.pumpAndSettle();
-    expect(find.text('Edit Target'), findsOneWidget);
-
-    await tester.tap(find.text('Activity'));
-    await tester.pumpAndSettle();
-
+    // The liability balance headlines the card; the activity follows in the
+    // same list, no tabs.
+    expect(find.textContaining('1.25'), findsWidgets);
+    await scrollIntoView(tester, find.text('Payment from Daily'));
     expect(find.text('Payment from Daily'), findsOneWidget);
-    expect(find.text('Payments'), findsOneWidget);
+    await scrollIntoView(tester, find.text('Initial Balance'));
+    expect(find.text('Initial Balance'), findsOneWidget);
   });
 }
-
-Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
-  (widget) => widget is SkribbleIcon && widget.data == data,
-);
 
 Future<void> _tapWhenVisible(WidgetTester tester, Finder finder) async {
   for (var attempt = 0; attempt < 10; attempt++) {
