@@ -125,136 +125,97 @@ GROUP BY 1, 2''';
     );
   }
 
+  /// Reads the summary of every month from [fromMonth] to [toMonth].
+  ///
+  /// The three section 6.4 aggregates run once up to [toMonth] and one walk
+  /// derives every month in the range, so a whole report costs the same
+  /// queries as a single month.
+  static Future<List<BudgetMonthSummary>> summaries(
+    Session session, {
+    required UuidValue entityId,
+    required int fromMonth,
+    required int toMonth,
+  }) async {
+    BudgetValidation.requireMonth(fromMonth);
+    BudgetValidation.requireMonth(toMonth);
+    if (toMonth < fromMonth) {
+      throw ValidationException(
+        message: 'toMonth must be on or after fromMonth',
+      );
+    }
+
+    return session.db.transaction(
+      (transaction) async {
+        _countStatement('entity');
+        final entity = await EntityAccess.requireOwned(
+          session,
+          entityId,
+          transaction: transaction,
+        );
+        final facts = await _loadFacts(
+          session,
+          transaction,
+          _requireId(entity),
+          throughMonth: toMonth,
+        );
+        final folded = foldEnvelopeMonthRange(
+          fromMonth: fromMonth,
+          toMonth: toMonth,
+          envelopes: facts.perEnvelope,
+          flows: facts.flows,
+        );
+
+        return [
+          for (final entry in folded.months.entries)
+            BudgetMonthSummary(
+              month: entry.key,
+              incomeMinor: facts.income[entry.key] ?? 0,
+              uncategorizedMinor: facts.uncategorised[entry.key] ?? 0,
+              fxDifferenceMinor: facts.fxDifference[entry.key] ?? 0,
+              allocatedMinor: entry.value.allocatedMinor,
+              activityMinor: entry.value.activityMinor,
+              overspentLastMonthMinor: entry.value.overspentLastMonthMinor,
+              assignedInFutureMinor: entry.value.assignedInFutureMinor,
+              readyToAssignMinor: entry.value.readyToAssignMinor,
+              availableMinor: entry.value.availableMinor,
+            ),
+        ];
+      },
+      settings: const TransactionSettings(
+        isolationLevel: IsolationLevel.repeatableRead,
+      ),
+    );
+  }
+
   static Future<BudgetMonthView> _build(
     Session session,
     Transaction transaction,
     Entity entity,
     int month,
   ) async {
-    final firstDayOfNextMonth = BudgetValidation.firstDayOfNextMonth(month);
-    final entityParameters = QueryParameters.named({
-      'entityId': entity.id.toString(),
-    });
-    final windowParameters = QueryParameters.named({
-      'entityId': entity.id.toString(),
-      'firstDayOfNextMonth': firstDayOfNextMonth,
-    });
-
-    _countStatement('envelopeActivity');
-    final activityRows = await session.db.unsafeQuery(
-      envelopeActivitySql,
-      parameters: windowParameters,
-      transaction: transaction,
+    final facts = await _loadFacts(
+      session,
+      transaction,
+      entity.id!,
+      throughMonth: month,
     );
-    final snapshotHook = debugAfterActivityQuery;
-    if (snapshotHook != null) await snapshotHook();
-
-    _countStatement('allocations');
-    final allocationRows = await session.db.unsafeQuery(
-      allocationsSql,
-      parameters: entityParameters,
-      transaction: transaction,
-    );
-
-    _countStatement('uncategorisedFlows');
-    final flowRows = await session.db.unsafeQuery(
-      uncategorisedFlowSql,
-      parameters: windowParameters,
-      transaction: transaction,
-    );
-
     final categories = await _categories(session, entity, transaction);
     final envelopes = await _envelopes(session, entity, transaction);
     final goals = await _goals(session, envelopes, transaction);
 
     final perEnvelope = <String, Map<int, EnvelopeMonthAmounts>>{};
     for (final envelope in envelopes) {
-      perEnvelope[_requireId(envelope).toString()] =
-          <int, EnvelopeMonthAmounts>{};
+      final id = _requireId(envelope).toString();
+      perEnvelope[id] = facts.perEnvelope[id] ?? <int, EnvelopeMonthAmounts>{};
     }
-
-    for (final row in activityRows) {
-      final envelopeId = row[0] as String;
-      final month = _safeMonth(row[1] as int);
-      final activity = _safeMinor(row[2], 'Envelope activity');
-      final byMonth = perEnvelope.putIfAbsent(
-        envelopeId,
-        () => <int, EnvelopeMonthAmounts>{},
-      );
-      final current = byMonth[month] ?? (allocatedMinor: 0, activityMinor: 0);
-      byMonth[month] = (
-        allocatedMinor: current.allocatedMinor,
-        activityMinor: BudgetValidation.checkedSum(
-          current.activityMinor,
-          activity,
-          'Envelope activity for month $month',
-        ),
-      );
-    }
-
-    for (final row in allocationRows) {
-      final envelopeId = row[0] as String;
-      final month = _safeMonth(row[1] as int);
-      final allocated = _safeMinor(row[2], 'Monthly allocation');
-      final byMonth = perEnvelope.putIfAbsent(
-        envelopeId,
-        () => <int, EnvelopeMonthAmounts>{},
-      );
-      final current = byMonth[month] ?? (allocatedMinor: 0, activityMinor: 0);
-      byMonth[month] = (
-        allocatedMinor: BudgetValidation.checkedSum(
-          current.allocatedMinor,
-          allocated,
-          'Monthly allocation for month $month',
-        ),
-        activityMinor: current.activityMinor,
-      );
-    }
-
-    final flows = <int, int>{};
-    final income = <int, int>{};
-    final uncategorised = <int, int>{};
-    final fxDifference = <int, int>{};
-    for (final row in flowRows) {
-      final month = _safeMonth(row[0] as int);
-      final kind = row[1] as String;
-      final inflow = _safeMinor(row[2], 'Uncategorised inflow');
-      final outflow = _safeMinor(row[3], 'Uncategorised outflow');
-      final net = BudgetValidation.checkedSum(
-        inflow,
-        outflow,
-        'Uncategorised flow',
-      );
-      flows[month] = BudgetValidation.checkedSum(
-        flows[month] ?? 0,
-        net,
-        'Uncategorised flow for month $month',
-      );
-
-      if (kind == TransactionKind.fxRevaluation.name) {
-        fxDifference[month] = BudgetValidation.checkedSum(
-          fxDifference[month] ?? 0,
-          net,
-          'FX difference for month $month',
-        );
-      } else {
-        income[month] = BudgetValidation.checkedSum(
-          income[month] ?? 0,
-          inflow,
-          'Income for month $month',
-        );
-        uncategorised[month] = BudgetValidation.checkedSum(
-          uncategorised[month] ?? 0,
-          outflow,
-          'Uncategorised outflow for month $month',
-        );
-      }
+    for (final entry in facts.perEnvelope.entries) {
+      perEnvelope.putIfAbsent(entry.key, () => entry.value);
     }
 
     final folded = foldEnvelopeMonths(
       month: month,
       envelopes: perEnvelope,
-      flows: flows,
+      flows: facts.flows,
     );
 
     final categoryOrder = <UuidValue, int>{
@@ -371,9 +332,9 @@ GROUP BY 1, 2''';
       currencyCode: entity.baseCurrencyCode,
       summary: BudgetMonthSummary(
         month: month,
-        incomeMinor: income[month] ?? 0,
-        uncategorizedMinor: uncategorised[month] ?? 0,
-        fxDifferenceMinor: fxDifference[month] ?? 0,
+        incomeMinor: facts.income[month] ?? 0,
+        uncategorizedMinor: facts.uncategorised[month] ?? 0,
+        fxDifferenceMinor: facts.fxDifference[month] ?? 0,
         allocatedMinor: allocatedThisMonth,
         activityMinor: activityThisMonth,
         overspentLastMonthMinor: folded.overspentLastMonthMinor,
@@ -383,6 +344,132 @@ GROUP BY 1, 2''';
       ),
       categories: categories,
       envelopes: envelopeViews,
+    );
+  }
+
+  /// Loads and folds the three sparse section 6.4 aggregates once.
+  static Future<_MonthFacts> _loadFacts(
+    Session session,
+    Transaction transaction,
+    UuidValue entityId, {
+    required int throughMonth,
+  }) async {
+    final entityParameters = QueryParameters.named({
+      'entityId': entityId.toString(),
+    });
+    final windowParameters = QueryParameters.named({
+      'entityId': entityId.toString(),
+      'firstDayOfNextMonth': BudgetValidation.firstDayOfNextMonth(throughMonth),
+    });
+
+    _countStatement('envelopeActivity');
+    final activityRows = await session.db.unsafeQuery(
+      envelopeActivitySql,
+      parameters: windowParameters,
+      transaction: transaction,
+    );
+    final snapshotHook = debugAfterActivityQuery;
+    if (snapshotHook != null) await snapshotHook();
+
+    _countStatement('allocations');
+    final allocationRows = await session.db.unsafeQuery(
+      allocationsSql,
+      parameters: entityParameters,
+      transaction: transaction,
+    );
+
+    _countStatement('uncategorisedFlows');
+    final flowRows = await session.db.unsafeQuery(
+      uncategorisedFlowSql,
+      parameters: windowParameters,
+      transaction: transaction,
+    );
+
+    final perEnvelope = <String, Map<int, EnvelopeMonthAmounts>>{};
+    for (final row in activityRows) {
+      final envelopeId = row[0] as String;
+      final month = _safeMonth(row[1] as int);
+      final activity = _safeMinor(row[2], 'Envelope activity');
+      final byMonth = perEnvelope.putIfAbsent(
+        envelopeId,
+        () => <int, EnvelopeMonthAmounts>{},
+      );
+      final current = byMonth[month] ?? (allocatedMinor: 0, activityMinor: 0);
+      byMonth[month] = (
+        allocatedMinor: current.allocatedMinor,
+        activityMinor: BudgetValidation.checkedSum(
+          current.activityMinor,
+          activity,
+          'Envelope activity for month $month',
+        ),
+      );
+    }
+
+    for (final row in allocationRows) {
+      final envelopeId = row[0] as String;
+      final month = _safeMonth(row[1] as int);
+      final allocated = _safeMinor(row[2], 'Monthly allocation');
+      final byMonth = perEnvelope.putIfAbsent(
+        envelopeId,
+        () => <int, EnvelopeMonthAmounts>{},
+      );
+      final current = byMonth[month] ?? (allocatedMinor: 0, activityMinor: 0);
+      byMonth[month] = (
+        allocatedMinor: BudgetValidation.checkedSum(
+          current.allocatedMinor,
+          allocated,
+          'Monthly allocation for month $month',
+        ),
+        activityMinor: current.activityMinor,
+      );
+    }
+
+    final flows = <int, int>{};
+    final income = <int, int>{};
+    final uncategorised = <int, int>{};
+    final fxDifference = <int, int>{};
+    for (final row in flowRows) {
+      final month = _safeMonth(row[0] as int);
+      final kind = row[1] as String;
+      final inflow = _safeMinor(row[2], 'Uncategorised inflow');
+      final outflow = _safeMinor(row[3], 'Uncategorised outflow');
+      final net = BudgetValidation.checkedSum(
+        inflow,
+        outflow,
+        'Uncategorised flow',
+      );
+      flows[month] = BudgetValidation.checkedSum(
+        flows[month] ?? 0,
+        net,
+        'Uncategorised flow for month $month',
+      );
+
+      if (kind == TransactionKind.fxRevaluation.name) {
+        fxDifference[month] = BudgetValidation.checkedSum(
+          fxDifference[month] ?? 0,
+          net,
+          'FX difference for month $month',
+        );
+      } else {
+        income[month] = BudgetValidation.checkedSum(
+          income[month] ?? 0,
+          inflow,
+          'Income for month $month',
+        );
+        uncategorised[month] = BudgetValidation.checkedSum(
+          uncategorised[month] ?? 0,
+          outflow,
+          'Uncategorised outflow for month $month',
+        );
+      }
+    }
+
+    return _MonthFacts(
+      perEnvelope: perEnvelope,
+      flows: flows,
+      income: income,
+      uncategorised: uncategorised,
+      fxDifference: fxDifference,
     );
   }
 
@@ -476,4 +563,21 @@ GROUP BY 1, 2''';
     if (id == null) throw StateError('A persisted row has no id');
     return id;
   }
+}
+
+/// The parsed section 6.4 aggregates for one entity.
+class _MonthFacts {
+  const _MonthFacts({
+    required this.perEnvelope,
+    required this.flows,
+    required this.income,
+    required this.uncategorised,
+    required this.fxDifference,
+  });
+
+  final Map<String, Map<int, EnvelopeMonthAmounts>> perEnvelope;
+  final Map<int, int> flows;
+  final Map<int, int> income;
+  final Map<int, int> uncategorised;
+  final Map<int, int> fxDifference;
 }

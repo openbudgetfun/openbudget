@@ -1,6 +1,7 @@
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/entities/entity_access.dart';
 import 'package:openbudget_server/src/entities/entity_service.dart';
+import 'package:openbudget_server/src/entities/entity_summary_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -35,6 +36,10 @@ class EntityEndpoint extends Endpoint {
   /// Lists entities owned by the caller.
   Future<List<Entity>> list(Session session, {bool? includeArchived}) =>
       EntityService.list(session, includeArchived: includeArchived ?? false);
+
+  /// One headline row per active entity the caller owns.
+  Future<List<EntitySummaryView>> listSummaries(Session session) =>
+      EntitySummaryService.list(session);
 
   /// Loads one owned entity.
   Future<Entity> get(Session session, UuidValue entityId) =>

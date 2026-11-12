@@ -127,4 +127,57 @@ void main() {
       }
     }
   });
+  test('a month range folds exactly like one fold per month', () {
+    final envelopes = <String, Map<int, EnvelopeMonthAmounts>>{
+      'food': {
+        202511: (allocatedMinor: 100, activityMinor: -150),
+        202601: (allocatedMinor: 200, activityMinor: -50),
+        202603: (allocatedMinor: 20, activityMinor: 0),
+      },
+      'empty': <int, EnvelopeMonthAmounts>{},
+      'future': {202701: (allocatedMinor: 40, activityMinor: 0)},
+    };
+    final flows = <int, int>{202511: 1000, 202602: 300};
+
+    final range = foldEnvelopeMonthRange(
+      fromMonth: 202512,
+      toMonth: 202612,
+      envelopes: envelopes,
+      flows: flows,
+    );
+
+    expect(range.months.keys.first, 202512);
+    expect(range.months.keys.last, 202612);
+    for (var month = 202512; month <= 202612; month = MonthKey.next(month)) {
+      final single = foldEnvelopeMonths(
+        month: month,
+        envelopes: envelopes,
+        flows: flows,
+      );
+      final totals = range.months[month]!;
+      expect(totals.readyToAssignMinor, single.readyToAssignMinor);
+      expect(totals.assignedInFutureMinor, single.assignedInFutureMinor);
+      expect(totals.overspentLastMonthMinor, single.overspentLastMonthMinor);
+      expect(
+        totals.availableMinor,
+        single.envelopes.values.fold(
+          0,
+          (sum, envelope) => sum + envelope.availableMinor,
+        ),
+      );
+    }
+    expect(range.envelopes, hasLength(envelopes.length));
+    expect(range.envelopes['empty'], (
+      carryoverMinor: 0,
+      allocatedMinor: 0,
+      activityMinor: 0,
+      availableMinor: 0,
+    ));
+    expect(range.envelopes['future'], (
+      carryoverMinor: 0,
+      allocatedMinor: 0,
+      activityMinor: 0,
+      availableMinor: 0,
+    ));
+  });
 }
