@@ -4,107 +4,114 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_plan_screen.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
 
 import 'common/patrol_helpers.dart';
+import 'common/test_data.dart';
 
-const _entityId = '00000000-0000-0000-0000-000000000A01';
-const _categoryId = '00000000-0000-0000-0000-000000000A02';
+const String _entityId = TestData.gbpEntityId;
+const String _categoryId = '00000000-0000-0000-0000-000000000a02';
 
-BudgetSummary _makeSummary() {
-  final budgetUuid = UuidValue.fromString(_entityId);
-  final categoryUuid = UuidValue.fromString(_categoryId);
-  final ownerUuid = UuidValue.fromString(
-    '00000000-0000-0000-0000-000000000A03',
-  );
+Envelope _envelope(String id, String name, int sortOrder) => Envelope(
+  id: UuidValue.fromString(id),
+  name: name,
+  entityId: UuidValue.fromString(_entityId),
+  categoryId: UuidValue.fromString(_categoryId),
+  sortOrder: sortOrder,
+);
 
-  Envelope envelope(String id, String name, int sortOrder) => Envelope(
-    id: UuidValue.fromString(id),
-    name: name,
-    categoryId: categoryUuid,
-    budgetedAmountMinor: 0,
-    spentAmountMinor: 0,
-    currencyCode: 'USD',
-    sortOrder: sortOrder,
-  );
-
-  final groceries = envelope(
-    '00000000-0000-0000-0000-000000000A10',
+/// One 'Needs' group with four envelopes and £8,000 waiting to be assigned.
+List<CategoryMonthGroup> _makeGroups() {
+  final groceries = _envelope(
+    '00000000-0000-0000-0000-000000000a10',
     'Groceries',
     0,
   );
-  final transportation = envelope(
-    '00000000-0000-0000-0000-000000000A11',
+  final transportation = _envelope(
+    '00000000-0000-0000-0000-000000000a11',
     'Transportation',
     1,
   );
-  final pets = envelope('00000000-0000-0000-0000-000000000A12', 'Pets', 2);
-  final vetVisits = envelope(
-    '00000000-0000-0000-0000-000000000A13',
+  final pets = _envelope('00000000-0000-0000-0000-000000000a12', 'Pets', 2);
+  final vetVisits = _envelope(
+    '00000000-0000-0000-0000-000000000a13',
     'Vet visits',
     3,
   );
 
-  MonthlyEnvelopeData monthly(Envelope e) => MonthlyEnvelopeData(
-    envelope: e,
-    allocatedMinor: 0,
-    spentMinor: 0,
-    availableMinor: 0,
+  EnvelopeMonthView view(Envelope envelope) => EnvelopeMonthView(
+    envelope: envelope,
     carryoverMinor: 0,
+    allocatedMinor: 0,
+    activityMinor: 0,
+    availableMinor: 0,
+    goalUnderfundedMinor: 0,
   );
 
-  return BudgetSummary(
-    budget: Budget(
-      id: budgetUuid,
-      name: 'Family Plan',
-      currencyCode: 'USD',
-      ownerId: ownerUuid,
-    ),
-    categories: [
-      CategoryWithEnvelopes(
-        category: Category(
-          id: categoryUuid,
-          name: 'Needs',
-          entityId: budgetUuid,
-          sortOrder: 0,
-        ),
-        envelopes: [groceries, transportation, pets, vetVisits],
-        monthlyEnvelopes: [
-          monthly(groceries),
-          monthly(transportation),
-          monthly(pets),
-          monthly(vetVisits),
-        ],
-        totalBudgetedMinor: 0,
-        totalSpentMinor: 0,
-        totalAvailableMinor: 0,
+  return [
+    CategoryMonthGroup(
+      category: Category(
+        id: UuidValue.fromString(_categoryId),
+        name: 'Needs',
+        entityId: UuidValue.fromString(_entityId),
+        sortOrder: 0,
       ),
-    ],
-    totalIncomeMinor: 800000,
-    totalBudgetedMinor: 0,
-    readyToAssignMinor: 800000,
-    year: 2026,
-    month: 2,
-  );
+      envelopes: [
+        view(groceries),
+        view(transportation),
+        view(pets),
+        view(vetVisits),
+      ],
+    ),
+  ];
 }
+
+BudgetMonthView _makeMonthView() => BudgetMonthView(
+  entityId: UuidValue.fromString(_entityId),
+  month: 202602,
+  currencyCode: 'GBP',
+  summary: BudgetMonthSummary(
+    month: 202602,
+    incomeMinor: 800000,
+    uncategorizedMinor: 0,
+    fxDifferenceMinor: 0,
+    allocatedMinor: 0,
+    activityMinor: 0,
+    overspentLastMonthMinor: 0,
+    assignedInFutureMinor: 0,
+    readyToAssignMinor: 800000,
+    availableMinor: 800000,
+  ),
+  categories: [_makeGroups().single.category],
+  envelopes: const [],
+);
 
 void main() {
   patrolWidgetTest(
     'edit plan screen supports target entry, group details, and next navigation',
     ($) async {
       final tester = $.tester;
-      final editPlanPage = EditPlanPage(tester);
+      final groups = _makeGroups();
       final container = ProviderContainer(
         overrides: [
-          budgetMonthlySummaryProvider.overrideWith(
-            (ref, _) async => _makeSummary(),
+          entityDetailProvider.overrideWith(
+            (ref, id) async => TestData.gbpEntity(),
           ),
-          budgetGoalsProvider.overrideWith((ref, _) async => {}),
+          budgetMonthProvider.overrideWith((ref, entityId) async {
+            ref.watch(selectedYyyymmProvider(entityId));
+            return _makeMonthView();
+          }),
+          budgetMonthGroupsProvider.overrideWith((ref, entityId) async {
+            ref.watch(selectedYyyymmProvider(entityId));
+            return groups;
+          }),
+          budgetGoalsProvider.overrideWith((ref, entityId) async => {}),
         ],
       );
       addTearDown(container.dispose);
@@ -114,13 +121,13 @@ void main() {
         routes: [
           GoRoute(
             name: planRoute,
-            path: '/budgets/:id/plan',
+            path: '/budgets/:entityId/plan',
             builder: (_, _) =>
                 const Scaffold(body: Center(child: Text('Plan destination'))),
           ),
           GoRoute(
             name: editPlanRoute,
-            path: '/budgets/:id/plan/edit',
+            path: '/budgets/:entityId/plan/edit',
             builder: (context, state) =>
                 EditPlanScreen(entityId: state.pathParameters['entityId']!),
           ),
@@ -149,6 +156,7 @@ void main() {
       expect(find.text('Needs'), findsOneWidget);
       expect(find.text('Add Target'), findsWidgets);
 
+      final editPlanPage = EditPlanPage(tester);
       await editPlanPage.openFirstAddTarget();
       expect(editPlanPage.saveTargetButton, findsOneWidget);
       await tester.tap(find.widgetWithText(BudgetAmountField, 'I need'));
