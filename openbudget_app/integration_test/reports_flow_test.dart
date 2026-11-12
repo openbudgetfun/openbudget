@@ -71,7 +71,16 @@ SpendingReport _reportForRange(int endMonth, int monthCount) {
   var expenses = 0;
   final categorySpending = <String, int>{};
   for (var offset = 0; offset < monthCount; offset++) {
-    final report = _reportForMonth(endMonth - offset);
+    // Walk back month by month across the year boundary; plain
+    // `endMonth - offset` would produce yyyymm values like 202600 that no
+    // fixture month matches.
+    var year = endMonth ~/ 100;
+    var month = endMonth % 100 - offset;
+    while (month <= 0) {
+      month += 12;
+      year--;
+    }
+    final report = _reportForMonth(year * 100 + month);
     income += report.totalIncome;
     expenses += report.totalExpenses;
     report.categorySpending.forEach((category, minor) {
