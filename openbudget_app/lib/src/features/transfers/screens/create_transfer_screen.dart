@@ -93,14 +93,19 @@ class CreateTransferScreen extends HookConsumerWidget {
           )
         : null;
 
+    // An empty Received field means "price it from the market rate", so a
+    // typed amount must be exact but an empty one is allowed.
+    final receivedIsValid =
+        !isCrossCurrency ||
+        toAmountController.text.trim().isEmpty ||
+        (toMinor != null && toMinor > 0);
     final canSubmit =
         fromAccount != null &&
         toAccount != null &&
         !sameAccount &&
         fromMinor != null &&
         fromMinor > 0 &&
-        toMinor != null &&
-        toMinor > 0;
+        receivedIsValid;
 
     Future<void> useMarketRate() async {
       // "Use today's rate": quote the market rate and fill Received. The
@@ -221,67 +226,70 @@ class CreateTransferScreen extends HookConsumerWidget {
                     onChanged: (value) => toAccountId.value = value,
                   ),
                   const SizedBox(height: SpacingTokens.md),
-                  ObCard(
-                    padding: const EdgeInsets.all(SpacingTokens.md),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (!isCrossCurrency)
-                          TextField(
-                            key: const Key('transfer-amount-field'),
-                            controller: fromAmountController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
+                  // The amount only means something once a source account
+                  // is picked.
+                  if (fromAccount != null)
+                    ObCard(
+                      padding: const EdgeInsets.all(SpacingTokens.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (!isCrossCurrency)
+                            TextField(
+                              key: const Key('transfer-amount-field'),
+                              controller: fromAmountController,
+                              keyboardType: TextInputType.numberWithOptions(
+                                decimal: fromDecimals > 0,
+                              ),
+                              decoration: InputDecoration(
+                                labelText: l10n.transferAmountLabel,
+                                errorText: fromError,
+                                prefixText: '${fromAccount.currencyCode} ',
+                              ),
+                            )
+                          else ...[
+                            TextField(
+                              key: const Key('transfer-sent-amount-field'),
+                              controller: fromAmountController,
+                              keyboardType: TextInputType.numberWithOptions(
+                                decimal: fromDecimals > 0,
+                              ),
+                              decoration: InputDecoration(
+                                labelText: l10n.transferSentLabel,
+                                errorText: fromError,
+                                prefixText: '${fromAccount.currencyCode} ',
+                              ),
                             ),
-                            decoration: InputDecoration(
-                              labelText: l10n.transferAmountLabel,
-                              errorText: fromError,
-                              prefixText: '${fromAccount!.currencyCode} ',
+                            const SizedBox(height: SpacingTokens.sm),
+                            TextField(
+                              key: const Key('transfer-received-amount-field'),
+                              controller: toAmountController,
+                              keyboardType: TextInputType.numberWithOptions(
+                                decimal: toDecimals > 0,
+                              ),
+                              decoration: InputDecoration(
+                                labelText: l10n.transferReceivedLabel,
+                                errorText: toError,
+                                prefixText: '${toAccount.currencyCode} ',
+                              ),
                             ),
-                          )
-                        else ...[
-                          TextField(
-                            key: const Key('transfer-sent-amount-field'),
-                            controller: fromAmountController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
+                            if (fromMinor != null && fromMinor > 0)
+                              FxRateLine(
+                                key: const Key('transfer-implied-rate'),
+                                fromCurrencyCode: fromAccount.currencyCode,
+                                toCurrencyCode: toAccount.currencyCode,
+                                date: selectedDate.value,
+                                amountMinor: fromMinor,
+                                onSetRate: useMarketRate,
+                              ),
+                            TextButton(
+                              onPressed: useMarketRate,
+                              child: Text(l10n.transferUseTodayRate),
                             ),
-                            decoration: InputDecoration(
-                              labelText: l10n.transferSentLabel,
-                              errorText: fromError,
-                              prefixText: '${fromAccount.currencyCode} ',
-                            ),
-                          ),
-                          const SizedBox(height: SpacingTokens.sm),
-                          TextField(
-                            key: const Key('transfer-received-amount-field'),
-                            controller: toAmountController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            decoration: InputDecoration(
-                              labelText: l10n.transferReceivedLabel,
-                              errorText: toError,
-                              prefixText: '${toAccount.currencyCode} ',
-                            ),
-                          ),
-                          if (fromMinor != null && fromMinor > 0)
-                            FxRateLine(
-                              key: const Key('transfer-implied-rate'),
-                              fromCurrencyCode: fromAccount.currencyCode,
-                              toCurrencyCode: toAccount.currencyCode,
-                              date: selectedDate.value,
-                              amountMinor: fromMinor,
-                              onSetRate: useMarketRate,
-                            ),
-                          TextButton(
-                            onPressed: useMarketRate,
-                            child: Text(l10n.transferUseTodayRate),
-                          ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-                  ),
                   const SizedBox(height: SpacingTokens.sm),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
@@ -397,7 +405,7 @@ class _AccountPicker extends HookWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return ObDropdown<String>(
-      value: selectedAccountId ?? '',
+      value: selectedAccountId,
       items: [
         for (final account in accounts)
           if (account.id?.toString() != excludeAccountId)
