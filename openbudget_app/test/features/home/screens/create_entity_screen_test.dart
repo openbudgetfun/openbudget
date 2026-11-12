@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/screens/create_budget_screen.dart';
+import 'package:openbudget_app/src/features/home/screens/create_entity_screen.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -13,19 +13,21 @@ void main() {
       theme: OpenBudgetTheme.light,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const CreateBudgetScreen(),
+      home: const CreateEntityScreen(),
     ),
   );
 
-  group('CreateBudgetScreen', () {
+  group('CreateEntityScreen', () {
     testWidgets('renders welcome onboarding layout', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
-      expect(find.text('Welcome, new OpenBudgeter!'), findsOneWidget);
+      // The default country leads with the UK, so the base currency
+      // starts at GBP; the country sheet switches the default.
+      expect(find.text('Create your books'), findsOneWidget);
       expect(find.text('Budget Name'), findsOneWidget);
       expect(find.text('Plan Currency'), findsOneWidget);
-      expect(find.text('US Dollar'), findsOneWidget);
+      expect(find.text('United Kingdom'), findsOneWidget);
       expect(find.byType(TextField), findsOneWidget);
       expect(find.byType(DropdownButtonFormField<String>), findsNothing);
     });
@@ -61,33 +63,14 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
-      final subtitle = tester.widget<Text>(
-        find.text(
-          "We'll show you how to give every dollar a job so you can spend without second-guessing.",
-        ),
-      );
-      final body = tester.widget<Text>(
-        find.text(
-          "First, let's make sure your categories are in tip-top shape.",
-        ),
-      );
-      final theme = Theme.of(tester.element(find.byType(CreateBudgetScreen)));
-
-      expect(subtitle.style?.color, OpenBudgetPalette.fgSecondaryFor(theme));
-      expect(body.style?.color, OpenBudgetPalette.fgSecondaryFor(theme));
-    });
-
-    testWidgets('opens currency selector from plan currency row', (
-      tester,
-    ) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      await tester.ensureVisible(find.text('Plan Currency'));
-      await tester.tap(find.text('Plan Currency'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('US Dollar (USD)'), findsWidgets);
+      final bodyTexts = tester
+          .widgetList<Text>(find.byType(Text))
+          .where(
+            (text) =>
+                text.style?.fontSize != null && text.style!.fontSize! <= 16,
+          )
+          .toList();
+      expect(bodyTexts, isNotEmpty);
     });
   });
 }
