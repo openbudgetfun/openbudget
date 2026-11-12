@@ -703,9 +703,10 @@ class CreateEntityPage {
   /// GB entity in GBP).
   Future<String> create({String name = 'My First Budget'}) async {
     await tester.enterText(nameField, name);
-    await tester.tap(createButton);
+    // The create button sits below the fold on the 800x600 surface.
+    await scrollAndTap(tester, createButton);
     // Wait for the async create + the redirect into the add account screen.
-    await waitForFinder(tester, find.text('Add Account'));
+    await waitForFinder(tester, find.text('Add Accounts'));
     await tester.pumpAndSettle();
     return name;
   }

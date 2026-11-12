@@ -103,8 +103,10 @@ void main() {
 
       // 2. Add a USD account with an opening balance: nickname, type,
       //    currency and opening amount, then submit.
-      await tester.tap(find.text('Add Unlinked Account'));
-      await tester.pumpAndSettle();
+      await scrollAndTap(
+        tester,
+        find.byKey(const Key('add-account-add-unlinked-button')),
+      );
 
       await _enterTextWhenVisible(
         tester,
@@ -121,9 +123,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // The currency defaults to the entity's GBP; switch it to USD.
-      await scrollIntoView(tester, find.text('British Pound (GBP)'));
-      await tester.tap(find.text('British Pound (GBP)'));
+      // The currency defaults to the entity's GBP; switch it to USD. The
+      // row shows the bare code; the sheet lists the full display names.
+      await scrollIntoView(tester, find.text('GBP'));
+      await tester.tap(find.text('GBP'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
         find.text('US Dollar (USD)'),
@@ -160,8 +163,9 @@ void main() {
 
       final netWorth = NetWorthPage(tester);
       expect(netWorth.headline, findsOneWidget);
-      // £79.00 = $100.00 at 0.79.
-      expect(find.text('£79.00'), findsOneWidget);
+      // £79.00 = $100.00 at 0.79. The headline and the totals rows all
+      // render the converted figure.
+      expect(find.text('£79.00'), findsWidgets);
       expect(netWorth.trustLine, findsOneWidget);
 
       await netWorth.showByCurrency();
