@@ -42,17 +42,17 @@ void main() {
                     case AddTransactionAction.income:
                       context.goNamed(
                         addIncomeRoute,
-                        pathParameters: {'id': entityId},
+                        pathParameters: {'entityId': entityId},
                       );
                     case AddTransactionAction.expense:
                       context.goNamed(
                         addExpenseRoute,
-                        pathParameters: {'id': entityId},
+                        pathParameters: {'entityId': entityId},
                       );
                     case AddTransactionAction.transfer:
                       context.goNamed(
                         createTransferRoute,
-                        pathParameters: {'id': entityId},
+                        pathParameters: {'entityId': entityId},
                       );
                   }
                 },

@@ -74,6 +74,7 @@ Envelope testEnvelope({
   int sortOrder = 0,
   bool isHidden = false,
   String? taxCategoryCode,
+  String? note,
 }) => Envelope(
   id: UuidValue.fromString(id),
   entityId: UuidValue.fromString(entityId),
@@ -82,6 +83,7 @@ Envelope testEnvelope({
   sortOrder: sortOrder,
   isHidden: isHidden,
   taxCategoryCode: taxCategoryCode,
+  note: note,
 );
 
 EnvelopeMonthView testEnvelopeRow({
@@ -96,6 +98,7 @@ EnvelopeMonthView testEnvelopeRow({
   int goalUnderfundedMinor = 0,
   EnvelopeGoal? goal,
   bool isHidden = false,
+  String? note,
 }) => EnvelopeMonthView(
   envelope: testEnvelope(
     id: envelopeId,
@@ -103,6 +106,7 @@ EnvelopeMonthView testEnvelopeRow({
     categoryId: categoryId,
     name: envelopeName,
     isHidden: isHidden,
+    note: note,
   ),
   goal: goal,
   carryoverMinor: carryoverMinor,

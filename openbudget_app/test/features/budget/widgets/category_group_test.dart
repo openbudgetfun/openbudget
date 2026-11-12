@@ -1,101 +1,50 @@
-// UuidValue is needed for constructing test model data.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
-import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-void main() {
-  final entityId = UuidValue.fromString('00000000-0000-0000-0000-000000000101');
-  final categoryId = UuidValue.fromString(
-    '00000000-0000-0000-0000-000000000102',
-  );
-  final envelopeOneId = UuidValue.fromString(
-    '00000000-0000-0000-0000-000000000103',
-  );
-  final envelopeTwoId = UuidValue.fromString(
-    '00000000-0000-0000-0000-000000000104',
-  );
+import '../../../fixtures/budget_month.dart';
 
-  CategoryWithEnvelopes makeCategoryWithEnvelopes() {
-    final groceries = Envelope(
-      id: envelopeOneId,
-      name: 'Groceries',
-      categoryId: categoryId,
-      budgetedAmountMinor: 0,
-      spentAmountMinor: 0,
-      currencyCode: 'USD',
-      sortOrder: 0,
-    );
-    final dining = Envelope(
-      id: envelopeTwoId,
-      name: 'Dining Out',
-      categoryId: categoryId,
-      budgetedAmountMinor: 0,
-      spentAmountMinor: 0,
-      currencyCode: 'USD',
-      sortOrder: 1,
-    );
+const _envelopeOneId = '00000000-0000-0000-0000-000000000103';
+const _envelopeTwoId = '00000000-0000-0000-0000-000000000104';
 
-    return CategoryWithEnvelopes(
-      category: Category(
-        id: categoryId,
-        name: 'Needs',
-        entityId: entityId,
-        sortOrder: 0,
-      ),
-      envelopes: [groceries, dining],
-      monthlyEnvelopes: [
-        MonthlyEnvelopeData(
-          envelope: groceries,
-          allocatedMinor: 0,
-          spentMinor: 0,
-          availableMinor: 0,
-          carryoverMinor: 0,
-        ),
-        MonthlyEnvelopeData(
-          envelope: dining,
-          allocatedMinor: 0,
-          spentMinor: 0,
-          availableMinor: 0,
-          carryoverMinor: 0,
-        ),
-      ],
-      totalBudgetedMinor: 0,
-      totalSpentMinor: 0,
-      totalAvailableMinor: 0,
-    );
-  }
+CategoryMonthGroup _makeGroup() => CategoryMonthGroup(
+  category: testCategory(name: 'Needs'),
+  envelopes: [
+    testEnvelopeRow(envelopeId: _envelopeOneId),
+    testEnvelopeRow(envelopeId: _envelopeTwoId, envelopeName: 'Dining Out'),
+  ],
+);
 
-  Widget buildSubject() => ProviderScope(
-    child: MaterialApp(
-      theme: OpenBudgetTheme.light,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-        body: CategoryGroup(
-          categoryWithEnvelopes: makeCategoryWithEnvelopes(),
-          currencyCode: 'USD',
-          onAddEnvelope: () {},
-          onDeleteCategory: () {},
-          onEditCategory: () {},
-          onEditEnvelope: (_) {},
-          onDeleteEnvelope: (_) {},
-          onReorderEnvelopes: (_) {},
-        ),
+Widget _buildSubject() => ProviderScope(
+  child: MaterialApp(
+    theme: OpenBudgetTheme.light,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(
+      body: CategoryGroup(
+        group: _makeGroup(),
+        currencyCode: 'USD',
+        onAddEnvelope: () {},
+        onDeleteCategory: () {},
+        onEditCategory: () {},
+        onEditEnvelope: (_) {},
+        onDeleteEnvelope: (_) {},
+        onReorderEnvelopes: (_) {},
       ),
     ),
-  );
+  ),
+);
 
+void main() {
   group('CategoryGroup', () {
     testWidgets('enters reorder mode from category long-press menu', (
       tester,
     ) async {
-      await tester.pumpWidget(buildSubject());
+      await tester.pumpWidget(_buildSubject());
       await tester.pumpAndSettle();
 
       expect(find.text('Done'), findsNothing);
@@ -114,7 +63,7 @@ void main() {
     testWidgets('enters reorder mode from envelope long-press menu', (
       tester,
     ) async {
-      await tester.pumpWidget(buildSubject());
+      await tester.pumpWidget(_buildSubject());
       await tester.pumpAndSettle();
 
       expect(find.text('Done'), findsNothing);
