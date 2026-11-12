@@ -2,23 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/more/screens/more_screen.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 import '../../ledger/ledger_test_data.dart';
 
 Widget buildSubject({
   TaxProfileRecord? profile,
-  String accountingMode = 'envelope',
+  AccountingMode accountingMode = AccountingMode.envelope,
+  EntityKind kind = EntityKind.individual,
 }) {
   final container = ProviderContainer(
     overrides: [
       taxProfileProvider.overrideWith((ref, id) async => profile),
-      budgetDetailProvider.overrideWith(
-        (ref, id) async => testBudget(accountingMode: accountingMode),
+      entityDetailProvider.overrideWith(
+        (ref, id) async =>
+            testEntity(accountingMode: accountingMode, kind: kind),
       ),
     ],
   );
@@ -89,7 +92,13 @@ void main() {
 
     group('books entry', () {
       testWidgets('hides for a personal budget', (tester) async {
-        await tester.pumpWidget(buildSubject());
+        await tester.pumpWidget(
+          buildSubject(
+            profile: businessTaxProfile(
+              entityKind: EntityKind.individual,
+            ),
+          ),
+        );
         await tester.pumpAndSettle();
 
         expect(find.byKey(const Key('books-entry-tile')), findsNothing);
@@ -100,7 +109,10 @@ void main() {
         tester,
       ) async {
         await tester.pumpWidget(
-          buildSubject(profile: businessTaxProfile()),
+          buildSubject(
+            profile: businessTaxProfile(),
+            kind: EntityKind.soleTrader,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -114,8 +126,9 @@ void main() {
       ) async {
         await tester.pumpWidget(
           buildSubject(
-            profile: businessTaxProfile(entityKind: 'company'),
-            accountingMode: 'ledger',
+            profile: businessTaxProfile(entityKind: EntityKind.company),
+            accountingMode: AccountingMode.ledger,
+            kind: EntityKind.company,
           ),
         );
         await tester.pumpAndSettle();
