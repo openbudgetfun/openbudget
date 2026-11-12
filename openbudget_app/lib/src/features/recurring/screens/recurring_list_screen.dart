@@ -745,7 +745,7 @@ class _AddRecurringDialog extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ObDropdown<String>(
-              value: accountId.value ?? '',
+              value: accountId.value,
               labelText: l10n.transactionAccountLabel,
               items: [
                 for (final account in accounts)
