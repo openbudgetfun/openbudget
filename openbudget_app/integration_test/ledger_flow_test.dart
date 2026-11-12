@@ -272,9 +272,7 @@ class FakeBooksRepository implements LedgerRepository {
     final rows = [
       for (final code in debitByAccount.keys.toList()..sort())
         TrialBalanceRowView(
-          ledgerAccountId: accounts
-              .firstWhere((a) => a.code == code)
-              .id!,
+          ledgerAccountId: accounts.firstWhere((a) => a.code == code).id!,
           accountCode: code,
           accountName: accounts.firstWhere((a) => a.code == code).name,
           accountType: accounts.firstWhere((a) => a.code == code).type,

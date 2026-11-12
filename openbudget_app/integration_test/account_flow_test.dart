@@ -145,8 +145,7 @@ class _FakeAccountActions extends AccountActions {
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000777'),
     name: name,
     kind: kind,
-    balanceSource:
-        balanceSource ?? AccountBalanceSource.transactions,
+    balanceSource: balanceSource ?? AccountBalanceSource.transactions,
     balanceMinor: openingBalanceMinor ?? 0,
     currencyCode: currencyCode,
     entityId: _entityUuid,

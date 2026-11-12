@@ -184,7 +184,11 @@ BudgetMonthView _makeReorderMonthView() {
     ),
     categories: [bills, groceriesCategory],
     envelopes: [
-      _view(utilities, allocatedMinor: _utilitiesAllocatedMinor, availableMinor: _utilitiesAllocatedMinor),
+      _view(
+        utilities,
+        allocatedMinor: _utilitiesAllocatedMinor,
+        availableMinor: _utilitiesAllocatedMinor,
+      ),
       _view(food, allocatedMinor: 3000, availableMinor: 3000),
     ],
   );
@@ -292,7 +296,9 @@ ProviderContainer _planContainer({
         return groups;
       }),
       budgetGoalsProvider.overrideWith((ref, entityId) async => {}),
-      creditCardPaymentsProvider.overrideWith((ref, entityId) async => const []),
+      creditCardPaymentsProvider.overrideWith(
+        (ref, entityId) async => const [],
+      ),
       recurringDueCountProvider.overrideWith((ref, entityId) async => 0),
       reviewQueueProvider.overrideWith((ref, entityId) async => reviewQueue),
     ],
@@ -374,10 +380,13 @@ void main() {
     );
 
     await tester.pumpWidget(
-      _buildApp(container, extraRoutes: [
-        _recentMovesRoutes(),
-        _categoryDetailRoute(),
-      ]),
+      _buildApp(
+        container,
+        extraRoutes: [
+          _recentMovesRoutes(),
+          _categoryDetailRoute(),
+        ],
+      ),
     );
     await tester.pumpAndSettle();
     final planPage = PlanTabPage(tester);
@@ -694,8 +703,7 @@ void main() {
     expect(categoryActions.reorderedEntityId, _entityId);
     expect(
       categoryActions.reorderedCategoryIds,
-      _groupsOf(_makeReorderMonthView())
-          .reversed
+      _groupsOf(_makeReorderMonthView()).reversed
           .map((group) => group.category.id.toString())
           .toList(),
     );

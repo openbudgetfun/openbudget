@@ -123,9 +123,7 @@ void main() {
       // Both balances moved: the USD account paid out $100, the GBP account
       // received the £79 the implied rate produced.
       expect(
-        accounts
-            .named(TestData.usdCheckingAccountName)
-            .balanceMinor,
+        accounts.named(TestData.usdCheckingAccountName).balanceMinor,
         10000,
       );
       expect(
@@ -199,7 +197,8 @@ class _AccountsProbe extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final accounts = ref.watch(accountListProvider('entity')).value ?? const <Account>[];
+    final accounts =
+        ref.watch(accountListProvider('entity')).value ?? const <Account>[];
     final texts = <Widget>[
       for (final account in accounts)
         Text(

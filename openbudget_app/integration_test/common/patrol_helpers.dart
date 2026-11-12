@@ -730,8 +730,7 @@ class NetWorthPage {
   Finder get tabByAccount => find.byKey(const Key('net-worth-tab-by-account'));
 
   /// "1 USD = 0.79 GBP · Nov 8" — the rate line behind a converted figure.
-  Finder rateLine(String from, String to) =>
-      find.textContaining('1 $from = ');
+  Finder rateLine(String from, String to) => find.textContaining('1 $from = ');
 
   Finder currencyRow(String currencyCode) => find.text(currencyCode).first;
 
@@ -749,8 +748,7 @@ class NetWorthPage {
     await tester.pumpAndSettle();
   }
 
-  Future<void> showByCurrency() =>
-      scrollAndTap(tester, tabByCurrency);
+  Future<void> showByCurrency() => scrollAndTap(tester, tabByCurrency);
 
   Future<void> showByAccount() => scrollAndTap(tester, tabByAccount);
 }

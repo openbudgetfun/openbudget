@@ -62,9 +62,13 @@ void main() {
           final month = ref.watch(selectedMonthProvider(entityId));
           return _makeMonthView(month);
         }),
-        budgetMonthGroupsProvider.overrideWith((ref, entityId) async => const []),
+        budgetMonthGroupsProvider.overrideWith(
+          (ref, entityId) async => const [],
+        ),
         budgetGoalsProvider.overrideWith((ref, entityId) async => {}),
-        creditCardPaymentsProvider.overrideWith((ref, entityId) async => const []),
+        creditCardPaymentsProvider.overrideWith(
+          (ref, entityId) async => const [],
+        ),
         recurringDueCountProvider.overrideWith((ref, entityId) async => 0),
         reviewQueueProvider.overrideWith((ref, entityId) async => const []),
       ],

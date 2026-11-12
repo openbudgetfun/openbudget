@@ -86,7 +86,9 @@ class _FakeTransactionPages extends TransactionPages {
       }
       return true;
     }).toList();
-    state = AsyncValue.data(TransactionPageState(filter: filter, items: filtered));
+    state = AsyncValue.data(
+      TransactionPageState(filter: filter, items: filtered),
+    );
   }
 }
 

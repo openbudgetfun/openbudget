@@ -113,7 +113,9 @@ ProviderContainer _planContainer({required int readyToAssignMinor}) {
       ),
       budgetMonthGroupsProvider.overrideWith((ref, entityId) async => const []),
       budgetGoalsProvider.overrideWith((ref, entityId) async => {}),
-      creditCardPaymentsProvider.overrideWith((ref, entityId) async => const []),
+      creditCardPaymentsProvider.overrideWith(
+        (ref, entityId) async => const [],
+      ),
       recurringDueCountProvider.overrideWith((ref, entityId) async => 0),
       reviewQueueProvider.overrideWith((ref, entityId) async => const []),
     ],
@@ -175,7 +177,9 @@ void main() {
     'add accounts onboarding CTA routes to add account screen',
     ($) async {
       final tester = $.tester;
-      await tester.pumpWidget(_buildPlanApp(_planContainer(readyToAssignMinor: 0)));
+      await tester.pumpWidget(
+        _buildPlanApp(_planContainer(readyToAssignMinor: 0)),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Add Accounts'), findsOneWidget);

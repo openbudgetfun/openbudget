@@ -68,7 +68,12 @@ TaxReportView _makeReport(int startYear) => TaxReportView(
 class _FakeTaxRepository implements TaxRepository {
   TaxProfileRecord? profile;
   final List<
-    ({String entityId, String jurisdiction, String entityKind, String profileJson})
+    ({
+      String entityId,
+      String jurisdiction,
+      String entityKind,
+      String profileJson,
+    })
   >
   savedProfiles = [];
 

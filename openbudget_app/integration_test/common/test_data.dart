@@ -36,14 +36,15 @@ abstract final class TestData {
   );
 
   /// A US entity, for flows that need a second base currency.
-  static Entity usdEntity({String name = 'US Budget'}) => gbpEntity(
-    id: usdEntityId,
-    name: name,
-  ).copyWith(
-    countryCode: 'US',
-    baseCurrencyCode: 'USD',
-    timeZone: 'America/New_York',
-  );
+  static Entity usdEntity({String name = 'US Budget'}) =>
+      gbpEntity(
+        id: usdEntityId,
+        name: name,
+      ).copyWith(
+        countryCode: 'US',
+        baseCurrencyCode: 'USD',
+        timeZone: 'America/New_York',
+      );
 
   // Accounts
   static const checkingAccountName = 'Main Checking';
@@ -136,7 +137,9 @@ abstract final class TestData {
     lines: [
       TransactionLine(
         id: UuidValue.fromString('00000000-0000-0000-0000-000000000202'),
-        transactionId: UuidValue.fromString('00000000-0000-0000-0000-000000000201'),
+        transactionId: UuidValue.fromString(
+          '00000000-0000-0000-0000-000000000201',
+        ),
         amountMinor: -3000,
         baseAmountMinor: -2370,
       ),
@@ -154,70 +157,71 @@ abstract final class TestData {
       gbpNetWorthMinor + usdConvertedMinor;
 
   /// Net worth for the GBP entity plus a converted USD account.
-  static NetWorthView gbpNetWorthWithUsd({bool hasStaleRates = false}) =>
-      NetWorthView(
+  static NetWorthView gbpNetWorthWithUsd({
+    bool hasStaleRates = false,
+  }) => NetWorthView(
+    currencyCode: 'GBP',
+    asOf: DateTime.utc(2026, 11, 8),
+    assetsMinor: gbpNetWorthWithUsdMinor,
+    liabilitiesMinor: 0,
+    netWorthMinor: gbpNetWorthWithUsdMinor,
+    isComplete: true,
+    missingCurrencyCodes: const [],
+    hasStaleRates: hasStaleRates,
+    currencies: [
+      NetWorthCurrencyRow(
         currencyCode: 'GBP',
-        asOf: DateTime.utc(2026, 11, 8),
+        nativeMinor: gbpNetWorthMinor,
+        convertedMinor: gbpNetWorthMinor,
+        fxRate: '1',
+        fxRateDate: DateTime.utc(2026, 11, 8),
+        isStale: false,
+        accountCount: 1,
+      ),
+      NetWorthCurrencyRow(
+        currencyCode: 'USD',
+        nativeMinor: usdNativeMinor,
+        convertedMinor: usdConvertedMinor,
+        fxRate: usdToGbpRate,
+        fxRateDate: DateTime.utc(2026, 11, 8),
+        isStale: hasStaleRates,
+        accountCount: 1,
+      ),
+    ],
+    entities: [
+      NetWorthEntityRow(
+        entityId: UuidValue.fromString(gbpEntityId),
+        name: entityName,
+        kind: EntityKind.individual,
         assetsMinor: gbpNetWorthWithUsdMinor,
         liabilitiesMinor: 0,
         netWorthMinor: gbpNetWorthWithUsdMinor,
         isComplete: true,
-        missingCurrencyCodes: const [],
-        hasStaleRates: hasStaleRates,
-        currencies: [
-          NetWorthCurrencyRow(
-            currencyCode: 'GBP',
-            nativeMinor: gbpNetWorthMinor,
-            convertedMinor: gbpNetWorthMinor,
-            fxRate: '1',
-            fxRateDate: DateTime.utc(2026, 11, 8),
-            isStale: false,
-            accountCount: 1,
-          ),
-          NetWorthCurrencyRow(
-            currencyCode: 'USD',
-            nativeMinor: usdNativeMinor,
-            convertedMinor: usdConvertedMinor,
-            fxRate: usdToGbpRate,
-            fxRateDate: DateTime.utc(2026, 11, 8),
-            isStale: hasStaleRates,
-            accountCount: 1,
-          ),
-        ],
-        entities: [
-          NetWorthEntityRow(
-            entityId: UuidValue.fromString(gbpEntityId),
-            name: entityName,
-            kind: EntityKind.individual,
-            assetsMinor: gbpNetWorthWithUsdMinor,
-            liabilitiesMinor: 0,
-            netWorthMinor: gbpNetWorthWithUsdMinor,
-            isComplete: true,
-          ),
-        ],
-        accounts: [
-          NetWorthAccountRow(
-            accountId: UuidValue.fromString('00000000-0000-0000-0000-000000000101'),
-            entityId: UuidValue.fromString(gbpEntityId),
-            name: checkingAccountName,
-            kind: AccountKind.checking,
-            currencyCode: 'GBP',
-            balanceMinor: gbpNetWorthMinor,
-            convertedMinor: gbpNetWorthMinor,
-            isLiability: false,
-          ),
-          NetWorthAccountRow(
-            accountId: UuidValue.fromString('00000000-0000-0000-0000-000000000102'),
-            entityId: UuidValue.fromString(gbpEntityId),
-            name: usdCheckingAccountName,
-            kind: AccountKind.checking,
-            currencyCode: 'USD',
-            balanceMinor: usdNativeMinor,
-            convertedMinor: usdConvertedMinor,
-            isLiability: false,
-          ),
-        ],
-      );
+      ),
+    ],
+    accounts: [
+      NetWorthAccountRow(
+        accountId: UuidValue.fromString('00000000-0000-0000-0000-000000000101'),
+        entityId: UuidValue.fromString(gbpEntityId),
+        name: checkingAccountName,
+        kind: AccountKind.checking,
+        currencyCode: 'GBP',
+        balanceMinor: gbpNetWorthMinor,
+        convertedMinor: gbpNetWorthMinor,
+        isLiability: false,
+      ),
+      NetWorthAccountRow(
+        accountId: UuidValue.fromString('00000000-0000-0000-0000-000000000102'),
+        entityId: UuidValue.fromString(gbpEntityId),
+        name: usdCheckingAccountName,
+        kind: AccountKind.checking,
+        currencyCode: 'USD',
+        balanceMinor: usdNativeMinor,
+        convertedMinor: usdConvertedMinor,
+        isLiability: false,
+      ),
+    ],
+  );
 
   // Transfer (flow 2: GBP -> USD cross-currency)
   static const transferSentMinor = 10000;

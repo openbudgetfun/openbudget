@@ -44,7 +44,8 @@ void main() {
     addTearDown(container.dispose);
 
     final router = GoRouter(
-      initialLocation: '/budgets/${TestData.gbpEntityId}/more/settings/plan/currency',
+      initialLocation:
+          '/budgets/${TestData.gbpEntityId}/more/settings/plan/currency',
       routes: [
         GoRoute(
           name: currencySettingsRoute,
@@ -102,16 +103,17 @@ void main() {
               onSaved: (code) => reportingCurrency = code,
             ),
           ),
-      netWorthProvider.overrideWith((ref) async => reportingCurrency == 'GBP'
-          ? TestData.gbpNetWorthWithUsd()
-          : _usdView()),
+          netWorthProvider.overrideWith(
+            (ref) async => reportingCurrency == 'GBP'
+                ? TestData.gbpNetWorthWithUsd()
+                : _usdView(),
+          ),
         ],
       );
       addTearDown(container.dispose);
 
       final router = GoRouter(
-        initialLocation:
-            '/budgets/${TestData.gbpEntityId}/reflect/net-worth',
+        initialLocation: '/budgets/${TestData.gbpEntityId}/reflect/net-worth',
         routes: [
           GoRoute(
             name: netWorthRoute,

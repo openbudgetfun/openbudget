@@ -38,8 +38,7 @@ void main() {
       addTearDown(container.dispose);
 
       final router = GoRouter(
-        initialLocation:
-            '/budgets/${TestData.gbpEntityId}/more/settings',
+        initialLocation: '/budgets/${TestData.gbpEntityId}/more/settings',
         routes: [
           GoRoute(
             name: agentAccessRoute,

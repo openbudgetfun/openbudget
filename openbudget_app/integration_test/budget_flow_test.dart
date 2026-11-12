@@ -18,7 +18,10 @@ void main() {
     final router = GoRouter(
       initialLocation: createEntityPath,
       routes: [
-        GoRoute(path: createEntityPath, builder: (_, _) => const CreateEntityScreen()),
+        GoRoute(
+          path: createEntityPath,
+          builder: (_, _) => const CreateEntityScreen(),
+        ),
       ],
     );
 
