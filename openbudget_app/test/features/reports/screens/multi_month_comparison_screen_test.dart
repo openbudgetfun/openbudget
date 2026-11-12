@@ -17,6 +17,7 @@ void main() {
       final l10n = await AppLocalizations.delegate.load(const Locale('en'));
 
       expect(reportGroupLabel(l10n, reportUncategorisedGroup), 'Uncategorised');
+      expect(reportGroupLabel(l10n, reportUnknownPayeeGroup), 'Unknown payee');
       expect(reportGroupLabel(l10n, 'Groceries'), 'Groceries');
     });
   });

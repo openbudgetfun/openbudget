@@ -53,7 +53,7 @@ Future<PayeeSpendingReport> spendingByPayee(
       if (row.outflowMinor < 0)
         PayeeSpendingEntry(
           // A row with no payee is spending the entity never attributed.
-          payeeName: row.groupId == null ? reportUncategorisedGroup : row.name,
+          payeeName: row.groupId == null ? reportUnknownPayeeGroup : row.name,
           totalMinor: row.outflowMinor.abs(),
           transactionCount: row.transactionCount,
         ),

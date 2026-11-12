@@ -59,7 +59,7 @@ void main() {
       [
         'Landlord',
         'Tesco',
-        reportUncategorisedGroup,
+        reportUnknownPayeeGroup,
       ],
     );
     expect(report.entries.first.totalMinor, 120000);
