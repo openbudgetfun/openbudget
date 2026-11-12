@@ -36,11 +36,12 @@ Future<CategoryTrendsData> categoryTrends(
     }
 
     for (final entry in spentByCategory.entries) {
-      final series = categoryMap.putIfAbsent(
-        entry.key,
-        () => List.filled(monthHeaders.length - 1, 0),
-      );
-      series.add(entry.value);
+      categoryMap
+          .putIfAbsent(
+            entry.key,
+            () => List.filled(monthHeaders.length - 1, 0),
+          )
+          .add(entry.value);
     }
     // Every earlier-known category gets a zero for this month.
     for (final entry in categoryMap.entries) {

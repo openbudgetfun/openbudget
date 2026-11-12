@@ -66,9 +66,7 @@ Future<PayeeSpendingReport> spendingByPayee(
       if (amount >= 0) continue; // Expenses only.
       final payeeName = view.payeeName ?? view.transaction.description;
       if (payeeName.isEmpty) continue;
-      payeeMap
-          .putIfAbsent(payeeName, () => _PayeeAccumulator())
-          .add(amount);
+      payeeMap.putIfAbsent(payeeName, _PayeeAccumulator.new).add(amount);
       totalSpent += amount.abs();
     }
 
@@ -90,7 +88,7 @@ Future<PayeeSpendingReport> spendingByPayee(
   return PayeeSpendingReport(
     entries: entries,
     totalSpentMinor: totalSpent,
-    currencyCode: entity?.baseCurrencyCode ?? 'USD',
+    currencyCode: entity.baseCurrencyCode,
   );
 }
 

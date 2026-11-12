@@ -57,7 +57,7 @@ extension NetWorthRangeDates on NetWorthRange {
         to: todayDate,
       ),
       NetWorthRange.all => (
-        from: DateTime.utc(1900, 1, 1),
+        from: DateTime.utc(1900),
         to: todayDate,
       ),
     };
