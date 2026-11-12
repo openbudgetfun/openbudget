@@ -2483,6 +2483,56 @@
     }
   },
   "netWorthMissingCurrencies": "Not included: no rate for {currencies}",
+  "netWorthRatesFrom": "Rates from {date}",
+  "@netWorthRatesFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "netWorthIncompleteTitle": "Some accounts are not included",
+  "netWorthIncompleteLine": "Not included: {count, plural, =1{1 account} other{{count} accounts}} in {currency} (no rate)",
+  "@netWorthIncompleteLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "netWorthTabByEntity": "By entity",
+  "netWorthTabByCurrency": "By currency",
+  "netWorthTabByAccount": "By account",
+  "netWorthValuedOn": "Valued {date}",
+  "@netWorthValuedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "netWorthRateLine": "1 {native} = {rate} {reporting}",
+  "@netWorthRateLine": {
+    "placeholders": {
+      "native": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "reporting": {
+        "type": "String"
+      }
+    }
+  },
+  "netWorthIncompletePoint": "Point based on incomplete data",
+  "netWorthHistory3M": "3M",
+  "netWorthHistory1Y": "1Y",
+  "netWorthHistoryAll": "All",
+  "netWorthAccountsCount": "{count} accounts",
   "@netWorthMissingCurrencies": {
     "placeholders": {
       "currencies": {

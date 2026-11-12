@@ -5214,6 +5214,61 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String netWorthRatesFrom(String date) {
+    return 'Rates from $date';
+  }
+
+  @override
+  String get netWorthIncompleteTitle => 'Some accounts are not included';
+
+  @override
+  String netWorthIncompleteLine(int count, String currency) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count accounts',
+      one: '1 account',
+    );
+    return 'Not included: $_temp0 in $currency (no rate)';
+  }
+
+  @override
+  String get netWorthTabByEntity => 'By entity';
+
+  @override
+  String get netWorthTabByCurrency => 'By currency';
+
+  @override
+  String get netWorthTabByAccount => 'By account';
+
+  @override
+  String netWorthValuedOn(String date) {
+    return 'Valued $date';
+  }
+
+  @override
+  String netWorthRateLine(String native, String rate, String reporting) {
+    return '1 $native = $rate $reporting';
+  }
+
+  @override
+  String get netWorthIncompletePoint => 'Point based on incomplete data';
+
+  @override
+  String get netWorthHistory3M => '3M';
+
+  @override
+  String get netWorthHistory1Y => '1Y';
+
+  @override
+  String get netWorthHistoryAll => 'All';
+
+  @override
+  String netWorthAccountsCount(Object count) {
+    return '$count accounts';
+  }
+
+  @override
   String get entityCountInNetWorth => 'Count in my net worth';
 
   @override

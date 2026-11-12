@@ -8,6 +8,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/plaid_account_link_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/edit_account_dialog.dart';
+import 'package:openbudget_app/src/features/accounts/utils/account_kind_labels.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
@@ -512,20 +513,7 @@ class _AccountTile extends HookWidget {
   };
 
   static String _labelForKind(AccountKind kind, AppLocalizations l10n) =>
-      switch (kind) {
-        AccountKind.checking => l10n.accountTypeChecking,
-        AccountKind.savings => l10n.accountTypeSavings,
-        AccountKind.creditCard => l10n.accountTypeCreditCard,
-        AccountKind.cash => l10n.accountTypeCash,
-        AccountKind.investment => l10n.accountTypeInvestment,
-        AccountKind.crypto => l10n.accountTypeCryptoWallet,
-        AccountKind.loan => l10n.addAccountTypePersonalLoan,
-        AccountKind.mortgage => l10n.addAccountTypeMortgage,
-        AccountKind.property => l10n.addAccountTypeProperty,
-        AccountKind.vehicle => l10n.addAccountTypeVehicle,
-        AccountKind.otherAsset => l10n.addAccountTypeOtherAsset,
-        AccountKind.otherLiability => l10n.addAccountTypeOtherDebt,
-      };
+      accountKindLabel(kind, l10n);
 }
 
 /// Bank connections: sync status, last error and Remove.

@@ -8952,6 +8952,84 @@ abstract class AppLocalizations {
   /// **'Not included: no rate for {currencies}'**
   String netWorthMissingCurrencies(String currencies);
 
+  /// No description provided for @netWorthRatesFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Rates from {date}'**
+  String netWorthRatesFrom(String date);
+
+  /// No description provided for @netWorthIncompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Some accounts are not included'**
+  String get netWorthIncompleteTitle;
+
+  /// No description provided for @netWorthIncompleteLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Not included: {count, plural, =1{1 account} other{{count} accounts}} in {currency} (no rate)'**
+  String netWorthIncompleteLine(int count, String currency);
+
+  /// No description provided for @netWorthTabByEntity.
+  ///
+  /// In en, this message translates to:
+  /// **'By entity'**
+  String get netWorthTabByEntity;
+
+  /// No description provided for @netWorthTabByCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'By currency'**
+  String get netWorthTabByCurrency;
+
+  /// No description provided for @netWorthTabByAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'By account'**
+  String get netWorthTabByAccount;
+
+  /// No description provided for @netWorthValuedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Valued {date}'**
+  String netWorthValuedOn(String date);
+
+  /// No description provided for @netWorthRateLine.
+  ///
+  /// In en, this message translates to:
+  /// **'1 {native} = {rate} {reporting}'**
+  String netWorthRateLine(String native, String rate, String reporting);
+
+  /// No description provided for @netWorthIncompletePoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Point based on incomplete data'**
+  String get netWorthIncompletePoint;
+
+  /// No description provided for @netWorthHistory3M.
+  ///
+  /// In en, this message translates to:
+  /// **'3M'**
+  String get netWorthHistory3M;
+
+  /// No description provided for @netWorthHistory1Y.
+  ///
+  /// In en, this message translates to:
+  /// **'1Y'**
+  String get netWorthHistory1Y;
+
+  /// No description provided for @netWorthHistoryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get netWorthHistoryAll;
+
+  /// No description provided for @netWorthAccountsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} accounts'**
+  String netWorthAccountsCount(Object count);
+
   /// No description provided for @entityCountInNetWorth.
   ///
   /// In en, this message translates to:
