@@ -1851,7 +1851,7 @@ class _SpotlightOverview extends HookWidget {
     );
   }
 
-  String _monthLabel(AppLocalizations l10n, int month) => switch (month) {
+  String _monthLabel(AppLocalizations l10n, int month) => switch (month % 100) {
     1 => l10n.budgetMonthJanuary,
     2 => l10n.budgetMonthFebruary,
     3 => l10n.budgetMonthMarch,
