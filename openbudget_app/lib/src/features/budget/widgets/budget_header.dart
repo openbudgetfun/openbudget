@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/auto_assign_dialog.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
@@ -43,6 +44,7 @@ class BudgetHeader extends HookConsumerWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
     final hideAmounts = ref.watch(hideAmountsProvider);
+    final ageOfMoney = ref.watch(ageOfMoneyProvider(entityId));
     final year = month ~/ 100;
     final calendarMonth = month % 100;
     final now = DateTime.now();
@@ -199,6 +201,8 @@ class BudgetHeader extends HookConsumerWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: SpacingTokens.sm),
+                _AgeOfMoneyStat(ageOfMoney: ageOfMoney),
               ],
             ),
           ),
@@ -475,6 +479,51 @@ class BudgetHeader extends HookConsumerWidget {
             Navigator.of(ctx).pop();
           },
         ),
+      ),
+    );
+  }
+}
+
+/// The age of money stat. Null from the server means there is not enough
+/// history for a figure yet, which the header says plainly.
+class _AgeOfMoneyStat extends HookWidget {
+  const _AgeOfMoneyStat({required this.ageOfMoney});
+
+  final AsyncValue<int?> ageOfMoney;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    if (ageOfMoney.isLoading || ageOfMoney.hasError) {
+      return const SizedBox.shrink();
+    }
+
+    final days = ageOfMoney.value;
+    final color = days == null ? palette.mutedInk : palette.brand;
+    final label = days == null
+        ? l10n.budgetAgeOfMoneyEmpty
+        : l10n.ageOfMoneyLabel(days);
+
+    return Tooltip(
+      message: l10n.reportsAgeOfMoneyHint,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SkribbleIcon(
+            data: OpenBudgetIcons.schedule,
+            size: 14,
+            color: color,
+          ),
+          const SizedBox(width: SpacingTokens.xs),
+          Flexible(
+            child: Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(color: color),
+            ),
+          ),
+        ],
       ),
     );
   }

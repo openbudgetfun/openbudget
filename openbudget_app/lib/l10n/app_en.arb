@@ -330,6 +330,7 @@
   "bulkMarkCleared": "Mark Cleared",
   "bulkMarkUncleared": "Mark Uncleared",
   "budgetAssignMoney": "Assign Money",
+  "budgetAgeOfMoneyEmpty": "Not enough history yet",
   "budgetAddCategory": "Add Category",
   "budgetAddEnvelope": "Add Envelope",
   "budgetCollapseExpand": "Collapse/Expand",

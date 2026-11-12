@@ -338,6 +338,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetAssignMoney => 'Assign Money';
 
   @override
+  String get budgetAgeOfMoneyEmpty => 'Not enough history yet';
+
+  @override
   String get budgetAddCategory => 'Add Category';
 
   @override

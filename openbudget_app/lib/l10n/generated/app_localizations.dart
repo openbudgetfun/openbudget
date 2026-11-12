@@ -586,6 +586,12 @@ abstract class AppLocalizations {
   /// **'Assign Money'**
   String get budgetAssignMoney;
 
+  /// No description provided for @budgetAgeOfMoneyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough history yet'**
+  String get budgetAgeOfMoneyEmpty;
+
   /// No description provided for @budgetAddCategory.
   ///
   /// In en, this message translates to:
