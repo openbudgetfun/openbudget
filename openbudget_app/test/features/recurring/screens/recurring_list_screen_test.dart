@@ -296,6 +296,24 @@ void main() {
       );
     });
 
+    testWidgets('the add dialog works from the empty state', (tester) async {
+      await _pumpRecurring(tester, items: const []);
+
+      await tester.tap(find.text('Add Recurring'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add Recurring Transaction'), findsOneWidget);
+      await tester.tap(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is ObDropdown<String> && widget.labelText == 'Account',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Current account').last, findsOneWidget);
+    });
+
     group('add recurring amount entry', () {
       Future<void> openAddDialog(WidgetTester tester) async {
         await tester.tap(find.byKey(RecurringListScreen.addButtonKey));
