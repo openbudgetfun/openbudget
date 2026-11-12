@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_actions_provider.dart';
@@ -18,11 +20,11 @@ ProviderContainer _containerWith(TaxRepository repository) {
 
 void main() {
   group('taxProfileProvider', () {
-    test('returns null when the budget has no profile', () async {
+    test('returns null when the entity has no profile', () async {
       final container = _containerWith(FakeTaxRepository());
 
       final profile = await container.read(
-        taxProfileProvider(testBudgetId).future,
+        taxProfileProvider(testEntityId).future,
       );
 
       expect(profile, isNull);
@@ -33,19 +35,20 @@ void main() {
       final container = _containerWith(FakeTaxRepository(profile: record));
 
       final profile = await container.read(
-        taxProfileProvider(testBudgetId).future,
+        taxProfileProvider(testEntityId).future,
       );
 
       expect(profile, same(record));
-      expect(profile?.jurisdiction, 'GB');
-      expect(profile?.entityKind, TaxEntityKind.individual.name);
+      final json = jsonDecode(profile!.profileJson) as Map<String, Object?>;
+      expect(json['jurisdiction'], 'GB');
+      expect(json['entityKind'], EntityKind.individual.name);
     });
 
     test('surfaces repository errors', () async {
       final container = _containerWith(
         FakeTaxRepository(profileError: Exception('offline')),
       );
-      final provider = taxProfileProvider(testBudgetId);
+      final provider = taxProfileProvider(testEntityId);
       final subscription = container.listen(provider, (_, _) {});
       addTearDown(subscription.close);
 
@@ -65,11 +68,11 @@ void main() {
       final container = _containerWith(fake);
 
       final report = await container.read(
-        taxReportProvider(testBudgetId, 2026).future,
+        taxReportProvider(testEntityId, 2026).future,
       );
 
       expect(report.yearLabel, '2026/27');
-      expect(fake.reportCalls, [(entityId: testBudgetId, startYear: 2026)]);
+      expect(fake.reportCalls, [(entityId: testEntityId, startYear: 2026)]);
     });
 
     test('keeps separate reports for separate years', () async {
@@ -79,10 +82,10 @@ void main() {
       final container = _containerWith(fake);
 
       final owed = await container.read(
-        taxReportProvider(testBudgetId, 2026).future,
+        taxReportProvider(testEntityId, 2026).future,
       );
       final refund = await container.read(
-        taxReportProvider(testBudgetId, 2025).future,
+        taxReportProvider(testEntityId, 2025).future,
       );
 
       expect(owed.balanceDueMinor, 748000);
@@ -97,7 +100,7 @@ void main() {
           ),
         ),
       );
-      final provider = taxReportProvider(testBudgetId, 2030);
+      final provider = taxReportProvider(testEntityId, 2030);
       final subscription = container.listen(provider, (_, _) {});
       addTearDown(subscription.close);
 
@@ -110,11 +113,11 @@ void main() {
   });
 
   group('taxCategoriesProvider', () {
-    test('returns the catalog for the budget', () async {
+    test('returns the catalog for the entity', () async {
       final container = _containerWith(FakeTaxRepository());
 
       final categories = await container.read(
-        taxCategoriesProvider(testBudgetId).future,
+        taxCategoriesProvider(testEntityId).future,
       );
 
       expect(categories, hasLength(3));
@@ -125,10 +128,10 @@ void main() {
     test('surfaces a missing profile as an error', () async {
       final container = _containerWith(
         FakeTaxRepository(
-          categoriesError: Exception('Tax profile not found for this budget'),
+          categoriesError: Exception('Tax profile not found for this entity'),
         ),
       );
-      final provider = taxCategoriesProvider(testBudgetId);
+      final provider = taxCategoriesProvider(testEntityId);
       final subscription = container.listen(provider, (_, _) {});
       addTearDown(subscription.close);
 
@@ -145,7 +148,7 @@ void main() {
       final fake = FakeTaxRepository();
       final container = _containerWith(fake);
       const profile = GbTaxProfile(
-        entityKind: TaxEntityKind.soleTrader,
+        entityKind: EntityKind.soleTrader,
         salesTaxRegistered: true,
         scottishTaxpayer: true,
       );
@@ -153,13 +156,14 @@ void main() {
       final saved = await container
           .read(taxActionsProvider.notifier)
           .saveProfile(
-            entityId: testBudgetId,
+            entityId: testEntityId,
             jurisdiction: profile.jurisdiction.countryCode,
             entityKind: profile.entityKind.name,
             profileJson: testProfileJson(profile),
           );
 
-      expect(saved.jurisdiction, 'GB');
+      final savedJson = jsonDecode(saved.profileJson) as Map<String, Object?>;
+      expect(savedJson['jurisdiction'], 'GB');
       expect(fake.savedProfiles, hasLength(1));
       expect(fake.savedProfiles.single.entityKind, 'soleTrader');
       expect(
@@ -172,19 +176,19 @@ void main() {
       );
     });
 
-    test('forwards envelope and transaction categorisation', () async {
+    test('forwards envelope and line categorisation', () async {
       final fake = FakeTaxRepository();
       final container = _containerWith(fake);
       final actions = container.read(taxActionsProvider.notifier);
 
       await actions.setEnvelopeTaxCategory(
-        entityId: testBudgetId,
+        entityId: testEntityId,
         envelopeId: testEnvelopeId,
         code: 'gb.se.office_costs',
       );
-      await actions.setTransactionTax(
-        entityId: testBudgetId,
-        transactionId: testTransactionId,
+      await actions.setLineTax(
+        entityId: testEntityId,
+        transactionLineId: testTransactionLineId,
         code: 'gb.se.office_costs',
         businessUsePercent: 60,
         salesTaxMinor: 250,
@@ -193,8 +197,8 @@ void main() {
       expect(fake.envelopeUpdates, [
         (envelopeId: testEnvelopeId, code: 'gb.se.office_costs'),
       ]);
-      expect(fake.transactionUpdates.single.businessUsePercent, 60);
-      expect(fake.transactionUpdates.single.salesTaxMinor, 250);
+      expect(fake.lineUpdates.single.businessUsePercent, 60);
+      expect(fake.lineUpdates.single.salesTaxMinor, 250);
     });
 
     test('records a failed save as an error state and rethrows', () async {
@@ -206,11 +210,11 @@ void main() {
         container
             .read(taxActionsProvider.notifier)
             .saveProfile(
-              entityId: testBudgetId,
+              entityId: testEntityId,
               jurisdiction: 'GB',
               entityKind: 'individual',
               profileJson: testProfileJson(
-                const GbTaxProfile(entityKind: TaxEntityKind.individual),
+                const GbTaxProfile(entityKind: EntityKind.individual),
               ),
             ),
         throwsA(isA<Exception>()),

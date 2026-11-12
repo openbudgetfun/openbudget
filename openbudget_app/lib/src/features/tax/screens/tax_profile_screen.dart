@@ -86,8 +86,15 @@ class _TaxProfileForm extends HookConsumerWidget {
     final ng = profile is NgTaxProfile ? profile : null;
     final de = profile is DeTaxProfile ? profile : null;
 
-    final country = useState(jurisdiction ?? TaxJurisdiction.gb);
-    final entityKind = useState(entity?.kind ?? EntityKind.individual);
+    // The country comes from the entity and is not editable here. It is a
+    // plain local so the form follows the entity when its detail resolves
+    // after the first frame (the default only covers the loading frame).
+    final country = jurisdiction ?? TaxJurisdiction.gb;
+    // The kind starts as the entity's, and the dropdown may override it for
+    // this profile until the entity detail arrives.
+    final entityKind = useState<EntityKind?>(null);
+    final entityKindValue =
+        entityKind.value ?? entity?.kind ?? EntityKind.individual;
     final salesTaxRegistered = useState(
       existing?.salesTaxRegistered ?? false,
     );
@@ -195,9 +202,9 @@ class _TaxProfileForm extends HookConsumerWidget {
       return value != null && value >= 0 ? value : null;
     }
 
-    TaxProfile buildProfile() => switch (country.value) {
+    TaxProfile buildProfile() => switch (country) {
       TaxJurisdiction.gb => GbTaxProfile(
-        entityKind: entityKind.value,
+        entityKind: entityKindValue,
         salesTaxRegistered: salesTaxRegistered.value,
         scottishTaxpayer: scottishTaxpayer.value,
         studentLoanPlan: studentLoanPlan.value,
@@ -207,7 +214,7 @@ class _TaxProfileForm extends HookConsumerWidget {
         associatedCompanies: associatedCompaniesValue() ?? 0,
       ),
       TaxJurisdiction.us => UsTaxProfile(
-        entityKind: entityKind.value,
+        entityKind: entityKindValue,
         salesTaxRegistered: salesTaxRegistered.value,
         filingStatus: filingStatus.value,
         homeOfficeMethod: homeOfficeMethod.value,
@@ -232,7 +239,7 @@ class _TaxProfileForm extends HookConsumerWidget {
         ],
       ),
       TaxJurisdiction.ng => NgTaxProfile(
-        entityKind: entityKind.value,
+        entityKind: entityKindValue,
         salesTaxRegistered: salesTaxRegistered.value,
         annualRentMinor:
             parseMinorUnits(
@@ -244,7 +251,7 @@ class _TaxProfileForm extends HookConsumerWidget {
         mneGroupMember: mneGroupMember.value,
       ),
       TaxJurisdiction.de => DeTaxProfile(
-        entityKind: entityKind.value,
+        entityKind: entityKindValue,
         salesTaxRegistered: salesTaxRegistered.value,
         jointAssessment: jointAssessment.value,
         churchTax: churchTax.value,
@@ -274,7 +281,7 @@ class _TaxProfileForm extends HookConsumerWidget {
       rentError.value = null;
       formError.value = null;
 
-      if (country.value == TaxJurisdiction.ng) {
+      if (country == TaxJurisdiction.ng) {
         final rentText = annualRentController.text.trim();
         if (rentText.isNotEmpty &&
             parseMinorUnits(rentText, CurrencyCode.ngn.decimals) == null) {
@@ -282,13 +289,13 @@ class _TaxProfileForm extends HookConsumerWidget {
           return;
         }
       }
-      if (country.value == TaxJurisdiction.gb &&
-          entityKind.value == EntityKind.company &&
+      if (country == TaxJurisdiction.gb &&
+          entityKindValue == EntityKind.company &&
           associatedCompaniesValue() == null) {
         formError.value = l10n.taxGbAssociatedCompaniesError;
         return;
       }
-      if (country.value == TaxJurisdiction.de) {
+      if (country == TaxJurisdiction.de) {
         final countTexts = [
           childrenController.text,
           commuteKmController.text,
@@ -343,7 +350,7 @@ class _TaxProfileForm extends HookConsumerWidget {
       }
     }
 
-    final isIndividual = entityKind.value == EntityKind.individual;
+    final isIndividual = entityKindValue == EntityKind.individual;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -361,7 +368,7 @@ class _TaxProfileForm extends HookConsumerWidget {
         ),
         const SizedBox(height: SpacingTokens.md),
         ObDropdown<EntityKind>(
-          value: entityKind.value,
+          value: entityKindValue,
           labelText: l10n.taxEntityKindLabel,
           items: [
             for (final kind in EntityKind.values)
@@ -382,12 +389,12 @@ class _TaxProfileForm extends HookConsumerWidget {
           ),
         ),
         Text(
-          taxJurisdictionLabel(l10n, country.value),
+          taxJurisdictionLabel(l10n, country),
           style: theme.textTheme.titleMedium,
         ),
         const SizedBox(height: SpacingTokens.md),
         ObSectionHeader(
-          title: taxJurisdictionLabel(l10n, country.value),
+          title: taxJurisdictionLabel(l10n, country),
           padding: const EdgeInsets.fromLTRB(
             0,
             SpacingTokens.lg,
@@ -408,7 +415,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                   color: palette.ink,
                 ),
               ),
-              if (country.value == TaxJurisdiction.gb) ...[
+              if (country == TaxJurisdiction.gb) ...[
                 const Divider(height: 1),
                 SwitchListTile(
                   value: scottishTaxpayer.value,
@@ -459,7 +466,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                     color: palette.ink,
                   ),
                 ),
-                if (entityKind.value == EntityKind.company) ...[
+                if (entityKindValue == EntityKind.company) ...[
                   const Divider(height: 1),
                   Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
@@ -555,7 +562,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                   ),
                 ],
               ],
-              if (country.value == TaxJurisdiction.us) ...[
+              if (country == TaxJurisdiction.us) ...[
                 const Divider(height: 1),
                 Padding(
                   padding: const EdgeInsets.all(SpacingTokens.md),
@@ -669,7 +676,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                     ),
                   ),
                 ],
-                if (entityKind.value == EntityKind.soleTrader) ...[
+                if (entityKindValue == EntityKind.soleTrader) ...[
                   const Divider(height: 1),
                   SwitchListTile(
                     value: specifiedServiceTrade.value,
@@ -703,7 +710,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                   ),
                 ],
               ],
-              if (country.value == TaxJurisdiction.ng) ...[
+              if (country == TaxJurisdiction.ng) ...[
                 const Divider(height: 1),
                 Padding(
                   padding: const EdgeInsets.all(SpacingTokens.md),
@@ -784,7 +791,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                   ),
                 ),
               ],
-              if (country.value == TaxJurisdiction.de) ...[
+              if (country == TaxJurisdiction.de) ...[
                 const Divider(height: 1),
                 SwitchListTile(
                   value: jointAssessment.value,
@@ -797,7 +804,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                   ),
                 ),
                 if (jointAssessment.value &&
-                    entityKind.value == EntityKind.individual) ...[
+                    entityKindValue == EntityKind.individual) ...[
                   const Divider(height: 1),
                   SwitchListTile(
                     value: spouseEmployed.value,
@@ -846,7 +853,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                       },
                     ),
                   ),
-                if (entityKind.value == EntityKind.soleTrader) ...[
+                if (entityKindValue == EntityKind.soleTrader) ...[
                   const Divider(height: 1),
                   Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),

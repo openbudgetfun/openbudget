@@ -4,40 +4,44 @@ import 'package:openbudget_app/src/features/tax/providers/tax_repository.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 
-const testBudgetId = '00000000-0000-0000-0000-0000000000a401';
+const testEntityId = '00000000-0000-0000-0000-0000000000a401';
 const testOwnerId = '00000000-0000-0000-0000-0000000000a402';
 const testEnvelopeId = '00000000-0000-0000-0000-0000000000a403';
 const testTransactionId = '00000000-0000-0000-0000-0000000000a404';
+const testTransactionLineId = '00000000-0000-0000-0000-0000000000a407';
 
-Budget testBudget({
-  String id = '00000000-0000-0000-0000-0000000000a401',
+/// Kept for the screens that still spell the id `testBudgetId`.
+const String testBudgetId = testEntityId;
+
+Entity testEntity({
+  String id = testEntityId,
   String name = 'My Budget',
-  String currencyCode = 'GBP',
-}) => Budget(
+  String baseCurrencyCode = 'GBP',
+  EntityKind kind = EntityKind.individual,
+  String countryCode = 'GB',
+}) => Entity(
   id: UuidValue.fromString(id),
   name: name,
-  currencyCode: currencyCode,
+  kind: kind,
+  countryCode: countryCode,
+  baseCurrencyCode: baseCurrencyCode,
+  timeZone: 'Europe/London',
+  fiscalYearEndMonth: 4,
+  fiscalYearEndDay: 5,
   ownerId: UuidValue.fromString(testOwnerId),
   createdAt: DateTime.utc(2026),
 );
 
 TaxProfileRecord taxProfileRecord({
-  String entityId = testBudgetId,
   TaxProfile? profile,
-  String? linkedBudgetId,
   DateTime? updatedAt,
 }) {
   final resolved =
-      profile ?? const GbTaxProfile(entityKind: TaxEntityKind.individual);
+      profile ?? const GbTaxProfile(entityKind: EntityKind.individual);
   return TaxProfileRecord(
     id: UuidValue.fromString('00000000-0000-0000-0000-0000000000a405'),
-    entityId: UuidValue.fromString(entityId),
-    jurisdiction: resolved.jurisdiction.countryCode,
-    entityKind: resolved.entityKind.name,
+    entityId: UuidValue.fromString(testEntityId),
     profileJson: jsonEncode(resolved.toJson()),
-    linkedBudgetId: linkedBudgetId == null
-        ? null
-        : UuidValue.fromString(linkedBudgetId),
     createdAt: DateTime.utc(2026),
     updatedAt: updatedAt ?? DateTime.utc(2026, 6),
   );
@@ -102,7 +106,7 @@ TaxReportView taxReportView({
   int startYear = 2026,
   String yearLabel = '2026/27',
   String currencyCode = 'GBP',
-  String entityKind = 'individual',
+  EntityKind entityKind = EntityKind.individual,
   List<TaxReportLineView>? lines,
   List<TaxLiabilityView>? liabilities,
   int totalLiabilityMinor = 748000,
@@ -169,6 +173,37 @@ List<TaxCategoryView> testCategories() => [
   ),
 ];
 
+/// A transaction view whose line carries the tax coding the fake records.
+TransactionView taxTransactionView({
+  String? taxCategoryCode,
+  int? businessUsePercent,
+  int? salesTaxMinor,
+}) => TransactionView(
+  transaction: Transaction(
+    id: UuidValue.fromString(testTransactionId),
+    entityId: UuidValue.fromString(testEntityId),
+    accountId: UuidValue.fromString('00000000-0000-0000-0000-0000000000a408'),
+    date: DateTime.utc(2026, 5),
+    amountMinor: -4250,
+    baseAmountMinor: -4250,
+    fxRateDate: DateTime.utc(2026, 5),
+    description: 'Train ticket',
+  ),
+  lines: [
+    TransactionLine(
+      id: UuidValue.fromString(testTransactionLineId),
+      transactionId: UuidValue.fromString(testTransactionId),
+      amountMinor: -4250,
+      baseAmountMinor: -4250,
+      taxCategoryCode: taxCategoryCode,
+      businessUsePercent: businessUsePercent,
+      salesTaxMinor: salesTaxMinor,
+    ),
+  ],
+  accountCurrencyCode: 'GBP',
+  accountName: 'Current account',
+);
+
 /// An in-memory [TaxRepository] for widget and provider tests.
 class FakeTaxRepository implements TaxRepository {
   FakeTaxRepository({
@@ -181,7 +216,7 @@ class FakeTaxRepository implements TaxRepository {
     this.reportError,
     this.saveError,
     this.envelopeError,
-    this.transactionError,
+    this.lineError,
   }) : reports = reports ?? {};
 
   TaxProfileRecord? profile;
@@ -193,7 +228,7 @@ class FakeTaxRepository implements TaxRepository {
   Exception? reportError;
   Exception? saveError;
   Exception? envelopeError;
-  Exception? transactionError;
+  Exception? lineError;
 
   final List<({String entityId, int startYear})> reportCalls = [];
   final List<
@@ -202,20 +237,19 @@ class FakeTaxRepository implements TaxRepository {
       String jurisdiction,
       String entityKind,
       String profileJson,
-      String? linkedBudgetId,
     })
   >
   savedProfiles = [];
   final List<({String envelopeId, String? code})> envelopeUpdates = [];
   final List<
     ({
-      String transactionId,
+      String transactionLineId,
       String? code,
       int? businessUsePercent,
       int? salesTaxMinor,
     })
   >
-  transactionUpdates = [];
+  lineUpdates = [];
 
   @override
   Future<TaxProfileRecord?> getProfile(String entityId) async {
@@ -229,7 +263,6 @@ class FakeTaxRepository implements TaxRepository {
     required String jurisdiction,
     required String entityKind,
     required String profileJson,
-    String? linkedBudgetId,
   }) async {
     if (saveError != null) throw saveError!;
     savedProfiles.add((
@@ -237,17 +270,11 @@ class FakeTaxRepository implements TaxRepository {
       jurisdiction: jurisdiction,
       entityKind: entityKind,
       profileJson: profileJson,
-      linkedBudgetId: linkedBudgetId,
     ));
     final record = TaxProfileRecord(
       id: UuidValue.fromString('00000000-0000-0000-0000-0000000000a499'),
       entityId: UuidValue.fromString(entityId),
-      jurisdiction: jurisdiction,
-      entityKind: entityKind,
       profileJson: profileJson,
-      linkedBudgetId: linkedBudgetId == null
-          ? null
-          : UuidValue.fromString(linkedBudgetId),
       createdAt: DateTime.utc(2026),
       updatedAt: DateTime.utc(2026, 7),
     );
@@ -270,39 +297,31 @@ class FakeTaxRepository implements TaxRepository {
     envelopeUpdates.add((envelopeId: envelopeId, code: code));
     return Envelope(
       id: UuidValue.fromString(envelopeId),
-      name: 'Rent',
+      entityId: UuidValue.fromString(testEntityId),
       categoryId: UuidValue.fromString(
         '00000000-0000-0000-0000-0000000000a406',
       ),
-      budgetedAmountMinor: 0,
-      spentAmountMinor: 0,
-      currencyCode: 'GBP',
+      name: 'Rent',
       sortOrder: 0,
       taxCategoryCode: code,
     );
   }
 
   @override
-  Future<Transaction> setTransactionTax({
-    required String transactionId,
+  Future<TransactionView> setLineTax({
+    required String transactionLineId,
     String? code,
     int? businessUsePercent,
     int? salesTaxMinor,
   }) async {
-    if (transactionError != null) throw transactionError!;
-    transactionUpdates.add((
-      transactionId: transactionId,
+    if (lineError != null) throw lineError!;
+    lineUpdates.add((
+      transactionLineId: transactionLineId,
       code: code,
       businessUsePercent: businessUsePercent,
       salesTaxMinor: salesTaxMinor,
     ));
-    return Transaction(
-      id: UuidValue.fromString(transactionId),
-      description: 'Train ticket',
-      amountMinor: -4250,
-      currencyCode: 'GBP',
-      entityId: UuidValue.fromString(testBudgetId),
-      transactionDate: DateTime.utc(2026, 5),
+    return taxTransactionView(
       taxCategoryCode: code,
       businessUsePercent: businessUsePercent,
       salesTaxMinor: salesTaxMinor,

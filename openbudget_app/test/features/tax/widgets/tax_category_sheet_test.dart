@@ -32,7 +32,7 @@ Widget _buildHost(
                 showTransactionTaxCategorySheet(
                   context,
                   entityId: testBudgetId,
-                  transactionId: testTransactionId,
+                  transactionLineId: testTransactionLineId,
                   subject: 'Train ticket',
                   currencyCode: 'GBP',
                   currentCode: currentCode,
@@ -210,9 +210,9 @@ void main() {
       await tester.tap(find.text('Save category'));
       await tester.pumpAndSettle();
 
-      expect(repository.transactionUpdates.single.code, 'gb.se.office_costs');
-      expect(repository.transactionUpdates.single.businessUsePercent, 40);
-      expect(repository.transactionUpdates.single.salesTaxMinor, 250);
+      expect(repository.lineUpdates.single.code, 'gb.se.office_costs');
+      expect(repository.lineUpdates.single.businessUsePercent, 40);
+      expect(repository.lineUpdates.single.salesTaxMinor, 250);
     });
 
     testWidgets('rejects a malformed sales tax amount', (tester) async {
@@ -234,7 +234,7 @@ void main() {
         find.text('Enter an amount no larger than the transaction.'),
         findsOneWidget,
       );
-      expect(repository.transactionUpdates, isEmpty);
+      expect(repository.lineUpdates, isEmpty);
     });
 
     testWidgets('shows a save failure without closing the sheet', (

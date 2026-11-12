@@ -5,7 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_list_provider.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_repository.dart';
 import 'package:openbudget_app/src/features/tax/screens/tax_overview_screen.dart';
@@ -20,11 +21,11 @@ Widget _buildApp(
   Future<TaxProfileRecord?> Function(Ref ref, String entityId)? profileBuilder,
 }) {
   final router = GoRouter(
-    initialLocation: '/budgets/$testBudgetId/tax',
+    initialLocation: '/budgets/$testEntityId/tax',
     routes: [
       GoRoute(
         name: taxOverviewRoute,
-        path: '/budgets/:id/tax',
+        path: '/budgets/:entityId/tax',
         builder: (context, state) =>
             TaxOverviewScreen(entityId: state.pathParameters['entityId']!),
         routes: [
@@ -37,7 +38,7 @@ Widget _buildApp(
       ),
       GoRoute(
         name: transactionListRoute,
-        path: '/budgets/:id/transactions',
+        path: '/budgets/:entityId/transactions',
         builder: (_, _) => const Scaffold(body: Text('Transactions stub')),
       ),
     ],
@@ -46,7 +47,8 @@ Widget _buildApp(
   return ProviderScope(
     overrides: [
       taxRepositoryProvider.overrideWithValue(repository),
-      budgetListProvider.overrideWith((ref) async => [testBudget()]),
+      entityDetailProvider.overrideWith((ref, entityId) async => testEntity()),
+      entityListProvider.overrideWith((ref) async => [testEntity()]),
       if (profileBuilder != null)
         taxProfileProvider.overrideWith(profileBuilder),
     ],
@@ -116,7 +118,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Tax year 2026/27'), findsOneWidget);
+      expect(find.text('Tax year 2026'), findsOneWidget);
       expect(find.text('Balance due'), findsOneWidget);
       expect(find.text('£7,480.00'), findsWidgets);
       await tester.scrollUntilVisible(find.text('£42,000.00'), 120);
@@ -196,7 +198,7 @@ void main() {
       await tester.tap(find.byKey(const Key('tax-year-previous')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Tax year 2025/26'), findsOneWidget);
+      expect(find.text('Tax year 2025'), findsOneWidget);
       expect(find.text('Nothing to pay'), findsOneWidget);
       expect(
         fake.reportCalls.map((call) => call.startYear),
