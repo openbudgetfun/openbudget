@@ -206,7 +206,7 @@ class _ComparisonTable extends HookWidget {
                         SizedBox(
                           width: _monthColumnWidth,
                           child: ObAmount(
-                            format(category.monthTotals[key]?[1] ?? 0),
+                            format(category.monthlyActivityMinor[key] ?? 0),
                             style: theme.textTheme.bodyMedium,
                             textAlign: TextAlign.end,
                           ),
@@ -242,7 +242,7 @@ class _ComparisonTable extends HookWidget {
                           SizedBox(
                             width: _monthColumnWidth,
                             child: ObAmount(
-                              format(envelope.monthData[key]?[1] ?? 0),
+                              format(envelope.monthlyActivityMinor[key] ?? 0),
                               style: theme.textTheme.bodySmall,
                               textAlign: TextAlign.end,
                             ),

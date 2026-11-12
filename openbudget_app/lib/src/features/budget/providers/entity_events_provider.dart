@@ -1,12 +1,19 @@
 import 'package:openbudget_app/src/features/accounts/providers/account_detail_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/assistant/providers/assistant_proposals_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/credit_card_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_summary_provider.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_providers.dart';
+import 'package:openbudget_app/src/features/reports/providers/category_trends_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/month_figures_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/multi_month_comparison_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/spending_by_payee_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/spending_trends_provider.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_pages_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
@@ -37,7 +44,8 @@ Stream<EntityChangedEvent> entityEvents(Ref ref, String entityId) {
 void _invalidate(Ref ref, ChangeScope scope) {
   switch (scope) {
     case ChangeScope.transactions:
-      // The transaction pages, the month views, the accounts, the summaries.
+      // The transaction pages, the month views, the accounts, the summaries
+      // and every report, including age of money.
       ref
         ..invalidate(transactionPagesProvider)
         ..invalidate(budgetMonthProvider)
@@ -47,10 +55,13 @@ void _invalidate(Ref ref, ChangeScope scope) {
         ..invalidate(accountListAllProvider)
         ..invalidate(accountBalancesProvider)
         ..invalidate(entitySummariesProvider);
+      _invalidateReports(ref);
     case ChangeScope.plan:
       ref
         ..invalidate(budgetMonthProvider)
-        ..invalidate(budgetMonthGroupsProvider);
+        ..invalidate(budgetMonthGroupsProvider)
+        ..invalidate(entitySummariesProvider);
+      _invalidateReports(ref);
     case ChangeScope.accounts:
       ref
         ..invalidate(accountListProvider)
@@ -80,4 +91,18 @@ void _invalidate(Ref ref, ChangeScope scope) {
         ..invalidate(taxReportProvider)
         ..invalidate(entitySummariesProvider);
   }
+}
+
+/// Every provider backed by `report.spending`, `report.monthSummaries` or
+/// `report.ageOfMoney`.
+void _invalidateReports(Ref ref) {
+  ref
+    ..invalidate(monthFiguresProvider)
+    ..invalidate(spendingReportProvider)
+    ..invalidate(spendingReportPresetProvider)
+    ..invalidate(spendingByPayeeProvider)
+    ..invalidate(categoryTrendsProvider)
+    ..invalidate(spendingTrendsProvider)
+    ..invalidate(multiMonthComparisonProvider)
+    ..invalidate(ageOfMoneyProvider);
 }

@@ -1,22 +1,20 @@
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/month_figures_provider.dart';
+import 'package:openbudget_app/src/features/reports/utils/month_range.dart';
+import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'spending_report_provider.g.dart';
 
-/// One month's spending and income in base minor units, read from the
-/// server's month view. Activity per envelope is grouped by its category.
+/// One month of spending grouped by category, from one `report.spending`
+/// call plus the month's figure from `report.monthSummaries`.
 @riverpod
 Future<SpendingReport> spendingReport(
   Ref ref,
   String entityId,
   int endMonth,
-) async {
-  final views = await ref.watch(
-    monthFiguresProvider(entityId, endMonth, 1).future,
-  );
-  return _reportFor(views, views.first.currencyCode);
-}
+) => _spendingReport(ref, entityId, endMonth, 1);
 
 /// The last [monthCount] months combined, for the preset ranges.
 @riverpod
@@ -25,103 +23,73 @@ Future<SpendingReport> spendingReportPreset(
   String entityId,
   int endMonth,
   int monthCount,
+) => _spendingReport(ref, entityId, endMonth, monthCount);
+
+Future<SpendingReport> _spendingReport(
+  Ref ref,
+  String entityId,
+  int endMonth,
+  int monthCount,
 ) async {
-  final views = await ref.watch(
+  final client = ref.read(serverpodClientProvider);
+  final entity = await ref.watch(entityDetailProvider(entityId).future);
+  final summaries = await ref.watch(
     monthFiguresProvider(entityId, endMonth, monthCount).future,
   );
-  return _reportFor(views, views.first.currencyCode);
-}
 
-SpendingReport _reportFor(List<BudgetMonthView> views, String currencyCode) {
-  final monthReports = views.map(_reportForView).toList();
-  return SpendingReport.combine(monthReports);
-}
+  final isSingleMonth = monthCount <= 1;
+  final rows = await client.report.spending(
+    UuidValue.fromString(entityId),
+    monthRangeStart(endMonth, monthCount),
+    endMonth,
+    ReportGrouping.category,
+    false,
+  );
 
-SpendingReport _reportForView(BudgetMonthView view) {
   final categorySpending = <String, int>{};
-  final categoryNameById = <String, String>{
-    for (final category in view.categories)
-      category.id?.toString() ?? '': category.name,
-  };
-
-  for (final envelope in view.envelopes) {
-    if (envelope.activityMinor >= 0) continue;
-    final categoryName =
-        categoryNameById[envelope.envelope.categoryId.toString()] ?? '';
-    categorySpending[categoryName] =
-        (categorySpending[categoryName] ?? 0) + envelope.activityMinor.abs();
+  var totalExpenses = 0;
+  for (final row in rows) {
+    if (row.outflowMinor >= 0) continue;
+    final spentMinor = row.outflowMinor.abs();
+    categorySpending[row.name] = (categorySpending[row.name] ?? 0) + spentMinor;
+    totalExpenses += spentMinor;
   }
 
+  final totalIncome = summaries.fold<int>(
+    0,
+    (sum, summary) => sum + summary.incomeMinor,
+  );
+
   return SpendingReport(
-    totalIncome: view.summary.incomeMinor,
-    totalExpenses: view.summary.activityMinor < 0
-        ? view.summary.activityMinor.abs()
-        : 0,
-    netIncome: view.summary.incomeMinor + view.summary.activityMinor,
-    transactionCount: 0,
+    totalIncome: totalIncome,
+    totalExpenses: totalExpenses,
+    netIncome: totalIncome - totalExpenses,
     categorySpending: categorySpending,
-    currencyCode: view.currencyCode,
-    month: view.month,
+    currencyCode: entity.baseCurrencyCode,
+    month: isSingleMonth ? endMonth : null,
   );
 }
 
 /// One month (or a range of months combined) of spending, in base minor
-/// units. All figures come from the server's month view; none are summed
-/// from raw transactions in the app.
+/// units. Spending comes from `report.spending`; income comes from
+/// `report.monthSummaries`. Neither is summed from raw transactions in the
+/// app.
 class SpendingReport {
   const SpendingReport({
     required this.totalIncome,
     required this.totalExpenses,
     required this.netIncome,
-    required this.transactionCount,
     required this.categorySpending,
     required this.currencyCode,
     this.month,
   });
 
-  factory SpendingReport.combine(Iterable<SpendingReport> reports) {
-    var totalIncome = 0;
-    var totalExpenses = 0;
-    var transactionCount = 0;
-    String? currencyCode;
-    int? month;
-    final categorySpending = <String, int>{};
-
-    for (final report in reports) {
-      totalIncome += report.totalIncome;
-      totalExpenses += report.totalExpenses;
-      transactionCount += report.transactionCount;
-      currencyCode = report.currencyCode;
-      month = report.month ?? month;
-
-      for (final entry in report.categorySpending.entries) {
-        categorySpending[entry.key] =
-            (categorySpending[entry.key] ?? 0) + entry.value;
-      }
-    }
-
-    return SpendingReport(
-      totalIncome: totalIncome,
-      totalExpenses: totalExpenses,
-      netIncome: totalIncome - totalExpenses,
-      transactionCount: transactionCount,
-      categorySpending: categorySpending,
-      currencyCode: currencyCode ?? 'USD',
-      month: month,
-    );
-  }
-
   final int totalIncome;
   final int totalExpenses;
   final int netIncome;
-  final int transactionCount;
   final Map<String, int> categorySpending;
   final String currencyCode;
 
   /// The yyyymm month this report covers; null when combined.
   final int? month;
-
-  /// The (year, month) pair screens use for their titles.
-  ({int year, int month})? get yearMonth =>
-      month == null ? null : (year: month! ~/ 100, month: month! % 100);
 }
