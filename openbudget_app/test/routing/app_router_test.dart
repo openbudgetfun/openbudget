@@ -97,7 +97,7 @@ void main() {
       expect(
         authRedirectForLocation(
           authState: const Authenticated(userId: '1'),
-          location: createBudgetPath,
+          location: createEntityPath,
         ),
         isNull,
       );
