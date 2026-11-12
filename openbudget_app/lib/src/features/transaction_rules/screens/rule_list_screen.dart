@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_actions_provider.dart';
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_list_provider.dart';
@@ -27,7 +27,7 @@ class RuleListScreen extends HookConsumerWidget {
     final viewFilter = useState(RuleViewFilter.all);
     final rulesAsync = ref.watch(ruleListProvider(entityId));
     final payeesAsync = ref.watch(payeeListProvider(entityId));
-    final summaryAsync = ref.watch(budgetSummaryProvider(entityId));
+    final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
 
     // Build lookup maps.
     final payeeNames = <String, String>{};
@@ -39,12 +39,13 @@ class RuleListScreen extends HookConsumerWidget {
     }
 
     final envelopeNames = <String, String>{};
-    if (summaryAsync.hasValue) {
-      for (final catEnv in summaryAsync.value!.categories) {
-        for (final envelope in catEnv.envelopes) {
-          final id = envelope.id?.toString();
+    if (groupsAsync.hasValue) {
+      for (final group in groupsAsync.value!) {
+        for (final envelopeView in group.envelopes) {
+          final id = envelopeView.envelope.id?.toString();
           if (id != null) {
-            envelopeNames[id] = '${catEnv.category.name} / ${envelope.name}';
+            envelopeNames[id] =
+                '${group.category.name} / ${envelopeView.envelope.name}';
           }
         }
       }
@@ -160,7 +161,7 @@ class RuleListScreen extends HookConsumerWidget {
                     payeeNames[rule.payeeId.toString()] ??
                     l10n.transactionsUnknownPayee;
                 final envelopeName =
-                    envelopeNames[rule.targetEnvelopeId.toString()] ??
+                    envelopeNames[rule.envelopeId.toString()] ??
                     l10n.transactionsUnknownEnvelope;
                 return _RuleTile(
                   payeeName: payeeName,
@@ -560,7 +561,7 @@ class _AddRuleDialog extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
     final payeesAsync = ref.watch(payeeListProvider(entityId));
-    final summaryAsync = ref.watch(budgetSummaryProvider(entityId));
+    final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
     final selectedPayeeId = useState<String?>(null);
     final selectedEnvelopeId = useState<String?>(null);
 
@@ -579,13 +580,15 @@ class _AddRuleDialog extends HookConsumerWidget {
 
     // Build envelope items.
     final envelopeItems = <DropdownMenuItem<String>>[];
-    if (summaryAsync.hasValue) {
-      for (final catEnv in summaryAsync.value!.categories) {
-        for (final envelope in catEnv.envelopes) {
+    if (groupsAsync.hasValue) {
+      for (final group in groupsAsync.value!) {
+        for (final envelopeView in group.envelopes) {
           envelopeItems.add(
             DropdownMenuItem<String>(
-              value: envelope.id?.toString() ?? '',
-              child: Text('${catEnv.category.name} / ${envelope.name}'),
+              value: envelopeView.envelope.id?.toString() ?? '',
+              child: Text(
+                '${group.category.name} / ${envelopeView.envelope.name}',
+              ),
             ),
           );
         }

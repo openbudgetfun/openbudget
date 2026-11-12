@@ -194,8 +194,8 @@ class CreateTransferScreen extends HookConsumerWidget {
             child: ObStatePanel.problem(title: l10n.accountLoadError),
           ),
         ),
-        data: (_) {
-          return Center(
+        data: (_) =>
+          Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(SpacingTokens.md),
               child: ConstrainedBox(
@@ -370,8 +370,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                 ),
               ),
             ),
-          );
-        },
+          ),
       ),
     );
   }

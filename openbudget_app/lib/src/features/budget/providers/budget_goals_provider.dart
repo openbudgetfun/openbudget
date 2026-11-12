@@ -50,11 +50,11 @@ GoalPresentation goalPresentation({
 int previewUnderfundedMinor({
   required EnvelopeGoalKind kind,
   required int amountMinor,
-  DateTime? targetDate,
   required int month,
   required int carryoverMinor,
   required int allocatedMinor,
   required int activityMinor,
+  DateTime? targetDate,
 }) {
   final funding = (
     kind: kind.name,

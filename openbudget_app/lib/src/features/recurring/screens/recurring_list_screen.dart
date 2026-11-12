@@ -5,7 +5,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_actions_provider.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
@@ -35,13 +36,9 @@ class RecurringListScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final recurringAsync = ref.watch(recurringListProvider(entityId));
-    final budgetAsync = ref.watch(budgetDetailProvider(entityId));
+    final currencyAsync = ref.watch(budgetMonthCurrencyProvider(entityId));
     final viewFilter = useState(RecurringViewFilter.all);
-    final budgetCurrency =
-        budgetAsync.whenOrNull(
-          data: (budget) => normalizeCurrencyCode(budget.currencyCode),
-        ) ??
-        '';
+    final budgetCurrency = currencyAsync.value ?? '';
 
     return Scaffold(
       appBar: AppBar(
@@ -94,25 +91,33 @@ class RecurringListScreen extends HookConsumerWidget {
             );
           }
 
+          final accountsAsync = ref.watch(accountListProvider(entityId));
+          final currencyByAccount = {
+            for (final account in accountsAsync.value ?? const <Account>[])
+              if (account.id != null) account.id!.toString(): account.currencyCode,
+          };
+          String currencyOf(RecurringTransaction item) =>
+              currencyByAccount[item.accountId.toString()] ?? budgetCurrency;
+
           final now = DateTime.now();
           final activeItems = items.where((item) => item.isActive).toList();
           final dueCount = activeItems.where((item) {
             final dueDate = DateTime(
-              item.nextOccurrence.year,
-              item.nextOccurrence.month,
-              item.nextOccurrence.day,
+              item.nextDate.year,
+              item.nextDate.month,
+              item.nextDate.day,
             );
             final today = DateTime(now.year, now.month, now.day);
             return !dueDate.isAfter(today);
           }).length;
           final expenseTotals = aggregateMinorByCurrency(
             activeItems.where((item) => item.amountMinor < 0),
-            currencyCodeOf: (item) => item.currencyCode,
+            currencyCodeOf: currencyOf,
             amountMinorOf: (item) => item.amountMinor.abs(),
           );
           final incomeTotals = aggregateMinorByCurrency(
             activeItems.where((item) => item.amountMinor > 0),
-            currencyCodeOf: (item) => item.currencyCode,
+            currencyCodeOf: currencyOf,
             amountMinorOf: (item) => item.amountMinor,
           );
           final filteredItems = items
@@ -122,7 +127,7 @@ class RecurringListScreen extends HookConsumerWidget {
                   RecurringViewFilter.expenses => item.amountMinor < 0,
                   RecurringViewFilter.income => item.amountMinor > 0,
                   RecurringViewFilter.due =>
-                    item.isActive && !item.nextOccurrence.isAfter(now),
+                    item.isActive && !item.nextDate.isAfter(now),
                 },
               )
               .toList();
@@ -196,7 +201,9 @@ class RecurringListScreen extends HookConsumerWidget {
                     padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
                     child: _RecurringTile(
                       recurring: item,
-                      onEdit: () => _showEditDialog(context, item),
+                      currencyCode: currencyOf(item),
+                      onEdit: () =>
+                          _showEditDialog(context, item, currencyOf(item)),
                       onDelete: () => _confirmDelete(context, ref, item),
                       onToggle: () => _toggleActive(ref, item),
                       onSkip: () => _skipOccurrence(context, ref, item),
@@ -221,12 +228,19 @@ class RecurringListScreen extends HookConsumerWidget {
     );
   }
 
-  void _showEditDialog(BuildContext context, RecurringTransaction recurring) {
+  void _showEditDialog(
+    BuildContext context,
+    RecurringTransaction recurring,
+    String currencyCode,
+  ) {
     unawaited(
       showDialog<void>(
         context: context,
-        builder: (_) =>
-            _EditRecurringDialog(recurring: recurring, entityId: entityId),
+        builder: (_) => _EditRecurringDialog(
+          recurring: recurring,
+          entityId: entityId,
+          currencyCode: currencyCode,
+        ),
       ),
     );
   }
@@ -507,6 +521,7 @@ class _RecurringFilterChip extends HookWidget {
 class _RecurringTile extends HookWidget {
   const _RecurringTile({
     required this.recurring,
+    required this.currencyCode,
     required this.onEdit,
     required this.onDelete,
     required this.onToggle,
@@ -514,6 +529,10 @@ class _RecurringTile extends HookWidget {
   });
 
   final RecurringTransaction recurring;
+
+  /// The account's currency; the recurring transaction carries no currency
+  /// of its own.
+  final String currencyCode;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onToggle;
@@ -524,18 +543,17 @@ class _RecurringTile extends HookWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final currency = normalizeCurrencyCode(recurring.currencyCode);
+    final currency = normalizeCurrencyCode(currencyCode);
     final isIncome = recurring.amountMinor > 0;
     final frequencyLabel = switch (recurring.frequency) {
-      'daily' => l10n.recurringFreqDaily,
-      'weekly' => l10n.recurringFreqWeekly,
-      'biweekly' => l10n.recurringFreqBiweekly,
-      'monthly' => l10n.recurringFreqMonthly,
-      'yearly' => l10n.recurringFreqYearly,
-      _ => recurring.frequency,
+      RecurrenceFrequency.daily => l10n.recurringFreqDaily,
+      RecurrenceFrequency.weekly => l10n.recurringFreqWeekly,
+      RecurrenceFrequency.biweekly => l10n.recurringFreqBiweekly,
+      RecurrenceFrequency.monthly => l10n.recurringFreqMonthly,
+      RecurrenceFrequency.yearly => l10n.recurringFreqYearly,
     };
 
-    final nextDate = recurring.nextOccurrence;
+    final nextDate = recurring.nextDate;
     final isDue = recurring.isActive && !nextDate.isAfter(DateTime.now());
     final dateStr =
         '${nextDate.year}-${nextDate.month.toString().padLeft(2, '0')}-${nextDate.day.toString().padLeft(2, '0')}';
@@ -702,10 +720,13 @@ class _AddRecurringDialog extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final descController = useTextEditingController();
     final amountController = useTextEditingController();
-    final frequency = useState('monthly');
+    final frequency = useState(RecurrenceFrequency.monthly);
     final nextDate = useState(DateTime.now());
     final isExpense = useState(true);
     final isSubmitting = useState(false);
+    final accountsAsync = ref.watch(accountListProvider(entityId));
+    final accounts = accountsAsync.value ?? const <Account>[];
+    final accountId = useState<String?>(null);
 
     useListenable(amountController);
     final amountDecimals = currencyDecimalsForCode(currencyCode);
@@ -722,6 +743,21 @@ class _AddRecurringDialog extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            ObDropdown<String>(
+              value: accountId.value ?? '',
+              labelText: l10n.transactionAccountLabel,
+              items: [
+                for (final account in accounts)
+                  DropdownMenuItem(
+                    value: account.id?.toString() ?? '',
+                    child: Text(account.name),
+                  ),
+              ],
+              onChanged: (value) {
+                if (value != null && value.isNotEmpty) accountId.value = value;
+              },
+            ),
+            const SizedBox(height: SpacingTokens.md),
             ObTextField(
               controller: descController,
               labelText: l10n.transactionDescriptionLabel,
@@ -740,6 +776,7 @@ class _AddRecurringDialog extends HookConsumerWidget {
                   nextDate,
                   isExpense,
                   currencyCode,
+                  accountId,
                   isSubmitting,
                 ),
               ),
@@ -771,30 +808,25 @@ class _AddRecurringDialog extends HookConsumerWidget {
               onSelectionChanged: (s) => isExpense.value = s.first,
             ),
             const SizedBox(height: SpacingTokens.md),
-            ObDropdown<String>(
+            ObDropdown<RecurrenceFrequency>(
               value: frequency.value,
               labelText: l10n.recurringFrequencyLabel,
               items: [
-                DropdownMenuItem(
-                  value: 'daily',
-                  child: Text(l10n.recurringFreqDaily),
-                ),
-                DropdownMenuItem(
-                  value: 'weekly',
-                  child: Text(l10n.recurringFreqWeekly),
-                ),
-                DropdownMenuItem(
-                  value: 'biweekly',
-                  child: Text(l10n.recurringFreqBiweekly),
-                ),
-                DropdownMenuItem(
-                  value: 'monthly',
-                  child: Text(l10n.recurringFreqMonthly),
-                ),
-                DropdownMenuItem(
-                  value: 'yearly',
-                  child: Text(l10n.recurringFreqYearly),
-                ),
+                for (final value in RecurrenceFrequency.values)
+                  DropdownMenuItem(
+                    value: value,
+                    child: Text(
+                      switch (value) {
+                        RecurrenceFrequency.daily => l10n.recurringFreqDaily,
+                        RecurrenceFrequency.weekly => l10n.recurringFreqWeekly,
+                        RecurrenceFrequency.biweekly =>
+                          l10n.recurringFreqBiweekly,
+                        RecurrenceFrequency.monthly =>
+                          l10n.recurringFreqMonthly,
+                        RecurrenceFrequency.yearly => l10n.recurringFreqYearly,
+                      },
+                    ),
+                  ),
               ],
               onChanged: (v) {
                 if (v != null) frequency.value = v;
@@ -838,6 +870,7 @@ class _AddRecurringDialog extends HookConsumerWidget {
             nextDate,
             isExpense,
             currencyCode,
+            accountId,
             isSubmitting,
           ),
           child: Text(l10n.dialogSave),
@@ -851,15 +884,17 @@ class _AddRecurringDialog extends HookConsumerWidget {
     WidgetRef ref,
     TextEditingController descController,
     TextEditingController amountController,
-    ValueNotifier<String> frequency,
+    ValueNotifier<RecurrenceFrequency> frequency,
     ValueNotifier<DateTime> nextDate,
     ValueNotifier<bool> isExpense,
     String currencyCode,
+    ValueNotifier<String?> accountId,
     ValueNotifier<bool> isSubmitting,
   ) async {
     final l10n = AppLocalizations.of(context);
     final description = descController.text.trim();
-    if (description.isEmpty) return;
+    final account = accountId.value;
+    if (description.isEmpty || account == null) return;
 
     final amountMinor = parseMoneyInput(
       amountController.text,
@@ -875,10 +910,9 @@ class _AddRecurringDialog extends HookConsumerWidget {
       await ref
           .read(recurringActionsProvider.notifier)
           .createRecurring(
+            accountId: account,
             description: description,
             amountMinor: signedMinor,
-            currencyCode: normalizeCurrencyCode(currencyCode),
-            entityId: entityId,
             frequency: frequency.value,
             nextOccurrence: nextDate.value,
           );
@@ -902,10 +936,17 @@ class _AddRecurringDialog extends HookConsumerWidget {
 }
 
 class _EditRecurringDialog extends HookConsumerWidget {
-  const _EditRecurringDialog({required this.recurring, required this.entityId});
+  const _EditRecurringDialog({
+    required this.recurring,
+    required this.entityId,
+    required this.currencyCode,
+  });
 
   final RecurringTransaction recurring;
   final String entityId;
+
+  /// The account's currency, resolved by the list.
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -913,14 +954,14 @@ class _EditRecurringDialog extends HookConsumerWidget {
     final descController = useTextEditingController(
       text: recurring.description,
     );
-    final currency = normalizeCurrencyCode(recurring.currencyCode);
+    final currency = normalizeCurrencyCode(currencyCode);
     final currencyDecimals = currencyDecimalsForCode(currency);
     final amountMinor = recurring.amountMinor.abs();
     final amountController = useTextEditingController(
       text: formatMinorUnits(amountMinor, currencyDecimals),
     );
     final frequency = useState(recurring.frequency);
-    final nextDate = useState(recurring.nextOccurrence);
+    final nextDate = useState(recurring.nextDate);
     final isSubmitting = useState(false);
 
     useListenable(amountController);
@@ -956,30 +997,25 @@ class _EditRecurringDialog extends HookConsumerWidget {
               ),
             ),
             const SizedBox(height: SpacingTokens.md),
-            ObDropdown<String>(
+            ObDropdown<RecurrenceFrequency>(
               value: frequency.value,
               labelText: l10n.recurringFrequencyLabel,
               items: [
-                DropdownMenuItem(
-                  value: 'daily',
-                  child: Text(l10n.recurringFreqDaily),
-                ),
-                DropdownMenuItem(
-                  value: 'weekly',
-                  child: Text(l10n.recurringFreqWeekly),
-                ),
-                DropdownMenuItem(
-                  value: 'biweekly',
-                  child: Text(l10n.recurringFreqBiweekly),
-                ),
-                DropdownMenuItem(
-                  value: 'monthly',
-                  child: Text(l10n.recurringFreqMonthly),
-                ),
-                DropdownMenuItem(
-                  value: 'yearly',
-                  child: Text(l10n.recurringFreqYearly),
-                ),
+                for (final value in RecurrenceFrequency.values)
+                  DropdownMenuItem(
+                    value: value,
+                    child: Text(
+                      switch (value) {
+                        RecurrenceFrequency.daily => l10n.recurringFreqDaily,
+                        RecurrenceFrequency.weekly => l10n.recurringFreqWeekly,
+                        RecurrenceFrequency.biweekly =>
+                          l10n.recurringFreqBiweekly,
+                        RecurrenceFrequency.monthly =>
+                          l10n.recurringFreqMonthly,
+                        RecurrenceFrequency.yearly => l10n.recurringFreqYearly,
+                      },
+                    ),
+                  ),
               ],
               onChanged: (v) {
                 if (v != null) frequency.value = v;
@@ -1035,7 +1071,7 @@ class _EditRecurringDialog extends HookConsumerWidget {
     WidgetRef ref,
     TextEditingController descController,
     TextEditingController amountController,
-    ValueNotifier<String> frequency,
+    ValueNotifier<RecurrenceFrequency> frequency,
     ValueNotifier<DateTime> nextDate,
     String currency,
     ValueNotifier<bool> isSubmitting,

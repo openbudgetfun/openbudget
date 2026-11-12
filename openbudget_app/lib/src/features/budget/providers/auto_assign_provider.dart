@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
+import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auto_assign_provider.g.dart';

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
 import 'package:openbudget_app/src/features/tax/tax_formatting.dart';
 import 'package:openbudget_app/src/features/tax/tax_labels.dart';
@@ -79,7 +80,7 @@ class TaxOverviewScreen extends HookConsumerWidget {
             : _TaxReportBody(
                 key: ValueKey(
                   '${record.updatedAt.microsecondsSinceEpoch}-'
-                  '${record.jurisdiction}',
+                  '${record.profileJson.hashCode}',
                 ),
                 entityId: entityId,
                 record: record,
@@ -128,14 +129,18 @@ class _TaxReportBody extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final jurisdiction = TaxJurisdiction.fromCountryCode(record.jurisdiction);
+    final entityAsync = ref.watch(entityDetailProvider(entityId));
+    final entity = entityAsync.value;
+    final jurisdiction = entity == null
+        ? null
+        : TaxJurisdiction.fromCountryCode(entity.countryCode);
     if (jurisdiction == null) {
       return Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(SpacingTokens.lg),
           child: ObStatePanel.problem(
             title: l10n.taxOverviewLoadError,
-            message: record.jurisdiction,
+            message: entity?.countryCode ?? '',
           ),
         ),
       );
@@ -145,12 +150,12 @@ class _TaxReportBody extends HookConsumerWidget {
     final startYear = selectedYear.value ?? currentTaxYearStart(jurisdiction);
     final reportAsync = ref.watch(taxReportProvider(entityId, startYear));
     final report = reportAsync.value;
-    final entityKind = _entityKind(record.entityKind);
+    final entityKind = entity?.kind;
 
     return Column(
       children: [
         _YearSwitcher(
-          label: l10n.taxYearLabel(report?.yearLabel ?? startYear.toString()),
+          label: l10n.taxYearLabel(report?.startYear ?? startYear),
           onPrevious: () => selectedYear.value = startYear - 1,
           onNext: () => selectedYear.value = startYear + 1,
         ),
@@ -866,10 +871,3 @@ class _HowWorkedOutCard extends HookWidget {
 }
 
 bool _isRulesUnavailable(Object error) => error is TaxRulesUnavailableException;
-
-TaxEntityKind? _entityKind(String name) {
-  for (final kind in TaxEntityKind.values) {
-    if (kind.name == name) return kind;
-  }
-  return null;
-}

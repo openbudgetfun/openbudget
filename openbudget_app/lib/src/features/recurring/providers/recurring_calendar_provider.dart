@@ -1,7 +1,7 @@
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:equatable/equatable.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'recurring_calendar_provider.g.dart';

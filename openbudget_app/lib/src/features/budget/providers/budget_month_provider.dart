@@ -130,9 +130,9 @@ class BudgetMonthActions extends _$BudgetMonthActions {
   /// A null envelope id means Ready to Assign; [amountMinor] is positive.
   Future<BudgetMonthView?> moveMoney({
     required String entityId,
+    required int amountMinor,
     String? fromEnvelopeId,
     String? toEnvelopeId,
-    required int amountMinor,
   }) async {
     final month = ref.read(selectedMonthProvider(entityId));
     return _run(

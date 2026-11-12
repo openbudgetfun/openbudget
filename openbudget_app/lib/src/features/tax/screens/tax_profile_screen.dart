@@ -6,13 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_actions_provider.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
 import 'package:openbudget_app/src/features/tax/tax_formatting.dart';
 import 'package:openbudget_app/src/features/tax/tax_labels.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
-import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -54,7 +53,6 @@ class TaxProfileScreen extends HookConsumerWidget {
           existing: record == null
               ? null
               : parseTaxProfileJson(record.profileJson),
-          existingLinkedBudgetId: record?.linkedBudgetId?.toString(),
         ),
       ),
     );
@@ -65,22 +63,22 @@ class _TaxProfileForm extends HookConsumerWidget {
   const _TaxProfileForm({
     required this.entityId,
     required this.existing,
-    required this.existingLinkedBudgetId,
     super.key,
   });
 
   final String entityId;
   final TaxProfile? existing;
-  final String? existingLinkedBudgetId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final budgetsAsync = ref.watch(budgetListProvider);
-    final budgets = budgetsAsync.value ?? const <Budget>[];
-    final currentBudget = _budgetWithId(budgets, entityId);
+    final entityAsync = ref.watch(entityDetailProvider(entityId));
+    final entity = entityAsync.value;
+    final jurisdiction = entity == null
+        ? null
+        : TaxJurisdiction.fromCountryCode(entity.countryCode);
 
     final profile = existing;
     final gb = profile is GbTaxProfile ? profile : null;
@@ -88,13 +86,8 @@ class _TaxProfileForm extends HookConsumerWidget {
     final ng = profile is NgTaxProfile ? profile : null;
     final de = profile is DeTaxProfile ? profile : null;
 
-    final country = useState(
-      existing?.jurisdiction ??
-          _jurisdictionForCurrency(currentBudget?.currencyCode),
-    );
-    final entityKind = useState(
-      existing?.entityKind ?? TaxEntityKind.individual,
-    );
+    final country = useState(jurisdiction ?? TaxJurisdiction.gb);
+    final entityKind = useState(entity?.kind ?? EntityKind.individual);
     final salesTaxRegistered = useState(
       existing?.salesTaxRegistered ?? false,
     );
@@ -189,19 +182,9 @@ class _TaxProfileForm extends HookConsumerWidget {
     final commuteDaysController = useTextEditingController(
       text: de == null || de.commuteDays == 0 ? '' : '${de.commuteDays}',
     );
-    final linkedBudgetId = useState<String?>(existingLinkedBudgetId);
     final rentError = useState<String?>(null);
     final formError = useState<String?>(null);
     final isSaving = useState(false);
-
-    final linkedBudgets = budgets
-        .whereType<Budget>()
-        .where(
-          (budget) =>
-              budget.id?.toString() != entityId &&
-              budget.id?.toString() != null,
-        )
-        .toList();
 
     // The associated companies field as a whole number of zero or more, or
     // null when it does not parse. Empty means none.
@@ -300,7 +283,7 @@ class _TaxProfileForm extends HookConsumerWidget {
         }
       }
       if (country.value == TaxJurisdiction.gb &&
-          entityKind.value == TaxEntityKind.company &&
+          entityKind.value == EntityKind.company &&
           associatedCompaniesValue() == null) {
         formError.value = l10n.taxGbAssociatedCompaniesError;
         return;
@@ -330,24 +313,16 @@ class _TaxProfileForm extends HookConsumerWidget {
           return;
         }
       }
-      if (entityKind.value != TaxEntityKind.individual &&
-          linkedBudgetId.value == entityId) {
-        formError.value = l10n.taxLinkedBudgetError;
-        return;
-      }
-
       final profile = buildProfile();
-      final isIndividual = entityKind.value == TaxEntityKind.individual;
       isSaving.value = true;
       try {
         await ref
             .read(taxActionsProvider.notifier)
             .saveProfile(
               entityId: entityId,
-              jurisdiction: profile.jurisdiction.countryCode,
-              entityKind: profile.entityKind.name,
+              jurisdiction: entity?.countryCode ?? profile.jurisdiction.countryCode,
+              entityKind: entity?.kind.name ?? profile.entityKind.name,
               profileJson: jsonEncode(profile.toJson()),
-              linkedBudgetId: isIndividual ? null : linkedBudgetId.value,
             );
         if (!context.mounted) return;
         showAppToast(
@@ -367,22 +342,7 @@ class _TaxProfileForm extends HookConsumerWidget {
       }
     }
 
-    String? linkedBudgetError() {
-      if (entityKind.value == TaxEntityKind.individual) return null;
-      if (linkedBudgetId.value == entityId) {
-        return l10n.taxLinkedBudgetError;
-      }
-      return null;
-    }
-
-    final entity = entityKind.value;
-    final linkedError = linkedBudgetError();
-    final selectedLinkedBudget = linkedBudgetId.value;
-    final linkedBudgetIsKnown =
-        selectedLinkedBudget == null ||
-        linkedBudgets.any(
-          (budget) => budget.id?.toString() == selectedLinkedBudget,
-        );
+    final isIndividual = entityKind.value == EntityKind.individual;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -399,83 +359,32 @@ class _TaxProfileForm extends HookConsumerWidget {
           ),
         ),
         const SizedBox(height: SpacingTokens.md),
-        ObDropdown<TaxJurisdiction>(
-          value: country.value,
-          labelText: l10n.taxCountryLabel,
-          items: [
-            for (final jurisdiction in TaxJurisdiction.values)
-              DropdownMenuItem(
-                value: jurisdiction,
-                child: Text(taxJurisdictionLabel(l10n, jurisdiction)),
-              ),
-          ],
-          onChanged: (jurisdiction) {
-            if (jurisdiction != null) country.value = jurisdiction;
-          },
-        ),
-        const SizedBox(height: SpacingTokens.md),
-        ObDropdown<TaxEntityKind>(
+        ObDropdown<EntityKind>(
           value: entityKind.value,
           labelText: l10n.taxEntityKindLabel,
           items: [
-            for (final kind in TaxEntityKind.values)
+            for (final kind in EntityKind.values)
               DropdownMenuItem(
                 value: kind,
                 child: Text(taxEntityKindLabel(l10n, kind)),
               ),
           ],
           onChanged: (kind) {
-            if (kind == null) return;
-            entityKind.value = kind;
-            if (kind == TaxEntityKind.individual) {
-              linkedBudgetId.value = null;
-            }
+            if (kind != null) entityKind.value = kind;
           },
         ),
-        if (entity != TaxEntityKind.individual) ...[
-          const SizedBox(height: SpacingTokens.md),
-          ObDropdown<String>(
-            value: selectedLinkedBudget ?? '',
-            labelText: l10n.taxLinkedBudget,
-            items: [
-              DropdownMenuItem(
-                value: '',
-                child: Text(l10n.taxLinkedBudgetNone),
-              ),
-              if (selectedLinkedBudget != null && !linkedBudgetIsKnown)
-                DropdownMenuItem(
-                  value: selectedLinkedBudget,
-                  child: Text(l10n.taxLinkedBudget),
-                ),
-              for (final budget in linkedBudgets)
-                DropdownMenuItem(
-                  value: budget.id.toString(),
-                  child: Text(budget.name),
-                ),
-            ],
-            onChanged: (value) {
-              linkedBudgetId.value = value == null || value.isEmpty
-                  ? null
-                  : value;
-            },
+        const SizedBox(height: SpacingTokens.xs),
+        Text(
+          l10n.taxCountryLabel,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: palette.mutedInk,
           ),
-          const SizedBox(height: SpacingTokens.xs),
-          Text(
-            l10n.taxLinkedBudgetHint,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: palette.mutedInk,
-            ),
-          ),
-          if (linkedError != null) ...[
-            const SizedBox(height: SpacingTokens.xs),
-            Text(
-              linkedError,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: palette.overspent,
-              ),
-            ),
-          ],
-        ],
+        ),
+        Text(
+          taxJurisdictionLabel(l10n, country.value),
+          style: theme.textTheme.titleMedium,
+        ),
+        const SizedBox(height: SpacingTokens.md),
         ObSectionHeader(
           title: taxJurisdictionLabel(l10n, country.value),
           padding: const EdgeInsets.fromLTRB(
@@ -549,7 +458,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                     color: palette.ink,
                   ),
                 ),
-                if (entityKind.value == TaxEntityKind.company) ...[
+                if (entityKind.value == EntityKind.company) ...[
                   const Divider(height: 1),
                   Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
@@ -664,7 +573,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                     },
                   ),
                 ),
-                if (entity == TaxEntityKind.individual) ...[
+                if (isIndividual) ...[
                   const Divider(height: 1),
                   SwitchListTile(
                     value: taxpayerHasSsn.value,
@@ -759,7 +668,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                     ),
                   ),
                 ],
-                if (entity == TaxEntityKind.soleTrader) ...[
+                if (entityKind.value == EntityKind.soleTrader) ...[
                   const Divider(height: 1),
                   SwitchListTile(
                     value: specifiedServiceTrade.value,
@@ -887,7 +796,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                   ),
                 ),
                 if (jointAssessment.value &&
-                    entity == TaxEntityKind.individual) ...[
+                    entityKind.value == EntityKind.individual) ...[
                   const Divider(height: 1),
                   SwitchListTile(
                     value: spouseEmployed.value,
@@ -936,7 +845,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                       },
                     ),
                   ),
-                if (entity == TaxEntityKind.soleTrader) ...[
+                if (entityKind.value == EntityKind.soleTrader) ...[
                   const Divider(height: 1),
                   Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
@@ -957,7 +866,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                     ),
                   ),
                 ],
-                if (entity == TaxEntityKind.individual) ...[
+                if (isIndividual) ...[
                   const Divider(height: 1),
                   Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
@@ -998,7 +907,7 @@ class _TaxProfileForm extends HookConsumerWidget {
                     ),
                   ),
                 ],
-                if (entity != TaxEntityKind.individual) ...[
+                if (!isIndividual) ...[
                   const Divider(height: 1),
                   Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
@@ -1055,15 +964,6 @@ class _TaxProfileForm extends HookConsumerWidget {
   }
 }
 
-TaxJurisdiction _jurisdictionForCurrency(String? currencyCode) =>
-    switch (currencyCode?.toUpperCase()) {
-      'GBP' => TaxJurisdiction.gb,
-      'USD' => TaxJurisdiction.us,
-      'NGN' => TaxJurisdiction.ng,
-      'EUR' => TaxJurisdiction.de,
-      _ => TaxJurisdiction.gb,
-    };
-
 /// The days an accounting period may end on for [month], allowing 29
 /// February: a year end that has no leap day is treated as 28 February by
 /// the rule pack.
@@ -1081,12 +981,6 @@ int? _wholeCount(String text) {
   return int.tryParse(normalized);
 }
 
-Budget? _budgetWithId(Iterable<Budget> budgets, String id) {
-  for (final budget in budgets) {
-    if (budget.id?.toString() == id) return budget;
-  }
-  return null;
-}
 
 GbStudentLoanPlan _studentLoanPlan(String name) {
   for (final plan in GbStudentLoanPlan.values) {
