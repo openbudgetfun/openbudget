@@ -5186,6 +5186,68 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get createEntityTaxYear => 'Tax year';
+
+  @override
+  String createEntityTaxYearValue(String start, String end) {
+    return '$start to $end';
+  }
+
+  @override
+  String get createEntityPickCountry => 'Choose a country';
+
+  @override
+  String get createEntityPickCurrency => 'Choose a currency';
+
+  @override
+  String get createEntityPickTimeZone => 'Choose a time zone';
+
+  @override
+  String get createEntitySearchCountries => 'Search countries or codes';
+
+  @override
+  String get createEntitySearchCurrencies => 'Search currencies or codes';
+
+  @override
+  String get createEntitySearchTimeZones => 'Search time zones';
+
+  @override
+  String get createEntityClearSearch => 'Clear search';
+
+  @override
+  String get createEntityPickerSelected => 'Selected';
+
+  @override
+  String createEntityResultCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createEntityNoMatch(String query) {
+    return 'Nothing matches “$query”';
+  }
+
+  @override
+  String get createEntitySectionTaxRules => 'With tax rules built in';
+
+  @override
+  String get createEntitySectionAllCountries => 'All countries';
+
+  @override
+  String createEntitySectionCountryCurrencies(String country) {
+    return 'Used in $country';
+  }
+
+  @override
+  String get createEntitySectionAllCurrencies => 'All currencies';
+
+  @override
   String get entityDeleteNameField => 'Type the entity\'s name to confirm';
 
   @override
