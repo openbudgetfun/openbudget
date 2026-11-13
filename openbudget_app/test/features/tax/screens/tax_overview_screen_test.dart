@@ -144,6 +144,45 @@ void main() {
       expect(find.text('Estimated saving £1,200.00'), findsOneWidget);
     });
 
+    testWidgets('warns that preview figures are not professionally checked', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildApp(
+          FakeTaxRepository(
+            profile: taxProfileRecord(),
+            defaultReport: taxReportView(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('tax-preview-banner')), findsOneWidget);
+      expect(
+        find.text(
+          'Preview: these figures have not yet been checked by a tax '
+          'professional.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('hides the preview banner once a pack is reviewed', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildApp(
+          FakeTaxRepository(
+            profile: taxProfileRecord(),
+            defaultReport: taxReportView(maturity: 'reviewed'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('tax-preview-banner')), findsNothing);
+    });
+
     testWidgets('uses refund wording when the year is in credit', (
       tester,
     ) async {

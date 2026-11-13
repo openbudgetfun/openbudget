@@ -582,6 +582,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_ic4zfx3b.TaxBandSliceView>>,
           _is.getType<List<_i6llsezf.TaxReportLineView>>,
           _is.getType<List<_ivss6b81.TaxLiabilityView>>,
+          _is.getType<Map<String, String>>,
           _is.getType<List<_iuft4v7q.TaxOpportunityView>>,
           _is.getType<List<_imsv7m6w.TransactionLineInput>>,
           _is.getType<List<_ilixdhed.TransactionView>>,
@@ -6300,6 +6301,11 @@ class Protocol extends _is.DatabaseSerializationManager
               .map((e) => deserialize<_ivss6b81.TaxLiabilityView>(e))
               .toList()
           as T;
+    }
+    if (t == Map<String, String>) {
+      return (data as Map).map(
+        (k, v) => MapEntry(deserialize<String>(k), deserialize<String>(v)),
+      ) as T;
     }
     if (t == List<_iuft4v7q.TaxOpportunityView>) {
       return (data as List)

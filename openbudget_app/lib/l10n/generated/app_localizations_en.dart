@@ -3711,6 +3711,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Guidance only, not tax advice. Check figures with a qualified adviser before filing.';
 
   @override
+  String get taxPreviewBanner =>
+      'Preview: these figures have not yet been checked by a tax professional.';
+
+  @override
   String get taxProfileTitle => 'Tax profile';
 
   @override
