@@ -43,9 +43,9 @@ final class Pricing extends StatelessComponent {
           ),
           _Plan(
             name: 'OpenBudget Plus',
-            price: r'$10',
+            price: r'$20',
             period: 'a month',
-            summary: r'$1 of assistant usage included every month.',
+            summary: r'$5 of assistant usage included every month.',
             benefits: const [
               'Everything in Free',
               'Tax reports for the UK, US, Nigeria and Germany, built from your own transactions',
