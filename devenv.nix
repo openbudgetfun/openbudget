@@ -17,6 +17,16 @@ let
   # then stops recognising the Flutter SDK ("openbudget_test_utils requires
   # the Flutter SDK"). Hooks that run Dart or Flutter unset these first.
   flutterHookEnv = "unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_PREFIX";
+
+  # CI's analyze job runs the `lint:analyze` script (`dart analyze
+  # --fatal-infos $DEVENV_ROOT`). Hooks resolve the repository toplevel at
+  # runtime instead of relying on DEVENV_ROOT, which is not exported at
+  # commit time, and pass it to the same analyzer command so the local gate
+  # agrees with CI in every worktree.
+  analyzeHookScript = ''
+    ROOT="$(git rev-parse --show-toplevel)"
+    ${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos "$ROOT"
+  '';
 in
 {
   packages =
@@ -78,12 +88,12 @@ in
       "lint:commit" = {
         enable = true;
         name = "lint:commit";
-        description = "Run dart analyze (fatal-infos) on the workspace.";
+        description = "Run dart analyze (fatal-infos) on the workspace, as CI's analyze job does.";
         entry = builtins.toString (
           pkgs.writeShellScript "lint-commit" ''
             set -e
             ${flutterHookEnv}
-            ${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos
+            ${analyzeHookScript}
           ''
         );
         pass_filenames = false;
@@ -111,7 +121,7 @@ in
             ${flutterHookEnv}
             export PATH="${config.env.DEVENV_PROFILE}/bin:$PATH"
             ${pkgs.dprint}/bin/dprint check
-            ${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos
+            ${analyzeHookScript}
           ''
         );
         pass_filenames = false;
@@ -150,6 +160,66 @@ in
       };
     };
   };
+
+  # Worktree-safe hook installation.
+  #
+  # Linked worktrees share one hooks directory (the main checkout's
+  # `.git/hooks`; `core.hooksPath` points there). The stock devenv v2.4.0
+  # install task runs `prek install -c "$DEVENV_ROOT/.pre-commit-config.yaml"`,
+  # which bakes the absolute path of whichever worktree entered devenv last
+  # into that shared hook shim. Commits in worktree B then run worktree A's
+  # config, and deleting A breaks every remaining worktree's hooks.
+  #
+  # Installing instead with a config path relative to the repository toplevel
+  # fixes this: git runs hooks from the toplevel of the worktree the commit
+  # happens in, so the shim resolves `.pre-commit-config.yaml` in that
+  # worktree and references no other worktree's paths. This mirrors the fix
+  # upstream devenv ships as "git-hooks use each worktree's own
+  # configuration" — drop this override once the pinned devenv includes it.
+  tasks."devenv:git-hooks:install".exec =
+    let
+      git = lib.getExe config.git-hooks.gitPackage;
+      prek = lib.getExe config.git-hooks.package;
+      stageHook =
+        stage:
+        if stage == "manual" then
+          null
+        else if
+          builtins.elem stage [
+            "commit"
+            "merge-commit"
+            "push"
+          ]
+        then
+          "pre-${stage}"
+        else
+          stage;
+      hookTypes = lib.unique (
+        if config.git-hooks.installStages == [ ] then
+          [ "pre-commit" ]
+        else
+          builtins.filter (hook: hook != null) (map stageHook config.git-hooks.installStages)
+      );
+    in
+    lib.mkForce ''
+      set -euo pipefail
+      if ! ${git} rev-parse --git-dir &> /dev/null; then
+        echo 1>&2 "WARNING: skipping hook installation: .git not found."
+        exit 0
+      fi
+      # Git runs hooks from the repository toplevel, so a config path
+      # relative to it makes the shared shim use each worktree's own config.
+      # The prefix is empty when devenv lives at the repository root.
+      toplevel="$(${git} -C "$DEVENV_ROOT" rev-parse --show-toplevel)"
+      prefix="$(${git} -C "$DEVENV_ROOT" rev-parse --show-prefix)"
+      hook_config="''${prefix}${config.git-hooks.configPath}"
+      # prek resolves -c against its working directory; install from the same
+      # toplevel git uses when running hooks.
+      cd "$toplevel"
+      ${lib.concatMapStringsSep "\n" (
+        hook: ''${prek} install -c "$hook_config" -t ${lib.escapeShellArg hook}''
+      ) hookTypes}
+    '';
 
   # Rely on the global sdk for now as the nix apple sdk is not working for me.
   apple.sdk = null;
