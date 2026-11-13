@@ -54,6 +54,14 @@ final class GbTaxProfile extends TaxProfile {
   final int associatedCompanies;
 
   @override
+  Map<String, Object?> toAnswers() => {
+    ...toJson(),
+    // [toJson] omits these at their defaults, but the form shows them.
+    'accountingPeriodEndMonth': accountingPeriodEndMonth,
+    'accountingPeriodEndDay': accountingPeriodEndDay,
+  };
+
+  @override
   Map<String, Object?> toJson() => {
     ...baseJson(),
     'scottishTaxpayer': scottishTaxpayer,
