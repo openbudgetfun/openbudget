@@ -713,9 +713,10 @@ class TaxSummaryService {
   /// precision the derivation is one BigInt multiply per line with
   /// embedded tax.
   static int _derivedRatePerMillion(int taxMinor, int netMinor) {
-    final scaled = BigInt.from(taxMinor) * BigInt.from(1000000);
+    final scaled = BigInt.from(taxMinor.abs()) * BigInt.from(1000000);
     final net = BigInt.from(netMinor);
-    return ((scaled * BigInt.two + net) ~/ (net * BigInt.two)).toInt();
+    final magnitude = (scaled * BigInt.two + net) ~/ (net * BigInt.two);
+    return (taxMinor.isNegative ? -magnitude : magnitude).toInt();
   }
 
   /// The quarter of the summary period a civil date falls in.
