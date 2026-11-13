@@ -1545,7 +1545,7 @@ class EndpointLedger extends _isc.EndpointRef {
     },
   );
 
-  /// Lists one journal's lines, oldest first.
+  /// Lists one journal's lines in entry order (the stored lineNumber).
   _ida.Future<List<_iwruw2s3.JournalLine>> listJournalLines(
     _isc.UuidValue journalId,
   ) => caller.callServerEndpoint<List<_iwruw2s3.JournalLine>>(

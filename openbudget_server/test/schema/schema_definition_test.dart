@@ -9,17 +9,24 @@ void main() {
   // The newest definition.sql is the full current schema; older ones are
   // history.
   final sql = File('${migrations.last.path}/definition.sql').readAsStringSync();
+  final multichain = migrations.singleWhere(
+    (m) => m.path.endsWith('multichain-wallet-schema'),
+  );
   final tables = RegExp(r'CREATE TABLE "([^\"]+)" \(([\s\S]*?)\n\);')
       .allMatches(sql)
       .where((m) => !m[1]!.startsWith('serverpod_'))
       .toList();
   String tableSql(String name) => tables.singleWhere((m) => m[1] == name)[2]!;
 
-  test('the schema reset is the first and multichain the newest migration', () {
-    expect(migrations, hasLength(2));
-    expect(migrations.first.path, endsWith('schema-reset'));
-    expect(migrations.last.path, endsWith('multichain-wallet-schema'));
-  });
+  test(
+    'the schema reset, multichain and journal order migrations, in order',
+    () {
+      expect(migrations, hasLength(3));
+      expect(migrations.first.path, endsWith('schema-reset'));
+      expect(migrations[1].path, endsWith('multichain-wallet-schema'));
+      expect(migrations.last.path, endsWith('journal-line-order'));
+    },
+  );
 
   test('no legacy root or wallet tables', () {
     final names = tables.map((m) => m[1]).toSet();
@@ -114,9 +121,9 @@ void main() {
     );
   });
 
-  test('the newest migration backfills holdings and transactions', () {
+  test('the multichain migration backfills holdings and transactions', () {
     final migrationSql = File(
-      '${migrations.last.path}/migration.sql',
+      '${multichain.path}/migration.sql',
     ).readAsStringSync();
     for (final entry in [
       ('wallet_holding', 'h'),
@@ -141,6 +148,47 @@ void main() {
         contains('ALTER TABLE "$table" ALTER COLUMN "network" SET NOT NULL;'),
       );
     }
+    expect(migrationSql, isNot(contains('DROP TABLE')));
+  });
+
+  test('the journal order migration backfills line numbers', () {
+    final migrationSql = File(
+      '${migrations.last.path}/migration.sql',
+    ).readAsStringSync();
+    expect(
+      migrationSql,
+      contains('ALTER TABLE "journal_line" ADD COLUMN "lineNumber" bigint;'),
+      reason: 'the column is added nullable so existing rows survive',
+    );
+    expect(
+      migrationSql,
+      contains(
+        'ROW_NUMBER() OVER (PARTITION BY "journalId" ORDER BY "id") - 1',
+      ),
+      reason: 'existing lines are numbered 0..n-1 in id order',
+    );
+    expect(
+      migrationSql,
+      contains(
+        'ALTER TABLE "journal_line" ALTER COLUMN "lineNumber" SET NOT NULL;',
+      ),
+    );
+    expect(
+      migrationSql,
+      contains(
+        'ALTER TABLE "journal_line" ALTER COLUMN "lineNumber" SET DEFAULT 0;',
+      ),
+    );
+    expect(
+      sql,
+      contains(
+        'CREATE UNIQUE INDEX "journal_line_journal_line_number_idx" ON '
+        '"journal_line" USING btree ("journalId", "lineNumber");',
+      ),
+      reason:
+          'the newest definition carries the unique (journalId, '
+          'lineNumber) index',
+    );
     expect(migrationSql, isNot(contains('DROP TABLE')));
   });
 

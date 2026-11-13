@@ -505,6 +505,64 @@ void main() {
         },
       );
 
+      test('then lines come back in the order they were supplied', () async {
+        // Six distinct accounts so every line is identifiable by its
+        // account. The draft alternates debit and credit on purpose: ids
+        // are UUIDv7, and lines saved within the same millisecond sort
+        // randomly after their timestamp, so an id ordering scrambles the
+        // lines. Twenty save/read cycles give the race plenty of room.
+        final others = <LedgerAccount>[];
+        for (var i = 1; i <= 5; i++) {
+          others.add(
+            await book.endpoint.createAccount(
+              book.session,
+              book.entity.id!,
+              '990$i',
+              'Order account $i',
+              LedgerAccountType.expense,
+            ),
+          );
+        }
+        final supplied = [
+          lines.debit(bank, 300),
+          lines.credit(others[0], 100),
+          lines.debit(others[1], 50),
+          lines.credit(others[2], 250),
+          lines.debit(others[3], 100),
+          lines.credit(others[4], 100),
+        ];
+        final expectedAccounts = [
+          bank.id!,
+          ...others.map((account) => account.id!),
+        ];
+
+        for (var iteration = 0; iteration < 20; iteration++) {
+          final draft = await book.endpoint.saveDraftJournal(
+            book.session,
+            book.entity.id!,
+            DateTime.utc(2026, 11),
+            supplied,
+            reference: 'JB-ORDER-$iteration',
+          );
+          final stored = await book.endpoint.listJournalLines(
+            book.session,
+            draft.id!,
+          );
+          expect(stored, hasLength(6));
+          expect(
+            stored.map((line) => line.lineNumber),
+            orderedEquals([0, 1, 2, 3, 4, 5]),
+            reason: 'iteration $iteration',
+          );
+          expect(
+            stored.map((line) => line.ledgerAccountId),
+            orderedEquals(expectedAccounts),
+            reason: 'iteration $iteration',
+          );
+          expect(stored.first.debitMinor, 300, reason: 'iteration $iteration');
+        }
+      });
+
       test('then a single-line draft is rejected', () async {
         await expectLater(
           book.endpoint.saveDraftJournal(
@@ -1148,6 +1206,7 @@ void main() {
           book.session,
           JournalLine(
             journalId: posted.id!,
+            lineNumber: 2,
             ledgerAccountId: income.id!,
             debitMinor: 1,
             currencyCode: book.baseCurrency,

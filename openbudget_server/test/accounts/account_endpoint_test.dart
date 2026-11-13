@@ -907,6 +907,7 @@ void main() {
         book.session,
         JournalLine(
           journalId: journal.id!,
+          lineNumber: 0,
           ledgerAccountId: ledger.id!,
           currencyCode: 'GBP',
           debitMinor: 100,

@@ -8922,6 +8922,102 @@ abstract class AppLocalizations {
   /// **'Day {day} of month {month}'**
   String createEntityFiscalYearValue(int day, int month);
 
+  /// No description provided for @createEntityTaxYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax year'**
+  String get createEntityTaxYear;
+
+  /// A tax year as two dates, such as '6 Apr to 5 Apr'.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} to {end}'**
+  String createEntityTaxYearValue(String start, String end);
+
+  /// No description provided for @createEntityPickCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a country'**
+  String get createEntityPickCountry;
+
+  /// No description provided for @createEntityPickCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a currency'**
+  String get createEntityPickCurrency;
+
+  /// No description provided for @createEntityPickTimeZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a time zone'**
+  String get createEntityPickTimeZone;
+
+  /// No description provided for @createEntitySearchCountries.
+  ///
+  /// In en, this message translates to:
+  /// **'Search countries or codes'**
+  String get createEntitySearchCountries;
+
+  /// No description provided for @createEntitySearchCurrencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Search currencies or codes'**
+  String get createEntitySearchCurrencies;
+
+  /// No description provided for @createEntitySearchTimeZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Search time zones'**
+  String get createEntitySearchTimeZones;
+
+  /// No description provided for @createEntityClearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get createEntityClearSearch;
+
+  /// No description provided for @createEntityPickerSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get createEntityPickerSelected;
+
+  /// No description provided for @createEntityResultCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 result} other{{count} results}}'**
+  String createEntityResultCount(int count);
+
+  /// No description provided for @createEntityNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches “{query}”'**
+  String createEntityNoMatch(String query);
+
+  /// No description provided for @createEntitySectionTaxRules.
+  ///
+  /// In en, this message translates to:
+  /// **'With tax rules built in'**
+  String get createEntitySectionTaxRules;
+
+  /// No description provided for @createEntitySectionAllCountries.
+  ///
+  /// In en, this message translates to:
+  /// **'All countries'**
+  String get createEntitySectionAllCountries;
+
+  /// No description provided for @createEntitySectionCountryCurrencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Used in {country}'**
+  String createEntitySectionCountryCurrencies(String country);
+
+  /// No description provided for @createEntitySectionAllCurrencies.
+  ///
+  /// In en, this message translates to:
+  /// **'All currencies'**
+  String get createEntitySectionAllCurrencies;
+
   /// No description provided for @entityDeleteNameField.
   ///
   /// In en, this message translates to:
