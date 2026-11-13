@@ -14,6 +14,8 @@ final class CanonicalAsset {
     required this.symbol,
     required this.name,
     required this.decimals,
+    this.coingeckoId,
+    this.coingeckoVerified = false,
   }) : isNative = assetId == 'native';
 
   /// The network the asset lives on.
@@ -34,6 +36,13 @@ final class CanonicalAsset {
   /// Base units per whole token: 0 to 36.
   final int decimals;
 
+  /// CoinGecko coin id for this asset when it is a native coin with its own
+  /// id (tokens are priced by platform plus contract instead).
+  final String? coingeckoId;
+
+  /// Whether [coingeckoId] was verified against /coins/list.
+  final bool coingeckoVerified;
+
   /// Whether this is the network's own coin, not a token.
   final bool isNative;
 }
@@ -46,6 +55,10 @@ final class ChainCatalogEntry {
     required this.network,
     required this.nativeAsset,
     required this.canonicalTokens,
+    this.coingeckoId,
+    this.coingeckoPlatform,
+    this.defillamaChain,
+    this.coingeckoVerified = false,
   });
 
   /// The network the entry belongs to. Every [WalletNetwork] value has one.
@@ -56,6 +69,31 @@ final class ChainCatalogEntry {
 
   /// Canonical tokens besides the native coin, in display order.
   final List<CanonicalAsset> canonicalTokens;
+
+  /// CoinGecko coin id for the network's native coin (used by /simple/price),
+  /// or null when the network has no priced native coin on CoinGecko.
+  final String? coingeckoId;
+
+  /// CoinGecko platform id for token pricing via /simple/token_price/{platform},
+  /// or null when the network's tokens are not priced on CoinGecko.
+  final String? coingeckoPlatform;
+
+  /// DefiLlama chain key for this network's `chain:address` keys, or null.
+  final String? defillamaChain;
+
+  /// Whether [coingeckoId] and [coingeckoPlatform] were verified against the
+  /// live /coins/list and /asset_platforms endpoints. Unverified until the
+  /// manual --check tool confirms them.
+  final bool coingeckoVerified;
+
+  // Aliases for naming flexibility.
+  String? get coingeckoCoinId => coingeckoId;
+  String? get coinGeckoId => coingeckoId;
+  String? get nativeCoingeckoId => coingeckoId;
+  String? get coingeckoNativeId => coingeckoId;
+  String? get coingeckoPlatformId => coingeckoPlatform;
+  String? get platform => coingeckoPlatform;
+  String? get coingeckoPlatformName => coingeckoPlatform;
 }
 
 /// The chain catalogue: canonical assets per network, the address-level
@@ -69,6 +107,9 @@ final class ChainCatalog {
   static const List<ChainCatalogEntry> entries = [
     ChainCatalogEntry(
       network: WalletNetwork.solanaMainnet,
+      coingeckoId: 'solana',
+      coingeckoPlatform: 'solana',
+      defillamaChain: 'solana',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.solanaMainnet,
         assetId: 'native',
@@ -107,6 +148,9 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.solanaDevnet,
+      coingeckoId: 'solana',
+      coingeckoPlatform: 'solana',
+      defillamaChain: 'solana',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.solanaDevnet,
         assetId: 'native',
@@ -118,6 +162,8 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.bitcoinMainnet,
+      coingeckoId: 'bitcoin',
+      defillamaChain: 'bitcoin',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.bitcoinMainnet,
         assetId: 'native',
@@ -129,6 +175,9 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.ethereumMainnet,
+      coingeckoId: 'ethereum',
+      coingeckoPlatform: 'ethereum',
+      defillamaChain: 'ethereum',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.ethereumMainnet,
         assetId: 'native',
@@ -186,6 +235,9 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.baseMainnet,
+      coingeckoId: 'ethereum',
+      coingeckoPlatform: 'base',
+      defillamaChain: 'base',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.baseMainnet,
         assetId: 'native',
@@ -225,6 +277,9 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.arbitrumOne,
+      coingeckoId: 'ethereum',
+      coingeckoPlatform: 'arbitrum-one',
+      defillamaChain: 'arbitrum',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.arbitrumOne,
         assetId: 'native',
@@ -255,6 +310,9 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.opMainnet,
+      coingeckoId: 'ethereum',
+      coingeckoPlatform: 'optimistic-ethereum',
+      defillamaChain: 'optimism',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.opMainnet,
         assetId: 'native',
@@ -285,6 +343,9 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.polygonPos,
+      coingeckoId: 'polygon-ecosystem-token',
+      coingeckoPlatform: 'polygon-pos',
+      defillamaChain: 'polygon',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.polygonPos,
         assetId: 'native',
@@ -316,6 +377,9 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.bnbSmartChain,
+      coingeckoId: 'binancecoin',
+      coingeckoPlatform: 'binance-smart-chain',
+      defillamaChain: 'bsc',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.bnbSmartChain,
         assetId: 'native',
@@ -346,6 +410,9 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.avalancheCChain,
+      coingeckoId: 'avalanche-2',
+      coingeckoPlatform: 'avalanche',
+      defillamaChain: 'avalanche',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.avalancheCChain,
         assetId: 'native',
@@ -375,6 +442,9 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.tronMainnet,
+      coingeckoId: 'tron',
+      coingeckoPlatform: 'tron',
+      defillamaChain: 'tron',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.tronMainnet,
         assetId: 'native',
@@ -404,6 +474,9 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.xrplMainnet,
+      coingeckoId: 'ripple',
+      coingeckoPlatform: 'ripple',
+      defillamaChain: 'ripple',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.xrplMainnet,
         assetId: 'native',
@@ -428,6 +501,8 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.hyperliquid,
+      coingeckoId: 'hyperliquid',
+      defillamaChain: 'hyperliquid',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.hyperliquid,
         assetId: 'native',
@@ -439,6 +514,8 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.dogecoinMainnet,
+      coingeckoId: 'dogecoin',
+      defillamaChain: 'dogecoin',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.dogecoinMainnet,
         assetId: 'native',
@@ -450,6 +527,8 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.litecoinMainnet,
+      coingeckoId: 'litecoin',
+      defillamaChain: 'litecoin',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.litecoinMainnet,
         assetId: 'native',
@@ -461,6 +540,8 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.cardanoMainnet,
+      coingeckoId: 'cardano',
+      defillamaChain: 'cardano',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.cardanoMainnet,
         assetId: 'native',
@@ -472,6 +553,9 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.tonMainnet,
+      coingeckoId: 'the-open-network',
+      coingeckoPlatform: 'ton',
+      defillamaChain: 'ton',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.tonMainnet,
         assetId: 'native',
@@ -495,6 +579,9 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.suiMainnet,
+      coingeckoId: 'sui',
+      coingeckoPlatform: 'sui',
+      defillamaChain: 'sui',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.suiMainnet,
         assetId: 'native',
@@ -518,6 +605,9 @@ final class ChainCatalog {
     ),
     ChainCatalogEntry(
       network: WalletNetwork.aptosMainnet,
+      coingeckoId: 'aptos',
+      coingeckoPlatform: 'aptos',
+      defillamaChain: 'aptos',
       nativeAsset: CanonicalAsset(
         network: WalletNetwork.aptosMainnet,
         assetId: 'native',
