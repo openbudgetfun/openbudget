@@ -3,11 +3,11 @@ import 'dart:math' as math;
 import 'package:openbudget_core/src/tax/de/de_assessment.dart';
 import 'package:openbudget_core/src/tax/de/de_categories.dart';
 import 'package:openbudget_core/src/tax/de/de_format.dart';
+import 'package:openbudget_core/src/tax/de/de_profile.dart';
 import 'package:openbudget_core/src/tax/de/de_reports.dart';
 import 'package:openbudget_core/src/tax/de/de_tables.dart';
 import 'package:openbudget_core/src/tax/de/de_tariff.dart';
 import 'package:openbudget_core/src/tax/tax_model.dart';
-import 'package:openbudget_core/src/tax/tax_profile.dart';
 import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 
 /// Legal ways for [input] to owe less, given the figures in [report].

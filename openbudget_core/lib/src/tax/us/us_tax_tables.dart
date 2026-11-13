@@ -1,6 +1,6 @@
 import 'package:openbudget_core/src/tax/tax_model.dart';
-import 'package:openbudget_core/src/tax/tax_profile.dart';
 import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
+import 'package:openbudget_core/src/tax/us/us_profile.dart';
 
 /// The date the federal figures in this pack were last checked against the
 /// IRS sources in [usTaxSources].
