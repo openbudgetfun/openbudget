@@ -410,16 +410,15 @@ final class _ScriptedProvider implements WalletProvider {
   final Future<WalletProviderSnapshot> Function(String? until) handler;
 
   @override
-  Future<WalletProviderSnapshot> fetchSnapshot({
-    required WalletNetwork network,
-    required String address,
-    String? untilSignature,
-  }) => handler(untilSignature);
+  Future<WalletProviderSnapshot> fetchSnapshot(WalletReadRequest request) =>
+      handler(request.untilSignature);
 }
 
 WalletProviderSnapshot _snapshot() => WalletProviderSnapshot(
+  readNetworks: [WalletNetwork.solanaMainnet],
   holdings: [
     WalletProviderHolding(
+      network: WalletNetwork.solanaMainnet,
       assetId: _nativeAsset,
       symbol: 'SOL',
       name: 'Solana',
