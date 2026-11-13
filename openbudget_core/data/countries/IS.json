@@ -24,18 +24,18 @@
       {
         "label": "standard",
         "basisPoints": 2400,
-        "from": "2026-11-13",
+        "from": "2015-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       },
       {
         "label": "reduced",
         "basisPoints": 1100,
-        "from": "2026-11-13",
+        "from": "2015-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       }
     ],
     "registrationThreshold": null,
@@ -82,6 +82,12 @@
       "url": "https://www.skatturinn.is/english/companies/value-added-tax/",
       "grade": "primary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "OECD Consumption Tax Trends: key findings for Iceland (24% standard and 11% reduced since 2015)",
+      "url": "https://www.oecd.org/content/dam/oecd/en/topics/policy-sub-issues/consumption-tax-trends/consumption-tax-trends-iceland.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
@@ -89,6 +95,7 @@
   "caveats": [
     "Rates primary from Skatturinn's VAT page (24% and 11%, retrieved 2026-11-13); the page does not state effective dates, so from records the retrieval date.",
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law."
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Both rates have applied since 1 January 2015 (standard cut from 25.5%, reduced raised from 7%); a legislated cut to 22.5% planned for 2019 was never brought into force. Fuel was temporarily moved to the 11% reduced rate from 1 May to 31 August 2026 - a scope carve-out, not a rate change."
   ]
 }

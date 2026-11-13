@@ -27,10 +27,10 @@
       {
         "label": "standard",
         "basisPoints": 1900,
-        "from": "2026-11-13",
+        "from": "2005-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       }
     ],
     "registrationThreshold": null,
@@ -77,6 +77,12 @@
       "url": "https://vatcalc.com/vat-rates/",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "OECD Consumption Tax Trends 2024: Annex Table 2.A.1 VAT rates (standard rate at benchmark years 2005-2024)",
+      "url": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2024/11/consumption-tax-trends-2024_57c7322a/dcd4dd36-en.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
@@ -84,6 +90,7 @@
   "caveats": [
     "Rate secondary (grade S): 19% from VATCalc's 2026 table; sii.cl renders rates through scripts that automated fetches cannot read this session.",
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law."
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2005-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed at the earliest OECD Consumption Tax Trends benchmark year in which the value appears)."
   ]
 }

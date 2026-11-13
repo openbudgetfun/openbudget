@@ -32,18 +32,18 @@
       {
         "label": "reduced",
         "basisPoints": 500,
-        "from": "2026-11-13",
+        "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 9
       },
       {
         "label": "zero",
         "basisPoints": 0,
-        "from": "2026-11-13",
+        "from": "2022-01-01",
         "to": null,
         "appliesTo": "zero-rated goods and services, e.g. most food and children's clothes",
-        "source": 3
+        "source": 9
       }
     ],
     "registrationThreshold": null,
@@ -108,6 +108,12 @@
       "url": "https://www.gov.uk/income-tax-rates",
       "grade": "primary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: 2022 VAT Rates in Europe (table as of January 2022, sourced from the European Commission's Taxes in Europe Database)",
+      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-2022-vat-rates-in-europe/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
@@ -115,6 +121,7 @@
   "caveats": [
     "Rates primary from gov.uk: the standard rate rose to 20% on 4 January 2011 (from 17.5%); the 5% reduced and 0% zero rates are current as retrieved 2026-11-13.",
     "individualTaxYear runs 6 April to 5 April, primary from gov.uk ('the current tax year is from 6 April 2026 to 5 April 2027').",
-    "companyYearEndDefault is 31 March (grade I): it preserves the app's existing GB default, aligned to the UK tax year; Companies House otherwise defaults to the incorporation anniversary."
+    "companyYearEndDefault is 31 March (grade I): it preserves the app's existing GB default, aligned to the UK tax year; Companies House otherwise defaults to the incorporation anniversary.",
+    "Lower-bound rows - reduced (2022-01-01), zero (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed applying on 1 January 2022 by the Tax Foundation's January 2022 table of VAT rates (sourced from the Commission's Taxes in Europe Database))."
   ]
 }

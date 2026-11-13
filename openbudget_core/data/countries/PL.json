@@ -24,26 +24,26 @@
       {
         "label": "standard",
         "basisPoints": 2300,
-        "from": "2026-11-13",
+        "from": "2014-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       },
       {
         "label": "reduced",
         "basisPoints": 500,
-        "from": "2026-11-13",
+        "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 7
       },
       {
         "label": "reduced2",
         "basisPoints": 800,
-        "from": "2026-11-13",
+        "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 7
       }
     ],
     "registrationThreshold": null,
@@ -90,13 +90,26 @@
       "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
       "grade": "primary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "OECD Consumption Tax Trends 2024: Annex Table 2.A.1 VAT rates (standard rate at benchmark years 2005-2024)",
+      "url": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2024/11/consumption-tax-trends-2024_57c7322a/dcd4dd36-en.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: 2022 VAT Rates in Europe (table as of January 2022, sourced from the European Commission's Taxes in Europe Database)",
+      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-2022-vat-rates-in-europe/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
   "recheckBy": "2027-05-13",
   "caveats": [
-    "VAT rates are primary from the European Commission's table of VAT rates applied in EU member countries (Your Europe page, Commission last checked 2026-07-13, retrieved 2026-11-13); the table publishes no effective dates, so each rate's from records the retrieval date.",
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law."
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2014-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed at the earliest OECD Consumption Tax Trends benchmark year in which the value appears).",
+    "Lower-bound rows - reduced (2022-01-01), reduced2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed applying on 1 January 2022 by the Tax Foundation's January 2022 table of VAT rates (sourced from the Commission's Taxes in Europe Database))."
   ]
 }

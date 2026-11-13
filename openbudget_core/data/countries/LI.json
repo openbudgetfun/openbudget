@@ -23,24 +23,48 @@
     "rates": [
       {
         "label": "standard",
+        "basisPoints": 770,
+        "from": "2018-01-01",
+        "to": "2024-01-01",
+        "appliesTo": null,
+        "source": 6
+      },
+      {
+        "label": "standard",
         "basisPoints": 810,
-        "from": "2026-11-13",
+        "from": "2024-01-01",
         "to": null,
         "appliesTo": null,
         "source": 3
       },
       {
         "label": "reduced",
+        "basisPoints": 250,
+        "from": "2018-01-01",
+        "to": "2024-01-01",
+        "appliesTo": null,
+        "source": 6
+      },
+      {
+        "label": "reduced",
         "basisPoints": 260,
-        "from": "2026-11-13",
+        "from": "2024-01-01",
         "to": null,
         "appliesTo": null,
         "source": 3
       },
       {
         "label": "special",
+        "basisPoints": 370,
+        "from": "2018-01-01",
+        "to": "2024-01-01",
+        "appliesTo": "accommodation (Sondersatz)",
+        "source": 6
+      },
+      {
+        "label": "special",
         "basisPoints": 380,
-        "from": "2026-11-13",
+        "from": "2024-01-01",
         "to": null,
         "appliesTo": "accommodation (Sondersatz)",
         "source": 3
@@ -90,6 +114,12 @@
       "url": "https://www.estv.admin.ch/estv/de/home/mehrwertsteuer/mwst-steuersaetze.html",
       "grade": "primary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "ESTV: Development of the Swiss VAT rates (official rate history)",
+      "url": "https://www.estv.admin.ch/en/development-swiss-vat-rates",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
@@ -98,6 +128,7 @@
     "Swiss VAT rates apply in Liechtenstein under the CH-LI treaty and are collected by the Swiss Federal Tax Administration; rates primary from the ESTV page (8.1% normal, 2.6% reduced, 3.8% accommodation, retrieved 2026-11-13).",
     "The Liechtenstein tax administration site (steuerverwaltung.li) was unreachable from this environment; the authority link is unverified this session.",
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law."
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Rate history follows the Swiss table because Swiss rates apply in Liechtenstein under the customs treaty: 7.7% / 2.5% / 3.7% from 1 January 2018, 8.1% / 2.6% / 3.8% from 1 January 2024."
   ]
 }

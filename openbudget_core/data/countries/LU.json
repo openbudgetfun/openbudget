@@ -24,34 +24,82 @@
       {
         "label": "standard",
         "basisPoints": 1700,
-        "from": "2026-11-13",
+        "from": "2015-01-01",
+        "to": "2023-01-01",
+        "appliesTo": null,
+        "source": 7
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1600,
+        "from": "2023-01-01",
+        "to": "2024-01-01",
+        "appliesTo": null,
+        "source": 6
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1700,
+        "from": "2024-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       },
       {
         "label": "reduced",
         "basisPoints": 800,
-        "from": "2026-11-13",
+        "from": "2015-01-01",
+        "to": "2023-01-01",
+        "appliesTo": null,
+        "source": 7
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 700,
+        "from": "2023-01-01",
+        "to": "2024-01-01",
+        "appliesTo": null,
+        "source": 6
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 800,
+        "from": "2024-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       },
       {
         "label": "superReduced",
         "basisPoints": 300,
-        "from": "2026-11-13",
+        "from": "2015-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 7
       },
       {
         "label": "parking",
         "basisPoints": 1400,
-        "from": "2026-11-13",
+        "from": "2015-01-01",
+        "to": "2023-01-01",
+        "appliesTo": null,
+        "source": 7
+      },
+      {
+        "label": "parking",
+        "basisPoints": 1300,
+        "from": "2023-01-01",
+        "to": "2024-01-01",
+        "appliesTo": null,
+        "source": 6
+      },
+      {
+        "label": "parking",
+        "basisPoints": 1400,
+        "from": "2024-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       }
     ],
     "registrationThreshold": null,
@@ -98,14 +146,26 @@
       "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
       "grade": "primary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Luxembourg tax administration (AED) Circular 812-1: VAT rates applicable from 1 January 2024 - end of the temporary 2023 cut (PDF)",
+      "url": "https://pfi.public.lu/dam-assets/pdf/legislation/tva/circulaires/812-1-tva-taux-applicables-partir-01012024.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Government of Luxembourg: 2015 VAT rise confirmed - 17/14/8 from 1 January 2015, super-reduced 3% unchanged",
+      "url": "https://gouvernement.lu/fr/gouvernement/xavier-bettel/actualites.gouvernement2024+fr+actualites+toutes_actualites+articles+2014+03-mars+28-partenaires-sociaux.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
   "recheckBy": "2027-05-13",
   "caveats": [
-    "VAT rates are primary from the European Commission's table of VAT rates applied in EU member countries (Your Europe page, Commission last checked 2026-07-13, retrieved 2026-11-13); the table publishes no effective dates, so each rate's from records the retrieval date.",
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Luxembourg's 17% standard rate is listed by the Commission as still in force (table checked 2026-07-13); a legislated rise to 18% has been discussed in budget bills - re-check when the 2027 budget passes."
+    "Luxembourg's 17% standard rate is listed by the Commission as still in force (table checked 2026-07-13); a legislated rise to 18% has been discussed in budget bills - re-check when the 2027 budget passes.",
+    "The 2015-01-01 rows reflect the 2-point rise of 1 January 2015 (15/12/6 to 17/14/8; the super-reduced 3% rate was unchanged). Under the 2023 solidarity package the standard, intermediate and reduced rates were cut by one point for 2023 (16/13/7) and returned to 17/14/8 on 1 January 2024 (AED Circular 812-1). The super-reduced row is a lower bound: 3% was unchanged in 2015 and applied before, but its true start was not sourced."
   ]
 }

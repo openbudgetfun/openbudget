@@ -25,34 +25,34 @@
       {
         "label": "standard",
         "basisPoints": 1900,
-        "from": "2026-11-13",
+        "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 7
       },
       {
         "label": "reduced",
         "basisPoints": 500,
-        "from": "2026-11-13",
+        "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 7
       },
       {
         "label": "reduced2",
         "basisPoints": 900,
-        "from": "2026-11-13",
+        "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 7
       },
       {
         "label": "superReduced",
         "basisPoints": 300,
-        "from": "2026-11-13",
+        "from": "2023-07-21",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       }
     ],
     "registrationThreshold": null,
@@ -99,14 +99,27 @@
       "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
       "grade": "primary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Ministry of Finance, Republic of Cyprus: 3% super-reduced and 0% rates adopted under the new EU rates directive (Law 75(I)/2023, in force 21 July 2023)",
+      "url": "https://www.gov.cy/mof/documents/archeio-anakoinoseon-ypoyrgeioy-oikonomikon/anakoinoseis-ypoyrgeioy-oikonomikon/paratasi-stin-prothesmia-ypovolis-aitiseon-gia-parochi-kratikis-foititikis-merimnas-gia-to-akadimaiko-etos-2023-2024-mechri-kai-tis-28-ioynioy-2024/15-06-23-efarmogi-meiomenoy-syntelesti-3-kai-midenikoy-syntelesti-se-orismenes-katigories-agathon-kai-ypiresion/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: 2022 VAT Rates in Europe (table as of January 2022, sourced from the European Commission's Taxes in Europe Database)",
+      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-2022-vat-rates-in-europe/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
   "recheckBy": "2027-05-13",
   "caveats": [
-    "VAT rates are primary from the European Commission's table of VAT rates applied in EU member countries (Your Europe page, Commission last checked 2026-07-13, retrieved 2026-11-13); the table publishes no effective dates, so each rate's from records the retrieval date.",
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The authority site (mof.gov.cy/tax) was blocked to automated fetches this session; rates rest on the Commission's table."
+    "The authority site (mof.gov.cy/tax) was blocked to automated fetches this session; rates rest on the Commission's table.",
+    "The 3% super-reduced rate was introduced on 21 July 2023 by Law 75(I)/2023 under Council Directive (EU) 2022/542 (books and press, disability aids, waste and sewage services, debut performances). Cyprus also runs repeated temporary 0% baskets on selected essentials (2023-2024 and 2026-2027 ministerial orders); these scope carve-outs are not modelled as rate rows.",
+    "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), reduced2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed applying on 1 January 2022 by the Tax Foundation's January 2022 table of VAT rates (sourced from the Commission's Taxes in Europe Database))."
   ]
 }

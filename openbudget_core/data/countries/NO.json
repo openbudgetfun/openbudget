@@ -24,26 +24,26 @@
       {
         "label": "standard",
         "basisPoints": 2500,
-        "from": "2026-11-13",
+        "from": "2005-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       },
       {
         "label": "reduced",
         "basisPoints": 1500,
-        "from": "2026-11-13",
+        "from": "2012-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       },
       {
         "label": "reduced2",
         "basisPoints": 1200,
-        "from": "2026-11-13",
+        "from": "2021-10-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       }
     ],
     "registrationThreshold": null,
@@ -90,13 +90,19 @@
       "url": "https://taxfoundation.org/data/all/eu/value-added-tax-vat-rates-europe/",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Skatteetaten: VAT Handbook 2024, sections 5-1.4 and 5-2.2 (rate history: general 25% since 1 January 2005, foodstuffs 15% since 1 January 2012, services rate back at 12% from 1 October 2021)",
+      "url": "https://www.skatteetaten.no/rettskilder/type/handboker/merverdiavgiftshandboken/merverdiavgiftshandboken-2024/M-5/M-5-1/M-5-1.4/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
   "recheckBy": "2027-05-13",
   "caveats": [
-    "Rates secondary from the Tax Foundation's 2026 VAT table (25% standard, 12 / 15 reduced); Skatteetaten's rate pages were not reachable this session and the secondary source does not itemise which goods each reduced rate covers.",
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law."
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Rate history primary from the Tax Administration's VAT handbook: the general rate has been 25% since 1 January 2005 and the foodstuffs rate 15% since 1 January 2012; the services rate (transport, accommodation, cinema, broadcasting, museums, amusement parks, sports) returned to 12% from 1 October 2021 after the temporary 6% covid cut."
   ]
 }

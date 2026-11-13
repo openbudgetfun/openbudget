@@ -23,27 +23,43 @@
     "rates": [
       {
         "label": "standard",
+        "basisPoints": 2000,
+        "from": "2022-01-01",
+        "to": "2025-01-01",
+        "appliesTo": null,
+        "source": 8
+      },
+      {
+        "label": "standard",
         "basisPoints": 2300,
-        "from": "2026-11-13",
+        "from": "2025-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       },
       {
         "label": "reduced",
         "basisPoints": 500,
-        "from": "2026-11-13",
+        "from": "2023-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 7
+      },
+      {
+        "label": "reduced2",
+        "basisPoints": 1000,
+        "from": "2022-01-01",
+        "to": "2025-01-01",
+        "appliesTo": null,
+        "source": 8
       },
       {
         "label": "reduced2",
         "basisPoints": 1900,
-        "from": "2026-11-13",
+        "from": "2025-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       }
     ],
     "registrationThreshold": null,
@@ -90,14 +106,32 @@
       "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
       "grade": "primary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Financna sprava SR: Information 5/DPH/2024/I - VAT rate changes effective 1 January 2025 (Law 278/2024 Z. z.)",
+      "url": "https://www.financnasprava.sk/_img/pfsedit/Dokumenty_PFS/Zverejnovanie_dok/Dane/Novinky_leg/Nepriame_dane/2024/2024.12.19_005_DPH_2024_I.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Financna sprava SR: Information 2/DPH/2022 - second reduced 5% rate for state-supported rental housing from 1 January 2023 (Law 222/2022 Z. z.)",
+      "url": "https://www.financnasprava.sk/_img/pfsedit/Dokumenty_PFS/Zverejnovanie_dok/Dane/Novinky_leg/Nepriame_dane/2022/2022.07.08_002_DPH_2022_I_najom_byv.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: 2022 VAT Rates in Europe (table as of January 2022, sourced from the European Commission's Taxes in Europe Database)",
+      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-2022-vat-rates-in-europe/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
   "recheckBy": "2027-05-13",
   "caveats": [
-    "VAT rates are primary from the European Commission's table of VAT rates applied in EU member countries (Your Europe page, Commission last checked 2026-07-13, retrieved 2026-11-13); the table publishes no effective dates, so each rate's from records the retrieval date.",
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Slovakia's 23% standard and 19% reduced rate reflect the January 2025 reform as listed by the Commission (table checked 2026-07-13)."
+    "Slovakia's 23% standard and 19% reduced rate reflect the January 2025 reform as listed by the Commission (table checked 2026-07-13).",
+    "From 1 January 2025 (Law 278/2024 Z. z., consolidation package) the standard rate rose from 20% to 23%, the 10% reduced rate was replaced by a new 19% rate and the 5% second reduced rate stayed (with a wider basket); the 5% rate itself was introduced on 1 January 2023 for state-supported rental housing (Law 222/2022 Z. z.). From 1 January 2026 selected items moved from 19% to 23% - a scope change. The superseded 20% and 10% rows are lower bounds."
   ]
 }

@@ -24,42 +24,42 @@
       {
         "label": "standard",
         "basisPoints": 2400,
-        "from": "2026-11-13",
+        "from": "2016-06-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       },
       {
         "label": "reduced",
         "basisPoints": 600,
-        "from": "2026-11-13",
+        "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 7
       },
       {
         "label": "reduced2",
         "basisPoints": 1300,
-        "from": "2026-11-13",
+        "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 7
       },
       {
         "label": "reduced3",
         "basisPoints": 1700,
-        "from": "2026-11-13",
+        "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       },
       {
         "label": "superReduced",
         "basisPoints": 400,
-        "from": "2026-11-13",
+        "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       }
     ],
     "registrationThreshold": null,
@@ -106,14 +106,27 @@
       "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
       "grade": "primary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Independent Authority for Public Revenue (AADE), Greece: basic VAT rates (24% standard in force since 1 June 2016; 30% island reduction)",
+      "url": "https://www.aade.gr/en/services-information/useful-guides/commencement-business-activity/basic-vat-rates",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: 2022 VAT Rates in Europe (table as of January 2022, sourced from the European Commission's Taxes in Europe Database)",
+      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-2022-vat-rates-in-europe/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
   "recheckBy": "2027-05-13",
   "caveats": [
-    "VAT rates are primary from the European Commission's table of VAT rates applied in EU member countries (Your Europe page, Commission last checked 2026-07-13, retrieved 2026-11-13); the table publishes no effective dates, so each rate's from records the retrieval date.",
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Greece lists three reduced rates (6 / 13 / 17) in the Commission's table; the authority site (aade.gr) was blocked to automated fetches this session."
+    "Greece lists three reduced rates (6 / 13 / 17) in the Commission's table; the authority site (aade.gr) was blocked to automated fetches this session.",
+    "The 24% standard rate has applied since 1 June 2016 (AADE). The 30% island reduction (17% / 9% / 4%) predates the coverage window but its start date was not sourced, so those rows carry lower-bound dates; from 1 January 2026 Law 5246/2025 extended the reduction to further small Aegean and Dodecanese islands - a scope change, not a rate change.",
+    "Lower-bound rows - reduced (2022-01-01), reduced2 (2022-01-01), superReduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed applying on 1 January 2022 by the Tax Foundation's January 2022 table of VAT rates (sourced from the Commission's Taxes in Europe Database))."
   ]
 }

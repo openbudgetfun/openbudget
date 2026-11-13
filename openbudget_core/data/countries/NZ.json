@@ -25,10 +25,10 @@
       {
         "label": "standard",
         "basisPoints": 1500,
-        "from": "2026-11-13",
+        "from": "2011-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 3
+        "source": 6
       }
     ],
     "registrationThreshold": null,
@@ -75,6 +75,12 @@
       "url": "https://www.ird.govt.nz/gst",
       "grade": "primary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "OECD Consumption Tax Trends 2024: Annex Table 2.A.1 VAT rates (standard rate at benchmark years 2005-2024)",
+      "url": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2024/11/consumption-tax-trends-2024_57c7322a/dcd4dd36-en.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
@@ -82,6 +88,7 @@
   "caveats": [
     "Rate primary from Inland Revenue ('GST is charged at a rate of 15%', retrieved 2026-11-13); the page does not state the effective date, so from records the retrieval date.",
     "individualTaxYear runs 1 April to 31 March (grade I, the standard New Zealand balance date; not confirmed on an IRD page this session).",
-    "companyYearEndDefault is 31 March (grade I): the common New Zealand balance date; other dates are permitted."
+    "companyYearEndDefault is 31 March (grade I): the common New Zealand balance date; other dates are permitted.",
+    "Lower-bound rows - standard (2011-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed at the earliest OECD Consumption Tax Trends benchmark year in which the value appears)."
   ]
 }
