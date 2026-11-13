@@ -3821,13 +3821,34 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String taxRateSource(String title) {
-    return 'Source: $title';
+  String taxRateSource(String name) {
+    return 'Source: $name';
   }
 
   @override
   String taxRateSourceOpen(String title) {
     return 'Open source: $title';
+  }
+
+  @override
+  String get taxRegistrationThresholdTitle => 'Registration threshold';
+
+  @override
+  String taxRegistrationThresholdPeriod(String period) {
+    String _temp0 = intl.Intl.selectLogic(
+      period,
+      {
+        'annualTurnover': 'a year in turnover',
+        'rolling12Months': 'in turnover over any 12 months',
+        'calendarYear': 'in turnover in a calendar year',
+        'fourConsecutiveQuarters': 'in turnover over four quarters in a row',
+        'annualTurnoverGoodsOnly': 'a year in turnover from goods',
+        'annualTurnoverSmallBusinessExclusion':
+            'a year in turnover, with a small-business exclusion',
+        'other': 'in turnover',
+      },
+    );
+    return '$_temp0';
   }
 
   @override
@@ -3856,6 +3877,30 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get taxLinkOpenFailed =>
       'We couldn\'t open that page. Try again in a moment.';
+
+  @override
+  String taxUniversalCaveatSecondary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count of the figures above come from secondary sources, not the tax authority\'s own pages.',
+      one: 'One of the figures above comes from a secondary source, not the tax authority\'s own pages.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String taxUniversalCaveatAssumed(String country) {
+    return 'The tax year and, for companies, the year-end date are defaults OpenBudget assumed for $country. Check them with the tax authority before you file.';
+  }
+
+  @override
+  String get taxResearchNotesTitle => 'Research notes';
+
+  @override
+  String get taxResearchNotesHint =>
+      'The notes behind these figures, as our researchers wrote them.';
 
   @override
   String taxUniversalVerifiedOn(String date) {

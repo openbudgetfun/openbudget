@@ -6426,17 +6426,29 @@ abstract class AppLocalizations {
   /// **'In force since {date}'**
   String taxRateSince(String date);
 
-  /// No description provided for @taxRateSource.
+  /// Short link text for a figure's source: the source's website, such as afriref.dev.
   ///
   /// In en, this message translates to:
-  /// **'Source: {title}'**
-  String taxRateSource(String title);
+  /// **'Source: {name}'**
+  String taxRateSource(String name);
 
   /// Spoken label of the link that opens a rate's source.
   ///
   /// In en, this message translates to:
   /// **'Open source: {title}'**
   String taxRateSourceOpen(String title);
+
+  /// Heading of the card with the turnover above which a business must register for VAT or sales tax.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration threshold'**
+  String get taxRegistrationThresholdTitle;
+
+  /// What a registration threshold is counted over, said after the amount.
+  ///
+  /// In en, this message translates to:
+  /// **'{period, select, annualTurnover{a year in turnover} rolling12Months{in turnover over any 12 months} calendarYear{in turnover in a calendar year} fourConsecutiveQuarters{in turnover over four quarters in a row} annualTurnoverGoodsOnly{a year in turnover from goods} annualTurnoverSmallBusinessExclusion{a year in turnover, with a small-business exclusion} other{in turnover}}'**
+  String taxRegistrationThresholdPeriod(String period);
 
   /// Badge on a figure taken from the authority's own publication.
   ///
@@ -6485,6 +6497,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We couldn\'t open that page. Try again in a moment.'**
   String get taxLinkOpenFailed;
+
+  /// First line of the summary card under What we could not verify: how many of the shown figures are not from the tax authority itself.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One of the figures above comes from a secondary source, not the tax authority\'s own pages.} other{{count} of the figures above come from secondary sources, not the tax authority\'s own pages.}}'**
+  String taxUniversalCaveatSecondary(int count);
+
+  /// No description provided for @taxUniversalCaveatAssumed.
+  ///
+  /// In en, this message translates to:
+  /// **'The tax year and, for companies, the year-end date are defaults OpenBudget assumed for {country}. Check them with the tax authority before you file.'**
+  String taxUniversalCaveatAssumed(String country);
+
+  /// No description provided for @taxResearchNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Research notes'**
+  String get taxResearchNotesTitle;
+
+  /// No description provided for @taxResearchNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The notes behind these figures, as our researchers wrote them.'**
+  String get taxResearchNotesHint;
 
   /// No description provided for @taxUniversalVerifiedOn.
   ///

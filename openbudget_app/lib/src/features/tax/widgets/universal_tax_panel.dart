@@ -114,7 +114,7 @@ class UniversalTaxPanel extends HookConsumerWidget {
               final secondary = [
                 _RatesSection(country: country, on: _ratesDate(lastDay)),
                 _AuthorityCard(country: country),
-                _CaveatsSection(country: country),
+                _CaveatsSection(country: country, on: _ratesDate(lastDay)),
               ];
               final twoColumns = constraints.maxWidth >= _twoColumnWidth;
 
@@ -603,6 +603,11 @@ class _RatesSection extends HookConsumerWidget {
                 source: country.sources.elementAtOrNull(rate.source),
                 decimalSeparator: decimalSeparator,
               ),
+          if (tax.registrationThreshold case final threshold?)
+            _ThresholdCard(
+              threshold: threshold,
+              source: country.sources.elementAtOrNull(threshold.source),
+            ),
           if (tax.subdivisions.isNotEmpty)
             _RegionalRates(
               subdivisions: tax.subdivisions,
@@ -639,7 +644,6 @@ class _RateCard extends HookConsumerWidget {
       ),
     );
     final grade = source?.grade;
-    final sourceUrl = source == null ? null : webLink(source!.url);
 
     return ObCard(
       key: Key('tax-rate-${rate.label}-${rate.ratePerMillion}'),
@@ -687,19 +691,7 @@ class _RateCard extends HookConsumerWidget {
                   runSpacing: SpacingTokens.xs,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    if (grade != null)
-                      ObToneChip(
-                        key: grade == SourceGrade.secondary
-                            ? const Key('tax-secondary-source-badge')
-                            : null,
-                        label: taxSourceGradeLabel(l10n, grade),
-                        tone: switch (grade) {
-                          SourceGrade.primary => ObTone.funded,
-                          SourceGrade.secondary => ObTone.review,
-                          SourceGrade.inferred => ObTone.underfunded,
-                          SourceGrade.background => ObTone.neutral,
-                        },
-                      ),
+                    if (grade != null) _GradeChip(grade: grade),
                     Text(
                       l10n.taxRateSince(DateFormat.yMMMd().format(rate.from)),
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -713,41 +705,147 @@ class _RateCard extends HookConsumerWidget {
           ),
           if (source case final cited?) ...[
             const SizedBox(height: SpacingTokens.xs),
-            if (sourceUrl == null)
-              Text(
-                l10n.taxRateSource(cited.title),
-                maxLines: 3,
+            _SourceLink(source: cited),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// The badge that says how firmly a source backs a figure.
+class _GradeChip extends HookWidget {
+  const _GradeChip({required this.grade});
+
+  final SourceGrade grade;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return ObToneChip(
+      key: grade == SourceGrade.secondary
+          ? const Key('tax-secondary-source-badge')
+          : null,
+      label: taxSourceGradeLabel(l10n, grade),
+      tone: switch (grade) {
+        SourceGrade.primary => ObTone.funded,
+        SourceGrade.secondary => ObTone.review,
+        SourceGrade.inferred => ObTone.underfunded,
+        SourceGrade.background => ObTone.neutral,
+      },
+    );
+  }
+}
+
+/// Where a figure comes from, as a short label that opens the source.
+///
+/// The label is the source's website, not its full research citation; the
+/// citation is the link's spoken label and its tooltip.
+class _SourceLink extends HookConsumerWidget {
+  const _SourceLink({required this.source});
+
+  final SourceInfo source;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    final url = webLink(source.url);
+    final label = l10n.taxRateSource(shortSourceLabel(source));
+
+    if (url == null) {
+      return Tooltip(
+        message: source.title,
+        child: Text(
+          label,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodySmall?.copyWith(color: palette.mutedInk),
+        ),
+      );
+    }
+    return Semantics(
+      link: true,
+      label: l10n.taxRateSourceOpen(source.title),
+      excludeSemantics: true,
+      child: Tooltip(
+        message: source.title,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(RadiusTokens.sm),
+          onTap: () => _openLink(context, ref, url),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                label,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: palette.mutedInk,
-                ),
-              )
-            else
-              Semantics(
-                link: true,
-                label: l10n.taxRateSourceOpen(cited.title),
-                excludeSemantics: true,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                  onTap: () => _openLink(context, ref, sourceUrl),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 48),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        l10n.taxRateSource(cited.title),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: palette.brand,
-                          decoration: TextDecoration.underline,
-                          decorationColor: palette.brand,
-                        ),
-                      ),
-                    ),
-                  ),
+                  color: palette.brand,
+                  decoration: TextDecoration.underline,
+                  decorationColor: palette.brand,
                 ),
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The turnover above which a business has to register for the tax.
+class _ThresholdCard extends HookWidget {
+  const _ThresholdCard({required this.threshold, required this.source});
+
+  final IndirectTaxThreshold threshold;
+  final SourceInfo? source;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    final grade = source?.grade;
+
+    return ObCard(
+      key: const Key('tax-registration-threshold'),
+      margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          MergeSemantics(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.taxRegistrationThresholdTitle,
+                  style: theme.textTheme.titleSmall,
+                ),
+                const SizedBox(height: SpacingTokens.xs),
+                ObAmount(
+                  formatMinorForCode(threshold.amountMinor, threshold.currency),
+                  style: theme.textTheme.headlineSmall,
+                ),
+                Text(
+                  l10n.taxRegistrationThresholdPeriod(threshold.period),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: palette.mutedInk,
+                  ),
+                ),
+                if (grade != null) ...[
+                  const SizedBox(height: SpacingTokens.xs),
+                  _GradeChip(grade: grade),
+                ],
+              ],
+            ),
+          ),
+          if (source case final cited?) ...[
+            const SizedBox(height: SpacingTokens.xs),
+            _SourceLink(source: cited),
           ],
         ],
       ),
@@ -915,12 +1013,19 @@ class _AuthorityCard extends HookConsumerWidget {
   }
 }
 
-/// What the country data could not fully stand behind, and when it was last
-/// checked.
+/// How much the country facts can be trusted, in plain words, and when they
+/// were last checked.
+///
+/// The dataset's own caveats are maintainers' research notes, so they are not
+/// shown as the main text. The card says what a person needs to know, built
+/// from the figures on screen; the notes themselves sit behind a disclosure.
 class _CaveatsSection extends HookWidget {
-  const _CaveatsSection({required this.country});
+  const _CaveatsSection({required this.country, required this.on});
 
   final CountryInfo country;
+
+  /// The day the rates shown apply on.
+  final DateTime on;
 
   @override
   Widget build(BuildContext context) {
@@ -941,8 +1046,16 @@ class _CaveatsSection extends HookWidget {
               SpacingTokens.xs,
             ),
           ),
-          for (final (index, caveat) in country.caveats.indexed)
-            TaxCaveatCard(key: Key('tax-country-caveat-$index'), text: caveat),
+          TaxCaveatCard(
+            key: const Key('tax-country-summary-caveat'),
+            text: [
+              if (_secondaryFigureCount(country, on) case final count
+                  when count > 0)
+                l10n.taxUniversalCaveatSecondary(count),
+              l10n.taxUniversalCaveatAssumed(country.displayName),
+            ].join('\n\n'),
+          ),
+          _ResearchNotes(notes: country.caveats),
         ],
         if (verifiedOn != null)
           Padding(
@@ -957,6 +1070,78 @@ class _CaveatsSection extends HookWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// How many of the figures shown on [on] come from a secondary source: the
+/// rates in force and the registration threshold.
+int _secondaryFigureCount(CountryInfo country, DateTime on) {
+  final tax = country.indirectTax;
+  if (tax == null || tax.kind == IndirectTaxKind.none) {
+    return 0;
+  }
+  final sources = [
+    for (final rate in ratesInForce(tax.rates, on)) rate.source,
+    if (tax.registrationThreshold case final threshold?) threshold.source,
+  ];
+  return sources
+      .where(
+        (index) =>
+            country.sources.elementAtOrNull(index)?.grade ==
+            SourceGrade.secondary,
+      )
+      .length;
+}
+
+/// The dataset's own caveats, as its researchers wrote them, kept out of the
+/// way until asked for.
+class _ResearchNotes extends HookWidget {
+  const _ResearchNotes({required this.notes});
+
+  final List<String> notes;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+
+    return ObCard(
+      key: const Key('tax-research-notes'),
+      child: ExpansionTile(
+        shape: const Border(),
+        collapsedShape: const Border(),
+        tilePadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.md),
+        childrenPadding: const EdgeInsets.fromLTRB(
+          SpacingTokens.md,
+          0,
+          SpacingTokens.md,
+          SpacingTokens.md,
+        ),
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        title: Text(
+          l10n.taxResearchNotesTitle,
+          style: theme.textTheme.titleSmall,
+        ),
+        subtitle: Text(
+          l10n.taxResearchNotesHint,
+          style: theme.textTheme.bodySmall?.copyWith(color: palette.mutedInk),
+        ),
+        children: [
+          for (final (index, note) in notes.indexed)
+            Padding(
+              key: Key('tax-country-caveat-$index'),
+              padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
+              child: Text(
+                note,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: palette.mutedInk,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

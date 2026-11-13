@@ -169,4 +169,43 @@ void main() {
       );
     });
   });
+  group('shortSourceLabel', () {
+    SourceInfo source(String title, String url) => SourceInfo(
+      title: title,
+      url: url,
+      grade: SourceGrade.secondary,
+      retrievedOn: DateTime.utc(2026, 11, 13),
+    );
+
+    test('is the website, without www', () {
+      expect(
+        shortSourceLabel(
+          source(
+            'afriref: Kenya — VAT standard rate',
+            'https://afriref.dev/ke',
+          ),
+        ),
+        'afriref.dev',
+      );
+      expect(
+        shortSourceLabel(source('HMRC', 'https://www.gov.uk/vat-rates')),
+        'gov.uk',
+      );
+    });
+
+    test('falls back to the title before the first dash or colon', () {
+      expect(
+        shortSourceLabel(source('Tax Act — s. 4: rates', 'not a url')),
+        'Tax Act',
+      );
+      expect(
+        shortSourceLabel(source('Tax Act: rates — s. 4', 'not a url')),
+        'Tax Act',
+      );
+      expect(
+        shortSourceLabel(source('Plain title', 'not a url')),
+        'Plain title',
+      );
+    });
+  });
 }

@@ -165,7 +165,8 @@ void main() {
       expect(find.text('VAT rates'), findsOneWidget);
       expect(find.text('16%'), findsOneWidget);
       expect(find.text('Standard'), findsOneWidget);
-      expect(find.textContaining('Source: afriref: Kenya'), findsOneWidget);
+      expect(find.text('Source: afriref.dev'), findsNWidgets(2));
+      expect(find.textContaining('afriref: Kenya'), findsNothing);
 
       expect(find.text('Kenya Revenue Authority (KRA)'), findsOneWidget);
       expect(find.text('Take it to your accountant'), findsOneWidget);
@@ -187,11 +188,12 @@ void main() {
     ) async {
       await _pump(tester, FakeTaxRepository());
 
+      // The rate and the registration threshold are both from afriref.
       expect(
         find.byKey(const Key('tax-secondary-source-badge')),
-        findsOneWidget,
+        findsNWidgets(2),
       );
-      expect(find.text('From a secondary source'), findsOneWidget);
+      expect(find.text('From a secondary source'), findsNWidgets(2));
       expect(find.text('From the tax authority'), findsNothing);
     });
 
@@ -270,23 +272,122 @@ void main() {
       );
     });
 
-    testWidgets(
-      "lists the country data's caveats under what we could not verify",
-      (
+    testWidgets('shows the registration threshold with its period', (
+      tester,
+    ) async {
+      await _pump(tester, FakeTaxRepository());
+      await _reveal(
         tester,
-      ) async {
-        await _pump(tester, FakeTaxRepository());
+        find.byKey(const Key('tax-registration-threshold')),
+      );
 
-        await tester.scrollUntilVisible(
-          find.text('What we could not verify'),
-          300,
-          scrollable: find.byType(Scrollable).first,
+      expect(find.text('Registration threshold'), findsOneWidget);
+      expect(find.text(_money(500000000, 'KES')), findsOneWidget);
+      expect(find.text('a year in turnover'), findsOneWidget);
+    });
+
+    testWidgets(
+      'sums up what we could not verify in plain words, not research notes',
+      (tester) async {
+        await _pump(tester, FakeTaxRepository());
+        await _reveal(tester, find.text('What we could not verify'));
+
+        final card = find.byKey(const Key('tax-country-summary-caveat'));
+        expect(card, findsOneWidget);
+        // The standard rate and the threshold are both from afriref.
+        expect(
+          find.descendant(
+            of: card,
+            matching: find.textContaining(
+              '2 of the figures above come from secondary sources',
+            ),
+          ),
+          findsOneWidget,
         );
-        expect(find.text('What we could not verify'), findsOneWidget);
-        expect(find.byKey(const Key('tax-country-caveat-0')), findsOneWidget);
+        expect(
+          find.descendant(
+            of: card,
+            matching: find.textContaining(
+              'defaults OpenBudget assumed for Kenya',
+            ),
+          ),
+          findsOneWidget,
+        );
+        expect(find.textContaining('individualTaxYear'), findsNothing);
+        expect(find.textContaining('coverage window'), findsNothing);
+        expect(find.textContaining('grade I'), findsNothing);
         expect(find.textContaining('Country facts checked on'), findsOneWidget);
       },
     );
+
+    testWidgets('keeps the research notes collapsed until asked for', (
+      tester,
+    ) async {
+      await _pump(tester, FakeTaxRepository());
+      await _reveal(tester, find.text('Research notes'));
+
+      expect(
+        find.text(
+          'The notes behind these figures, as our researchers wrote them.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('individualTaxYear'), findsNothing);
+      expect(find.byKey(const Key('tax-country-caveat-0')), findsNothing);
+
+      await _tapRevealed(tester, find.text('Research notes'));
+
+      expect(find.byKey(const Key('tax-country-caveat-0')), findsOneWidget);
+      expect(
+        find.textContaining('individualTaxYear is the calendar year'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('from 1 July 2023'), findsOneWidget);
+    });
+
+    testWidgets('counts a single secondary figure in the singular', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        FakeTaxRepository(
+          defaultSummary: taxSummaryView(
+            countryCode: 'AG',
+            currencyCode: 'XCD',
+          ),
+        ),
+        entity: testEntity(countryCode: 'AG', baseCurrencyCode: 'XCD'),
+      );
+      await _reveal(tester, find.text('What we could not verify'));
+
+      expect(
+        find.textContaining('One of the figures above comes'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('leaves the secondary-source line out when there is none', (
+      tester,
+    ) async {
+      // India's rates are all cited to the tax authority itself.
+      await _pump(
+        tester,
+        FakeTaxRepository(
+          defaultSummary: taxSummaryView(
+            countryCode: 'IN',
+            currencyCode: 'INR',
+          ),
+        ),
+        entity: testEntity(countryCode: 'IN', baseCurrencyCode: 'INR'),
+      );
+      await _reveal(tester, find.text('What we could not verify'));
+
+      expect(find.textContaining('secondary source'), findsNothing);
+      expect(
+        find.textContaining('defaults OpenBudget assumed for India'),
+        findsOneWidget,
+      );
+    });
 
     testWidgets(
       'shows sales tax totals once there is some, named for the tax',
@@ -456,7 +557,7 @@ void main() {
       final launcher = FakeTaxUrlLauncher();
       await _pump(tester, FakeTaxRepository(), launcher: launcher);
 
-      await _tapRevealed(tester, find.textContaining('Source: afriref: Kenya'));
+      await _tapRevealed(tester, find.text('Source: afriref.dev').first);
 
       expect(launcher.openedPages, [Uri.parse('https://afriref.dev/ke/vat')]);
     });
@@ -762,6 +863,34 @@ void main() {
     });
   });
 
+  group('bottom of the page', () {
+    for (final size in [_phone, const Size(1280, 900)]) {
+      testWidgets(
+        'keeps the last card clear of the disclaimer at ${size.width}',
+        (
+          tester,
+        ) async {
+          await _pump(tester, FakeTaxRepository(), size: size);
+          await tester.scrollUntilVisible(
+            find.textContaining('Country facts checked on'),
+            300,
+            scrollable: find.byType(Scrollable).first,
+          );
+          await tester.drag(find.byType(ListView), const Offset(0, -2000));
+          await tester.pumpAndSettle();
+
+          final bar = tester.getTopLeft(
+            find.textContaining('not a tax return'),
+          );
+          final last = tester.getBottomLeft(
+            find.textContaining('Country facts checked on'),
+          );
+          expect(last.dy, lessThan(bar.dy));
+        },
+      );
+    }
+  });
+
   group('accessibility', () {
     testWidgets('announces each rate as one phrase and the links as links', (
       tester,
@@ -776,7 +905,7 @@ void main() {
       );
       expect(
         find.bySemanticsLabel(RegExp('^Open source: afriref: Kenya')),
-        findsOneWidget,
+        findsNWidgets(2),
       );
       await _reveal(tester, find.byKey(const Key('tax-authority-link')));
       expect(
@@ -784,6 +913,18 @@ void main() {
         findsWidgets,
       );
       handle.dispose();
+    });
+
+    testWidgets('keeps the full citation in the source link tooltip', (
+      tester,
+    ) async {
+      await _pump(tester, FakeTaxRepository());
+      await _reveal(tester, find.text('Source: afriref.dev').first);
+
+      expect(
+        find.byTooltip(RegExp('^afriref: Kenya — VAT standard rate')),
+        findsWidgets,
+      );
     });
 
     testWidgets('keeps the sections apart for a screen reader', (tester) async {
@@ -796,9 +937,7 @@ void main() {
       expect(heading.label, 'Your year so far');
       final income = tester.getSemantics(find.text('Income this tax year'));
       expect(income.label, isNot(contains('Your year so far')));
-      final link = tester.getSemantics(
-        find.textContaining('Source: afriref: Kenya'),
-      );
+      final link = tester.getSemantics(find.text('Source: afriref.dev').first);
       expect(link.label, startsWith('Open source:'));
       expect(link.label, isNot(contains('In force since')));
       handle.dispose();

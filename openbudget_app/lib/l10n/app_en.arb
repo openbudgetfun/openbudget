@@ -1946,10 +1946,11 @@
       }
     }
   },
-  "taxRateSource": "Source: {title}",
+  "taxRateSource": "Source: {name}",
   "@taxRateSource": {
+    "description": "Short link text for a figure's source: the source's website, such as afriref.dev.",
     "placeholders": {
-      "title": {
+      "name": {
         "type": "String"
       }
     }
@@ -1959,6 +1960,19 @@
     "description": "Spoken label of the link that opens a rate's source.",
     "placeholders": {
       "title": {
+        "type": "String"
+      }
+    }
+  },
+  "taxRegistrationThresholdTitle": "Registration threshold",
+  "@taxRegistrationThresholdTitle": {
+    "description": "Heading of the card with the turnover above which a business must register for VAT or sales tax."
+  },
+  "taxRegistrationThresholdPeriod": "{period, select, annualTurnover{a year in turnover} rolling12Months{in turnover over any 12 months} calendarYear{in turnover in a calendar year} fourConsecutiveQuarters{in turnover over four quarters in a row} annualTurnoverGoodsOnly{a year in turnover from goods} annualTurnoverSmallBusinessExclusion{a year in turnover, with a small-business exclusion} other{in turnover}}",
+  "@taxRegistrationThresholdPeriod": {
+    "description": "What a registration threshold is counted over, said after the amount.",
+    "placeholders": {
+      "period": {
         "type": "String"
       }
     }
@@ -1988,6 +2002,25 @@
     }
   },
   "taxLinkOpenFailed": "We couldn't open that page. Try again in a moment.",
+  "taxUniversalCaveatSecondary": "{count, plural, =1{One of the figures above comes from a secondary source, not the tax authority's own pages.} other{{count} of the figures above come from secondary sources, not the tax authority's own pages.}}",
+  "@taxUniversalCaveatSecondary": {
+    "description": "First line of the summary card under What we could not verify: how many of the shown figures are not from the tax authority itself.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taxUniversalCaveatAssumed": "The tax year and, for companies, the year-end date are defaults OpenBudget assumed for {country}. Check them with the tax authority before you file.",
+  "@taxUniversalCaveatAssumed": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "taxResearchNotesTitle": "Research notes",
+  "taxResearchNotesHint": "The notes behind these figures, as our researchers wrote them.",
   "taxUniversalVerifiedOn": "Country facts checked on {date}",
   "@taxUniversalVerifiedOn": {
     "placeholders": {

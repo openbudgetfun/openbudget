@@ -94,3 +94,24 @@ Uri? webLink(String value) {
   }
   return uri.scheme == 'https' || uri.scheme == 'http' ? uri : null;
 }
+
+/// A short name for [source], to show where a figure comes from.
+///
+/// This is the source website without a leading `www.`, such as `afriref.dev`.
+/// A source with no web address falls back to the part of its title before the
+/// first ` — ` or `:`. The full title stays available for the link's spoken
+/// label and tooltip.
+String shortSourceLabel(SourceInfo source) {
+  final host = webLink(source.url)?.host;
+  if (host != null) {
+    return host.startsWith('www.') ? host.substring(4) : host;
+  }
+  final title = source.title;
+  final ends = [
+    ' — ',
+    ':',
+  ].map(title.indexOf).where((index) => index > 0).toList();
+  return ends.isEmpty
+      ? title.trim()
+      : title.substring(0, ends.reduce((a, b) => a < b ? a : b)).trim();
+}
