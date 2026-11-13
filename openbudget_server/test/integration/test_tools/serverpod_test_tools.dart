@@ -107,6 +107,8 @@ import 'package:openbudget_server/src/generated/settings/user_settings.dart'
     as _ijkobaqo;
 import 'package:openbudget_server/src/generated/tax/tax_category_view.dart'
     as _i687t6y5;
+import 'package:openbudget_server/src/generated/tax/tax_deadline_view.dart'
+    as _i5r4fio6;
 import 'package:openbudget_server/src/generated/tax/tax_profile.dart'
     as _iqcxgux6;
 import 'package:openbudget_server/src/generated/tax/tax_report_view.dart'
@@ -5010,6 +5012,35 @@ class _TaxEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _ida.Future<_ik01tkfb.TaxReportView>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_i5r4fio6.TaxDeadlineView>> listDeadlines(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue entityId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'tax',
+            method: 'listDeadlines',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'tax',
+          methodName: 'listDeadlines',
+          parameters: _ist.testObjectToJson({'entityId': entityId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<List<_i5r4fio6.TaxDeadlineView>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

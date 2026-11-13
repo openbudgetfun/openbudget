@@ -1,3 +1,4 @@
+import 'package:openbudget_core/src/tax/de/de_calendar.dart';
 import 'package:openbudget_core/src/tax/de/de_categories.dart';
 import 'package:openbudget_core/src/tax/de/de_opportunities.dart';
 import 'package:openbudget_core/src/tax/de/de_profile.dart';
@@ -28,6 +29,12 @@ final class DeTaxRules implements TaxRulePack {
 
   @override
   TaxJurisdiction get jurisdiction => TaxJurisdiction.de;
+
+  @override
+  List<TaxDeadline> deadlines(TaxYear period, TaxProfile profile) {
+    requireTaxDeadlineInput(this, period, profile);
+    return deDeadlines(period, profile as DeTaxProfile);
+  }
 
   @override
   TaxPackManifest get manifest => deTaxManifest;

@@ -102,6 +102,8 @@ import 'package:openbudget_client/src/protocol/settings/user_settings.dart'
     as _ivxpuwvx;
 import 'package:openbudget_client/src/protocol/tax/tax_category_view.dart'
     as _ic177lol;
+import 'package:openbudget_client/src/protocol/tax/tax_deadline_view.dart'
+    as _i735p57b;
 import 'package:openbudget_client/src/protocol/tax/tax_profile.dart'
     as _ibyrfq34;
 import 'package:openbudget_client/src/protocol/tax/tax_report_view.dart'
@@ -2019,8 +2021,8 @@ class EndpointSettings extends _isc.EndpointRef {
   );
 }
 
-/// API surface for tax profiles, line coding, envelope defaults, reports
-/// and tax-ready summaries.
+/// API surface for tax profiles, line coding, envelope defaults, reports,
+/// the filing calendar and tax-ready summaries.
 ///
 /// Every method requires authentication and delegates to [TaxService], which
 /// owns the entity boundary and the write rules.
@@ -2124,6 +2126,19 @@ class EndpointTax extends _isc.EndpointRef {
       'entityId': entityId,
       'startYear': startYear,
     },
+  );
+
+  /// Lists the entity's upcoming filing and payment deadlines, soonest
+  /// first.
+  ///
+  /// Covers the entity's local today to a year ahead. An entity whose
+  /// country has no rule pack gets an empty list.
+  _ida.Future<List<_i735p57b.TaxDeadlineView>> listDeadlines(
+    _isc.UuidValue entityId,
+  ) => caller.callServerEndpoint<List<_i735p57b.TaxDeadlineView>>(
+    'tax',
+    'listDeadlines',
+    {'entityId': entityId},
   );
 
   /// Builds the entity's tax-ready summary for the year starting in

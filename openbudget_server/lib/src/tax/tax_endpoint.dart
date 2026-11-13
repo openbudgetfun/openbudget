@@ -4,8 +4,8 @@ import 'package:openbudget_server/src/tax/tax_service.dart';
 import 'package:openbudget_server/src/tax/tax_summary_service.dart';
 import 'package:serverpod/serverpod.dart';
 
-/// API surface for tax profiles, line coding, envelope defaults, reports
-/// and tax-ready summaries.
+/// API surface for tax profiles, line coding, envelope defaults, reports,
+/// the filing calendar and tax-ready summaries.
 ///
 /// Every method requires authentication and delegates to [TaxService], which
 /// owns the entity boundary and the write rules.
@@ -93,6 +93,16 @@ class TaxEndpoint extends Endpoint {
     entityId: entityId,
     startYear: startYear,
   );
+
+  /// Lists the entity's upcoming filing and payment deadlines, soonest
+  /// first.
+  ///
+  /// Covers the entity's local today to a year ahead. An entity whose
+  /// country has no rule pack gets an empty list.
+  Future<List<TaxDeadlineView>> listDeadlines(
+    Session session,
+    UuidValue entityId,
+  ) => TaxService.listDeadlines(session, entityId: entityId);
 
   /// Builds the entity's tax-ready summary for the year starting in
   /// [startYear].
