@@ -8,10 +8,44 @@
   "timeZones": [
     "Asia/Tokyo"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 3,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "consumptionTax",
+    "localName": "Consumption Tax (shohizei)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1000,
+        "from": "2019-10-01",
+        "to": null,
+        "appliesTo": "national 7.8% plus local 2.2%",
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 800,
+        "from": "2019-10-01",
+        "to": null,
+        "appliesTo": "basic foodstuffs and newspapers; national 6.24% plus local 1.76%",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "National Tax Agency (NTA)",
+    "url": "https://www.nta.go.jp"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +64,31 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Rates secondary (grade S): 10% standard and 8% reduced, both from 1 October 2019, from VATCalc's 2026 table; the NTA's English rate pages were not reachable this session.",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is 31 March (grade I): the common Japanese fiscal-year end for companies; other dates are permitted."
+  ]
 }

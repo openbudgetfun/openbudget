@@ -197,8 +197,15 @@ void main() {
       expect(gb!.name, isoNames['GB']);
       expect(gb.currencies, ['GBP']);
       expect(gb.timeZones, ['Europe/London']);
-      expect(gb.companyYearEndDefault, isNull);
-      expect(gb.indirectTax, isNull);
+      // Filled by the U3 research pass: HMRC's tax year (6 April) and VAT
+      // rates (20% standard since 4 January 2011), preserving the app's
+      // 31 March company year-end default.
+      expect(gb.individualTaxYear!.startMonth, 4);
+      expect(gb.individualTaxYear!.startDay, 6);
+      expect(gb.companyYearEndDefault, (month: 3, day: 31));
+      expect(gb.indirectTax!.kind, IndirectTaxKind.vat);
+      expect(gb.indirectTax!.rates.first.basisPoints, 2000);
+      expect(gb.authority!.name, 'HM Revenue & Customs (HMRC)');
 
       expect(Countries.byCode('US')!.currencies, ['USD']);
       expect(Countries.byCode('NG')!.timeZones, ['Africa/Lagos']);

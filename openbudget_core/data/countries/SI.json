@@ -8,10 +8,52 @@
   "timeZones": [
     "Europe/Ljubljana"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "DDV (VAT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2200,
+        "from": "2013-07-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 6
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 500,
+        "from": "2020-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 7
+      },
+      {
+        "label": "reduced2",
+        "basisPoints": 950,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 8
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Financial Administration (FURS)",
+    "url": "https://www.fu.gov.si"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +72,50 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "OECD Consumption Tax Trends: key findings for Slovenia (22% standard rate since July 2013)",
+      "url": "https://www.oecd.org/content/dam/oecd/en/topics/policy-sub-issues/consumption-tax-trends/consumption-tax-trends-slovenia.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "PwC Worldwide Tax Summaries: Slovenia - other taxes (5% super-reduced rate for books and newspapers from 1 January 2020)",
+      "url": "https://taxsummaries.pwc.com/slovenia/corporate/other-taxes",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: 2022 VAT Rates in Europe (table as of January 2022, sourced from the European Commission's Taxes in Europe Database)",
+      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-2022-vat-rates-in-europe/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The standard rate has been 22% since July 2013 (OECD Consumption Tax Trends) and the 5% super-reduced rate for books and newspapers applies from 1 January 2020 (PwC). Since 1 January 2025 sugared and sweetened drinks are taxed at the standard rate - a scope change.",
+    "Lower-bound rows - reduced2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed applying on 1 January 2022 by the Tax Foundation's January 2022 table of VAT rates (sourced from the Commission's Taxes in Europe Database))."
+  ]
 }
