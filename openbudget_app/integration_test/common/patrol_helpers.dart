@@ -841,6 +841,28 @@ class NetWorthPage {
   Future<void> showByCurrency() => scrollAndTap(tester, tabByCurrency);
 
   Future<void> showByAccount() => scrollAndTap(tester, tabByAccount);
+
+  // The Crypto section: the overprint bar, its rows and the chain / asset
+  // toggle.
+  Finder get cryptoSection => find.byKey(const Key('crypto-breakdown-section'));
+  Finder get cryptoTotal => find.byKey(const Key('crypto-breakdown-total'));
+  Finder get cryptoToggleByChain =>
+      find.byKey(const Key('crypto-breakdown-toggle-by-chain'));
+  Finder get cryptoToggleByAsset =>
+      find.byKey(const Key('crypto-breakdown-toggle-by-asset'));
+
+  /// The overprint bar for `byChain` or `byAsset`.
+  Finder cryptoBar(String grouping) =>
+      find.byKey(ValueKey('crypto-breakdown-bar-$grouping'));
+
+  /// One row, by the key the server gave its slice (`ethereumMainnet`,
+  /// `asset:USDC`, `other`).
+  Finder cryptoRow(String key) =>
+      find.byKey(ValueKey('crypto-breakdown-row-$key'));
+
+  Future<void> showCryptoByChain() => scrollAndTap(tester, cryptoToggleByChain);
+
+  Future<void> showCryptoByAsset() => scrollAndTap(tester, cryptoToggleByAsset);
 }
 
 /// Page object for the cross-currency transfer form.

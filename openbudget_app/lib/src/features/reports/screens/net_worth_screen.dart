@@ -7,7 +7,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/utils/account_kind_labels.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_list_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/crypto_breakdown_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
+import 'package:openbudget_app/src/features/reports/widgets/crypto_breakdown_section.dart';
 import 'package:openbudget_app/src/features/settings/providers/reporting_currency_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/utils/date_labels.dart';
@@ -78,6 +80,9 @@ class NetWorthScreen extends HookConsumerWidget {
                   historyRange.value = range;
                 },
               ),
+              // Hides itself unless the entity has wallets, and brings its own
+              // spacing.
+              CryptoBreakdownSection(entityId: entityId),
               const SizedBox(height: SpacingTokens.lg),
               _BreakdownTabs(
                 selected: breakdownTab.value,
@@ -348,7 +353,8 @@ class _ReportingCurrencyChip extends HookConsumerWidget {
     ref
       ..invalidate(netWorthProvider)
       ..invalidate(netWorthForEntitiesProvider)
-      ..invalidate(netWorthHistoryProvider);
+      ..invalidate(netWorthHistoryProvider)
+      ..invalidate(cryptoBreakdownProvider);
   }
 }
 

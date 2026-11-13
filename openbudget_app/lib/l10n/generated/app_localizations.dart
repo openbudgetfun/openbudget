@@ -9648,6 +9648,96 @@ abstract class AppLocalizations {
   /// **'By account'**
   String get netWorthTabByAccount;
 
+  /// No description provided for @cryptoBreakdownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Crypto'**
+  String get cryptoBreakdownTitle;
+
+  /// No description provided for @cryptoBreakdownByChain.
+  ///
+  /// In en, this message translates to:
+  /// **'By chain'**
+  String get cryptoBreakdownByChain;
+
+  /// No description provided for @cryptoBreakdownByAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'By asset'**
+  String get cryptoBreakdownByAsset;
+
+  /// No description provided for @cryptoBreakdownWallets.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Across 1 wallet} other{Across {count} wallets}}'**
+  String cryptoBreakdownWallets(int count);
+
+  /// Text alternative for the crypto overprint bar. grouping is the selected toggle label; shares lists each row and its share.
+  ///
+  /// In en, this message translates to:
+  /// **'{grouping}: {shares}'**
+  String cryptoBreakdownBarLabel(String grouping, String shares);
+
+  /// No description provided for @cryptoBreakdownBarShare.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} {share}'**
+  String cryptoBreakdownBarShare(String name, String share);
+
+  /// No description provided for @cryptoBreakdownShareUnderOne.
+  ///
+  /// In en, this message translates to:
+  /// **'<1%'**
+  String get cryptoBreakdownShareUnderOne;
+
+  /// No description provided for @cryptoBreakdownOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get cryptoBreakdownOther;
+
+  /// No description provided for @cryptoBreakdownOtherHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 smaller holding} other{{count} smaller holdings}}'**
+  String cryptoBreakdownOtherHoldings(int count);
+
+  /// No description provided for @cryptoBreakdownChainHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 holding} other{{count} holdings}}'**
+  String cryptoBreakdownChainHoldings(int count);
+
+  /// No description provided for @cryptoBreakdownNetworksMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} +{count}'**
+  String cryptoBreakdownNetworksMore(String names, int count);
+
+  /// No description provided for @cryptoBreakdownEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is counted yet. Tokens without a price are left out until one is found.'**
+  String get cryptoBreakdownEmpty;
+
+  /// No description provided for @cryptoBreakdownFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens that look like scams and tokens without a price are left out.'**
+  String get cryptoBreakdownFootnote;
+
+  /// No description provided for @cryptoBreakdownMissingRates.
+  ///
+  /// In en, this message translates to:
+  /// **'No exchange rate for {currencies}, so those holdings are left out of this figure.'**
+  String cryptoBreakdownMissingRates(String currencies);
+
+  /// No description provided for @cryptoBreakdownLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your crypto breakdown'**
+  String get cryptoBreakdownLoadError;
+
   /// No description provided for @netWorthValuedOn.
   ///
   /// In en, this message translates to:
