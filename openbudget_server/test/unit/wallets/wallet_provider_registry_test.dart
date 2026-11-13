@@ -12,7 +12,7 @@ void main() {
 
   group('Given WalletProviderRegistry.defaultRegistry', () {
     test(
-      'when the family secret is missing then the family is unsupported',
+      'when the family secret is missing then Solana is unsupported',
       () {
         expect(
           WalletProviderRegistry.defaultRegistry.isSupported(
@@ -56,11 +56,33 @@ void main() {
     );
 
     test(
+      'when Bitcoin is asked for then it is supported with no secret at '
+      'all, because Esplora reads public hosts',
+      () {
+        expect(
+          WalletProviderRegistry.defaultRegistry.registrationFor(
+            ChainFamily.bitcoin,
+          ),
+          isNotNull,
+        );
+        expect(
+          WalletProviderRegistry.defaultRegistry.isSupported(
+            passwords: emptyPasswords,
+            environment: emptyEnvironment,
+            family: ChainFamily.bitcoin,
+          ),
+          isTrue,
+        );
+      },
+    );
+
+    test(
       'when a family has no registered provider then it stays unsupported '
       'whatever its secret',
       () {
         for (final family in ChainFamily.values) {
           if (family == ChainFamily.solana) continue;
+          if (family == ChainFamily.bitcoin) continue;
           expect(
             WalletProviderRegistry.defaultRegistry.isSupported(
               passwords: passwords,
@@ -87,7 +109,7 @@ void main() {
           WalletProviderRegistry.defaultRegistry.registrationFor(
             ChainFamily.bitcoin,
           ),
-          isNull,
+          isNotNull,
         );
         expect(
           WalletProviderRegistry.defaultRegistry.registrationFor(
@@ -99,22 +121,22 @@ void main() {
     );
 
     test(
-      'when listing supported families then only Solana appears, and only '
-      'while its secret is present',
+      'when listing supported families then Solana appears while its '
+      'secret is present and Bitcoin always',
       () {
         expect(
           WalletProviderRegistry.defaultRegistry.supportedFamilies(
             passwords: passwords,
             environment: emptyEnvironment,
           ),
-          [ChainFamily.solana],
+          [ChainFamily.solana, ChainFamily.bitcoin],
         );
         expect(
           WalletProviderRegistry.defaultRegistry.supportedFamilies(
             passwords: emptyPasswords,
             environment: emptyEnvironment,
           ),
-          isEmpty,
+          [ChainFamily.bitcoin],
         );
       },
     );
