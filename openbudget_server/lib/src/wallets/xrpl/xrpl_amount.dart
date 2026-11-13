@@ -42,11 +42,6 @@ class XrplAmount {
       exponent = 0;
     }
 
-    if (!RegExp(r'^\d*\.?\d+$|^\d+\.?$').hasMatch(mantissa)) {
-      // Require at least one digit somewhere.
-      if (!RegExp(r'\d').hasMatch(mantissa)) return null;
-    }
-    // Stricter validation: mantissa must be a valid decimal.
     if (!RegExp(r'^(\d+\.?\d*|\.\d+)$').hasMatch(mantissa)) {
       return null;
     }
@@ -63,7 +58,6 @@ class XrplAmount {
       fractionDigits = mantissa.length - dotIndex - 1;
     }
     if (digits.isEmpty) return null;
-    // Strip leading zeros is fine for BigInt.parse; but all-zero stays zero.
     final mantissaInt = BigInt.tryParse(digits);
     if (mantissaInt == null) return null;
 
