@@ -1150,6 +1150,55 @@ void main() {
           );
         },
       );
+
+      test('then a tax proposal records the rule version', () async {
+        final entity = await createEntity();
+        final category = await createCategory(entity);
+        final envelope = await createEnvelope(category, 'Salary');
+        await endpoints.tax.saveProfile(
+          authedSession,
+          entity.id!,
+          'GB',
+          EntityKind.individual.name,
+          jsonEncode(
+            const GbTaxProfile(entityKind: EntityKind.individual).toJson(),
+          ),
+        );
+
+        final context = AgentToolContext(
+          session: rawSession,
+          userId: userId,
+          canPropose: true,
+        );
+        const registry = AgentToolRegistry();
+        final result = await registry.call(
+          context,
+          'propose_envelope_tax_category',
+          {
+            'envelopeId': envelope.id.toString(),
+            'code': 'gb.ind.employment',
+            'reason': 'Test',
+          },
+        );
+        final proposalId =
+            (jsonDecode(result) as Map<String, Object?>)['proposalId']!
+                as String;
+        final stored = await AgentProposal.db.findById(
+          rawSession,
+          UuidValue.fromString(proposalId),
+        );
+
+        final pack = TaxRules.forJurisdiction(TaxJurisdiction.gb);
+        final year = pack.taxYearFor(EntityClock.today(entity));
+        final expected = pack
+            .ruleSet(year.startYear)
+            .versionFor(
+              TaxJurisdiction.gb,
+            );
+        expect(stored, isNotNull);
+        expect(stored!.rulesVersion, expected);
+        expect(stored.rulesVersion, matches(RegExp(r'^gb-\d{4}-r\d+$')));
+      });
     });
 
     group('when reading a conversation', () {

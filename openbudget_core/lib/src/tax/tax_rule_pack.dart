@@ -33,6 +33,9 @@ class TaxInput {
 abstract interface class TaxRulePack {
   TaxJurisdiction get jurisdiction;
 
+  /// What this pack covers, per section, and how mature it is.
+  TaxPackManifest get manifest;
+
   /// Tax years whose rates this pack knows, by [TaxYear.startYear].
   Set<int> get supportedStartYears;
 
@@ -41,6 +44,12 @@ abstract interface class TaxRulePack {
 
   /// The tax year that starts in [startYear].
   TaxYear taxYear(int startYear);
+
+  /// Version, sources and verified-on date for [startYear].
+  ///
+  /// Throws [UnsupportedTaxYearException] when the year's rates are not in
+  /// this pack.
+  TaxRuleSet ruleSet(int startYear);
 
   /// Categories that may appear in books of [kind], in return order.
   List<TaxCategory> categoriesFor(EntityKind kind);

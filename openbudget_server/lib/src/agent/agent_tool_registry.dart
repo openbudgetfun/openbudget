@@ -629,7 +629,7 @@ class AgentToolRegistry {
     if (transaction == null) {
       throw NotFoundException(message: 'Transaction not found');
     }
-    await requireOwnedEntity(
+    final entity = await requireOwnedEntity(
       context.session,
       userId: context.userId,
       entityId: transaction.entityId,
@@ -647,6 +647,7 @@ class AgentToolRegistry {
       context,
       entityId: transaction.entityId,
       kind: AgentProposalKind.setTransactionTaxCategory,
+      rulesVersion: _taxRulesVersion(entity),
       payload: {
         'entityId': transaction.entityId.toString(),
         'transactionLineId': transactionLineId.toString(),
@@ -673,7 +674,7 @@ class AgentToolRegistry {
     if (envelope == null) {
       throw NotFoundException(message: 'Envelope not found');
     }
-    await requireOwnedEntity(
+    final entity = await requireOwnedEntity(
       context.session,
       userId: context.userId,
       entityId: envelope.entityId,
@@ -688,6 +689,7 @@ class AgentToolRegistry {
       context,
       entityId: envelope.entityId,
       kind: AgentProposalKind.setEnvelopeTaxCategory,
+      rulesVersion: _taxRulesVersion(entity),
       payload: {
         'entityId': envelope.entityId.toString(),
         'envelopeId': envelopeId.toString(),
@@ -733,6 +735,7 @@ class AgentToolRegistry {
     required AgentProposalKind kind,
     required Map<String, Object?> payload,
     required String summary,
+    String? rulesVersion,
   }) => AgentProposal.db.insertRow(
     context.session,
     AgentProposal(
@@ -743,8 +746,25 @@ class AgentToolRegistry {
       payloadJson: jsonEncode(payload),
       summary: summary,
       status: AgentProposalStatus.pending,
+      rulesVersion: rulesVersion,
     ),
   );
+
+  /// The tax rule version a proposal about [entity] was made under.
+  ///
+  /// Tax tools only run for entities whose country has a pack, so an unknown
+  /// country here means the tool checks were bypassed.
+  String _taxRulesVersion(Entity entity) {
+    final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+    if (jurisdiction == null) {
+      throw ValidationException(
+        message: 'No tax rules are available for ${entity.countryCode}.',
+      );
+    }
+    final pack = TaxRules.forJurisdiction(jurisdiction);
+    final year = pack.taxYearFor(EntityClock.today(entity));
+    return pack.ruleSet(year.startYear).versionFor(jurisdiction);
+  }
 
   static String _proposalResult(AgentProposal proposal) => _json({
     'proposalId': proposal.id?.toString(),
