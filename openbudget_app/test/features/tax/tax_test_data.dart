@@ -75,12 +75,50 @@ TaxReportLineView taxLine({
   String? code = 'gb.ind.employment',
   String? reportReference = 'SA100 box 1',
   int entryCount = 12,
+  String? figureId,
 }) => TaxReportLineView(
   label: label,
   amountMinor: amountMinor,
   code: code,
   reportReference: reportReference,
   entryCount: entryCount,
+  figureId: figureId,
+);
+
+TaxRuleCaveatView taxCaveat({
+  String id = 'gb.hmrc-rounding-inferences',
+  String text =
+      'HMRC does not publish its per-slice rounding, so the pack infers it '
+      'from guidance.',
+  String grade = 'inferred',
+  List<String> sections = const ['personalReturn'],
+  List<String> keys = const [],
+  DateTime? recheckBy,
+  bool announced = false,
+}) => TaxRuleCaveatView(
+  id: id,
+  text: text,
+  grade: grade,
+  sections: sections,
+  keys: keys,
+  recheckBy: recheckBy ?? DateTime.utc(2027, 1, 30),
+  announced: announced,
+);
+
+TaxFigureView taxFigure({
+  String id = 'personalAllowance',
+  int value = 1257000,
+  String unit = 'currencyMinor',
+  String grade = 'primary',
+  DateTime? verifiedOn,
+  String source = 'https://www.gov.uk/income-tax-rates',
+}) => TaxFigureView(
+  id: id,
+  value: value,
+  unit: unit,
+  grade: grade,
+  verifiedOn: verifiedOn ?? DateTime.utc(2026, 4, 6),
+  source: source,
 );
 
 TaxOpportunityView taxOpportunity({
@@ -120,6 +158,8 @@ TaxReportView taxReportView({
   String rulesVersion = 'gb-2026-r1',
   String maturity = 'preview',
   Map<String, String>? coverage,
+  List<TaxRuleCaveatView>? caveats,
+  List<TaxFigureView>? figures,
 }) => TaxReportView(
   jurisdiction: jurisdiction,
   startYear: startYear,
@@ -139,6 +179,8 @@ TaxReportView taxReportView({
   rulesVersion: rulesVersion,
   maturity: maturity,
   coverage: coverage ?? const {'personalReturn': 'full'},
+  caveats: caveats ?? const [],
+  figures: figures ?? const [],
   uncategorizedCount: uncategorizedCount,
   convertedEntryCount: convertedEntryCount,
   opportunities: opportunities ?? [taxOpportunity()],

@@ -24,6 +24,11 @@ fields:
   assumptions: List<String>
   ### The authority pages the rates came from.
   sources: List<String>
+  ### What could not be verified for the sections and rules this report
+  ### used: the "What we could not verify" list.
+  caveats: List<TaxRuleCaveatView>
+  ### The named figures this report's lines quote, with their grades.
+  figures: List<TaxFigureView>
   ### When the rule figures were last checked against the sources.
   rulesVerifiedOn: DateTime
   ### The rule pack version that produced the report: `gb-2026-r1`.

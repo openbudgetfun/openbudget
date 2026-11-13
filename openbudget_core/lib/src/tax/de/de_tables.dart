@@ -398,14 +398,211 @@ final List<Uri> deSources = List.unmodifiable([
   Uri.parse('https://www.gesetze-im-internet.de/rvbeitrsbek_2026/----.html'),
 ]);
 
-/// The version, sources and verification date of each supported year.
+/// The named figures knowledge cards quote for [table]'s year, each with
+/// the page it came from. The values are the tables' own; naming them adds
+/// no new number. The 2025 Soli Freigrenze and Basisrente cap carry the
+/// grades the germany-tax skill recorded.
+Map<String, TaxFigure> deFiguresFor(DeTaxTable table) {
+  final y2025 = table.startYear == 2025;
+  return Map.unmodifiable({
+    for (final figure in [
+      TaxFigure(
+        id: 'grundfreibetrag',
+        value: table.tariff.grundfreibetrag * 100,
+        unit: TaxFigureUnit.currencyMinor,
+        source: Uri.parse('https://www.gesetze-im-internet.de/estg/__32a.html'),
+        grade: TaxEvidenceGrade.primary,
+        verifiedOn: deRulesVerifiedOn,
+      ),
+      TaxFigure(
+        id: 'sparerPauschbetrag',
+        value: table.allowances.sparerPauschbetrag,
+        unit: TaxFigureUnit.currencyMinor,
+        source: Uri.parse('https://www.gesetze-im-internet.de/estg/__20.html'),
+        grade: TaxEvidenceGrade.primary,
+        verifiedOn: deRulesVerifiedOn,
+      ),
+      TaxFigure(
+        id: 'werbungskostenPauschbetrag',
+        value: table.allowances.werbungskostenPauschbetrag,
+        unit: TaxFigureUnit.currencyMinor,
+        source: Uri.parse('https://www.gesetze-im-internet.de/estg/__9a.html'),
+        grade: TaxEvidenceGrade.primary,
+        verifiedOn: deRulesVerifiedOn,
+      ),
+      TaxFigure(
+        id: 'soliFreigrenze',
+        value: table.solidarity.freigrenze,
+        unit: TaxFigureUnit.currencyMinor,
+        source: Uri.parse(
+          'https://www.gesetze-im-internet.de/solzg_1995/__3.html',
+        ),
+        grade: y2025 ? TaxEvidenceGrade.secondary : TaxEvidenceGrade.primary,
+        verifiedOn: deRulesVerifiedOn,
+      ),
+      TaxFigure(
+        id: 'basisrenteCap',
+        value: table.basisrenteMax,
+        unit: TaxFigureUnit.currencyMinor,
+        source: Uri.parse('https://www.gesetze-im-internet.de/estg/__10.html'),
+        grade: y2025 ? TaxEvidenceGrade.inferred : TaxEvidenceGrade.primary,
+        verifiedOn: deRulesVerifiedOn,
+      ),
+      TaxFigure(
+        id: 'gewerbesteuerFreibetrag',
+        value: table.businessTaxes.tradeTaxFreeAmount,
+        unit: TaxFigureUnit.currencyMinor,
+        source: Uri.parse(
+          'https://www.gesetze-im-internet.de/gewstg/__11.html',
+        ),
+        grade: TaxEvidenceGrade.primary,
+        verifiedOn: deRulesVerifiedOn,
+      ),
+      TaxFigure(
+        id: 'koerperschaftsteuerRate',
+        value: table.businessTaxes.corporateTaxRateBasisPoints,
+        unit: TaxFigureUnit.rateBasisPoints,
+        source: Uri.parse(
+          'https://www.gesetze-im-internet.de/kstg_1977/__23.html',
+        ),
+        grade: TaxEvidenceGrade.primary,
+        verifiedOn: deRulesVerifiedOn,
+      ),
+      TaxFigure(
+        id: 'ustStandardRate',
+        value: table.vat.standardRateBasisPoints,
+        unit: TaxFigureUnit.rateBasisPoints,
+        source: Uri.parse(
+          'https://www.gesetze-im-internet.de/ustg_1980/__12.html',
+        ),
+        grade: TaxEvidenceGrade.primary,
+        verifiedOn: deRulesVerifiedOn,
+      ),
+      TaxFigure(
+        id: 'ustReducedRate',
+        value: table.vat.reducedRateBasisPoints,
+        unit: TaxFigureUnit.rateBasisPoints,
+        source: Uri.parse(
+          'https://www.gesetze-im-internet.de/ustg_1980/__12.html',
+        ),
+        grade: TaxEvidenceGrade.primary,
+        verifiedOn: deRulesVerifiedOn,
+      ),
+      TaxFigure(
+        id: 'kleinunternehmerPreviousYearLimit',
+        value: table.vat.smallBusinessPreviousYearTurnover,
+        unit: TaxFigureUnit.currencyMinor,
+        source: Uri.parse(
+          'https://www.gesetze-im-internet.de/ustg_1980/__19.html',
+        ),
+        grade: TaxEvidenceGrade.primary,
+        verifiedOn: deRulesVerifiedOn,
+      ),
+    ])
+      figure.id: figure,
+  });
+}
+
+/// What the germany-tax skill could not verify, as data (its "Unverified
+/// and changing" list). Re-check dates follow that list.
+final List<TaxRuleCaveat> deRuleCaveats = [
+  TaxRuleCaveat(
+    id: 'de.est-2026-forms',
+    text:
+        'The 2026 ESt forms (Anlage N, S, G, KAP, V, Vorsorgeaufwand, '
+        'Sonderausgaben, AUS) were not published as of 5 November 2026, so '
+        'checklists use the 2025 lines.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.personalReturn, TaxSection.selfEmployment},
+    recheckBy: DateTime.utc(2026, 12, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'de.soli-2025-secondary',
+    text:
+        'The 2025 Soli Freigrenze of 19,950 euro and the 2025 zone '
+        'constant of 19,246.67 are secondary; they must be checked against '
+        'BGBl. 2024 I Nr. 449 and the BMF Tarifhistorie.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {TaxSection.personalReturn},
+    recheckBy: DateTime.utc(2026, 12, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'de.basisrente-2025',
+    text:
+        'The 2025 Basisrente cap of 29,344 euro and its doubling for joint '
+        'assessment were not in the research.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.personalReturn},
+    recheckBy: DateTime.utc(2026, 12, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'de.church-tax-details',
+    text:
+        'Kirchensteuer Kappung, state rates beyond 8 and 9 per cent and '
+        'the rounding of church tax were not researched.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.personalReturn},
+    recheckBy: DateTime.utc(2026, 12, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'de.entfernungspauschale-2026-source',
+    text:
+        'The 2026 Entfernungspauschale statutory reference (BGBl. 2025 I '
+        'Nr. 363) comes from a secondary source.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {TaxSection.personalReturn, TaxSection.selfEmployment},
+    recheckBy: DateTime.utc(2026, 12, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'de.announced-2027',
+    text:
+        'Announced but not enacted as of 5 November 2026: the 2027 income '
+        'tax reform draft, a 280 per cent Gewerbesteuer minimum Hebesatz '
+        'from 2027, the 2027 social-security contribution ceilings, the 633 '
+        'euro Minijob limit and the 14.60 euro minimum wage.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {
+      TaxSection.personalReturn,
+      TaxSection.selfEmployment,
+      TaxSection.companyReturn,
+    },
+    recheckBy: DateTime.utc(2026, 12, 31),
+    announced: true,
+  ),
+  TaxRuleCaveat(
+    id: 'de.not-researched-topics',
+    text:
+        'The Übungsleiter and Ehrenamt allowances, the 2026 restaurant VAT '
+        'rate, §233a AO interest, Pflichtveranlagung, the §34c foreign tax '
+        'credit detail, the U1/U2/U3 levies, E-Bilanz, the KSt and GewSt '
+        'form Kennzahlen, the Lohnsteuer PAP and vGA criteria were not '
+        'researched.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.companyReturn, TaxSection.payroll},
+    recheckBy: DateTime.utc(2026, 12, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'de.anlage-lines',
+    text:
+        'Anlage V lines below Z54 and the Anlage KAP lines after 2025 '
+        '(which reportedly shift) need a read of the official form.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.personalReturn},
+    recheckBy: DateTime.utc(2026, 12, 31),
+  ),
+];
+
+/// The version, sources, verification date, caveats and named figures of
+/// each supported year.
 final Map<int, TaxRuleSet> deRuleSetsByStartYear = Map.unmodifiable({
-  for (final startYear in deTaxTables.keys)
-    startYear: TaxRuleSet(
-      startYear: startYear,
+  for (final entry in deTaxTables.entries)
+    entry.key: TaxRuleSet(
+      startYear: entry.key,
       revision: 1,
       verifiedOn: deRulesVerifiedOn,
       sources: deSources,
+      caveats: deRuleCaveats,
+      figures: deFiguresFor(entry.value),
     ),
 });
 

@@ -14,9 +14,11 @@ import 'package:openbudget_client/src/protocol/protocol.dart' as _irkl4crj;
 import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
+import '../tax/tax_figure_view.dart' as _i1qdlon8;
 import '../tax/tax_liability_view.dart' as _iyg1xvx7;
 import '../tax/tax_opportunity_view.dart' as _i7gx5xr1;
 import '../tax/tax_report_line_view.dart' as _i8pphqdm;
+import '../tax/tax_rule_caveat_view.dart' as _ihcq0ud7;
 
 /// The computed tax position for one entity and tax year.
 abstract class TaxReportView
@@ -36,6 +38,8 @@ abstract class TaxReportView
     required this.balanceDueMinor,
     required this.assumptions,
     required this.sources,
+    required this.caveats,
+    required this.figures,
     required this.rulesVerifiedOn,
     required this.rulesVersion,
     required this.maturity,
@@ -60,6 +64,8 @@ abstract class TaxReportView
     required int balanceDueMinor,
     required List<String> assumptions,
     required List<String> sources,
+    required List<_ihcq0ud7.TaxRuleCaveatView> caveats,
+    required List<_i1qdlon8.TaxFigureView> figures,
     required DateTime rulesVerifiedOn,
     required String rulesVersion,
     required String maturity,
@@ -100,6 +106,13 @@ abstract class TaxReportView
       ),
       sources: _irkl4crj.Protocol().deserialize<List<String>>(
         jsonSerialization['sources'],
+      ),
+      caveats: _irkl4crj.Protocol()
+          .deserialize<List<_ihcq0ud7.TaxRuleCaveatView>>(
+            jsonSerialization['caveats'],
+          ),
+      figures: _irkl4crj.Protocol().deserialize<List<_i1qdlon8.TaxFigureView>>(
+        jsonSerialization['figures'],
       ),
       rulesVerifiedOn: _isc.DateTimeJsonExtension.fromJson(
         jsonSerialization['rulesVerifiedOn'],
@@ -155,6 +168,13 @@ abstract class TaxReportView
   /// The authority pages the rates came from.
   List<String> sources;
 
+  /// What could not be verified for the sections and rules this report
+  /// used: the "What we could not verify" list.
+  List<_ihcq0ud7.TaxRuleCaveatView> caveats;
+
+  /// The named figures this report's lines quote, with their grades.
+  List<_i1qdlon8.TaxFigureView> figures;
+
   /// When the rule figures were last checked against the sources.
   DateTime rulesVerifiedOn;
 
@@ -193,6 +213,8 @@ abstract class TaxReportView
     int? balanceDueMinor,
     List<String>? assumptions,
     List<String>? sources,
+    List<_ihcq0ud7.TaxRuleCaveatView>? caveats,
+    List<_i1qdlon8.TaxFigureView>? figures,
     DateTime? rulesVerifiedOn,
     String? rulesVersion,
     String? maturity,
@@ -219,6 +241,8 @@ abstract class TaxReportView
       'balanceDueMinor': balanceDueMinor,
       'assumptions': assumptions.toJson(),
       'sources': sources.toJson(),
+      'caveats': caveats.toJson(valueToJson: (v) => v.toJson()),
+      'figures': figures.toJson(valueToJson: (v) => v.toJson()),
       'rulesVerifiedOn': rulesVerifiedOn.toJson(),
       'rulesVersion': rulesVersion,
       'maturity': maturity,
@@ -249,6 +273,8 @@ abstract class TaxReportView
       'balanceDueMinor': balanceDueMinor,
       'assumptions': assumptions.toJson(),
       'sources': sources.toJson(),
+      'caveats': caveats.toJson(valueToJson: (v) => v.toJsonForProtocol()),
+      'figures': figures.toJson(valueToJson: (v) => v.toJsonForProtocol()),
       'rulesVerifiedOn': rulesVerifiedOn.toJson(),
       'rulesVersion': rulesVersion,
       'maturity': maturity,
@@ -283,6 +309,8 @@ class _TaxReportViewImpl extends TaxReportView {
     required int balanceDueMinor,
     required List<String> assumptions,
     required List<String> sources,
+    required List<_ihcq0ud7.TaxRuleCaveatView> caveats,
+    required List<_i1qdlon8.TaxFigureView> figures,
     required DateTime rulesVerifiedOn,
     required String rulesVersion,
     required String maturity,
@@ -305,6 +333,8 @@ class _TaxReportViewImpl extends TaxReportView {
          balanceDueMinor: balanceDueMinor,
          assumptions: assumptions,
          sources: sources,
+         caveats: caveats,
+         figures: figures,
          rulesVerifiedOn: rulesVerifiedOn,
          rulesVersion: rulesVersion,
          maturity: maturity,
@@ -333,6 +363,8 @@ class _TaxReportViewImpl extends TaxReportView {
     int? balanceDueMinor,
     List<String>? assumptions,
     List<String>? sources,
+    List<_ihcq0ud7.TaxRuleCaveatView>? caveats,
+    List<_i1qdlon8.TaxFigureView>? figures,
     DateTime? rulesVerifiedOn,
     String? rulesVersion,
     String? maturity,
@@ -357,6 +389,8 @@ class _TaxReportViewImpl extends TaxReportView {
       balanceDueMinor: balanceDueMinor ?? this.balanceDueMinor,
       assumptions: assumptions ?? this.assumptions.map((e0) => e0).toList(),
       sources: sources ?? this.sources.map((e0) => e0).toList(),
+      caveats: caveats ?? this.caveats.map((e0) => e0.copyWith()).toList(),
+      figures: figures ?? this.figures.map((e0) => e0.copyWith()).toList(),
       rulesVerifiedOn: rulesVerifiedOn ?? this.rulesVerifiedOn,
       rulesVersion: rulesVersion ?? this.rulesVersion,
       maturity: maturity ?? this.maturity,
