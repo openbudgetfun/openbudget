@@ -71,6 +71,46 @@ final class _WalletBucket {
   BigInt realized = BigInt.zero;
 }
 
+/// One summary computation together with the provenance the export needs.
+///
+/// [entries] are the mapped, converted entries that fed the view, one per
+/// contributing line. Each keeps its position in the pre-mapping entry
+/// list through [sourceIndexes], where [fxRequests] holds that entry's
+/// conversion request and [rates] can quote it. [sourceLines] is every
+/// in-period line the shared query loaded, keyed by line id, so the
+/// export can show the original amount, payee and envelope per line.
+final class TaxSummaryComputation {
+  const TaxSummaryComputation({
+    required this.view,
+    required this.currencyCode,
+    required this.entries,
+    required this.sourceIndexes,
+    required this.fxRequests,
+    required this.rates,
+    required this.sourceLines,
+  });
+
+  final TaxSummaryView view;
+
+  /// ISO 4217 code every amount in the view is reported in.
+  final String currencyCode;
+
+  /// The mapped entries that fed the view, in line order.
+  final List<TaxEntry> entries;
+
+  /// For each entry, its index in the pre-mapping entry list.
+  final List<int> sourceIndexes;
+
+  /// One conversion request per pre-mapping entry.
+  final List<TaxFxRequest> fxRequests;
+
+  /// The exact daily rates the conversions used.
+  final TaxFxRates rates;
+
+  /// Every in-period source line the shared query loaded, by line id.
+  final Map<String, TaxEntrySourceLine> sourceLines;
+}
+
 /// Which side of the sales-tax sections an embedded tax belongs to.
 enum _SalesTaxDirection { collected, paid }
 
@@ -114,10 +154,33 @@ class TaxSummaryService {
   /// line, wallet and rate comes from one committed snapshot even while a
   /// write is in flight. A missing rate fails the read with
   /// [FxRateUnavailableException] after requesting one backfill per date.
+  ///
+  /// A [systemOwner] replaces the session's authenticated user for one
+  /// server-owned build, such as the export download serving a signed link;
+  /// the ownership rule itself is unchanged.
   static Future<TaxSummaryView> build(
     Session session, {
     required UuidValue entityId,
     int? startYear,
+    SystemEntityOwner? systemOwner,
+  }) async => (await buildForExport(
+    session,
+    entityId: entityId,
+    startYear: startYear,
+    systemOwner: systemOwner,
+  )).view;
+
+  /// Builds the summary together with the provenance the export needs.
+  ///
+  /// Same read, same isolation and same ownership rule as [build]; the
+  /// result adds the mapped entries with their position in the raw entry
+  /// list, the conversion requests and rates behind them, and every
+  /// in-period source line the query loaded.
+  static Future<TaxSummaryComputation> buildForExport(
+    Session session, {
+    required UuidValue entityId,
+    int? startYear,
+    SystemEntityOwner? systemOwner,
   }) async {
     _log.info('Building tax summary entity=$entityId year=$startYear');
 
@@ -128,6 +191,7 @@ class TaxSummaryService {
             session,
             entityId,
             transaction: tx,
+            systemOwner: systemOwner,
           );
           final jurisdiction = TaxJurisdiction.fromCountryCode(
             entity.countryCode,
@@ -140,7 +204,7 @@ class TaxSummaryService {
           final now = clock();
           final period = _resolvePeriod(entity, pack, startYear, now);
 
-          final lines =
+          final sourceLines =
               (await TaxService.loadTaxLines(
                 session,
                 {entity.id!},
@@ -150,7 +214,7 @@ class TaxSummaryService {
               ))[entity.id!] ??
               const <TaxEntrySourceLine>[];
           final requests = taxFxRequestsInPeriod(
-            lines: lines,
+            lines: sourceLines,
             periodStart: period.start,
             periodEnd: period.end,
             targetCurrencyCode: currencyCode,
@@ -165,7 +229,7 @@ class TaxSummaryService {
           if (missing.isNotEmpty) throw _MissingTaxRates(missing);
 
           final built = buildTaxEntriesInPeriod(
-            lines: lines,
+            lines: sourceLines,
             periodStart: period.start,
             periodEnd: period.end,
             rates: rates,
@@ -181,9 +245,9 @@ class TaxSummaryService {
             onUnmapped: () => unmappedUniversalCount++,
           );
 
-          return _toView(
+          final view = _toView(
             entity,
-            entries,
+            [for (final (_, entry) in entries) entry],
             pack: pack,
             period: period,
             generatedAt: now,
@@ -191,6 +255,17 @@ class TaxSummaryService {
             uncategorised: built.uncategorizedCount + unmappedUniversalCount,
             fxGroups: fxGroups.values.toList(),
             wallets: await _walletViews(session, entity, period, tx),
+          );
+          return TaxSummaryComputation(
+            view: view,
+            currencyCode: currencyCode,
+            entries: [for (final (_, entry) in entries) entry],
+            sourceIndexes: [for (final (index, _) in entries) index],
+            fxRequests: requests,
+            rates: rates,
+            sourceLines: {
+              for (final line in sourceLines) line.id.toString(): line,
+            },
           );
         },
         settings: const TransactionSettings(
@@ -215,6 +290,24 @@ class TaxSummaryService {
       );
     }
   }
+
+  /// The year a summary for [entityId] covers when the caller gives none.
+  ///
+  /// The export link needs a year pinned into its token, so it resolves
+  /// the default through this instead of guessing the rule twice.
+  static Future<int> defaultStartYear(
+    Session session,
+    UuidValue entityId,
+  ) => session.db.transaction((tx) async {
+    final entity = await EntityAccess.requireOwned(
+      session,
+      entityId,
+      transaction: tx,
+    );
+    final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+    final pack = jurisdiction == null ? null : packFor(jurisdiction);
+    return _resolvePeriod(entity, pack, null, clock()).startYear;
+  });
 
   /// The summary period for [entity].
   ///
@@ -378,19 +471,29 @@ class TaxSummaryService {
   /// has no home in the pack is dropped and counted as uncategorised
   /// rather than land somewhere the pack's rules may not allow. Entries
   /// pass through unchanged when [pack] is null.
-  static List<TaxEntry> _mapUniversalEntries(
+  ///
+  /// Each result pair keeps the entry's index in [entries], so the export
+  /// can look the entry's exchange-rate facts up in the pre-mapping
+  /// request list.
+  static List<(int, TaxEntry)> _mapUniversalEntries(
     List<TaxEntry> entries, {
     required TaxRulePack? pack,
     required EntityKind kind,
     required void Function() onUnmapped,
   }) {
-    if (pack == null) return entries;
+    if (pack == null) {
+      return [
+        for (var index = 0; index < entries.length; index++)
+          (index, entries[index]),
+      ];
+    }
 
-    final mapped = <TaxEntry>[];
-    for (final entry in entries) {
+    final mapped = <(int, TaxEntry)>[];
+    for (var index = 0; index < entries.length; index++) {
+      final entry = entries[index];
       final code = entry.categoryCode;
       if (!UniversalTaxCategories.isUniversalCode(code)) {
-        mapped.add(entry);
+        mapped.add((index, entry));
         continue;
       }
       final packCode = pack.mapUniversalCategory(code, kind);
@@ -399,18 +502,21 @@ class TaxSummaryService {
         continue;
       }
       if (packCode == code) {
-        mapped.add(entry);
+        mapped.add((index, entry));
         continue;
       }
       mapped.add(
-        TaxEntry(
-          date: entry.date,
-          amountMinor: entry.amountMinor,
-          categoryCode: packCode,
-          businessUsePercent: entry.businessUsePercent,
-          salesTaxMinor: entry.salesTaxMinor,
-          sourceId: entry.sourceId,
-          note: entry.note,
+        (
+          index,
+          TaxEntry(
+            date: entry.date,
+            amountMinor: entry.amountMinor,
+            categoryCode: packCode,
+            businessUsePercent: entry.businessUsePercent,
+            salesTaxMinor: entry.salesTaxMinor,
+            sourceId: entry.sourceId,
+            note: entry.note,
+          ),
         ),
       );
     }

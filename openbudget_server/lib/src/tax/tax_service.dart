@@ -687,6 +687,8 @@ class TaxService {
           taxCategoryCode: row[8] as String?,
           envelopeTaxCategoryCode: row[9] as String?,
           isTransfer: row[10] as bool,
+          envelopeName: row[11] as String?,
+          payeeName: row[12] as String?,
         ),
       );
     }
@@ -1030,11 +1032,14 @@ SELECT
   l."businessUsePercent",
   l."taxCategoryCode",
   e."taxCategoryCode",
-  tr.id IS NOT NULL
+  tr.id IS NOT NULL,
+  e.name,
+  p.name
 FROM transaction_line l
 JOIN "transaction" t ON t.id = l."transactionId"
 JOIN account a ON a.id = t."accountId"
 LEFT JOIN envelope e ON e.id = l."envelopeId"
+LEFT JOIN payee p ON p.id = t."payeeId"
 LEFT JOIN transfer tr
   ON tr."fromTransactionId" = t.id OR tr."toTransactionId" = t.id
 WHERE t."entityId" = ANY(@entityIds::uuid[])
