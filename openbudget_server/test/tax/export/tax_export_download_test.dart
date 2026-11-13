@@ -25,9 +25,13 @@ void main() {
   late TaxEndpoint endpoint;
   var serverStarted = false;
 
-  /// The signing key the tests share, derived the way the service derives
-  /// it from the injected `serviceSecret` password.
-  final key = TaxExportSigningKey.derive('test-tax-export-secret');
+  /// The signing key the server uses, derived the way the service derives
+  /// it from whichever `serviceSecret` the test server runs with (CI's
+  /// passwords.yaml carries its own), so a hand-minted token is only ever
+  /// refused for the reason a test names, never for a key mismatch.
+  Uint8List key() => TaxExportSigningKey.derive(
+    server.session.server.passwords['serviceSecret']!,
+  );
 
   String mintToken({
     required UuidValue userId,
@@ -35,7 +39,7 @@ void main() {
     int startYear = 2026,
     DateTime? expiresAt,
   }) => TaxExportToken.mint(
-    signingKey: key,
+    signingKey: key(),
     payload: TaxExportTokenPayload(
       userId: userId,
       entityId: entityId,
