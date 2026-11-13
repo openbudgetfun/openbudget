@@ -9,10 +9,68 @@
     "Asia/Kuala_Lumpur",
     "Asia/Kuching"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "salesTax",
+    "localName": "Sales and Service Tax (SST)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 600,
+        "from": "2022-01-01",
+        "to": "2024-03-01",
+        "appliesTo": "service tax on taxable services",
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 800,
+        "from": "2024-03-01",
+        "to": null,
+        "appliesTo": "service tax on taxable services; food and beverage, telecommunications, parking and logistics services remain at 6%",
+        "source": 3
+      },
+      {
+        "label": "service",
+        "basisPoints": 600,
+        "from": "2024-03-01",
+        "to": null,
+        "appliesTo": "food and beverage, telecommunications, parking and logistics services (retained 6% rate)",
+        "source": 3
+      },
+      {
+        "label": "sales",
+        "basisPoints": 1000,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "sales tax on goods",
+        "source": 3
+      },
+      {
+        "label": "salesReduced",
+        "basisPoints": 500,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "certain goods including basic foodstuffs, construction supplies and telecoms/IT equipment",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Royal Malaysian Customs Department (RMCD)",
+    "url": "https://mysst.customs.gov.my"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -31,9 +89,32 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "MySST (Royal Malaysian Customs Department): background — service tax 6% from 1 September 2018 to 29 February 2024 and 8% from 1 March 2024 (F&B, parking, logistics and telecoms stay 6%); scope expanded 1 July 2025",
+      "url": "https://mysst.customs.gov.my/background/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Malaysia's SST is a single-stage tax, not a VAT: the 8% service tax (from 1 March 2024, Budget 2024) and 10%/5% sales tax. New service categories added from 1 July 2025 (financial services 8%; construction, private healthcare, education and rental at 6%) are not modelled.",
+    "Lower-bound rows - service (2022-01-01), sales (2022-01-01), salesReduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Malaysia's SST is a single-stage tax, not a VAT: the 8% service tax (from 1 March 2024, Budget 2024) and 10%/5% sales tax. New service categories added from 1 July 2025 (financial services 8%; construction, private healthcare, education and rental at 6%) are not modelled.",
+    "Lower-bound rows - service (2022-01-01), sales (2022-01-01), salesReduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Malaysia's SST is a single-stage tax, not a VAT: the 8% service tax (from 1 March 2024, Budget 2024) and 10%/5% sales tax. New service categories added from 1 July 2025 (financial services 8%; construction, private healthcare, education and rental at 6%) are not modelled.",
+    "Lower-bound rows - service (2022-01-01), sales (2022-01-01), salesReduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Malaysia's SST is a single-stage tax, not a VAT: the 8% service tax (from 1 March 2024, Budget 2024) and 10%/5% sales tax. New service categories added from 1 July 2025 (financial services 8%; construction, private healthcare, education and rental at 6%) are not modelled.",
+    "Lower-bound rows - service (2022-01-01), sales (2022-01-01), salesReduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
+  ]
 }

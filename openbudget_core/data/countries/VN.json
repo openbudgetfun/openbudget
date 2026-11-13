@@ -8,10 +8,76 @@
   "timeZones": [
     "Asia/Ho_Chi_Minh"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Thuế giá trị gia tăng (VAT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1000,
+        "from": "2022-01-01",
+        "to": "2022-02-01",
+        "appliesTo": null,
+        "source": 5
+      },
+      {
+        "label": "standard",
+        "basisPoints": 800,
+        "from": "2022-02-01",
+        "to": "2023-01-01",
+        "appliesTo": "2-point cut under Resolution 43/2022/QH15 (Decree 15/2022)",
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1000,
+        "from": "2023-01-01",
+        "to": "2023-07-01",
+        "appliesTo": "cut lapsed 1 January 2023 until Resolution 101/2023/QH15",
+        "source": 4
+      },
+      {
+        "label": "standard",
+        "basisPoints": 800,
+        "from": "2023-07-01",
+        "to": null,
+        "appliesTo": "2-point cut under Resolutions 101/2023, 142/2024, 259/2024 and 204/2025 (Decrees 44, 72, 94, 204 and 174); lapses 31 December 2026 unless extended",
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 500,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "essential goods and services (water, medical, education, public transport, and others)",
+        "source": 5
+      },
+      {
+        "label": "standardExcluded",
+        "basisPoints": 1000,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "telecommunications, financial activities, banking, securities, insurance, real estate, metal products, most mining, and goods and services subject to special consumption tax — never received the 2-point cut",
+        "source": 5
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "General Department of Taxation (Vietnam)",
+    "url": "https://gdt.gov.vn"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +96,44 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Hanoi Tax Department (General Department of Taxation): Resolution 204/2025/QH15 — 2-point VAT cut (10% to 8%) from 1 July 2025 to 31 December 2026",
+      "url": "https://hanoi.gdt.gov.vn/wps/wcm/connect/HaNoi/site/news/cucthue/64b285a2-6cd5-4f69-a760-f4e8403ca1b6",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Allen & Gledhill: Vietnam reduces VAT rate to 8% from 1 July 2023 (Resolution 101/2023/QH15 and Decree 44/2023 — window 1 July to 31 December 2023, later extended through 2024)",
+      "url": "https://www.allenandgledhill.com/vn/perspectives/articles/25010/vnkh-vietnam-reduces-vat-rate-to-8-from-1-july-2023",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+      "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-01-15",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The statutory rates are 0%, 5% and 10%; the 8% rows record the temporary 2-point cuts on the 10% track: 1 February 2022 to 31 January 2023 (Res. 43/2022), lapsed 1 January to 30 June 2023, 1 July 2023 to 31 December 2024 (Res. 101/2023, extended by Decree 94/2023 and Res. 142/2024), 1 January to 30 June 2025 (Res. 259/2024) and 1 July 2025 to 31 December 2026 (Res. 204/2025). Extension into 2027 was still under review in November 2026, so the open 8% row may lapse on 31 December 2026.",
+    "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), standardExcluded (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The statutory rates are 0%, 5% and 10%; the 8% rows record the temporary 2-point cuts on the 10% track: 1 February 2022 to 31 January 2023 (Res. 43/2022), lapsed 1 January to 30 June 2023, 1 July 2023 to 31 December 2024 (Res. 101/2023, extended by Decree 94/2023 and Res. 142/2024), 1 January to 30 June 2025 (Res. 259/2024) and 1 July 2025 to 31 December 2026 (Res. 204/2025). Extension into 2027 was still under review in November 2026, so the open 8% row may lapse on 31 December 2026.",
+    "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), standardExcluded (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The statutory rates are 0%, 5% and 10%; the 8% rows record the temporary 2-point cuts on the 10% track: 1 February 2022 to 31 January 2023 (Res. 43/2022), lapsed 1 January to 30 June 2023, 1 July 2023 to 31 December 2024 (Res. 101/2023, extended by Decree 94/2023 and Res. 142/2024), 1 January to 30 June 2025 (Res. 259/2024) and 1 July 2025 to 31 December 2026 (Res. 204/2025). Extension into 2027 was still under review in November 2026, so the open 8% row may lapse on 31 December 2026.",
+    "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), standardExcluded (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The statutory rates are 0%, 5% and 10%; the 8% rows record the temporary 2-point cuts on the 10% track: 1 February 2022 to 31 January 2023 (Res. 43/2022), lapsed 1 January to 30 June 2023, 1 July 2023 to 31 December 2024 (Res. 101/2023, extended by Decree 94/2023 and Res. 142/2024), 1 January to 30 June 2025 (Res. 259/2024) and 1 July 2025 to 31 December 2026 (Res. 204/2025). Extension into 2027 was still under review in November 2026, so the open 8% row may lapse on 31 December 2026.",
+    "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), standardExcluded (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
+  ]
 }

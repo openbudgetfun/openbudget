@@ -8,10 +8,68 @@
   "timeZones": [
     "Asia/Colombo"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Value Added Tax (VAT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 800,
+        "from": "2022-01-01",
+        "to": "2022-06-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1200,
+        "from": "2022-06-01",
+        "to": "2022-09-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2022-09-01",
+        "to": "2024-01-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1800,
+        "from": "2024-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "financial",
+        "basisPoints": 1800,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "supply of financial services by specified institutions",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Inland Revenue Department (Sri Lanka)",
+    "url": "https://www.ird.gov.lk"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +88,28 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Inland Revenue Department Sri Lanka: Value Added Tax — standard rate 8% to 31 May 2022, 12% from 1 June 2022, 15% from 1 September 2022 and 18% from 1 January 2024; financial services 18% from 1 January 2022",
+      "url": "https://www.ird.gov.lk/en/type%20of%20taxes/sitepages/value%20added%20tax%20(vat).aspx",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "The tax year is the calendar year from 2024 (grade I); the 2023/24 year was the transitional nine months from 1 April to 31 December 2023, which the schema cannot express as a start-month/day pair.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Sri Lanka raised VAT three times during the window (June 2022, September 2022, January 2024) under IMF-programme revenue measures; the 8% row is a lower bound from the start of the window (the 8% rate dated from December 2019).",
+    "The tax year is the calendar year from 2024 (grade I); the 2023/24 year was the transitional nine months from 1 April to 31 December 2023, which the schema cannot express as a start-month/day pair.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Sri Lanka raised VAT three times during the window (June 2022, September 2022, January 2024) under IMF-programme revenue measures; the 8% row is a lower bound from the start of the window (the 8% rate dated from December 2019).",
+    "The tax year is the calendar year from 2024 (grade I); the 2023/24 year was the transitional nine months from 1 April to 31 December 2023, which the schema cannot express as a start-month/day pair.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Sri Lanka raised VAT three times during the window (June 2022, September 2022, January 2024) under IMF-programme revenue measures; the 8% row is a lower bound from the start of the window (the 8% rate dated from December 2019).",
+    "The tax year is the calendar year from 2024 (grade I); the 2023/24 year was the transitional nine months from 1 April to 31 December 2023, which the schema cannot express as a start-month/day pair.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Sri Lanka raised VAT three times during the window (June 2022, September 2022, January 2024) under IMF-programme revenue measures; the 8% row is a lower bound from the start of the window (the 8% rate dated from December 2019)."
+  ]
 }

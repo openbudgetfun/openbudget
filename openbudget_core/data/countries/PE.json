@@ -8,10 +8,36 @@
   "timeZones": [
     "America/Lima"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Impuesto General a las Ventas (IGV, incl. IPM)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1800,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "combined IGV and municipal promotion tax (IPM)",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Superintendencia Nacional de Aduanas y de Administración Tributaria (SUNAT)",
+    "url": "https://www.gob.pe/sunat"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +56,32 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "SUNAT: Impuesto General a las Ventas — 2026 rate 15.5% IGV plus 2.5% IPM, total 18% (Ley 32387 shifts half a point a year from IGV to IPM 2026-2029)",
+      "url": "https://www.gob.pe/institucion/sunat/pages/7910-impuesto-general-a-las-ventas-igv",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The combined rate paid at the till is 18% throughout the window; Ley 32387 (published 16 June 2025) only shifts half a point a year between the IGV and the municipal IPM from 1 January 2026 (IGV 15.5% plus IPM 2.5% in 2026), so no rate row changes. A reduced 10.5% combined rate (2026) applies to qualifying micro/small restaurants and hotels (not modelled).",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The combined rate paid at the till is 18% throughout the window; Ley 32387 (published 16 June 2025) only shifts half a point a year between the IGV and the municipal IPM from 1 January 2026 (IGV 15.5% plus IPM 2.5% in 2026), so no rate row changes. A reduced 10.5% combined rate (2026) applies to qualifying micro/small restaurants and hotels (not modelled).",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The combined rate paid at the till is 18% throughout the window; Ley 32387 (published 16 June 2025) only shifts half a point a year between the IGV and the municipal IPM from 1 January 2026 (IGV 15.5% plus IPM 2.5% in 2026), so no rate row changes. A reduced 10.5% combined rate (2026) applies to qualifying micro/small restaurants and hotels (not modelled).",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The combined rate paid at the till is 18% throughout the window; Ley 32387 (published 16 June 2025) only shifts half a point a year between the IGV and the municipal IPM from 1 January 2026 (IGV 15.5% plus IPM 2.5% in 2026), so no rate row changes. A reduced 10.5% combined rate (2026) applies to qualifying micro/small restaurants and hotels (not modelled).",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
+  ]
 }

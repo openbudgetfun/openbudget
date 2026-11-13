@@ -54,7 +54,217 @@
     ],
     "registrationThreshold": null,
     "returnFrequency": null,
-    "subdivisions": []
+    "subdivisions": [
+      {
+        "code": "CA-AB",
+        "rates": [
+          {
+            "label": "gst",
+            "basisPoints": 500,
+            "from": "2008-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 14
+          }
+        ]
+      },
+      {
+        "code": "CA-BC",
+        "rates": [
+          {
+            "label": "gst",
+            "basisPoints": 500,
+            "from": "2008-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 14
+          },
+          {
+            "label": "pst",
+            "basisPoints": 700,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 13
+          }
+        ]
+      },
+      {
+        "code": "CA-MB",
+        "rates": [
+          {
+            "label": "gst",
+            "basisPoints": 500,
+            "from": "2008-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 14
+          },
+          {
+            "label": "pst",
+            "basisPoints": 700,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": "retail sales tax (RST)",
+            "source": 13
+          }
+        ]
+      },
+      {
+        "code": "CA-NB",
+        "rates": [
+          {
+            "label": "hst",
+            "basisPoints": 1500,
+            "from": "2016-07-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 13
+          }
+        ]
+      },
+      {
+        "code": "CA-NL",
+        "rates": [
+          {
+            "label": "hst",
+            "basisPoints": 1500,
+            "from": "2016-07-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 13
+          }
+        ]
+      },
+      {
+        "code": "CA-NS",
+        "rates": [
+          {
+            "label": "hst",
+            "basisPoints": 1500,
+            "from": "2016-07-01",
+            "to": "2025-04-01",
+            "appliesTo": null,
+            "source": 13
+          },
+          {
+            "label": "hst",
+            "basisPoints": 1400,
+            "from": "2025-04-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 13
+          }
+        ]
+      },
+      {
+        "code": "CA-NT",
+        "rates": [
+          {
+            "label": "gst",
+            "basisPoints": 500,
+            "from": "2008-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 14
+          }
+        ]
+      },
+      {
+        "code": "CA-NU",
+        "rates": [
+          {
+            "label": "gst",
+            "basisPoints": 500,
+            "from": "2008-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 14
+          }
+        ]
+      },
+      {
+        "code": "CA-ON",
+        "rates": [
+          {
+            "label": "hst",
+            "basisPoints": 1300,
+            "from": "2013-04-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 13
+          }
+        ]
+      },
+      {
+        "code": "CA-PE",
+        "rates": [
+          {
+            "label": "hst",
+            "basisPoints": 1500,
+            "from": "2016-10-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 13
+          }
+        ]
+      },
+      {
+        "code": "CA-QC",
+        "rates": [
+          {
+            "label": "gst",
+            "basisPoints": 500,
+            "from": "2008-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 14
+          },
+          {
+            "label": "qst",
+            "basisPoints": 998,
+            "from": "2013-01-01",
+            "to": null,
+            "appliesTo": "9.975% QST rounded to 998bp (schema stores integer hundredths)",
+            "source": 14
+          }
+        ]
+      },
+      {
+        "code": "CA-SK",
+        "rates": [
+          {
+            "label": "gst",
+            "basisPoints": 500,
+            "from": "2008-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 14
+          },
+          {
+            "label": "pst",
+            "basisPoints": 600,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 13
+          }
+        ]
+      },
+      {
+        "code": "CA-YT",
+        "rates": [
+          {
+            "label": "gst",
+            "basisPoints": 500,
+            "from": "2008-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 14
+          }
+        ]
+      }
+    ]
   },
   "authority": {
     "name": "Canada Revenue Agency (CRA)",
@@ -102,15 +312,67 @@
       "url": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2024/11/consumption-tax-trends-2024_57c7322a/dcd4dd36-en.pdf",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Canada Revenue Agency: GST/HST calculator (and rates) — GST, HST and PST by province, including the Nova Scotia HST decrease to 14% on 1 April 2025",
+      "url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Revenu Québec: Tables of GST and QST rates (GST 5% since 1 January 2008; QST 9.975% since 1 January 2013)",
+      "url": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/basic-rules-for-applying-the-gsthst-and-qst/tables-of-gst-and-qst-rates/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Canada Revenue Agency: GST/HST calculator (and rates) — GST, HST and PST by province, including the Nova Scotia HST decrease to 14% on 1 April 2025",
+      "url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Revenu Québec: Tables of GST and QST rates (GST 5% since 1 January 2008; QST 9.975% since 1 January 2013)",
+      "url": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/basic-rules-for-applying-the-gsthst-and-qst/tables-of-gst-and-qst-rates/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Canada Revenue Agency: GST/HST calculator (and rates) — GST, HST and PST by province, including the Nova Scotia HST decrease to 14% on 1 April 2025",
+      "url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Revenu Québec: Tables of GST and QST rates (GST 5% since 1 January 2008; QST 9.975% since 1 January 2013)",
+      "url": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/basic-rules-for-applying-the-gsthst-and-qst/tables-of-gst-and-qst-rates/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Canada Revenue Agency: GST/HST calculator (and rates) — GST, HST and PST by province, including the Nova Scotia HST decrease to 14% on 1 April 2025",
+      "url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Revenu Québec: Tables of GST and QST rates (GST 5% since 1 January 2008; QST 9.975% since 1 January 2013)",
+      "url": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/basic-rules-for-applying-the-gsthst-and-qst/tables-of-gst-and-qst-rates/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
   "recheckBy": "2027-05-13",
   "caveats": [
     "Rate primary from section 165 of the Excise Tax Act (5% GST, retrieved 2026-11-13); the act publishes no effective dates, so from records the retrieval date.",
-    "Provincial HST/QST/PST rates are subdivision data and arrive with task U4.",
+    "Provincial rates are primary from the CRA GST/HST calculator table and Revenu Québec's rate tables: HST 15% in New Brunswick, Newfoundland and Labrador and Prince Edward Island, 13% in Ontario; Nova Scotia's HST fell from 15% to 14% on 1 April 2025. Quebec charges GST 5% plus QST 9.975% (stored as 998bp — the schema stores integer hundredths of a percent). British Columbia, Manitoba and Saskatchewan charge GST 5% plus PST/RST (7%, 7%, 6%).",
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Lower-bound rows - standard (2008-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed at the earliest OECD Consumption Tax Trends benchmark year in which the value appears)."
+    "Lower-bound rows - standard (2008-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed at the earliest OECD Consumption Tax Trends benchmark year in which the value appears).",
+    "Lower-bound subdivision rows: BC, Manitoba and Saskatchewan PST rows start at 2022-01-01 (the CRA table lists current values only; the 7%, 7% and 6% rates date from 2013, 2010 and 2017 respectively). Ontario HST 13% is recorded from 2013-04-01, the earliest date in the CRA historical table (the rate itself dates from 1 July 2010).",
+    "Lower-bound subdivision rows: BC, Manitoba and Saskatchewan PST rows start at 2022-01-01 (the CRA table lists current values only; the 7%, 7% and 6% rates date from 2013, 2010 and 2017 respectively). Ontario HST 13% is recorded from 2013-04-01, the earliest date in the CRA historical table (the rate itself dates from 1 July 2010).",
+    "Lower-bound subdivision rows: BC, Manitoba and Saskatchewan PST rows start at 2022-01-01 (the CRA table lists current values only; the 7%, 7% and 6% rates date from 2013, 2010 and 2017 respectively). Ontario HST 13% is recorded from 2013-04-01, the earliest date in the CRA historical table (the rate itself dates from 1 July 2010).",
+    "Lower-bound subdivision rows: BC, Manitoba and Saskatchewan PST rows start at 2022-01-01 (the CRA table lists current values only; the 7%, 7% and 6% rates date from 2013, 2010 and 2017 respectively). Ontario HST 13% is recorded from 2013-04-01, the earliest date in the CRA historical table (the rate itself dates from 1 July 2010)."
   ]
 }

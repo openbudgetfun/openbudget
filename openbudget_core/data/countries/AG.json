@@ -8,10 +8,52 @@
   "timeZones": [
     "America/Antigua"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Antigua and Barbuda Sales Tax (ABST)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2022-01-01",
+        "to": "2024-01-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1700,
+        "from": "2024-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "hotel",
+        "basisPoints": 1400,
+        "from": "2022-01-01",
+        "to": "2024-01-01",
+        "appliesTo": "hotel and holiday accommodation",
+        "source": 4
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Inland Revenue Department, Antigua and Barbuda",
+    "url": "https://abird.gov.ag"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +72,38 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Antigua and Barbuda Inland Revenue Department notice of 1 January 2024: ABST increases from 15% to 17% under the Revenue (Miscellaneous Provisions) Act No. 13 of 2023 (reproduced by Antigua News Room)",
+      "url": "https://antiguanewsroom.com/abst-increases-from-15-to-17-from-today-january-1-2024-ird/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "PwC / EY iGuide tax summary for Antigua and Barbuda (ABST 17% from 1 January 2024; hotel accommodation 14% from 1 March 2020 to 31 December 2023)",
+      "url": "http://admin.theiguides.org/Media/Documents/AG%20TaxCorp%20-%20June%202024.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "ABST rose from 15% to 17% on 1 January 2024 (Revenue (Miscellaneous Provisions) Act No. 13 of 2023); the concessionary 14% hotel rate rose to 17% the same day and tourism concessions were repealed (grade S — IRD notice read via a reproduction, the IRD site itself was unreachable).",
+    "Lower-bound rows - standard (2022-01-01), hotel (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "ABST rose from 15% to 17% on 1 January 2024 (Revenue (Miscellaneous Provisions) Act No. 13 of 2023); the concessionary 14% hotel rate rose to 17% the same day and tourism concessions were repealed (grade S — IRD notice read via a reproduction, the IRD site itself was unreachable).",
+    "Lower-bound rows - standard (2022-01-01), hotel (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "ABST rose from 15% to 17% on 1 January 2024 (Revenue (Miscellaneous Provisions) Act No. 13 of 2023); the concessionary 14% hotel rate rose to 17% the same day and tourism concessions were repealed (grade S — IRD notice read via a reproduction, the IRD site itself was unreachable).",
+    "Lower-bound rows - standard (2022-01-01), hotel (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "ABST rose from 15% to 17% on 1 January 2024 (Revenue (Miscellaneous Provisions) Act No. 13 of 2023); the concessionary 14% hotel rate rose to 17% the same day and tourism concessions were repealed (grade S — IRD notice read via a reproduction, the IRD site itself was unreachable).",
+    "Lower-bound rows - standard (2022-01-01), hotel (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
+  ]
 }

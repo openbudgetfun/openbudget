@@ -8,10 +8,36 @@
   "timeZones": [
     "Asia/Dhaka"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 7,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 6,
+    "day": 30
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "মূল্য সংযোজন কর (VAT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "National Board of Revenue (NBR)",
+    "url": "https://nbr.gov.bd"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +56,36 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+      "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear runs 1 July to 30 June (grade I, from the assessment cycle; the NBR site was unreachable this session).",
+    "companyYearEndDefault is a 30 June app default for new entities (grade I), not a statutory requirement.",
+    "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+    "Multiple reduced VAT tiers (10%, 7.5%, 5% and 4.5% for listed goods and services) are not modelled (grade S).",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear runs 1 July to 30 June (grade I, from the assessment cycle; the NBR site was unreachable this session).",
+    "companyYearEndDefault is a 30 June app default for new entities (grade I), not a statutory requirement.",
+    "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+    "Multiple reduced VAT tiers (10%, 7.5%, 5% and 4.5% for listed goods and services) are not modelled (grade S).",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear runs 1 July to 30 June (grade I, from the assessment cycle; the NBR site was unreachable this session).",
+    "companyYearEndDefault is a 30 June app default for new entities (grade I), not a statutory requirement.",
+    "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+    "Multiple reduced VAT tiers (10%, 7.5%, 5% and 4.5% for listed goods and services) are not modelled (grade S).",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear runs 1 July to 30 June (grade I, from the assessment cycle; the NBR site was unreachable this session).",
+    "companyYearEndDefault is a 30 June app default for new entities (grade I), not a statutory requirement.",
+    "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+    "Multiple reduced VAT tiers (10%, 7.5%, 5% and 4.5% for listed goods and services) are not modelled (grade S).",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
+  ]
 }

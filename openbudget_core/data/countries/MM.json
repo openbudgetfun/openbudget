@@ -8,10 +8,60 @@
   "timeZones": [
     "Asia/Yangon"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 4,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 3,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "salesTax",
+    "localName": "Commercial Tax (CT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 500,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 300,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "hotel and tourism services; construction and sale of buildings",
+        "source": 3
+      },
+      {
+        "label": "higher",
+        "basisPoints": 1500,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "internet services",
+        "source": 3
+      },
+      {
+        "label": "reduced2",
+        "basisPoints": 100,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "importation and sale of gold jewellery",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Internal Revenue Department (Myanmar)",
+    "url": "https://ird.gov.mm"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +80,42 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Union Taxation Law 2023 (30 March 2023, English text via the Myanmar Trade Portal) — commercial tax 5% general, 3% hotels/tourism and building sales, 15% internet services, 1% gold jewellery",
+      "url": "https://www.myanmartradeportal.gov.mm/uploads/legals/2024/7/Union%20Taxation%20Law%202023%20Eng.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VDB Loi Myanmar tax booklet 2023-24 / 2024-25 — financial year runs 1 April to 31 March for all sectors; commercial tax rates summary",
+      "url": "https://www.vdb-loi.com/wp-content/uploads/2024/07/Myanmar-Tax-Booklet_2023-2024_2024-2025-.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Myanmar's financial year runs 1 April to 31 March (grade S, VDB Loi booklet); the individual tax year and company default year end follow it. The pre-2018 October-September year is outside the window.",
+    "companyYearEndDefault is a 31 March app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Commercial tax rates are set annually by the Union Taxation Law; the 2023 law's rates (in force through the 2024-25 financial year) are recorded as a lower bound from 1 January 2022, the earliest date a source confirms for the window.",
+    "A MMK 20,000 per-SIM levy and 8% export electricity rate are not modelled. Grade S where read from the VDB Loi or PwC summaries rather than the law text.",
+    "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), higher (2022-01-01), reduced2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "Myanmar's financial year runs 1 April to 31 March (grade S, VDB Loi booklet); the individual tax year and company default year end follow it. The pre-2018 October-September year is outside the window.",
+    "companyYearEndDefault is a 31 March app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Commercial tax rates are set annually by the Union Taxation Law; the 2023 law's rates (in force through the 2024-25 financial year) are recorded as a lower bound from 1 January 2022, the earliest date a source confirms for the window.",
+    "A MMK 20,000 per-SIM levy and 8% export electricity rate are not modelled. Grade S where read from the VDB Loi or PwC summaries rather than the law text.",
+    "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), higher (2022-01-01), reduced2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "Myanmar's financial year runs 1 April to 31 March (grade S, VDB Loi booklet); the individual tax year and company default year end follow it. The pre-2018 October-September year is outside the window.",
+    "companyYearEndDefault is a 31 March app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Commercial tax rates are set annually by the Union Taxation Law; the 2023 law's rates (in force through the 2024-25 financial year) are recorded as a lower bound from 1 January 2022, the earliest date a source confirms for the window.",
+    "A MMK 20,000 per-SIM levy and 8% export electricity rate are not modelled. Grade S where read from the VDB Loi or PwC summaries rather than the law text.",
+    "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), higher (2022-01-01), reduced2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "Myanmar's financial year runs 1 April to 31 March (grade S, VDB Loi booklet); the individual tax year and company default year end follow it. The pre-2018 October-September year is outside the window.",
+    "companyYearEndDefault is a 31 March app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Commercial tax rates are set annually by the Union Taxation Law; the 2023 law's rates (in force through the 2024-25 financial year) are recorded as a lower bound from 1 January 2022, the earliest date a source confirms for the window.",
+    "A MMK 20,000 per-SIM levy and 8% export electricity rate are not modelled. Grade S where read from the VDB Loi or PwC summaries rather than the law text.",
+    "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), higher (2022-01-01), reduced2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
+  ]
 }

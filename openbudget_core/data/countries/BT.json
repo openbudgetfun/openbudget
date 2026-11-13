@@ -9,10 +9,44 @@
   "timeZones": [
     "Asia/Thimphu"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "gst",
+    "localName": "Goods and Services Tax (GST)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 500,
+        "from": "2026-01-01",
+        "to": null,
+        "appliesTo": "single rate on all taxable supplies and imports (Schedule I, GST Amendment Act 2025)",
+        "source": 3
+      },
+      {
+        "label": "zero",
+        "basisPoints": 0,
+        "from": "2026-01-01",
+        "to": null,
+        "appliesTo": "exports of goods and services",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Department of Revenue and Customs, Ministry of Finance (Bhutan)",
+    "url": "https://www.drc.gov.bt"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -31,9 +65,38 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Department of Revenue and Customs (Bhutan): GST frequently asked questions — 5% single rate implemented from 1 January 2026, replacing the Sales Tax regime",
+      "url": "https://www.drc.gov.bt/wp-content/uploads/2026/02/Frequently-Asked-Questions-3.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "DRC Public Notification DRC/STD/GST/50/2025 (19 December 2025): GST implemented with effect from 1 January 2026, replacing the existing Sales Tax regime",
+      "url": "https://www.drc.gov.bt/wp-content/uploads/2025/12/GST-Implementation.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Bhutan had no single-rate consumption tax before 1 January 2026: the Sales Tax, Customs and Excise framework taxed a schedule of goods at product-specific rates, so no pre-2026 standard rate can be recorded. The 5% GST was confirmed by the GST (Amendment) Act 2025 (reduced from the originally proposed 7%) after earlier 2022 and 2024 deferrals.",
+    "First-year regime: re-verify against DRC notices during 2026-27 as exemption schedules are still moving (Schedule IV additions in May and June 2026).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Bhutan had no single-rate consumption tax before 1 January 2026: the Sales Tax, Customs and Excise framework taxed a schedule of goods at product-specific rates, so no pre-2026 standard rate can be recorded. The 5% GST was confirmed by the GST (Amendment) Act 2025 (reduced from the originally proposed 7%) after earlier 2022 and 2024 deferrals.",
+    "First-year regime: re-verify against DRC notices during 2026-27 as exemption schedules are still moving (Schedule IV additions in May and June 2026).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Bhutan had no single-rate consumption tax before 1 January 2026: the Sales Tax, Customs and Excise framework taxed a schedule of goods at product-specific rates, so no pre-2026 standard rate can be recorded. The 5% GST was confirmed by the GST (Amendment) Act 2025 (reduced from the originally proposed 7%) after earlier 2022 and 2024 deferrals.",
+    "First-year regime: re-verify against DRC notices during 2026-27 as exemption schedules are still moving (Schedule IV additions in May and June 2026).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Bhutan had no single-rate consumption tax before 1 January 2026: the Sales Tax, Customs and Excise framework taxed a schedule of goods at product-specific rates, so no pre-2026 standard rate can be recorded. The 5% GST was confirmed by the GST (Amendment) Act 2025 (reduced from the originally proposed 7%) after earlier 2022 and 2024 deferrals.",
+    "First-year regime: re-verify against DRC notices during 2026-27 as exemption schedules are still moving (Schedule IV additions in May and June 2026)."
+  ]
 }

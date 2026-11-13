@@ -8,10 +8,52 @@
   "timeZones": [
     "Pacific/Fiji"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Value Added Tax (VAT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 900,
+        "from": "2022-01-01",
+        "to": "2023-08-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2023-08-01",
+        "to": "2025-08-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1250,
+        "from": "2025-08-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Fiji Revenue and Customs Service (FRCS)",
+    "url": "https://frcs.org.fj"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +72,34 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "FRCS Standard Interpretation Guideline 2024-15: time of supply — VAT rose from 9% to 15% on 1 August 2023 (2023-24 Budget); 9% had applied since 2016",
+      "url": "https://frcs.org.fj/files/2024/08/SIG-on-Time-of-Supply.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "FRCS public notice: VAT calculation — VAT reduced from 15% to 12.5% effective 1 August 2025 (2025-26 National Budget)",
+      "url": "https://frcs.org.fj/public-notice/value-added-tax-vat-calculation-notice/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Fiji's standard rate moved twice inside the window: 9% to 15% on 1 August 2023 and back down to 12.5% on 1 August 2025. The 9% row is a lower bound from the start of the window (9% had applied since 2016).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Fiji's standard rate moved twice inside the window: 9% to 15% on 1 August 2023 and back down to 12.5% on 1 August 2025. The 9% row is a lower bound from the start of the window (9% had applied since 2016).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Fiji's standard rate moved twice inside the window: 9% to 15% on 1 August 2023 and back down to 12.5% on 1 August 2025. The 9% row is a lower bound from the start of the window (9% had applied since 2016).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Fiji's standard rate moved twice inside the window: 9% to 15% on 1 August 2023 and back down to 12.5% on 1 August 2025. The 9% row is a lower bound from the start of the window (9% had applied since 2016)."
+  ]
 }

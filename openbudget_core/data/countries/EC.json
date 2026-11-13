@@ -9,10 +9,52 @@
     "America/Guayaquil",
     "Pacific/Galapagos"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Impuesto al Valor Agregado (IVA)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1200,
+        "from": "2022-01-01",
+        "to": "2024-04-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2024-04-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "zero",
+        "basisPoints": 0,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "basic basket goods and other zero-rated supplies",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Servicio de Rentas Internas (SRI)",
+    "url": "https://www.sri.gob.ec"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -31,9 +73,32 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Decreto Ejecutivo No. 198 and SRI guidance: IVA general sube del 12% al 15% desde el 1 de abril de 2024 (Ley Orgánica para enfrentar el conflicto armado interno)",
+      "url": "https://esigef.finanzas.gob.ec/esigef/pub/Gu%C3%ADa%20Informativa%20Incremento%20IVA.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The standard IVA rate rose from 12% to 15% on 1 April 2024 (Executive Decree 198) to fund the internal armed conflict; the underlying law fixes 13% as the permanent rate once the temporary surcharge ends, so the 15% rate carries re-check risk.",
+    "Lower-bound rows - standard (2022-01-01), zero (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The standard IVA rate rose from 12% to 15% on 1 April 2024 (Executive Decree 198) to fund the internal armed conflict; the underlying law fixes 13% as the permanent rate once the temporary surcharge ends, so the 15% rate carries re-check risk.",
+    "Lower-bound rows - standard (2022-01-01), zero (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The standard IVA rate rose from 12% to 15% on 1 April 2024 (Executive Decree 198) to fund the internal armed conflict; the underlying law fixes 13% as the permanent rate once the temporary surcharge ends, so the 15% rate carries re-check risk.",
+    "Lower-bound rows - standard (2022-01-01), zero (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The standard IVA rate rose from 12% to 15% on 1 April 2024 (Executive Decree 198) to fund the internal armed conflict; the underlying law fixes 13% as the permanent rate once the temporary surcharge ends, so the 15% rate carries re-check risk.",
+    "Lower-bound rows - standard (2022-01-01), zero (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
+  ]
 }
