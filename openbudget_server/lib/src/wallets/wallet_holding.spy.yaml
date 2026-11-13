@@ -1,19 +1,32 @@
-### The current quantity and valuation of one asset in a wallet.
+### The current quantity and valuation of one asset in a wallet, on one
+### network and in one position.
 class: WalletHolding
 table: wallet_holding
 fields:
   id: UuidValue?, defaultPersist=random_v7
   walletId: UuidValue, relation(parent=wallet, onDelete=Cascade)
-  ### Mint address, or `native` for the chain's own token.
+  ### The network the asset is on. A single-network wallet's holdings use the
+  ### wallet's network.
+  network: WalletNetwork
+  ### The asset on that network: `native`, or the contract, mint, coin type,
+  ### jetton master or policy-and-name unit (multichain-wallets.md 7.2).
   assetId: String
+  ### Spendable, staked or unclaimed. Each position of an asset is its own
+  ### holding.
+  position: HoldingPosition, default=available
   symbol: String?
   name: String?
-  ### Token program id, such as Tokenkeg... or TokenzQd...
+  ### The token standard or program: a Solana token program id, or erc20,
+  ### trc20, trc10, xrplIou, jetton, cardanoNative, suiCoin or aptosFa.
   tokenProgram: String?
   decimals: int
-  ### Quantity in the asset's base units (lamports for SOL).
+  ### Quantity in the asset's base units (lamports, wei, satoshis, sun,
+  ### drops).
   quantityRaw: BigInt
   isNft: bool, default=false
+  ### Whether the holding counts toward net worth. The classifier sets clean
+  ### or suspected; a user choice overrides it and survives syncs.
+  spamVerdict: SpamVerdict, default=clean
   ### ISO 4217 code that unitPrice and every *Minor field here are in.
   priceCurrencyCode: String?
   ### Price of one whole token, exact decimal string.
@@ -34,7 +47,7 @@ fields:
   updatedAt: DateTime, default=now
 indexes:
   wallet_holding_wallet_asset_unique_idx:
-    fields: walletId, assetId
+    fields: walletId, network, assetId, position
     unique: true
   wallet_holding_asset_idx:
-    fields: assetId
+    fields: network, assetId

@@ -19,7 +19,9 @@ enum PriceSource implements _is.SerializableModel {
   magicEden,
 
   /// Computed from a related asset or pool.
-  derived;
+  derived,
+  coingecko,
+  defillama;
 
   static PriceSource fromJson(String name) {
     switch (name) {
@@ -31,6 +33,10 @@ enum PriceSource implements _is.SerializableModel {
         return PriceSource.magicEden;
       case 'derived':
         return PriceSource.derived;
+      case 'coingecko':
+        return PriceSource.coingecko;
+      case 'defillama':
+        return PriceSource.defillama;
       default:
         throw ArgumentError(
           'Value "$name" cannot be converted to "PriceSource"',

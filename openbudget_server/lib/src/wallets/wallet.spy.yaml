@@ -1,4 +1,8 @@
 ### A read-only blockchain wallet whose holdings value one crypto account.
+###
+### One wallet is one address, or one HD key, in one chain family. An EVM
+### wallet reads every network in scanNetworks; any other wallet reads its
+### one network.
 class: Wallet
 table: wallet
 fields:
@@ -6,11 +10,24 @@ fields:
   entityId: UuidValue, relation(parent=entity, onDelete=Cascade)
   ### The crypto account carrying the wallet's value into net worth.
   accountId: UuidValue, relation(parent=account, onDelete=Cascade)
+  ### The wallet's home network, which fixes its chain family. Every EVM
+  ### wallet uses ethereumMainnet here, so one EVM address is one wallet,
+  ### and lists the networks it reads in scanNetworks.
   network: WalletNetwork
-  ### Base58 address.
+  ### The address in its family's canonical form (core WalletAddressParser).
+  ### For an HD wallet, `hd:` and the first 40 hex digits of the SHA-256 of
+  ### its canonical descriptor, so the key is never stored in clear.
   address: String
+  ### EVM wallets: the networks each read covers, in display order. Null for
+  ### every other family.
+  scanNetworks: List<WalletNetwork>?
+  ### HD wallets: the BIP 380 output descriptor, sealed with SecretBox.
+  ### Written together with descriptorNonce or not at all.
+  descriptorCiphertext: String?, scope=serverOnly
+  descriptorNonce: String?, scope=serverOnly
   label: String?
-  ### Newest signature already processed, for incremental sync.
+  ### Solana only: the newest signature already processed. Other families
+  ### keep history positions in wallet_network_state.
   lastSignature: String?
   syncStatus: SyncStatus, default=pending
   lastSyncedAt: DateTime?

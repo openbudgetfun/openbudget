@@ -82,6 +82,7 @@ void main() {
       book.session,
       WalletHolding(
         walletId: wallet.id!,
+        network: wallet.network,
         assetId: _nativeAsset,
         symbol: 'SOL',
         name: 'Solana',

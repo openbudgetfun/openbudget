@@ -10,12 +10,17 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_client/src/protocol/protocol.dart' as _irkl4crj;
 import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 import '../common/sync_status.dart' as _ijl385hj;
 
 /// A read-only blockchain wallet whose holdings value one crypto account.
+///
+/// One wallet is one address, or one HD key, in one chain family. An EVM
+/// wallet reads every network in scanNetworks; any other wallet reads its
+/// one network.
 abstract class Wallet
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   Wallet._({
@@ -24,6 +29,7 @@ abstract class Wallet
     required this.accountId,
     required this.network,
     required this.address,
+    this.scanNetworks,
     this.label,
     this.lastSignature,
     _ijl385hj.SyncStatus? syncStatus,
@@ -41,6 +47,7 @@ abstract class Wallet
     required _isc.UuidValue accountId,
     required _ifz8weqz.WalletNetwork network,
     required String address,
+    List<_ifz8weqz.WalletNetwork>? scanNetworks,
     String? label,
     String? lastSignature,
     _ijl385hj.SyncStatus? syncStatus,
@@ -65,6 +72,11 @@ abstract class Wallet
         (jsonSerialization['network'] as String),
       ),
       address: jsonSerialization['address'] as String,
+      scanNetworks: jsonSerialization['scanNetworks'] == null
+          ? null
+          : _irkl4crj.Protocol().deserialize<List<_ifz8weqz.WalletNetwork>>(
+              jsonSerialization['scanNetworks'],
+            ),
       label: jsonSerialization['label'] as String?,
       lastSignature: jsonSerialization['lastSignature'] as String?,
       syncStatus: jsonSerialization['syncStatus'] == null
@@ -97,14 +109,24 @@ abstract class Wallet
   /// The crypto account carrying the wallet's value into net worth.
   _isc.UuidValue accountId;
 
+  /// The wallet's home network, which fixes its chain family. Every EVM
+  /// wallet uses ethereumMainnet here, so one EVM address is one wallet,
+  /// and lists the networks it reads in scanNetworks.
   _ifz8weqz.WalletNetwork network;
 
-  /// Base58 address.
+  /// The address in its family's canonical form (core WalletAddressParser).
+  /// For an HD wallet, `hd:` and the first 40 hex digits of the SHA-256 of
+  /// its canonical descriptor, so the key is never stored in clear.
   String address;
+
+  /// EVM wallets: the networks each read covers, in display order. Null for
+  /// every other family.
+  List<_ifz8weqz.WalletNetwork>? scanNetworks;
 
   String? label;
 
-  /// Newest signature already processed, for incremental sync.
+  /// Solana only: the newest signature already processed. Other families
+  /// keep history positions in wallet_network_state.
   String? lastSignature;
 
   _ijl385hj.SyncStatus syncStatus;
@@ -126,6 +148,8 @@ abstract class Wallet
     _isc.UuidValue? accountId,
     _ifz8weqz.WalletNetwork? network,
     String? address,
+    List<_ifz8weqz.WalletNetwork>? scanNetworks =
+        const _isc.$UndefinedList<_ifz8weqz.WalletNetwork>(),
     String? label,
     String? lastSignature,
     _ijl385hj.SyncStatus? syncStatus,
@@ -143,6 +167,8 @@ abstract class Wallet
       'accountId': accountId.toJson(),
       'network': network.toJson(),
       'address': address,
+      if (scanNetworks != null)
+        'scanNetworks': scanNetworks?.toJson(valueToJson: (v) => v.toJson()),
       if (label != null) 'label': label,
       if (lastSignature != null) 'lastSignature': lastSignature,
       'syncStatus': syncStatus.toJson(),
@@ -162,6 +188,8 @@ abstract class Wallet
       'accountId': accountId.toJson(),
       'network': network.toJson(),
       'address': address,
+      if (scanNetworks != null)
+        'scanNetworks': scanNetworks?.toJson(valueToJson: (v) => v.toJson()),
       if (label != null) 'label': label,
       if (lastSignature != null) 'lastSignature': lastSignature,
       'syncStatus': syncStatus.toJson(),
@@ -187,6 +215,7 @@ class _WalletImpl extends Wallet {
     required _isc.UuidValue accountId,
     required _ifz8weqz.WalletNetwork network,
     required String address,
+    List<_ifz8weqz.WalletNetwork>? scanNetworks,
     String? label,
     String? lastSignature,
     _ijl385hj.SyncStatus? syncStatus,
@@ -200,6 +229,7 @@ class _WalletImpl extends Wallet {
          accountId: accountId,
          network: network,
          address: address,
+         scanNetworks: scanNetworks,
          label: label,
          lastSignature: lastSignature,
          syncStatus: syncStatus,
@@ -219,6 +249,8 @@ class _WalletImpl extends Wallet {
     _isc.UuidValue? accountId,
     _ifz8weqz.WalletNetwork? network,
     String? address,
+    List<_ifz8weqz.WalletNetwork>? scanNetworks =
+        const _isc.$UndefinedList<_ifz8weqz.WalletNetwork>(),
     Object? label = _Undefined,
     Object? lastSignature = _Undefined,
     _ijl385hj.SyncStatus? syncStatus,
@@ -233,6 +265,9 @@ class _WalletImpl extends Wallet {
       accountId: accountId ?? this.accountId,
       network: network ?? this.network,
       address: address ?? this.address,
+      scanNetworks: scanNetworks is _isc.UndefinedSentinel
+          ? this.scanNetworks?.map((e0) => e0).toList()
+          : scanNetworks,
       label: label is String? ? label : this.label,
       lastSignature: lastSignature is String?
           ? lastSignature
