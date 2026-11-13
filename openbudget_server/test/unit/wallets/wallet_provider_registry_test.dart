@@ -76,12 +76,34 @@ void main() {
     );
 
     test(
+      'when Bitcoin is asked for then it is supported with no secret at '
+      'all, because Esplora reads public hosts',
+      () {
+        expect(
+          WalletProviderRegistry.defaultRegistry.registrationFor(
+            ChainFamily.bitcoin,
+          ),
+          isNotNull,
+        );
+        expect(
+          WalletProviderRegistry.defaultRegistry.isSupported(
+            passwords: emptyPasswords,
+            environment: emptyEnvironment,
+            family: ChainFamily.bitcoin,
+          ),
+          isTrue,
+        );
+      },
+    );
+
+    test(
       'when a family has no registered provider then it stays unsupported '
       'whatever its secret',
       () {
         for (final family in ChainFamily.values) {
           if (family == ChainFamily.solana) continue;
           if (family == ChainFamily.xrpl) continue;
+          if (family == ChainFamily.bitcoin) continue;
           expect(
             WalletProviderRegistry.defaultRegistry.isSupported(
               passwords: passwords,
@@ -121,21 +143,21 @@ void main() {
 
     test(
       'when listing supported families then Solana appears while its secret '
-      'is present and XRPL always',
+      'is present and XRPL and Bitcoin always',
       () {
         expect(
           WalletProviderRegistry.defaultRegistry.supportedFamilies(
             passwords: passwords,
             environment: emptyEnvironment,
           ),
-          [ChainFamily.solana, ChainFamily.xrpl],
+          [ChainFamily.solana, ChainFamily.bitcoin, ChainFamily.xrpl],
         );
         expect(
           WalletProviderRegistry.defaultRegistry.supportedFamilies(
             passwords: emptyPasswords,
             environment: emptyEnvironment,
           ),
-          [ChainFamily.xrpl],
+          [ChainFamily.bitcoin, ChainFamily.xrpl],
         );
       },
     );

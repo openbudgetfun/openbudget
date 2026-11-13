@@ -5047,6 +5047,39 @@ class _TaxEndpoint {
       }
     });
   }
+
+  _ida.Future<String> createExportLink(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue entityId, {
+    int? startYear,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'tax',
+            method: 'createExportLink',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'tax',
+          methodName: 'createExportLink',
+          parameters: _ist.testObjectToJson({
+            'entityId': entityId,
+            'startYear': startYear,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _TransactionRuleEndpoint {
