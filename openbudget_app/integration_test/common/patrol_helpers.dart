@@ -704,7 +704,7 @@ Finder _iconFinder(WiredSvgIconData data) => find.byWidgetPredicate(
   (widget) => widget is SkribbleIcon && widget.data == data,
 );
 
-/// Page object for the create entity screen.
+/// Page object for the create entity screen and its pickers.
 class CreateEntityPage {
   CreateEntityPage(this.tester);
 
@@ -720,6 +720,63 @@ class CreateEntityPage {
     const Key('create-entity-create-button'),
   );
 
+  Finder get countryField => find.byKey(const Key('create-entity-country-row'));
+  Finder get currencyField =>
+      find.byKey(const Key('create-entity-currency-row'));
+  Finder get timeZoneField =>
+      find.byKey(const Key('create-entity-time-zone-row'));
+  Finder get taxYearField =>
+      find.byKey(const Key('create-entity-tax-year-row'));
+
+  /// The picker sheet that is open, if any.
+  Finder get pickerSheet => find.byType(BottomSheet);
+
+  /// The picker's search field.
+  Finder get pickerSearch => find.descendant(
+    of: pickerSheet,
+    matching: find.byType(TextField),
+  );
+
+  /// The row for [label] in the open picker (not the form row behind it).
+  Finder pickerRow(String label) => find.descendant(
+    of: pickerSheet,
+    matching: find.widgetWithText(InkWell, label),
+  );
+
+  /// What [field] currently shows: its value line, under the label.
+  String valueOf(Finder field) => tester
+      .widgetList<Text>(find.descendant(of: field, matching: find.byType(Text)))
+      .map((text) => text.data)
+      .whereType<String>()
+      .last;
+
+  /// Opens a form row's picker.
+  Future<void> open(Finder field) async {
+    await scrollAndTap(tester, field);
+  }
+
+  /// Types [query] into the open picker's search field.
+  Future<void> search(String query) async {
+    await tester.enterText(pickerSearch, query);
+    await tester.pumpAndSettle();
+  }
+
+  /// Opens the country picker, searches for [query] and picks [name].
+  Future<void> chooseCountry(String query, String name) async {
+    await open(countryField);
+    await search(query);
+    await tester.tap(pickerRow(name));
+    await tester.pumpAndSettle();
+  }
+
+  /// Opens the currency picker, searches for [query] and picks [name].
+  Future<void> chooseCurrency(String query, String name) async {
+    await open(currencyField);
+    await search(query);
+    await tester.tap(pickerRow(name));
+    await tester.pumpAndSettle();
+  }
+
   /// Fills the name and submits with the pre-selected defaults (a personal
   /// GB entity in GBP). [navigatesTo] is the first thing the flow waits for
   /// on the screen the create redirects to; the real add account screen
@@ -729,6 +786,10 @@ class CreateEntityPage {
     Finder? navigatesTo,
   }) async {
     await tester.enterText(nameField, name);
+    // Let the focused field finish scrolling its caret into view before the
+    // button is scrolled, or the two scrolls fight and the tap lands below
+    // the fold.
+    await tester.pumpAndSettle();
     // The create button sits below the fold on the 800x600 surface.
     await scrollAndTap(tester, createButton);
     // Wait for the async create + the redirect into the next screen.

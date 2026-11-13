@@ -694,3 +694,30 @@ abstract final class MultiCurrencyData {
     isStale: false,
   );
 }
+
+/// What the create-entity flow picks: a Kenyan individual, a country with no
+/// tax pack, and Russia, a country OpenBudget does not serve.
+abstract final class AnyCountryData {
+  static const kenyaName = 'Kenya';
+  static const kenyaQuery = 'kenya';
+  static const kenyaCode = 'KE';
+  static const kenyaCurrencyRow = 'Kenyan Shilling (KES)';
+  static const kenyaTimeZone = 'Africa/Nairobi';
+
+  /// Kenya's individual tax year is the calendar year.
+  static const kenyaTaxYear = 'Jan 1 to Dec 31';
+
+  /// What a person types for the United Kingdom.
+  static const ukAlias = 'uk';
+  static const ukName = 'United Kingdom';
+
+  static const unservableName = 'Russia';
+  static const unservableQuery = 'russia';
+
+  static const usDollarName = 'US Dollar';
+  static const usDollarQuery = 'USD';
+  static const usDollarCurrencyRow = 'US Dollar (USD)';
+
+  /// The entity id the fake creator hands back.
+  static const String createdEntityId = TestData.gbpEntityId;
+}

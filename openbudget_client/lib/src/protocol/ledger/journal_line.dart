@@ -18,6 +18,10 @@ import 'package:serverpod_client/serverpod_client.dart' as _isc;
 /// Each line carries the transaction-currency amount and the base amount
 /// with the exact rate that produced it. Exactly one of debitMinor and
 /// creditMinor is positive, and the base pair follows the same side.
+///
+/// UUID ids sort only by their embedded millisecond timestamp, so lines
+/// written in the same millisecond have no inherent order; lineNumber is
+/// the stable, unique order the reads rely on.
 abstract class JournalLine
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   JournalLine._({
@@ -25,6 +29,7 @@ abstract class JournalLine
     required this.journalId,
     required this.ledgerAccountId,
     this.description,
+    int? lineNumber,
     int? debitMinor,
     int? creditMinor,
     required this.currencyCode,
@@ -34,7 +39,8 @@ abstract class JournalLine
     required this.fxRateDate,
     _ifz8weqz.FxRateSource? fxRateSource,
     this.taxCode,
-  }) : debitMinor = debitMinor ?? 0,
+  }) : lineNumber = lineNumber ?? 0,
+       debitMinor = debitMinor ?? 0,
        creditMinor = creditMinor ?? 0,
        baseDebitMinor = baseDebitMinor ?? 0,
        baseCreditMinor = baseCreditMinor ?? 0,
@@ -46,6 +52,7 @@ abstract class JournalLine
     required _isc.UuidValue journalId,
     required _isc.UuidValue ledgerAccountId,
     String? description,
+    int? lineNumber,
     int? debitMinor,
     int? creditMinor,
     required String currencyCode,
@@ -69,6 +76,7 @@ abstract class JournalLine
         jsonSerialization['ledgerAccountId'],
       ),
       description: jsonSerialization['description'] as String?,
+      lineNumber: jsonSerialization['lineNumber'] as int?,
       debitMinor: jsonSerialization['debitMinor'] as int?,
       creditMinor: jsonSerialization['creditMinor'] as int?,
       currencyCode: jsonSerialization['currencyCode'] as String,
@@ -97,6 +105,12 @@ abstract class JournalLine
   _isc.UuidValue ledgerAccountId;
 
   String? description;
+
+  /// Zero-based position of this line within its journal.
+  ///
+  /// Assigned in the order the caller supplied the lines and renumbered
+  /// whenever a draft's lines are replaced; reads order by it.
+  int lineNumber;
 
   /// Debit in transaction-currency minor units, or 0.
   int debitMinor;
@@ -132,6 +146,7 @@ abstract class JournalLine
     _isc.UuidValue? journalId,
     _isc.UuidValue? ledgerAccountId,
     String? description,
+    int? lineNumber,
     int? debitMinor,
     int? creditMinor,
     String? currencyCode,
@@ -150,6 +165,7 @@ abstract class JournalLine
       'journalId': journalId.toJson(),
       'ledgerAccountId': ledgerAccountId.toJson(),
       if (description != null) 'description': description,
+      'lineNumber': lineNumber,
       'debitMinor': debitMinor,
       'creditMinor': creditMinor,
       'currencyCode': currencyCode,
@@ -170,6 +186,7 @@ abstract class JournalLine
       'journalId': journalId.toJson(),
       'ledgerAccountId': ledgerAccountId.toJson(),
       if (description != null) 'description': description,
+      'lineNumber': lineNumber,
       'debitMinor': debitMinor,
       'creditMinor': creditMinor,
       'currencyCode': currencyCode,
@@ -196,6 +213,7 @@ class _JournalLineImpl extends JournalLine {
     required _isc.UuidValue journalId,
     required _isc.UuidValue ledgerAccountId,
     String? description,
+    int? lineNumber,
     int? debitMinor,
     int? creditMinor,
     required String currencyCode,
@@ -210,6 +228,7 @@ class _JournalLineImpl extends JournalLine {
          journalId: journalId,
          ledgerAccountId: ledgerAccountId,
          description: description,
+         lineNumber: lineNumber,
          debitMinor: debitMinor,
          creditMinor: creditMinor,
          currencyCode: currencyCode,
@@ -230,6 +249,7 @@ class _JournalLineImpl extends JournalLine {
     _isc.UuidValue? journalId,
     _isc.UuidValue? ledgerAccountId,
     Object? description = _Undefined,
+    int? lineNumber,
     int? debitMinor,
     int? creditMinor,
     String? currencyCode,
@@ -245,6 +265,7 @@ class _JournalLineImpl extends JournalLine {
       journalId: journalId ?? this.journalId,
       ledgerAccountId: ledgerAccountId ?? this.ledgerAccountId,
       description: description is String? ? description : this.description,
+      lineNumber: lineNumber ?? this.lineNumber,
       debitMinor: debitMinor ?? this.debitMinor,
       creditMinor: creditMinor ?? this.creditMinor,
       currencyCode: currencyCode ?? this.currencyCode,

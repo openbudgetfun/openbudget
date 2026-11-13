@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_actions_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
@@ -11,13 +12,31 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-/// Countries offered first, each with its default base currency.
-const _leadCountries = <({String code, String name, CurrencyCode currency})>[
-  (code: 'GB', name: 'United Kingdom', currency: CurrencyCode.gbp),
-  (code: 'US', name: 'United States', currency: CurrencyCode.usd),
-  (code: 'NG', name: 'Nigeria', currency: CurrencyCode.ngn),
-  (code: 'DE', name: 'Germany', currency: CurrencyCode.eur),
-];
+/// The base currency a new entity starts with in [country]: its first
+/// current currency that OpenBudget can book in, or US dollars for a
+/// territory with none (such as Antarctica).
+CurrencyCode _defaultCurrencyFor(CountryInfo country) {
+  for (final code in country.currencies) {
+    if (CurrencyCode.tryParse(code) case final currency?) return currency;
+  }
+  return CurrencyCode.usd;
+}
+
+/// The countries the picker offers: every servable one, those with a tax
+/// pack first.
+List<CountryInfo> _pickableCountries() {
+  final servable = [
+    for (final country in Countries.all)
+      if (country.servable) country,
+  ];
+  bool hasPack(CountryInfo country) =>
+      TaxJurisdiction.fromCountryCode(country.code) != null;
+  servable.sort((a, b) => a.displayName.compareTo(b.displayName));
+  return [
+    ...servable.where(hasPack),
+    ...servable.where((country) => !hasPack(country)),
+  ];
+}
 
 /// Creates an entity: name, kind, country, base currency, time zone and —
 /// for businesses — the financial year end, all defaulted from the country.
@@ -31,8 +50,8 @@ class CreateEntityScreen extends HookConsumerWidget {
       text: l10n.createBudgetDefaultName,
     );
     final selectedKind = useState(EntityKind.individual);
-    final selectedCountry = useState(_leadCountries.first);
-    final selectedCurrency = useState(_leadCountries.first.currency);
+    final selectedCountry = useState(Countries.byCode('GB')!);
+    final selectedCurrency = useState(CurrencyCode.gbp);
     final selectedTimeZone = useState(defaultTimeZone('GB'));
     final fiscalYearEnd = useState(
       defaultFiscalYearEnd('GB', EntityKind.individual),
@@ -46,11 +65,9 @@ class CreateEntityScreen extends HookConsumerWidget {
                 : SystemUiOverlayStyle.light)
             .copyWith(statusBarColor: palette.canvas);
 
-    void pickCountry(
-      ({String code, String name, CurrencyCode currency}) country,
-    ) {
+    void pickCountry(CountryInfo country) {
       selectedCountry.value = country;
-      selectedCurrency.value = country.currency;
+      selectedCurrency.value = _defaultCurrencyFor(country);
       selectedTimeZone.value = defaultTimeZone(country.code);
       fiscalYearEnd.value = defaultFiscalYearEnd(
         country.code,
@@ -66,7 +83,11 @@ class CreateEntityScreen extends HookConsumerWidget {
       );
     }
 
-    final showFiscalYear = selectedKind.value != EntityKind.individual;
+    final isCompany = selectedKind.value == EntityKind.company;
+    final taxYear = _taxYearRange(
+      selectedCountry.value,
+      Localizations.localeOf(context).toString(),
+    );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: statusBarStyle,
@@ -154,8 +175,9 @@ class CreateEntityScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: SpacingTokens.md),
                     _EntityPickerRow(
+                      key: const Key('create-entity-country-row'),
                       label: l10n.createEntityCountry,
-                      value: selectedCountry.value.name,
+                      value: selectedCountry.value.displayName,
                       onTap: isSubmitting.value
                           ? null
                           : () async {
@@ -168,6 +190,7 @@ class CreateEntityScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: SpacingTokens.sm),
                     _EntityPickerRow(
+                      key: const Key('create-entity-currency-row'),
                       label: l10n.createBudgetPlanCurrency,
                       value:
                           '${selectedCurrency.value.displayName} (${selectedCurrency.value.code})',
@@ -176,6 +199,7 @@ class CreateEntityScreen extends HookConsumerWidget {
                           : () async {
                               final selected = await _selectCurrency(
                                 context,
+                                selectedCountry.value,
                                 selectedCurrency.value,
                               );
                               if (selected != null) {
@@ -185,6 +209,7 @@ class CreateEntityScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: SpacingTokens.sm),
                     _EntityPickerRow(
+                      key: const Key('create-entity-time-zone-row'),
                       label: l10n.createEntityTimeZone,
                       value: selectedTimeZone.value,
                       onTap: isSubmitting.value
@@ -200,13 +225,14 @@ class CreateEntityScreen extends HookConsumerWidget {
                               }
                             },
                     ),
-                    if (showFiscalYear) ...[
+                    if (isCompany) ...[
                       const SizedBox(height: SpacingTokens.sm),
                       _EntityPickerRow(
+                        key: const Key('create-entity-fiscal-year-row'),
                         label: l10n.createEntityFiscalYearEnd,
                         value: l10n.createEntityFiscalYearValue(
-                          fiscalYearEnd.value.month,
                           fiscalYearEnd.value.day,
+                          fiscalYearEnd.value.month,
                         ),
                         onTap: isSubmitting.value
                             ? null
@@ -228,6 +254,19 @@ class CreateEntityScreen extends HookConsumerWidget {
                                   );
                                 }
                               },
+                      ),
+                    ] else if (taxYear != null) ...[
+                      // A person's tax year is set by the country, so it is
+                      // shown, not offered for editing.
+                      const SizedBox(height: SpacingTokens.sm),
+                      _EntityPickerRow(
+                        key: const Key('create-entity-tax-year-row'),
+                        label: l10n.createEntityTaxYear,
+                        value: l10n.createEntityTaxYearValue(
+                          taxYear.start,
+                          taxYear.end,
+                        ),
+                        readOnly: true,
                       ),
                     ],
                     const SizedBox(height: SpacingTokens.lg),
@@ -294,94 +333,116 @@ class CreateEntityScreen extends HookConsumerWidget {
     );
   }
 
-  Future<({String code, String name, CurrencyCode currency})?> _selectCountry(
+  Future<CountryInfo?> _selectCountry(
     BuildContext context,
-    ({String code, String name, CurrencyCode currency}) current,
-  ) => showModalBottomSheet(
-    context: context,
-    showDragHandle: true,
-    builder: (context) => SafeArea(
-      child: ListView.separated(
-        shrinkWrap: true,
-        itemCount: _leadCountries.length,
-        separatorBuilder: (_, _) => const Divider(height: 1),
-        itemBuilder: (context, index) {
-          final country = _leadCountries[index];
-          return ListTile(
-            title: Text(country.name),
-            subtitle: Text(country.code),
-            trailing: country.code == current.code
-                ? SkribbleIcon(
-                    data: OpenBudgetIcons.check,
-                    color: Theme.of(context).ob.funded,
-                  )
-                : null,
-            onTap: () => Navigator.of(context).pop(country),
-          );
-        },
-      ),
-    ),
-  );
+    CountryInfo current,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    return showObPickerSheet<CountryInfo>(
+      context,
+      title: l10n.createEntityPickCountry,
+      options: [
+        for (final country in _pickableCountries())
+          ObPickerOption(
+            value: country,
+            label: country.displayName,
+            code: country.code,
+            keywords: [
+              if (country.name != country.displayName) country.name,
+              ...country.searchAliases,
+            ],
+            section: TaxJurisdiction.fromCountryCode(country.code) != null
+                ? l10n.createEntitySectionTaxRules
+                : l10n.createEntitySectionAllCountries,
+          ),
+      ],
+      selected: current,
+      searchHint: l10n.createEntitySearchCountries,
+      clearSearchLabel: l10n.createEntityClearSearch,
+      selectedLabel: l10n.createEntityPickerSelected,
+      resultCountLabel: l10n.createEntityResultCount,
+      noMatchLabel: l10n.createEntityNoMatch,
+    );
+  }
 
   Future<CurrencyCode?> _selectCurrency(
     BuildContext context,
+    CountryInfo country,
     CurrencyCode current,
-  ) => showModalBottomSheet<CurrencyCode>(
-    context: context,
-    showDragHandle: true,
-    builder: (context) => SafeArea(
-      child: ListView.separated(
-        shrinkWrap: true,
-        itemCount: CurrencyCode.values.length,
-        separatorBuilder: (_, _) => const Divider(height: 1),
-        itemBuilder: (context, index) {
-          final currency = CurrencyCode.values[index];
-          return ListTile(
-            title: Text('${currency.displayName} (${currency.code})'),
-            trailing: currency == current
-                ? SkribbleIcon(
-                    data: OpenBudgetIcons.check,
-                    color: Theme.of(context).ob.funded,
-                  )
-                : null,
-            onTap: () => Navigator.of(context).pop(currency),
-          );
-        },
-      ),
-    ),
-  );
+  ) {
+    final l10n = AppLocalizations.of(context);
+    final local = [
+      for (final code in country.currencies) ?CurrencyCode.tryParse(code),
+    ];
+    final rest = [
+      for (final currency in CurrencyCode.values)
+        if (!local.contains(currency)) currency,
+    ]..sort((a, b) => a.displayName.compareTo(b.displayName));
+    return showObPickerSheet<CurrencyCode>(
+      context,
+      title: l10n.createEntityPickCurrency,
+      options: [
+        for (final currency in [...local, ...rest])
+          ObPickerOption(
+            value: currency,
+            label: currency.displayName,
+            code: currency.code,
+            keywords: [currency.symbol.trim()],
+            section: local.contains(currency)
+                ? l10n.createEntitySectionCountryCurrencies(country.displayName)
+                : l10n.createEntitySectionAllCurrencies,
+          ),
+      ],
+      selected: current,
+      searchHint: l10n.createEntitySearchCurrencies,
+      clearSearchLabel: l10n.createEntityClearSearch,
+      selectedLabel: l10n.createEntityPickerSelected,
+      resultCountLabel: l10n.createEntityResultCount,
+      noMatchLabel: l10n.createEntityNoMatch,
+    );
+  }
 
   Future<String?> _selectTimeZone(
     BuildContext context,
     String countryCode,
     String current,
   ) {
-    final choices = timeZoneChoices(countryCode);
-    return showModalBottomSheet<String>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: ListView.separated(
-          shrinkWrap: true,
-          itemCount: choices.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            final zone = choices[index];
-            return ListTile(
-              title: Text(zone),
-              trailing: zone == current
-                  ? SkribbleIcon(
-                      data: OpenBudgetIcons.check,
-                      color: Theme.of(context).ob.funded,
-                    )
-                  : null,
-              onTap: () => Navigator.of(context).pop(zone),
-            );
-          },
-        ),
-      ),
+    final l10n = AppLocalizations.of(context);
+    return showObPickerSheet<String>(
+      context,
+      title: l10n.createEntityPickTimeZone,
+      options: [
+        for (final zone in timeZoneChoices(countryCode))
+          ObPickerOption(value: zone, label: zone),
+      ],
+      selected: current,
+      searchHint: l10n.createEntitySearchTimeZones,
+      clearSearchLabel: l10n.createEntityClearSearch,
+      selectedLabel: l10n.createEntityPickerSelected,
+      resultCountLabel: l10n.createEntityResultCount,
+      noMatchLabel: l10n.createEntityNoMatch,
     );
   }
+}
+
+/// The start and end of [country]'s individual tax year as short dates in
+/// [locale], or null when the dataset has none or follows a calendar other
+/// than the Gregorian one.
+({String start, String end})? _taxYearRange(
+  CountryInfo country,
+  String locale,
+) {
+  final taxYear = country.individualTaxYear;
+  if (taxYear == null || taxYear.calendar != TaxYearCalendar.gregorian) {
+    return null;
+  }
+  final end = defaultFiscalYearEnd(country.code, EntityKind.individual);
+  // 2001 is not a leap year, so no date rolls over.
+  final format = DateFormat.MMMd(locale);
+  return (
+    start: format.format(DateTime(2001, taxYear.startMonth, taxYear.startDay)),
+    end: format.format(DateTime(2001, end.month, end.day)),
+  );
 }
 
 class _EntityPickerRow extends HookWidget {
@@ -389,11 +450,16 @@ class _EntityPickerRow extends HookWidget {
     required this.label,
     required this.value,
     this.onTap,
+    this.readOnly = false,
+    super.key,
   });
 
   final String label;
   final String value;
   final VoidCallback? onTap;
+
+  /// Shows the row as a fact: no pencil, no tap target.
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -410,7 +476,9 @@ class _EntityPickerRow extends HookWidget {
             vertical: SpacingTokens.sm + 2,
           ),
           decoration: ObRoughDecoration(
-            color: palette.surface,
+            // A fact on the quiet wash reads as settled; a choice sits on
+            // paper.
+            color: readOnly ? palette.wash(ObTone.neutral) : palette.surface,
             outline: palette.quietPen,
             radius: 10,
             seed: 53,
@@ -437,7 +505,8 @@ class _EntityPickerRow extends HookWidget {
                   ],
                 ),
               ),
-              SkribbleIcon(data: OpenBudgetIcons.edit, color: palette.ink),
+              if (!readOnly)
+                SkribbleIcon(data: OpenBudgetIcons.edit, color: palette.ink),
             ],
           ),
         ),

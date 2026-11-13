@@ -490,11 +490,16 @@ abstract final class LedgerService {
         );
       }
 
-      for (final line in drafts) {
+      // Caller order is the display order: number the lines 0..n-1 in the
+      // order they were supplied so reads can rely on it (ids are UUIDv7
+      // and only sort by their millisecond timestamp).
+      for (var index = 0; index < drafts.length; index++) {
+        final line = drafts[index];
         await JournalLine.db.insertRow(
           session,
           JournalLine(
             journalId: journal.id!,
+            lineNumber: index,
             ledgerAccountId: line.account.id!,
             description: line.description,
             debitMinor: line.debitMinor,
@@ -617,7 +622,7 @@ abstract final class LedgerService {
       final storedLines = await JournalLine.db.find(
         session,
         where: (l) => l.journalId.equals(journalId),
-        orderBy: (l) => l.id,
+        orderByList: (l) => [l.lineNumber, l.id],
         transaction: transaction,
       );
       final drafts = await _draftsFromStored(
@@ -737,7 +742,7 @@ abstract final class LedgerService {
       final storedLines = await JournalLine.db.find(
         session,
         where: (l) => l.journalId.equals(journalId),
-        orderBy: (l) => l.id,
+        orderByList: (l) => [l.lineNumber, l.id],
         transaction: transaction,
       );
       final accounts = await LedgerAccount.db.find(
@@ -797,12 +802,16 @@ abstract final class LedgerService {
         ),
         transaction: transaction,
       );
-      for (final entry in reversalLines) {
+      // Mirror the original entry order, so the reversal reads like the
+      // journal it undoes.
+      for (var index = 0; index < reversalLines.length; index++) {
+        final entry = reversalLines[index];
         final line = entry.draft;
         await JournalLine.db.insertRow(
           session,
           JournalLine(
             journalId: created.id!,
+            lineNumber: index,
             ledgerAccountId: entry.source.ledgerAccountId,
             description: line.description,
             debitMinor: line.debitMinor,
@@ -906,7 +915,12 @@ abstract final class LedgerService {
     );
   }
 
-  /// Lists one journal's lines in insertion order.
+  /// Lists one journal's lines in entry order.
+  ///
+  /// Lines order by `lineNumber`, the zero-based position assigned when the
+  /// lines were written. Ids are UUIDv7 and sort only by their embedded
+  /// millisecond timestamp, so they cannot express the caller's order for
+  /// lines saved in the same millisecond.
   static Future<List<JournalLine>> listJournalLines(
     Session session,
     UuidValue journalId,
@@ -916,7 +930,7 @@ abstract final class LedgerService {
     return JournalLine.db.find(
       session,
       where: (l) => l.journalId.equals(journalId),
-      orderBy: (l) => l.id,
+      orderByList: (l) => [l.lineNumber, l.id],
     );
   }
 
