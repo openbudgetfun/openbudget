@@ -1,0 +1,24 @@
+### One wallet's estimated digital-asset disposals for a summary period.
+###
+### The figures are the stored FIFO estimates on the wallet's transactions,
+### in [currencyCode], which is the wallet's own P&L currency and not the
+### summary's base currency. They are not a tax disposal computation; the
+### caveats say so.
+class: TaxSummaryWalletView
+fields:
+  walletId: UuidValue
+  ### The wallet's label, when one is set.
+  label: String?
+  ### ISO 4217 code of every amount in this row.
+  currencyCode: String
+  ### The valued transactions dated inside the period.
+  transactionCount: int
+  proceedsMinor: int
+  costBasisMinor: int
+  ### Realised profit or loss: proceeds less cost, negative when a loss.
+  gainMinor: int
+  ### The matching method behind the figures: `fifo`.
+  costBasisMethod: String
+  ### The method caveat, plus a count of the period's transactions that
+  ### carry no stored valuation.
+  caveats: List<String>

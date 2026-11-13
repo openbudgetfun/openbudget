@@ -1,8 +1,10 @@
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:openbudget_server/src/tax/tax_service.dart';
+import 'package:openbudget_server/src/tax/tax_summary_service.dart';
 import 'package:serverpod/serverpod.dart';
 
-/// API surface for tax profiles, line coding, envelope defaults and reports.
+/// API surface for tax profiles, line coding, envelope defaults, reports
+/// and tax-ready summaries.
 ///
 /// Every method requires authentication and delegates to [TaxService], which
 /// owns the entity boundary and the write rules.
@@ -86,6 +88,23 @@ class TaxEndpoint extends Endpoint {
     UuidValue entityId, {
     int? startYear,
   }) => TaxService.report(
+    session,
+    entityId: entityId,
+    startYear: startYear,
+  );
+
+  /// Builds the entity's tax-ready summary for the year starting in
+  /// [startYear].
+  ///
+  /// When [startYear] is null the year containing the entity's local today
+  /// is used. Every country is served: a pack country uses its pack's tax
+  /// year, any other country its universal tax year, and a company its own
+  /// financial year.
+  Future<TaxSummaryView> getSummary(
+    Session session,
+    UuidValue entityId, {
+    int? startYear,
+  }) => TaxSummaryService.build(
     session,
     entityId: entityId,
     startYear: startYear,

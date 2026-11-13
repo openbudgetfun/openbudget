@@ -1,0 +1,13 @@
+### One category's total inside a tax summary.
+class: TaxSummaryCategoryTotalView
+fields:
+  ### The tax category code the total is grouped under. A pack country
+  ### reports the pack's own code, after mapping any universal code.
+  categoryCode: String
+  ### The category's catalogue label.
+  label: String
+  ### The total in the summary's currency. Expenses are after business-use
+  ### share and net of any sales tax on the line.
+  totalMinor: int
+  ### The lines that make up the total.
+  entryCount: int

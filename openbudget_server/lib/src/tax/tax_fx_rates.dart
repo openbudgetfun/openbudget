@@ -51,7 +51,7 @@ class TaxFxRates {
       _requireExponent(request.fromCurrencyCode);
       _requireExponent(request.toCurrencyCode);
 
-      if (_quoteFor(request) != null) continue;
+      if (quoteFor(request) != null) continue;
       missing[(
             request.fromCurrencyCode,
             request.toCurrencyCode,
@@ -80,7 +80,7 @@ class TaxFxRates {
       toCurrencyCode: toCurrencyCode,
       date: date,
     );
-    final quote = _quoteFor(request);
+    final quote = quoteFor(request);
     if (quote == null) {
       throw FxRateUnavailableException(
         message:
@@ -113,7 +113,11 @@ class TaxFxRates {
     }
   }
 
-  FxQuoteSelection? _quoteFor(TaxFxRequest request) {
+  /// The quote a conversion used, or null when no stored row covers it.
+  ///
+  /// Exposed so a summary can report the rate facts behind its converted
+  /// lines without converting anything a second time.
+  FxQuoteSelection? quoteFor(TaxFxRequest request) {
     final key = (
       request.fromCurrencyCode,
       request.toCurrencyCode,
