@@ -2144,6 +2144,25 @@ class EndpointTax extends _isc.EndpointRef {
       'startYear': startYear,
     },
   );
+
+  /// Creates a short-lived signed download link for the entity's tax
+  /// summary export for the year starting in [startYear].
+  ///
+  /// When [startYear] is null the year containing the entity's local today
+  /// is used. The link carries only opaque ids, the year and an expiry
+  /// inside its HMAC token — no name, email or entity name — and stops
+  /// working after ten minutes. The app opens it with `url_launcher`.
+  _ida.Future<String> createExportLink(
+    _isc.UuidValue entityId, {
+    int? startYear,
+  }) => caller.callServerEndpoint<String>(
+    'tax',
+    'createExportLink',
+    {
+      'entityId': entityId,
+      'startYear': startYear,
+    },
+  );
 }
 
 /// API surface for transaction rule operations.
