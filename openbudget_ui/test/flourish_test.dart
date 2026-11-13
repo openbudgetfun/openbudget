@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openbudget_core/openbudget_core.dart' show ChainFamily;
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 Future<void> _pump(
@@ -108,6 +109,275 @@ void main() {
       await _pump(tester, const ObCurrencyStamp('EUR'));
       final text = tester.widget<Text>(find.text('EUR'));
       expect(text.style?.color, const ObPalette.paper().onAction);
+    });
+  });
+
+  group('ObChainStamp', () {
+    const named = <ChainFamily, Color>{
+      ChainFamily.bitcoin: ObSwatch.tangerine,
+      ChainFamily.evm: ObSwatch.lilac,
+      ChainFamily.solana: ObSwatch.teal,
+      ChainFamily.tron: ObSwatch.pink,
+      ChainFamily.xrpl: ObSwatch.sky,
+    };
+
+    RenderObject stampPaint(WidgetTester tester) => tester.renderObject(
+      find
+          .descendant(
+            of: find.byType(ObChainStamp),
+            matching: find.byType(CustomPaint),
+          )
+          .first,
+    );
+
+    for (final family in ChainFamily.values) {
+      testWidgets('${family.name}: letters its name in its fixed ink', (
+        tester,
+      ) async {
+        await _pump(tester, ObChainStamp(family: family, label: family.name));
+        final palette = Theme.of(tester.element(find.byType(ObChainStamp))).ob;
+        final ink = ObChainStamp.inkOf(family, palette);
+        expect(find.text(family.name.toUpperCase()), findsOneWidget);
+        expect(stampPaint(tester), paints..path(color: ink));
+        final word = tester.widget<Text>(find.text(family.name.toUpperCase()));
+        expect(word.style?.color, palette.onAction);
+      });
+
+      testWidgets('${family.name}: an outline stamp is bare paper', (
+        tester,
+      ) async {
+        await _pump(
+          tester,
+          ObChainStamp(family: family, label: family.name, inked: false),
+        );
+        final palette = Theme.of(tester.element(find.byType(ObChainStamp))).ob;
+        expect(stampPaint(tester), paints..path(color: palette.surface));
+        final word = tester.widget<Text>(find.text(family.name.toUpperCase()));
+        expect(word.style?.color, palette.ink);
+      });
+    }
+
+    test('the five launch families print in their named inks', () {
+      const palette = ObPalette.paper();
+      for (final MapEntry(key: family, value: ink) in named.entries) {
+        expect(ObChainStamp.inkOf(family, palette), ink, reason: family.name);
+      }
+    });
+
+    test('each family has one ink, so two that sit together stay apart', () {
+      const palette = ObPalette.paper();
+      expect(
+        ObChainStamp.inkOf(ChainFamily.sui, palette),
+        isNot(ObChainStamp.inkOf(ChainFamily.aptos, palette)),
+      );
+      expect(
+        ObChainStamp.inkOf(ChainFamily.dogecoin, palette),
+        isNot(ObChainStamp.inkOf(ChainFamily.bitcoin, palette)),
+      );
+    });
+
+    testWidgets('prints in the night inks in the dark print run', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        const ObChainStamp(family: ChainFamily.solana, label: 'Solana'),
+        theme: OpenBudgetTheme.dark,
+      );
+      expect(stampPaint(tester), paints..path(color: ObSwatch.nightTeal));
+    });
+
+    testWidgets('announces the chain, its detail and its state', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await _pump(
+        tester,
+        const ObChainStamp(
+          family: ChainFamily.evm,
+          label: 'Ethereum',
+          detail: '+ 6',
+          value: r'$12.40',
+        ),
+      );
+      expect(
+        find.bySemanticsLabel(r'Ethereum, + 6, $12.40, inked'),
+        findsOneWidget,
+      );
+      await _pump(
+        tester,
+        const ObChainStamp(
+          family: ChainFamily.bitcoin,
+          label: 'Bitcoin',
+          detail: 'zpub',
+          inked: false,
+        ),
+      );
+      expect(find.bySemanticsLabel('Bitcoin, zpub, outline'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('takes its state words from the app', (tester) async {
+      final handle = tester.ensureSemantics();
+      await _pump(
+        tester,
+        const ObChainStamp(
+          family: ChainFamily.tron,
+          label: 'Tron',
+          inked: false,
+          words: ObChainStampWords(outline: 'vide'),
+        ),
+      );
+      expect(find.bySemanticsLabel('Tron, vide'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('sets the value line in tabular figures', (tester) async {
+      await _pump(
+        tester,
+        const ObChainStamp(
+          family: ChainFamily.evm,
+          label: 'Base',
+          value: '0.5 ETH',
+        ),
+      );
+      final figure = tester.widget<Text>(find.text('0.5 ETH'));
+      expect(figure.style?.fontFeatures, contains(isA<FontFeature>()));
+      expect(figure.style?.fontFeatures?.first.feature, 'tnum');
+    });
+
+    for (final (name, palette) in [
+      ('paper', const ObPalette.paper()),
+      ('night', const ObPalette.night()),
+    ]) {
+      test('every family reads in the $name print run', () {
+        // Words on the filled stamp and on the bare one, and the pencil edge
+        // that outlines a bare stamp against its sheet.
+        final edge = Color.alphaBlend(palette.quietPen, palette.surface);
+        expect(obContrastRatio(edge, palette.surface), greaterThanOrEqualTo(3));
+        expect(
+          obContrastRatio(palette.ink, palette.surface),
+          greaterThanOrEqualTo(4.5),
+        );
+        for (final family in ChainFamily.values) {
+          expect(
+            obContrastRatio(
+              palette.onAction,
+              ObChainStamp.inkOf(family, palette),
+            ),
+            greaterThanOrEqualTo(4.5),
+            reason: family.name,
+          );
+        }
+      });
+    }
+  });
+
+  group('ObChainStampToggle', () {
+    Widget toggle({
+      required bool selected,
+      ValueChanged<bool>? onChanged,
+      String? detail,
+    }) => ObChainStampToggle(
+      family: ChainFamily.evm,
+      label: 'Base',
+      detail: detail,
+      selected: selected,
+      onChanged: onChanged,
+    );
+
+    testWidgets('toggles on tap', (tester) async {
+      final taps = <bool>[];
+      await _pump(tester, toggle(selected: false, onChanged: taps.add));
+      await tester.tap(find.byType(ObChainStampToggle));
+      await _pump(tester, toggle(selected: true, onChanged: taps.add));
+      await tester.tap(find.byType(ObChainStampToggle));
+      expect(taps, [true, false]);
+    });
+
+    testWidgets('is inked while selected and an outline while not', (
+      tester,
+    ) async {
+      await _pump(tester, toggle(selected: true, onChanged: (_) {}));
+      final palette = Theme.of(tester.element(find.byType(ObChainStampToggle)));
+      RenderObject paint() => tester.renderObject(
+        find
+            .descendant(
+              of: find.byType(ObChainStampToggle),
+              matching: find.byType(CustomPaint),
+            )
+            .first,
+      );
+      expect(paint(), paints..path(color: ObSwatch.lilac));
+      await _pump(tester, toggle(selected: false, onChanged: (_) {}));
+      expect(paint(), paints..path(color: palette.ob.surface));
+    });
+
+    testWidgets('announces the chain and whether it is selected', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await _pump(
+        tester,
+        toggle(selected: true, detail: '0.5 ETH', onChanged: (_) {}),
+      );
+      expect(
+        tester.getSemantics(find.byType(ObChainStampToggle)),
+        matchesSemantics(
+          label: 'Base, 0.5 ETH',
+          value: 'selected',
+          isButton: true,
+          isSelected: true,
+          hasSelectedState: true,
+          isEnabled: true,
+          hasEnabledState: true,
+          isFocusable: true,
+          hasTapAction: true,
+          hasFocusAction: true,
+        ),
+      );
+      await _pump(tester, toggle(selected: false, onChanged: (_) {}));
+      expect(
+        tester.getSemantics(find.byType(ObChainStampToggle)),
+        matchesSemantics(
+          label: 'Base',
+          value: 'not selected',
+          isButton: true,
+          hasSelectedState: true,
+          isEnabled: true,
+          hasEnabledState: true,
+          isFocusable: true,
+          hasTapAction: true,
+          hasFocusAction: true,
+        ),
+      );
+      handle.dispose();
+    });
+
+    testWidgets('is a 48 point touch target even as a one-line stamp', (
+      tester,
+    ) async {
+      await _pump(tester, toggle(selected: false, onChanged: (_) {}));
+      final size = tester.getSize(find.byType(ObChainStampToggle));
+      expect(size.width, greaterThanOrEqualTo(48));
+      expect(size.height, greaterThanOrEqualTo(48));
+    });
+
+    testWidgets('does nothing when disabled', (tester) async {
+      final handle = tester.ensureSemantics();
+      await _pump(tester, toggle(selected: false));
+      await tester.tap(find.byType(ObChainStampToggle));
+      expect(
+        tester.getSemantics(find.byType(ObChainStampToggle)),
+        matchesSemantics(
+          label: 'Base',
+          value: 'not selected',
+          isButton: true,
+          hasSelectedState: true,
+          hasEnabledState: true,
+        ),
+      );
+      handle.dispose();
     });
   });
 
