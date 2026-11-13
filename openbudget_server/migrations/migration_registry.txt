@@ -5,3 +5,4 @@
 ### the conflict by removing and recreating the conflicting migration.
 
 20261109142242191-schema-reset
+20261113100308076-multichain-wallet-schema
