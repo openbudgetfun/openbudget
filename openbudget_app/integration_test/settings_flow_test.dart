@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/reporting_currency_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/ui_preferences_store.dart';
 import 'package:openbudget_app/src/features/settings/screens/account_settings_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/app_icon_screen.dart';
@@ -15,6 +16,7 @@ import 'package:openbudget_app/src/features/settings/screens/plan_settings_scree
 import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
 
 import 'common/test_data.dart';
@@ -31,6 +33,12 @@ void main() {
         overrides: [
           entityDetailProvider.overrideWith(
             (ref, id) async => TestData.gbpEntity(name: "Alex's Plan"),
+          ),
+          userSettingsProvider.overrideWith(
+            (ref) async => UserSettings(
+              userId: UuidValue.fromString(TestData.ownerId),
+              reportingCurrencyCode: 'GBP',
+            ),
           ),
           uiPreferencesStoreProvider.overrideWithValue(store),
         ],

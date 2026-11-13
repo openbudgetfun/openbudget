@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_actions_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
@@ -44,6 +45,12 @@ void main() {
           ),
           entityListProvider.overrideWith(
             (ref) async => [TestData.gbpEntity()],
+          ),
+          institutionCatalogProvider.overrideWith(
+            (ref, locationCode) async => const [],
+          ),
+          netWorthForEntitiesProvider.overrideWith(
+            (ref, entityIds) async => _netWorthFor(createdAccounts),
           ),
           accountListProvider.overrideWith(
             (ref, entityId) async => createdAccounts,
