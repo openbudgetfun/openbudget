@@ -16,7 +16,11 @@ import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 /// built [report], so a recommendation can never drift from the liability
 /// above it. Where a saving depends on facts the books do not hold, the
 /// opportunity says so and leaves [TaxOpportunity.estimatedSavingMinor] empty
-/// instead of guessing.
+/// instead of guessing. A saving is quantified only on primary-grade
+/// figures: the Basisrente headroom follows the `basisrenteCap` figure's
+/// grade in the year's rule set, and the GmbH Gehalt-versus-Ausschüttung
+/// comparison is signpost-only under the German perimeter (StBerG §5),
+/// so it explains the general rule and points to a Steuerberater.
 List<TaxOpportunity> deOpportunities(
   TaxInput input,
   TaxReport report,
@@ -44,6 +48,11 @@ List<TaxOpportunity> deOpportunities(
   ];
 }
 
+/// The named figure [id] of [table]'s year, or null when the rule set does
+/// not name it.
+TaxFigure? _figureFor(DeTaxTable table, String id) =>
+    deRuleSetFor(table.startYear).figures[id];
+
 List<TaxOpportunity> _individualOpportunities(
   TaxInput input,
   DeTaxProfile profile,
@@ -68,11 +77,16 @@ List<TaxOpportunity> _individualOpportunities(
     opportunities.add(
       TaxOpportunity(
         id: 'de.sparer_pauschbetrag',
-        title: 'Freistellungsauftrag nutzen',
+        title: 'Freistellungsauftrag und Sparer-Pauschbetrag',
         explanation:
             'Der Sparer-Pauschbetrag von ${deEuro(assessment.sparerPauschbetrag)} ist nicht ausgeschöpft. Mit einem Freistellungsauftrag bei der Bank werden Kapitalerträge bis zu dieser Grenze ohne Abgeltungsteuer ausgezahlt.',
         source: Uri.parse('https://www.gesetze-im-internet.de/estg/__20.html'),
         estimatedSavingMinor: saving,
+        ruleYear: input.year.label,
+        assumptions: const [
+          'Bei mehreren Banken gilt der Pauschbetrag insgesamt einmal und wird auf die Freistellungsaufträge verteilt.',
+          'Die Schätzung setzt voraus, dass die Bank die einbehaltene Kapitalertragsteuer angibt.',
+        ],
       ),
     );
   }
@@ -91,7 +105,7 @@ List<TaxOpportunity> _individualOpportunities(
     opportunities.add(
       TaxOpportunity(
         id: 'de.homeoffice_pauschale',
-        title: 'Homeoffice-Pauschale ausschöpfen',
+        title: 'Homeoffice-Pauschale und Höchstgrenze',
         explanation:
             'Für jeden Kalendertag mit überwiegend häuslicher Tätigkeit sind ${deEuro(daily)} abziehbar, höchstens ${deEuro(homeOfficeMax)} im Jahr (§ 4 Abs. 5 Satz 1 Nr. 6c EStG). Erfasst sind bisher ${deEuro(homeOfficeClaimed)}; es fehlen $remainingDays Tage (${deEuro(shortfall)}) bis zur Höchstgrenze.',
         source: Uri.parse('https://www.gesetze-im-internet.de/estg/__4.html'),
@@ -99,7 +113,13 @@ List<TaxOpportunity> _individualOpportunities(
             math.min(shortfall, assessment.taxableIncome) *
             assessment.marginalRateBasisPoints ~/
             10000,
+        ruleYear: input.year.label,
+        needsEvidence: true,
         deadline: DateTime.utc(table.startYear, 12, 31),
+        assumptions: const [
+          'Die Tage mit überwiegend häuslicher Tätigkeit sind aufgezeichnet oder werden geschätzt; ein Tagesnachweis ist die Grundlage.',
+          'Die Pauschale und ein Arbeitszimmer können sich nicht überlappen.',
+        ],
       ),
     );
   }
@@ -111,16 +131,29 @@ List<TaxOpportunity> _individualOpportunities(
     assessment.taxableIncome,
   );
   if (usableBasisrente > 0) {
+    // The headroom follows the named figure's grade: primary in 2026,
+    // inferred in 2025, and never quantified on an unverified grade.
+    final basisrenteGrade = _figureFor(table, 'basisrenteCap')?.grade;
+    final saving = basisrenteGrade == TaxEvidenceGrade.primary
+        ? usableBasisrente * assessment.marginalRateBasisPoints ~/ 10000
+        : null;
     opportunities.add(
       TaxOpportunity(
         id: 'de.basisrente_hoechstbetrag',
-        title: 'Basisrente bis zum Höchstbetrag einzahlen',
+        title: 'Basisrente und Höchstbetrag nach § 10 EStG',
         explanation:
-            'Beiträge zu einer Basisrente sind bis ${deEuro(basisrenteCap)} im Jahr als Sonderausgaben abziehbar (§ 10 Abs. 3 EStG${profile.jointAssessment ? '; bei Zusammenveranlagung verdoppelter Höchstbetrag' : ''}${assessment.statutoryPension > 0 ? ', gemindert um ${deEuro(assessment.statutoryPension)} Beiträge zur gesetzlichen Rentenversicherung' : ''}). Erfasst sind bisher ${deEuro(assessment.basisrentePaid)}. Die Ersparnis gilt für zusätzliche Beiträge bis zur Höhe des zu versteuernden Einkommens; die Auszahlung der Rente ist später steuerpflichtig.',
+            'Beiträge zu einer basisrentenversicherten Rente (Basisrente, Rürup) sind bis ${deEuro(basisrenteCap)} im Jahr als Sonderausgaben abziehbar (§ 10 Abs. 3 EStG${profile.jointAssessment ? '; bei Zusammenveranlagung verdoppelter Höchstbetrag' : ''}${assessment.statutoryPension > 0 ? ', gemindert um ${deEuro(assessment.statutoryPension)} Beiträge zur gesetzlichen Rentenversicherung' : ''}). Erfasst sind bisher ${deEuro(assessment.basisrentePaid)}. ${basisrenteGrade == TaxEvidenceGrade.primary ? 'Die Ersparnis gilt für zusätzliche Beiträge bis zur Höhe des zu versteuernden Einkommens; die Auszahlung der Rente ist später steuerpflichtig.' : 'Für dieses Jahr ist der Höchstbetrag nur abgeleitet; bis der Gesetzestext geprüft ist, wird keine Ersparnis beziffert.'}',
         source: Uri.parse('https://www.gesetze-im-internet.de/estg/__10.html'),
-        estimatedSavingMinor:
-            usableBasisrente * assessment.marginalRateBasisPoints ~/ 10000,
+        estimatedSavingMinor: saving,
+        ruleYear: input.year.label,
+        grade: basisrenteGrade ?? TaxEvidenceGrade.inferred,
+        needsEvidence: true,
         deadline: DateTime.utc(table.startYear, 12, 31),
+        assumptions: const [
+          'Die Beiträge gelten für einen basisrentenversicherten Vertrag; die Beitragsbestätigung ist der Nachweis.',
+          'Die Auszahlung der Rente ist später steuerpflichtig.',
+          'Bei Zusammenveranlagung verdoppelt sich der Höchstbetrag.',
+        ],
       ),
     );
   }
@@ -137,13 +170,18 @@ List<TaxOpportunity> _individualOpportunities(
       opportunities.add(
         TaxOpportunity(
           id: 'de.guenstigerpruefung',
-          title: 'Günstigerprüfung bei Kapitalerträgen beantragen',
+          title: 'Günstigerprüfung für Kapitalerträge',
           explanation: 'Der persönliche Steuersatz liegt unter 25 %. Auf Antrag werden die Kapitalerträge statt mit der Abgeltungsteuer mit dem Tarif besteuert (§ 32d Abs. 6 EStG). Die Schätzung vergleicht nur die Einkommensteuer, nicht die Zuschlagsteuern.',
           source: Uri.parse(
             'https://www.gesetze-im-internet.de/estg/__32d.html',
           ),
           estimatedSavingMinor: saving,
+          ruleYear: input.year.label,
           deadline: deFilingDeadline(table.startYear),
+          assumptions: const [
+            'Der Antrag wird in der Steuererklärung gestellt; die Bank behält zunächst die Abgeltungsteuer ein.',
+            'Die Schätzung vergleicht nur die Einkommensteuer, nicht die Zuschlagsteuern.',
+          ],
         ),
       );
     }
@@ -160,49 +198,27 @@ List<TaxOpportunity> _individualOpportunities(
     if (profit == 0) {
       continue;
     }
-    final corporateTax =
-        profit * table.businessTaxes.corporateTaxRateBasisPoints ~/ 10000;
-    final corporateSolidarity = corporateTax * 55 ~/ 1000;
-    final messbetrag = deTradeTaxMessbetragMinor(
-      profitMinor: profit,
-      freeAmountMinor: 0,
-      messzahlBasisPoints: table.businessTaxes.tradeTaxMesszahlBasisPoints,
-    );
-    final companyTax =
-        corporateTax +
-        corporateSolidarity +
-        deTradeTaxMinor(
-          messbetragMinor: messbetrag,
-          hebesatz: table.businessTaxes.assumedTradeTaxHebesatz,
-        );
-    final dividend = profit - companyTax;
-    final dividendTax = deCapitalIncomeTaxMinor(
-      baseMinor: dividend,
-      churchTaxRateBasisPoints: churchRate,
-    );
-    final dividendSolidarity = deCapitalIncomeSoliMinor(dividendTax);
-    final dividendRoute = companyTax + dividendTax + dividendSolidarity;
-
-    final salaryTax = profit * assessment.marginalRateBasisPoints ~/ 10000;
-    final salaryRoute =
-        salaryTax +
-        salaryTax * 55 ~/ 1000 +
-        (churchRate > 0 ? salaryTax * churchRate ~/ 10000 : 0);
-
-    if (salaryRoute < dividendRoute) {
-      opportunities.add(
-        TaxOpportunity(
-          id: 'de.geschaeftsfuehrer_vergleich',
-          title: 'Gehalt statt Gewinnausschüttung prüfen',
-          explanation:
-              'Ein Gesellschafter-Geschäftsführer kann seinen Gewinn als Gehalt oder als Ausschüttung beziehen. Bei ${deEuro(profit)} Gewinn kostet die Ausschüttung rund ${deEuro(dividendRoute)} Steuern (Körperschaftsteuer, Solidaritätszuschlag, Gewerbesteuer und Abgeltungsteuer), das Gehalt rund ${deEuro(salaryRoute)} (Einkommensteuer mit Zuschlagsteuern). Angemessenheit des Gehalts und Sozialversicherung sind nicht geprüft; ab 25 % Beteiligung kommt statt der Abgeltungsteuer das Teileinkünfteverfahren in Betracht (§ 32d Abs. 2 Nr. 3 EStG).',
-          source: Uri.parse(
-            'https://www.gesetze-im-internet.de/estg/__32d.html',
-          ),
-          estimatedSavingMinor: dividendRoute - salaryRoute,
+    // Signpost-only: Gehalt-versus-Ausschüttung comparisons for a GmbH
+    // are reserved advice territory under StBerG §5, so the row explains
+    // the general mechanics, names the vGA risk and points to a
+    // Steuerberater, without quantifying either route.
+    opportunities.add(
+      TaxOpportunity(
+        id: 'de.geschaeftsfuehrer_vergleich',
+        title: 'Gehalt und Gewinnausschüttung im Vergleich',
+        explanation: 'Ein Gesellschafter-Geschäftsführer kann den Gewinn als Gehalt oder als Ausschüttung beziehen; beide Wege sind unterschiedlich besteuert (Gehalt: Einkommensteuer mit Zuschlagsteuern; Ausschüttung: Körperschaftsteuer, Gewerbesteuer und Abgeltungsteuer, ab 25 % Beteiligung Teileinkünfteverfahren, § 32d Abs. 2 Nr. 3 EStG). Ein unangemessen niedriges Gehalt kann als verdeckte Gewinnausschüttung gelten; Angemessenheit und Sozialversicherung sind Einzelfallfragen. Dieser Vergleich wird nicht beziffert: Er gehört in die Beratung durch einen Steuerberater, der die volle Situation prüft.',
+        source: Uri.parse(
+          'https://www.gesetze-im-internet.de/estg/__32d.html',
         ),
-      );
-    }
+        ruleYear: input.year.label,
+        signpostOnly: true,
+        assumptions: const [
+          'Gehalts- und Ausschüttungswege hängen von Beteiligung, Angemessenheit und Sozialversicherung ab.',
+          'Die Zahlen dieses Unternehmens werden hier nicht verglichen; ein Steuerberater kann beide Wege beziffern.',
+        ],
+      ),
+    );
+    break;
   }
 
   return opportunities;
@@ -221,11 +237,16 @@ List<TaxOpportunity> _soleTraderOpportunities(
     opportunities.add(
       TaxOpportunity(
         id: 'de.investitionsabzugsbetrag',
-        title: 'Investitionsabzugsbetrag nach § 7g EStG bilden',
+        title: 'Investitionsabzugsbetrag nach § 7g EStG',
         explanation:
             'Für geplante Anschaffungen lassen sich bis zu ${table.investmentDeduction.rateBasisPoints ~/ 100} % der voraussichtlichen Kosten gewinnmindernd abziehen, insgesamt höchstens ${deEuro(table.investmentDeduction.maxPerBusiness)} je Betrieb. Der Gewinn liegt unter ${deEuro(table.investmentDeduction.profitLimit)}, die Gewinngrenze ist damit eingehalten. Die Höhe der Ersparnis hängt von der geplanten Investition und dem Steuersatz ab.',
         source: Uri.parse('https://www.gesetze-im-internet.de/estg/__7g.html'),
+        ruleYear: input.year.label,
         deadline: deFilingDeadline(table.startYear),
+        assumptions: const [
+          'Die Investition muss im Ansatzjahr geplant und innerhalb von drei Jahren durchgeführt werden; andernfalls wird der Abzug hinzugerechnet.',
+          'Die Ersparnis hängt von der Höhe der geplanten Investition und dem Steuersatz ab.',
+        ],
       ),
     );
   }
@@ -274,14 +295,19 @@ List<TaxOpportunity> _smallBusinessOpportunity(
   return [
     TaxOpportunity(
       id: 'de.kleinunternehmerregelung',
-      title: 'Kleinunternehmerregelung nach § 19 UStG prüfen',
+      title: 'Kleinunternehmerregelung nach § 19 UStG',
       explanation:
           'Der Vorjahresumsatz von ${deEuro(profile.previousYearTurnoverMinor)} und der diesjährige Umsatz von ${deEuro(turnover)} liegen unter den Grenzen von ${deEuro(table.vat.smallBusinessPreviousYearTurnover)} (Vorjahr) und ${deEuro(table.vat.smallBusinessCurrentYearTurnover)} (laufendes Jahr). Bleibt der laufende Umsatz unter der Grenze, entfällt die Umsatzsteuer; dafür entfällt auch der Vorsteuerabzug. Die Ersparnis ist die bisherige Zahllast.',
       source: Uri.parse(
         'https://www.gesetze-im-internet.de/ustg_1980/__19.html',
       ),
       estimatedSavingMinor: math.max(0, vatDue),
+      ruleYear: input.year.label,
       deadline: deFilingDeadline(table.startYear),
+      assumptions: const [
+        'Der Vorjahresumsatz und der laufende Umsatz bleiben unter den Grenzen des § 19 UStG.',
+        'Ohne Umsatzsteuer entfällt auch der Vorsteuerabzug; die Ersparnis ist die bisherige Zahllast.',
+      ],
     ),
   ];
 }
@@ -295,6 +321,11 @@ TaxOpportunity _filingDeadline(DeTaxTable table) {
     explanation:
         'Die Steuererklärung für ${table.startYear} ist bis ${deDate(selfFiled)} abzugeben (§ 149 Abs. 2 AO). Mit Steuerberater oder Lohnsteuerhilfeverein verlängert sich die Frist bis ${deDate(advised)} (§ 149 Abs. 3 AO). Fällt eine Frist auf einen Samstag, Sonntag oder Feiertag, verschiebt sie sich auf den nächsten Werktag (§ 108 Abs. 3 AO).',
     source: Uri.parse('https://www.gesetze-im-internet.de/ao_1977/__149.html'),
+    ruleYear: '${table.startYear}',
     deadline: selfFiled,
+    assumptions: const [
+      'Die Fristen folgen § 149 AO; mit Steuerberater oder Lohnsteuerhilfeverein gilt die verlängerte Frist.',
+      'Fällt eine Frist auf einen Samstag, Sonntag oder Feiertag, verschiebt sie sich auf den nächsten Werktag.',
+    ],
   );
 }

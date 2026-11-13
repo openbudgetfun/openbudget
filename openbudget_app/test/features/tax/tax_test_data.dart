@@ -124,13 +124,19 @@ TaxFigureView taxFigure({
 
 TaxOpportunityView taxOpportunity({
   String id = 'gb.pension_annual_allowance',
-  String title = 'Use your pension annual allowance',
+  String title = 'Pension annual allowance',
   String explanation =
       'Pay into a private pension to get tax relief at your marginal rate.',
   int? estimatedSavingMinor = 120000,
   DateTime? deadline,
   String source =
       'https://www.gov.uk/tax-on-your-private-pension/annual-allowance',
+  String ruleYear = '2026/27',
+  String grade = 'primary',
+  bool announced = false,
+  bool signpostOnly = false,
+  bool needsEvidence = false,
+  List<String> assumptions = const [],
 }) => TaxOpportunityView(
   id: id,
   title: title,
@@ -138,6 +144,12 @@ TaxOpportunityView taxOpportunity({
   estimatedSavingMinor: estimatedSavingMinor,
   deadline: deadline,
   source: source,
+  ruleYear: ruleYear,
+  grade: grade,
+  announced: announced,
+  signpostOnly: signpostOnly,
+  needsEvidence: needsEvidence,
+  assumptions: assumptions,
 );
 
 TaxReportView taxReportView({

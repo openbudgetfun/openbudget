@@ -497,6 +497,13 @@ class TaxBandSlice {
 ///
 /// OpenBudget shows opportunities as guidance, never as regulated advice;
 /// each one says what it assumes and links to the authority's guidance.
+/// An opportunity built on a secondary or inferred figure carries that
+/// [grade] and no [estimatedSavingMinor], an announced rule never feeds a
+/// saving, and a [signpostOnly] row explains the rule and points to a
+/// professional instead of quantifying one (tax-planning-guardrails).
+///
+/// The title is a neutral noun phrase, never an imperative addressed to
+/// the user; the wording lint test enforces it.
 @immutable
 class TaxOpportunity {
   const TaxOpportunity({
@@ -504,9 +511,26 @@ class TaxOpportunity {
     required this.title,
     required this.explanation,
     required this.source,
+    required this.ruleYear,
     this.estimatedSavingMinor,
     this.deadline,
-  });
+    this.grade = TaxEvidenceGrade.primary,
+    this.announced = false,
+    this.signpostOnly = false,
+    this.needsEvidence = false,
+    this.assumptions = const [],
+  }) : assert(
+         estimatedSavingMinor == null || grade == TaxEvidenceGrade.primary,
+         'a saving may only be computed on primary-grade figures',
+       ),
+       assert(
+         !announced || estimatedSavingMinor == null,
+         'an announced rule is not law yet and never feeds a saving',
+       ),
+       assert(
+         !signpostOnly || estimatedSavingMinor == null,
+         'a signpost-only row computes no saving',
+       );
 
   /// Stable identifier, such as `gb.pension_annual_allowance`.
   final String id;
@@ -514,7 +538,10 @@ class TaxOpportunity {
   final String title;
   final String explanation;
 
-  /// The estimated tax saved if acted on, when it can be computed.
+  /// The estimated tax saved if acted on, when it can be computed. Null
+  /// whenever [grade] is not primary, [announced] is true,
+  /// [signpostOnly] is true, or the saving depends on a fact the books do
+  /// not hold.
   final int? estimatedSavingMinor;
 
   /// The last day acting on it counts for the year.
@@ -522,6 +549,31 @@ class TaxOpportunity {
 
   /// The authority's guidance for it.
   final Uri source;
+
+  /// The tax year whose rules the figures come from, as the authority
+  /// writes it: `2026/27` or `2026`.
+  final String ruleYear;
+
+  /// How well sourced the key figure behind this opportunity is. A
+  /// secondary or inferred grade shows with the row and carries no saving.
+  final TaxEvidenceGrade grade;
+
+  /// True when the rule is announced but not yet law. Labelled "announced,
+  /// not yet law" and never used in arithmetic.
+  final bool announced;
+
+  /// True when the topic is reserved to a professional in this country (a
+  /// `GuidancePerimeter` signpost-only topic): the row explains the
+  /// general rule, computes nothing and signposts.
+  final bool signpostOnly;
+
+  /// True when acting on the relief needs evidence the books do not hold
+  /// (receipts, day logs, statements); the guide asks for the evidence,
+  /// not only the number.
+  final bool needsEvidence;
+
+  /// What the explanation assumes, in plain sentences.
+  final List<String> assumptions;
 }
 
 /// The computed position for one entity and tax year.

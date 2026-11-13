@@ -233,7 +233,7 @@ void main() {
       expect(opportunity.source.scheme, 'https');
     });
 
-    test('small company status and levy exemption are quantified', () {
+    test('small company status and levy exemption are not quantified', () {
       final input = ngInput(
         profile: ngCompany(),
         entries: [
@@ -246,11 +246,16 @@ void main() {
       final small = opportunities.firstWhere(
         (item) => item.id == 'ng.small_company',
       );
-      expect(small.estimatedSavingMinor, 270_000_000);
+      // The two 2025 Acts dispute the turnover ceiling, so the row names
+      // the status and quantifies nothing until the text is confirmed.
+      expect(small.estimatedSavingMinor, isNull);
+      expect(small.grade, TaxEvidenceGrade.secondary);
+      expect(small.explanation, contains('only if'));
       final levy = opportunities.firstWhere(
         (item) => item.id == 'ng.development_levy',
       );
-      expect(levy.estimatedSavingMinor, 36_000_000);
+      expect(levy.estimatedSavingMinor, isNull);
+      expect(levy.grade, TaxEvidenceGrade.secondary);
     });
 
     test('a company above the threshold has no small company estimate', () {
@@ -296,7 +301,7 @@ void main() {
       final largeOpportunity = ngRules
           .opportunities(large, ngRules.report(large))
           .firstWhere((item) => item.id == 'ng.vat_registration');
-      expect(largeOpportunity.title, 'Register for VAT');
+      expect(largeOpportunity.title, 'VAT registration');
     });
 
     test('the VAT small business threshold is N100,000,000', () {
@@ -321,7 +326,7 @@ void main() {
             .opportunities(above, ngRules.report(above))
             .firstWhere((item) => item.id == 'ng.vat_registration')
             .title,
-        'Register for VAT',
+        'VAT registration',
       );
     });
 
@@ -333,7 +338,7 @@ void main() {
       final opportunity = ngRules
           .opportunities(input, ngRules.report(input))
           .firstWhere((item) => item.id == 'ng.vat_registration');
-      expect(opportunity.title, 'Register for VAT');
+      expect(opportunity.title, 'VAT registration');
     });
   });
 }
