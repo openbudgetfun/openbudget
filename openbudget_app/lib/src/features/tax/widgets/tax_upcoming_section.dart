@@ -163,7 +163,7 @@ class _DeadlineCard extends HookConsumerWidget {
       margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
       padding: const EdgeInsets.all(SpacingTokens.md),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // The date and the days left share a line while they fit and wrap
           // apart at large text sizes; the title takes the full width below.
