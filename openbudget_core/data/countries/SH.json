@@ -10,8 +10,18 @@
   ],
   "individualTaxYear": null,
   "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "indirectTax": {
+    "kind": "none",
+    "localName": null,
+    "rates": [],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "St Helena Government",
+    "url": "https://www.sainthelena.gov.sh"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +40,18 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "St Helena Government: taxation pages (income tax; no VAT/GST is chargeable)",
+      "url": "https://www.sainthelena.gov.sh",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "St Helena levies no VAT, GST or general sales tax (grade I: no VAT/GST is chargeable on the island; imports attract customs duties - not confirmed on a primary page this session).",
+    "individualTaxYear left null: the island's income tax year was not sourced this pass (grade I; the government's income tax pages were not reachable)."
+  ]
 }

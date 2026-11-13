@@ -8,10 +8,49 @@
   "timeZones": [
     "Africa/Bujumbura"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "TVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1800,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 1000,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "imported food products, agricultural inputs and listed goods processed in Burundi",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 100000000,
+      "currency": "BIF",
+      "period": "annualTurnover",
+      "source": 4
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Office Burundais des Recettes (OBR)",
+    "url": "https://www.obr.gov.bi"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +69,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "LookupTax: Burundi VAT guidelines (OBR VAT law Loi n°1/10 of 16 November 2020, art. 19)",
+      "url": "https://www.lookuptax.com/docs/worldwide-tax-rates",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "East African Community: Value Added Tax matrix (registration thresholds and return rules of the partner states)",
+      "url": "https://www.eac.int/financial/eac-tax-matrices/value-added-tax",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Rates secondary (grade S): 18% standard and a 10% intermediate band under Loi n°1/10 of 16 November 2020, art. 19 (per LookupTax's reading of the OBR law, checked October 2026); obr.gov.bi was not reachable this session.",
+    "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window); the 2020 VAT law carries the 18% rate.",
+    "Registration threshold of BIF 100,000,000 gross turnover per the East African Community VAT matrix (grade S)."
+  ]
 }

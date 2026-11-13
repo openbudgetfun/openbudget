@@ -8,10 +8,57 @@
   "timeZones": [
     "Europe/Andorra"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "IGI (Impost General Indirecte)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 450,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 100,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "basic foodstuffs (bread, milk)",
+        "source": 3
+      },
+      {
+        "label": "reduced2",
+        "basisPoints": 250,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "public transport, newspapers and culture",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 4000000,
+      "currency": "EUR",
+      "period": "annualTurnover",
+      "source": 3
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Andorran Tax Administration (ATA)",
+    "url": "https://www.impostos.ad"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +77,26 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VAT Review: Andorra — key facts (IGI 4.5% with 1% and 2.5% reduced bands; EUR 40,000 threshold), sourced to the Govern d'Andorra (reviewed August 2026)",
+      "url": "https://vatreview.com/andorra",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+      "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - all rows start 2022-01-01: the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (the IGI was introduced in 2013 at these levels per general references; current rates confirmed against the Govern d'Andorra by VAT Review, August 2026).",
+    "A higher incremental IGI rate applies to banking and financial services (grade S, not modelled); registration threshold EUR 40,000 (EUR 150,000 for agriculture)."
+  ]
 }

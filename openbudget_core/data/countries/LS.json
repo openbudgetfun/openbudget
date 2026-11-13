@@ -9,10 +9,41 @@
   "timeZones": [
     "Africa/Maseru"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 4,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 3,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2018-04-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 200000000,
+      "currency": "LSL",
+      "period": "annualTurnover",
+      "source": 3
+    },
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Revenue Services Lesotho (RSL)",
+    "url": "https://www.rsl.org.ls"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -31,9 +62,26 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Lesotho — VAT standard rate (Legal Notice No. 27 of 2018) and registration threshold (VAT Act 2001, s.17)",
+      "url": "https://afriref.dev/ls/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Revenue Services Lesotho: Guide on Taxation of Employment Income 2026-27 (tax year 1 April to 31 March)",
+      "url": "https://www.rsl.org.ls/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear runs 1 April to 31 March (grade S; RSL's own employment-income guide for 2026-27, which also dates provisional payments to 30 September, 31 December and 31 March).",
+    "companyYearEndDefault is a 31 March default aligned to the tax year (grade S); companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2018-04-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (15% set by Legal Notice No. 27 of 2018, Value Added Tax (Amendment) Regulations, per afriref).",
+    "Registration threshold of LSL 2,000,000 in force from 25 April 2025 (grade S, afriref citing the VAT Act 2001 s.17 as amended)."
+  ]
 }

@@ -9,10 +9,41 @@
   "timeZones": [
     "Africa/Windhoek"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 3,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 2,
+    "day": 28
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2000-11-27",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 100000000,
+      "currency": "NAD",
+      "period": "annualTurnover",
+      "source": 3
+    },
+    "returnFrequency": "bimonthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Namibia Revenue Agency (NamRA)",
+    "url": "https://www.namra.gov.na"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -31,9 +62,21 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Namibia — VAT standard rate (Value-Added Tax Act 10 of 2000, s. 6(1)) and registration threshold (s. 15(1)(b))",
+      "url": "https://afriref.dev/na/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear runs 1 March to the end of February, following South Africa's year of assessment (grade S; standard Namibian practice, not confirmed on namra.gov.na this session).",
+    "companyYearEndDefault is a 28 February default aligned to the tax year (grade S).",
+    "Lower-bound rows - standard (2000-11-27): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (15% set by the Value-Added Tax Act 10 of 2000, s. 6(1)).",
+    "Registration threshold of NAD 1,000,000 in force from 1 October 2024 (grade S; s. 15(1)(b) as substituted per afriref).",
+    "VAT periods are two months (grade S), as in South Africa."
+  ]
 }

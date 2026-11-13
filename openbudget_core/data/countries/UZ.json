@@ -9,10 +9,44 @@
     "Asia/Tashkent",
     "Asia/Samarkand"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2019-10-01",
+        "to": "2023-01-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1200,
+        "from": "2023-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Tax Committee",
+    "url": "https://soliq.uz"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -31,9 +65,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Uzbekistan Tax Code art. 258 with the amending instruments (per Leader Audit's legal citations): 20% to 30 September 2019; 15% from 1 October 2019 (Decree UP-5837); 12% from 1 January 2023 (Law ZRU-812)",
+      "url": "https://leaderaudit.uz/en/vat-rate-uzbekistan",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "EY: Doing Business in Uzbekistan 2025 (standard VAT rate 12%; rates frozen until 2028 by Presidential Decree UP-229)",
+      "url": "https://www.ey.com/content/dam/ey-unified-site/ey-com/en-uz/documents/doing-business-uz-2025.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Effective dating (grade P, Tax Code art. 258 with the amending laws named): 20% until 30 September 2019; 15% from 1 October 2019 (Presidential Decree UP-5837, restated by Law ZRU-599 from 2020); 12% from 1 January 2023 (Law ZRU-812 of 30 December 2022). Presidential Decree UP-229 freezes the VAT and income tax rates until 1 January 2028 (grade S).",
+    "The tax period is one month (grade S, art. 259 per Uzbek tax guides).",
+    "No single registration threshold is recorded: VAT payer status turns on regime choice (turnover-tax payers with income up to UZS 1 billion from 2026) rather than a simple VAT threshold (grade S); left null rather than guessed."
+  ]
 }

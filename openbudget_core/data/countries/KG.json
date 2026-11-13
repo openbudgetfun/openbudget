@@ -8,10 +8,36 @@
   "timeZones": [
     "Asia/Bishkek"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1200,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "State Tax Service under the Ministry of Economy and Finance",
+    "url": "https://salyq.kg"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +56,21 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Invest Kyrgyzstan (State Investment Agency): comparative tax table of the five Central Asian countries (Kyrgyzstan VAT 12%; live 2026)",
+      "url": "https://invest.gov.kg/en/comparison",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (12% under the 2022 Tax Code, confirmed by the State Investment Agency's five-country comparative table, live 2026).",
+    "Registration threshold left null: sources conflict - the 2022 Tax Code raised the threshold from KGS 8 million to KGS 30 million (World Bank 2024 review), while a reading of the August 2026 edition of the Tax Code (art. 255) finds no monetary threshold attached to VAT registration at all.",
+    "The authority URL could not be verified this session (grade S for the URL)."
+  ]
 }

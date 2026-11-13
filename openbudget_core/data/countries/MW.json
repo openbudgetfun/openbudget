@@ -8,10 +8,44 @@
   "timeZones": [
     "Africa/Blantyre"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 4,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 3,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1650,
+        "from": "2022-01-01",
+        "to": "2026-01-01",
+        "appliesTo": null,
+        "source": 5
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1750,
+        "from": "2026-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Malawi Revenue Authority (MRA)",
+    "url": "https://www.mra.mw"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +64,32 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "PwC Worldwide Tax Summaries: Malawi — administration (tax year runs 1 April to 31 March with effect from 1 April 2022)",
+      "url": "https://taxsummaries.pwc.com/malawi/corporate/tax-administration",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "BDO Indirect Tax News: International — VAT Rates and Other Indirect Tax Rate Changes for 2026 (15 January 2026)",
+      "url": "https://www.bdo.global/en-gb/insights/tax/indirect-tax/international-vat-and-excise-duty-changes-in-2026",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+      "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-02-13",
+  "caveats": [
+    "individualTaxYear runs 1 April to 31 March: Malawi's tax year changed from July-June to April-March with effect from 1 April 2022 (the 2021/22 year was shortened to end 31 March 2022; grade S, PwC Malawi and the MRA's 2022 change notice).",
+    "companyYearEndDefault is a 31 March default aligned to the tax year (grade S).",
+    "Effective dating (grade S): the standard rate rose from 16.5% to 17.5% from 1 January 2026 under the 2025/26 mid-year budget measures (BDO's 2026 table and AfroTools). The 16.5% row starts at the coverage window's lower bound.",
+    "The 17.5% effective date is BDO's 'from 1 January 2026 unless otherwise noted'; AfroTools attributes the rise to the mid-year budget review without a date - flag if MRA guidance differs."
+  ]
 }

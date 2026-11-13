@@ -8,10 +8,49 @@
   "timeZones": [
     "Asia/Riyadh"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "islamic"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 500,
+        "from": "2018-01-01",
+        "to": "2020-07-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2020-07-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 37500000,
+      "currency": "SAR",
+      "period": "rolling12Months",
+      "source": 4
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Zakat, Tax and Customs Authority (ZATCA)",
+    "url": "https://zatca.gov.sa"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +69,39 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "ZATCA (Saudi Arabia): Value Added Tax Law and Implementing Regulations — 5% from 1 January 2018, 15% from 1 July 2020",
+      "url": "https://zatca.gov.sa/en/RulesRegulations/Taxes/Pages/ValueAddedTax.aspx",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "ZATCA guideline on professional services under VAT provisions: mandatory registration threshold SAR 375,000 (Implementing Regulations art. 5)",
+      "url": "https://zatca.gov.sa/en/HelpCenter/guidelines/Documents/Guideline-on-Professional-Services-under-VAT-Provisions.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "ZATCA: Implementing Regulations for Zakat Collection — art. 15 (zakat year is the fiscal year, twelve lunar months by default; day-count rule for Gregorian years)",
+      "url": "https://zatca.gov.sa/en/RulesRegulations/Documents/ZAKAT%20COLLECTION.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "mearef: Saudi Arabia — VAT rate (ZATCA VAT Law: 15% from 1 July 2020) and registration threshold (GCC Common VAT Agreement art. 50(2))",
+      "url": "https://mearef.dev/sa/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Non-Gregorian tax year (grade P, Implementing Regulations for Zakat Collection, art. 15, on zatca.gov.sa): a zakat payer's fiscal year is twelve lunar (Hijri) months - about 354 days, drifting roughly 11 days earlier each Gregorian year - and payers may adopt the Gregorian calendar year instead. The stored start (1 Muharram, approximated as 1 January) follows the default lunar year; Saudi and GCC nationals pay zakat (2.5% of the zakat base for a Hijri year; about 2.5778% by day-count for a 365-day Gregorian year), not income tax.",
+    "companyYearEndDefault is a 31 December app default (grade S): most Saudi zakat and tax payers keep a Gregorian year ending 31 December, and ZATCA assesses non-Hijri years by day count.",
+    "Effective dating of VAT (grade P, ZATCA's VAT Law and Implementing Regulations): VAT was introduced on 1 January 2018 at 5% and raised to 15% from 1 July 2020.",
+    "Registration threshold of SAR 375,000 taxable supplies over 12 months (voluntary at SAR 187,500; grade P, ZATCA's professional-services guideline citing art. 5 of the Implementing Regulations).",
+    "Returns are monthly where annual supplies exceed SAR 40,000,000 and quarterly otherwise (grade S); left as a caveat rather than a single frequency."
+  ]
 }

@@ -10,8 +10,27 @@
   ],
   "individualTaxYear": null,
   "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "indirectTax": {
+    "kind": "salesTax",
+    "localName": "Sales tax",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1800,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "National Revenue Authority (NRA)",
+    "url": "https://www.nra.gov.ss"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +49,20 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "South Sudan Business Guide: sales tax and excise — rates and legal basis (2024/2025 Financial Act: 18% in Schedule 1 with conflicting section rates; VAT draft discussed May 2026)",
+      "url": "https://southsudanbusinessguide.com/sales-tax-south-sudan/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-02-13",
+  "caveats": [
+    "individualTaxYear left null (grade I): sources conflict - the government's fiscal year runs 1 July to 30 June, while one secondary table describes a calendar tax year; not recorded rather than guessed.",
+    "companyYearEndDefault left null for the same reason.",
+    "Rates secondary (grade S): the 2024/2025 Financial Act's Schedule 1 sets an 18% sales tax, but its sections 11, 13 and 14 carry different figures (1-20% and 20%) with no official reconciliation located as of 11 November 2026; recorded at 18% with the conflict flagged.",
+    "Draft VAT legislation was discussed with the IMF in May 2026; no signed law or commencement notice was found (grade S)."
+  ]
 }

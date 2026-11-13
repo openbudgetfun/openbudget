@@ -8,10 +8,27 @@
   "timeZones": [
     "Asia/Damascus"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "none",
+    "localName": null,
+    "rates": [],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Ministry of Finance – General Commission for Taxes and Fees",
+    "url": "https://mof.gov.sy"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +47,26 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VAT Review: Syria — the 5% Sales Tax Law was finalised in 2025 but no commencement date was published; the consumption expenditure tax instructions were reissued 1 July 2026",
+      "url": "https://vatreview.com/syria",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Nomad Watch: Syria tax profile (no general VAT; selective consumption taxes; fiscal year 1 January to 31 December; Income Tax Law 24 of 2003 as amended)",
+      "url": "https://nomad.watch/countries/SY/taxes",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-02-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (grade S; secondary review of the Income Tax Law No. 24 of 2003 framework).",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Syria levies no general VAT (grade S): the consumption expenditure tax (Legislative Decree 11 of 2015) still operates - its implementing instructions were reissued on 1 July 2026. A new Sales Tax Law with a 5% general rate (and up to 15% on luxuries, 45% pork, 84% alcohol) was finalised in late 2025, but no source states a commencement date and none was found applying it - recorded as none with an early re-check.",
+    "Post-2024 transition makes every Syrian figure volatile; the authority site was not reachable this session."
+  ]
 }

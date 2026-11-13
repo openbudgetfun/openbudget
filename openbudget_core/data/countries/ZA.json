@@ -8,10 +8,49 @@
   "timeZones": [
     "Africa/Johannesburg"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 3,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 2,
+    "day": 28
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2018-04-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "zero",
+        "basisPoints": 0,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "basic foodstuffs and other zero-rated schedule items",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 230000000,
+      "currency": "ZAR",
+      "period": "rolling12Months",
+      "source": 3
+    },
+    "returnFrequency": "bimonthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "South African Revenue Service (SARS)",
+    "url": "https://www.sars.gov.za"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +69,21 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: South Africa — VAT standard rate (SARS tax rates page; 15% since 1 April 2018) and registration threshold (SARS registration page)",
+      "url": "https://afriref.dev/za/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear runs 1 March to the end of February (grade S; SARS's standard year of assessment).",
+    "companyYearEndDefault is a 28 February default aligned to the year of assessment (grade S); companies may choose other year ends under the Income Tax Act.",
+    "Lower-bound rows - standard (2018-04-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (15% since 1 April 2018 per SARS's tax-rates page, last updated 14 May 2026, cited by afriref). The 2025 and 2026 budget proposals to raise the rate were withdrawn; 15% stands.",
+    "Registration threshold of ZAR 2,300,000 in force from 1 April 2026 (grade S; SARS's registration page per afriref - raised from ZAR 1,000,000, which applied throughout the earlier coverage window).",
+    "VAT periods are two months (grade S); some categories file monthly or every six months."
+  ]
 }
