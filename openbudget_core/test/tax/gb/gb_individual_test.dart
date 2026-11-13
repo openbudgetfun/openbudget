@@ -824,4 +824,42 @@ void main() {
       expect(opportunity.estimatedSavingMinor, 12000);
     });
   });
+
+  group('caveats', () {
+    test('a report that uses the student-loan rules lists the student-loan '
+        'caveats and no German ones', () {
+      final report = _report(
+        loan: GbStudentLoanPlan.plan2,
+        entries: [_pounds('gb.ind.employment', 60000)],
+      );
+
+      expect(
+        report.caveats.map((caveat) => caveat.id),
+        contains('gb.student-loan-unearned-threshold'),
+      );
+      for (final caveat in report.caveats) {
+        expect(
+          caveat.id,
+          startsWith('gb.'),
+          reason: '${caveat.id} is not a GB caveat',
+        );
+      }
+      // The report carried only caveats its sections and keys touched:
+      // every caveat is one of its rule set's.
+      final ruleSet = _gb.ruleSet(report.year.startYear);
+      expect(
+        report.caveats.toSet().difference(ruleSet.caveats.toSet()),
+        isEmpty,
+      );
+    });
+
+    test('a report with no student loan carries no student-loan caveat', () {
+      final report = _report(entries: [_pounds('gb.ind.employment', 30000)]);
+
+      expect(
+        report.caveats.map((caveat) => caveat.id),
+        isNot(contains('gb.student-loan-unearned-threshold')),
+      );
+    });
+  });
 }

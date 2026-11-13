@@ -3715,6 +3715,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'Preview: these figures have not yet been checked by a tax professional.';
 
   @override
+  String get taxUnverifiedTitle => 'What we could not verify';
+
+  @override
+  String get taxSecondarySourceBadge => 'From a secondary source';
+
+  @override
+  String get taxAnnouncedBadge => 'Announced, not yet law';
+
+  @override
   String get taxProfileTitle => 'Tax profile';
 
   @override

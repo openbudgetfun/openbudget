@@ -518,6 +518,7 @@ TaxReport _individualReport(
           assessment.sparerPauschbetrag,
         ),
         reportReference: '§ 20 Abs. 9 EStG',
+        figureId: 'sparerPauschbetrag',
       ),
     if (assessment.basisrente > 0)
       TaxReportLine(
@@ -639,6 +640,12 @@ TaxReport _individualReport(
     ).versionFor(TaxJurisdiction.de),
     maturity: deTaxManifest.maturity,
     coverage: deTaxManifest.sections,
+    caveats: deRuleSetFor(input.year.startYear).caveatsTouching(
+      sections: {
+        TaxSection.personalReturn,
+        if (assessment.businessProfit != 0) TaxSection.selfEmployment,
+      },
+    ),
     uncategorizedCount: _uncategorizedCount(input),
   );
 }
@@ -740,6 +747,12 @@ TaxReport _soleTraderReport(
     ).versionFor(TaxJurisdiction.de),
     maturity: deTaxManifest.maturity,
     coverage: deTaxManifest.sections,
+    caveats: deRuleSetFor(input.year.startYear).caveatsTouching(
+      sections: {
+        TaxSection.selfEmployment,
+        if (chargesVat && vatDue != 0) TaxSection.indirectTax,
+      },
+    ),
     uncategorizedCount: _uncategorizedCount(input),
   );
 }
@@ -846,6 +859,12 @@ TaxReport _companyReport(
     ).versionFor(TaxJurisdiction.de),
     maturity: deTaxManifest.maturity,
     coverage: deTaxManifest.sections,
+    caveats: deRuleSetFor(input.year.startYear).caveatsTouching(
+      sections: {
+        TaxSection.companyReturn,
+        if (chargesVat && company.vatDueMinor != 0) TaxSection.indirectTax,
+      },
+    ),
     uncategorizedCount: _uncategorizedCount(input),
   );
 }

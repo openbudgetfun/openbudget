@@ -188,6 +188,7 @@ final class GbTaxRules implements TaxRulePack {
       TaxReportLine(
         label: 'Personal allowance',
         amountMinor: figures.tax.personalAllowanceMinor,
+        figureId: 'personalAllowance',
       ),
       TaxReportLine(
         label: 'Taxable income',
@@ -219,6 +220,7 @@ final class GbTaxRules implements TaxRulePack {
             figures.netGainsMinor,
             rates.capitalGainsAnnualExemptAmountMinor,
           ),
+          figureId: 'capitalGainsAnnualExemptAmount',
         ),
         TaxReportLine(
           label: 'Taxable gains',
@@ -291,6 +293,21 @@ final class GbTaxRules implements TaxRulePack {
       rulesVersion: rules.versionFor(TaxJurisdiction.gb),
       maturity: manifest.maturity,
       coverage: manifest.sections,
+      caveats: rules.caveatsTouching(
+        sections: {
+          TaxSection.personalReturn,
+          if (totals['gb.ind.self_employment'] != 0 ||
+              figures.linkedBusinesses > 0)
+            TaxSection.selfEmployment,
+          if (figures.netGainsMinor > 0) TaxSection.capitalGains,
+        },
+        keys: {
+          // The student-loan working sheet runs whenever a plan or the
+          // postgraduate loan is on the profile, even before any income.
+          if (profile.studentLoanPlan != null || profile.postgraduateLoan)
+            'studentLoans',
+        },
+      ),
       uncategorizedCount: figures.uncategorizedCount,
     );
   }
@@ -365,6 +382,7 @@ final class GbTaxRules implements TaxRulePack {
           code: 'gb.se.capital_allowances',
           reportReference: 'SA103F box 49',
           entryCount: totals.counts['gb.se.capital_allowances'] ?? 0,
+          figureId: 'annualInvestmentAllowance',
         ),
       if (figures.capitalAllowancesUnrelievedMinor > 0)
         TaxReportLine(
@@ -421,6 +439,12 @@ final class GbTaxRules implements TaxRulePack {
       rulesVersion: rules.versionFor(TaxJurisdiction.gb),
       maturity: manifest.maturity,
       coverage: manifest.sections,
+      caveats: rules.caveatsTouching(
+        sections: {
+          TaxSection.selfEmployment,
+          if (vatRegistered && vat.hasEntries) TaxSection.indirectTax,
+        },
+      ),
       uncategorizedCount: figures.uncategorizedCount,
     );
   }
@@ -467,6 +491,7 @@ final class GbTaxRules implements TaxRulePack {
           code: 'gb.co.capital_allowances',
           reportReference: 'CT600 box 690',
           entryCount: totals.counts['gb.co.capital_allowances'] ?? 0,
+          figureId: 'annualInvestmentAllowance',
         ),
       if (figures.allowances.unrelievedMinor > 0)
         TaxReportLine(
@@ -553,6 +578,12 @@ final class GbTaxRules implements TaxRulePack {
       rulesVersion: rules.versionFor(TaxJurisdiction.gb),
       maturity: manifest.maturity,
       coverage: manifest.sections,
+      caveats: rules.caveatsTouching(
+        sections: {
+          TaxSection.companyReturn,
+          if (vatRegistered && vat.hasEntries) TaxSection.indirectTax,
+        },
+      ),
       uncategorizedCount: figures.uncategorizedCount,
     );
   }
