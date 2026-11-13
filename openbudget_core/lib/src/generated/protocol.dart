@@ -23,6 +23,7 @@ import 'journal_status.dart' as _ivhj1h0b;
 import 'ledger_account_type.dart' as _itr586k3;
 import 'ledger_system_role.dart' as _if8rpjam;
 import 'recurrence_frequency.dart' as _ieaa5lpg;
+import 'wallet_network.dart' as _i6lhrrpg;
 export 'account_balance_source.dart';
 export 'account_kind.dart';
 export 'accounting_mode.dart';
@@ -33,6 +34,7 @@ export 'journal_status.dart';
 export 'ledger_account_type.dart';
 export 'ledger_system_role.dart';
 export 'recurrence_frequency.dart';
+export 'wallet_network.dart';
 
 class Protocol extends _iss.SerializationManager
     implements _iss.ProtocolDeserializationProvider {
@@ -59,6 +61,7 @@ class Protocol extends _iss.SerializationManager
           _iss.getType<_itr586k3.LedgerAccountType>,
           _iss.getType<_if8rpjam.LedgerSystemRole>,
           _iss.getType<_ieaa5lpg.RecurrenceFrequency>,
+          _iss.getType<_i6lhrrpg.WalletNetwork>,
           _iss.getType<_iajlz9u3.AccountBalanceSource?>,
           _iss.getType<_ifkquxga.AccountKind?>,
           _iss.getType<_inp9sd6t.AccountingMode?>,
@@ -69,6 +72,7 @@ class Protocol extends _iss.SerializationManager
           _iss.getType<_itr586k3.LedgerAccountType?>,
           _iss.getType<_if8rpjam.LedgerSystemRole?>,
           _iss.getType<_ieaa5lpg.RecurrenceFrequency?>,
+          _iss.getType<_i6lhrrpg.WalletNetwork?>,
         ],
         modules: const [],
         classNames: const [
@@ -82,6 +86,7 @@ class Protocol extends _iss.SerializationManager
           'LedgerAccountType',
           'LedgerSystemRole',
           'RecurrenceFrequency',
+          'WalletNetwork',
         ],
       );
 
@@ -146,6 +151,9 @@ class Protocol extends _iss.SerializationManager
     if (t == _ieaa5lpg.RecurrenceFrequency) {
       return _ieaa5lpg.RecurrenceFrequency.fromJson(data) as T;
     }
+    if (t == _i6lhrrpg.WalletNetwork) {
+      return _i6lhrrpg.WalletNetwork.fromJson(data) as T;
+    }
     if (t == _iss.getType<_iajlz9u3.AccountBalanceSource?>()) {
       return (data != null
               ? _iajlz9u3.AccountBalanceSource.fromJson(data)
@@ -187,6 +195,10 @@ class Protocol extends _iss.SerializationManager
               : null)
           as T;
     }
+    if (t == _iss.getType<_i6lhrrpg.WalletNetwork?>()) {
+      return (data != null ? _i6lhrrpg.WalletNetwork.fromJson(data) : null)
+          as T;
+    }
     return super.deserialize<T>(data, t);
   }
 
@@ -202,6 +214,7 @@ class Protocol extends _iss.SerializationManager
       _itr586k3.LedgerAccountType => 'LedgerAccountType',
       _if8rpjam.LedgerSystemRole => 'LedgerSystemRole',
       _ieaa5lpg.RecurrenceFrequency => 'RecurrenceFrequency',
+      _i6lhrrpg.WalletNetwork => 'WalletNetwork',
       _ => null,
     };
   }
@@ -236,6 +249,8 @@ class Protocol extends _iss.SerializationManager
         return 'LedgerSystemRole';
       case _ieaa5lpg.RecurrenceFrequency():
         return 'RecurrenceFrequency';
+      case _i6lhrrpg.WalletNetwork():
+        return 'WalletNetwork';
     }
     return null;
   }
@@ -275,6 +290,9 @@ class Protocol extends _iss.SerializationManager
     }
     if (dataClassName == 'RecurrenceFrequency') {
       return deserialize<_ieaa5lpg.RecurrenceFrequency>(data['data']);
+    }
+    if (dataClassName == 'WalletNetwork') {
+      return deserialize<_i6lhrrpg.WalletNetwork>(data['data']);
     }
     return super.deserializeByClassName(data);
   }

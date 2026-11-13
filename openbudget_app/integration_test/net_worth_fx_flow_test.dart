@@ -172,11 +172,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(netWorth.currencyRow('USD'), findsOneWidget);
-      expect(
-        find.textContaining('1 USD = 0.79 GBP'),
-        findsOneWidget,
-      );
-      expect(find.textContaining('Nov 8'), findsOneWidget);
+      // The row's rate line carries its own date; the trust line and the
+      // chart's end label also say "Nov 8", so match the whole line.
+      expect(find.text('1 USD = 0.79 GBP · Nov 8'), findsOneWidget);
+      expect(netWorth.trustLine, findsOneWidget);
       expect(find.text(r'$100.00'), findsOneWidget);
       expect(find.text('£79.00'), findsWidgets);
     },

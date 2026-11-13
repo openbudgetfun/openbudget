@@ -7,6 +7,7 @@ import 'package:openbudget_app/src/features/payees/providers/payee_list_provider
 import 'package:openbudget_app/src/features/tax/widgets/tax_category_row.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/date_labels.dart';
 import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -152,11 +153,7 @@ class EditTransactionDialog extends HookConsumerWidget {
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const SkribbleIcon(data: OpenBudgetIcons.calendar),
-              title: Text(
-                '${selectedDate.value.year}-'
-                '${selectedDate.value.month.toString().padLeft(2, '0')}-'
-                '${selectedDate.value.day.toString().padLeft(2, '0')}',
-              ),
+              title: Text(DateLabels.full(context, selectedDate.value)),
               onTap: () async {
                 final picked = await showDatePicker(
                   context: context,

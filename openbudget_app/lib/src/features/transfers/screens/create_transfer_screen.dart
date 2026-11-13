@@ -12,6 +12,7 @@ import 'package:openbudget_app/src/features/transactions/widgets/fx_rate_line.da
 import 'package:openbudget_app/src/providers/fx_rate_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/date_labels.dart';
 import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -280,7 +281,6 @@ class CreateTransferScreen extends HookConsumerWidget {
                                 toCurrencyCode: toAccount.currencyCode,
                                 date: selectedDate.value,
                                 amountMinor: fromMinor,
-                                onSetRate: useMarketRate,
                               ),
                             TextButton(
                               onPressed: useMarketRate,
@@ -296,9 +296,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                     leading: const SkribbleIcon(data: OpenBudgetIcons.calendar),
                     title: Text(l10n.transactionDateLabel),
                     subtitle: Text(
-                      '${selectedDate.value.year}-'
-                      '${selectedDate.value.month.toString().padLeft(2, '0')}-'
-                      '${selectedDate.value.day.toString().padLeft(2, '0')}',
+                      DateLabels.full(context, selectedDate.value),
                     ),
                     onTap: () async {
                       final picked = await showDatePicker(

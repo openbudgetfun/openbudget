@@ -12,10 +12,10 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod/serverpod.dart' as _is;
 
 import '../common/sync_status.dart' as _ijl385hj;
-import '../wallets/wallet_network.dart' as _ilag50y5;
 
 /// A read-only blockchain wallet whose holdings value one crypto account.
 abstract class Wallet
@@ -41,7 +41,7 @@ abstract class Wallet
     _is.UuidValue? id,
     required _is.UuidValue entityId,
     required _is.UuidValue accountId,
-    required _ilag50y5.WalletNetwork network,
+    required _ifz8weqz.WalletNetwork network,
     required String address,
     String? label,
     String? lastSignature,
@@ -63,7 +63,7 @@ abstract class Wallet
       accountId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['accountId'],
       ),
-      network: _ilag50y5.WalletNetwork.fromJson(
+      network: _ifz8weqz.WalletNetwork.fromJson(
         (jsonSerialization['network'] as String),
       ),
       address: jsonSerialization['address'] as String,
@@ -101,7 +101,7 @@ abstract class Wallet
   /// The crypto account carrying the wallet's value into net worth.
   _is.UuidValue accountId;
 
-  _ilag50y5.WalletNetwork network;
+  _ifz8weqz.WalletNetwork network;
 
   /// Base58 address.
   String address;
@@ -131,7 +131,7 @@ abstract class Wallet
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
     _is.UuidValue? entityId,
     _is.UuidValue? accountId,
-    _ilag50y5.WalletNetwork? network,
+    _ifz8weqz.WalletNetwork? network,
     String? address,
     String? label,
     String? lastSignature,
@@ -214,7 +214,7 @@ class _WalletImpl extends Wallet {
     _is.UuidValue? id,
     required _is.UuidValue entityId,
     required _is.UuidValue accountId,
-    required _ilag50y5.WalletNetwork network,
+    required _ifz8weqz.WalletNetwork network,
     required String address,
     String? label,
     String? lastSignature,
@@ -246,7 +246,7 @@ class _WalletImpl extends Wallet {
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
     _is.UuidValue? entityId,
     _is.UuidValue? accountId,
-    _ilag50y5.WalletNetwork? network,
+    _ifz8weqz.WalletNetwork? network,
     String? address,
     Object? label = _Undefined,
     Object? lastSignature = _Undefined,
@@ -295,8 +295,8 @@ class WalletUpdateTable extends _is.UpdateTable<WalletTable> {
     value,
   );
 
-  _is.ColumnValue<_ilag50y5.WalletNetwork, _ilag50y5.WalletNetwork> network(
-    _ilag50y5.WalletNetwork value,
+  _is.ColumnValue<_ifz8weqz.WalletNetwork, _ifz8weqz.WalletNetwork> network(
+    _ifz8weqz.WalletNetwork value,
   ) => _is.ColumnValue(
     table.network,
     value,
@@ -411,7 +411,7 @@ class WalletTable extends _is.Table<_is.UuidValue?> {
   /// The crypto account carrying the wallet's value into net worth.
   late final _is.ColumnUuid accountId;
 
-  late final _is.ColumnEnum<_ilag50y5.WalletNetwork> network;
+  late final _is.ColumnEnum<_ifz8weqz.WalletNetwork> network;
 
   /// Base58 address.
   late final _is.ColumnString address;
