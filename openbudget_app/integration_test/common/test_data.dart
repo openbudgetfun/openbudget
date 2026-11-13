@@ -223,6 +223,126 @@ abstract final class TestData {
     ],
   );
 
+  // Crypto breakdown (net worth with two connected wallets, in GBP)
+  static const cryptoTotalMinor = 20000;
+
+  static CryptoBreakdownRow _cryptoRow(
+    String key,
+    int valueMinor,
+    int shareBasisPoints, {
+    required List<WalletNetwork> networks,
+    String? symbol,
+    String? name,
+    bool isOther = false,
+    int holdingCount = 1,
+  }) => CryptoBreakdownRow(
+    key: key,
+    networks: networks,
+    symbol: symbol,
+    name: name,
+    isOther: isOther,
+    holdingCount: holdingCount,
+    valueMinor: valueMinor,
+    shareBasisPoints: shareBasisPoints,
+  );
+
+  /// The server's crypto breakdown for [gbpEntityId]: £200.00 across
+  /// Ethereum, Solana and Base, or the same money by asset, where USDC on
+  /// three networks is one row.
+  static CryptoBreakdownView gbpCryptoBreakdown(
+    CryptoBreakdownGrouping grouping,
+  ) {
+    final rows = switch (grouping) {
+      CryptoBreakdownGrouping.byChain => [
+        _cryptoRow(
+          'ethereumMainnet',
+          10000,
+          5000,
+          networks: [WalletNetwork.ethereumMainnet],
+          holdingCount: 4,
+        ),
+        _cryptoRow(
+          'solanaMainnet',
+          7000,
+          3500,
+          networks: [WalletNetwork.solanaMainnet],
+          holdingCount: 2,
+        ),
+        _cryptoRow(
+          'baseMainnet',
+          3000,
+          1500,
+          networks: [WalletNetwork.baseMainnet],
+        ),
+      ],
+      CryptoBreakdownGrouping.byAsset => [
+        _cryptoRow(
+          'asset:USDC',
+          8000,
+          4000,
+          networks: [
+            WalletNetwork.ethereumMainnet,
+            WalletNetwork.baseMainnet,
+            WalletNetwork.solanaMainnet,
+          ],
+          symbol: 'USDC',
+          name: 'USD Coin',
+          holdingCount: 3,
+        ),
+        _cryptoRow(
+          'asset:ETH',
+          6000,
+          3000,
+          networks: [WalletNetwork.ethereumMainnet, WalletNetwork.baseMainnet],
+          symbol: 'ETH',
+          holdingCount: 2,
+        ),
+        _cryptoRow(
+          'asset:SOL',
+          4000,
+          2000,
+          networks: [WalletNetwork.solanaMainnet],
+          symbol: 'SOL',
+        ),
+        _cryptoRow(
+          'other',
+          2000,
+          1000,
+          networks: [WalletNetwork.baseMainnet],
+          isOther: true,
+          holdingCount: 3,
+        ),
+      ],
+    };
+    return CryptoBreakdownView(
+      currencyCode: 'GBP',
+      asOf: DateTime.utc(2026, 11, 8),
+      grouping: grouping,
+      totalMinor: cryptoTotalMinor,
+      walletCount: 2,
+      isComplete: true,
+      missingCurrencyCodes: const [],
+      hasStaleRates: false,
+      rows: rows,
+    );
+  }
+
+  /// The server's answer for an entity without wallets: the Crypto section
+  /// stays hidden.
+  static CryptoBreakdownView noWalletsCryptoBreakdown(
+    CryptoBreakdownGrouping grouping,
+  ) => CryptoBreakdownView(
+    currencyCode: 'GBP',
+    asOf: DateTime.utc(2026, 11, 8),
+    grouping: grouping,
+    totalMinor: 0,
+    walletCount: 0,
+    isComplete: true,
+    missingCurrencyCodes: const [],
+    hasStaleRates: false,
+    rows: const [],
+  );
+
   // Transfer (flow 2: GBP -> USD cross-currency)
   static const transferSentMinor = 10000;
   static const transferReceivedMinor = 7900;

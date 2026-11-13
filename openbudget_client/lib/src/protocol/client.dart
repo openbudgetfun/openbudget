@@ -88,6 +88,10 @@ import 'package:openbudget_client/src/protocol/plaid/plaid_connection.dart'
     as _itydqisw;
 import 'package:openbudget_client/src/protocol/recurring_transactions/recurring_transaction.dart'
     as _i41tn6nr;
+import 'package:openbudget_client/src/protocol/reports/crypto_breakdown_grouping.dart'
+    as _if8evbml;
+import 'package:openbudget_client/src/protocol/reports/crypto_breakdown_view.dart'
+    as _ir10t9fr;
 import 'package:openbudget_client/src/protocol/reports/net_worth_granularity.dart'
     as _idze6lni;
 import 'package:openbudget_client/src/protocol/reports/net_worth_history_view.dart'
@@ -1908,8 +1912,8 @@ class EndpointRecurringTransaction extends _isc.EndpointRef {
       );
 }
 
-/// Read-only reporting surface for net worth, spending, month summaries and
-/// age of money. Every method requires a signed-in caller and delegates the
+/// Read-only reporting surface for net worth, the crypto breakdown, spending,
+/// month summaries and age of money. Every method requires a signed-in caller and delegates the
 /// ownership boundary to its service.
 /// {@category Endpoint}
 class EndpointReport extends _isc.EndpointRef {
@@ -1948,6 +1952,22 @@ class EndpointReport extends _isc.EndpointRef {
       'toDate': toDate,
       'granularity': granularity,
       'entityIds': entityIds,
+      'currencyCode': currencyCode,
+    },
+  );
+
+  /// What one owned entity's wallets are worth today, split by chain or by
+  /// asset, in the reporting currency. Only counted holdings are summed.
+  _ida.Future<_ir10t9fr.CryptoBreakdownView> cryptoBreakdown(
+    _isc.UuidValue entityId,
+    _if8evbml.CryptoBreakdownGrouping grouping, {
+    String? currencyCode,
+  }) => caller.callServerEndpoint<_ir10t9fr.CryptoBreakdownView>(
+    'report',
+    'cryptoBreakdown',
+    {
+      'entityId': entityId,
+      'grouping': grouping,
       'currencyCode': currencyCode,
     },
   );

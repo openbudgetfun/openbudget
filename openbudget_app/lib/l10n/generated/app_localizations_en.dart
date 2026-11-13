@@ -5721,6 +5721,85 @@ class AppLocalizationsEn extends AppLocalizations {
   String get netWorthTabByAccount => 'By account';
 
   @override
+  String get cryptoBreakdownTitle => 'Crypto';
+
+  @override
+  String get cryptoBreakdownByChain => 'By chain';
+
+  @override
+  String get cryptoBreakdownByAsset => 'By asset';
+
+  @override
+  String cryptoBreakdownWallets(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Across $count wallets',
+      one: 'Across 1 wallet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cryptoBreakdownBarLabel(String grouping, String shares) {
+    return '$grouping: $shares';
+  }
+
+  @override
+  String cryptoBreakdownBarShare(String name, String share) {
+    return '$name $share';
+  }
+
+  @override
+  String get cryptoBreakdownShareUnderOne => '<1%';
+
+  @override
+  String get cryptoBreakdownOther => 'Other';
+
+  @override
+  String cryptoBreakdownOtherHoldings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count smaller holdings',
+      one: '1 smaller holding',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cryptoBreakdownChainHoldings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count holdings',
+      one: '1 holding',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cryptoBreakdownNetworksMore(String names, int count) {
+    return '$names +$count';
+  }
+
+  @override
+  String get cryptoBreakdownEmpty =>
+      'Nothing is counted yet. Tokens without a price are left out until one is found.';
+
+  @override
+  String get cryptoBreakdownFootnote =>
+      'Tokens that look like scams and tokens without a price are left out.';
+
+  @override
+  String cryptoBreakdownMissingRates(String currencies) {
+    return 'No exchange rate for $currencies, so those holdings are left out of this figure.';
+  }
+
+  @override
+  String get cryptoBreakdownLoadError => 'Couldn\'t load your crypto breakdown';
+
+  @override
   String netWorthValuedOn(String date) {
     return 'Valued $date';
   }

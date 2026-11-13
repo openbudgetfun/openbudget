@@ -166,6 +166,9 @@ import 'monthly_allocations/monthly_allocation.dart' as _igdgld5u;
 import 'payees/payee.dart' as _ignezpci;
 import 'plaid/plaid_connection.dart' as _i1vmvtrm;
 import 'recurring_transactions/recurring_transaction.dart' as _i9is7zb8;
+import 'reports/crypto_breakdown_grouping.dart' as _i9t71w04;
+import 'reports/crypto_breakdown_row.dart' as _id3mj5jh;
+import 'reports/crypto_breakdown_view.dart' as _ivz6et46;
 import 'reports/net_worth_account_row.dart' as _ieg4kkwo;
 import 'reports/net_worth_currency_row.dart' as _if6ke1e2;
 import 'reports/net_worth_entity_row.dart' as _i2p47r1m;
@@ -298,6 +301,9 @@ export 'monthly_allocations/monthly_allocation.dart';
 export 'payees/payee.dart';
 export 'plaid/plaid_connection.dart';
 export 'recurring_transactions/recurring_transaction.dart';
+export 'reports/crypto_breakdown_grouping.dart';
+export 'reports/crypto_breakdown_row.dart';
+export 'reports/crypto_breakdown_view.dart';
 export 'reports/net_worth_account_row.dart';
 export 'reports/net_worth_currency_row.dart';
 export 'reports/net_worth_entity_row.dart';
@@ -445,6 +451,9 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_ignezpci.Payee>,
           _is.getType<_i1vmvtrm.PlaidConnection>,
           _is.getType<_i9is7zb8.RecurringTransaction>,
+          _is.getType<_i9t71w04.CryptoBreakdownGrouping>,
+          _is.getType<_id3mj5jh.CryptoBreakdownRow>,
+          _is.getType<_ivz6et46.CryptoBreakdownView>,
           _is.getType<_ieg4kkwo.NetWorthAccountRow>,
           _is.getType<_if6ke1e2.NetWorthCurrencyRow>,
           _is.getType<_i2p47r1m.NetWorthEntityRow>,
@@ -578,6 +587,9 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_ignezpci.Payee?>,
           _is.getType<_i1vmvtrm.PlaidConnection?>,
           _is.getType<_i9is7zb8.RecurringTransaction?>,
+          _is.getType<_i9t71w04.CryptoBreakdownGrouping?>,
+          _is.getType<_id3mj5jh.CryptoBreakdownRow?>,
+          _is.getType<_ivz6et46.CryptoBreakdownView?>,
           _is.getType<_ieg4kkwo.NetWorthAccountRow?>,
           _is.getType<_if6ke1e2.NetWorthCurrencyRow?>,
           _is.getType<_i2p47r1m.NetWorthEntityRow?>,
@@ -638,8 +650,10 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_ii8h2sft.EnvelopeMonthView>>,
           _is.getType<List<_i15udi7x.FxRateQuote>>,
           _is.getType<List<_i5gsx3ds.TrialBalanceRowView>>,
-          _is.getType<List<_ihwosu5p.NetWorthPoint>>,
+          _is.getType<List<_ifz8weqz.WalletNetwork>>,
           _is.getType<List<String>>,
+          _is.getType<List<_id3mj5jh.CryptoBreakdownRow>>,
+          _is.getType<List<_ihwosu5p.NetWorthPoint>>,
           _is.getType<List<_if6ke1e2.NetWorthCurrencyRow>>,
           _is.getType<List<_i2p47r1m.NetWorthEntityRow>>,
           _is.getType<List<_ieg4kkwo.NetWorthAccountRow>>,
@@ -658,7 +672,6 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_imsv7m6w.TransactionLineInput>>,
           _is.getType<List<_ilixdhed.TransactionView>>,
           _is.getType<List<_ipio7ws3.TransactionLine>>,
-          _is.getType<List<_ifz8weqz.WalletNetwork>>,
           _is.getType<List<_ifz8weqz.WalletNetwork>?>,
           _is.getType<List<_icbqx9y3.WalletPreviewNetwork>>,
           _is.getType<List<String>?>,
@@ -788,6 +801,9 @@ class Protocol extends _is.DatabaseSerializationManager
           'Payee',
           'PlaidConnection',
           'RecurringTransaction',
+          'CryptoBreakdownGrouping',
+          'CryptoBreakdownRow',
+          'CryptoBreakdownView',
           'NetWorthAccountRow',
           'NetWorthCurrencyRow',
           'NetWorthEntityRow',
@@ -5880,6 +5896,15 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _i9is7zb8.RecurringTransaction) {
       return _i9is7zb8.RecurringTransaction.fromJson(data) as T;
     }
+    if (t == _i9t71w04.CryptoBreakdownGrouping) {
+      return _i9t71w04.CryptoBreakdownGrouping.fromJson(data) as T;
+    }
+    if (t == _id3mj5jh.CryptoBreakdownRow) {
+      return _id3mj5jh.CryptoBreakdownRow.fromJson(data) as T;
+    }
+    if (t == _ivz6et46.CryptoBreakdownView) {
+      return _ivz6et46.CryptoBreakdownView.fromJson(data) as T;
+    }
     if (t == _ieg4kkwo.NetWorthAccountRow) {
       return _ieg4kkwo.NetWorthAccountRow.fromJson(data) as T;
     }
@@ -6378,6 +6403,22 @@ class Protocol extends _is.DatabaseSerializationManager
               : null)
           as T;
     }
+    if (t == _is.getType<_i9t71w04.CryptoBreakdownGrouping?>()) {
+      return (data != null
+              ? _i9t71w04.CryptoBreakdownGrouping.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_id3mj5jh.CryptoBreakdownRow?>()) {
+      return (data != null ? _id3mj5jh.CryptoBreakdownRow.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ivz6et46.CryptoBreakdownView?>()) {
+      return (data != null
+              ? _ivz6et46.CryptoBreakdownView.fromJson(data)
+              : null)
+          as T;
+    }
     if (t == _is.getType<_ieg4kkwo.NetWorthAccountRow?>()) {
       return (data != null ? _ieg4kkwo.NetWorthAccountRow.fromJson(data) : null)
           as T;
@@ -6636,14 +6677,26 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
-    if (t == List<_ihwosu5p.NetWorthPoint>) {
+    if (t == List<_ifz8weqz.WalletNetwork>) {
       return (data as List)
-              .map((e) => deserialize<_ihwosu5p.NetWorthPoint>(e))
+              .map((e) => deserialize<_ifz8weqz.WalletNetwork>(e))
               .toList()
           as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == List<_id3mj5jh.CryptoBreakdownRow>) {
+      return (data as List)
+              .map((e) => deserialize<_id3mj5jh.CryptoBreakdownRow>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ihwosu5p.NetWorthPoint>) {
+      return (data as List)
+              .map((e) => deserialize<_ihwosu5p.NetWorthPoint>(e))
+              .toList()
+          as T;
     }
     if (t == List<_if6ke1e2.NetWorthCurrencyRow>) {
       return (data as List)
@@ -6751,12 +6804,6 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == List<_ipio7ws3.TransactionLine>) {
       return (data as List)
               .map((e) => deserialize<_ipio7ws3.TransactionLine>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_ifz8weqz.WalletNetwork>) {
-      return (data as List)
-              .map((e) => deserialize<_ifz8weqz.WalletNetwork>(e))
               .toList()
           as T;
     }
@@ -7121,6 +7168,9 @@ class Protocol extends _is.DatabaseSerializationManager
       _ignezpci.Payee => 'Payee',
       _i1vmvtrm.PlaidConnection => 'PlaidConnection',
       _i9is7zb8.RecurringTransaction => 'RecurringTransaction',
+      _i9t71w04.CryptoBreakdownGrouping => 'CryptoBreakdownGrouping',
+      _id3mj5jh.CryptoBreakdownRow => 'CryptoBreakdownRow',
+      _ivz6et46.CryptoBreakdownView => 'CryptoBreakdownView',
       _ieg4kkwo.NetWorthAccountRow => 'NetWorthAccountRow',
       _if6ke1e2.NetWorthCurrencyRow => 'NetWorthCurrencyRow',
       _i2p47r1m.NetWorthEntityRow => 'NetWorthEntityRow',
@@ -7346,6 +7396,12 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'PlaidConnection';
       case _i9is7zb8.RecurringTransaction():
         return 'RecurringTransaction';
+      case _i9t71w04.CryptoBreakdownGrouping():
+        return 'CryptoBreakdownGrouping';
+      case _id3mj5jh.CryptoBreakdownRow():
+        return 'CryptoBreakdownRow';
+      case _ivz6et46.CryptoBreakdownView():
+        return 'CryptoBreakdownView';
       case _ieg4kkwo.NetWorthAccountRow():
         return 'NetWorthAccountRow';
       case _if6ke1e2.NetWorthCurrencyRow():
@@ -7730,6 +7786,15 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (dataClassName == 'RecurringTransaction') {
       return deserialize<_i9is7zb8.RecurringTransaction>(data['data']);
+    }
+    if (dataClassName == 'CryptoBreakdownGrouping') {
+      return deserialize<_i9t71w04.CryptoBreakdownGrouping>(data['data']);
+    }
+    if (dataClassName == 'CryptoBreakdownRow') {
+      return deserialize<_id3mj5jh.CryptoBreakdownRow>(data['data']);
+    }
+    if (dataClassName == 'CryptoBreakdownView') {
+      return deserialize<_ivz6et46.CryptoBreakdownView>(data['data']);
     }
     if (dataClassName == 'NetWorthAccountRow') {
       return deserialize<_ieg4kkwo.NetWorthAccountRow>(data['data']);
