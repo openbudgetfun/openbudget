@@ -1,0 +1,88 @@
+{
+    "coins": {
+        "coingecko:bitcoin": {
+            "price": 68830.3139288,
+            "symbol": "BTC",
+            "timestamp": 1794595080,
+            "confidence": 0.999
+        },
+        "coingecko:ripple": {
+            "price": 1.024188958,
+            "symbol": "XRP",
+            "timestamp": 1794595080,
+            "confidence": 0.999
+        },
+        "coingecko:cardano": {
+            "price": 0.17165568800000003,
+            "symbol": "ADA",
+            "timestamp": 1794595080,
+            "confidence": 0.999
+        },
+        "coingecko:the-open-network": {
+            "price": 1.1271,
+            "symbol": "GRAM",
+            "timestamp": 1794595080,
+            "confidence": 0.999
+        },
+        "coingecko:hyperliquid": {
+            "price": 72.5989656,
+            "symbol": "HYPE",
+            "timestamp": 1794595080,
+            "confidence": 0.999
+        },
+        "coingecko:dogecoin": {
+            "price": 0.0654649632,
+            "symbol": "DOGE",
+            "timestamp": 1794595080,
+            "confidence": 0.999
+        },
+        "coingecko:litecoin": {
+            "price": 49.7481764,
+            "symbol": "LTC",
+            "timestamp": 1794595080,
+            "confidence": 0.999
+        },
+        "coingecko:sui": {
+            "price": 0.8084203560000001,
+            "symbol": "SUI",
+            "timestamp": 1794595080,
+            "confidence": 0.999
+        },
+        "coingecko:aptos": {
+            "price": 0.543221604,
+            "symbol": "APT",
+            "timestamp": 1794595080,
+            "confidence": 0.999
+        },
+        "coingecko:polygon-ecosystem-token": {
+            "price": 0.08598,
+            "symbol": "POL",
+            "timestamp": 1794595080,
+            "confidence": 0.999
+        },
+        "coingecko:avalanche-2": {
+            "price": 8.400937279999999,
+            "symbol": "AVAX",
+            "timestamp": 1794595080,
+            "confidence": 0.999
+        },
+        "coingecko:ethereum": {
+            "price": 1940.2987788000003,
+            "symbol": "ETH",
+            "timestamp": 1794595080,
+            "confidence": 0.999
+        },
+        "coingecko:binancecoin": {
+            "price": 635.365844,
+            "symbol": "BNB",
+            "timestamp": 1794595080,
+            "confidence": 0.999
+        },
+        "coingecko:solana": {
+            "price": 79.9527832,
+            "symbol": "SOL",
+            "timestamp": 1794595080,
+            "confidence": 0.999
+        }
+    }
+}

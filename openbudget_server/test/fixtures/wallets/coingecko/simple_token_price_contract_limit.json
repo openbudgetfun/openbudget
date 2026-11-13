@@ -1,0 +1,7 @@
+{
+    "timestamp": "2026-11-13T18:37:56.979+00:00",
+    "error_code": 10012,
+    "status": {
+        "error_message": "Number of contract addresses in the request exceeds the allowed limit of 1 contract address. Please note that to ensure fair usage and prevent abuse, the allowed limit may be adjusted periodically. To enjoy higher allowed limit, please subscribe to Demo plan or a paid plan at https://www.coingecko.com/en/api/pricing"
+    }
+}
