@@ -10,6 +10,16 @@ final List<DateTime> coverageDates = [
   DateTime.now().toUtc(),
 ];
 
+/// Indirect-tax regimes that began inside the coverage window, keyed by
+/// country code: Anguilla's GST (1 July 2022), Palau's PGST (1 January 2023)
+/// and Bhutan's GST (1 January 2026). Every other country must show a
+/// standard rate from the window's first day.
+final Map<String, DateTime> regimeStarts = {
+  'AI': DateTime.utc(2022, 7),
+  'PW': DateTime.utc(2023),
+  'BT': DateTime.utc(2026),
+};
+
 void main() {
   final withIndirectTax = [
     for (final country in Countries.all)
@@ -27,17 +37,24 @@ void main() {
   group('effective-dated rates', () {
     for (final country in withIndirectTax) {
       final tax = country.indirectTax!;
-      // Regimes that began inside the coverage window (Anguilla's July 2022
-      // GST, Palau's January 2023 PGST, Bhutan's January 2026 GST) cannot
-      // have rates before their first `from`, so coverage is only required
-      // from the date the country's earliest rate row starts.
-      final firstRate = [
-        for (final rate in tax.rates) rate.from,
-      ].reduce((a, b) => a.isBefore(b) ? a : b);
+      // A regime that began inside the coverage window cannot have rates
+      // before it started, so coverage is required from its start. Only the
+      // countries pinned in [regimeStarts] get that exemption: a research
+      // date mistaken for an effective date must still fail here.
+      final regimeStart = regimeStarts[country.code];
       final datesFromRegimeStart = [
         for (final date in coverageDates)
-          if (!date.isBefore(firstRate)) date,
+          if (regimeStart == null || !date.isBefore(regimeStart)) date,
       ];
+
+      if (regimeStart != null) {
+        test('${country.code} rates start when its regime started', () {
+          final firstRate = [
+            for (final rate in tax.rates) rate.from,
+          ].reduce((a, b) => a.isBefore(b) ? a : b);
+          expect(firstRate, regimeStart);
+        });
+      }
 
       test(
         '${country.code} applies a standard rate on every coverage date',
@@ -118,13 +135,7 @@ void main() {
           continue;
         }
         for (final subdivision in tax.subdivisions) {
-          final firstRate = [
-            for (final rate in subdivision.rates) rate.from,
-          ].reduce((a, b) => a.isBefore(b) ? a : b);
           for (final date in coverageDates) {
-            if (date.isBefore(firstRate)) {
-              continue;
-            }
             final inForce = subdivision.rates.any(
               (rate) =>
                   (rate.from.isBefore(date) ||
