@@ -13,6 +13,10 @@ class WalletEndpoint extends Endpoint {
   bool get requireLogin => true;
 
   /// Creates the wallet and its crypto account in one transaction, then syncs.
+  ///
+  /// The address is validated through the core parser before anything is
+  /// stored or read. EVM wallets pass [scanNetworks], the networks each read
+  /// covers; every other family reads its one network.
   Future<Wallet> connect(
     Session session,
     UuidValue entityId,
@@ -20,6 +24,7 @@ class WalletEndpoint extends Endpoint {
     String address, {
     String? label,
     String? accountName,
+    List<WalletNetwork>? scanNetworks,
   }) => WalletService.connect(
     session,
     entityId,
@@ -27,7 +32,37 @@ class WalletEndpoint extends Endpoint {
     address,
     label: label,
     accountName: accountName,
+    scanNetworks: scanNetworks,
   );
+
+  /// Reads what one address holds across its family's supported networks,
+  /// before connecting. Nothing is written. Rate limited to 20 reads an
+  /// hour per user; the 21st is rejected.
+  Future<WalletPreview> preview(
+    Session session,
+    UuidValue entityId,
+    String address,
+  ) => WalletService.preview(session, entityId, address);
+
+  /// The networks that can be read now: each one's family has a registered
+  /// provider and its secret is present.
+  Future<List<WalletNetwork>> supportedNetworks(Session session) async =>
+      WalletService.supportedNetworks(session);
+
+  /// Replaces the networks an EVM wallet reads on its next sync; null reads
+  /// its home network only.
+  Future<Wallet> setScanNetworks(
+    Session session,
+    UuidValue walletId,
+    List<WalletNetwork>? networks,
+  ) => WalletService.setScanNetworks(session, walletId, networks);
+
+  /// One row per network of the wallet: when its holdings were last read
+  /// and why the last read failed.
+  Future<List<WalletNetworkState>> listNetworkStates(
+    Session session,
+    UuidValue walletId,
+  ) => WalletService.listNetworkStates(session, walletId);
 
   /// Lists the wallets of one owned entity.
   Future<List<Wallet>> list(Session session, UuidValue entityId) =>

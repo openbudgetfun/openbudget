@@ -73,6 +73,8 @@ import 'package:openbudget_server/src/generated/wallets/wallet.dart'
     as _igcr1vxe;
 import 'package:openbudget_server/src/generated/wallets/wallet_holding.dart'
     as _icu5m6lt;
+import 'package:openbudget_server/src/generated/wallets/wallet_network_state.dart'
+    as _inqpauom;
 import 'package:openbudget_server/src/generated/wallets/wallet_tax_year_summary.dart'
     as _ilgsya0a;
 import 'package:openbudget_server/src/generated/wallets/wallet_transaction.dart'
@@ -141,6 +143,7 @@ import 'exceptions/fx_rate_unavailable_exception.dart' as _if5umnl3;
 import 'exceptions/not_found_exception.dart' as _izob2ctl;
 import 'exceptions/tax_rules_unavailable_exception.dart' as _i4yu9vcq;
 import 'exceptions/validation_exception.dart' as _igpdbyom;
+import 'exceptions/wallet_preview_rate_limited_exception.dart' as _i4nmh6wd;
 import 'future_calls_generated_models/fx_backfill_future_call_fetch_model.dart'
     as _iuflqeka;
 import 'fx_rates/fx_latest_snapshot.dart' as _i8cxakqz;
@@ -203,6 +206,8 @@ import 'wallets/spam_verdict.dart' as _i4uehszw;
 import 'wallets/wallet.dart' as _ilu5i0rn;
 import 'wallets/wallet_holding.dart' as _iqqppnaa;
 import 'wallets/wallet_network_state.dart' as _i73xhbar;
+import 'wallets/wallet_preview.dart' as _iuw2colh;
+import 'wallets/wallet_preview_network.dart' as _icbqx9y3;
 import 'wallets/wallet_sync_result.dart' as _ipdq2p58;
 import 'wallets/wallet_tax_year_summary.dart' as _ivsmsmw6;
 import 'wallets/wallet_transaction.dart' as _i6m1jx15;
@@ -263,6 +268,7 @@ export 'exceptions/fx_rate_unavailable_exception.dart';
 export 'exceptions/not_found_exception.dart';
 export 'exceptions/tax_rules_unavailable_exception.dart';
 export 'exceptions/validation_exception.dart';
+export 'exceptions/wallet_preview_rate_limited_exception.dart';
 export 'fx_rates/fx_latest_snapshot.dart';
 export 'fx_rates/fx_provider.dart';
 export 'fx_rates/fx_quote_view.dart';
@@ -323,6 +329,8 @@ export 'wallets/spam_verdict.dart';
 export 'wallets/wallet.dart';
 export 'wallets/wallet_holding.dart';
 export 'wallets/wallet_network_state.dart';
+export 'wallets/wallet_preview.dart';
+export 'wallets/wallet_preview_network.dart';
 export 'wallets/wallet_sync_result.dart';
 export 'wallets/wallet_tax_year_summary.dart';
 export 'wallets/wallet_transaction.dart';
@@ -397,6 +405,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_izob2ctl.NotFoundException>,
           _is.getType<_i4yu9vcq.TaxRulesUnavailableException>,
           _is.getType<_igpdbyom.ValidationException>,
+          _is.getType<_i4nmh6wd.WalletPreviewRateLimitedException>,
           _is.getType<_iuflqeka.FxBackfillFutureCallFetchModel>,
           _is.getType<_i8cxakqz.FxLatestSnapshot>,
           _is.getType<_ifsg8hc8.FxProvider>,
@@ -458,6 +467,8 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_ilu5i0rn.Wallet>,
           _is.getType<_iqqppnaa.WalletHolding>,
           _is.getType<_i73xhbar.WalletNetworkState>,
+          _is.getType<_iuw2colh.WalletPreview>,
+          _is.getType<_icbqx9y3.WalletPreviewNetwork>,
           _is.getType<_ipdq2p58.WalletSyncResult>,
           _is.getType<_ivsmsmw6.WalletTaxYearSummary>,
           _is.getType<_i6m1jx15.WalletTransaction>,
@@ -518,6 +529,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_izob2ctl.NotFoundException?>,
           _is.getType<_i4yu9vcq.TaxRulesUnavailableException?>,
           _is.getType<_igpdbyom.ValidationException?>,
+          _is.getType<_i4nmh6wd.WalletPreviewRateLimitedException?>,
           _is.getType<_iuflqeka.FxBackfillFutureCallFetchModel?>,
           _is.getType<_i8cxakqz.FxLatestSnapshot?>,
           _is.getType<_ifsg8hc8.FxProvider?>,
@@ -579,6 +591,8 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_ilu5i0rn.Wallet?>,
           _is.getType<_iqqppnaa.WalletHolding?>,
           _is.getType<_i73xhbar.WalletNetworkState?>,
+          _is.getType<_iuw2colh.WalletPreview?>,
+          _is.getType<_icbqx9y3.WalletPreviewNetwork?>,
           _is.getType<_ipdq2p58.WalletSyncResult?>,
           _is.getType<_ivsmsmw6.WalletTaxYearSummary?>,
           _is.getType<_i6m1jx15.WalletTransaction?>,
@@ -601,6 +615,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_ipio7ws3.TransactionLine>>,
           _is.getType<List<_ifz8weqz.WalletNetwork>>,
           _is.getType<List<_ifz8weqz.WalletNetwork>?>,
+          _is.getType<List<_icbqx9y3.WalletPreviewNetwork>>,
           _is.getType<List<String>?>,
           _is.getType<List<_i3fh9aci.Account>>,
           _is.getType<List<_is.UuidValue>>,
@@ -633,6 +648,9 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_i4wqhpw2.TransactionRule>>,
           _is.getType<List<_iw07wj0h.TransactionView>>,
           _is.getType<List<_iyod81ld.ImportRow>>,
+          _is.getType<List<_ifz8weqz.WalletNetwork>>,
+          _is.getType<List<_ifz8weqz.WalletNetwork>?>,
+          _is.getType<List<_inqpauom.WalletNetworkState>>,
           _is.getType<List<_igcr1vxe.Wallet>>,
           _is.getType<List<_icu5m6lt.WalletHolding>>,
           _is.getType<List<_imzwq91q.WalletTransaction>>,
@@ -704,6 +722,7 @@ class Protocol extends _is.DatabaseSerializationManager
           'NotFoundException',
           'TaxRulesUnavailableException',
           'ValidationException',
+          'WalletPreviewRateLimitedException',
           'FxBackfillFutureCallFetchModel',
           'FxLatestSnapshot',
           'FxProvider',
@@ -765,6 +784,8 @@ class Protocol extends _is.DatabaseSerializationManager
           'Wallet',
           'WalletHolding',
           'WalletNetworkState',
+          'WalletPreview',
+          'WalletPreviewNetwork',
           'WalletSyncResult',
           'WalletTaxYearSummary',
           'WalletTransaction',
@@ -5744,6 +5765,9 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _igpdbyom.ValidationException) {
       return _igpdbyom.ValidationException.fromJson(data) as T;
     }
+    if (t == _i4nmh6wd.WalletPreviewRateLimitedException) {
+      return _i4nmh6wd.WalletPreviewRateLimitedException.fromJson(data) as T;
+    }
     if (t == _iuflqeka.FxBackfillFutureCallFetchModel) {
       return _iuflqeka.FxBackfillFutureCallFetchModel.fromJson(data) as T;
     }
@@ -5926,6 +5950,12 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (t == _i73xhbar.WalletNetworkState) {
       return _i73xhbar.WalletNetworkState.fromJson(data) as T;
+    }
+    if (t == _iuw2colh.WalletPreview) {
+      return _iuw2colh.WalletPreview.fromJson(data) as T;
+    }
+    if (t == _icbqx9y3.WalletPreviewNetwork) {
+      return _icbqx9y3.WalletPreviewNetwork.fromJson(data) as T;
     }
     if (t == _ipdq2p58.WalletSyncResult) {
       return _ipdq2p58.WalletSyncResult.fromJson(data) as T;
@@ -6184,6 +6214,12 @@ class Protocol extends _is.DatabaseSerializationManager
               : null)
           as T;
     }
+    if (t == _is.getType<_i4nmh6wd.WalletPreviewRateLimitedException?>()) {
+      return (data != null
+              ? _i4nmh6wd.WalletPreviewRateLimitedException.fromJson(data)
+              : null)
+          as T;
+    }
     if (t == _is.getType<_iuflqeka.FxBackfillFutureCallFetchModel?>()) {
       return (data != null
               ? _iuflqeka.FxBackfillFutureCallFetchModel.fromJson(data)
@@ -6424,6 +6460,16 @@ class Protocol extends _is.DatabaseSerializationManager
       return (data != null ? _i73xhbar.WalletNetworkState.fromJson(data) : null)
           as T;
     }
+    if (t == _is.getType<_iuw2colh.WalletPreview?>()) {
+      return (data != null ? _iuw2colh.WalletPreview.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_icbqx9y3.WalletPreviewNetwork?>()) {
+      return (data != null
+              ? _icbqx9y3.WalletPreviewNetwork.fromJson(data)
+              : null)
+          as T;
+    }
     if (t == _is.getType<_ipdq2p58.WalletSyncResult?>()) {
       return (data != null ? _ipdq2p58.WalletSyncResult.fromJson(data) : null)
           as T;
@@ -6548,6 +6594,12 @@ class Protocol extends _is.DatabaseSerializationManager
                     .map((e) => deserialize<_ifz8weqz.WalletNetwork>(e))
                     .toList()
               : null)
+          as T;
+    }
+    if (t == List<_icbqx9y3.WalletPreviewNetwork>) {
+      return (data as List)
+              .map((e) => deserialize<_icbqx9y3.WalletPreviewNetwork>(e))
+              .toList()
           as T;
     }
     if (t == _is.getType<List<String>?>()) {
@@ -6740,6 +6792,26 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
+    if (t == List<_ifz8weqz.WalletNetwork>) {
+      return (data as List)
+              .map((e) => deserialize<_ifz8weqz.WalletNetwork>(e))
+              .toList()
+          as T;
+    }
+    if (t == _is.getType<List<_ifz8weqz.WalletNetwork>?>()) {
+      return (data != null
+              ? (data as List)
+                    .map((e) => deserialize<_ifz8weqz.WalletNetwork>(e))
+                    .toList()
+              : null)
+          as T;
+    }
+    if (t == List<_inqpauom.WalletNetworkState>) {
+      return (data as List)
+              .map((e) => deserialize<_inqpauom.WalletNetworkState>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_igcr1vxe.Wallet>) {
       return (data as List)
               .map((e) => deserialize<_igcr1vxe.Wallet>(e))
@@ -6849,6 +6921,8 @@ class Protocol extends _is.DatabaseSerializationManager
       _izob2ctl.NotFoundException => 'NotFoundException',
       _i4yu9vcq.TaxRulesUnavailableException => 'TaxRulesUnavailableException',
       _igpdbyom.ValidationException => 'ValidationException',
+      _i4nmh6wd.WalletPreviewRateLimitedException =>
+        'WalletPreviewRateLimitedException',
       _iuflqeka.FxBackfillFutureCallFetchModel =>
         'FxBackfillFutureCallFetchModel',
       _i8cxakqz.FxLatestSnapshot => 'FxLatestSnapshot',
@@ -6911,6 +6985,8 @@ class Protocol extends _is.DatabaseSerializationManager
       _ilu5i0rn.Wallet => 'Wallet',
       _iqqppnaa.WalletHolding => 'WalletHolding',
       _i73xhbar.WalletNetworkState => 'WalletNetworkState',
+      _iuw2colh.WalletPreview => 'WalletPreview',
+      _icbqx9y3.WalletPreviewNetwork => 'WalletPreviewNetwork',
       _ipdq2p58.WalletSyncResult => 'WalletSyncResult',
       _ivsmsmw6.WalletTaxYearSummary => 'WalletTaxYearSummary',
       _i6m1jx15.WalletTransaction => 'WalletTransaction',
@@ -7042,6 +7118,8 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'TaxRulesUnavailableException';
       case _igpdbyom.ValidationException():
         return 'ValidationException';
+      case _i4nmh6wd.WalletPreviewRateLimitedException():
+        return 'WalletPreviewRateLimitedException';
       case _iuflqeka.FxBackfillFutureCallFetchModel():
         return 'FxBackfillFutureCallFetchModel';
       case _i8cxakqz.FxLatestSnapshot():
@@ -7164,6 +7242,10 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'WalletHolding';
       case _i73xhbar.WalletNetworkState():
         return 'WalletNetworkState';
+      case _iuw2colh.WalletPreview():
+        return 'WalletPreview';
+      case _icbqx9y3.WalletPreviewNetwork():
+        return 'WalletPreviewNetwork';
       case _ipdq2p58.WalletSyncResult():
         return 'WalletSyncResult';
       case _ivsmsmw6.WalletTaxYearSummary():
@@ -7379,6 +7461,11 @@ class Protocol extends _is.DatabaseSerializationManager
     if (dataClassName == 'ValidationException') {
       return deserialize<_igpdbyom.ValidationException>(data['data']);
     }
+    if (dataClassName == 'WalletPreviewRateLimitedException') {
+      return deserialize<_i4nmh6wd.WalletPreviewRateLimitedException>(
+        data['data'],
+      );
+    }
     if (dataClassName == 'FxBackfillFutureCallFetchModel') {
       return deserialize<_iuflqeka.FxBackfillFutureCallFetchModel>(
         data['data'],
@@ -7563,6 +7650,12 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (dataClassName == 'WalletNetworkState') {
       return deserialize<_i73xhbar.WalletNetworkState>(data['data']);
+    }
+    if (dataClassName == 'WalletPreview') {
+      return deserialize<_iuw2colh.WalletPreview>(data['data']);
+    }
+    if (dataClassName == 'WalletPreviewNetwork') {
+      return deserialize<_icbqx9y3.WalletPreviewNetwork>(data['data']);
     }
     if (dataClassName == 'WalletSyncResult') {
       return deserialize<_ipdq2p58.WalletSyncResult>(data['data']);
