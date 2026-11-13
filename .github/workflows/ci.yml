@@ -43,6 +43,12 @@ jobs:
         run: cd openbudget_ui && dart run tool/generate_openbudget_icons.dart --check
         shell: devenv shell -- bash -e {0}
 
+      # The currency vocabulary is generated from the ISO 4217 data file; fail
+      # when the committed Dart drifts from the data.
+      - name: check generated currencies
+        run: cd openbudget_core && dart run tool/generate_currencies.dart --check
+        shell: devenv shell -- bash -e {0}
+
   analyze:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
