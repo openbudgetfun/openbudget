@@ -11,6 +11,7 @@ export 'src/countries/country_display_name.dart';
 export 'src/countries/country_info.dart';
 export 'src/countries/tax_freshness.dart';
 export 'src/generated/protocol.dart';
+export 'src/guidance/guidance.dart';
 export 'src/ledger/chart_of_accounts.dart';
 export 'src/ledger/exchange_rate.dart';
 export 'src/ledger/journal_draft.dart';

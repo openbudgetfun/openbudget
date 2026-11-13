@@ -342,7 +342,7 @@ void main() {
       final aboveOpportunity = ngRules
           .opportunities(aboveInput, above)
           .firstWhere((item) => item.id == 'ng.vat_registration');
-      expect(aboveOpportunity.title, 'Register for VAT');
+      expect(aboveOpportunity.title, 'VAT registration');
       expect(aboveOpportunity.explanation, contains('N25000000'));
     });
 
@@ -393,6 +393,37 @@ void main() {
           .firstWhere((item) => item.id == 'ng.small_company');
       expect(opportunity.title, 'Small company status');
       expect(opportunity.explanation, contains('N25000000'));
+    });
+
+    test('2025 opportunities are graded secondary and carry no saving', () {
+      // The 2025 old-regime figures come from PwC and KPMG summaries, so
+      // every saving built on them stays unquantified.
+      final individual = ngInput(
+        startYear: 2025,
+        profile: ngIndividual(),
+        entries: [
+          ngEntry('ng.ind.employment.salary', 2_800_000),
+          ngEntry('ng.ind.relief.pension', 1_000_000),
+        ],
+      );
+      final pension = ngRules
+          .opportunities(individual, ngRules.report(individual))
+          .firstWhere((item) => item.id == 'ng.voluntary_pension');
+      expect(pension.grade, TaxEvidenceGrade.secondary);
+      expect(pension.estimatedSavingMinor, isNull);
+
+      final company = ngInput(
+        startYear: 2025,
+        profile: ngCompany(),
+        entries: [ngEntry('ng.co.revenue.sales', 20_000_000)],
+      );
+      for (final opportunity in ngRules.opportunities(
+        company,
+        ngRules.report(company),
+      )) {
+        expect(opportunity.grade, TaxEvidenceGrade.secondary);
+        expect(opportunity.estimatedSavingMinor, isNull);
+      }
     });
   });
 }

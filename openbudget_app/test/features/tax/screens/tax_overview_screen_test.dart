@@ -134,13 +134,13 @@ void main() {
       );
 
       await tester.scrollUntilVisible(
-        find.text('Use your pension annual allowance'),
+        find.text('Pension annual allowance'),
         300,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Use your pension annual allowance'), findsOneWidget);
+      expect(find.text('Pension annual allowance'), findsOneWidget);
       expect(find.text('Estimated saving £1,200.00'), findsOneWidget);
     });
 
