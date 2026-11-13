@@ -82,6 +82,10 @@ final class UsTaxRules implements TaxRulePack {
   TaxCategory? category(String code) => _categoriesByCode[code];
 
   @override
+  String? mapUniversalCategory(String universalCode, EntityKind kind) =>
+      usMapUniversalCategory(universalCode, kind);
+
+  @override
   TaxReport report(TaxInput input) {
     _requireUsInput(input);
     final table = _tableFor(input.year.startYear);

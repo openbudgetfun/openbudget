@@ -1,4 +1,5 @@
 import 'package:openbudget_core/src/tax/tax_model.dart';
+import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 
 /// Umsatzsteuer charged on the business's own invoices (§ 12 UStG).
 const TaxCategory deVatOutput = TaxCategory(
@@ -361,3 +362,76 @@ final Map<String, TaxCategory> deCategories = Map.unmodifiable({
   ])
     category.code: category,
 });
+
+/// The universal catalogue mapped onto German codes, per book kind
+/// (`docs/tax-jurisdictions.md` sections 4.7 and 8.6). An absent code is a
+/// deliberate gap, not an oversight: the entry counts as uncategorised
+/// rather than land on a line its German rules may not allow.
+///
+/// Notable gaps: Vermietung (rental income), private disposal proceeds
+/// and cost (Anlage SO covers them net), digital-asset rules (not built
+/// yet), GWG-versus-AfA equipment and software (the €800-net split is an
+/// asset-by-asset choice), and Körperschaftsteuer versus Gewerbesteuer
+/// instalments for companies.
+const Map<EntityKind, Map<String, String>> deUniversalCategoryMap = {
+  EntityKind.individual: {
+    'universal.income.employment': 'de.ind.arbeitslohn',
+    'universal.income.interest': 'de.ind.kapitalertraege',
+    'universal.income.dividends': 'de.ind.kapitalertraege',
+    'universal.income.pension': 'de.ind.sonstige_einkuenfte',
+    'universal.income.other': 'de.ind.sonstige_einkuenfte',
+    'universal.relief.pension': 'de.ind.basisrente',
+    'universal.relief.charitable': 'de.ind.spenden',
+    'universal.tax.income_tax_withheld': 'de.ind.lohnsteuer',
+  },
+  EntityKind.soleTrader: {
+    'universal.income.self_employment': 'de.euer.betriebseinnahmen',
+    'universal.expense.cost_of_goods': 'de.euer.wareneinkauf',
+    'universal.expense.wages': 'de.euer.personal',
+    'universal.expense.rent': 'de.euer.raumkosten',
+    'universal.expense.utilities': 'de.euer.raumkosten',
+    'universal.expense.office': 'de.euer.sonstige',
+    'universal.expense.phone_and_internet': 'de.euer.telekommunikation',
+    'universal.expense.travel': 'de.euer.fahrtkosten',
+    'universal.expense.vehicle': 'de.euer.fahrtkosten',
+    // The pack applies the 70 % deduction limit on this line.
+    'universal.expense.meals': 'de.euer.bewirtung',
+    'universal.expense.professional_fees': 'de.euer.sonstige',
+    'universal.expense.insurance': 'de.euer.versicherungen',
+    'universal.expense.bank_fees': 'de.euer.sonstige',
+    'universal.expense.marketing': 'de.euer.sonstige',
+    'universal.expense.training': 'de.euer.fortbildung',
+    'universal.expense.other': 'de.euer.sonstige',
+    'universal.tax.sales_tax_collected': 'de.ust.ausgang',
+    'universal.tax.sales_tax_paid': 'de.ust.eingang',
+    'universal.out_of_scope.owner_capital_and_drawings': 'de.euer.entnahmen',
+  },
+  EntityKind.company: {
+    'universal.income.self_employment': 'de.co.umsatzerloese',
+    'universal.income.interest': 'de.co.sonstige_ertraege',
+    'universal.income.dividends': 'de.co.sonstige_ertraege',
+    'universal.income.rent': 'de.co.sonstige_ertraege',
+    'universal.income.other': 'de.co.sonstige_ertraege',
+    'universal.expense.cost_of_goods': 'de.co.materialaufwand',
+    'universal.expense.wages': 'de.co.personal',
+    'universal.expense.rent': 'de.co.raumkosten',
+    'universal.expense.utilities': 'de.co.raumkosten',
+    'universal.expense.office': 'de.co.sonstige',
+    'universal.expense.phone_and_internet': 'de.co.sonstige',
+    'universal.expense.travel': 'de.co.fahrtkosten',
+    'universal.expense.vehicle': 'de.co.fahrtkosten',
+    'universal.expense.meals': 'de.co.bewirtung',
+    'universal.expense.professional_fees': 'de.co.sonstige',
+    'universal.expense.insurance': 'de.co.versicherungen',
+    'universal.expense.bank_fees': 'de.co.sonstige',
+    'universal.expense.marketing': 'de.co.sonstige',
+    'universal.expense.training': 'de.co.sonstige',
+    'universal.expense.other': 'de.co.sonstige',
+    'universal.tax.sales_tax_collected': 'de.ust.ausgang',
+    'universal.tax.sales_tax_paid': 'de.ust.eingang',
+  },
+};
+
+/// [TaxRulePack.mapUniversalCategory] for the German pack.
+String? deMapUniversalCategory(String universalCode, EntityKind kind) =>
+    deUniversalCategoryMap[kind]?[universalCode];

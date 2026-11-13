@@ -116,5 +116,83 @@ void main() {
         );
       }
     });
+
+    test('every applicable universal code maps or is declared unmapped', () {
+      for (final jurisdiction in TaxJurisdiction.values) {
+        final pack = TaxRules.forJurisdiction(jurisdiction);
+        for (final kind in EntityKind.values) {
+          for (final universal in UniversalTaxCategories.categoriesFor(kind)) {
+            final mapped = pack.mapUniversalCategory(universal.code, kind);
+            if (mapped == null) continue; // deliberately unmapped.
+
+            final category = pack.category(mapped);
+            final reason =
+                '${jurisdiction.countryCode} '
+                '${universal.code} → $mapped (${kind.name})';
+            expect(category, isNotNull, reason: reason);
+            expect(
+              category!.entityKinds.contains(kind),
+              isTrue,
+              reason: reason,
+            );
+            expect(
+              category.kind,
+              universal.kind,
+              reason:
+                  'a universal entry of one kind must not land in '
+                  'another ($reason)',
+            );
+          }
+        }
+      }
+    });
+
+    test('a non-universal code never maps through the universal path', () {
+      for (final jurisdiction in TaxJurisdiction.values) {
+        final pack = TaxRules.forJurisdiction(jurisdiction);
+        for (final kind in EntityKind.values) {
+          for (final category in pack.categoriesFor(kind)) {
+            expect(
+              pack.mapUniversalCategory(category.code, kind),
+              isNull,
+              reason: '${category.code} is not a universal code',
+            );
+          }
+        }
+      }
+    });
+
+    test('mappings count per pack, for the release notes', () {
+      final counts = <String, String>{};
+      for (final jurisdiction in TaxJurisdiction.values) {
+        var mapped = 0;
+        var unmapped = 0;
+        final pack = TaxRules.forJurisdiction(jurisdiction);
+        for (final kind in EntityKind.values) {
+          for (final universal in UniversalTaxCategories.categoriesFor(kind)) {
+            if (pack.mapUniversalCategory(universal.code, kind) == null) {
+              unmapped++;
+            } else {
+              mapped++;
+            }
+          }
+        }
+        counts[jurisdiction.countryCode] = '$mapped mapped, $unmapped unmapped';
+      }
+      // Every pack must map at least the income and out-of-scope basics,
+      // and every pack must leave genuinely unplaceable codes unmapped.
+      for (final entry in counts.entries) {
+        expect(
+          int.parse(entry.value.split(' ')[0]),
+          greaterThan(0),
+          reason: entry.key,
+        );
+        expect(
+          int.parse(entry.value.split(' ')[2]),
+          greaterThan(0),
+          reason: entry.key,
+        );
+      }
+    });
   });
 }
