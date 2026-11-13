@@ -1,4 +1,5 @@
 import 'package:openbudget_core/src/tax/tax_model.dart';
+import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 
 const Set<EntityKind> _individualOnly = {EntityKind.individual};
 const Set<EntityKind> _soleTraderOnly = {EntityKind.soleTrader};
@@ -633,3 +634,77 @@ const List<TaxCategory> allUsTaxCategories = [
   ...usScheduleCCategories,
   ...usCompanyCategories,
 ];
+
+/// The universal catalogue mapped onto federal codes, per book kind
+/// (`docs/tax-jurisdictions.md` sections 4.7 and 8.6). An absent code is a
+/// deliberate gap, not an oversight: the entry counts as uncategorised
+/// rather than land on a line its federal rules may not allow.
+///
+/// Notable gaps: Schedule D gains (the pack models computed gains, not
+/// entry-level proceeds and cost), digital-asset rules (not built yet),
+/// the Schedule A detail lines (a single user-entered total, so
+/// itemised reliefs stay unmapped), Schedule C and Form 1120 tax
+/// payments other than estimated tax, sales tax (no federal
+/// sales-tax return), and company charitable gifts (Form 1120 line 19
+/// is an expense line, not a relief, so a relief-kind tag stays
+/// unmapped).
+const Map<EntityKind, Map<String, String>> usUniversalCategoryMap = {
+  EntityKind.individual: {
+    'universal.income.employment': 'us.ind.wages',
+    'universal.income.interest': 'us.ind.taxable_interest',
+    'universal.income.dividends': 'us.ind.dividends',
+    'universal.income.pension': 'us.ind.other_income',
+    'universal.income.other': 'us.ind.other_income',
+    'universal.relief.pension': 'us.ind.ira_contribution',
+    'universal.tax.income_tax_withheld': 'us.ind.federal_withholding',
+    'universal.tax.instalments': 'us.ind.estimated_tax_payments',
+  },
+  EntityKind.soleTrader: {
+    'universal.income.self_employment': 'us.sch_c.gross_receipts',
+    'universal.income.other': 'us.sch_c.other_income',
+    'universal.expense.cost_of_goods': 'us.sch_c.cost_of_goods_sold',
+    'universal.expense.wages': 'us.sch_c.wages',
+    'universal.expense.office': 'us.sch_c.office_expense',
+    'universal.expense.phone_and_internet': 'us.sch_c.utilities',
+    'universal.expense.utilities': 'us.sch_c.utilities',
+    'universal.expense.rent': 'us.sch_c.rent',
+    'universal.expense.vehicle': 'us.sch_c.car_and_truck',
+    'universal.expense.travel': 'us.sch_c.travel',
+    // The pack applies the 50% deduction limit on this line.
+    'universal.expense.meals': 'us.sch_c.meals',
+    'universal.expense.software': 'us.sch_c.office_expense',
+    'universal.expense.professional_fees': 'us.sch_c.legal_and_professional',
+    'universal.expense.insurance': 'us.sch_c.insurance',
+    'universal.expense.bank_fees': 'us.sch_c.other_expenses',
+    'universal.expense.marketing': 'us.sch_c.advertising',
+    'universal.expense.training': 'us.sch_c.other_expenses',
+    'universal.expense.other': 'us.sch_c.other_expenses',
+  },
+  EntityKind.company: {
+    'universal.income.self_employment': 'us.co.gross_receipts',
+    'universal.income.interest': 'us.co.interest',
+    'universal.income.dividends': 'us.co.dividends',
+    'universal.income.rent': 'us.co.gross_rents',
+    'universal.income.other': 'us.co.other_income',
+    'universal.expense.cost_of_goods': 'us.co.cost_of_goods_sold',
+    'universal.expense.wages': 'us.co.salaries_and_wages',
+    'universal.expense.rent': 'us.co.rents',
+    'universal.expense.utilities': 'us.co.other_deductions',
+    'universal.expense.office': 'us.co.other_deductions',
+    'universal.expense.phone_and_internet': 'us.co.other_deductions',
+    'universal.expense.software': 'us.co.other_deductions',
+    'universal.expense.travel': 'us.co.other_deductions',
+    'universal.expense.vehicle': 'us.co.other_deductions',
+    'universal.expense.professional_fees': 'us.co.other_deductions',
+    'universal.expense.insurance': 'us.co.other_deductions',
+    'universal.expense.bank_fees': 'us.co.other_deductions',
+    'universal.expense.marketing': 'us.co.advertising',
+    'universal.expense.training': 'us.co.other_deductions',
+    'universal.expense.other': 'us.co.other_deductions',
+    'universal.tax.instalments': 'us.co.estimated_tax_payments',
+  },
+};
+
+/// [TaxRulePack.mapUniversalCategory] for the US pack.
+String? usMapUniversalCategory(String universalCode, EntityKind kind) =>
+    usUniversalCategoryMap[kind]?[universalCode];

@@ -9725,6 +9725,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No {currency} rate'**
   String accountNoRateShort(String currency);
+
+  /// No description provided for @universalCategoryIncomeEmployment.
+  ///
+  /// In en, this message translates to:
+  /// **'Employment income'**
+  String get universalCategoryIncomeEmployment;
+
+  /// No description provided for @universalCategoryIncomeSelfEmployment.
+  ///
+  /// In en, this message translates to:
+  /// **'Business turnover'**
+  String get universalCategoryIncomeSelfEmployment;
+
+  /// No description provided for @universalCategoryIncomeInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest'**
+  String get universalCategoryIncomeInterest;
+
+  /// No description provided for @universalCategoryIncomeDividends.
+  ///
+  /// In en, this message translates to:
+  /// **'Dividends'**
+  String get universalCategoryIncomeDividends;
+
+  /// No description provided for @universalCategoryIncomeRent.
+  ///
+  /// In en, this message translates to:
+  /// **'Rent'**
+  String get universalCategoryIncomeRent;
+
+  /// No description provided for @universalCategoryIncomePension.
+  ///
+  /// In en, this message translates to:
+  /// **'Pension income'**
+  String get universalCategoryIncomePension;
+
+  /// No description provided for @universalCategoryIncomeCapitalGainsProceeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset sale proceeds'**
+  String get universalCategoryIncomeCapitalGainsProceeds;
+
+  /// No description provided for @universalCategoryIncomeCapitalGainsCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset acquisition cost'**
+  String get universalCategoryIncomeCapitalGainsCost;
+
+  /// No description provided for @universalCategoryIncomeDigitalAssetProceeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital asset sale proceeds'**
+  String get universalCategoryIncomeDigitalAssetProceeds;
+
+  /// No description provided for @universalCategoryIncomeDigitalAssetCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital asset acquisition cost'**
+  String get universalCategoryIncomeDigitalAssetCost;
+
+  /// No description provided for @universalCategoryIncomeDigitalAssetIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital asset income'**
+  String get universalCategoryIncomeDigitalAssetIncome;
+
+  /// No description provided for @universalCategoryIncomeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other income'**
+  String get universalCategoryIncomeOther;
+
+  /// No description provided for @universalCategoryExpenseCostOfGoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost of goods'**
+  String get universalCategoryExpenseCostOfGoods;
+
+  /// No description provided for @universalCategoryExpenseOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'Office supplies'**
+  String get universalCategoryExpenseOffice;
+
+  /// No description provided for @universalCategoryExpenseRent.
+  ///
+  /// In en, this message translates to:
+  /// **'Rent'**
+  String get universalCategoryExpenseRent;
+
+  /// No description provided for @universalCategoryExpenseUtilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Utilities'**
+  String get universalCategoryExpenseUtilities;
+
+  /// No description provided for @universalCategoryExpensePhoneAndInternet.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone and internet'**
+  String get universalCategoryExpensePhoneAndInternet;
+
+  /// No description provided for @universalCategoryExpenseSoftware.
+  ///
+  /// In en, this message translates to:
+  /// **'Software'**
+  String get universalCategoryExpenseSoftware;
+
+  /// No description provided for @universalCategoryExpenseTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get universalCategoryExpenseTravel;
+
+  /// No description provided for @universalCategoryExpenseVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get universalCategoryExpenseVehicle;
+
+  /// No description provided for @universalCategoryExpenseMeals.
+  ///
+  /// In en, this message translates to:
+  /// **'Meals and entertainment'**
+  String get universalCategoryExpenseMeals;
+
+  /// No description provided for @universalCategoryExpenseProfessionalFees.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional fees'**
+  String get universalCategoryExpenseProfessionalFees;
+
+  /// No description provided for @universalCategoryExpenseInsurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance'**
+  String get universalCategoryExpenseInsurance;
+
+  /// No description provided for @universalCategoryExpenseEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment'**
+  String get universalCategoryExpenseEquipment;
+
+  /// No description provided for @universalCategoryExpenseWages.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff costs'**
+  String get universalCategoryExpenseWages;
+
+  /// No description provided for @universalCategoryExpenseBankFees.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank fees'**
+  String get universalCategoryExpenseBankFees;
+
+  /// No description provided for @universalCategoryExpenseMarketing.
+  ///
+  /// In en, this message translates to:
+  /// **'Marketing'**
+  String get universalCategoryExpenseMarketing;
+
+  /// No description provided for @universalCategoryExpenseTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get universalCategoryExpenseTraining;
+
+  /// No description provided for @universalCategoryExpenseOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other business expenses'**
+  String get universalCategoryExpenseOther;
+
+  /// No description provided for @universalCategoryReliefPension.
+  ///
+  /// In en, this message translates to:
+  /// **'Pension contributions'**
+  String get universalCategoryReliefPension;
+
+  /// No description provided for @universalCategoryReliefCharitable.
+  ///
+  /// In en, this message translates to:
+  /// **'Charitable gifts'**
+  String get universalCategoryReliefCharitable;
+
+  /// No description provided for @universalCategoryReliefMedical.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical'**
+  String get universalCategoryReliefMedical;
+
+  /// No description provided for @universalCategoryReliefEducation.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get universalCategoryReliefEducation;
+
+  /// No description provided for @universalCategoryReliefChildcare.
+  ///
+  /// In en, this message translates to:
+  /// **'Childcare'**
+  String get universalCategoryReliefChildcare;
+
+  /// No description provided for @universalCategoryReliefMortgageInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Mortgage interest'**
+  String get universalCategoryReliefMortgageInterest;
+
+  /// No description provided for @universalCategoryReliefSocialContributions.
+  ///
+  /// In en, this message translates to:
+  /// **'Social contributions'**
+  String get universalCategoryReliefSocialContributions;
+
+  /// No description provided for @universalCategoryTaxIncomeTaxWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'Income tax withheld'**
+  String get universalCategoryTaxIncomeTaxWithheld;
+
+  /// No description provided for @universalCategoryTaxInstalments.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax instalments'**
+  String get universalCategoryTaxInstalments;
+
+  /// No description provided for @universalCategoryTaxSalesTaxPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales tax paid on purchases'**
+  String get universalCategoryTaxSalesTaxPaid;
+
+  /// No description provided for @universalCategoryTaxSalesTaxCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales tax collected on sales'**
+  String get universalCategoryTaxSalesTaxCollected;
+
+  /// No description provided for @universalCategoryOutOfScopeTransfers.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfers'**
+  String get universalCategoryOutOfScopeTransfers;
+
+  /// No description provided for @universalCategoryOutOfScopeLoans.
+  ///
+  /// In en, this message translates to:
+  /// **'Loans'**
+  String get universalCategoryOutOfScopeLoans;
+
+  /// No description provided for @universalCategoryOutOfScopeGiftsReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Gifts received'**
+  String get universalCategoryOutOfScopeGiftsReceived;
+
+  /// No description provided for @universalCategoryOutOfScopeOwnerCapitalAndDrawings.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner capital and drawings'**
+  String get universalCategoryOutOfScopeOwnerCapitalAndDrawings;
 }
 
 class _AppLocalizationsDelegate

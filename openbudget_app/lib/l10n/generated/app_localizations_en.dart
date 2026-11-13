@@ -5693,4 +5693,144 @@ class AppLocalizationsEn extends AppLocalizations {
   String accountNoRateShort(String currency) {
     return 'No $currency rate';
   }
+
+  @override
+  String get universalCategoryIncomeEmployment => 'Employment income';
+
+  @override
+  String get universalCategoryIncomeSelfEmployment => 'Business turnover';
+
+  @override
+  String get universalCategoryIncomeInterest => 'Interest';
+
+  @override
+  String get universalCategoryIncomeDividends => 'Dividends';
+
+  @override
+  String get universalCategoryIncomeRent => 'Rent';
+
+  @override
+  String get universalCategoryIncomePension => 'Pension income';
+
+  @override
+  String get universalCategoryIncomeCapitalGainsProceeds =>
+      'Asset sale proceeds';
+
+  @override
+  String get universalCategoryIncomeCapitalGainsCost =>
+      'Asset acquisition cost';
+
+  @override
+  String get universalCategoryIncomeDigitalAssetProceeds =>
+      'Digital asset sale proceeds';
+
+  @override
+  String get universalCategoryIncomeDigitalAssetCost =>
+      'Digital asset acquisition cost';
+
+  @override
+  String get universalCategoryIncomeDigitalAssetIncome =>
+      'Digital asset income';
+
+  @override
+  String get universalCategoryIncomeOther => 'Other income';
+
+  @override
+  String get universalCategoryExpenseCostOfGoods => 'Cost of goods';
+
+  @override
+  String get universalCategoryExpenseOffice => 'Office supplies';
+
+  @override
+  String get universalCategoryExpenseRent => 'Rent';
+
+  @override
+  String get universalCategoryExpenseUtilities => 'Utilities';
+
+  @override
+  String get universalCategoryExpensePhoneAndInternet => 'Phone and internet';
+
+  @override
+  String get universalCategoryExpenseSoftware => 'Software';
+
+  @override
+  String get universalCategoryExpenseTravel => 'Travel';
+
+  @override
+  String get universalCategoryExpenseVehicle => 'Vehicle';
+
+  @override
+  String get universalCategoryExpenseMeals => 'Meals and entertainment';
+
+  @override
+  String get universalCategoryExpenseProfessionalFees => 'Professional fees';
+
+  @override
+  String get universalCategoryExpenseInsurance => 'Insurance';
+
+  @override
+  String get universalCategoryExpenseEquipment => 'Equipment';
+
+  @override
+  String get universalCategoryExpenseWages => 'Staff costs';
+
+  @override
+  String get universalCategoryExpenseBankFees => 'Bank fees';
+
+  @override
+  String get universalCategoryExpenseMarketing => 'Marketing';
+
+  @override
+  String get universalCategoryExpenseTraining => 'Training';
+
+  @override
+  String get universalCategoryExpenseOther => 'Other business expenses';
+
+  @override
+  String get universalCategoryReliefPension => 'Pension contributions';
+
+  @override
+  String get universalCategoryReliefCharitable => 'Charitable gifts';
+
+  @override
+  String get universalCategoryReliefMedical => 'Medical';
+
+  @override
+  String get universalCategoryReliefEducation => 'Education';
+
+  @override
+  String get universalCategoryReliefChildcare => 'Childcare';
+
+  @override
+  String get universalCategoryReliefMortgageInterest => 'Mortgage interest';
+
+  @override
+  String get universalCategoryReliefSocialContributions =>
+      'Social contributions';
+
+  @override
+  String get universalCategoryTaxIncomeTaxWithheld => 'Income tax withheld';
+
+  @override
+  String get universalCategoryTaxInstalments => 'Tax instalments';
+
+  @override
+  String get universalCategoryTaxSalesTaxPaid => 'Sales tax paid on purchases';
+
+  @override
+  String get universalCategoryTaxSalesTaxCollected =>
+      'Sales tax collected on sales';
+
+  @override
+  String get universalCategoryOutOfScopeTransfers => 'Transfers';
+
+  @override
+  String get universalCategoryOutOfScopeLoans => 'Loans';
+
+  @override
+  String get universalCategoryOutOfScopeGiftsReceived => 'Gifts received';
+
+  @override
+  String get universalCategoryOutOfScopeOwnerCapitalAndDrawings =>
+      'Owner capital and drawings';
 }
