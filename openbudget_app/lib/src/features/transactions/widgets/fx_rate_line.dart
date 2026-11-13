@@ -4,12 +4,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/providers/fx_rate_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/date_labels.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-/// The live FX line under an amount field for a foreign-currency account:
-/// "≈ £78.91 · 1 USD = 0.7891 GBP · 8 Nov · market", from `fxRate.quote`.
+/// The live FX line under an amount field for a foreign-currency account,
+/// from `fxRate.quote`: "≈ £78.91" over "1 USD = 0.7891 GBP · Nov 8, 2026 ·
+/// market rate".
 ///
 /// When no rate exists the line carries the server's explanation and an
 /// action that opens the manual-rate sheet.
@@ -19,7 +21,7 @@ class FxRateLine extends HookConsumerWidget {
     required this.toCurrencyCode,
     required this.date,
     required this.amountMinor,
-    required this.onSetRate,
+    this.onSetRate,
     super.key,
   });
 
@@ -30,8 +32,9 @@ class FxRateLine extends HookConsumerWidget {
   /// The amount in [fromCurrencyCode] shown converted on the line.
   final int? amountMinor;
 
-  /// Opens the manual-rate sheet.
-  final VoidCallback onSetRate;
+  /// Opens the manual-rate sheet. Null hides the action, for a form that
+  /// offers its own way to pick the rate.
+  final VoidCallback? onSetRate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -84,10 +87,11 @@ class FxRateLine extends HookConsumerWidget {
                   ),
                 ),
               ),
-              TextButton(
-                onPressed: onSetRate,
-                child: Text(l10n.fxRateSetRate),
-              ),
+              if (onSetRate case final onSetRate?)
+                TextButton(
+                  onPressed: onSetRate,
+                  child: Text(l10n.fxRateSetRate),
+                ),
             ],
           ),
         );
@@ -104,63 +108,74 @@ class FxRateLine extends HookConsumerWidget {
                 functionalExponent: currencyDecimalsForCode(toCurrencyCode),
               )
             : null;
-        final parts = <String>[
-          if (converted != null)
-            l10n.fxRateApproximate(
-              formatMinorForCode(converted, toCurrencyCode),
-            ),
-          '1 $fromCurrencyCode = ${quote.rate} $toCurrencyCode',
-          _shortDate(quote.rateDate),
-          quote.source.name,
+        final convertedLabel = converted == null
+            ? null
+            : formatMinorForCode(converted, toCurrencyCode);
+        // The converted figure is what the eye wants; the rate, its date
+        // and where it came from are the footnote under it.
+        final provenance = <String>[
+          l10n.netWorthRateLine(fromCurrencyCode, quote.rate, toCurrencyCode),
+          // Each part keeps to one line: a date split after its comma, or
+          // "market" orphaned from "rate", reads badly.
+          DateLabels.full(context, quote.rateDate).replaceAll(' ', '\u00a0'),
+          fxRateSourceLabel(l10n, quote.source).replaceAll(' ', '\u00a0'),
           if (quote.isStale) l10n.fxRateStale,
-        ];
+        ].join(' \u00b7 ');
         return Padding(
-          padding: const EdgeInsets.only(top: SpacingTokens.xs),
+          padding: const EdgeInsets.only(top: SpacingTokens.sm),
           child: Row(
             children: [
               SkribbleIcon(
                 data: OpenBudgetIcons.priceChange,
-                size: 14,
-                color: palette.mutedInk,
+                size: 18,
+                color: palette.brand,
               ),
-              const SizedBox(width: SpacingTokens.xs),
+              const SizedBox(width: SpacingTokens.sm),
               Expanded(
-                child: Text(
-                  parts.join(' \u00b7 '),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: palette.mutedInk,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (convertedLabel != null)
+                      Text(
+                        l10n.fxRateApproximate(convertedLabel),
+                        semanticsLabel: l10n.fxRateConvertsTo(convertedLabel),
+                        style: ObTextStyles.amount(
+                          theme.textTheme.titleSmall,
+                        ).copyWith(color: palette.ink),
+                      ),
+                    Text(
+                      provenance,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: quote.isStale
+                            ? palette.underfunded
+                            : palette.mutedInk,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              TextButton(
-                onPressed: onSetRate,
-                child: Text(l10n.fxRateSetRate),
-              ),
+              if (onSetRate case final onSetRate?)
+                TextButton(
+                  onPressed: onSetRate,
+                  child: Text(l10n.fxRateSetRate),
+                ),
             ],
           ),
         );
       },
     );
   }
-
-  static String _shortDate(DateTime date) =>
-      '${date.day} ${_monthAbbr(date.month)} ${date.year}';
-
-  static String _monthAbbr(int month) => switch (month) {
-    1 => 'Jan',
-    2 => 'Feb',
-    3 => 'Mar',
-    4 => 'Apr',
-    5 => 'May',
-    6 => 'Jun',
-    7 => 'Jul',
-    8 => 'Aug',
-    9 => 'Sep',
-    10 => 'Oct',
-    11 => 'Nov',
-    _ => 'Dec',
-  };
 }
+
+/// The localized name of where a rate came from: "market rate", "your
+/// rate" and so on, never the raw enum name.
+String fxRateSourceLabel(AppLocalizations l10n, FxRateSource source) =>
+    switch (source) {
+      FxRateSource.identity => l10n.fxRateSourceIdentity,
+      FxRateSource.market => l10n.fxRateSourceMarket,
+      FxRateSource.implied => l10n.fxRateSourceImplied,
+      FxRateSource.manual => l10n.fxRateSourceManual,
+    };
 
 /// The manual-rate sheet: the user types the rate, the form carries it as a
 /// manual `fxRate` on the transaction.
@@ -200,9 +215,20 @@ class ManualRateSheet extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.fxRateSetRateTitle,
-            style: Theme.of(context).textTheme.titleMedium,
+          Row(
+            children: [
+              const ObIconBadge(
+                icon: SkribbleIcon(data: OpenBudgetIcons.priceChange),
+                spot: 2,
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: Text(
+                  l10n.fxRateSetRateTitle,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+            ],
           ),
           if (explanation != null) ...[
             const SizedBox(height: SpacingTokens.xs),
@@ -219,10 +245,12 @@ class ManualRateSheet extends HookConsumerWidget {
             controller: rateController,
             autofocus: true,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            style: ObTextStyles.amount(Theme.of(context).textTheme.titleLarge),
             decoration: InputDecoration(
               labelText: l10n.fxRateRateField,
               helperText: '1 $fromCurrencyCode = ? $toCurrencyCode',
               errorText: error.value,
+              prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.priceChange),
             ),
           ),
           const SizedBox(height: SpacingTokens.md),

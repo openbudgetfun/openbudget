@@ -1035,22 +1035,22 @@
   "addAccountSectionCashAccountsHint": "Cash accounts hold funds you already own and can spend immediately.",
   "addAccountSectionCreditAccounts": "Credit Accounts",
   "addAccountSectionCreditAccountsHint": "A credit account lets you spend borrowed money that you'll need to repay later, often with interest.",
-  "addAccountTypeLineOfCredit": "Add Account Type Line Of Credit",
+  "addAccountTypeLineOfCredit": "Line of Credit",
   "addAccountSectionMortgagesAndLoans": "Mortgages and Loans",
   "addAccountSectionMortgagesAndLoansHint": "Accounts that have an outstanding balance you're currently paying off, and aren't spending from.",
-  "addAccountTypeMortgage": "Add Account Type Mortgage",
-  "addAccountTypeAutoLoan": "Add Account Type Auto Loan",
-  "addAccountTypeStudentLoan": "Add Account Type Student Loan",
-  "addAccountTypePersonalLoan": "Add Account Type Personal Loan",
-  "addAccountTypeMedicalDebt": "Add Account Type Medical Debt",
-  "addAccountTypeOtherDebt": "Add Account Type Other Debt",
+  "addAccountTypeMortgage": "Mortgage",
+  "addAccountTypeAutoLoan": "Auto Loan",
+  "addAccountTypeStudentLoan": "Student Loan",
+  "addAccountTypePersonalLoan": "Personal Loan",
+  "addAccountTypeMedicalDebt": "Medical Debt",
+  "addAccountTypeOtherDebt": "Other Debt",
   "addAccountSectionTrackingAccounts": "Tracking Accounts",
   "addAccountSectionTrackingAccountsHint": "Accounts that hold money you don't plan to spend soon, such as investments or loans.",
   "addAccountTypeAssetExample": "Asset (e.g. Investment)",
-  "addAccountTypeLiability": "Add Account Type Liability",
+  "addAccountTypeLiability": "Liability",
   "addAccountSectionDigitalAssets": "Digital Assets",
   "addAccountSectionDigitalAssetsHint": "Track a Solana wallet with automatic transaction history and asset valuations.",
-  "addAccountTypeSolanaWallet": "Add Account Type Solana Wallet",
+  "addAccountTypeSolanaWallet": "Solana Wallet",
   "accountEditNicknameLabel": "Account Nickname",
   "accountEditNicknameHint": "Daily",
   "accountEditNotesLabel": "Account Notes",
@@ -2485,7 +2485,7 @@
     }
   },
   "netWorthMissingCurrencies": "Not included: no rate for {currencies}",
-  "netWorthRatesFrom": "Rates from {date}",
+  "netWorthRatesFrom": "Rates as of {date}",
   "@netWorthRatesFrom": {
     "placeholders": {
       "date": {
@@ -2534,7 +2534,14 @@
   "netWorthHistory3M": "3M",
   "netWorthHistory1Y": "1Y",
   "netWorthHistoryAll": "All",
-  "netWorthAccountsCount": "{count} accounts",
+  "netWorthAccountsCount": "{count, plural, =1{1 account} other{{count} accounts}}",
+  "@netWorthAccountsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "@netWorthMissingCurrencies": {
     "placeholders": {
       "currencies": {
@@ -2697,7 +2704,7 @@
   "fxRateRateField": "Exchange rate",
   "fxRateInvalidRate": "Enter a positive rate, e.g. 0.79",
   "fxRateUseThisRate": "Use this rate",
-  "fxRateStale": "stale",
+  "fxRateStale": "Stale",
   "fxRateApproximate": "≈ {amount}",
   "@fxRateApproximate": {
     "placeholders": {
@@ -2734,17 +2741,13 @@
       }
     }
   },
-  "transactionDateFullLabel": "{year}-{month}-{day}",
+  "transactionDateFullLabel": "{date}",
   "@transactionDateFullLabel": {
+    "description": "A transaction's calendar date, written the way the reader's locale writes dates.",
     "placeholders": {
-      "year": {
-        "type": "int"
-      },
-      "month": {
-        "type": "int"
-      },
-      "day": {
-        "type": "int"
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMd"
       }
     }
   },
@@ -2801,5 +2804,84 @@
       }
     }
   },
-  "envelopeDeleteMoveHistoryTitle": "Move its history to which envelope?"
+  "envelopeDeleteMoveHistoryTitle": "Move its history to which envelope?",
+  "netWorthHeadlineEyebrow": "Combined net worth",
+  "netWorthHistoryTitle": "History",
+  "netWorthIncompleteLegend": "Dashed where a currency has no rate",
+  "netWorthNoRate": "No {currency} rate · not counted",
+  "@netWorthNoRate": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "netWorthEntityIncomplete": "Leaves out unconverted accounts",
+  "netWorthRateDated": "{rateLine} · {date}",
+  "@netWorthRateDated": {
+    "placeholders": {
+      "rateLine": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "fxRateSourceMarket": "market rate",
+  "fxRateSourceImplied": "implied rate",
+  "fxRateSourceManual": "your rate",
+  "fxRateSourceIdentity": "same currency",
+  "fxRateConvertsTo": "Converts to about {amount}",
+  "@fxRateConvertsTo": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailBalanceEyebrow": "Balance",
+  "accountDetailValueEyebrow": "Current value",
+  "accountReconcileClearedNow": "Cleared in OpenBudget",
+  "accountReconcileMatches": "Matches your statement",
+  "accountValuationChange": "{amount} since the last valuation",
+  "@accountValuationChange": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountHoldingsUnpriced": "No price yet",
+  "transactionDetailAndDate": "{detail} · {date}",
+  "@transactionDetailAndDate": {
+    "description": "A transaction row's second line: the payee or other detail, then the date.",
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "netWorthChangeSince": "since {date}",
+  "@netWorthChangeSince": {
+    "description": "After the change in net worth over the chart's range.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountNoRateShort": "No {currency} rate",
+  "@accountNoRateShort": {
+    "description": "Under a foreign account's balance when no rate converts it into the base currency.",
+    "placeholders": {
+      "currency": {
+        "type": "String",
+        "example": "NGN"
+      }
+    }
+  }
 }
