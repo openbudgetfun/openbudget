@@ -8,10 +8,52 @@
   "timeZones": [
     "America/Anguilla"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "General Services Tax (GST)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1300,
+        "from": "2022-07-01",
+        "to": "2025-08-01",
+        "appliesTo": "goods and services tax on goods and services",
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1300,
+        "from": "2025-08-01",
+        "to": null,
+        "appliesTo": "general services tax on services (retailers, wholesalers, manufacturers, restaurants and bars exempt)",
+        "source": 4
+      },
+      {
+        "label": "goods",
+        "basisPoints": 900,
+        "from": "2025-08-01",
+        "to": null,
+        "appliesTo": "import goods tax on goods and at the port",
+        "source": 5
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Inland Revenue Department, Anguilla",
+    "url": "https://ird.gov.ai"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +72,31 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Inland Revenue Department Anguilla: Goods & Services Tax (came into force 1 July 2022, 13%)",
+      "url": "https://ird.gov.ai/Services/Tax/gst",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Inland Revenue Department Anguilla: General Services Tax (came into force 1 August 2025, 13% on services)",
+      "url": "https://ird.gov.ai/Services/Tax/GenST",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "KPMG tax news flash: Anguilla — implementation of general services tax from 1 August 2025, replacing the 2022 goods and services tax; 9% import goods tax on goods",
+      "url": "https://kpmg.com/us/en/taxnewsflash/news/2025/11/anguilla-implementation-gst-services.html",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Anguilla had no broad consumption tax before 1 July 2022, so rate coverage starts on that date. The 13% goods and services tax was repealed on 1 August 2025 and split into a 13% General Services Tax on services and a 9% import goods tax on goods."
+  ]
 }

@@ -8,10 +8,44 @@
   "timeZones": [
     "Asia/Karachi"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 7,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 6,
+    "day": 30
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Sales Tax",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1700,
+        "from": "2022-01-01",
+        "to": "2023-02-15",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1800,
+        "from": "2023-02-15",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Federal Board of Revenue (FBR)",
+    "url": "https://www.fbr.gov.pk"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +64,26 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "FBR: S.R.O. 179(I)/2023 of 14 February 2023 — sales tax rate enhanced from 17% to 18% (published 15 February 2023; ratified by the Finance (Supplementary) Act 2023)",
+      "url": "https://download1.fbr.gov.pk/SROs/20232151124337684SRO179-2023.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "EY Global Tax Alert: Pakistan increases Sales Tax and Federal Excise Tax rates (18% effective 14 February 2023; 25% higher rate for a range of goods from 8 March 2023)",
+      "url": "https://taxnews.ey.com/news/2023-0484-pakistan-increases-sales-tax-and-federal-excise-tax-rates",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear runs 1 July to 30 June (grade I, from the assessment cycle; FBR's own page was unreachable this session).",
+    "companyYearEndDefault is a 30 June app default for new entities (grade I), not a statutory requirement.",
+    "The 18% rate is charged from 15 February 2023, the date S.R.O. 179(I)/2023 (dated 14 February) was published; a 25% higher rate applies to listed luxury goods and higher-value mobile phones from 8 March 2023 (not modelled). Provincial sales taxes on services are separate.",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
+  ]
 }

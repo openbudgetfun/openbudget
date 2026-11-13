@@ -18,15 +18,40 @@
     "day": 20
   },
   "indirectTax": {
-    "kind": "none",
-    "localName": null,
-    "rates": [],
+    "kind": "salesTax",
+    "localName": "Business Receipts Tax (BRT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 400,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "higher",
+        "basisPoints": 500,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "larger hotels, large entertainment venues and domestic air transport",
+        "source": 3
+      },
+      {
+        "label": "higher2",
+        "basisPoints": 1000,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "luxury hotels and restaurants and telecommunications services",
+        "source": 3
+      }
+    ],
     "registrationThreshold": null,
     "returnFrequency": null,
     "subdivisions": []
   },
   "authority": {
-    "name": "Ministry of Finance",
+    "name": "Ministry of Finance (Islamic Emirate of Afghanistan)",
     "url": "https://mof.gov.af"
   },
   "sources": [
@@ -49,23 +74,19 @@
       "retrievedOn": "2026-11-13"
     },
     {
-      "title": "Afghanistan Income Tax Law 2009 (unofficial translation, Official Gazette 976, 18 March 2009), art. 3: the tax year is the solar (Hejiri Shamsi) year, 1 Hamal (21 March) to the last day of Hoot (20 March)",
-      "url": "https://www.wto.org/english/thewto_e/acc_e/afg_e/wtaccafg5a1_leg_1.pdf",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Islamic Republic of Afghanistan Ministry of Finance: Tax Overview for Businesses, Investors & Individuals (solar taxation year; business receipts tax; no VAT)",
-      "url": "https://mof.gov.af/sites/default/files/2019-03/Guide%2004%20-%20Tax%20Overview%20for%20Businesses%2C%20Investors%20%26%20Individuals-min.pdf",
-      "grade": "primary",
+      "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+      "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+      "grade": "secondary",
       "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
   "recheckBy": "2027-05-13",
   "caveats": [
-    "Non-Gregorian tax year (grade P, Income Tax Law 2009, art. 3): the tax year is the solar (Hejiri Shamsi) year starting 1 Hamal (21 March) and ending the last day of Hoot (20 March). The Gregorian dates are the law's own translation; the solar year drifts against the Gregorian calendar.",
-    "companyYearEndDefault of 20 March follows the solar tax year (grade P, same article); a legal person may apply to the Ministry of Finance to use a different twelve-month year.",
-    "Afghanistan levies no VAT or GST (grade S): a narrow Business Receipts Tax and a 2% fixed business tax exist under the Income Tax Manual, but no general consumption tax (nomad.watch's reading of the MoF law; the Ministry's own overview guide)."
+    "individualTaxYear follows the Solar Hijri (Afghan) year, which starts on 1 Jawza (21 or 22 March); the Gregorian start date shifts by a day between years and the model pins 21 March (grade I).",
+    "companyYearEndDefault approximates the Solar Hijri year end at 20 March (grade I); the Gregorian date shifts by a day between years.",
+    "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+    "Afghanistan's BRT tiers (4% general, 5% and 10% higher tiers) are recorded from the cited secondary table; the Ministry of Finance site was unreachable in this session and post-2021 administration changes make re-checking important.",
+    "Lower-bound rows - standard (2022-01-01), higher (2022-01-01), higher2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
   ]
 }

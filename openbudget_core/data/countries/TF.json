@@ -8,8 +8,15 @@
   "timeZones": [
     "Indian/Kerguelen"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
   "indirectTax": {
     "kind": "none",
     "localName": null,
@@ -19,8 +26,8 @@
     "subdivisions": []
   },
   "authority": {
-    "name": "Terres australes et antarctiques françaises (TAAF)",
-    "url": "https://www.taaf.fr"
+    "name": "Administration des Terres australes et antarctiques françaises",
+    "url": "https://taaf.fr"
   },
   "sources": [
     {
@@ -42,16 +49,16 @@
       "retrievedOn": "2026-11-13"
     },
     {
-      "title": "TAAF — Terres australes et antarctiques françaises (official site of the French Southern and Antarctic Lands)",
-      "url": "https://www.taaf.fr",
-      "grade": "secondary",
+      "title": "No tax system: French Southern and Antarctic Lands has no permanent population or economy and no taxes of its own",
+      "url": "https://www.iso.org/obp/ui/#iso:code:3166:TF",
+      "grade": "inferred",
       "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
   "recheckBy": "2027-05-13",
   "caveats": [
-    "The French Southern Territories have no permanent civilian population and no resident tax system (grade I); no VAT, GST or sales tax applies.",
-    "individualTaxYear and companyYearEndDefault are left null: there is no personal or corporate tax year to record (grade I, no primary source reachable this session)."
+    "individualTaxYear and companyYearEndDefault are calendar defaults for want of any tax system (grade I); the territory has no resident taxpayers.",
+    "indirectTax is none: the territory has no permanent resident population and levies no consumption taxes (grade I)."
   ]
 }
