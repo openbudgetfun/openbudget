@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:openbudget_core/src/tax/ng/ng_profile.dart';
 import 'package:openbudget_core/src/tax/tax_model.dart';
 import 'package:openbudget_core/src/tax/tax_profile.dart';
 import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
@@ -83,6 +84,17 @@ final class NgTaxRules implements TaxRulePack {
 
   @override
   TaxRuleSet ruleSet(int startYear) => _ngRuleSetFor(startYear);
+
+  @override
+  TaxProfile profileFromJson(Map<String, Object?> json) =>
+      ngProfileFromJson(json);
+
+  @override
+  List<TaxProfileQuestion> profileQuestions(EntityKind kind) =>
+      taxProfileQuestionsFor(kind, [
+        ...commonTaxProfileQuestions,
+        ...ngTaxProfileQuestions,
+      ]);
 
   @override
   TaxYear taxYearFor(DateTime date) => taxYear(date.year);

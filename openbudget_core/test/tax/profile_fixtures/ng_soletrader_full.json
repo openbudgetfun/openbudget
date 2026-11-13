@@ -1,0 +1,8 @@
+{
+  "jurisdiction": "NG",
+  "entityKind": "soleTrader",
+  "salesTaxRegistered": true,
+  "annualRentMinor": 240000000,
+  "smallCompanyCeiling": "ntaaIntended",
+  "mneGroupMember": true
+}
