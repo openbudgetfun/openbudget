@@ -40,6 +40,7 @@ void main() {
     events = EventLog()..install();
     WalletService.debugPublisher = events.record;
     AccountService.debugPublisher = events.record;
+    WalletService.clock = () => DateTime.utc(2026);
     book = await BudgetTestBook.create(server.anonymousSession());
     await book.session.caches.clear();
     addTearDown(book.expectBalancesConsistent);
@@ -431,7 +432,7 @@ WalletProviderSnapshot _snapshot() => WalletProviderSnapshot(
           source: PriceSource.jupiter,
           quality: PriceQuality.live,
           confidence: Confidence.high,
-          asOf: DateTime.now().toUtc(),
+          asOf: DateTime.utc(2026),
           unitPrice: ExactDecimal.tryParse('150'),
         ),
       ],

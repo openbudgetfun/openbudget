@@ -27,6 +27,7 @@ void main() {
   });
 
   setUp(() async {
+    WalletService.clock = () => DateTime.utc(2026);
     book = await BudgetTestBook.create(server.anonymousSession());
     await book.session.caches.clear();
   });
@@ -184,7 +185,7 @@ final class _TransactionProbeProvider implements WalletProvider {
               source: PriceSource.jupiter,
               quality: PriceQuality.live,
               confidence: Confidence.high,
-              asOf: DateTime.now().toUtc(),
+              asOf: DateTime.utc(2026),
               unitPrice: ExactDecimal.tryParse('150'),
             ),
           ],

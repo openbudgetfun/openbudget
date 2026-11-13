@@ -44,6 +44,7 @@ void main() {
   setUp(() async {
     events = EventLog()..install();
     WalletService.debugPublisher = events.record;
+    WalletService.clock = () => DateTime.utc(2026);
     book = await BudgetTestBook.create(server.anonymousSession());
     await book.session.caches.clear();
     await book.session.db.unsafeExecute('DELETE FROM asset_price');
@@ -698,7 +699,7 @@ void main() {
                   source: PriceSource.jupiter,
                   quality: PriceQuality.live,
                   confidence: Confidence.high,
-                  asOf: DateTime.now().toUtc(),
+                  asOf: DateTime.utc(2026),
                   unitPrice: ExactDecimal.tryParse('150'),
                 ),
               ],
@@ -762,7 +763,7 @@ WalletProviderHolding _evmHolding({
             source: PriceSource.jupiter,
             quality: PriceQuality.live,
             confidence: Confidence.high,
-            asOf: DateTime.now().toUtc(),
+            asOf: DateTime.utc(2026),
             unitPrice: ExactDecimal.tryParse(price),
           ),
       ],

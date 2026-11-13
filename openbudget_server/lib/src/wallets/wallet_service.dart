@@ -45,6 +45,10 @@ abstract final class WalletService {
   static WalletChangePublisher _publisher = EntityRealtimeNotifier.notify;
   static final _previewRateLimiter = _PreviewRateLimiter();
 
+  /// The server clock used for the 7-day price rule and related stamps.
+  @visibleForTesting
+  static DateTime Function() clock = () => DateTime.now().toUtc();
+
   /// The chain provider used by [connect], [sync] and [preview].
   @visibleForTesting
   static WalletProviderFactory get debugProviderFactory => _providerFactory;
@@ -84,6 +88,7 @@ abstract final class WalletService {
     _registry = WalletProviderRegistry.defaultRegistry;
     _publisher = EntityRealtimeNotifier.notify;
     _previewRateLimiter.reset();
+    clock = () => DateTime.now().toUtc();
   }
 
   /// Creates the wallet and its fixed crypto account in one transaction, then
@@ -152,7 +157,7 @@ abstract final class WalletService {
             session,
             current.copyWith(
               label: cleanLabel,
-              updatedAt: DateTime.now().toUtc(),
+              updatedAt: clock(),
             ),
             transaction: tx,
           );
@@ -162,7 +167,7 @@ abstract final class WalletService {
             session,
             account.copyWith(
               name: cleanAccountName,
-              updatedAt: DateTime.now().toUtc(),
+              updatedAt: clock(),
             ),
             transaction: tx,
           );
@@ -183,7 +188,7 @@ abstract final class WalletService {
         balanceSource: AccountBalanceSource.valuations,
         onBudget: false,
       );
-      final now = DateTime.now().toUtc();
+      final now = clock();
       return Wallet.db.insertRow(
         session,
         Wallet(
@@ -470,7 +475,7 @@ abstract final class WalletService {
         current.copyWith(
           // An explicit null clears the list, it does not keep it.
           scanNetworks: cleanNetworks,
-          updatedAt: DateTime.now().toUtc(),
+          updatedAt: clock(),
         ),
         transaction: tx,
       );
@@ -593,7 +598,7 @@ abstract final class WalletService {
         session,
         current.copyWith(
           spamVerdict: newVerdict,
-          updatedAt: DateTime.now().toUtc(),
+          updatedAt: clock(),
         ),
         transaction: tx,
       );
@@ -768,7 +773,7 @@ LIMIT @limit''',
           category: category == null ? current.category : cleanCategory,
           tags: tags == null ? current.tags : cleanTags,
           memo: memo == null ? current.memo : cleanMemo,
-          updatedAt: DateTime.now().toUtc(),
+          updatedAt: clock(),
         ),
         transaction: tx,
       );
@@ -1048,7 +1053,7 @@ LIMIT @limit''',
       final persistedHoldings =
           <(WalletNetwork, String, HoldingPosition), WalletHolding>{};
       final transactions = <String, WalletTransaction>{};
-      final now = DateTime.now().toUtc();
+      final now = clock();
       var insertedTransactions = 0;
       var updatedTransactions = 0;
 
@@ -1552,8 +1557,7 @@ LIMIT @limit''',
     final asOf = existing?.priceAsOf ?? cached?.fetchedAt;
     // A cached price counts for 7 days; older than that the holding is
     // unpriced until a source quotes it again.
-    if (asOf == null ||
-        DateTime.now().toUtc().difference(asOf) > const Duration(days: 7)) {
+    if (asOf == null || clock().difference(asOf) > const Duration(days: 7)) {
       return null;
     }
     warnings.add('Using cached price for asset ${holding.assetId}');
@@ -1645,7 +1649,7 @@ LIMIT @limit''',
           return;
         }
         final message = _capMessage(_userSafeFailureMessage(error));
-        final now = DateTime.now().toUtc();
+        final now = clock();
         await Wallet.db.updateRow(
           session,
           current.copyWith(
