@@ -7,8 +7,16 @@ library;
 /// in double quotes with any inner quote doubled; every other field is
 /// written as-is. Amounts never pass through here as doubles — callers
 /// format minor units with [minorToDecimalString] first.
+///
+/// Text a spreadsheet would run as a formula (a payee named `=HYPERLINK(…)`,
+/// say) is prefixed with a single quote, so opening the export never
+/// executes user-entered content. Plain numbers such as `-12.34` are left
+/// alone so the amounts still add up.
 String csvField(Object? value) {
-  final text = value?.toString() ?? '';
+  var text = value?.toString() ?? '';
+  if (_startsLikeFormula(text) && !_plainNumber.hasMatch(text)) {
+    text = "'$text";
+  }
   final needsQuotes =
       text.contains(',') ||
       text.contains('"') ||
@@ -17,6 +25,11 @@ String csvField(Object? value) {
   if (!needsQuotes) return text;
   return '"${text.replaceAll('"', '""')}"';
 }
+
+final _plainNumber = RegExp(r'^-?\d+(\.\d+)?$');
+
+bool _startsLikeFormula(String text) =>
+    text.isNotEmpty && '=+-@\t\r'.contains(text[0]);
 
 /// One CSV row of [fields], joined with commas and a CRLF terminator as
 /// RFC 4180 prescribes.

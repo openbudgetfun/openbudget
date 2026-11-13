@@ -37,8 +37,9 @@ abstract final class TaxExportSigningKey {
 
 /// What a signed export link carries: opaque ids, a year and an expiry.
 ///
-/// No name, email or entity name ever enters the token; the two UUIDs are
-/// readable only after the signature has been accepted.
+/// No name, email or entity name ever enters the token. The payload is
+/// signed, not encrypted: anyone holding the link can decode the two UUIDs,
+/// which are opaque ids with no personal data in them.
 @immutable
 final class TaxExportTokenPayload {
   const TaxExportTokenPayload({
