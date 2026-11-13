@@ -329,7 +329,217 @@ const _ngTables = <int, _NgTaxTable>{2025: _ngTable2025, 2026: _ngTable2026};
 /// and the cited secondary sources.
 final DateTime _ngRulesVerifiedOn = DateTime.utc(2026, 11, 5);
 
-/// The version, sources and verification date of each supported year.
+/// The named figures knowledge cards quote for [table]'s year. 2026
+/// figures are primary (the gazetted Nigeria Tax Act); 2025 old-regime
+/// figures are secondary, because the PITA and CITA texts were not read.
+Map<String, TaxFigure> _ngFiguresFor(_NgTaxTable table) {
+  final primary = table.regime == _NgRegime.nta;
+  final grade = primary ? TaxEvidenceGrade.primary : TaxEvidenceGrade.secondary;
+  final source = Uri.parse(table.sourceUrls.first);
+  return Map.unmodifiable({
+    for (final figure in [
+      if (primary) ...[
+        TaxFigure(
+          id: 'rentReliefCap',
+          value: table.rentReliefCapMinor,
+          unit: TaxFigureUnit.currencyMinor,
+          source: source,
+          grade: grade,
+          verifiedOn: _ngRulesVerifiedOn,
+        ),
+        TaxFigure(
+          id: 'developmentLevyRate',
+          value: table.developmentLevyBasisPoints,
+          unit: TaxFigureUnit.rateBasisPoints,
+          source: source,
+          grade: grade,
+          verifiedOn: _ngRulesVerifiedOn,
+        ),
+        TaxFigure(
+          id: 'smallCompanyTurnoverCeiling',
+          value: table.smallCompanyTurnoverCeilingMinor,
+          unit: TaxFigureUnit.currencyMinor,
+          source: source,
+          grade: grade,
+          verifiedOn: _ngRulesVerifiedOn,
+        ),
+        TaxFigure(
+          id: 'minimumEtrTurnover',
+          value: table.minimumEtrTurnoverMinor,
+          unit: TaxFigureUnit.currencyMinor,
+          source: source,
+          grade: grade,
+          verifiedOn: _ngRulesVerifiedOn,
+        ),
+      ] else ...[
+        TaxFigure(
+          id: 'consolidatedReliefAllowanceFloor',
+          value: table.craFloorMinor,
+          unit: TaxFigureUnit.currencyMinor,
+          source: source,
+          grade: grade,
+          verifiedOn: _ngRulesVerifiedOn,
+        ),
+        TaxFigure(
+          id: 'minimumTaxRate',
+          value: table.minimumTaxBasisPoints,
+          unit: TaxFigureUnit.rateBasisPoints,
+          source: source,
+          grade: grade,
+          verifiedOn: _ngRulesVerifiedOn,
+        ),
+        TaxFigure(
+          id: 'tertiaryEducationTaxRate',
+          value: table.tertiaryEducationTaxBasisPoints,
+          unit: TaxFigureUnit.rateBasisPoints,
+          source: source,
+          grade: grade,
+          verifiedOn: _ngRulesVerifiedOn,
+        ),
+      ],
+      TaxFigure(
+        id: 'companiesIncomeTaxRate',
+        value: table.citBasisPoints,
+        unit: TaxFigureUnit.rateBasisPoints,
+        source: source,
+        grade: grade,
+        verifiedOn: _ngRulesVerifiedOn,
+      ),
+      TaxFigure(
+        id: 'vatRate',
+        value: table.vatBasisPoints,
+        unit: TaxFigureUnit.rateBasisPoints,
+        source: source,
+        grade: grade,
+        verifiedOn: _ngRulesVerifiedOn,
+      ),
+    ])
+      figure.id: figure,
+  });
+}
+
+/// What the nigeria-tax skill could not verify, as data (its "Unverified
+/// and changing" list). Re-check dates follow that list.
+final List<TaxRuleCaveat> ngRuleCaveats = [
+  TaxRuleCaveat(
+    id: 'ng.small-company-threshold',
+    text:
+        'The Nigeria Tax Act\u2019s 50 million naira small-company turnover '
+        'conflicts with the Tax Administration Act\u2019s 100 million naira '
+        'small business figure, and no enacted correction was found, so the '
+        'pack carries both.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {TaxSection.companyReturn, TaxSection.indirectTax},
+    recheckBy: DateTime.utc(2026, 12, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'ng.transition-guidelines',
+    text:
+        'The Transition Guidelines of 18 June 2026 are known only through '
+        'law-firm summaries, and the NRS (Establishment) Act text was not '
+        'read.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {TaxSection.personalReturn, TaxSection.companyReturn},
+    recheckBy: DateTime.utc(2026, 12, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'ng.2025-old-regime-secondary',
+    text:
+        'The 2025 old-regime figures come from PwC and KPMG summaries '
+        'because the PITA and CITA texts were not read.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {
+      TaxSection.personalReturn,
+      TaxSection.selfEmployment,
+      TaxSection.companyReturn,
+      TaxSection.indirectTax,
+    },
+    recheckBy: DateTime.utc(2027, 3, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'ng.filing-dates',
+    text:
+        'The individual filing date for 2026 income (31 March 2027 by '
+        'default) is inferred, and the PAYE remittance day and return form '
+        'names are secondary.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.filingCalendar},
+    recheckBy: DateTime.utc(2027, 3, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'ng.capital-allowance-and-levy-base',
+    text:
+        'The capital allowance method, the 1 per cent notional carry and '
+        'whether the development levy sits before or after losses and '
+        'allowances are unconfirmed.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.selfEmployment, TaxSection.companyReturn},
+    recheckBy: DateTime.utc(2027, 3, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'ng.wht-rates',
+    text:
+        'The withholding tax rates and the 25 million naira small-supplier '
+        'exemption come from a 2024 Regulations PDF that was scanned but '
+        'unread, and whether they survive the repeal is unconfirmed.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {TaxSection.companyReturn},
+    recheckBy: DateTime.utc(2027, 3, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'ng.einvoicing-dates',
+    text:
+        'The e-invoicing rollout dates (large taxpayers from 31 July 2026, '
+        'medium from 1 July 2026, small from July 2027) come from the '
+        'press, and one source claims a three-month extension for large '
+        'taxpayers.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {TaxSection.indirectTax},
+    recheckBy: DateTime.utc(2026, 12, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'ng.interest-rate',
+    text:
+        'The 2026 interest Order is sourced, but no published monthly rate '
+        'was found and the day-count basis is unknown.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {TaxSection.filingCalendar},
+    recheckBy: DateTime.utc(2026, 12),
+  ),
+  TaxRuleCaveat(
+    id: 'ng.digital-asset-guidelines',
+    text:
+        'The virtual-asset guidelines were reported as published on 31 '
+        'July 2026, and the VASP record-retention period is six or seven '
+        'years depending on the source.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {TaxSection.capitalGains, TaxSection.digitalAssets},
+    recheckBy: DateTime.utc(2026, 12, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'ng.penalty-counting',
+    text:
+        'Month counting for the s.100 and s.101 penalties, the ss.121-122 '
+        'credit time limit and the UK treaty rates (sources differ) are '
+        'unconfirmed.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.filingCalendar},
+    recheckBy: DateTime.utc(2027, 3, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'ng.minimum-wage-and-contributions',
+    text:
+        'The national minimum wage amount and whether its test is monthly '
+        'or annual, and the PRA, NHF and NHIS contribution rates, were not '
+        'researched.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.payroll},
+    recheckBy: DateTime.utc(2027, 3, 31),
+  ),
+];
+
+/// The version, sources, verification date, caveats and named figures of
+/// each supported year.
 final Map<int, TaxRuleSet> _ngRuleSetsByStartYear = Map.unmodifiable({
   for (final entry in _ngTables.entries)
     entry.key: TaxRuleSet(
@@ -339,5 +549,7 @@ final Map<int, TaxRuleSet> _ngRuleSetsByStartYear = Map.unmodifiable({
       sources: [
         for (final url in entry.value.sourceUrls) Uri.parse(url),
       ],
+      caveats: ngRuleCaveats,
+      figures: _ngFiguresFor(entry.value),
     ),
 });

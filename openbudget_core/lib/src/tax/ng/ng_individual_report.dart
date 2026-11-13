@@ -196,6 +196,7 @@ TaxReport _individualReport(TaxInput input, _NgTaxTable table) {
       label: 'Rent relief (20% of annual rent, capped at N500,000)',
       amountMinor: position.statutoryRelief,
       reportReference: 'NTA 2025 s.30(2)(a)(vi)',
+      figureId: 'rentReliefCap',
     ),
     // PITA consolidated relief allowance (secondary source; the section
     // number is unverified).
@@ -203,6 +204,7 @@ TaxReport _individualReport(TaxInput input, _NgTaxTable table) {
       label: 'Consolidated relief allowance',
       amountMinor: position.statutoryRelief,
       reportReference: 'PITA (secondary source; section unverified)',
+      figureId: 'consolidatedReliefAllowanceFloor',
     ),
     _ => null,
   };
@@ -266,6 +268,7 @@ TaxReport _individualReport(TaxInput input, _NgTaxTable table) {
             'progressive tax)',
         amountMinor: minimumTax,
         reportReference: 'PITA (secondary source; section unverified)',
+        figureId: 'minimumTaxRate',
       ),
     TaxReportLine(
       label: 'Chargeable income',
@@ -338,6 +341,13 @@ TaxReport _individualReport(TaxInput input, _NgTaxTable table) {
     ).versionFor(TaxJurisdiction.ng),
     maturity: ngTaxManifest.maturity,
     coverage: ngTaxManifest.sections,
+    caveats: _ngRuleSetFor(input.year.startYear).caveatsTouching(
+      sections: {
+        TaxSection.personalReturn,
+        if (position.linkedLines.isNotEmpty) TaxSection.selfEmployment,
+        if (position.gains > 0) TaxSection.capitalGains,
+      },
+    ),
     uncategorizedCount: position.uncategorized,
   );
 }
