@@ -10,6 +10,7 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:openbudget_server/src/generated/protocol.dart' as _is0sbm8r;
 import 'package:serverpod/serverpod.dart' as _is;
 
@@ -28,6 +29,8 @@ abstract class WalletSyncResult
     required this.pricedNftHoldingCount,
     required this.cachedNftHoldingCount,
     required this.unpricedNftHoldingCount,
+    required this.readNetworks,
+    required this.failedNetworks,
     this.valuationCoverageRatio,
     this.totalValueMinor,
     this.valuationCurrencyCode,
@@ -47,6 +50,8 @@ abstract class WalletSyncResult
     required int pricedNftHoldingCount,
     required int cachedNftHoldingCount,
     required int unpricedNftHoldingCount,
+    required List<_ifz8weqz.WalletNetwork> readNetworks,
+    required List<_ifz8weqz.WalletNetwork> failedNetworks,
     double? valuationCoverageRatio,
     int? totalValueMinor,
     String? valuationCurrencyCode,
@@ -70,6 +75,14 @@ abstract class WalletSyncResult
       cachedNftHoldingCount: jsonSerialization['cachedNftHoldingCount'] as int,
       unpricedNftHoldingCount:
           jsonSerialization['unpricedNftHoldingCount'] as int,
+      readNetworks: _is0sbm8r.Protocol()
+          .deserialize<List<_ifz8weqz.WalletNetwork>>(
+            jsonSerialization['readNetworks'],
+          ),
+      failedNetworks: _is0sbm8r.Protocol()
+          .deserialize<List<_ifz8weqz.WalletNetwork>>(
+            jsonSerialization['failedNetworks'],
+          ),
       valuationCoverageRatio:
           (jsonSerialization['valuationCoverageRatio'] as num?)?.toDouble(),
       totalValueMinor: jsonSerialization['totalValueMinor'] as int?,
@@ -106,6 +119,13 @@ abstract class WalletSyncResult
 
   int unpricedNftHoldingCount;
 
+  /// The networks this sync read successfully.
+  List<_ifz8weqz.WalletNetwork> readNetworks;
+
+  /// The networks this sync could not read. Their holdings keep their
+  /// quantities and their wallet_network_state rows carry the reason.
+  List<_ifz8weqz.WalletNetwork> failedNetworks;
+
   /// Share of holdings with a price, 0.0-1.0. Not money.
   double? valuationCoverageRatio;
 
@@ -133,6 +153,8 @@ abstract class WalletSyncResult
     int? pricedNftHoldingCount,
     int? cachedNftHoldingCount,
     int? unpricedNftHoldingCount,
+    List<_ifz8weqz.WalletNetwork>? readNetworks,
+    List<_ifz8weqz.WalletNetwork>? failedNetworks,
     double? valuationCoverageRatio,
     int? totalValueMinor,
     String? valuationCurrencyCode,
@@ -154,6 +176,8 @@ abstract class WalletSyncResult
       'pricedNftHoldingCount': pricedNftHoldingCount,
       'cachedNftHoldingCount': cachedNftHoldingCount,
       'unpricedNftHoldingCount': unpricedNftHoldingCount,
+      'readNetworks': readNetworks.toJson(valueToJson: (v) => v.toJson()),
+      'failedNetworks': failedNetworks.toJson(valueToJson: (v) => v.toJson()),
       if (valuationCoverageRatio != null)
         'valuationCoverageRatio': valuationCoverageRatio,
       if (totalValueMinor != null) 'totalValueMinor': totalValueMinor,
@@ -179,6 +203,8 @@ abstract class WalletSyncResult
       'pricedNftHoldingCount': pricedNftHoldingCount,
       'cachedNftHoldingCount': cachedNftHoldingCount,
       'unpricedNftHoldingCount': unpricedNftHoldingCount,
+      'readNetworks': readNetworks.toJson(valueToJson: (v) => v.toJson()),
+      'failedNetworks': failedNetworks.toJson(valueToJson: (v) => v.toJson()),
       if (valuationCoverageRatio != null)
         'valuationCoverageRatio': valuationCoverageRatio,
       if (totalValueMinor != null) 'totalValueMinor': totalValueMinor,
@@ -210,6 +236,8 @@ class _WalletSyncResultImpl extends WalletSyncResult {
     required int pricedNftHoldingCount,
     required int cachedNftHoldingCount,
     required int unpricedNftHoldingCount,
+    required List<_ifz8weqz.WalletNetwork> readNetworks,
+    required List<_ifz8weqz.WalletNetwork> failedNetworks,
     double? valuationCoverageRatio,
     int? totalValueMinor,
     String? valuationCurrencyCode,
@@ -227,6 +255,8 @@ class _WalletSyncResultImpl extends WalletSyncResult {
          pricedNftHoldingCount: pricedNftHoldingCount,
          cachedNftHoldingCount: cachedNftHoldingCount,
          unpricedNftHoldingCount: unpricedNftHoldingCount,
+         readNetworks: readNetworks,
+         failedNetworks: failedNetworks,
          valuationCoverageRatio: valuationCoverageRatio,
          totalValueMinor: totalValueMinor,
          valuationCurrencyCode: valuationCurrencyCode,
@@ -250,6 +280,8 @@ class _WalletSyncResultImpl extends WalletSyncResult {
     int? pricedNftHoldingCount,
     int? cachedNftHoldingCount,
     int? unpricedNftHoldingCount,
+    List<_ifz8weqz.WalletNetwork>? readNetworks,
+    List<_ifz8weqz.WalletNetwork>? failedNetworks,
     Object? valuationCoverageRatio = _Undefined,
     Object? totalValueMinor = _Undefined,
     Object? valuationCurrencyCode = _Undefined,
@@ -271,6 +303,9 @@ class _WalletSyncResultImpl extends WalletSyncResult {
           cachedNftHoldingCount ?? this.cachedNftHoldingCount,
       unpricedNftHoldingCount:
           unpricedNftHoldingCount ?? this.unpricedNftHoldingCount,
+      readNetworks: readNetworks ?? this.readNetworks.map((e0) => e0).toList(),
+      failedNetworks:
+          failedNetworks ?? this.failedNetworks.map((e0) => e0).toList(),
       valuationCoverageRatio: valuationCoverageRatio is double?
           ? valuationCoverageRatio
           : this.valuationCoverageRatio,

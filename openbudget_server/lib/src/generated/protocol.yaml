@@ -178,6 +178,10 @@ transaction:
   - findDuplicates:
 wallet:
   - connect:
+  - preview:
+  - supportedNetworks:
+  - setScanNetworks:
+  - listNetworkStates:
   - list:
   - getForAccount:
   - sync:

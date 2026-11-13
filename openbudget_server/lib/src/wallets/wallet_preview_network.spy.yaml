@@ -1,0 +1,14 @@
+### What one network exposed about one address during a preview.
+class: WalletPreviewNetwork
+fields:
+  network: WalletNetwork
+  ### Every holding the provider reported on this network, priced or not.
+  holdingCount: int
+  ### The holdings that carry a price, which the picker can total.
+  pricedHoldingCount: int
+  ### Sum of the priced holdings, in valueCurrencyCode minor units. Null when
+  ### nothing was priced.
+  valueMinor: int?
+  valueCurrencyCode: String?
+  ### Why this network could not be read, in plain words. Null when it read.
+  readError: String?

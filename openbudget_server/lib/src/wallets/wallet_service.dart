@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -38,9 +39,12 @@ abstract final class WalletService {
   static const _maxTagLength = 50;
 
   static WalletProviderFactory _providerFactory = _registryProvider;
+  static WalletProviderRegistry _registry =
+      WalletProviderRegistry.defaultRegistry;
   static WalletChangePublisher _publisher = EntityRealtimeNotifier.notify;
+  static final _previewRateLimiter = _PreviewRateLimiter();
 
-  /// The chain provider used by [connect] and [sync].
+  /// The chain provider used by [connect], [sync] and [preview].
   @visibleForTesting
   static WalletProviderFactory get debugProviderFactory => _providerFactory;
 
@@ -48,6 +52,17 @@ abstract final class WalletService {
   @visibleForTesting
   static set debugProviderFactory(WalletProviderFactory factory) {
     _providerFactory = factory;
+  }
+
+  /// The provider registry behind provider resolution and
+  /// [supportedNetworks].
+  @visibleForTesting
+  static WalletProviderRegistry get debugRegistry => _registry;
+
+  /// Replaces the registry so a test can register a fake chain family.
+  @visibleForTesting
+  static set debugRegistry(WalletProviderRegistry registry) {
+    _registry = registry;
   }
 
   /// The publisher receiving committed wallet changes.
@@ -60,18 +75,24 @@ abstract final class WalletService {
     _publisher = publisher;
   }
 
-  /// Restores the production provider and message bus.
+  /// Restores the production registry, provider and message bus, and forgets
+  /// the in-memory preview rate windows.
   @visibleForTesting
   static void resetForTests() {
     _providerFactory = _registryProvider;
+    _registry = WalletProviderRegistry.defaultRegistry;
     _publisher = EntityRealtimeNotifier.notify;
+    _previewRateLimiter.reset();
   }
 
   /// Creates the wallet and its fixed crypto account in one transaction, then
   /// syncs.
   ///
-  /// A sync failure keeps the usable local wallet and account, marks the
-  /// wallet failed with a clear error, and never erases committed facts.
+  /// The address is validated through the core parser before anything is
+  /// stored or read, and [scanNetworks] names the networks an EVM wallet
+  /// reads; every other family reads its one network. A sync failure keeps
+  /// the usable local wallet and account, marks the wallet failed with a
+  /// clear error, and never erases committed facts.
   static Future<Wallet> connect(
     Session session,
     UuidValue entityId,
@@ -79,9 +100,11 @@ abstract final class WalletService {
     String address, {
     String? label,
     String? accountName,
+    List<WalletNetwork>? scanNetworks,
   }) async {
-    final normalizedAddress = _requireAddress(address);
-    _requireNetwork(network);
+    final normalizedAddress = _requireAddressForNetwork(address, network);
+    final cleanScanNetworks = _requireScanNetworks(network, scanNetworks);
+    _requireReaderFor(network);
     final cleanLabel = _normaliseOptional(label);
     final cleanAccountName = _normaliseOptional(accountName);
 
@@ -153,7 +176,7 @@ abstract final class WalletService {
         name:
             cleanAccountName ??
             cleanLabel ??
-            'Solana Wallet (${_shortAddress(normalizedAddress)})',
+            '${network.displayName} Wallet (${_shortAddress(normalizedAddress)})',
         kind: AccountKind.crypto,
         currencyCode: _valuationCurrency,
         balanceSource: AccountBalanceSource.valuations,
@@ -167,6 +190,7 @@ abstract final class WalletService {
           accountId: account.id!,
           network: network,
           address: normalizedAddress,
+          scanNetworks: cleanScanNetworks,
           label: cleanLabel,
           syncStatus: SyncStatus.pending,
           createdAt: now,
@@ -221,8 +245,14 @@ abstract final class WalletService {
     );
   }
 
-  /// Fetches the chain, then commits holdings, transactions, the cursor and
-  /// today's wallet valuation in one transaction.
+  /// Fetches the chain, then commits holdings, transactions, the cursors,
+  /// the per-network read state and today's wallet valuation in one
+  /// transaction.
+  ///
+  /// Holdings are replaced only for the networks the provider read; a
+  /// network that failed keeps its stored quantities and is re-priced from
+  /// cache. When no network could be read, every committed fact stands and
+  /// the wallet is marked failed.
   static Future<WalletSyncResult> sync(
     Session session,
     UuidValue walletId,
@@ -233,24 +263,49 @@ abstract final class WalletService {
     var attempt = 0;
 
     while (true) {
+      final networks = _readNetworksFor(wallet);
       try {
+        // Every network call happens before the transaction opens: the
+        // per-network history cursors are read here, outside any
+        // transaction, and the provider is resolved before the commit below
+        // opens one.
+        final states = await WalletNetworkState.db.find(
+          session,
+          where: (t) => t.walletId.equals(wallet.id),
+        );
+        final cursors = {
+          for (final state in states)
+            if (state.historyCursor != null && networks.contains(state.network))
+              state.network: state.historyCursor!,
+        };
         final provider = _providerFactory(session, wallet.network);
         final snapshot = await provider.fetchSnapshot(
           WalletReadRequest(
             homeNetwork: wallet.network,
-            networks: wallet.scanNetworks ?? [wallet.network],
+            networks: networks,
             address: wallet.address,
             // HD wallets pass the opened descriptor here from W4.2 on.
             untilSignature: wallet.lastSignature,
             // Solana keeps its cursor in the wallet row (multichain-wallets.md
-            // 7.3); other families pass their wallet_network_state cursors
-            // once history sync covers them.
+            // 7.3); other families resume from these wallet_network_state
+            // cursors once history sync covers them.
+            historyCursors: cursors,
           ),
         );
+        if (snapshot.readNetworks.isEmpty) {
+          // Nothing was readable: the catch below keeps every committed
+          // fact and records each network's own reason.
+          throw _AllNetworksFailed(
+            _combinedFailureMessage(networks, snapshot.failedNetworks),
+            snapshot.failedNetworks,
+          );
+        }
         final outcome = await _commit(
           session,
           wallet,
           snapshot,
+          requestNetworks: networks,
+          cursorsByNetwork: cursors,
           startedAt: startedAt,
         );
         await _publish(
@@ -275,15 +330,180 @@ abstract final class WalletService {
         }
         wallet = await _ownedWallet(session, walletId);
         startedAt = DateTime.now().toUtc();
+      } on _AllNetworksFailed catch (failure, stackTrace) {
+        _log.warning(
+          'Wallet sync failed for $walletId: $failure',
+          stackTrace,
+        );
+        await _markFailed(
+          session,
+          walletId,
+          startedAt,
+          WalletProviderException(failure.message),
+          networks,
+          reasonsByNetwork: failure.reasonsByNetwork,
+        );
+        throw WalletProviderException(failure.message);
       } on Object catch (error, stackTrace) {
         _log.warning(
           'Wallet sync failed for $walletId: $error',
           stackTrace,
         );
-        await _markFailed(session, walletId, startedAt, error);
+        await _markFailed(session, walletId, startedAt, error, networks);
         rethrow;
       }
     }
+  }
+
+  /// Reads what one address holds across its family's supported networks,
+  /// without connecting or writing anything.
+  ///
+  /// Rate limited to 20 reads an hour per user, counting reads only: a
+  /// refused input or an unsupported chain never reaches a provider and
+  /// consumes none of the hour.
+  static Future<WalletPreview> preview(
+    Session session,
+    UuidValue entityId,
+    String address,
+  ) async {
+    await EntityAccess.requireOwned(session, entityId);
+    final (candidate, ambiguous) = _requirePreviewAddress(address);
+    final supported = [
+      for (final network in candidate.networks)
+        if (_registry.isSupported(
+          passwords: session.passwords,
+          environment: Platform.environment,
+          family: network.family,
+        ))
+          network,
+    ];
+    if (supported.isEmpty) {
+      return WalletPreview(
+        network: candidate.networks.first,
+        address: candidate.canonical,
+        networks: const [],
+        warnings: const ['No reader is set up for that chain yet.'],
+      );
+    }
+
+    if (!_previewRateLimiter.allow(EntityAccess.userId(session))) {
+      throw WalletPreviewRateLimitedException();
+    }
+
+    final home = supported.first;
+    final provider = _providerFactory(session, home);
+    final snapshot = await provider.fetchSnapshot(
+      WalletReadRequest(
+        homeNetwork: home,
+        networks: supported,
+        address: candidate.canonical,
+        // Previews report holdings only; history is a sync concern.
+        includeHistory: false,
+      ),
+    );
+
+    final warnings = [...snapshot.warnings];
+    if (ambiguous) {
+      warnings.add(
+        'That address could belong to more than one chain; '
+        'showing the first.',
+      );
+    }
+    final rows = [
+      for (final network in supported)
+        _previewNetworkRow(network, snapshot, warnings),
+    ];
+    return WalletPreview(
+      network: home,
+      address: candidate.canonical,
+      networks: rows,
+      warnings: warnings,
+    );
+  }
+
+  /// The networks that can be read now: each one's family has a registered
+  /// provider and its secret is present. Test networks are never offered.
+  static List<WalletNetwork> supportedNetworks(Session session) {
+    final passwords = session.passwords;
+    final environment = Platform.environment;
+    return [
+      for (final network in WalletNetwork.values)
+        if (!network.isTestnet &&
+            _registry.isSupported(
+              passwords: passwords,
+              environment: environment,
+              family: network.family,
+            ))
+          network,
+    ];
+  }
+
+  /// Replaces which networks an EVM wallet reads, or clears them back to its
+  /// home network when [networks] is null. The change takes effect on the
+  /// wallet's next read.
+  static Future<Wallet> setScanNetworks(
+    Session session,
+    UuidValue walletId,
+    List<WalletNetwork>? networks,
+  ) async {
+    final wallet = await _ownedWallet(session, walletId);
+    _requireWritable(await EntityAccess.requireOwned(session, wallet.entityId));
+    final cleanNetworks = _requireScanNetworks(wallet.network, networks);
+
+    await session.db.transaction((tx) async {
+      await EntityAccess.requireOwned(
+        session,
+        wallet.entityId,
+        transaction: tx,
+        lockMode: LockMode.forNoKeyUpdate,
+      );
+      final current = await Wallet.db.findById(
+        session,
+        walletId,
+        transaction: tx,
+        lockMode: LockMode.forUpdate,
+      );
+      if (current == null) throw NotFoundException();
+      await Wallet.db.updateRow(
+        session,
+        current.copyWith(
+          // An explicit null clears the list, it does not keep it.
+          scanNetworks: cleanNetworks,
+          updatedAt: DateTime.now().toUtc(),
+        ),
+        transaction: tx,
+      );
+    });
+
+    await _publish(
+      session,
+      wallet.entityId,
+      ChangeScope.accounts,
+      accountId: wallet.accountId,
+    );
+    return await Wallet.db.findById(session, walletId) ?? wallet;
+  }
+
+  /// One row per network the wallet reads: when its holdings were last read
+  /// and why the last read failed, in display order.
+  static Future<List<WalletNetworkState>> listNetworkStates(
+    Session session,
+    UuidValue walletId,
+  ) async {
+    await _ownedWallet(session, walletId);
+    final states = await WalletNetworkState.db.find(
+      session,
+      where: (t) => t.walletId.equals(walletId),
+    );
+    final order = {
+      for (final (index, network) in WalletNetwork.values.indexed)
+        network: index,
+    };
+    return states..sort((left, right) {
+      final byNetwork = order[left.network]!.compareTo(order[right.network]!);
+      if (byNetwork != 0) return byNetwork;
+      return left.updatedAt.compareTo(right.updatedAt);
+    });
   }
 
   /// Lists current holdings largest first, with unpriced assets last.
@@ -531,6 +751,8 @@ LIMIT @limit''',
     Session session,
     Wallet wallet,
     WalletProviderSnapshot snapshot, {
+    required List<WalletNetwork> requestNetworks,
+    required Map<WalletNetwork, String> cursorsByNetwork,
     required DateTime startedAt,
   }) async {
     final outcome = await session.db.transaction((tx) async {
@@ -584,110 +806,121 @@ LIMIT @limit''',
         throw const _SyncConflict();
       }
 
+      // The commit replaces holdings only for the networks this read read. A
+      // network that failed keeps its stored holdings, which are re-priced
+      // from cache below, and a network that left the scan set loses its
+      // holdings (multichain-wallets.md 8.1 and 8.3).
+      final readNetworks = [
+        for (final network in requestNetworks)
+          if (snapshot.readNetworks.contains(network)) network,
+      ];
+      final failedReasons = {
+        for (final network in requestNetworks)
+          if (!readNetworks.contains(network))
+            network: _capMessage(
+              snapshot.failedNetworks[network] ??
+                  '${network.displayName} could not be read.',
+            ),
+      };
+      final failedNetworks = failedReasons.keys.toList();
+      // A provider that answers with holdings for a network it did not read
+      // is broken; refuse them rather than commit unverifiable quantities.
+      for (final holding in snapshot.holdings) {
+        if (!readNetworks.contains(holding.network)) {
+          throw ValidationException(
+            message:
+                'Provider returned holdings for a network it did not read.',
+          );
+        }
+      }
+
       final warnings = [...snapshot.warnings];
       final existingHoldings = await WalletHolding.db.find(
         session,
         where: (t) => t.walletId.equals(wallet.id),
         transaction: tx,
       );
-      final existingByAsset = {
-        for (final holding in existingHoldings) holding.assetId: holding,
+      final existingByKey = {
+        for (final holding in existingHoldings)
+          (holding.network, holding.assetId, holding.position): holding,
       };
-      final cacheRows = snapshot.holdings.isEmpty
+      final existingByFailedNetwork = {
+        for (final network in failedNetworks)
+          network: [
+            for (final holding in existingHoldings)
+              if (holding.network == network) holding,
+          ],
+      };
+      // Price cache rows for every asset the sync touches: the read
+      // networks' assets and the failed networks' stored assets.
+      final assetIdsByNetwork = <WalletNetwork, Set<String>>{};
+      for (final holding in snapshot.holdings) {
+        assetIdsByNetwork
+            .putIfAbsent(holding.network, () => {})
+            .add(holding.assetId.trim());
+      }
+      for (final holdings in existingByFailedNetwork.values) {
+        for (final holding in holdings) {
+          assetIdsByNetwork
+              .putIfAbsent(holding.network, () => {})
+              .add(holding.assetId);
+        }
+      }
+      final cacheRows = assetIdsByNetwork.isEmpty
           ? const <AssetPrice>[]
           : await AssetPrice.db.find(
               session,
               where: (t) =>
-                  t.network.equals(wallet.network) &
+                  t.network.inSet(assetIdsByNetwork.keys.toSet()) &
                   t.assetId.inSet({
-                    for (final holding in snapshot.holdings) holding.assetId,
+                    for (final assetIds in assetIdsByNetwork.values)
+                      ...assetIds,
                   }),
               transaction: tx,
             );
-      final cacheByAsset = {
-        for (final row in cacheRows) row.assetId: row,
+      final cacheByKey = {
+        for (final row in cacheRows) (row.network, row.assetId): row,
       };
 
       final resolved = <_ResolvedHolding>[];
-      final seenAssets = <String>{};
+      final seenKeys = <(WalletNetwork, String, HoldingPosition)>{};
       for (final holding in snapshot.holdings) {
         final assetId = holding.assetId.trim();
-        if (assetId.isEmpty || !seenAssets.add(assetId)) {
+        if (assetId.isEmpty ||
+            !seenKeys.add((holding.network, assetId, holding.position))) {
           throw ValidationException(
             message: 'Provider returned an invalid or duplicate asset id.',
           );
         }
         _requireHoldingQuantity(assetId, holding.quantityRaw, holding.decimals);
-        final existing = existingByAsset[assetId];
-        final choice = _choosePrice(
-          holding,
-          existing: existing,
-          cached: cacheByAsset[assetId],
-          warnings: warnings,
-        );
-        int? valueMinor;
-        String? unitPrice;
-        if (choice != null) {
-          unitPrice = choice.unitPrice;
-          try {
-            valueMinor = choice.totalPrice == null
-                ? WalletMath.valueMinor(
-                    quantityRaw: holding.quantityRaw,
-                    decimals: holding.decimals,
-                    unitPrice: choice.exactUnitPrice!,
-                    currencyCode: choice.currencyCode,
-                  )
-                : WalletMath.totalValueMinor(
-                    totalPrice: choice.totalPrice!,
-                    currencyCode: choice.currencyCode,
-                  );
-            if (unitPrice == null && choice.totalPrice != null) {
-              unitPrice = WalletMath.unitPriceFromTotal(
-                totalPrice: choice.totalPrice!,
-                quantityRaw: holding.quantityRaw,
-                decimals: holding.decimals,
-              );
-            }
-          } on WalletValueException catch (error) {
-            throw ValidationException(
-              message: 'Wallet value for $assetId is unsafe: ${error.message}',
-            );
-          }
-          if (valueMinor == null) {
-            warnings.add(
-              'No supported currency exponent for $assetId; left unpriced.',
-            );
-          }
-        }
-        if (choice == null || valueMinor == null) {
-          warnings.add('Missing price for asset $assetId');
-        }
-
         resolved.add(
-          _ResolvedHolding(
-            assetId: assetId,
-            symbol: holding.symbol,
-            name: holding.name,
-            tokenProgram: holding.tokenProgram,
-            decimals: holding.decimals,
-            quantityRaw: holding.quantityRaw,
-            isNft: holding.isNft,
-            metadataJson: holding.metadataJson,
-            unitPrice: valueMinor == null ? null : unitPrice,
-            valueMinor: valueMinor,
-            currencyCode: valueMinor == null ? null : choice!.currencyCode,
-            source: valueMinor == null ? null : choice!.source,
-            quality: valueMinor == null
-                ? PriceQuality.unpriced
-                : choice!.quality,
-            confidence: valueMinor == null ? null : choice!.confidence,
-            asOf: valueMinor == null ? null : choice!.asOf,
-            freshCache:
-                choice != null &&
-                choice.quality != PriceQuality.cached &&
-                choice.source != null,
+          _resolveHolding(
+            source: holding,
+            existing:
+                existingByKey[(holding.network, assetId, holding.position)],
+            cached: cacheByKey[(holding.network, assetId)],
+            warnings: warnings,
           ),
         );
+      }
+      // A failed network keeps its stored holdings: same quantities, priced
+      // again from the cache where a price is still available.
+      for (final entry in existingByFailedNetwork.entries) {
+        for (final existing in entry.value) {
+          if (!seenKeys.add(
+            (entry.key, existing.assetId, existing.position),
+          )) {
+            continue;
+          }
+          resolved.add(
+            _resolveHolding(
+              source: _holdingFromRow(existing),
+              existing: existing,
+              cached: cacheByKey[(entry.key, existing.assetId)],
+              warnings: warnings,
+            ),
+          );
+        }
       }
 
       var total = BigInt.zero;
@@ -698,7 +931,8 @@ LIMIT @limit''',
       }
       final totalValueMinor = _safeMinor(total, 'wallet total value');
 
-      final persistedHoldings = <String, WalletHolding>{};
+      final persistedHoldings =
+          <(WalletNetwork, String, HoldingPosition), WalletHolding>{};
       final transactions = <String, WalletTransaction>{};
       final now = DateTime.now().toUtc();
       var insertedTransactions = 0;
@@ -714,6 +948,7 @@ LIMIT @limit''',
           session,
           where: (t) =>
               t.walletId.equals(wallet.id) &
+              t.network.equals(wallet.network) &
               t.signature.equals(transaction.signature),
           transaction: tx,
           lockMode: LockMode.forUpdate,
@@ -766,14 +1001,16 @@ LIMIT @limit''',
       }
 
       for (final holding in resolved) {
-        final existing = existingByAsset[holding.assetId];
+        final key = (holding.network, holding.assetId, holding.position);
+        final existing = existingByKey[key];
         if (existing == null) {
-          persistedHoldings[holding.assetId] = await WalletHolding.db.insertRow(
+          persistedHoldings[key] = await WalletHolding.db.insertRow(
             session,
             WalletHolding(
               walletId: wallet.id!,
-              network: wallet.network,
+              network: holding.network,
               assetId: holding.assetId,
+              position: holding.position,
               symbol: holding.symbol,
               name: holding.name,
               tokenProgram: holding.tokenProgram,
@@ -793,9 +1030,12 @@ LIMIT @limit''',
             transaction: tx,
           );
         } else {
-          persistedHoldings[holding.assetId] = await WalletHolding.db.updateRow(
+          persistedHoldings[key] = await WalletHolding.db.updateRow(
             session,
             existing.copyWith(
+              network: holding.network,
+              assetId: holding.assetId,
+              position: holding.position,
               symbol: holding.symbol,
               name: holding.name,
               tokenProgram: holding.tokenProgram,
@@ -817,8 +1057,14 @@ LIMIT @limit''',
         }
       }
 
+      final keepNetworks = {...readNetworks, ...failedNetworks};
       for (final existing in existingHoldings) {
-        if (!seenAssets.contains(existing.assetId)) {
+        final key = (existing.network, existing.assetId, existing.position);
+        final replaced =
+            !keepNetworks.contains(existing.network) ||
+            (readNetworks.contains(existing.network) &&
+                !seenKeys.contains(key));
+        if (replaced) {
           await WalletHolding.db.deleteRow(session, existing, transaction: tx);
         }
       }
@@ -850,8 +1096,11 @@ LIMIT @limit''',
         walletAddress: wallet.address,
         transactions: pnlTransactions,
         holdings: [
+          // P&L stays scoped to the home network until history lands for the
+          // other families (multichain-wallets.md 8.4); ids can repeat
+          // across networks.
           for (final holding in resolved)
-            if (holding.unitPrice != null)
+            if (holding.unitPrice != null && holding.network == wallet.network)
               WalletPnlHolding(
                 assetId: holding.assetId,
                 quantityRaw: holding.quantityRaw,
@@ -878,8 +1127,8 @@ LIMIT @limit''',
         );
       }
       for (final entry in persistedHoldings.entries) {
-        final estimate = pnl.holdings[entry.key];
         final holding = entry.value;
+        final estimate = pnl.holdings[holding.assetId];
         final costBasis = estimate?.costBasisMinor;
         final realized = estimate?.realizedPnlMinor;
         final changed =
@@ -898,14 +1147,7 @@ LIMIT @limit''',
         );
       }
 
-      await _upsertFreshPrices(
-        session,
-        tx,
-        wallet.network,
-        resolved,
-        warnings,
-        now,
-      );
+      await _upsertFreshPrices(session, tx, resolved, warnings, now);
 
       final valuationDate = EntityClock.today(entity);
       await AccountValuationService.setInTransaction(
@@ -918,7 +1160,48 @@ LIMIT @limit''',
         note: 'Wallet sync',
       );
 
+      // One state row per network: a read refreshes lastReadAt and clears
+      // the error, a failure records the reason and keeps the facts
+      // (multichain-wallets.md 8.1).
       final syncedAt = DateTime.now().toUtc();
+      for (final network in readNetworks) {
+        await WalletNetworkState.db.upsertRow(
+          session,
+          WalletNetworkState(
+            walletId: wallet.id!,
+            network: network,
+            lastReadAt: syncedAt,
+            historyCursor:
+                snapshot.historyCursors[network] ?? cursorsByNetwork[network],
+            updatedAt: syncedAt,
+          ),
+          conflictColumns: (t) => [t.walletId, t.network],
+          updateColumns: (t) => [
+            t.lastReadAt,
+            t.lastError,
+            t.historyCursor,
+            t.updatedAt,
+          ],
+          transaction: tx,
+        );
+      }
+      for (final network in failedNetworks) {
+        await WalletNetworkState.db.upsertRow(
+          session,
+          WalletNetworkState(
+            walletId: wallet.id!,
+            network: network,
+            lastError: failedReasons[network],
+            updatedAt: syncedAt,
+          ),
+          conflictColumns: (t) => [t.walletId, t.network],
+          // Only the error moves: lastReadAt and the history cursor stand
+          // with the network's facts.
+          updateColumns: (t) => [t.lastError, t.updatedAt],
+          transaction: tx,
+        );
+      }
+
       final updatedWallet = await Wallet.db.updateRow(
         session,
         current.copyWith(
@@ -980,6 +1263,8 @@ LIMIT @limit''',
               : (priced + cached) / resolved.length,
           totalValueMinor: resolved.isEmpty ? null : totalValueMinor,
           valuationCurrencyCode: resolved.isEmpty ? null : _valuationCurrency,
+          readNetworks: readNetworks,
+          failedNetworks: failedNetworks,
           syncedAt: syncedAt,
           warnings: uniqueWarnings,
         ),
@@ -989,6 +1274,124 @@ LIMIT @limit''',
     });
     return outcome.result;
   }
+
+  /// Resolves one provider holding into a persisted shape: picks the price
+  /// (fresh quote first, then the stored or cached price) and computes the
+  /// value.
+  ///
+  /// A holding with no price anywhere stays unpriced; its row keeps any
+  /// previous price through the copyWith semantics of the update below.
+  static _ResolvedHolding _resolveHolding({
+    required WalletProviderHolding source,
+    required WalletHolding? existing,
+    required AssetPrice? cached,
+    required List<String> warnings,
+  }) {
+    final assetId = source.assetId.trim();
+    final choice = _choosePrice(
+      source,
+      existing: existing,
+      cached: cached,
+      warnings: warnings,
+    );
+    int? valueMinor;
+    String? unitPrice;
+    if (choice != null) {
+      final value = _valueFromChoice(
+        choice,
+        assetId,
+        source.quantityRaw,
+        source.decimals,
+      );
+      valueMinor = value.valueMinor;
+      unitPrice = value.unitPrice;
+      if (valueMinor == null) {
+        warnings.add(
+          'No supported currency exponent for $assetId; left unpriced.',
+        );
+      }
+    }
+    if (choice == null || valueMinor == null) {
+      warnings.add('Missing price for asset $assetId');
+    }
+    return _ResolvedHolding(
+      network: source.network,
+      assetId: assetId,
+      position: source.position,
+      symbol: source.symbol,
+      name: source.name,
+      tokenProgram: source.tokenProgram,
+      decimals: source.decimals,
+      quantityRaw: source.quantityRaw,
+      isNft: source.isNft,
+      metadataJson: source.metadataJson,
+      unitPrice: valueMinor == null ? null : unitPrice,
+      valueMinor: valueMinor,
+      currencyCode: valueMinor == null ? null : choice!.currencyCode,
+      source: valueMinor == null ? null : choice!.source,
+      quality: valueMinor == null ? PriceQuality.unpriced : choice!.quality,
+      confidence: valueMinor == null ? null : choice!.confidence,
+      asOf: valueMinor == null ? null : choice!.asOf,
+      freshCache:
+          choice != null &&
+          choice.quality != PriceQuality.cached &&
+          choice.source != null,
+    );
+  }
+
+  /// The value of one holding under a price choice, half up, once.
+  static ({int? valueMinor, String? unitPrice}) _valueFromChoice(
+    _PriceChoice choice,
+    String assetId,
+    BigInt quantityRaw,
+    int decimals,
+  ) {
+    var unitPrice = choice.unitPrice;
+    int? valueMinor;
+    try {
+      valueMinor = choice.totalPrice == null
+          ? WalletMath.valueMinor(
+              quantityRaw: quantityRaw,
+              decimals: decimals,
+              unitPrice: choice.exactUnitPrice!,
+              currencyCode: choice.currencyCode,
+            )
+          : WalletMath.totalValueMinor(
+              totalPrice: choice.totalPrice!,
+              currencyCode: choice.currencyCode,
+            );
+      if (unitPrice == null && choice.totalPrice != null) {
+        unitPrice = WalletMath.unitPriceFromTotal(
+          totalPrice: choice.totalPrice!,
+          quantityRaw: quantityRaw,
+          decimals: decimals,
+        );
+      }
+    } on WalletValueException catch (error) {
+      throw ValidationException(
+        message: 'Wallet value for $assetId is unsafe: ${error.message}',
+      );
+    }
+    return (valueMinor: valueMinor, unitPrice: unitPrice);
+  }
+
+  /// A stored holding, re-presented for pricing: same identity and quantity,
+  /// no fresh quote, so [_choosePrice] falls back to the stored or cached
+  /// price.
+  static WalletProviderHolding _holdingFromRow(WalletHolding row) =>
+      WalletProviderHolding(
+        network: row.network,
+        assetId: row.assetId,
+        decimals: row.decimals,
+        quantityRaw: row.quantityRaw,
+        isNft: row.isNft,
+        position: row.position,
+        symbol: row.symbol,
+        name: row.name,
+        tokenProgram: row.tokenProgram,
+        metadataJson: row.metadataJson,
+        prices: const [],
+      );
 
   static _PriceChoice? _choosePrice(
     WalletProviderHolding holding, {
@@ -1045,7 +1448,6 @@ LIMIT @limit''',
   static Future<void> _upsertFreshPrices(
     Session session,
     Transaction tx,
-    WalletNetwork network,
     List<_ResolvedHolding> holdings,
     List<String> warnings,
     DateTime now,
@@ -1062,7 +1464,7 @@ LIMIT @limit''',
       await AssetPrice.db.upsertRow(
         session,
         AssetPrice(
-          network: network,
+          network: holding.network,
           assetId: holding.assetId,
           symbol: holding.symbol,
           currencyCode: _valuationCurrency,
@@ -1085,12 +1487,21 @@ LIMIT @limit''',
     }
   }
 
+  /// Marks a failed sync on the wallet and every attempted network, keeping
+  /// the last committed facts alone.
+  ///
+  /// The stored message is user-safe by construction: a provider failure
+  /// carries its own plain-words message, anything else becomes a fixed
+  /// sentence, so no URL, key or address ever reaches the user. The full
+  /// error still goes to the log at the call site.
   static Future<void> _markFailed(
     Session session,
     UuidValue walletId,
     DateTime startedAt,
     Object error,
-  ) async {
+    List<WalletNetwork> attemptedNetworks, {
+    Map<WalletNetwork, String> reasonsByNetwork = const {},
+  }) async {
     try {
       await session.db.transaction((tx) async {
         final current = await Wallet.db.findById(
@@ -1110,18 +1521,34 @@ LIMIT @limit''',
         if (lastSyncedAt != null && lastSyncedAt.isAfter(startedAt)) {
           return;
         }
-        final message = error.toString();
+        final message = _capMessage(_userSafeFailureMessage(error));
+        final now = DateTime.now().toUtc();
         await Wallet.db.updateRow(
           session,
           current.copyWith(
             syncStatus: SyncStatus.failed,
-            lastSyncError: message.length <= 1000
-                ? message
-                : '${message.substring(0, 997)}...',
-            updatedAt: DateTime.now().toUtc(),
+            lastSyncError: message,
+            updatedAt: now,
           ),
           transaction: tx,
         );
+        for (final network in attemptedNetworks) {
+          final reason = _capMessage(
+            reasonsByNetwork[network] ?? message,
+          );
+          await WalletNetworkState.db.upsertRow(
+            session,
+            WalletNetworkState(
+              walletId: current.id!,
+              network: network,
+              lastError: reason,
+              updatedAt: now,
+            ),
+            conflictColumns: (t) => [t.walletId, t.network],
+            updateColumns: (t) => [t.lastError, t.updatedAt],
+            transaction: tx,
+          );
+        }
       });
     } on Object catch (failure) {
       _log.warning('Could not mark wallet $walletId failed: $failure');
@@ -1276,26 +1703,226 @@ LIMIT @limit''',
     }
   }
 
-  static String _requireAddress(String raw) {
-    final address = raw.trim();
-    if (!_isSolanaAddress(address)) {
-      throw ValidationException(
-        message: 'Invalid Solana wallet address.',
-      );
+  /// Validates [raw] through the core parser and returns its canonical form.
+  ///
+  /// The address must parse as [network]'s chain family. A refusal — a
+  /// private key, a recovery phrase, a testnet form — and invalid input are
+  /// rejected here, before anything is stored or sent to a provider.
+  static String _requireAddressForNetwork(String raw, WalletNetwork network) {
+    final result = WalletAddressParser.parse(raw);
+    switch (result) {
+      case WalletAddressRefused(:final refusal):
+        throw ValidationException(message: refusal.message);
+      case WalletAddressInvalid(:final hint):
+        throw ValidationException(message: hint);
+      case WalletAddressMatch(:final candidates):
+        final forFamily = candidates
+            .where((candidate) => candidate.family == network.family)
+            .toList();
+        if (forFamily.isEmpty) {
+          throw ValidationException(
+            message: "That address isn't a ${network.displayName} address.",
+          );
+        }
+        if (forFamily.length > 1) {
+          throw ValidationException(
+            message:
+                'That address form is ambiguous for ${network.displayName}; '
+                'pick one in the app.',
+          );
+        }
+        return forFamily.single.canonical;
     }
-    return address;
   }
 
-  static void _requireNetwork(WalletNetwork network) {
-    // The Solana provider is the only reader today; W1.5 replaces this gate
-    // with the core address parser and per-family providers.
-    if (network != WalletNetwork.solanaMainnet &&
-        network != WalletNetwork.solanaDevnet) {
+  /// Validates the networks one read covers.
+  ///
+  /// Only an EVM wallet scans several networks; its home is always
+  /// ethereumMainnet, so one address is one wallet, and every scanned
+  /// network belongs to the EVM family and includes the home. Every other
+  /// family reads its one network and takes no list.
+  static List<WalletNetwork>? _requireScanNetworks(
+    WalletNetwork network,
+    List<WalletNetwork>? scanNetworks,
+  ) {
+    if (network.family != ChainFamily.evm) {
+      if (scanNetworks != null) {
+        throw ValidationException(
+          message: 'Only an EVM wallet reads more than one network.',
+        );
+      }
+      return null;
+    }
+    if (network != WalletNetwork.ethereumMainnet) {
+      throw ValidationException(
+        message:
+            'An EVM wallet connects through Ethereum; its other networks '
+            'are scan networks.',
+      );
+    }
+    if (scanNetworks == null) return null;
+    final seen = <WalletNetwork>{};
+    for (final candidate in scanNetworks) {
+      if (candidate.family != ChainFamily.evm) {
+        throw ValidationException(
+          message: 'A wallet scans EVM networks only.',
+        );
+      }
+      if (!seen.add(candidate)) {
+        throw ValidationException(
+          message: 'A wallet scans each network once.',
+        );
+      }
+    }
+    if (!seen.contains(network)) {
+      throw ValidationException(
+        message: 'A wallet always reads its home network.',
+      );
+    }
+    return [...scanNetworks];
+  }
+
+  /// The wallet's chain family must have a registered reader before a wallet
+  /// row exists. A registered family whose secret is missing still connects
+  /// and fails at its first sync with the factory's setup message.
+  static void _requireReaderFor(WalletNetwork network) {
+    if (_registry.registrationFor(network.family) == null) {
       throw ValidationException(
         message: 'That network has no wallet reader yet',
       );
     }
   }
+
+  /// The networks one read covers: an EVM wallet's scanNetworks, or the
+  /// wallet's home network for every other family.
+  static List<WalletNetwork> _readNetworksFor(Wallet wallet) {
+    final scan = wallet.scanNetworks;
+    if (wallet.network.family == ChainFamily.evm &&
+        scan != null &&
+        scan.isNotEmpty) {
+      return [...scan];
+    }
+    return [wallet.network];
+  }
+
+  /// Validates a previewed address and returns its candidate, plus whether
+  /// the input was ambiguous across chain families.
+  static (WalletAddressCandidate, bool) _requirePreviewAddress(String raw) {
+    final result = WalletAddressParser.parse(raw);
+    switch (result) {
+      case WalletAddressRefused(:final refusal):
+        throw ValidationException(message: refusal.message);
+      case WalletAddressInvalid(:final hint):
+        throw ValidationException(message: hint);
+      case WalletAddressMatch(:final candidates):
+        return (candidates.first, candidates.length > 1);
+    }
+  }
+
+  /// One preview row for [network]: what the snapshot carried, or the
+  /// plain-words reason it could not be read.
+  static WalletPreviewNetwork _previewNetworkRow(
+    WalletNetwork network,
+    WalletProviderSnapshot snapshot,
+    List<String> warnings,
+  ) {
+    final reason = snapshot.failedNetworks[network];
+    if (reason != null) {
+      return WalletPreviewNetwork(
+        network: network,
+        holdingCount: 0,
+        pricedHoldingCount: 0,
+        readError: _capMessage(reason),
+      );
+    }
+    if (!snapshot.readNetworks.contains(network)) {
+      return WalletPreviewNetwork(
+        network: network,
+        holdingCount: 0,
+        pricedHoldingCount: 0,
+        readError: '${network.displayName} could not be read.',
+      );
+    }
+    var holdingCount = 0;
+    var pricedHoldingCount = 0;
+    var total = BigInt.zero;
+    for (final holding in snapshot.holdings) {
+      if (holding.network != network) continue;
+      holdingCount += 1;
+      final value = _previewHoldingValue(holding, warnings);
+      if (value == null) continue;
+      pricedHoldingCount += 1;
+      total += BigInt.from(value);
+    }
+    return WalletPreviewNetwork(
+      network: network,
+      holdingCount: holdingCount,
+      pricedHoldingCount: pricedHoldingCount,
+      valueMinor: pricedHoldingCount == 0
+          ? null
+          : _safeMinor(total, 'preview value'),
+      valueCurrencyCode: pricedHoldingCount == 0 ? null : _valuationCurrency,
+    );
+  }
+
+  /// The first usable USD price of one previewed holding, as minor units.
+  static int? _previewHoldingValue(
+    WalletProviderHolding holding,
+    List<String> warnings,
+  ) {
+    for (final candidate in holding.prices) {
+      if (candidate.currencyCode.toUpperCase() != _valuationCurrency) continue;
+      final unit = candidate.unitPrice;
+      final total = candidate.totalPrice;
+      if ((unit == null && total == null) ||
+          (unit != null && unit.numerator <= BigInt.zero) ||
+          (total != null && total.numerator <= BigInt.zero)) {
+        continue;
+      }
+      try {
+        return total != null
+            ? WalletMath.totalValueMinor(
+                totalPrice: total,
+                currencyCode: _valuationCurrency,
+              )
+            : WalletMath.valueMinor(
+                quantityRaw: holding.quantityRaw,
+                decimals: holding.decimals,
+                unitPrice: unit!,
+                currencyCode: _valuationCurrency,
+              );
+      } on WalletValueException catch (error) {
+        warnings.add(
+          'Wallet value for ${holding.assetId} is unsafe: ${error.message}',
+        );
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /// One plain-words line for a read where every network failed, from the
+  /// provider's per-network reasons.
+  static String _combinedFailureMessage(
+    List<WalletNetwork> networks,
+    Map<WalletNetwork, String> failedNetworks,
+  ) => _capMessage(
+    [
+      for (final network in networks)
+        failedNetworks[network] ?? '${network.displayName} could not be read.',
+    ].join(' '),
+  );
+
+  /// The message stored on a failed sync. Provider failures carry their own
+  /// plain-words message; anything else becomes a fixed sentence, so no URL,
+  /// key or address ever reaches the user.
+  static String _userSafeFailureMessage(Object error) {
+    if (error is WalletProviderException) return error.message;
+    return 'The wallet could not be synced. Your saved figures are unchanged.';
+  }
+
+  static String _capMessage(String message) =>
+      message.length <= 1000 ? message : '${message.substring(0, 997)}...';
 
   static Entity _requireWritable(Entity entity) {
     if (entity.archivedAt != null) {
@@ -1365,29 +1992,6 @@ LIMIT @limit''',
     return '${value.substring(0, 4)}...${value.substring(value.length - 4)}';
   }
 
-  static bool _isSolanaAddress(String value) {
-    if (value.length < 32 || value.length > 44) return false;
-    const alphabet =
-        '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-    var number = BigInt.zero;
-    final base = BigInt.from(58);
-    for (final unit in value.codeUnits) {
-      final digit = alphabet.indexOf(String.fromCharCode(unit));
-      if (digit < 0) return false;
-      number = number * base + BigInt.from(digit);
-    }
-    var leadingZeros = 0;
-    while (leadingZeros < value.length && value[leadingZeros] == '1') {
-      leadingZeros += 1;
-    }
-    var byteLength = 0;
-    while (number > BigInt.zero) {
-      byteLength += 1;
-      number >>= 8;
-    }
-    return leadingZeros + byteLength == 32;
-  }
-
   /// Resolves the wallet's provider through the registry.
   ///
   /// A family without a registered provider has no reader yet; a registered
@@ -1397,9 +2001,7 @@ LIMIT @limit''',
     Session session,
     WalletNetwork network,
   ) {
-    final registration = WalletProviderRegistry.defaultRegistry.registrationFor(
-      network.family,
-    );
+    final registration = _registry.registrationFor(network.family);
     if (registration == null) {
       throw WalletProviderException(
         'No wallet reader is registered for ${network.name} yet.',
@@ -1411,7 +2013,9 @@ LIMIT @limit''',
 
 final class _ResolvedHolding {
   const _ResolvedHolding({
+    required this.network,
     required this.assetId,
+    required this.position,
     required this.symbol,
     required this.name,
     required this.tokenProgram,
@@ -1429,7 +2033,9 @@ final class _ResolvedHolding {
     required this.freshCache,
   });
 
+  final WalletNetwork network;
   final String assetId;
+  final HoldingPosition position;
   final String? symbol;
   final String? name;
   final String? tokenProgram;
@@ -1476,6 +2082,51 @@ final class _TaxBucket {
   BigInt costBasis = BigInt.zero;
 }
 
+/// A fixed-window, in-memory limit on wallet previews: 20 per hour per user.
+///
+/// Each user gets their own window, so one busy client cannot lock out
+/// another. The window resets after it opens; a server restart forgets it,
+/// matching the MCP rate limiter's trade-off.
+final class _PreviewRateLimiter {
+  _PreviewRateLimiter({DateTime Function()? clock})
+    : _clock = clock ?? DateTime.now;
+
+  static const _limit = 20;
+  static const _window = Duration(hours: 1);
+
+  final DateTime Function() _clock;
+  final Map<UuidValue, ({DateTime openedAt, int count})> _windows = {};
+
+  /// Returns true when [userId] may read another preview now.
+  bool allow(UuidValue userId) {
+    final now = _clock();
+    final current = _windows[userId];
+    if (current == null || now.difference(current.openedAt) >= _window) {
+      _windows[userId] = (openedAt: now, count: 1);
+      return true;
+    }
+    if (current.count >= _limit) return false;
+    _windows[userId] = (openedAt: current.openedAt, count: current.count + 1);
+    return true;
+  }
+
+  /// Forgets every window.
+  void reset() => _windows.clear();
+}
+
 final class _SyncConflict implements Exception {
   const _SyncConflict();
+}
+
+/// A read where the provider answered but no network could be read. It
+/// carries each network's own plain-words reason for the network state rows
+/// and one combined line for the wallet.
+final class _AllNetworksFailed implements Exception {
+  const _AllNetworksFailed(this.message, this.reasonsByNetwork);
+
+  final String message;
+  final Map<WalletNetwork, String> reasonsByNetwork;
+
+  @override
+  String toString() => message;
 }
