@@ -14,22 +14,46 @@ void main() {
       expect(defaultTimeZone('gb'), 'Europe/London');
     });
 
-    test('falls back to UTC for other countries', () {
-      expect(defaultTimeZone('FR'), 'UTC');
+    test('defaults every known country to its own zone', () {
+      expect(defaultTimeZone('FR'), 'Europe/Paris');
+      expect(defaultTimeZone('BR'), 'America/Sao_Paulo');
+      expect(defaultTimeZone('IN'), 'Asia/Kolkata');
+    });
+
+    test('falls back to UTC for unknown codes', () {
+      expect(defaultTimeZone('ZZ'), 'UTC');
       expect(defaultTimeZone(''), 'UTC');
     });
   });
 
   group('timeZoneChoices', () {
-    test('offers the US zones with the default first', () {
-      final choices = timeZoneChoices('US');
-      expect(choices.first, 'America/New_York');
-      expect(choices, contains('America/Los_Angeles'));
-      expect(choices.length, greaterThan(1));
+    test('offers the hand-kept US zones with the default first', () {
+      expect(timeZoneChoices('US'), [
+        'America/New_York',
+        'America/Chicago',
+        'America/Denver',
+        'America/Phoenix',
+        'America/Los_Angeles',
+        'America/Anchorage',
+        'Pacific/Honolulu',
+      ]);
     });
 
     test('single-zone countries list one choice', () {
       expect(timeZoneChoices('GB'), ['Europe/London']);
+      expect(timeZoneChoices('NG'), ['Africa/Lagos']);
+    });
+
+    test('Germany hides its Büsingen enclave zone', () {
+      expect(timeZoneChoices('DE'), ['Europe/Berlin']);
+    });
+
+    test('multi-zone countries put the hand-kept default first', () {
+      expect(timeZoneChoices('RU').first, 'Europe/Moscow');
+      expect(timeZoneChoices('CA').first, 'America/Toronto');
+    });
+
+    test('unknown codes get the single UTC fallback', () {
       expect(timeZoneChoices('XX'), ['UTC']);
     });
   });

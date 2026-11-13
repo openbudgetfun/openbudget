@@ -1,0 +1,38 @@
+{
+  "code": "TG",
+  "name": "Togo",
+  "servable": true,
+  "currencies": [
+    "XOF"
+  ],
+  "timeZones": [
+    "Africa/Lome"
+  ],
+  "individualTaxYear": null,
+  "companyYearEndDefault": null,
+  "indirectTax": null,
+  "authority": null,
+  "sources": [
+    {
+      "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
+      "url": "https://raw.githubusercontent.com/eggert/tz/2026f/iso3166.tab",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "IANA Time Zone Database 2026f: zone.tab (country time zones)",
+      "url": "https://raw.githubusercontent.com/eggert/tz/2026f/zone.tab",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    }
+  ],
+  "verifiedOn": null,
+  "recheckBy": null,
+  "caveats": []
+}
