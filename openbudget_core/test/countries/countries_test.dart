@@ -95,6 +95,162 @@ void main() {
     });
   });
 
+  group('rate precision', () {
+    /// Rates are exact integers in millionths, so no caveat needs to excuse a
+    /// rounded value any more (the schema used to store whole basis points).
+    final roundingWords = RegExp(
+      r'\bround(ed|ing|s)?\b|basis point|hundredth',
+      caseSensitive: false,
+    );
+
+    test('no caveat anywhere mentions rounding', () {
+      for (final country in dataset.values) {
+        for (final caveat in country.caveats) {
+          expect(
+            roundingWords.hasMatch(caveat),
+            isFalse,
+            reason: '${country.code} still excuses a rounded rate: $caveat',
+          );
+        }
+      }
+    });
+
+    test('the fractional rates are stored exactly, not rounded', () {
+      final expected = <String, int>{
+        // Revenu Québec: QST 9.975% since 1 January 2013.
+        'CA-QC qst 2013-01-01': 99750,
+        // Tax Foundation state base rates.
+        'US-MN standard 2022-01-01': 68750, // 6.875%
+        'US-MO standard 2022-01-01': 42250, // 4.225%
+        'US-NJ standard 2022-01-01': 66250, // 6.625%
+        'US-NM standard 2022-01-01': 51250, // 5.125%
+        'US-NM standard 2023-07-01': 48750, // 4.875%
+      };
+      final found = <String, int>{};
+      for (final country in dataset.values) {
+        final indirect = country.indirectTax;
+        if (indirect == null) {
+          continue;
+        }
+        for (final subdivision in indirect.subdivisions) {
+          for (final rate in subdivision.rates) {
+            found['${subdivision.code} ${rate.label} ${_day(rate.from)}'] =
+                rate.ratePerMillion;
+          }
+        }
+      }
+      for (final entry in expected.entries) {
+        expect(
+          found[entry.key],
+          entry.value,
+          reason:
+              '${entry.key} must be ${entry.value} per million exactly, not '
+              'a rounded value',
+        );
+      }
+    });
+  });
+
+  group('schema strictness', () {
+    /// A minimal file that satisfies the schema, for mutation in tests.
+    Map<String, Object?> validCountryJson() => {
+      'code': 'ZZ',
+      'name': 'Example Republic',
+      'servable': true,
+      'currencies': ['XXC'],
+      'timeZones': ['Region/City'],
+      'individualTaxYear': {
+        'startMonth': 1,
+        'startDay': 1,
+        'calendar': 'gregorian',
+      },
+      'companyYearEndDefault': {'month': 12, 'day': 31},
+      'indirectTax': {
+        'kind': 'vat',
+        'localName': 'Value Added Tax',
+        'rates': [
+          {
+            'label': 'standard',
+            'ratePerMillion': 160000,
+            'from': '2020-01-01',
+            'to': null,
+            'appliesTo': null,
+            'source': 0,
+          },
+        ],
+        'registration_threshold': null,
+        'returnFrequency': 'monthly',
+        'subdivisions': <Object?>[],
+      },
+      'authority': {
+        'name': 'Example Revenue Authority',
+        'url': 'https://revenue.example',
+      },
+      'sources': [
+        {
+          'title': 'VAT Act, section 5',
+          'url': 'https://revenue.example/vat-act',
+          'grade': 'primary',
+          'retrievedOn': '2026-11-20',
+        },
+      ],
+      'verifiedOn': '2026-11-20',
+      'recheckBy': '2027-07-01',
+      'caveats': <Object?>[],
+    };
+
+    test('rejects a caveat listed twice, naming the country', () {
+      final json = validCountryJson()
+        ..['caveats'] = <Object?>['Q1 placeholder', 'Q1 placeholder'];
+      expect(
+        () => CountryInfo.fromJson(json),
+        throwsA(
+          isA<ArgumentError>().having(
+            (error) => error.message,
+            'message',
+            allOf(contains('ZZ'), contains('caveat')),
+          ),
+        ),
+      );
+    });
+
+    test('rejects a source listed twice, naming the country', () {
+      final json = validCountryJson();
+      (json['sources']! as List<Object?>).add({
+        'title': 'VAT Act, section 5',
+        'url': 'https://revenue.example/vat-act',
+        'grade': 'primary',
+        'retrievedOn': '2026-11-20',
+      });
+      expect(
+        () => CountryInfo.fromJson(json),
+        throwsA(
+          isA<ArgumentError>().having(
+            (error) => error.message,
+            'message',
+            allOf(contains('ZZ'), contains('source')),
+          ),
+        ),
+      );
+    });
+
+    test('rejects an unknown tax-year calendar, naming the country', () {
+      final json = validCountryJson();
+      (json['individualTaxYear']! as Map<String, Object?>)['calendar'] =
+          'julian';
+      expect(
+        () => CountryInfo.fromJson(json),
+        throwsA(
+          isA<ArgumentError>().having(
+            (error) => error.message,
+            'message',
+            allOf(contains('ZZ'), contains('calendar'), contains('julian')),
+          ),
+        ),
+      );
+    });
+  });
+
   group('hand-kept time-zone defaults', () {
     final overrides =
         (jsonDecode(timezoneDefaults.readAsStringSync())
@@ -204,7 +360,7 @@ void main() {
       expect(gb.individualTaxYear!.startDay, 6);
       expect(gb.companyYearEndDefault, (month: 3, day: 31));
       expect(gb.indirectTax!.kind, IndirectTaxKind.vat);
-      expect(gb.indirectTax!.rates.first.basisPoints, 2000);
+      expect(gb.indirectTax!.rates.first.ratePerMillion, 200000);
       expect(gb.authority!.name, 'HM Revenue & Customs (HMRC)');
 
       expect(Countries.byCode('US')!.currencies, ['USD']);
@@ -232,6 +388,12 @@ Map<String, String> _parseIso3166Tab(String text) => {
     if (line.isNotEmpty && !line.startsWith('#'))
       line.split('\t')[0]: line.split('\t')[1],
 };
+
+/// The YYYY-MM-DD spelling used in `data/countries/<CC>.json`.
+String _day(DateTime date) =>
+    '${date.year.toString().padLeft(4, '0')}-'
+    '${date.month.toString().padLeft(2, '0')}-'
+    '${date.day.toString().padLeft(2, '0')}';
 
 /// `code → zones in file order`, from `zone.tab`.
 Map<String, List<String>> _parseZoneTab(String text) {

@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1500,
+        "ratePerMillion": 150000,
         "from": "2022-01-01",
         "to": "2024-01-01",
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1700,
+        "ratePerMillion": 170000,
         "from": "2024-01-01",
         "to": null,
         "appliesTo": null,
@@ -39,7 +39,7 @@
       },
       {
         "label": "hotel",
-        "basisPoints": 1400,
+        "ratePerMillion": 140000,
         "from": "2022-01-01",
         "to": "2024-01-01",
         "appliesTo": "hotel and holiday accommodation",

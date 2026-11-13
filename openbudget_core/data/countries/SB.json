@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1000,
+        "ratePerMillion": 100000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "sales tax on the scheduled services and goods tax on locally manufactured goods",
@@ -31,7 +31,7 @@
       },
       {
         "label": "goodsImport",
-        "basisPoints": 1500,
+        "ratePerMillion": 150000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "goods tax on imported goods (collected at the port)",

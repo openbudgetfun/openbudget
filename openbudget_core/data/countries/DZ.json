@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1900,
+        "ratePerMillion": 190000,
         "from": "2017-01-01",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 900,
+        "ratePerMillion": 90000,
         "from": "2017-01-01",
         "to": null,
         "appliesTo": "essential goods",

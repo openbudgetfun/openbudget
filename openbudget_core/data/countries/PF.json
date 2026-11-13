@@ -25,7 +25,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1600,
+        "ratePerMillion": 160000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
@@ -33,7 +33,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 1300,
+        "ratePerMillion": 130000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "services",
@@ -41,7 +41,7 @@
       },
       {
         "label": "reduced2",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "various services and imports",

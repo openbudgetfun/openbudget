@@ -24,7 +24,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1200,
+        "ratePerMillion": 120000,
         "from": "2022-01-01",
         "to": "2024-04-01",
         "appliesTo": null,
@@ -32,7 +32,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1500,
+        "ratePerMillion": 150000,
         "from": "2024-04-01",
         "to": null,
         "appliesTo": null,
@@ -40,7 +40,7 @@
       },
       {
         "label": "zero",
-        "basisPoints": 0,
+        "ratePerMillion": 0,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "basic basket goods and other zero-rated supplies",

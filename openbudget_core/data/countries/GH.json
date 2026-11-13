@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1250,
+        "ratePerMillion": 125000,
         "from": "2018-08-01",
         "to": "2023-01-01",
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1500,
+        "ratePerMillion": 150000,
         "from": "2023-01-01",
         "to": null,
         "appliesTo": null,
@@ -39,7 +39,7 @@
       },
       {
         "label": "nhil",
-        "basisPoints": 250,
+        "ratePerMillion": 25000,
         "from": "2018-08-01",
         "to": null,
         "appliesTo": null,
@@ -47,7 +47,7 @@
       },
       {
         "label": "getfund",
-        "basisPoints": 250,
+        "ratePerMillion": 25000,
         "from": "2018-08-01",
         "to": "2023-01-01",
         "appliesTo": null,
@@ -55,7 +55,7 @@
       },
       {
         "label": "getfund",
-        "basisPoints": 350,
+        "ratePerMillion": 35000,
         "from": "2023-01-01",
         "to": "2026-01-01",
         "appliesTo": null,
@@ -63,7 +63,7 @@
       },
       {
         "label": "getfund",
-        "basisPoints": 250,
+        "ratePerMillion": 25000,
         "from": "2026-01-01",
         "to": null,
         "appliesTo": null,
@@ -71,7 +71,7 @@
       },
       {
         "label": "covidLevy",
-        "basisPoints": 100,
+        "ratePerMillion": 10000,
         "from": "2021-05-01",
         "to": "2026-01-01",
         "appliesTo": "COVID-19 Health Recovery Levy, abolished from 1 January 2026",

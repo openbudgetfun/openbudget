@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 850,
+        "ratePerMillion": 85000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 210,
+        "ratePerMillion": 21000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "basic products",
@@ -39,7 +39,7 @@
       },
       {
         "label": "reduced2",
-        "basisPoints": 105,
+        "ratePerMillion": 10500,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "newspapers",

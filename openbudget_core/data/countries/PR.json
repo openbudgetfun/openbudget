@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1150,
+        "ratePerMillion": 115000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "10.5% commonwealth rate plus 1% municipal rate",

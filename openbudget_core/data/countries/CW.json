@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 600,
+        "ratePerMillion": 60000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "higher",
-        "basisPoints": 700,
+        "ratePerMillion": 70000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "hotels and insurance",
@@ -39,7 +39,7 @@
       },
       {
         "label": "higher2",
-        "basisPoints": 900,
+        "ratePerMillion": 90000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "luxuries, motor vehicles, alcohol and tobacco",

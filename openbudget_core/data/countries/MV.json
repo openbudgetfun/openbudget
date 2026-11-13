@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 600,
+        "ratePerMillion": 60000,
         "from": "2022-01-01",
         "to": "2023-01-01",
         "appliesTo": "general sector supplies (tourism sector supplies carry the tourism rate)",
@@ -31,7 +31,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 800,
+        "ratePerMillion": 80000,
         "from": "2023-01-01",
         "to": null,
         "appliesTo": "general sector supplies (tourism sector supplies carry the tourism rate)",
@@ -39,7 +39,7 @@
       },
       {
         "label": "tourism",
-        "basisPoints": 1200,
+        "ratePerMillion": 120000,
         "from": "2022-01-01",
         "to": "2023-01-01",
         "appliesTo": null,
@@ -47,7 +47,7 @@
       },
       {
         "label": "tourism",
-        "basisPoints": 1600,
+        "ratePerMillion": 160000,
         "from": "2023-01-01",
         "to": "2025-07-01",
         "appliesTo": null,
@@ -55,7 +55,7 @@
       },
       {
         "label": "tourism",
-        "basisPoints": 1700,
+        "ratePerMillion": 170000,
         "from": "2025-07-01",
         "to": null,
         "appliesTo": null,

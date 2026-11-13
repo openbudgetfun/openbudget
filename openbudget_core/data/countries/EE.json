@@ -23,51 +23,51 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 2000,
+        "ratePerMillion": 200000,
         "from": "2022-01-01",
         "to": "2024-01-01",
         "appliesTo": null,
-        "source": 7
+        "source": 5
       },
       {
         "label": "standard",
-        "basisPoints": 2200,
+        "ratePerMillion": 220000,
         "from": "2024-01-01",
         "to": "2025-07-01",
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "standard",
-        "basisPoints": 2400,
+        "ratePerMillion": 240000,
         "from": "2025-07-01",
         "to": null,
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "reduced",
-        "basisPoints": 900,
+        "ratePerMillion": 90000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 7
+        "source": 5
       },
       {
         "label": "reduced2",
-        "basisPoints": 1300,
+        "ratePerMillion": 130000,
         "from": "2025-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "reduced3",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2024-01-01",
         "to": "2025-01-01",
         "appliesTo": "press publications",
-        "source": 6
+        "source": 4
       }
     ],
     "registrationThreshold": null,
@@ -95,18 +95,6 @@
       "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-      "grade": "primary",
       "retrievedOn": "2026-11-13"
     },
     {

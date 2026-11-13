@@ -490,7 +490,7 @@ For every ISO 3166-1 country:
 
 - English name, `servable` flag, currencies (the first is the default), time zones (the first is the default);
 - the individual tax year (start month and day, and the calendar it follows) and the default company year end;
-- indirect tax: kind (`vat`, `gst`, `salesTax`, `consumptionTax`, `none`), local name, rates with labels and effective dates, the registration threshold when known, the default return frequency, and optional subdivision rates;
+- indirect tax: kind (`vat`, `gst`, `salesTax`, `consumptionTax`, `none`), local name, exact rates with labels and effective dates, the registration threshold when known, the default return frequency, and optional subdivision rates;
 - the tax authority's name and URL;
 - sources, grades, `verifiedOn`, `recheckBy` and caveats.
 
@@ -538,13 +538,13 @@ Illustrative values, not research:
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1600,
+        "ratePerMillion": 160000,
         "from": "2020-01-01",
         "source": 0
       },
       {
         "label": "reduced",
-        "basisPoints": 800,
+        "ratePerMillion": 80000,
         "from": "2020-01-01",
         "appliesTo": "food and medicines",
         "source": 0
@@ -583,7 +583,8 @@ Illustrative values, not research:
 }
 ```
 
-- `calendar` is `gregorian` for almost every country. Some countries' tax years follow another calendar (Iran, Nepal, Ethiopia, Afghanistan). For those it names the calendar, and the entity's Gregorian `fiscalYearEnd` is the nearest approximation, with a caveat on screen. None of the 20 needs this.
+- `calendar` is a CLDR calendar identifier (`gregorian` for almost every country; `persian`, `ethiopic`, `islamic`, `islamic-umalqura`, and so on), and the schema rejects unknown values. Nepal's Bikram Sambat has no CLDR identifier, so it is spelled `bikram-sambat`. Some countries' tax years follow another calendar (Iran, Nepal, Ethiopia, Afghanistan). For those the entity's Gregorian `fiscalYearEnd` is the nearest approximation, with a caveat on screen. None of the 20 needs this.
+- `ratePerMillion` is the exact rate as an integer in millionths of the taxed amount: 1% is `10000`, so fractional rates such as Québec's 9.975% QST (`99750`) or Minnesota's 6.875% sales tax (`68750`) are never rounded. A source and grade back every rate, and a source appears in `sources` once only — the parser rejects a repeated caveat or source and fails the generator and CI.
 - `subdivisions` carries ISO 3166-2 codes with their own rates: US state sales-tax base rates, Canadian provincial GST/HST/PST, Indian state codes where they matter. Local rates (US counties and cities) are out: the user enters the rate on the receipt.
 - `CurrencyCode` grows from 27 values to every active ISO 4217 currency, generated from `iso4217.json`. BTC stays. The FX provider (currencyapi.com) prices most of them. A currency it does not price works as a base currency, and cross-currency writes ask for a manual rate through the existing `FxRateUnavailableException` path.
 
