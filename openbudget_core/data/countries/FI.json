@@ -8,10 +8,68 @@
   "timeZones": [
     "Europe/Helsinki"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "ALV (VAT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2400,
+        "from": "2022-01-01",
+        "to": "2024-09-01",
+        "appliesTo": null,
+        "source": 9
+      },
+      {
+        "label": "standard",
+        "basisPoints": 2550,
+        "from": "2024-09-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 1400,
+        "from": "2022-01-01",
+        "to": "2026-01-01",
+        "appliesTo": null,
+        "source": 9
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 1350,
+        "from": "2026-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      },
+      {
+        "label": "reduced2",
+        "basisPoints": 1000,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "second reduced rate (e.g. medicines, passenger transport, accommodation, books)",
+        "source": 9
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Finnish Tax Administration (Vero)",
+    "url": "https://www.vero.fi"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +88,57 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Finnish Tax Administration: Rates of VAT (vero.fi)",
+      "url": "https://www.vero.fi/en/businesses-and-corporations/taxes-and-charges/vat/rates-of-vat/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Finnish Tax Administration: Rates of VAT (vero.fi)",
+      "url": "https://www.vero.fi/en/businesses-and-corporations/taxes-and-charges/vat/rates-of-vat/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Finnish Tax Administration: Rates of VAT (vero.fi)",
+      "url": "https://www.vero.fi/en/businesses-and-corporations/taxes-and-charges/vat/rates-of-vat/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: 2022 VAT Rates in Europe (table as of January 2022, sourced from the European Commission's Taxes in Europe Database)",
+      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-2022-vat-rates-in-europe/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Rates and effective dates confirmed on vero.fi: the general rate rose from 24% to 25.5% on 1 September 2024 and the reduced rate from 14% to 13.5% on 1 January 2026.",
+    "The superseded 24% standard and 14% reduced rows are lower bounds (confirmed applying on 1 January 2022); vero.fi confirms their end dates - 24% to 25.5% on 1 September 2024 and 14% to 13.5% on 1 January 2026 - but not when those rates began.",
+    "Lower-bound rows - reduced2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed applying on 1 January 2022 by the Tax Foundation's January 2022 table of VAT rates (sourced from the Commission's Taxes in Europe Database))."
+  ]
 }

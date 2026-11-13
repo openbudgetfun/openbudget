@@ -8,10 +8,52 @@
   "timeZones": [
     "Europe/London"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 4,
+    "startDay": 6,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 3,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2000,
+        "from": "2011-01-04",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 500,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 9
+      },
+      {
+        "label": "zero",
+        "basisPoints": 0,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "zero-rated goods and services, e.g. most food and children's clothes",
+        "source": 9
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "HM Revenue & Customs (HMRC)",
+    "url": "https://www.gov.uk/government/organisations/hm-revenue-customs"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +72,56 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "HM Revenue & Customs: VAT rates (gov.uk)",
+      "url": "https://www.gov.uk/vat-rates",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "HM Revenue & Customs: Income Tax rates (gov.uk, 'the current tax year is from 6 April 2026 to 5 April 2027')",
+      "url": "https://www.gov.uk/income-tax-rates",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "HM Revenue & Customs: VAT rates (gov.uk)",
+      "url": "https://www.gov.uk/vat-rates",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "HM Revenue & Customs: Income Tax rates (gov.uk, 'the current tax year is from 6 April 2026 to 5 April 2027')",
+      "url": "https://www.gov.uk/income-tax-rates",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "HM Revenue & Customs: VAT rates (gov.uk)",
+      "url": "https://www.gov.uk/vat-rates",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "HM Revenue & Customs: Income Tax rates (gov.uk, 'the current tax year is from 6 April 2026 to 5 April 2027')",
+      "url": "https://www.gov.uk/income-tax-rates",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: 2022 VAT Rates in Europe (table as of January 2022, sourced from the European Commission's Taxes in Europe Database)",
+      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-2022-vat-rates-in-europe/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Rates primary from gov.uk: the standard rate rose to 20% on 4 January 2011 (from 17.5%); the 5% reduced and 0% zero rates are current as retrieved 2026-11-13.",
+    "individualTaxYear runs 6 April to 5 April, primary from gov.uk ('the current tax year is from 6 April 2026 to 5 April 2027').",
+    "companyYearEndDefault is 31 March (grade I): it preserves the app's existing GB default, aligned to the UK tax year; Companies House otherwise defaults to the incorporation anniversary.",
+    "Lower-bound rows - reduced (2022-01-01), zero (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed applying on 1 January 2022 by the Tax Foundation's January 2022 table of VAT rates (sourced from the Commission's Taxes in Europe Database))."
+  ]
 }
