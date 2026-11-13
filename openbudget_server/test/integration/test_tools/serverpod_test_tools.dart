@@ -135,6 +135,8 @@ import 'package:openbudget_server/src/generated/transactions/transaction_view.da
     as _iw07wj0h;
 import 'package:openbudget_server/src/generated/transactions/transfer_input.dart'
     as _i7e3qnpf;
+import 'package:openbudget_server/src/generated/wallets/spam_verdict.dart'
+    as _i2db4e6h;
 import 'package:openbudget_server/src/generated/wallets/wallet.dart'
     as _igcr1vxe;
 import 'package:openbudget_server/src/generated/wallets/wallet_holding.dart'
@@ -5926,6 +5928,39 @@ class _WalletEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _ida.Future<List<_icu5m6lt.WalletHolding>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_icu5m6lt.WalletHolding> setHoldingVerdict(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue walletHoldingId,
+    _i2db4e6h.SpamVerdict? verdict,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'wallet',
+            method: 'setHoldingVerdict',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'wallet',
+          methodName: 'setHoldingVerdict',
+          parameters: _ist.testObjectToJson({
+            'walletHoldingId': walletHoldingId,
+            'verdict': verdict,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_icu5m6lt.WalletHolding>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

@@ -184,7 +184,7 @@ final class _TransactionProbeProvider implements WalletProvider {
               source: PriceSource.jupiter,
               quality: PriceQuality.live,
               confidence: Confidence.high,
-              asOf: DateTime.utc(2026),
+              asOf: DateTime.now().toUtc(),
               unitPrice: ExactDecimal.tryParse('150'),
             ),
           ],
