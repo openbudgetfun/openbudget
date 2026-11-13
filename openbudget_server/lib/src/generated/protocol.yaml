@@ -141,6 +141,7 @@ recurringTransaction:
 report:
   - netWorth:
   - netWorthHistory:
+  - cryptoBreakdown:
   - spending:
   - monthSummaries:
   - ageOfMoney:
