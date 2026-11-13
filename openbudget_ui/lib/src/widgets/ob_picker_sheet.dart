@@ -51,7 +51,7 @@ const int obPickerSearchThreshold = 8;
 /// and keywords.
 ///
 /// Searching ignores case, accents and apostrophes, and ranks an exact code
-/// first, then names that start with the query, then names with a word that
+/// or keyword first, then names that start with the query, then names with a word that
 /// starts with it, then the rest. Enter picks the top result; the down arrow
 /// moves from the field into the list. Sheets of [searchThreshold] options or
 /// fewer skip the search field. [selected] gets the highlighter, a check and
@@ -392,7 +392,9 @@ List<_Folded<T>> _search<T>(List<_Folded<T>> all, String query) {
 }
 
 int? _rank<T>(_Folded<T> item, String needle) {
-  if (item.code == needle) {
+  // An exact code or keyword is what the person means: "uk" is the United
+  // Kingdom before it is the start of "Ukraine".
+  if (item.code == needle || item.keywords.contains(needle)) {
     return 0;
   }
   if (item.label.startsWith(needle)) {

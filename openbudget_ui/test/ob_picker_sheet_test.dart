@@ -143,6 +143,36 @@ void main() {
       expect(_rowLabels(tester).first, 'Kenya');
     });
 
+    testWidgets('an exact keyword ranks before names that start with it', (
+      tester,
+    ) async {
+      await _Harness().pump(
+        tester,
+        options: const [
+          ObPickerOption(value: 'UA', label: 'Ukraine', code: 'UA'),
+          ObPickerOption(
+            value: 'GB',
+            label: 'United Kingdom',
+            code: 'GB',
+            keywords: ['UK'],
+          ),
+          ObPickerOption(value: 'US', label: 'United States', code: 'US'),
+          ObPickerOption(value: 'KE', label: 'Kenya', code: 'KE'),
+          ObPickerOption(value: 'TR', label: 'Türkiye', code: 'TR'),
+          ObPickerOption(value: 'AU', label: 'Australia', code: 'AU'),
+          ObPickerOption(value: 'KW', label: 'Kuwait', code: 'KW'),
+          ObPickerOption(value: 'IE', label: 'Ireland', code: 'IE'),
+          ObPickerOption(value: 'NG', label: 'Nigeria', code: 'NG'),
+        ],
+      );
+      await tester.enterText(find.byType(TextField), 'uk');
+      await tester.pumpAndSettle();
+
+      final uk = tester.getTopLeft(find.text('United Kingdom')).dy;
+      final ukraine = tester.getTopLeft(find.text('Ukraine')).dy;
+      expect(uk, lessThan(ukraine));
+    });
+
     testWidgets('ignores accents and apostrophes', (tester) async {
       await _Harness().pump(tester);
 
