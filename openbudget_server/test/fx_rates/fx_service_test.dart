@@ -36,8 +36,8 @@ class _FakeFxProviderClient implements FxRateProviderClient {
   Future<FxProviderResult> fetchLatest({
     required String apiKey,
     required String baseCurrencyCode,
-    required List<String> currencies,
     required String baseUrl,
+    List<String>? currencies,
   }) async {
     latestCalls += 1;
     final builder = latest;
@@ -51,9 +51,9 @@ class _FakeFxProviderClient implements FxRateProviderClient {
   Future<FxProviderResult> fetchHistorical({
     required String apiKey,
     required String baseCurrencyCode,
-    required List<String> currencies,
     required DateTime date,
     required String baseUrl,
+    List<String>? currencies,
   }) async {
     historicalCalls.add(date);
     final error = historicalError;
