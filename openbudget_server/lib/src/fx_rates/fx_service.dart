@@ -123,6 +123,8 @@ class FxService {
 
   /// Fetches the provider's latest rates and upserts today's daily rows.
   ///
+  /// No currency filter is sent: currencyapi answers with every currency it
+  /// prices, and a filter naming one it does not list fails the whole request.
   /// A provider failure is surfaced unchanged. An individual malformed rate is
   /// skipped and never stored as zero.
   static Future<FxLatestSnapshot> refreshNow(Session session) async {
@@ -131,7 +133,6 @@ class FxService {
     final result = await _providerClient.fetchLatest(
       apiKey: apiKey,
       baseCurrencyCode: baseCurrencyCode,
-      currencies: CurrencyCode.values.map((currency) => currency.code).toList(),
       baseUrl: _resolveBaseUrl(session),
     );
 
@@ -160,7 +161,6 @@ class FxService {
     final result = await _providerClient.fetchHistorical(
       apiKey: apiKey,
       baseCurrencyCode: baseCurrencyCode,
-      currencies: CurrencyCode.values.map((currency) => currency.code).toList(),
       date: date,
       baseUrl: _resolveBaseUrl(session),
     );
