@@ -111,7 +111,7 @@ class LedgerEndpoint extends Endpoint {
     cursor: cursor,
   );
 
-  /// Lists one journal's lines, oldest first.
+  /// Lists one journal's lines in entry order (the stored lineNumber).
   Future<List<JournalLine>> listJournalLines(
     Session session,
     UuidValue journalId,
