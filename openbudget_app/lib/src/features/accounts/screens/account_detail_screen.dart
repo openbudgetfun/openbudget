@@ -9,6 +9,7 @@ import 'package:openbudget_app/src/features/accounts/providers/account_actions_p
 import 'package:openbudget_app/src/features/accounts/providers/account_detail_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/wallet_provider.dart';
+import 'package:openbudget_app/src/features/accounts/widgets/wallet_holdings_section.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
@@ -197,7 +198,7 @@ class AccountDetailScreen extends HookConsumerWidget {
                   ),
                 ] else ...[
                   if (walletId != null) ...[
-                    _WalletHoldingsSection(
+                    WalletHoldingsSection(
                       walletId: walletId,
                       fallbackCurrencyCode: currencyCode,
                     ),
@@ -579,131 +580,6 @@ class _ValuationChange extends HookWidget {
   }
 }
 
-/// One wallet holding: name, symbol and quantity in the asset's decimals on
-/// the left; value and unrealised P&L in the price currency on the right.
-/// Unrealised P&L is `valueMinor − costBasisMinor`, computed here in the
-/// view model from the sync's stored figures.
-class _HoldingRow extends HookWidget {
-  const _HoldingRow({
-    required this.holding,
-    required this.priceCurrencyCode,
-  });
-
-  final WalletHolding holding;
-  final String priceCurrencyCode;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final palette = theme.ob;
-    final quantity = _formatQuantity(holding);
-    final valueMinor = holding.valueMinor;
-    final costMinor = holding.costBasisMinor;
-    final pnlMinor = valueMinor != null && costMinor != null
-        ? valueMinor - costMinor
-        : null;
-    final name = holding.name ?? holding.symbol ?? holding.assetId;
-    final symbol = holding.name != null ? holding.symbol : null;
-    final pnlTone = switch (pnlMinor) {
-      null || 0 => ObTone.neutral,
-      > 0 => ObTone.funded,
-      _ => ObTone.overspent,
-    };
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: SpacingTokens.md,
-        vertical: SpacingTokens.sm,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        name,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: palette.ink,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (symbol != null) ...[
-                      const SizedBox(width: SpacingTokens.xs),
-                      Text(
-                        symbol,
-                        style: ObTextStyles.stamp(
-                          theme.textTheme.labelSmall,
-                        ).copyWith(color: palette.brand),
-                      ),
-                    ],
-                  ],
-                ),
-                Text(
-                  l10n.accountHoldingsQuantityLabel(quantity),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: palette.mutedInk,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: SpacingTokens.sm),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (valueMinor != null)
-                ObAmount(
-                  formatMinorForCode(valueMinor, priceCurrencyCode),
-                  semanticsLabel: l10n.accountHoldingsValueLabel(
-                    formatMinorForCode(valueMinor, priceCurrencyCode),
-                  ),
-                  style: theme.textTheme.titleSmall,
-                )
-              else
-                Text(
-                  l10n.accountHoldingsUnpriced,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: palette.mutedInk,
-                  ),
-                ),
-              if (pnlMinor != null)
-                Text(
-                  l10n.accountHoldingsPnlLabel(
-                    formatMinorForCode(pnlMinor, priceCurrencyCode),
-                  ),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: palette.hue(pnlTone),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Renders `quantityRaw` (a BigInt of base units) with the asset's
-  /// decimals — no floating point touches the quantity.
-  static String _formatQuantity(WalletHolding holding) {
-    final decimals = holding.decimals;
-    final raw = holding.quantityRaw.toString();
-    if (decimals <= 0) return raw;
-    final padded = raw.padLeft(decimals + 1, '0');
-    final whole = padded.substring(0, padded.length - decimals);
-    final fraction = padded.substring(padded.length - decimals);
-    final trimmed = fraction.replaceAll(RegExp(r'0+$'), '');
-    return trimmed.isEmpty ? whole : '$whole.$trimmed';
-  }
-}
-
 /// The reconcile sheet: statement balance pre-filled from the bank's
 /// reported figure, live difference, optional adjustment transaction.
 class _ReconcileSheet extends HookConsumerWidget {
@@ -1007,64 +883,6 @@ class _ValuationSheet extends HookConsumerWidget {
           const SizedBox(height: SpacingTokens.md),
         ],
       ),
-    );
-  }
-}
-
-/// Holdings of the account's wallet, loaded directly from `client.wallet`.
-class _WalletHoldingsSection extends HookConsumerWidget {
-  const _WalletHoldingsSection({
-    required this.walletId,
-    required this.fallbackCurrencyCode,
-  });
-
-  final String walletId;
-  final String fallbackCurrencyCode;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final palette = Theme.of(context).ob;
-    // The cached provider, not a hand-rolled client call: reading the
-    // client from a hook's init state crashes with "Cannot listen to
-    // inherited widgets inside HookState.initState", and the provider is
-    // what the test overrides.
-    final holdingsAsync = ref.watch(walletHoldingsProvider(walletId));
-    final list = holdingsAsync.value ?? const <WalletHolding>[];
-    if (!holdingsAsync.hasValue || list.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: SpacingTokens.md),
-        ObSectionHeader(
-          title: l10n.accountDetailHoldingsTitle,
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-        ),
-        ObCard(
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              for (final (index, holding) in list.indexed) ...[
-                if (index > 0)
-                  Divider(
-                    height: 1,
-                    indent: SpacingTokens.md,
-                    endIndent: SpacingTokens.md,
-                    color: palette.line,
-                  ),
-                _HoldingRow(
-                  holding: holding,
-                  priceCurrencyCode:
-                      holding.priceCurrencyCode ?? fallbackCurrencyCode,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

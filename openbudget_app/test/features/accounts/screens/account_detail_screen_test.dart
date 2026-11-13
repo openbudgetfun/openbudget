@@ -135,6 +135,7 @@ WalletHolding _holding({
   quantityRaw: quantityRaw ?? BigInt.from(1500000000),
   priceCurrencyCode: priceCurrencyCode,
   valueMinor: valueMinor,
+  priceQuality: PriceQuality.live,
   costBasisMinor: costBasisMinor,
   realizedPnlMinor: realizedPnlMinor,
 );
@@ -497,7 +498,8 @@ void main() {
       expect(find.text('SOL'), findsOneWidget);
       // 9 decimals: 1500000000 raw = 1.5 SOL.
       expect(find.text('Quantity 1.5'), findsOneWidget);
-      expect(find.text(r'$280.00'), findsOneWidget);
+      // The network's subtotal and the row both show the value.
+      expect(find.text(r'$280.00'), findsNWidgets(2));
       expect(
         find.bySemanticsLabel(
           RegExp(r'^Value \$280\.00$', multiLine: true),

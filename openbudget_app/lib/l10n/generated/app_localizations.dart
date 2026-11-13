@@ -10050,6 +10050,286 @@ abstract class AppLocalizations {
   /// **'No price yet'**
   String get accountHoldingsUnpriced;
 
+  /// No description provided for @accountHoldingsCostUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost unknown'**
+  String get accountHoldingsCostUnknown;
+
+  /// No description provided for @walletHoldingsNetworkSolana.
+  ///
+  /// In en, this message translates to:
+  /// **'Solana'**
+  String get walletHoldingsNetworkSolana;
+
+  /// No description provided for @walletHoldingsNetworkSolanaDevnet.
+  ///
+  /// In en, this message translates to:
+  /// **'Solana Devnet'**
+  String get walletHoldingsNetworkSolanaDevnet;
+
+  /// No description provided for @walletHoldingsNetworkBitcoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Bitcoin'**
+  String get walletHoldingsNetworkBitcoin;
+
+  /// No description provided for @walletHoldingsNetworkEthereum.
+  ///
+  /// In en, this message translates to:
+  /// **'Ethereum'**
+  String get walletHoldingsNetworkEthereum;
+
+  /// No description provided for @walletHoldingsNetworkBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Base'**
+  String get walletHoldingsNetworkBase;
+
+  /// No description provided for @walletHoldingsNetworkArbitrumOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Arbitrum One'**
+  String get walletHoldingsNetworkArbitrumOne;
+
+  /// No description provided for @walletHoldingsNetworkOpMainnet.
+  ///
+  /// In en, this message translates to:
+  /// **'OP Mainnet'**
+  String get walletHoldingsNetworkOpMainnet;
+
+  /// No description provided for @walletHoldingsNetworkPolygonPos.
+  ///
+  /// In en, this message translates to:
+  /// **'Polygon PoS'**
+  String get walletHoldingsNetworkPolygonPos;
+
+  /// No description provided for @walletHoldingsNetworkBnbSmartChain.
+  ///
+  /// In en, this message translates to:
+  /// **'BNB Smart Chain'**
+  String get walletHoldingsNetworkBnbSmartChain;
+
+  /// No description provided for @walletHoldingsNetworkAvalancheCChain.
+  ///
+  /// In en, this message translates to:
+  /// **'Avalanche C-Chain'**
+  String get walletHoldingsNetworkAvalancheCChain;
+
+  /// No description provided for @walletHoldingsNetworkTron.
+  ///
+  /// In en, this message translates to:
+  /// **'Tron'**
+  String get walletHoldingsNetworkTron;
+
+  /// No description provided for @walletHoldingsNetworkXrpl.
+  ///
+  /// In en, this message translates to:
+  /// **'XRP Ledger'**
+  String get walletHoldingsNetworkXrpl;
+
+  /// No description provided for @walletHoldingsNetworkHyperliquid.
+  ///
+  /// In en, this message translates to:
+  /// **'Hyperliquid'**
+  String get walletHoldingsNetworkHyperliquid;
+
+  /// No description provided for @walletHoldingsNetworkDogecoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Dogecoin'**
+  String get walletHoldingsNetworkDogecoin;
+
+  /// No description provided for @walletHoldingsNetworkLitecoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Litecoin'**
+  String get walletHoldingsNetworkLitecoin;
+
+  /// No description provided for @walletHoldingsNetworkCardano.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardano'**
+  String get walletHoldingsNetworkCardano;
+
+  /// No description provided for @walletHoldingsNetworkTon.
+  ///
+  /// In en, this message translates to:
+  /// **'TON'**
+  String get walletHoldingsNetworkTon;
+
+  /// No description provided for @walletHoldingsNetworkSui.
+  ///
+  /// In en, this message translates to:
+  /// **'Sui'**
+  String get walletHoldingsNetworkSui;
+
+  /// No description provided for @walletHoldingsNetworkAptos.
+  ///
+  /// In en, this message translates to:
+  /// **'Aptos'**
+  String get walletHoldingsNetworkAptos;
+
+  /// How long ago a wallet read or a price was, under an hour. Read after "Read", "from" or "Showing amounts from".
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{less than a minute ago} =1{1 minute ago} other{{count} minutes ago}}'**
+  String walletHoldingsAgeMinutes(int count);
+
+  /// No description provided for @walletHoldingsAgeHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hour ago} other{{count} hours ago}}'**
+  String walletHoldingsAgeHours(int count);
+
+  /// No description provided for @walletHoldingsAgeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day ago} other{{count} days ago}}'**
+  String walletHoldingsAgeDays(int count);
+
+  /// A network section's second line: when its holdings were last read. {age} is a phrase such as "2 hours ago".
+  ///
+  /// In en, this message translates to:
+  /// **'Read {age}'**
+  String walletHoldingsReadAgo(String age);
+
+  /// No description provided for @walletHoldingsNeverRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Not read yet'**
+  String get walletHoldingsNeverRead;
+
+  /// No description provided for @walletHoldingsNothingCounted.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing counted'**
+  String get walletHoldingsNothingCounted;
+
+  /// What a screen reader says for a network section's header: the network, its subtotal and its read status.
+  ///
+  /// In en, this message translates to:
+  /// **'{network}, {total}, {status}'**
+  String walletHoldingsSectionSemantics(
+    String network,
+    String total,
+    String status,
+  );
+
+  /// No description provided for @walletHoldingsReadFailedWithAmounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{network} couldn\'t be read. Showing amounts from {age}.'**
+  String walletHoldingsReadFailedWithAmounts(String network, String age);
+
+  /// No description provided for @walletHoldingsReadFailedWithoutAmounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{network} couldn\'t be read yet. There are no amounts to show.'**
+  String walletHoldingsReadFailedWithoutAmounts(String network);
+
+  /// No description provided for @walletHoldingsStaked.
+  ///
+  /// In en, this message translates to:
+  /// **'Staked'**
+  String get walletHoldingsStaked;
+
+  /// No description provided for @walletHoldingsRewards.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewards'**
+  String get walletHoldingsRewards;
+
+  /// A chip on a holding whose price is a cached one. {age} is a phrase such as "3 days ago".
+  ///
+  /// In en, this message translates to:
+  /// **'Price from {age}'**
+  String walletHoldingsOldPrice(String age);
+
+  /// No description provided for @walletHoldingsOldPriceUndated.
+  ///
+  /// In en, this message translates to:
+  /// **'Old price'**
+  String get walletHoldingsOldPriceUndated;
+
+  /// No description provided for @walletHoldingsHiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hidden} other{{count} hidden}}'**
+  String walletHoldingsHiddenTitle(int count);
+
+  /// No description provided for @walletHoldingsHiddenUnpriced.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} without a price'**
+  String walletHoldingsHiddenUnpriced(int count);
+
+  /// No description provided for @walletHoldingsHiddenSuspected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} suspected spam'**
+  String walletHoldingsHiddenSuspected(int count);
+
+  /// No description provided for @walletHoldingsHiddenByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hidden by you'**
+  String walletHoldingsHiddenByYou(int count);
+
+  /// No description provided for @walletHoldingsReasonUnpriced.
+  ///
+  /// In en, this message translates to:
+  /// **'No price'**
+  String get walletHoldingsReasonUnpriced;
+
+  /// No description provided for @walletHoldingsReasonSuspected.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspected spam'**
+  String get walletHoldingsReasonSuspected;
+
+  /// No description provided for @walletHoldingsReasonHiddenByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden by you'**
+  String get walletHoldingsReasonHiddenByYou;
+
+  /// No description provided for @walletHoldingsHiddenDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{network} · Quantity {quantity}'**
+  String walletHoldingsHiddenDetail(String network, String quantity);
+
+  /// No description provided for @walletHoldingsShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get walletHoldingsShow;
+
+  /// No description provided for @walletHoldingsHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get walletHoldingsHide;
+
+  /// No description provided for @walletHoldingsShowSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Show {name}'**
+  String walletHoldingsShowSemantics(String name);
+
+  /// No description provided for @walletHoldingsHideSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide {name}'**
+  String walletHoldingsHideSemantics(String name);
+
+  /// No description provided for @walletHoldingsVerdictFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update {name}. Try again.'**
+  String walletHoldingsVerdictFailed(String name);
+
   /// A transaction row's second line: the payee or other detail, then the date.
   ///
   /// In en, this message translates to:
