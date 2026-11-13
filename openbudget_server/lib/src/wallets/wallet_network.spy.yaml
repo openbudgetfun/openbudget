@@ -1,6 +1,0 @@
-### Which chain and cluster a wallet lives on.
-enum: WalletNetwork
-serialized: byName
-values:
-  - solanaMainnet
-  - solanaDevnet

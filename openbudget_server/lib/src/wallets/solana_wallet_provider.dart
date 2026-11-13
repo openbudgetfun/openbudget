@@ -5,7 +5,6 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/generated/common/confidence.dart';
 import 'package:openbudget_server/src/generated/wallets/price_quality.dart';
 import 'package:openbudget_server/src/generated/wallets/price_source.dart';
-import 'package:openbudget_server/src/generated/wallets/wallet_network.dart';
 import 'package:openbudget_server/src/wallets/jupiter_price_client.dart';
 import 'package:openbudget_server/src/wallets/magic_eden_nft_price_client.dart';
 import 'package:openbudget_server/src/wallets/solana_transaction_interpreter.dart';
