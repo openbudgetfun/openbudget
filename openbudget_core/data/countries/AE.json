@@ -8,10 +8,41 @@
   "timeZones": [
     "Asia/Dubai"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 500,
+        "from": "2018-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 37500000,
+      "currency": "AED",
+      "period": "rolling12Months",
+      "source": 4
+    },
+    "returnFrequency": "quarterly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Federal Tax Authority (FTA)",
+    "url": "https://tax.gov.ae"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +61,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "mearef: United Arab Emirates — VAT rate (Federal Decree-Law No. 8 of 2017, art. 3: 5% since 1 January 2018)",
+      "url": "https://mearef.dev/ae/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "UAE Federal Tax Authority: VAT registration (mandatory threshold AED 375,000, voluntary AED 187,500; quarterly returns)",
+      "url": "https://tax.gov.ae/en/services/vat.registration.aspx",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year as an app default (grade I); the UAE levies no personal income tax, so no individual tax year is prescribed.",
+    "companyYearEndDefault is a 31 December app default (grade I): the corporate tax period is the taxable person's financial year (or any 12-month period), with no statutory calendar-year requirement.",
+    "VAT 5% since introduction on 1 January 2018 (grade P, Federal Decree-Law No. 8 of 2017, art. 3, cited by mearef and confirmed on tax.gov.ae).",
+    "Registration threshold of AED 375,000 over 12 months (voluntary at AED 187,500; grade P, FTA). Non-resident suppliers register regardless of turnover.",
+    "Returns are quarterly (monthly for taxable supplies of AED 150 million or more; grade P, FTA)."
+  ]
 }

@@ -8,10 +8,49 @@
   "timeZones": [
     "Africa/Cairo"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1400,
+        "from": "2017-07-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 500,
+        "from": "2026-07-29",
+        "to": null,
+        "appliesTo": "machinery and medical equipment (BDO summary of the July 2026 VAT package)",
+        "source": 4
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 50000000,
+      "currency": "EGP",
+      "period": "rolling12Months",
+      "source": 3
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Egyptian Tax Authority (ETA)",
+    "url": "https://www.eta.gov.eg"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +69,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Egypt — VAT standard rate (VAT Law No. 67 of 2016, art. 3) and registration threshold (ETA guideline)",
+      "url": "https://afriref.dev/eg/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "BDO Indirect Tax News: International — VAT Rates and Other Indirect Tax Rate Changes for 2026 (15 January 2026)",
+      "url": "https://www.bdo.global/en-gb/insights/tax/indirect-tax/international-vat-and-excise-duty-changes-in-2026",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear for natural persons is the calendar year (grade S; the Egyptian tax year for individuals runs 1 January to 31 December; not confirmed on eta.gov.eg this session).",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2017-07-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window); the 14% rate was set by the 2017 amendments to VAT Law No. 67 of 2016, art. 3, cited by afriref from the ETA's own guideline.",
+    "A July 2026 VAT package introduced a 5% reduced rate for machinery and medical equipment and suspended VAT on medical devices for a year (grade S, BDO); the reduced row's date is the reported effective date of that package.",
+    "Registration threshold of EGP 500,000 over 12 months (grade S; ETA guideline per afriref)."
+  ]
 }

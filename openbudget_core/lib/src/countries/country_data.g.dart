@@ -17,10 +17,57 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Europe/Andorra",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "IGI (Impost General Indirecte)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 450,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 100,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "basic foodstuffs (bread, milk)",
+          "source": 3,
+        },
+        {
+          "label": "reduced2",
+          "basisPoints": 250,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "public transport, newspapers and culture",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 4000000,
+        "currency": "EUR",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Andorran Tax Administration (ATA)",
+      "url": "https://www.impostos.ad",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -40,10 +87,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VAT Review: Andorra — key facts (IGI 4.5% with 1% and 2.5% reduced bands; EUR 40,000 threshold), sourced to the Govern d'Andorra (reviewed August 2026)",
+        "url": "https://vatreview.com/andorra",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+        "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - all rows start 2022-01-01: the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (the IGI was introduced in 2013 at these levels per general references; current rates confirmed against the Govern d'Andorra by VAT Review, August 2026).",
+      "A higher incremental IGI rate applies to banking and financial services (grade S, not modelled); registration threshold EUR 40,000 (EUR 150,000 for agriculture).",
+    ],
   },
   "AE": {
     "code": "AE",
@@ -55,10 +119,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Dubai",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 500,
+          "from": "2018-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 37500000,
+        "currency": "AED",
+        "period": "rolling12Months",
+        "source": 4,
+      },
+      "returnFrequency": "quarterly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Federal Tax Authority (FTA)",
+      "url": "https://tax.gov.ae",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -78,10 +173,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "mearef: United Arab Emirates — VAT rate (Federal Decree-Law No. 8 of 2017, art. 3: 5% since 1 January 2018)",
+        "url": "https://mearef.dev/ae/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "UAE Federal Tax Authority: VAT registration (mandatory threshold AED 375,000, voluntary AED 187,500; quarterly returns)",
+        "url": "https://tax.gov.ae/en/services/vat.registration.aspx",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year as an app default (grade I); the UAE levies no personal income tax, so no individual tax year is prescribed.",
+      "companyYearEndDefault is a 31 December app default (grade I): the corporate tax period is the taxable person's financial year (or any 12-month period), with no statutory calendar-year requirement.",
+      "VAT 5% since introduction on 1 January 2018 (grade P, Federal Decree-Law No. 8 of 2017, art. 3, cited by mearef and confirmed on tax.gov.ae).",
+      "Registration threshold of AED 375,000 over 12 months (voluntary at AED 187,500; grade P, FTA). Non-resident suppliers register regardless of turnover.",
+      "Returns are quarterly (monthly for taxable supplies of AED 150 million or more; grade P, FTA).",
+    ],
   },
   "AF": {
     "code": "AF",
@@ -93,10 +206,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Kabul",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 3,
+      "startDay": 21,
+      "calendar": "persian",
+    },
+    "companyYearEndDefault": {
+      "month": 3,
+      "day": 20,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Finance",
+      "url": "https://mof.gov.af",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -116,10 +246,26 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Afghanistan Income Tax Law 2009 (unofficial translation, Official Gazette 976, 18 March 2009), art. 3: the tax year is the solar (Hejiri Shamsi) year, 1 Hamal (21 March) to the last day of Hoot (20 March)",
+        "url": "https://www.wto.org/english/thewto_e/acc_e/afg_e/wtaccafg5a1_leg_1.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Islamic Republic of Afghanistan Ministry of Finance: Tax Overview for Businesses, Investors & Individuals (solar taxation year; business receipts tax; no VAT)",
+        "url": "https://mof.gov.af/sites/default/files/2019-03/Guide%2004%20-%20Tax%20Overview%20for%20Businesses%2C%20Investors%20%26%20Individuals-min.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "Non-Gregorian tax year (grade P, Income Tax Law 2009, art. 3): the tax year is the solar (Hejiri Shamsi) year starting 1 Hamal (21 March) and ending the last day of Hoot (20 March). The Gregorian dates are the law's own translation; the solar year drifts against the Gregorian calendar.",
+      "companyYearEndDefault of 20 March follows the solar tax year (grade P, same article); a legal person may apply to the Ministry of Finance to use a different twelve-month year.",
+      "Afghanistan levies no VAT or GST (grade S): a narrow Business Receipts Tax and a 2% fixed business tax exist under the Income Tax Manual, but no general consumption tax (nomad.watch's reading of the MoF law; the Ministry's own overview guide).",
+    ],
   },
   "AG": {
     "code": "AG",
@@ -207,10 +353,57 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Europe/Tirane",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVSH",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 2000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "accommodation services",
+          "source": 4,
+        },
+        {
+          "label": "reduced2",
+          "basisPoints": 600,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "listed goods and services",
+          "source": 4,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 1000000000,
+        "currency": "ALL",
+        "period": "annualTurnover",
+        "source": 4,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Tax Administration of Albania",
+      "url": "https://www.tatimet.gov.al",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -230,10 +423,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+        "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "1stopVAT: VAT in Europe — standard rates and registration thresholds (August 2024)",
+        "url": "https://1stopvat.com/vat-in-europe",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - all rows start 2022-01-01: the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (20% standard with 10% and 6% reduced bands unchanged through the window).",
+      "Registration threshold of ALL 10,000,000 (grade S, 1stopVAT August 2024; Albania raised the threshold from ALL 5,000,000 in recent years - re-verify).",
+    ],
   },
   "AM": {
     "code": "AM",
@@ -245,10 +455,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Yerevan",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 2000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 11500000000,
+        "currency": "AMD",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "State Revenue Committee",
+      "url": "https://www.taxservice.am",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -268,10 +509,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "1stopVAT: VAT in Europe — standard rates and registration thresholds (August 2024)",
+        "url": "https://1stopvat.com/vat-in-europe",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+        "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (20% unchanged; Armenia's VAT has been 20% throughout and including the window).",
+      "Registration threshold of AMD 115,000,000 (grade S, 2024 figure; the threshold is indexed annually - re-verify each year).",
+    ],
   },
   "AO": {
     "code": "AO",
@@ -283,10 +541,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Luanda",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "IVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1400,
+          "from": "2019-10-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 2500000000,
+        "currency": "AOA",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Autoridade Tributária (AGT)",
+      "url": "https://www.agt.min-fin.gov.ao",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -306,10 +595,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Angola — VAT standard rate and registration threshold (cited to the Código do IVA)",
+        "url": "https://afriref.dev/ao/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rates and effective date cited by afriref to Código do IVA art. 19 (grade S): 14% since the IVA entered force on 1 October 2019.",
+      "Registration threshold of AOA 25,000,000 cited by afriref to the Código do IVA (grade S). One March 2026 secondary table wrongly reported a 2024 increase from 10%; the code date stands.",
+    ],
   },
   "AQ": {
     "code": "AQ",
@@ -763,10 +1063,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Baku",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT (ƏDV)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 20000000,
+        "currency": "AZN",
+        "period": "rolling12Months",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "State Tax Service under the Ministry of Economy",
+      "url": "https://www.taxes.gov.az",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -786,10 +1117,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "1stopVAT: VAT in Europe — standard rates and registration thresholds (August 2024)",
+        "url": "https://1stopvat.com/vat-in-europe",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+        "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% unchanged, including throughout the window).",
+      "Registration threshold of AZN 200,000 over the previous 12 months (grade S).",
+    ],
   },
   "BA": {
     "code": "BA",
@@ -801,10 +1149,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Europe/Sarajevo",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "PDV",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1700,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Indirect Taxation Authority (Uprava za indirektno oporezivanje)",
+      "url": "https://www.uino.gov.ba",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -824,10 +1198,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+        "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "1stopVAT: VAT in Europe — standard rates and registration thresholds (August 2024)",
+        "url": "https://1stopvat.com/vat-in-europe",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (17% unchanged, including throughout the window).",
+      "Registration threshold left null: secondary tables disagree (BAM 50,000 in older PwC summaries, BAM 100,000 in the August 2024 1stopVAT table); not recorded rather than guessed.",
+    ],
   },
   "BB": {
     "code": "BB",
@@ -1038,10 +1429,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Ouagadougou",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2018-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 50000000,
+        "currency": "XOF",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (DGI)",
+      "url": "https://www.impots.bf",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -1061,10 +1483,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Burkina Faso — VAT standard rate and registration threshold (cited to the CGI, art. 317)",
+        "url": "https://afriref.dev/bf/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2018-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% cited to CGI art. 317, Loi n°058-2017/AN).",
+      "Registration threshold of XOF 50,000,000 (grade S, CGI art. 317 bis per afriref).",
+    ],
   },
   "BG": {
     "code": "BG",
@@ -1176,10 +1609,49 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Bahrain",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 500,
+          "from": "2019-01-01",
+          "to": "2022-01-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 37500000,
+        "currency": "BHD",
+        "period": "annualTurnover",
+        "source": 4,
+      },
+      "returnFrequency": "quarterly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "National Bureau for Revenue (NBR)",
+      "url": "https://www.nbr.gov.bh",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -1199,10 +1671,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Bahrain NBR VAT Rate Change Transitional Provisions Guide and BDO Bahrain's Law No. 33 of 2021 summary: 5% from 1 January 2019, 10% from 1 January 2022",
+        "url": "https://www.bdo.bh/getattachment/Services/Tax-Legal/Indirect-Tax-VAT/VAT-INSIGHTS/BDO-publication_VAT-rate-change_24-december-2021.pdf.aspx?lang=en-GB",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "mearef: Bahrain — VAT rate (NBR VAT FAQs: 10% from 1 January 2022) and registration threshold (NBR VAT General Guide: BHD 37,500)",
+        "url": "https://mearef.dev/bh/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year as an app default (grade I); Bahrain levies no personal income tax, so no individual tax year is prescribed.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Effective dating (grade P for the law as summarised by the NBR's own transitional guide and BDO Bahrain): VAT was introduced on 1 January 2019 at 5%; Law No. 33 of 2021 doubled the standard rate to 10% from 1 January 2022, with transitional rules for pre-24 December 2021 contracts through 2022.",
+      "Registration threshold of BHD 37,500 annual supplies (voluntary at BHD 18,750; grade S, NBR VAT General Guide per mearef).",
+      "Returns are monthly or quarterly depending on NBR assignment (most SMEs quarterly; grade S).",
+    ],
   },
   "BI": {
     "code": "BI",
@@ -1214,10 +1704,49 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Bujumbura",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "imported food products, agricultural inputs and listed goods processed in Burundi",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 100000000,
+        "currency": "BIF",
+        "period": "annualTurnover",
+        "source": 4,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Office Burundais des Recettes (OBR)",
+      "url": "https://www.obr.gov.bi",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -1237,10 +1766,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "LookupTax: Burundi VAT guidelines (OBR VAT law Loi n°1/10 of 16 November 2020, art. 19)",
+        "url": "https://www.lookuptax.com/docs/worldwide-tax-rates",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "East African Community: Value Added Tax matrix (registration thresholds and return rules of the partner states)",
+        "url": "https://www.eac.int/financial/eac-tax-matrices/value-added-tax",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rates secondary (grade S): 18% standard and a 10% intermediate band under Loi n°1/10 of 16 November 2020, art. 19 (per LookupTax's reading of the OBR law, checked October 2026); obr.gov.bi was not reachable this session.",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window); the 2020 VAT law carries the 18% rate.",
+      "Registration threshold of BIF 100,000,000 gross turnover per the East African Community VAT matrix (grade S).",
+    ],
   },
   "BJ": {
     "code": "BJ",
@@ -1252,10 +1799,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Porto-Novo",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 50000000,
+        "currency": "XOF",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (DGI)",
+      "url": "https://www.impots.finances.bj",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -1275,10 +1853,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Benin — VAT standard rate and registration threshold (cited to the Code Général des Impôts 2026, art. 241)",
+        "url": "https://afriref.dev/bj/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% confirmed in the Code Général des Impôts 2026, art. 241).",
+      "Registration threshold of XOF 50,000,000 from 3 March 2022, cited by afriref to Arrêté N° 529-c/MEF/DC/SGM/DGI/DLC/054SGG22 (grade S).",
+    ],
   },
   "BL": {
     "code": "BL",
@@ -1646,10 +2235,65 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Gaborone",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 7,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 6,
+      "day": 30,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1400,
+          "from": "2021-04-01",
+          "to": "2022-08-03",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1200,
+          "from": "2022-08-03",
+          "to": "2023-04-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1400,
+          "from": "2023-04-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 4,
+        },
+        {
+          "label": "zero",
+          "basisPoints": 0,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "basic foodstuffs and other listed schedule items",
+          "source": 4,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 100000000,
+        "currency": "BWP",
+        "period": "annualTurnover",
+        "source": 4,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Botswana Unified Revenue Service (BURS)",
+      "url": "https://www.burs.org.bw",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -1669,10 +2313,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "PwC Worldwide Tax Summaries: Botswana — individual significant developments (VAT rate history 2021-2023) and corporate other taxes",
+        "url": "https://taxsummaries.pwc.com/botswana/individual/significant-developments",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "afriref: Botswana — VAT standard rate and registration threshold (cited to the Value Added Tax Act, 2026, s 7(2))",
+        "url": "https://afriref.dev/bw/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear runs 1 July to 30 June (grade S; PwC Botswana, which dates the employer annual return to within 31 days of the 30 June year end).",
+      "companyYearEndDefault is a 30 June default aligned to the tax year (grade S); companies may choose other year ends under national law.",
+      "Effective dating (grade S): VAT rose from 12% to 14% on 1 April 2021; the rate was temporarily cut back to 12% from 3 August 2022 (SI 96 of 2022, extended to 31 March 2023) and reverted to 14% on 1 April 2023. The 14% row is re-enacted by the Value Added Tax Act, 2026 (No. 15 of 2026), s 7(2), quoted by afriref.",
+      "VAT registration threshold of BWP 1,000,000 annual turnover (grade S).",
+    ],
   },
   "BY": {
     "code": "BY",
@@ -1917,10 +2578,41 @@ const Map<String, Map<String, Object?>> countryData = {
       "Africa/Kinshasa",
       "Africa/Lubumbashi",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1600,
+          "from": "2012-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 8000000000,
+        "currency": "CDF",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (DGI)",
+      "url": "https://www.dgi.gouv.cd",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -1940,10 +2632,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: DR Congo — VAT standard rate and registration threshold (cited to the Code des Impôts, édition 2023)",
+        "url": "https://afriref.dev/cd/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2012-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (16% cited to the Code des Impôts, édition 2023).",
+      "Registration threshold of CDF 80,000,000 (grade S; Ordonnance-loi n°10/001 per afriref).",
+    ],
   },
   "CF": {
     "code": "CF",
@@ -1955,10 +2658,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Bangui",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1900,
+          "from": "2019-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 30000000,
+        "currency": "XAF",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (Ministère des Finances et du Budget)",
+      "url": "https://www.dgi.cf",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -1978,10 +2712,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Central African Republic — VAT standard rate and registration threshold (cited to the CGI, art. 257)",
+        "url": "https://afriref.dev/cf/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2019-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (19% cited to the Code Général des Impôts, art. 257).",
+      "Registration threshold of XAF 30,000,000 from 2017 (grade S).",
+      "The authority URL could not be verified this session; the DGI's own site was unreachable (grade S for the URL).",
+    ],
   },
   "CG": {
     "code": "CG",
@@ -1993,10 +2739,49 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Brazzaville",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "1997-05-12",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "centimesAdditionnels",
+          "basisPoints": 90,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "5% surcharge levied on the VAT itself (not deductible)",
+          "source": 4,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 100000000,
+        "currency": "XAF",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (DGI)",
+      "url": "https://www.dgi.gouv.cg",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -2016,10 +2801,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Republic of the Congo — VAT standard rate (Loi n°12-97) and registration threshold (2026 finance law)",
+        "url": "https://afriref.dev/cg/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "LookupTax: Worldwide tax rates table (VAT/GST with legal citations, checked October 2026)",
+        "url": "https://lookuptax.com/docs/worldwide-tax-rates",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The standard TVA is 18% (Loi n°12-97 instituting the TVA, per afriref); a 5% centimes additionnels surcharge levied on the VAT itself brings the combined burden to 18.9% (grade S, LookupTax). The surcharge row's `from` is a lower bound (the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window)).",
+      "Registration threshold of XAF 100,000,000 from 1 January 2026 (grade S; Loi n°42 du 31 décembre 2025, finance law for 2026, per afriref — raised from XAF 60,000,000).",
+    ],
   },
   "CH": {
     "code": "CH",
@@ -2164,10 +2966,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Abidjan",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2003-07-07",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 200000000,
+        "currency": "XOF",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (DGI)",
+      "url": "https://www.dgi-ci.org",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -2187,10 +3020,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Côte d'Ivoire — VAT standard rate and registration threshold (cited to the CGI and DGI pages)",
+        "url": "https://afriref.dev/ci/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2003-07-07): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% cited to CGI art. 200 et seq. and the DGI 'Impôts et taxes' page).",
+      "Registration threshold of XOF 200,000,000 (grade S; threshold set by art. 33 of law 2021-35 per afriref).",
+    ],
   },
   "CK": {
     "code": "CK",
@@ -2336,10 +3180,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Douala",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1925,
+          "from": "2005-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 50000000,
+        "currency": "XAF",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (DGI)",
+      "url": "https://www.impots.cm",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -2359,10 +3234,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Cameroon — VAT standard rate and registration threshold (cited to the DGI fiche: 17.5% plus the 10% community surcharge = 19.25%)",
+        "url": "https://afriref.dev/cm/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The 19.25% standard rate comprises 17.5% VAT plus the 10% community integration surcharge (CEMAC) levied on the VAT itself; the Direction Générale des Impôts publishes it as a single 19.25% figure (grade S, via afriref's citation of the DGI fiche).",
+      "Lower-bound rows - standard (2005-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window); the DGI fiche dates the 19.25% figure to 2005.",
+      "Registration threshold of XAF 50,000,000 (grade S, CGI art. 127 per afriref).",
+    ],
   },
   "CN": {
     "code": "CN",
@@ -2695,10 +3582,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Atlantic/Cape_Verde",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "IVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direção dos Impostos (Ministério das Finanças)",
+      "url": "https://www.minfin.gov.cv",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -2718,10 +3631,26 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "BDO Indirect Tax News: International — VAT Rates and Other Indirect Tax Rate Changes for 2026 (15 January 2026)",
+        "url": "https://www.bdo.global/en-gb/insights/tax/indirect-tax/international-vat-and-excise-duty-changes-in-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (15% confirmed by AfroTools, March 2026; a reduced 8% rate for transmission of electricity and water to final consumers applies from 1 January 2026 per BDO).",
+    ],
   },
   "CW": {
     "code": "CW",
@@ -3216,10 +4145,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Djibouti",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministère des Finances (Direction de la Fiscalité)",
+      "url": "https://www.finances.dj",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -3239,10 +4194,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rates secondary only (grade S): a 10% consumption tax described as 'TVA' by AfroTools (March 2026); Djibouti also levies the internal consumption tax (TIC) at varying product-specific rates. No primary source was reachable this session.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window).",
+    ],
   },
   "DK": {
     "code": "DK",
@@ -3437,10 +4403,49 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Algiers",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1900,
+          "from": "2017-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 900,
+          "from": "2017-01-01",
+          "to": null,
+          "appliesTo": "essential goods",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 800000000,
+        "currency": "DZD",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (DGI)",
+      "url": "https://www.mfdgi.gov.dz",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -3460,10 +4465,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Algeria — VAT standard rate and registration threshold (cited to the DGI's Code des taxes sur le chiffre d'affaires)",
+        "url": "https://afriref.dev/dz/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rates secondary (grade S): 19% standard and 9% reduced since 1 January 2017, cited by afriref to the 2017 finance law amendment of the Code des taxes sur le chiffre d'affaires; mfdgi.gov.dz was not reachable this session.",
+      "Lower-bound rows - standard (2017-01-01), reduced (2017-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window); the 19% rate was set by the loi de finances 2017.",
+      "Registration threshold of DZD 8,000,000 (annual turnover) from 1 January 2022, cited by afriref to CIDTA art. 282 ter (grade S); afriref records no earlier threshold value.",
+    ],
   },
   "EC": {
     "code": "EC",
@@ -3653,10 +4670,49 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Cairo",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1400,
+          "from": "2017-07-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 500,
+          "from": "2026-07-29",
+          "to": null,
+          "appliesTo": "machinery and medical equipment (BDO summary of the July 2026 VAT package)",
+          "source": 4,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 50000000,
+        "currency": "EGP",
+        "period": "rolling12Months",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Egyptian Tax Authority (ETA)",
+      "url": "https://www.eta.gov.eg",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -3676,10 +4732,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Egypt — VAT standard rate (VAT Law No. 67 of 2016, art. 3) and registration threshold (ETA guideline)",
+        "url": "https://afriref.dev/eg/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "BDO Indirect Tax News: International — VAT Rates and Other Indirect Tax Rate Changes for 2026 (15 January 2026)",
+        "url": "https://www.bdo.global/en-gb/insights/tax/indirect-tax/international-vat-and-excise-duty-changes-in-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear for natural persons is the calendar year (grade S; the Egyptian tax year for individuals runs 1 January to 31 December; not confirmed on eta.gov.eg this session).",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2017-07-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window); the 14% rate was set by the 2017 amendments to VAT Law No. 67 of 2016, art. 3, cited by afriref from the ETA's own guideline.",
+      "A July 2026 VAT package introduced a 5% reduced rate for machinery and medical equipment and suspended VAT on medical devices for a year (grade S, BDO); the reduced row's date is the reported effective date of that package.",
+      "Registration threshold of EGP 500,000 over 12 months (grade S; ETA guideline per afriref).",
+    ],
   },
   "EH": {
     "code": "EH",
@@ -3691,10 +4765,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/El_Aaiun",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 2000,
+          "from": "1996-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts du Maroc (administering authority)",
+      "url": "https://www.tax.gov.ma",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -3714,10 +4814,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Morocco — VAT standard rate (CGI 2026, art. 99) and registration threshold",
+        "url": "https://afriref.dev/ma/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Western Sahara is a disputed territory administered in most of its area by Morocco, whose DGI applies Moroccan VAT (20% standard) and tax calendar there de facto (grade I for the extension of Morocco's rules; the territory itself publishes no tax administration).",
+      "Lower-bound rows - standard (1996-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (Morocco's 20% rate, cited by afriref to the Moroccan CGI 2026, art. 99).",
+      "Servability of the territory does not imply a position on its status; entity creation here may need review when counsel answers open question Q1.",
+    ],
   },
   "ER": {
     "code": "ER",
@@ -3729,10 +4841,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Asmara",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "Sales tax",
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Department (Ministry of Finance)",
+      "url": "https://mofe.gov.er",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -3752,10 +4881,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Eritrea levies no VAT (grade S): secondary sources describe a sales tax at category rates reported between 4% and 12%, with no single published standard rate; no rate row is recorded rather than guessing (AfroTools, March 2026).",
+      "Annual returns are due 30 April for the prior calendar year (grade S, secondary deadlines table); no primary source was reachable this session.",
+    ],
   },
   "ES": {
     "code": "ES",
@@ -3885,10 +5025,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Addis_Ababa",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 7,
+      "startDay": 8,
+      "calendar": "ethiopic",
+    },
+    "companyYearEndDefault": {
+      "month": 7,
+      "day": 7,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2003-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 4,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 200000000,
+        "currency": "ETB",
+        "period": "annualTurnover",
+        "source": 4,
+      },
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Revenues (MoR)",
+      "url": "https://mor.gov.et",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -3908,10 +5079,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Federal Income Tax Proclamation No. 979/2016 (Ethiopia), art. 2(21): tax year for an individual is 1 Hamle to 30 Sene (8 July to 7 July)",
+        "url": "https://ethiodata.et/wp-content/uploads/2023/01/Ethiopia-Federal-Income-Tax-Proclamation-No.-979_-2016-English.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "afriref: Ethiopia — VAT standard rate (Proclamation No. 1341/2024, art. 8(2); 15% since Proclamation 285/2002) and registration threshold",
+        "url": "https://afriref.dev/et/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "Non-Gregorian tax year (grade P, Federal Income Tax Proclamation No. 979/2016, art. 2(21)): for an individual the tax year is the one-year period from 1 Hamle to 30 Sene in the Ethiopian calendar, which is 8 July to 7 July in a common Gregorian year. The Gregorian dates shift by a day around the Ethiopian leap month (Pagume, 5-6 days), so the stored start is the common-year approximation.",
+      "companyYearEndDefault of 7 July follows the Ethiopian fiscal year (grade S): bodies are taxed on their accounting year, and most Ethiopian businesses use the government fiscal year ending 30 Sene (7 July).",
+      "Lower-bound rows - standard (2003-01-01): 15% was set by the repealed VAT Proclamation No. 285/2002 (in force January 2003) and re-enacted unchanged by Proclamation No. 1341/2024, art. 8(2), quoted by afriref (grade S).",
+      "Registration threshold of ETB 2,000,000 annual turnover under Proclamation No. 1341/2024 (grade S; the 2024 proclamation raised it from ETB 600,000, effective from its publication on 21 August 2024).",
+      "VAT returns are filed monthly (grade S).",
+    ],
   },
   "FI": {
     "code": "FI",
@@ -4183,10 +5372,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Atlantic/Faroe",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "MVG (moms)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 2500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "TAKS (Skattevæsenet)",
+      "url": "https://www.taks.fo",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -4206,10 +5421,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "CalcBright: VAT and sales tax rates in 177 countries (updated October 2026)",
+        "url": "https://calcbright.com/blog/vat-rates-by-country-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The Faroe Islands are a self-governing part of the Danish Realm outside the EU and Denmark's VAT system, with their own 25% moms (VÁT) (grade S; CalcBright and Faroese practice).",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window).",
+    ],
   },
   "FR": {
     "code": "FR",
@@ -4344,10 +5570,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Libreville",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "1995-04-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 60000000,
+        "currency": "XAF",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (DGI)",
+      "url": "https://dgi.ga",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -4367,10 +5624,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Gabon — VAT standard rate (CGI art. 221; TVA instituted at 18% by Loi n°1/95) and registration threshold",
+        "url": "https://afriref.dev/ga/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (1995-04-01): the TVA was instituted by Loi n°1/95 with an 18% standard rate from 1 April 1995 per PwC's Gabon guide as corroborated (but not primary-verified) by afriref; the current CGI art. 221 (as amended by the 2026 finance law) keeps 18%, with reduced bands of 10% and 5%.",
+      "Registration threshold of XAF 60,000,000 (grade S; CGI édition 2022 per afriref).",
+    ],
   },
   "GB": {
     "code": "GB",
@@ -4547,10 +5815,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Tbilisi",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2004-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 10000000,
+        "currency": "GEL",
+        "period": "calendarYear",
+        "source": 3,
+      },
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Revenue Service of the Ministry of Finance (RS)",
+      "url": "https://www.rs.ge",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -4570,10 +5869,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Andersen Georgia: VAT rules under the Georgian Tax Code (18% rate unchanged since 2004; GEL 100,000 registration threshold; monthly returns)",
+        "url": "https://ge.andersen.com/vat-in-georgia",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Grant Thornton: indirect tax guide — Georgia (18% standard rate)",
+        "url": "https://www.grantthornton.global/en/insights/indirect-tax-guide/indirect-tax---Georgia",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2004-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% flat; the rate has remained unchanged since 2004 per Andersen Georgia's 2025 review - no 19% increase exists, contrary to some secondary tables).",
+      "Registration threshold of GEL 100,000 taxable turnover in a calendar year (grade S; multiple Georgian practice guides).",
+      "VAT returns are monthly, due by the 15th of the following month (grade S).",
+    ],
   },
   "GF": {
     "code": "GF",
@@ -4623,10 +5940,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Europe/Guernsey",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Revenue Service (States of Guernsey)",
+      "url": "https://www.gov.gg/revenue",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -4646,10 +5980,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "States of Guernsey: Revenue Service pages (income tax and social security; no GST is levied)",
+        "url": "https://www.gov.gg/revenue",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (grade S; Guernsey's basis year is the calendar year).",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Guernsey levies no VAT, GST or sales tax (grade P for the absence: the States of Guernsey's own revenue pages list income tax and social security only; the long-debated GST introduction has not been enacted).",
+    ],
   },
   "GH": {
     "code": "GH",
@@ -4661,10 +6005,89 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Accra",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT / NHIL / GETFund levy",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1250,
+          "from": "2018-08-01",
+          "to": "2023-01-01",
+          "appliesTo": null,
+          "source": 4,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2023-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "nhil",
+          "basisPoints": 250,
+          "from": "2018-08-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 4,
+        },
+        {
+          "label": "getfund",
+          "basisPoints": 250,
+          "from": "2018-08-01",
+          "to": "2023-01-01",
+          "appliesTo": null,
+          "source": 4,
+        },
+        {
+          "label": "getfund",
+          "basisPoints": 350,
+          "from": "2023-01-01",
+          "to": "2026-01-01",
+          "appliesTo": null,
+          "source": 4,
+        },
+        {
+          "label": "getfund",
+          "basisPoints": 250,
+          "from": "2026-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "covidLevy",
+          "basisPoints": 100,
+          "from": "2021-05-01",
+          "to": "2026-01-01",
+          "appliesTo": "COVID-19 Health Recovery Levy, abolished from 1 January 2026",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 75000000,
+        "currency": "GHS",
+        "period": "annualTurnoverGoodsOnly",
+        "source": 3,
+      },
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ghana Revenue Authority (GRA)",
+      "url": "https://gra.gov.gh",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -4684,10 +6107,35 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Ghana Revenue Authority: VAT — Value Added Tax Act, 2025 (Act 1151) reforms in effect from 1 January 2026 (rates, levies, threshold)",
+        "url": "https://gra.gov.gh/domestic-tax/tax-types/vat",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "afriref: Ghana — VAT standard rate history (12.5% under Act 970 from 1 August 2018; 15% from 1 January 2023 by Act 1087) and thresholds",
+        "url": "https://afriref.dev/gh/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "BDO Indirect Tax News: International — VAT Rates and Other Indirect Tax Rate Changes for 2026 (15 January 2026)",
+        "url": "https://www.bdo.global/en-gb/insights/tax/indirect-tax/international-vat-and-excise-duty-changes-in-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Effective dating of the components (grade P for the current structure from the GRA's own VAT page; grade S for the superseded rows via afriref's citation of the VAT (Amendment) (No. 2) Act 2022, Act 1087): VAT 12.5% from 1 August 2018, rising to 15% from 1 January 2023; GETFund levy 2.5% to 3.5% from 1 January 2023 and back to 2.5% from 1 January 2026; the 1% COVID-19 levy ran 1 May 2021 to 31 December 2025.",
+      "From 1 January 2026 the VAT Act, 2025 (Act 1151) charges VAT 15%, NHIL 2.5% and GETFund 2.5% on the same base — a 20% effective charge, down from about 21.9% under the old cascading structure, which charged VAT on top of the levies (grade P, GRA).",
+      "Registration threshold of GHS 750,000 (raised from GHS 200,000) applies to suppliers of goods only; every supplier of taxable services must register regardless of turnover (grade P, GRA; confirmed by the IFS survey of the Ghanaian tax system, August 2026).",
+      "The VAT Flat Rate Scheme (3% retailers, 5% real estate) was abolished from 1 January 2026 (grade P, GRA).",
+    ],
   },
   "GI": {
     "code": "GI",
@@ -4699,10 +6147,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Europe/Gibraltar",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 7,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 6,
+      "day": 30,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Income Tax Office",
+      "url": "https://www.gibraltar.gov.gi",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -4722,10 +6187,26 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "EY Gibraltar Tax Facts 2025-2026 (tax year 1 July to 30 June; no VAT in Gibraltar)",
+        "url": "https://www.ey.com/content/dam/ey-unified-site/ey-com/en-gi/tax-alerts/documents/ey-gibraltar-tax-facts-2025-2026.pdf",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "VatInfo.org: countries with no VAT in 2026 (Gibraltar Transaction Tax from 15 July 2026; Kuwait, Qatar, Greenland, San Marino, Syria, Afghanistan and others)",
+        "url": "https://vatinfo.org/countries-with-no-vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-02-13",
+    "caveats": [
+      "individualTaxYear runs 1 July to 30 June (grade S; EY Gibraltar Tax Facts and KPMG's Thinking Beyond Borders guide - returns due 30 November after the 30 June year end).",
+      "companyYearEndDefault is a 30 June default aligned to the year of assessment (grade S); companies may choose other year ends (tax returns due nine months after their own financial year end).",
+      "Gibraltar levies no VAT (grade S; EY: 'There is no VAT in Gibraltar'). Under the UK-EU treaty, a Transaction Tax replaced import duty on goods from 15 July 2026 - 15% in the first year rising to 16% - with alignment to follow (grade S, VatInfo September 2026); a goods-only border tax, not recorded as a VAT rate row.",
+    ],
   },
   "GL": {
     "code": "GL",
@@ -4740,10 +6221,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "America/Scoresbysund",
       "America/Thule",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Tax Agency (SKAT Greenland, Naalakkersuisut)",
+      "url": "https://skat.gl",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -4763,10 +6261,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VatInfo.org: countries with no VAT in 2026 (Gibraltar Transaction Tax from 15 July 2026; Kuwait, Qatar, Greenland, San Marino, Syria, Afghanistan and others)",
+        "url": "https://vatinfo.org/countries-with-no-vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (grade S; Greenland's tax year follows the calendar year).",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Greenland levies no VAT (grade S; VatInfo September 2026 and Denmark's 25% VAT do not extend there) - consumption is taxed through customs duties and excises; personal and corporate income taxes apply.",
+      "The authority URL could not be verified this session (grade S for the URL).",
+    ],
   },
   "GM": {
     "code": "GM",
@@ -4778,10 +6287,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Banjul",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2013-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Gambia Revenue Authority (GRA)",
+      "url": "https://www.gra.gm",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -4801,10 +6336,33 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "CalcBright: VAT and sales tax rates in 177 countries (updated October 2026)",
+        "url": "https://calcbright.com/blog/vat-rates-by-country-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "TaxProsRated: Gambia jurisdiction overview (VAT 15% under the Income and VAT Act 2012; reviewed against the GRA)",
+        "url": "https://taxprosrated.com/global/jurisdictions/country/gm",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2013-01-01): VAT was introduced in 2013 at 15% under the Income and VAT Act 2012 (grade S; CalcBright citing gra.gm, AfroTools March 2026 and a GRA-reviewed secondary summary).",
+      "VAT-registered businesses file monthly returns (grade S). No registration threshold figure was sourced this pass; left null rather than guessed.",
+    ],
   },
   "GN": {
     "code": "GN",
@@ -4816,10 +6374,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Conakry",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Nationale des Impôts",
+      "url": "https://www.impots.gov.gn",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -4839,10 +6423,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% per AfroTools, March 2026); no primary source was reachable this session.",
+    ],
   },
   "GP": {
     "code": "GP",
@@ -4892,10 +6486,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Malabo",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "IVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2005-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Dirección General de Impuestos (Ministerio de Hacienda y Economía)",
+      "url": "https://www.economiafinanzas.gob.gq",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -4915,10 +6535,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Equatorial Guinea — VAT standard rate (Ley núm. 4/2004)",
+        "url": "https://afriref.dev/gq/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2005-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (15% cited to Ley núm. 4/2004, the tax-system law, effective 2005).",
+      "No single VAT registration threshold is published (grade S, afriref); left null rather than guessed.",
+      "The authority URL could not be verified this session (grade S for the URL).",
+    ],
   },
   "GR": {
     "code": "GR",
@@ -5176,10 +6808,44 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Bissau",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "IVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": "2025-01-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1900,
+          "from": "2025-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 4,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministério das Finanças (Direção Geral das Contribuições e Impostos)",
+      "url": "https://www.mf.gov.gw",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -5199,10 +6865,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "CalcBright: VAT and sales tax rates in 177 countries (updated October 2026)",
+        "url": "https://calcbright.com/blog/vat-rates-by-country-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Sources disagree on Guinea-Bissau (both grade S): AfroTools (March 2026) reports a 15% IGV still current, while CalcBright (October 2026, citing Orbitax/Innovate Tax) reports a 19% VAT replacing the sales tax from 1 January 2025. Both rows are recorded with their sources; flag for early re-check.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window).",
+    ],
   },
   "GY": {
     "code": "GY",
@@ -5883,10 +7566,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Europe/Isle_of_Man",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 4,
+      "startDay": 6,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 2000,
+          "from": "2011-01-04",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 9000000,
+        "currency": "GBP",
+        "period": "rolling12Months",
+        "source": 3,
+      },
+      "returnFrequency": "quarterly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Income Tax Division (Isle of Man Treasury)",
+      "url": "https://www.gov.im/incometax",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -5906,10 +7620,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Isle of Man Customs & Excise: the Isle of Man applies UK VAT law (20% standard rate, GBP 90,000 registration threshold from April 2024, quarterly returns) under the Customs and Excise Agreement 1979",
+        "url": "https://www.gov.im/customs",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Isle of Man Treasury Assessor: income tax (year of assessment runs 6 April to 5 April, as in the UK)",
+        "url": "https://www.gov.im/incometax",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear runs 6 April to 5 April, like the UK's (grade S; the Isle of Man Income Tax Division's year of assessment).",
+      "companyYearEndDefault is a 31 December app default (grade I); Manx companies choose their own accounting date, with the first accounting reference date set after incorporation.",
+      "The Isle of Man is part of the UK VAT area under the Customs and Excise Agreement 1979: UK VAT law, including the 20% standard rate in force since 4 January 2011 and the registration threshold (GBP 90,000 from 1 April 2024), applies unchanged (grade S, Isle of Man Customs & Excise guidance).",
+      "Returns are quarterly as in the UK (grade S).",
+    ],
   },
   "IN": {
     "code": "IN",
@@ -5961,8 +7692,18 @@ const Map<String, Map<String, Object?>> countryData = {
     ],
     "individualTaxYear": null,
     "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "British Indian Ocean Territory Administration (FCDO)",
+      "url": "https://www.gov.uk/government/collections/british-indian-ocean-territory-territorial-waters-and-archipelago",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -5982,10 +7723,19 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VatInfo.org: countries with no VAT in 2026 (Gibraltar Transaction Tax from 15 July 2026; Kuwait, Qatar, Greenland, San Marino, Syria, Afghanistan and others)",
+        "url": "https://vatinfo.org/countries-with-no-vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "The British Indian Ocean Territory has no permanent civilian population and no resident tax system (grade I); no VAT, GST or sales tax applies.",
+      "individualTaxYear and companyYearEndDefault are left null: there is no personal or corporate tax year to record (grade I, no primary source reachable).",
+    ],
   },
   "IQ": {
     "code": "IQ",
@@ -5997,10 +7747,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Baghdad",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Finance – General Commission for Taxes",
+      "url": "https://mof.gov.iq",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6020,10 +7787,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "mearef: Iraq — VAT is a structural null (Federal Budget Law No. 13 of 2023, art. 20(First), Iraqi Gazette No. 4726: itemised sales taxes, no VAT law)",
+        "url": "https://mearef.dev/iq/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (the Iraqi tax year is generally the calendar year, grade S).",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Iraq levies no VAT or GST (grade S, mearef reading Federal Budget Law No. 13 of 2023 from the Iraqi Gazette): consumption taxes are itemised - 10% on hotel and restaurant services (extended to second-class establishments), 20% on mobile top-up and internet, 15% on car imports and travel tickets - none of which is a general consumption tax.",
+      "VAT-introduction proposals appear periodically in reform commentary; none has been enacted (grade S).",
+    ],
   },
   "IR": {
     "code": "IR",
@@ -6299,10 +8077,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Europe/Jersey",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "gst",
+      "localName": "GST",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 500,
+          "from": "2011-06-06",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 30000000,
+        "currency": "GBP",
+        "period": "rolling12Months",
+        "source": 3,
+      },
+      "returnFrequency": "quarterly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Revenue Jersey",
+      "url": "https://www.gov.je/taxesmoney",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6322,10 +8131,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Government of Jersey: GST registration thresholds (GBP 300,000) and GST quick guide (5%; quarterly returns; calendar tax year)",
+        "url": "https://www.gov.je/TaxesMoney/GST/Businesses/Registration/Pages/ShouldIBe.aspx",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (grade P, gov.je: 'Jersey's tax year runs from 1 January to 31 December').",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rates and effective dating (grade P for the current 5% from gov.je's GST pages; grade S for the 2011 date): GST was introduced in 2008 at 3% and rose to 5% on 6 June 2011, unchanged since.",
+      "Registration threshold of GBP 300,000 taxable supplies in any 12 months (grade P, gov.je); overseas retailers register at the same threshold from 1 July 2023.",
+      "Returns are quarterly, due within one month of the quarter end (grade P, gov.je).",
+    ],
   },
   "JM": {
     "code": "JM",
@@ -6375,10 +8196,49 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Amman",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "General Sales Tax (GST)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1600,
+          "from": "2010-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 400,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "certain agricultural products and listed goods",
+          "source": 4,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 3000000,
+        "currency": "JOD",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": "bimonthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Income and Sales Tax Department (ISTD)",
+      "url": "https://www.istd.gov.jo",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6398,10 +8258,35 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Jordan Income and Sales Tax Department: The General Sales Tax Law No. 6 of 1994 and its amendments (consolidated English text, 2023), art. 6(a) 16% (in force since Law No. 29 of 2009 commenced 1 January 2010) and art. 16 two-month returns",
+        "url": "https://istd.gov.jo/ebv4.0/root_storage/en/eb_list_page/general_sales_tax_law_and_its_amendments_2023-1.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Jordan ISTD notification guide under the General Sales Tax Law: general rate 16%, 4% band for listed goods",
+        "url": "https://istd.gov.jo/ebv4.0/root_storage/en/eb_list_page/notification_guide.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "asiaref: Jordan — General Sales Tax standard rate (16% since 1 January 2010, cited to the ISTD's consolidated law)",
+        "url": "https://asiaref.dev/jo/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Effective dating (grade P, the General Sales Tax Law's consolidated English text on istd.gov.jo): the general rate is 16% under art. 6(a), in force since 1 January 2010 when Law No. 29 of 2009 commenced; the rate has not moved since (WTO review 2023 corroborates).",
+      "A 4% band applies to listed goods by Council of Ministers decision (grade P, ISTD notification guide).",
+      "Registration threshold of JOD 30,000 annual taxable turnover (grade S, per the law and Deloitte).",
+      "Registered persons file a two-month tax return (grade P, art. 16 of the law).",
+    ],
   },
   "JP": {
     "code": "JP",
@@ -6507,10 +8392,57 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Nairobi",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1400,
+          "from": "2020-04-01",
+          "to": "2021-01-01",
+          "appliesTo": "temporary COVID-19 reduction",
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1600,
+          "from": "2021-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "petroleum",
+          "basisPoints": 800,
+          "from": "2022-01-01",
+          "to": "2023-07-01",
+          "appliesTo": "petroleum products band, deleted by the Finance Act 2023",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 500000000,
+        "currency": "KES",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Kenya Revenue Authority (KRA)",
+      "url": "https://www.kra.go.ke",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6530,10 +8462,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Kenya — VAT standard rate (KRA; 16% continuously since 1 January 2021; 8% petroleum band deleted 1 July 2023) and registration threshold (VAT Act 2013, s.34)",
+        "url": "https://afriref.dev/ke/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Effective dating (grade S, KRA page cited by afriref): the temporary 14% COVID-19 rate ended 31 December 2020 and 16% was restored from 1 January 2021. The separate 8% petroleum band was deleted by the Finance Act 2023 from 1 July 2027 (moving petroleum to 16%); its row starts at the coverage window's lower bound because no source was reached for its 2018 start.",
+      "Finance Acts 2025 and 2026 reclassified specific supplies only; the standard rate is unchanged (grade S, afriref, last verified 15 October 2026).",
+      "Registration threshold of KES 5,000,000 (grade S; VAT Act No. 35 of 2013, s. 34).",
+    ],
   },
   "KG": {
     "code": "KG",
@@ -6545,10 +8489,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Bishkek",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1200,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "State Tax Service under the Ministry of Economy and Finance",
+      "url": "https://salyq.kg",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6568,10 +8538,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Invest Kyrgyzstan (State Investment Agency): comparative tax table of the five Central Asian countries (Kyrgyzstan VAT 12%; live 2026)",
+        "url": "https://invest.gov.kg/en/comparison",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (12% under the 2022 Tax Code, confirmed by the State Investment Agency's five-country comparative table, live 2026).",
+      "Registration threshold left null: sources conflict - the 2022 Tax Code raised the threshold from KGS 8 million to KGS 30 million (World Bank 2024 review), while a reading of the August 2026 edition of the Tax Code (art. 255) finds no monetary threshold attached to VAT registration at all.",
+      "The authority URL could not be verified this session (grade S for the URL).",
+    ],
   },
   "KH": {
     "code": "KH",
@@ -6661,10 +8643,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Indian/Comoro",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "Turnover tax",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (Ministère des Finances)",
+      "url": "https://www.finances.gov.km",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6684,10 +8692,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "IMF Fiscal Affairs Department: VAT rates dataset (Comoros turnover tax and bands)",
+        "url": "https://www.imf.org/external/np/fad/tpaf/files/vat_substandard_rates.xlsx",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Comoros levies no VAT (grade S): secondary tables describe a turnover/sales tax at 10% (IMF VAT-rates dataset; AfroTools describes a turnover tax rather than a VAT), with reduced bands reported at 3%, 5% and 7.5% and higher rates on air tickets and casinos. No primary source was reachable this session.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window); the IMF dataset predates the window but carries no effective date.",
+    ],
   },
   "KN": {
     "code": "KN",
@@ -6870,10 +8895,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Kuwait",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Finance",
+      "url": "https://www.mof.gov.kw",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6893,10 +8935,26 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "mearef: Kuwait — no VAT (KDIPA official investment guidance; the GCC agreement was signed but never enacted)",
+        "url": "https://mearef.dev/kw/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "VatInfo.org: countries with no VAT in 2026 (Gibraltar Transaction Tax from 15 July 2026; Kuwait, Qatar, Greenland, San Marino, Syria, Afghanistan and others)",
+        "url": "https://vatinfo.org/countries-with-no-vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year as an app default (grade I); Kuwait levies no personal income tax, so no individual tax year is prescribed.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Kuwait levies no VAT or GST (grade S): it signed the GCC VAT agreement but has never enacted a VAT law, and its 2026-2030 fiscal plan contains no VAT provision (mearef reading KDIPA's official investment guidance; VatInfo, September 2026).",
+    ],
   },
   "KY": {
     "code": "KY",
@@ -6952,10 +9010,65 @@ const Map<String, Map<String, Object?>> countryData = {
       "Asia/Atyrau",
       "Asia/Oral",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT (НДС)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1200,
+          "from": "2018-01-01",
+          "to": "2026-01-01",
+          "appliesTo": null,
+          "source": 4,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1600,
+          "from": "2026-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 500,
+          "from": "2026-01-01",
+          "to": null,
+          "appliesTo": "medicines, medical devices and licensed medical services (rises to 10% from 1 January 2027)",
+          "source": 3,
+        },
+        {
+          "label": "reduced2",
+          "basisPoints": 1000,
+          "from": "2026-01-01",
+          "to": null,
+          "appliesTo": "domestically produced periodical print publications",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 4325000000,
+        "currency": "KZT",
+        "period": "annualTurnover",
+        "source": 4,
+      },
+      "returnFrequency": "quarterly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "State Revenue Committee (Ministry of Finance)",
+      "url": "https://www.kgd.gov.kz",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6975,10 +9088,35 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Department of State Revenues of Almaty City (KGD): new VAT and excise rules from 1 January 2026 — 16% standard; 5% medicines (10% from 2027); 10% periodicals",
+        "url": "https://almaty.kgd.gov.kz/en/news/new-vat-and-excise-rules-what-has-changed-importers-medicines-and-goods-2026-3-162984",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "asiaref: Kazakhstan — VAT rate (16% from 1 January 2026 under Tax Code No. 214-VIII, art. 503(1); 12% from 2018 under the 2017 code) and registration threshold (art. 99(4)(2): 10,000 MCI = KZT 43,250,000 in 2026)",
+        "url": "https://asiaref.dev/kz/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "PwC Worldwide Tax Summaries: Kazakhstan — significant developments (new Tax Code from 1 January 2026; VAT raised from 12% to 16%)",
+        "url": "https://taxsummaries.pwc.com/kazakhstan/corporate/significant-developments",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-02-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Effective dating (grade P, Tax Code No. 214-VIII of 18 July 2025, art. 503(1), quoted by the KGD Almaty directorate): the standard rate rose from 12% to 16% from 1 January 2026 under the new Tax Code. The superseded 12% row starts 1 January 2018 (the 2017 Tax Code's commencement, per asiaref); 12% had in fact applied since 2009 under earlier codes (grade S caveat).",
+      "The medicines reduced band is 5% in 2026 and rises to 10% from 1 January 2027 by the code's own article 503(2) (grade P); a scheduled future change to re-verify.",
+      "Registration threshold halved to 10,000 MCI from 2026 - KZT 43,250,000 at the 2026 MCI of KZT 4,325 (grade P, art. 99(4)(2) per asiaref; confirmed by the Almaty KGD page).",
+      "The tax period is the calendar quarter (grade P, art. 504).",
+    ],
   },
   "LA": {
     "code": "LA",
@@ -7028,10 +9166,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Beirut",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1100,
+          "from": "2017-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 4,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 500000000000,
+        "currency": "LBP",
+        "period": "fourConsecutiveQuarters",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Finance – Directorate of VAT",
+      "url": "https://www.mof.gov.lb",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -7051,10 +9220,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "PwC Worldwide Tax Summaries: Lebanon — corporate other taxes (VAT 11%; threshold LL 5 billion from the 2024 Budget Law; last reviewed 1 July 2026)",
+        "url": "https://taxsummaries.pwc.com/lebanon/corporate/other-taxes",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "IMF Country Report No. 23/8: Lebanon Technical Assistance Report on Putting Tax Policy Back on Track (VAT raised to 11% in 2017 from 10% at introduction in 2002)",
+        "url": "https://www.elibrary.imf.org/downloadpdf/view/journals/002/2023/008/article-A001-en.pdf",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-02-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rates secondary (grade S): VAT rose from 10% to 11% in 2017 (IMF technical assistance report 23/8, citing the rate change year); PwC (last reviewed 1 July 2026) still publishes 11%. A 12% rate passed by parliament in the 2024 budget was not implemented, and a 12% rise was again reported as pending parliamentary approval in late 2026 - re-check early.",
+      "Registration threshold raised from LBP 100 million to LBP 5 billion by the 2024 Budget Law (grade S, PwC); the exact commencement day of the 2024 change is not published, so the threshold carries no effective date in this dataset.",
+      "Exchange-rate collapse makes the LBP threshold's real value volatile; VAT on foreign-currency invoices uses the Sayrafa rate (grade S).",
+    ],
   },
   "LC": {
     "code": "LC",
@@ -7276,10 +9463,52 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Monrovia",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "GST",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": "2025-04-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1200,
+          "from": "2025-04-01",
+          "to": "2026-05-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1300,
+          "from": "2026-05-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Liberia Revenue Authority (LRA)",
+      "url": "https://revenue.lra.gov.lr",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -7299,10 +9528,34 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Liberia Revenue Authority: Revenue Notice of April 2026 — GST rises from 12% to 13% from 1 May 2026 under the Liberia Tax Amendment Act of December 2025",
+        "url": "https://revenue.lra.gov.lr/wp-content/uploads/2026/04/GST-Revenue-Notice.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "PwC Worldwide Tax Summaries: Liberia — corporate other taxes (GST 13%; VAT replaces GST on 1 January 2027 at 15%)",
+        "url": "https://taxsummaries.pwc.com/republic-of-liberia/corporate/other-taxes",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "VATCalc: Liberia — GST increase to 13% from 1 May 2026 and the January 2027 VAT implementation with USD 20,000 threshold",
+        "url": "https://www.vatcalc.com/liberia/liberia-looks-to-implement-vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2026-12-15",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Effective dating (grade P for the current rate from the LRA's own Revenue Notice of April 2026; grade S for the earlier steps): GST on goods and services was 10% (row starts at the coverage window's lower bound), rose to 12% on 1 April 2025 and to 13% on 1 May 2026 under the Liberia Tax Amendment Act of December 2025. Exports stay zero-rated; telecommunications stay at 15%.",
+      "A VAT replaces the GST on 1 January 2027: registration opened 1 July 2026 with a USD 20,000 threshold. The enacted rate is reported as 15% by PwC (the December 2024 amendment cut it from 18%) but other trackers still say 18% - flagged for re-check before go-live.",
+      "Registration threshold left null for the GST period (no figure sourced); the USD 20,000 threshold belongs to the 2027 VAT regime.",
+    ],
   },
   "LS": {
     "code": "LS",
@@ -7315,10 +9568,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Maseru",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 4,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 3,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2018-04-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 200000000,
+        "currency": "LSL",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Revenue Services Lesotho (RSL)",
+      "url": "https://www.rsl.org.ls",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -7338,10 +9622,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Lesotho — VAT standard rate (Legal Notice No. 27 of 2018) and registration threshold (VAT Act 2001, s.17)",
+        "url": "https://afriref.dev/ls/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Revenue Services Lesotho: Guide on Taxation of Employment Income 2026-27 (tax year 1 April to 31 March)",
+        "url": "https://www.rsl.org.ls/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear runs 1 April to 31 March (grade S; RSL's own employment-income guide for 2026-27, which also dates provisional payments to 30 September, 31 December and 31 March).",
+      "companyYearEndDefault is a 31 March default aligned to the tax year (grade S); companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2018-04-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (15% set by Legal Notice No. 27 of 2018, Value Added Tax (Amendment) Regulations, per afriref).",
+      "Registration threshold of LSL 2,000,000 in force from 25 April 2025 (grade S, afriref citing the VAT Act 2001 s.17 as amended).",
+    ],
   },
   "LT": {
     "code": "LT",
@@ -7770,10 +10071,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Tripoli",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Finance – Tax Department",
+      "url": "https://mof.gov.ly",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -7793,10 +10111,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "TaxProsRated: tax filing deadlines by country (Libya — no general VAT; annual returns due 30 April)",
+        "url": "https://taxprosrated.com/deadlines",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Libya levies no general VAT (grade S): a VAT law exists but is not implemented; narrow production and sales taxes apply to selected goods (AfroTools, March 2026; secondary deadlines table).",
+      "The authority URL could not be verified this session (grade S for the URL).",
+    ],
   },
   "MA": {
     "code": "MA",
@@ -7808,10 +10143,65 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Casablanca",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 2000,
+          "from": "1996-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 1400,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "listed goods and services",
+          "source": 3,
+        },
+        {
+          "label": "reduced2",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "listed goods and services",
+          "source": 3,
+        },
+        {
+          "label": "superReduced",
+          "basisPoints": 700,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "listed essential goods and services",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 50000000,
+        "currency": "MAD",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (DGI)",
+      "url": "https://www.tax.gov.ma",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -7831,10 +10221,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Morocco — VAT standard rate (CGI 2026, art. 99) and registration threshold",
+        "url": "https://afriref.dev/ma/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (1996-01-01): 20% since the TVA's introduction in 1993 and restated by the CGI 2026, art. 99 (grade S, afriref's citation of the official consolidated CGI).",
+      "Lower-bound rows - reduced (2022-01-01), reduced2 (2022-01-01), superReduced (2022-01-01): the 14%, 10% and 7% bands are listed in the CGI without dated histories; the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window).",
+      "Registration threshold of MAD 500,000 from 1 January 2023 (grade S, official consolidated CGI per afriref).",
+    ],
   },
   "MC": {
     "code": "MC",
@@ -7846,10 +10248,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Europe/Monaco",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 2000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction des Services Fiscaux",
+      "url": "https://www.gouv.mc",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -7869,10 +10297,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+        "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "1stopVAT: VAT in Europe — standard rates and registration thresholds (August 2024)",
+        "url": "https://1stopvat.com/vat-in-europe",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Monaco applies French VAT law through the customs union with France (grade S): the French standard 20% (reduced 10%, 5.5% and 2.1% also apply) is collected in Monaco under the 1963 fiscal convention.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (the 20% French rate has applied since 2014; Monaco follows every French rate change).",
+      "Registration thresholds follow the French franchise regime with Monaco-specific amounts (EUR 33,100 per one secondary table, unverified); left null rather than guessed.",
+    ],
   },
   "MD": {
     "code": "MD",
@@ -7884,10 +10330,57 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Europe/Chisinau",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 2000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 800,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "listed goods and services",
+          "source": 3,
+        },
+        {
+          "label": "reduced2",
+          "basisPoints": 500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "listed essential goods",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 120000000,
+        "currency": "MDL",
+        "period": "annualTurnover",
+        "source": 4,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "State Tax Service (Serviciul Fiscal de Stat)",
+      "url": "https://www.fisc.md",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -7907,10 +10400,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+        "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "1stopVAT: VAT in Europe — standard rates and registration thresholds (August 2024)",
+        "url": "https://1stopvat.com/vat-in-europe",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - all rows start 2022-01-01: the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (20% standard with 8% and 5% reduced bands unchanged through the window).",
+      "Registration threshold of MDL 1,200,000 (grade S, 1stopVAT August 2024; Moldova raised the threshold from MDL 600,000 - re-verify).",
+    ],
   },
   "ME": {
     "code": "ME",
@@ -7922,10 +10432,57 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Europe/Podgorica",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "PDV",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 2100,
+          "from": "2018-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 700,
+          "from": "2018-01-01",
+          "to": null,
+          "appliesTo": "basic foodstuffs, medicines, books, accommodation and public transport",
+          "source": 3,
+        },
+        {
+          "label": "reduced2",
+          "basisPoints": 1500,
+          "from": "2025-01-01",
+          "to": null,
+          "appliesTo": "accommodation and hospitality services (new band)",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 3000000,
+        "currency": "EUR",
+        "period": "rolling12Months",
+        "source": 3,
+      },
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Tax Administration of Montenegro (Poreska uprava)",
+      "url": "https://www.poreskauprava.gov.me",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -7945,10 +10502,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "LookupTax: Montenegro VAT guidelines (quoting Sl. list CG 50/2017 — 21% from 1 January 2018; Sl. list CG 94/2024 — 15% band from 1 January 2025; EUR 30,000 threshold; the 2026 law applies only on EU accession)",
+        "url": "https://www.lookuptax.com/docs/country/montenegro-vat-guidelines-indirect-tax",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Effective dating (grade S, LookupTax quoting the Official Gazette texts): the standard rate rose from 19% to 21% from 1 January 2018 (Sl. list CG 50/2017 amending art. 24 and adding art. 71c) - not, as some tables state, in 2023; the 15% band for tourism and hospitality was added from 1 January 2025 (art. 24a restated by Sl. list CG 94/2024).",
+      "A wholly new VAT law (Sl. list CG 104/2026) entered force on 25 July 2026 but applies only from the day Montenegro joins the EU; the 2001 law with the rates above continues until then (grade S).",
+      "Registration threshold of EUR 30,000 in the last 12 months (grade S; raised from EUR 18,000 by Sl. list CG 59/2021). Monthly returns are due by the 15th (grade S).",
+    ],
   },
   "MF": {
     "code": "MF",
@@ -7998,10 +10567,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Indian/Antananarivo",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 2000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (DGI)",
+      "url": "https://www.dgi.mg",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -8021,10 +10616,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (20% per AfroTools, March 2026). TVA-registered businesses file monthly returns (grade S, secondary deadlines table).",
+    ],
   },
   "MH": {
     "code": "MH",
@@ -8075,10 +10680,49 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Europe/Skopje",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "DDV",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "listed essential goods and services",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 200000000,
+        "currency": "MKD",
+        "period": "annualTurnover",
+        "source": 4,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Public Revenue Office (Uprava za javni prihodi)",
+      "url": "https://www.ujp.gov.mk",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -8098,10 +10742,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+        "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "1stopVAT: VAT in Europe — standard rates and registration thresholds (August 2024)",
+        "url": "https://1stopvat.com/vat-in-europe",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - all rows start 2022-01-01: the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% standard and 5% reduced unchanged through the window; a temporary energy-crisis reduction on electricity ran during 2022-2023 and is not modelled).",
+      "Registration threshold of MKD 2,000,000 (grade S, 1stopVAT).",
+    ],
   },
   "ML": {
     "code": "ML",
@@ -8113,10 +10774,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Bamako",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2007-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 50000000,
+        "currency": "XOF",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (DGI)",
+      "url": "https://www.dgi.gov.ml",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -8136,10 +10828,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Mali — VAT standard rate (CGI art. 192) and registration threshold",
+        "url": "https://afriref.dev/ml/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2007-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% cited to CGI art. 192, Loi n°06-067).",
+      "Registration threshold of XOF 50,000,000 (grade S, afriref). The authority URL could not be verified this session.",
+    ],
   },
   "MM": {
     "code": "MM",
@@ -8342,10 +11045,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Nouakchott",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1600,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (DGI)",
+      "url": "https://www.impots.mr",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -8365,10 +11094,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (16% per AfroTools, March 2026); no primary source was reachable this session.",
+    ],
   },
   "MS": {
     "code": "MS",
@@ -8554,10 +11293,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Indian/Mauritius",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2002-07-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 300000000,
+        "currency": "MUR",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Mauritius Revenue Authority (MRA)",
+      "url": "https://mra.mu",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -8577,10 +11347,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Mauritius — VAT standard rate (Value Added Tax Act, s. 10) and registration threshold (Sixth Schedule)",
+        "url": "https://afriref.dev/mu/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2002-07-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (15% cited to the Value Added Tax Act, s. 10, consolidated to May 2026).",
+      "Registration threshold of MUR 3,000,000 in force from 1 October 2025 (grade S, afriref citing the VAT Act's Sixth Schedule as amended).",
+    ],
   },
   "MV": {
     "code": "MV",
@@ -8630,10 +11411,44 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Blantyre",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 4,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 3,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1650,
+          "from": "2022-01-01",
+          "to": "2026-01-01",
+          "appliesTo": null,
+          "source": 5,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1750,
+          "from": "2026-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 4,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Malawi Revenue Authority (MRA)",
+      "url": "https://www.mra.mw",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -8653,10 +11468,33 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "PwC Worldwide Tax Summaries: Malawi — administration (tax year runs 1 April to 31 March with effect from 1 April 2022)",
+        "url": "https://taxsummaries.pwc.com/malawi/corporate/tax-administration",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "BDO Indirect Tax News: International — VAT Rates and Other Indirect Tax Rate Changes for 2026 (15 January 2026)",
+        "url": "https://www.bdo.global/en-gb/insights/tax/indirect-tax/international-vat-and-excise-duty-changes-in-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-02-13",
+    "caveats": [
+      "individualTaxYear runs 1 April to 31 March: Malawi's tax year changed from July-June to April-March with effect from 1 April 2022 (the 2021/22 year was shortened to end 31 March 2022; grade S, PwC Malawi and the MRA's 2022 change notice).",
+      "companyYearEndDefault is a 31 March default aligned to the tax year (grade S).",
+      "Effective dating (grade S): the standard rate rose from 16.5% to 17.5% from 1 January 2026 under the 2025/26 mid-year budget measures (BDO's 2026 table and AfroTools). The 16.5% row starts at the coverage window's lower bound.",
+      "The 17.5% effective date is BDO's 'from 1 January 2026 unless otherwise noted'; AfroTools attributes the rise to the mid-year budget review without a date - flag if MRA guidance differs.",
+    ],
   },
   "MX": {
     "code": "MX",
@@ -8820,10 +11658,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Maputo",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "IVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1600,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Autoridade Tributária (AT)",
+      "url": "https://www.at.gov.mz",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -8843,10 +11707,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Mozambique — VAT standard rate (Ministério da Economia e Finanças measures package)",
+        "url": "https://afriref.dev/mz/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "LookupTax: Worldwide tax rates table (VAT/GST with legal citations, checked October 2026)",
+        "url": "https://lookuptax.com/docs/worldwide-tax-rates",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-02-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (16% cited by afriref to the Ministério da Economia e Finanças measures package, last verified 24 July 2026).",
+      "Sources disagree (both grade S): one LookupTax table lists 17% for Mozambique without a date, while afriref's primary-cited reading gives 16% unchanged; recorded as 16% and flagged for early re-check.",
+      "No single registration threshold is published (grade S, afriref); left null rather than guessed.",
+    ],
   },
   "NA": {
     "code": "NA",
@@ -8859,10 +11741,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Windhoek",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 3,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 2,
+      "day": 28,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2000-11-27",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 100000000,
+        "currency": "NAD",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": "bimonthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Namibia Revenue Agency (NamRA)",
+      "url": "https://www.namra.gov.na",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -8882,10 +11795,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Namibia — VAT standard rate (Value-Added Tax Act 10 of 2000, s. 6(1)) and registration threshold (s. 15(1)(b))",
+        "url": "https://afriref.dev/na/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear runs 1 March to the end of February, following South Africa's year of assessment (grade S; standard Namibian practice, not confirmed on namra.gov.na this session).",
+      "companyYearEndDefault is a 28 February default aligned to the tax year (grade S).",
+      "Lower-bound rows - standard (2000-11-27): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (15% set by the Value-Added Tax Act 10 of 2000, s. 6(1)).",
+      "Registration threshold of NAD 1,000,000 in force from 1 October 2024 (grade S; s. 15(1)(b) as substituted per afriref).",
+      "VAT periods are two months (grade S), as in South Africa.",
+    ],
   },
   "NC": {
     "code": "NC",
@@ -8935,10 +11860,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Niamey",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1900,
+          "from": "2000-06-21",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 50000000,
+        "currency": "XOF",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (DGI)",
+      "url": "https://www.dgi.ne",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -8958,10 +11914,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Niger — VAT standard rate (CGI art. 226) and registration threshold (art. 328)",
+        "url": "https://afriref.dev/ne/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2000-06-21): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (19% cited to CGI art. 226; Niger's standard rate is 19%, above the UEMOA directive's 18%).",
+      "Registration threshold of XOF 50,000,000 (grade S, CGI art. 328). The authority URL could not be verified this session.",
+    ],
   },
   "NF": {
     "code": "NF",
@@ -9011,10 +11978,49 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Lagos",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 750,
+          "from": "2020-02-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "zero",
+          "basisPoints": 0,
+          "from": "2026-01-01",
+          "to": null,
+          "appliesTo": "basic food, medicines, educational books, exports and other s.187 supplies",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 10000000000,
+        "currency": "NGN",
+        "period": "annualTurnoverSmallBusinessExclusion",
+        "source": 4,
+      },
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Nigeria Revenue Service (NRS, formerly FIRS)",
+      "url": "https://www.nrs.gov.ng",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -9034,10 +12040,35 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Nigeria Tax Act 2025 gazette (Act No. 7): s. 148 VAT 7.5%; ss. 186-187 exempt and zero-rated supplies (also mirrored on the NRS site)",
+        "url": "https://www.nrs.gov.ng/uploads/NIGERIA_TAX_ACT_2025_ef6bb812a5.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Nigeria Tax Administration Act 2025 gazette (small business rules; monthly VAT return by the 21st) as summarised in the nigeria-tax skill and afriref's NTAA citation",
+        "url": "https://afriref.dev/ng/vat-registration-threshold",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "afriref: Nigeria — VAT standard rate (NTA 2025 s. 148; 7.5% since 1 February 2020)",
+        "url": "https://afriref.dev/ng/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year (grade P, cross-checked against the nigeria-tax skill: the year of assessment is the calendar year under both the old regime and the Nigeria Tax Act 2025).",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "VAT is 7.5% (grade P): 5% until 31 January 2020 and 7.5% from 1 February 2020 under the Finance Act 2019 VATA amendment; the Nigeria Tax Act 2025, s. 148 keeps 7.5% in force from 1 January 2026. Cross-checked against the nigeria-tax skill - no disagreement found.",
+      "Zero-rated and exempt supplies (ss. 186-187 NTA) apply from 1 January 2026; the zero-rate row's date is the NTA commencement, not a change in the underlying treatment of the listed goods.",
+      "Small businesses (turnover NGN 100,000,000 or less, fixed assets NGN 250,000,000 or less, no professional services) are outside VAT unless they opt in (grade P, NTAA-based small business rule as summarised in the nigeria-tax skill; afriref cites the NTAA gazette for the same figure from 1 January 2026).",
+      "Monthly VAT return by the 21st of the following month, even if nil (grade P, NTAA s. 22 per the nigeria-tax skill).",
+    ],
   },
   "NI": {
     "code": "NI",
@@ -9510,10 +12541,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Muscat",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 500,
+          "from": "2021-04-16",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 38500000,
+        "currency": "OMR",
+        "period": "rolling12Months",
+        "source": 4,
+      },
+      "returnFrequency": "quarterly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Oman Tax Authority (OTA)",
+      "url": "https://www.taxoman.gov.om",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -9533,10 +12595,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Oman Tax Authority: VAT FAQs ('the standard rate of tax will be 5%'), in force since 16 April 2021 (cited by mearef)",
+        "url": "https://www.taxoman.gov.om",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "mearef: Oman — VAT rate (OTA VAT FAQs) and registration threshold (OTA Chairman's Decision: OMR 38,500)",
+        "url": "https://mearef.dev/om/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year as an app default (grade I); Oman levies no personal income tax today - a personal income tax on high earners was announced for 2028 and is not yet in force (grade S caveat).",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "VAT 5% since introduction on 16 April 2021 (grade P, OTA VAT FAQs and the VAT Royal Decree 121/2020 regime, cited by mearef).",
+      "Registration threshold of OMR 38,500 over 12 months (voluntary at OMR 19,250; grade S, OTA Chairman's decision per mearef).",
+      "Returns are quarterly, due within 30 days of quarter end (grade S).",
+    ],
   },
   "PA": {
     "code": "PA",
@@ -10011,10 +13091,36 @@ const Map<String, Map<String, Object?>> countryData = {
       "Asia/Gaza",
       "Asia/Hebron",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1600,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Finance",
+      "url": "https://www.mof.pna.ps",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10034,10 +13140,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "PwC Worldwide Tax Summaries: Palestinian territories — corporate other taxes (VAT 16%; last reviewed 12 August 2026)",
+        "url": "https://taxsummaries.pwc.com/Palestinian-territories/Corporate/Other-taxes",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rates secondary (grade S): VAT is 16% on deals subject to VAT (PwC Palestinian territories, last reviewed 12 August 2026). The rate's history is not published in English sources; the row starts at the coverage window's lower bound.",
+      "The Palestinian VAT rate is set under the Paris Protocol in step with Jordan and Israel; the authority's own pages were not reachable this session.",
+    ],
   },
   "PT": {
     "code": "PT",
@@ -10250,10 +13367,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Qatar",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "General Tax Authority (GTA)",
+      "url": "https://www.tax.gov.qa",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10273,10 +13407,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "mearef: Qatar — no VAT (General Tax Authority's taxes overview)",
+        "url": "https://mearef.dev/qa/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year as an app default (grade I); Qatar levies no personal income tax on salaries, so no individual tax year is prescribed.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Qatar levies no VAT or GST (grade S, mearef reading the GTA's own taxes overview): the GCC common VAT agreement (10% framework) is committed in principle but not in force as of November 2026.",
+    ],
   },
   "RE": {
     "code": "RE",
@@ -10288,10 +13432,52 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Indian/Reunion",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 850,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 210,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "goods and services qualifying for 5.5% or 10% in metropolitan France",
+          "source": 3,
+        },
+        {
+          "label": "superReduced",
+          "basisPoints": 175,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "particular rate (press, first performances)",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction générale des Finances publiques (DGFiP)",
+      "url": "https://www.impots.gouv.fr",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10311,10 +13497,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "economie.gouv.fr: TVA — quels sont les taux de votre quotidien (DROM rates 8.5%/2.1%/1.75%/1.05%; VAT not applicable in Guyane and Mayotte, CGI art. 294-1)",
+        "url": "https://www.economie.gouv.fr/particuliers/impots-et-fiscalite/gerer-mes-autres-impots-et-taxes/tva-quels-sont-les-taux-de-votre-quotidien",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Réunion is an outermost region of France and the EU: the DOM VAT rates apply (grade P, economie.gouv.fr) - 8.5% normal, 2.1% reduced, 1.75% and 1.05% particular rates; octroi de mer duties apply on top of VAT on imports.",
+      "Lower-bound rows - all rows start 2022-01-01: the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (the DOM rate structure has been stable for years; the official page states current rates without dates).",
+    ],
   },
   "RO": {
     "code": "RO",
@@ -10457,10 +13654,49 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Europe/Belgrade",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "PDV",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 2000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "listed goods and services",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 800000000,
+        "currency": "RSD",
+        "period": "annualTurnover",
+        "source": 4,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Tax Administration of the Republic of Serbia (Poreska uprava)",
+      "url": "https://www.poreskauprava.gov.rs",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10480,10 +13716,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+        "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "1stopVAT: VAT in Europe — standard rates and registration thresholds (August 2024)",
+        "url": "https://1stopvat.com/vat-in-europe",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - all rows start 2022-01-01: the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (20% standard and 10% reduced unchanged through the window).",
+      "Registration threshold of RSD 8,000,000 (grade S, 1stopVAT).",
+    ],
   },
   "RU": {
     "code": "RU",
@@ -10560,10 +13813,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Kigali",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 20000000,
+        "currency": "RWF",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Rwanda Revenue Authority (RRA)",
+      "url": "https://www.rra.gov.rw",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10583,10 +13867,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Rwanda — VAT standard rate (Law n° 049/2023, art. 4) and registration threshold (Law n° 020/2023)",
+        "url": "https://afriref.dev/rw/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "East African Community: Value Added Tax matrix (registration thresholds and return rules of the partner states)",
+        "url": "https://www.eac.int/financial/eac-tax-matrices/value-added-tax",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (18% was re-enacted by Law n° 049/2023 establishing VAT, art. 4, published 14 September 2023; the rate was 18% long before, including throughout the coverage window).",
+      "Registration threshold of RWF 20,000,000 (grade S; Law n° 020/2023 on tax procedures per afriref and the EAC VAT matrix).",
+      "VAT is declared monthly (or quarterly for taxpayers under RWF 200,000,000 turnover; grade S, EAC matrix).",
+    ],
   },
   "SA": {
     "code": "SA",
@@ -10598,10 +13900,49 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Riyadh",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "islamic",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 500,
+          "from": "2018-01-01",
+          "to": "2020-07-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2020-07-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 37500000,
+        "currency": "SAR",
+        "period": "rolling12Months",
+        "source": 4,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Zakat, Tax and Customs Authority (ZATCA)",
+      "url": "https://zatca.gov.sa",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10621,10 +13962,40 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "ZATCA (Saudi Arabia): Value Added Tax Law and Implementing Regulations — 5% from 1 January 2018, 15% from 1 July 2020",
+        "url": "https://zatca.gov.sa/en/RulesRegulations/Taxes/Pages/ValueAddedTax.aspx",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "ZATCA guideline on professional services under VAT provisions: mandatory registration threshold SAR 375,000 (Implementing Regulations art. 5)",
+        "url": "https://zatca.gov.sa/en/HelpCenter/guidelines/Documents/Guideline-on-Professional-Services-under-VAT-Provisions.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "ZATCA: Implementing Regulations for Zakat Collection — art. 15 (zakat year is the fiscal year, twelve lunar months by default; day-count rule for Gregorian years)",
+        "url": "https://zatca.gov.sa/en/RulesRegulations/Documents/ZAKAT%20COLLECTION.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "mearef: Saudi Arabia — VAT rate (ZATCA VAT Law: 15% from 1 July 2020) and registration threshold (GCC Common VAT Agreement art. 50(2))",
+        "url": "https://mearef.dev/sa/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "Non-Gregorian tax year (grade P, Implementing Regulations for Zakat Collection, art. 15, on zatca.gov.sa): a zakat payer's fiscal year is twelve lunar (Hijri) months - about 354 days, drifting roughly 11 days earlier each Gregorian year - and payers may adopt the Gregorian calendar year instead. The stored start (1 Muharram, approximated as 1 January) follows the default lunar year; Saudi and GCC nationals pay zakat (2.5% of the zakat base for a Hijri year; about 2.5778% by day-count for a 365-day Gregorian year), not income tax.",
+      "companyYearEndDefault is a 31 December app default (grade S): most Saudi zakat and tax payers keep a Gregorian year ending 31 December, and ZATCA assesses non-Hijri years by day count.",
+      "Effective dating of VAT (grade P, ZATCA's VAT Law and Implementing Regulations): VAT was introduced on 1 January 2018 at 5% and raised to 15% from 1 July 2020.",
+      "Registration threshold of SAR 375,000 taxable supplies over 12 months (voluntary at SAR 187,500; grade P, ZATCA's professional-services guideline citing art. 5 of the Implementing Regulations).",
+      "Returns are monthly where annual supplies exceed SAR 40,000,000 and quarterly otherwise (grade S); left as a caveat rather than a single frequency.",
+    ],
   },
   "SB": {
     "code": "SB",
@@ -10674,10 +14045,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Indian/Mahe",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Seychelles Revenue Commission (SRC)",
+      "url": "https://src.gov.sc",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10697,10 +14094,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (15%, introduced 2013, per AfroTools, March 2026). No threshold figure was sourced this pass; left null rather than guessed.",
+    ],
   },
   "SD": {
     "code": "SD",
@@ -10712,10 +14119,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Khartoum",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1700,
+          "from": "2017-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Taxation Chamber (Ministry of Finance and Economic Planning)",
+      "url": "https://tax.gov.sd",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10735,10 +14168,29 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Trading Economics: Sudan sales tax rate series (17% since 2017, per the Sudan Chamber of Taxation)",
+        "url": "https://tradingeconomics.com/sudan/sales-tax-rate",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2017-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (17% since 2017 per the Taxation Chamber series carried by Trading Economics; the Chamber restated the fixed 17% in March 2026).",
+      "Special VAT bands of 40% (telecommunications) and 30% (cigarettes) override the standard rate on those supplies (grade S); only the standard rate is modelled.",
+      "Monthly VAT return (Form 3) within 15 days of the month end (grade S). War-damaged administration means enforcement is uneven - caveat for users.",
+      "The authority URL could not be verified this session (grade S for the URL).",
+    ],
   },
   "SE": {
     "code": "SE",
@@ -10905,8 +14357,18 @@ const Map<String, Map<String, Object?>> countryData = {
     ],
     "individualTaxYear": null,
     "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "St Helena Government",
+      "url": "https://www.sainthelena.gov.sh",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10926,10 +14388,19 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "St Helena Government: taxation pages (income tax; no VAT/GST is chargeable)",
+        "url": "https://www.sainthelena.gov.sh",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "St Helena levies no VAT, GST or general sales tax (grade I: no VAT/GST is chargeable on the island; imports attract customs duties - not confirmed on a primary page this session).",
+      "individualTaxYear left null: the island's income tax year was not sourced this pass (grade I; the government's income tax pages were not reachable).",
+    ],
   },
   "SI": {
     "code": "SI",
@@ -11237,10 +14708,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Freetown",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "gst",
+      "localName": "GST",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "National Revenue Authority (NRA)",
+      "url": "https://www.nra.gov.sl",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11260,10 +14757,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (15% GST per AfroTools, March 2026); no primary source was reachable this session.",
+    ],
   },
   "SM": {
     "code": "SM",
@@ -11275,10 +14782,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Europe/San_Marino",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "consumptionTax",
+      "localName": "Imposta monofase (single-stage import tax)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1700,
+          "from": "2011-11-22",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Segreteria di Stato per le Finanze e il Bilancio",
+      "url": "https://www.segreteriafinanze.sm",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11298,10 +14831,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Bloomberg Tax VAT Navigator: San Marino (no VAT; single-stage import tax imposta monofase at 17% since Delegate Decree No. 183 of 22 November 2011, with 2% and 6% reduced bands and a 3% service tax; no input credit)",
+        "url": "https://www.sferastp.com/wp-content/uploads/2022/11/VAT_San-Marino_final.pdf",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+        "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-02-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (grade S; declarations are filed by 30 June for the prior calendar year).",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "San Marino levies no VAT (grade S): goods carry a single-stage import tax (imposta monofase) at a 17% standard rate - set by Delegate Decree No. 183 of 22 November 2011 - with reduced bands (2%, 6%) and no input-tax credit; a 3% service tax applies separately. A VAT-like regime has been announced for 2027 (grade S, FiscaWorld August 2026) - early re-check.",
+      "Several secondary tables list a '17% VAT' for San Marino; it is the monofase import tax, not a VAT.",
+    ],
   },
   "SN": {
     "code": "SN",
@@ -11313,10 +14863,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Dakar",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2013-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts et des Domaines (DGID)",
+      "url": "https://www.impots.finances.sn",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11336,10 +14912,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Senegal — VAT standard rate (CGI, Loi n° 2012-31)",
+        "url": "https://afriref.dev/sn/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2013-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% cited to the CGI, Loi n° 2012-31).",
+      "No single registration threshold is published (grade S, afriref); left null rather than guessed. TVA returns are monthly (grade S).",
+    ],
   },
   "SO": {
     "code": "SO",
@@ -11351,10 +14938,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Mogadishu",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "Sales tax",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Finance",
+      "url": "https://www.mof.gov.so",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11374,10 +14987,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rates secondary only (grade S): a 10% general sales tax with limited enforcement outside major cities (AfroTools, March 2026; corroborated by a second secondary tracker). Some references describe a lower rate on selected services; not recorded without a source.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window).",
+    ],
   },
   "SR": {
     "code": "SR",
@@ -11429,8 +15053,27 @@ const Map<String, Map<String, Object?>> countryData = {
     ],
     "individualTaxYear": null,
     "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "Sales tax",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "National Revenue Authority (NRA)",
+      "url": "https://www.nra.gov.ss",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11450,10 +15093,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "South Sudan Business Guide: sales tax and excise — rates and legal basis (2024/2025 Financial Act: 18% in Schedule 1 with conflicting section rates; VAT draft discussed May 2026)",
+        "url": "https://southsudanbusinessguide.com/sales-tax-south-sudan/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-02-13",
+    "caveats": [
+      "individualTaxYear left null (grade I): sources conflict - the government's fiscal year runs 1 July to 30 June, while one secondary table describes a calendar tax year; not recorded rather than guessed.",
+      "companyYearEndDefault left null for the same reason.",
+      "Rates secondary (grade S): the 2024/2025 Financial Act's Schedule 1 sets an 18% sales tax, but its sections 11, 13 and 14 carry different figures (1-20% and 20%) with no official reconciliation located as of 11 November 2026; recorded at 18% with the conflict flagged.",
+      "Draft VAT legislation was discussed with the IMF in May 2026; no signed law or commencement notice was found (grade S).",
+    ],
   },
   "ST": {
     "code": "ST",
@@ -11465,10 +15119,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Sao_Tome",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "IVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministério das Finanças (Direção dos Impostos)",
+      "url": "https://www.financas.gov.st",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11488,10 +15168,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+        "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "São Tomé e Príncipe: Ministério das Finanças e Economia Azul (Direção dos Impostos)",
+        "url": "https://www.financas.gov.st",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (15% per AfroTools, March 2026); no primary source was reachable this session.",
+      "The authority URL could not be verified this session (grade S for the URL).",
+    ],
   },
   "SV": {
     "code": "SV",
@@ -11579,10 +15276,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Damascus",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Finance – General Commission for Taxes and Fees",
+      "url": "https://mof.gov.sy",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11602,10 +15316,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VAT Review: Syria — the 5% Sales Tax Law was finalised in 2025 but no commencement date was published; the consumption expenditure tax instructions were reissued 1 July 2026",
+        "url": "https://vatreview.com/syria",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Nomad Watch: Syria tax profile (no general VAT; selective consumption taxes; fiscal year 1 January to 31 December; Income Tax Law 24 of 2003 as amended)",
+        "url": "https://nomad.watch/countries/SY/taxes",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-02-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (grade S; secondary review of the Income Tax Law No. 24 of 2003 framework).",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Syria levies no general VAT (grade S): the consumption expenditure tax (Legislative Decree 11 of 2015) still operates - its implementing instructions were reissued on 1 July 2026. A new Sales Tax Law with a 5% general rate (and up to 15% on luxuries, 45% pork, 84% alcohol) was finalised in late 2025, but no source states a commencement date and none was found applying it - recorded as none with an early re-check.",
+      "Post-2024 transition makes every Syrian figure volatile; the authority site was not reachable this session.",
+    ],
   },
   "SZ": {
     "code": "SZ",
@@ -11617,10 +15348,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Mbabane",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 7,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 6,
+      "day": 30,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2018-08-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 90000000,
+        "currency": "SZL",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Eswatini Revenue Service (ERS)",
+      "url": "https://www.sra.org.sz",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11640,10 +15402,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Eswatini — VAT standard rate (Eswatini Revenue Service guidance) and registration threshold (VAT Act 2011, s.6(1))",
+        "url": "https://afriref.dev/sz/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear runs 1 July to 30 June (grade S; PwC Eswatini, 'the tax year runs from 1 July to 30 June', returns within 120 days of 30 June).",
+      "companyYearEndDefault is a 30 June default aligned to the tax year (grade S); companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2018-08-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (15% cited to the ERS taxpayer guidance per afriref).",
+      "Registration threshold of SZL 900,000 from 1 April 2024 (grade S; Value Added Tax Act 2011 s.6(1) per afriref).",
+    ],
   },
   "TC": {
     "code": "TC",
@@ -11693,10 +15466,57 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Ndjamena",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2016-01-01",
+          "to": "2024-01-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1750,
+          "from": "2024-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 900,
+          "from": "2024-01-01",
+          "to": null,
+          "appliesTo": "listed local products (sugar, oil, soap, textiles, local agri-food products)",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 50000000,
+        "currency": "XAF",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministère des Finances et du Budget (Direction Générale des Impôts)",
+      "url": "https://finances.gouv.td",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11716,10 +15536,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Chad — VAT standard rate (verbatim article 26 of the 2024 finance law: 18% replaced by 17.5% from 1 January 2024) and registration threshold",
+        "url": "https://afriref.dev/td/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Effective dating (grade S, verbatim from the enacted law quoted by afriref): article 26 of the 2024 finance law (Loi n°031/PT/2023) replaced '18%' with '17,5%' in CGI art. 238-I-1° from 1 January 2024; the 9% reduced band on listed local products was introduced at the same time.",
+      "Stale secondary tables (including PwC, last reviewed August 2024) still publish 18% for Chad; afriref re-extracted the enacted 17.5% text from the CABRI budget-library PDF and the earlier 18% from the 2016 CGI.",
+      "Registration threshold of XAF 50,000,000 (grade S, CGI 2025 per afriref).",
+    ],
   },
   "TF": {
     "code": "TF",
@@ -11733,8 +15565,18 @@ const Map<String, Map<String, Object?>> countryData = {
     ],
     "individualTaxYear": null,
     "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Terres australes et antarctiques françaises (TAAF)",
+      "url": "https://www.taaf.fr",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11754,10 +15596,19 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "TAAF — Terres australes et antarctiques françaises (official site of the French Southern and Antarctic Lands)",
+        "url": "https://www.taaf.fr",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "The French Southern Territories have no permanent civilian population and no resident tax system (grade I); no VAT, GST or sales tax applies.",
+      "individualTaxYear and companyYearEndDefault are left null: there is no personal or corporate tax year to record (grade I, no primary source reachable this session).",
+    ],
   },
   "TG": {
     "code": "TG",
@@ -11769,10 +15620,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Lome",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2019-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 100000000,
+        "currency": "XOF",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Office Togolais des Recettes (OTR)",
+      "url": "https://www.otr.tg",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11792,10 +15674,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Togo — VAT standard rate (CGI, Loi n° 2018-024) and registration threshold (art. 177)",
+        "url": "https://afriref.dev/tg/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2019-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% cited to the CGI, Loi n° 2018-024).",
+      "Registration threshold of XOF 100,000,000 from 1 January 2025 (grade S; CGI art. 177 per afriref - raised from XOF 50,000,000).",
+    ],
   },
   "TH": {
     "code": "TH",
@@ -11845,10 +15738,73 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Dushanbe",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": "2024-01-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1400,
+          "from": "2024-01-01",
+          "to": "2027-01-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1300,
+          "from": "2027-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 700,
+          "from": "2024-01-01",
+          "to": null,
+          "appliesTo": "construction work, hotel services and catering",
+          "source": 3,
+        },
+        {
+          "label": "reduced2",
+          "basisPoints": 500,
+          "from": "2024-01-01",
+          "to": null,
+          "appliesTo": "domestic agricultural products, processing, training and sanatorium medical services",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 100000000,
+        "currency": "TJS",
+        "period": "rolling12Months",
+        "source": 4,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Tax Committee under the President of the Republic of Tajikistan",
+      "url": "https://andoz.tj",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11868,10 +15824,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Tax Code of the Republic of Tajikistan (unofficial English translation, consolidated to Law No. 2168 of 14 May 2025): heading note and art. 397(4) — 14% from 1 January 2024 to 31 December 2026, 13% from 1 January 2027",
+        "url": "https://andoz.tj/docs/kodex/Kodex_14_05_2025_Nav_ENG_en.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Grant Thornton: indirect tax guide — Tajikistan (14% standard with 7% and 5% reduced bands; TJS 1 million registration threshold)",
+        "url": "https://www.grantthornton.global/en/insights/indirect-tax-guide/indirect-tax---Tajikistan",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Effective dating (grade P, the Tax Code's own heading note, art. 397(4), consolidated to Law No. 2168 of 14 May 2025, published in English by the Tax Committee): the rate under art. 264(1)(1) is 14% for 1 January 2024 to 31 December 2026 and 13% from 1 January 2027. The 2022 Tax Code had cut the rate from 18% to 15% effective 1 January 2022; the 13% row is pre-recorded ahead of its 2027 start.",
+      "Reduced bands of 7% and 5% apply per art. 264(1) (grade P, Grant Thornton's snapshot of the same code).",
+      "Registration threshold of TJS 1,000,000 over the previous 12 months (grade S; Grant Thornton and VAT compliance trackers).",
+    ],
   },
   "TK": {
     "code": "TK",
@@ -11959,10 +15933,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Ashgabat",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Main State Tax Service (Ministry of Finance)",
+      "url": "https://www.sai.gov.tm",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11982,10 +15982,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "US International Trade Administration country commercial guide: Turkmenistan (standard VAT rate 15%)",
+        "url": "https://www.trade.gov/country-commercial-guides/turkmenistan-import-tariffs",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "GSL: taxes of Turkmenistan (VAT normally paid at 15%; zero rate for exports other than oil and gas)",
+        "url": "https://gsl.org/en/taxes/turkmenistan",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) - the rate was already 15% when the US Department of Commerce's 2020 country guide published, and secondary readings of the Tax Code keep it at 15% (art. 103).",
+      "The Tax Code sets no explicit turnover threshold for VAT registration (grade S); left null rather than guessed.",
+      "The authority URL could not be verified this session (grade S for the URL).",
+    ],
   },
   "TN": {
     "code": "TN",
@@ -11997,10 +16015,52 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Tunis",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1900,
+          "from": "2018-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 1300,
+          "from": "2018-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "superReduced",
+          "basisPoints": 700,
+          "from": "2018-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (DGI)",
+      "url": "https://www.impots.finances.gov.tn",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12020,10 +16080,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Tunisia — VAT standard rate (loi de finances 2018, art. 43 raised 18/12/6% to 19/13/7%)",
+        "url": "https://afriref.dev/tn/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "PwC Worldwide Tax Summaries: Tunisia — corporate other taxes (VAT rates; 2025 and 2026 finance law changes; monthly filing by day 20)",
+        "url": "https://taxsummaries.pwc.com/tunisia/corporate/other-taxes",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Effective dating (grade S, afriref quoting loi de finances 2018, art. 43 verbatim): the standard rate rose from 18% to 19%, the intermediate band from 12% to 13% and the reduced band from 6% to 7%, all from 1 January 2018. Finance laws since (including 2025 and 2026) left article 7 of the VAT Code untouched.",
+      "No single registration threshold is published (grade S, afriref); left null rather than guessed.",
+      "Monthly tax returns are due by day 20 of the following month (grade S; the 2024 finance law cut the deadline from day 28).",
+    ],
   },
   "TO": {
     "code": "TO",
@@ -12318,10 +16396,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Dar_es_Salaam",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2009-07-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 200000000,
+        "currency": "TZS",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Tanzania Revenue Authority (TRA)",
+      "url": "https://www.tra.go.tz",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12341,10 +16450,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Tanzania — VAT standard rate (Finance Act 2009) and registration threshold (GN No. 448Y of 30 June 2023)",
+        "url": "https://afriref.dev/tz/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "East African Community: Value Added Tax matrix (registration thresholds and return rules of the partner states)",
+        "url": "https://www.eac.int/financial/eac-tax-matrices/value-added-tax",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2009-07-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% set by the Finance Act 2009).",
+      "Registration threshold of TZS 200,000,000 from 1 July 2023 (grade S; GN No. 448Y of 30 June 2023 per afriref - raised from TZS 100,000,000, and far above the EAC matrix's older TZS 40,000,000 figure).",
+      "VAT returns are monthly (grade S).",
+    ],
   },
   "UA": {
     "code": "UA",
@@ -12357,10 +16484,41 @@ const Map<String, Map<String, Object?>> countryData = {
       "Europe/Kyiv",
       "Europe/Simferopol",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "PDV",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 2000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 100000000,
+        "currency": "UAH",
+        "period": "calendarYear",
+        "source": 4,
+      },
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "State Tax Service of Ukraine (DPS)",
+      "url": "https://tax.gov.ua",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12380,10 +16538,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Tax Foundation: 2022 VAT Rates in Europe (table as of January 2022, sourced from the European Commission's Taxes in Europe Database)",
+        "url": "https://taxfoundation.org/data/all/eu/value-added-tax-2022-vat-rates-in-europe/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "1stopVAT: VAT in Europe — standard rates and registration thresholds (August 2024)",
+        "url": "https://1stopvat.com/vat-in-europe",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (20% confirmed applying from 1 January 2022 by the Tax Foundation's January 2022 table; the 20% rate dates back to 2014 per general references, unverified this pass).",
+      "Registration threshold of UAH 1,000,000 taxable turnover in a calendar year (grade S, 1stopVAT); VAT is generally monthly, quarterly for some small taxpayers (grade S).",
+      "Martial-law measures (reporting deadlines, penalties) change frequently; rates themselves have been stable.",
+    ],
   },
   "UG": {
     "code": "UG",
@@ -12395,10 +16571,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Kampala",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2005-07-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 300000000,
+        "currency": "UGX",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Uganda Revenue Authority (URA)",
+      "url": "https://www.ura.go.ug",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12418,10 +16625,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Uganda — VAT standard rate (VAT (Rate of Tax) Order 2006) and registration threshold (Parliament, April 2026)",
+        "url": "https://afriref.dev/ug/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Lower-bound rows - standard (2005-07-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% under the VAT (Rate of Tax) Order 2006 per afriref).",
+      "Registration threshold of UGX 300,000,000 from 1 July 2026 (grade S; Parliament's April 2026 announcement cited by afriref - raised from UGX 150,000,000).",
+    ],
   },
   "UM": {
     "code": "UM",
@@ -12576,10 +16794,44 @@ const Map<String, Map<String, Object?>> countryData = {
       "Asia/Tashkent",
       "Asia/Samarkand",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2019-10-01",
+          "to": "2023-01-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1200,
+          "from": "2023-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Tax Committee",
+      "url": "https://soliq.uz",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12599,10 +16851,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Uzbekistan Tax Code art. 258 with the amending instruments (per Leader Audit's legal citations): 20% to 30 September 2019; 15% from 1 October 2019 (Decree UP-5837); 12% from 1 January 2023 (Law ZRU-812)",
+        "url": "https://leaderaudit.uz/en/vat-rate-uzbekistan",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "EY: Doing Business in Uzbekistan 2025 (standard VAT rate 12%; rates frozen until 2028 by Presidential Decree UP-229)",
+        "url": "https://www.ey.com/content/dam/ey-unified-site/ey-com/en-uz/documents/doing-business-uz-2025.pdf",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Effective dating (grade P, Tax Code art. 258 with the amending laws named): 20% until 30 September 2019; 15% from 1 October 2019 (Presidential Decree UP-5837, restated by Law ZRU-599 from 2020); 12% from 1 January 2023 (Law ZRU-812 of 30 December 2022). Presidential Decree UP-229 freezes the VAT and income tax rates until 1 January 2028 (grade S).",
+      "The tax period is one month (grade S, art. 259 per Uzbek tax guides).",
+      "No single registration threshold is recorded: VAT payer status turns on regime choice (turnover-tax payers with income up to UZS 1 billion from 2026) rather than a simple VAT threshold (grade S); left null rather than guessed.",
+    ],
   },
   "VA": {
     "code": "VA",
@@ -12614,10 +16884,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Europe/Vatican",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Governatorato dello Stato della Città del Vaticano",
+      "url": "https://www.vatican.va",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12637,10 +16924,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VatInfo.org: countries with no VAT in 2026 (Gibraltar Transaction Tax from 15 July 2026; Kuwait, Qatar, Greenland, San Marino, Syria, Afghanistan and others)",
+        "url": "https://vatinfo.org/countries-with-no-vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (grade I; the Vatican City State has no general income tax - employees of the Holy See are exempt under the Lateran instruments).",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The Vatican City levies no VAT or sales tax (grade I; it is outside the EU VAT area and purchases flow through Italian arrangements - not confirmed on a primary page this session).",
+    ],
   },
   "VC": {
     "code": "VC",
@@ -12956,10 +17253,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Aden",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "gst",
+      "localName": "General Sales Tax (GST)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 500,
+          "from": "2001-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Yemen Tax Authority",
+      "url": "https://www.tax.gov.ye",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12979,10 +17302,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Nomad Watch: Yemen tax profile (GST 5% under Law No. 19 of 2001; calendar tax year; monthly declarations within 21 days)",
+        "url": "https://nomad.watch/countries/YE/taxes",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (grade S; the tax year is the calendar year).",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rates secondary (grade S): the general sales tax is 5% on most taxable supplies and imports under Law No. 19 of 2001 (a WTO accession text and Moore/Grant Thornton guides); a 10% rate on telecoms is reported but not separately recorded. The row's start is a lower bound - the 2001 law date; the exact first application of the 5% general rate is not pinned.",
+      "GST declarations are monthly, within the first 21 days of the following month (grade S).",
+    ],
   },
   "YT": {
     "code": "YT",
@@ -12994,10 +17328,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Indian/Mayotte",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction générale des Finances publiques (DGFiP)",
+      "url": "https://www.impots.gouv.fr",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -13017,10 +17368,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "economie.gouv.fr: TVA — quels sont les taux de votre quotidien (DROM rates 8.5%/2.1%/1.75%/1.05%; VAT not applicable in Guyane and Mayotte, CGI art. 294-1)",
+        "url": "https://www.economie.gouv.fr/particuliers/impots-et-fiscalite/gerer-mes-autres-impots-et-taxes/tva-quels-sont-les-taux-de-votre-quotidien",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "VAT does not apply in Mayotte (grade P, economie.gouv.fr citing CGI art. 294-1: VAT is provisionally not applicable in Guyane and Mayotte); the octroi de mer and customs duties apply instead.",
+      "Mayotte is an outermost region of France and the EU; income tax follows the French calendar year.",
+    ],
   },
   "ZA": {
     "code": "ZA",
@@ -13032,10 +17394,49 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Johannesburg",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 3,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 2,
+      "day": 28,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2018-04-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "zero",
+          "basisPoints": 0,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "basic foodstuffs and other zero-rated schedule items",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 230000000,
+        "currency": "ZAR",
+        "period": "rolling12Months",
+        "source": 3,
+      },
+      "returnFrequency": "bimonthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "South African Revenue Service (SARS)",
+      "url": "https://www.sars.gov.za",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -13055,10 +17456,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: South Africa — VAT standard rate (SARS tax rates page; 15% since 1 April 2018) and registration threshold (SARS registration page)",
+        "url": "https://afriref.dev/za/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear runs 1 March to the end of February (grade S; SARS's standard year of assessment).",
+      "companyYearEndDefault is a 28 February default aligned to the year of assessment (grade S); companies may choose other year ends under the Income Tax Act.",
+      "Lower-bound rows - standard (2018-04-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (15% since 1 April 2018 per SARS's tax-rates page, last updated 14 May 2026, cited by afriref). The 2025 and 2026 budget proposals to raise the rate were withdrawn; 15% stands.",
+      "Registration threshold of ZAR 2,300,000 in force from 1 April 2026 (grade S; SARS's registration page per afriref - raised from ZAR 1,000,000, which applied throughout the earlier coverage window).",
+      "VAT periods are two months (grade S); some categories file monthly or every six months.",
+    ],
   },
   "ZM": {
     "code": "ZM",
@@ -13070,10 +17483,41 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Lusaka",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 4,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 3,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1600,
+          "from": "2008-04-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 80000000,
+        "currency": "ZMW",
+        "period": "annualTurnover",
+        "source": 3,
+      },
+      "returnFrequency": "monthly",
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Zambia Revenue Authority (ZRA)",
+      "url": "https://www.zra.org.zm",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -13093,10 +17537,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "afriref: Zambia — VAT standard rate (ZRA practice notes 2008) and registration threshold (VAT Act Cap 331, s. 28)",
+        "url": "https://afriref.dev/zm/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear runs 1 April to 31 March (grade S; the Zambian charge year, standard ZRA practice).",
+      "companyYearEndDefault is a 31 March default aligned to the charge year (grade S).",
+      "Lower-bound rows - standard (2008-04-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (16% per the ZRA's own 2008 practice notes, cited by afriref).",
+      "Registration threshold of ZMW 800,000 (grade S; VAT Act Cap 331, s. 28 per afriref).",
+    ],
   },
   "ZW": {
     "code": "ZW",
@@ -13109,10 +17564,49 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Africa/Harare",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "VAT",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": "2026-01-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1550,
+          "from": "2026-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": {
+        "amountMinor": 2500000,
+        "currency": "USD",
+        "period": "rolling12Months",
+        "source": 3,
+      },
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Zimbabwe Revenue Authority (ZIMRA)",
+      "url": "https://www.zimra.co.zw",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -13132,9 +17626,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "ZIMRA Public Notice No. 7 of 2026 (quoted by LookupTax): VAT rate rose from 15% to 15.5% from 1 January 2026 under Finance Act 2025 (No. 7 of 2025), s. 34",
+        "url": "https://www.lookuptax.com/tax-changes/zimbabwe/vat-rate-15-5",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year (grade S; ZIMRA Public Notice 58 of 2026, per a secondary reading of the notice).",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Effective dating (grade S, ZIMRA Public Notice No. 7 of 2026 quoting Finance Act, 2025 (No. 7 of 2025), s. 34): the general VAT rate rose from 15% to 15.5% from 1 January 2026, with transitional treatment for Category A filers on the combined December 2025/January 2026 return. The 15% row starts at the coverage window's lower bound.",
+      "Registration is compulsory once taxable supplies exceed USD 25,000 (or ZiG equivalent) in 12 months (grade S; ZIMRA registration guidance via secondary readings).",
+      "Filing frequency varies by VAT category (monthly, bi-monthly, or per ZIMRA allocation); left null rather than guessed.",
+    ],
   },
 };

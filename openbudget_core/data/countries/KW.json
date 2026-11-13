@@ -8,10 +8,27 @@
   "timeZones": [
     "Asia/Kuwait"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "none",
+    "localName": null,
+    "rates": [],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Ministry of Finance",
+    "url": "https://www.mof.gov.kw"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +47,25 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "mearef: Kuwait — no VAT (KDIPA official investment guidance; the GCC agreement was signed but never enacted)",
+      "url": "https://mearef.dev/kw/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VatInfo.org: countries with no VAT in 2026 (Gibraltar Transaction Tax from 15 July 2026; Kuwait, Qatar, Greenland, San Marino, Syria, Afghanistan and others)",
+      "url": "https://vatinfo.org/countries-with-no-vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year as an app default (grade I); Kuwait levies no personal income tax, so no individual tax year is prescribed.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Kuwait levies no VAT or GST (grade S): it signed the GCC VAT agreement but has never enacted a VAT law, and its 2026-2030 fiscal plan contains no VAT provision (mearef reading KDIPA's official investment guidance; VatInfo, September 2026)."
+  ]
 }

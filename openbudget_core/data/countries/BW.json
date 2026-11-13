@@ -8,10 +8,65 @@
   "timeZones": [
     "Africa/Gaborone"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 7,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 6,
+    "day": 30
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1400,
+        "from": "2021-04-01",
+        "to": "2022-08-03",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1200,
+        "from": "2022-08-03",
+        "to": "2023-04-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1400,
+        "from": "2023-04-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      },
+      {
+        "label": "zero",
+        "basisPoints": 0,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "basic foodstuffs and other listed schedule items",
+        "source": 4
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 100000000,
+      "currency": "BWP",
+      "period": "annualTurnover",
+      "source": 4
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Botswana Unified Revenue Service (BURS)",
+    "url": "https://www.burs.org.bw"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +85,26 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "PwC Worldwide Tax Summaries: Botswana — individual significant developments (VAT rate history 2021-2023) and corporate other taxes",
+      "url": "https://taxsummaries.pwc.com/botswana/individual/significant-developments",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Botswana — VAT standard rate and registration threshold (cited to the Value Added Tax Act, 2026, s 7(2))",
+      "url": "https://afriref.dev/bw/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear runs 1 July to 30 June (grade S; PwC Botswana, which dates the employer annual return to within 31 days of the 30 June year end).",
+    "companyYearEndDefault is a 30 June default aligned to the tax year (grade S); companies may choose other year ends under national law.",
+    "Effective dating (grade S): VAT rose from 12% to 14% on 1 April 2021; the rate was temporarily cut back to 12% from 3 August 2022 (SI 96 of 2022, extended to 31 March 2023) and reverted to 14% on 1 April 2023. The 14% row is re-enacted by the Value Added Tax Act, 2026 (No. 15 of 2026), s 7(2), quoted by afriref.",
+    "VAT registration threshold of BWP 1,000,000 annual turnover (grade S)."
+  ]
 }

@@ -8,10 +8,41 @@
   "timeZones": [
     "Africa/Addis_Ababa"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 7,
+    "startDay": 8,
+    "calendar": "ethiopic"
+  },
+  "companyYearEndDefault": {
+    "month": 7,
+    "day": 7
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2003-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 200000000,
+      "currency": "ETB",
+      "period": "annualTurnover",
+      "source": 4
+    },
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Ministry of Revenues (MoR)",
+    "url": "https://mor.gov.et"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +61,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Federal Income Tax Proclamation No. 979/2016 (Ethiopia), art. 2(21): tax year for an individual is 1 Hamle to 30 Sene (8 July to 7 July)",
+      "url": "https://ethiodata.et/wp-content/uploads/2023/01/Ethiopia-Federal-Income-Tax-Proclamation-No.-979_-2016-English.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Ethiopia — VAT standard rate (Proclamation No. 1341/2024, art. 8(2); 15% since Proclamation 285/2002) and registration threshold",
+      "url": "https://afriref.dev/et/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Non-Gregorian tax year (grade P, Federal Income Tax Proclamation No. 979/2016, art. 2(21)): for an individual the tax year is the one-year period from 1 Hamle to 30 Sene in the Ethiopian calendar, which is 8 July to 7 July in a common Gregorian year. The Gregorian dates shift by a day around the Ethiopian leap month (Pagume, 5-6 days), so the stored start is the common-year approximation.",
+    "companyYearEndDefault of 7 July follows the Ethiopian fiscal year (grade S): bodies are taxed on their accounting year, and most Ethiopian businesses use the government fiscal year ending 30 Sene (7 July).",
+    "Lower-bound rows - standard (2003-01-01): 15% was set by the repealed VAT Proclamation No. 285/2002 (in force January 2003) and re-enacted unchanged by Proclamation No. 1341/2024, art. 8(2), quoted by afriref (grade S).",
+    "Registration threshold of ETB 2,000,000 annual turnover under Proclamation No. 1341/2024 (grade S; the 2024 proclamation raised it from ETB 600,000, effective from its publication on 21 August 2024).",
+    "VAT returns are filed monthly (grade S)."
+  ]
 }

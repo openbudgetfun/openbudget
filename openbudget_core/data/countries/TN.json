@@ -8,10 +8,52 @@
   "timeZones": [
     "Africa/Tunis"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "TVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1900,
+        "from": "2018-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 1300,
+        "from": "2018-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "superReduced",
+        "basisPoints": 700,
+        "from": "2018-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Direction Générale des Impôts (DGI)",
+    "url": "https://www.impots.finances.gov.tn"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +72,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Tunisia — VAT standard rate (loi de finances 2018, art. 43 raised 18/12/6% to 19/13/7%)",
+      "url": "https://afriref.dev/tn/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "PwC Worldwide Tax Summaries: Tunisia — corporate other taxes (VAT rates; 2025 and 2026 finance law changes; monthly filing by day 20)",
+      "url": "https://taxsummaries.pwc.com/tunisia/corporate/other-taxes",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Effective dating (grade S, afriref quoting loi de finances 2018, art. 43 verbatim): the standard rate rose from 18% to 19%, the intermediate band from 12% to 13% and the reduced band from 6% to 7%, all from 1 January 2018. Finance laws since (including 2025 and 2026) left article 7 of the VAT Code untouched.",
+    "No single registration threshold is published (grade S, afriref); left null rather than guessed.",
+    "Monthly tax returns are due by day 20 of the following month (grade S; the 2024 finance law cut the deadline from day 28)."
+  ]
 }

@@ -8,10 +8,41 @@
   "timeZones": [
     "Europe/Isle_of_Man"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 4,
+    "startDay": 6,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2000,
+        "from": "2011-01-04",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 9000000,
+      "currency": "GBP",
+      "period": "rolling12Months",
+      "source": 3
+    },
+    "returnFrequency": "quarterly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Income Tax Division (Isle of Man Treasury)",
+    "url": "https://www.gov.im/incometax"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +61,26 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Isle of Man Customs & Excise: the Isle of Man applies UK VAT law (20% standard rate, GBP 90,000 registration threshold from April 2024, quarterly returns) under the Customs and Excise Agreement 1979",
+      "url": "https://www.gov.im/customs",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Isle of Man Treasury Assessor: income tax (year of assessment runs 6 April to 5 April, as in the UK)",
+      "url": "https://www.gov.im/incometax",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear runs 6 April to 5 April, like the UK's (grade S; the Isle of Man Income Tax Division's year of assessment).",
+    "companyYearEndDefault is a 31 December app default (grade I); Manx companies choose their own accounting date, with the first accounting reference date set after incorporation.",
+    "The Isle of Man is part of the UK VAT area under the Customs and Excise Agreement 1979: UK VAT law, including the 20% standard rate in force since 4 January 2011 and the registration threshold (GBP 90,000 from 1 April 2024), applies unchanged (grade S, Isle of Man Customs & Excise guidance).",
+    "Returns are quarterly as in the UK (grade S)."
+  ]
 }

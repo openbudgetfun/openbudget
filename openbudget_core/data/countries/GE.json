@@ -8,10 +8,41 @@
   "timeZones": [
     "Asia/Tbilisi"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1800,
+        "from": "2004-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 10000000,
+      "currency": "GEL",
+      "period": "calendarYear",
+      "source": 3
+    },
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Revenue Service of the Ministry of Finance (RS)",
+    "url": "https://www.rs.ge"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +61,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Andersen Georgia: VAT rules under the Georgian Tax Code (18% rate unchanged since 2004; GEL 100,000 registration threshold; monthly returns)",
+      "url": "https://ge.andersen.com/vat-in-georgia",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Grant Thornton: indirect tax guide — Georgia (18% standard rate)",
+      "url": "https://www.grantthornton.global/en/insights/indirect-tax-guide/indirect-tax---Georgia",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2004-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% flat; the rate has remained unchanged since 2004 per Andersen Georgia's 2025 review - no 19% increase exists, contrary to some secondary tables).",
+    "Registration threshold of GEL 100,000 taxable turnover in a calendar year (grade S; multiple Georgian practice guides).",
+    "VAT returns are monthly, due by the 15th of the following month (grade S)."
+  ]
 }

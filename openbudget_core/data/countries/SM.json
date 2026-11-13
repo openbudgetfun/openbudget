@@ -8,10 +8,36 @@
   "timeZones": [
     "Europe/San_Marino"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "consumptionTax",
+    "localName": "Imposta monofase (single-stage import tax)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1700,
+        "from": "2011-11-22",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Segreteria di Stato per le Finanze e il Bilancio",
+    "url": "https://www.segreteriafinanze.sm"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +56,26 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Bloomberg Tax VAT Navigator: San Marino (no VAT; single-stage import tax imposta monofase at 17% since Delegate Decree No. 183 of 22 November 2011, with 2% and 6% reduced bands and a 3% service tax; no input credit)",
+      "url": "https://www.sferastp.com/wp-content/uploads/2022/11/VAT_San-Marino_final.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+      "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-02-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (grade S; declarations are filed by 30 June for the prior calendar year).",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "San Marino levies no VAT (grade S): goods carry a single-stage import tax (imposta monofase) at a 17% standard rate - set by Delegate Decree No. 183 of 22 November 2011 - with reduced bands (2%, 6%) and no input-tax credit; a 3% service tax applies separately. A VAT-like regime has been announced for 2027 (grade S, FiscaWorld August 2026) - early re-check.",
+    "Several secondary tables list a '17% VAT' for San Marino; it is the monofase import tax, not a VAT."
+  ]
 }
