@@ -106,6 +106,8 @@ import 'package:openbudget_client/src/protocol/tax/tax_profile.dart'
     as _ibyrfq34;
 import 'package:openbudget_client/src/protocol/tax/tax_report_view.dart'
     as _ieaa4q0n;
+import 'package:openbudget_client/src/protocol/tax/tax_summary_view.dart'
+    as _iets520s;
 import 'package:openbudget_client/src/protocol/transaction_rules/transaction_rule.dart'
     as _iwxd5v0a;
 import 'package:openbudget_client/src/protocol/transactions/import_result.dart'
@@ -2011,7 +2013,8 @@ class EndpointSettings extends _isc.EndpointRef {
   );
 }
 
-/// API surface for tax profiles, line coding, envelope defaults and reports.
+/// API surface for tax profiles, line coding, envelope defaults, reports
+/// and tax-ready summaries.
 ///
 /// Every method requires authentication and delegates to [TaxService], which
 /// owns the entity boundary and the write rules.
@@ -2111,6 +2114,25 @@ class EndpointTax extends _isc.EndpointRef {
   }) => caller.callServerEndpoint<_ieaa4q0n.TaxReportView>(
     'tax',
     'getReport',
+    {
+      'entityId': entityId,
+      'startYear': startYear,
+    },
+  );
+
+  /// Builds the entity's tax-ready summary for the year starting in
+  /// [startYear].
+  ///
+  /// When [startYear] is null the year containing the entity's local today
+  /// is used. Every country is served: a pack country uses its pack's tax
+  /// year, any other country its universal tax year, and a company its own
+  /// financial year.
+  _ida.Future<_iets520s.TaxSummaryView> getSummary(
+    _isc.UuidValue entityId, {
+    int? startYear,
+  }) => caller.callServerEndpoint<_iets520s.TaxSummaryView>(
+    'tax',
+    'getSummary',
     {
       'entityId': entityId,
       'startYear': startYear,

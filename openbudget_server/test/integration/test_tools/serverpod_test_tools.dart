@@ -111,6 +111,8 @@ import 'package:openbudget_server/src/generated/tax/tax_profile.dart'
     as _iqcxgux6;
 import 'package:openbudget_server/src/generated/tax/tax_report_view.dart'
     as _ik01tkfb;
+import 'package:openbudget_server/src/generated/tax/tax_summary_view.dart'
+    as _i8zfm0mo;
 import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
     as _i4wqhpw2;
 import 'package:openbudget_server/src/generated/transactions/import_result.dart'
@@ -5002,6 +5004,39 @@ class _TaxEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _ida.Future<_ik01tkfb.TaxReportView>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i8zfm0mo.TaxSummaryView> getSummary(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue entityId, {
+    int? startYear,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'tax',
+            method: 'getSummary',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'tax',
+          methodName: 'getSummary',
+          parameters: _ist.testObjectToJson({
+            'entityId': entityId,
+            'startYear': startYear,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_i8zfm0mo.TaxSummaryView>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
