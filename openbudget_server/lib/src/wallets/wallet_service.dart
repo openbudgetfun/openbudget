@@ -8,17 +8,11 @@ import 'package:openbudget_server/src/entities/entity_access.dart';
 import 'package:openbudget_server/src/entities/entity_clock.dart';
 import 'package:openbudget_server/src/entities/entity_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
-import 'package:openbudget_server/src/wallets/solana_wallet_provider.dart';
 import 'package:openbudget_server/src/wallets/wallet_math.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
+import 'package:openbudget_server/src/wallets/wallet_provider_registry.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
-
-/// Builds the chain provider for one wallet and network.
-typedef WalletProviderFactory = WalletProvider Function(
-  Session session,
-  WalletNetwork network,
-);
 
 /// Publishes a committed wallet change.
 typedef WalletChangePublisher = Future<void> Function(
@@ -43,7 +37,7 @@ abstract final class WalletService {
   static const _maxTags = 20;
   static const _maxTagLength = 50;
 
-  static WalletProviderFactory _providerFactory = _heliusProvider;
+  static WalletProviderFactory _providerFactory = _registryProvider;
   static WalletChangePublisher _publisher = EntityRealtimeNotifier.notify;
 
   /// The chain provider used by [connect] and [sync].
@@ -69,7 +63,7 @@ abstract final class WalletService {
   /// Restores the production provider and message bus.
   @visibleForTesting
   static void resetForTests() {
-    _providerFactory = _heliusProvider;
+    _providerFactory = _registryProvider;
     _publisher = EntityRealtimeNotifier.notify;
   }
 
@@ -240,15 +234,19 @@ abstract final class WalletService {
 
     while (true) {
       try {
-        final snapshot =
-            await _providerFactory(
-              session,
-              wallet.network,
-            ).fetchSnapshot(
-              network: wallet.network,
-              address: wallet.address,
-              untilSignature: wallet.lastSignature,
-            );
+        final provider = _providerFactory(session, wallet.network);
+        final snapshot = await provider.fetchSnapshot(
+          WalletReadRequest(
+            homeNetwork: wallet.network,
+            networks: wallet.scanNetworks ?? [wallet.network],
+            address: wallet.address,
+            // HD wallets pass the opened descriptor here from W4.2 on.
+            untilSignature: wallet.lastSignature,
+            // Solana keeps its cursor in the wallet row (multichain-wallets.md
+            // 7.3); other families pass their wallet_network_state cursors
+            // once history sync covers them.
+          ),
+        );
         final outcome = await _commit(
           session,
           wallet,
@@ -1390,10 +1388,25 @@ LIMIT @limit''',
     return leadingZeros + byteLength == 32;
   }
 
-  static WalletProvider _heliusProvider(
+  /// Resolves the wallet's provider through the registry.
+  ///
+  /// A family without a registered provider has no reader yet; a registered
+  /// family whose secret is missing fails in its factory with its setup
+  /// message, as any provider failure does.
+  static WalletProvider _registryProvider(
     Session session,
     WalletNetwork network,
-  ) => SolanaWalletProvider.fromSession(session, network);
+  ) {
+    final registration = WalletProviderRegistry.defaultRegistry.registrationFor(
+      network.family,
+    );
+    if (registration == null) {
+      throw WalletProviderException(
+        'No wallet reader is registered for ${network.name} yet.',
+      );
+    }
+    return registration.factory(session, network);
+  }
 }
 
 final class _ResolvedHolding {
