@@ -4,13 +4,16 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_list_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
 import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/spending_by_payee_screen.dart';
+import 'package:openbudget_app/src/features/settings/providers/reporting_currency_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
+import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
@@ -96,6 +99,32 @@ SpendingReport _reportForRange(int endMonth, int monthCount) {
   );
 }
 
+/// Two-point history that mirrors the flow's net worth fixture so the
+/// dashboard's history section has data without a server round trip.
+NetWorthHistoryView _historyFor(NetWorthGranularity granularity) {
+  final view = TestData.gbpNetWorthWithUsd();
+  return NetWorthHistoryView(
+    currencyCode: view.currencyCode,
+    granularity: granularity,
+    points: [
+      NetWorthPoint(
+        date: DateTime.utc(2026, 11, 4),
+        assetsMinor: view.assetsMinor ~/ 2,
+        liabilitiesMinor: view.liabilitiesMinor,
+        netWorthMinor: view.netWorthMinor ~/ 2,
+        isComplete: true,
+      ),
+      NetWorthPoint(
+        date: view.asOf,
+        assetsMinor: view.assetsMinor,
+        liabilitiesMinor: view.liabilitiesMinor,
+        netWorthMinor: view.netWorthMinor,
+        isComplete: true,
+      ),
+    ],
+  );
+}
+
 Widget _buildApp({ThemeMode themeMode = ThemeMode.light}) {
   final router = GoRouter(
     initialLocation: '/budgets/$_entityId/reflect',
@@ -139,6 +168,21 @@ Widget _buildApp({ThemeMode themeMode = ThemeMode.light}) {
       }),
       netWorthProvider.overrideWith(
         (ref) async => TestData.gbpNetWorthWithUsd(),
+      ),
+      userSettingsProvider.overrideWith(
+        (ref) async => UserSettings(
+          userId: UuidValue.fromString(TestData.ownerId),
+          reportingCurrencyCode: 'USD',
+        ),
+      ),
+      entityListProvider.overrideWith(
+        (ref) async => [TestData.usdEntity()],
+      ),
+      netWorthForEntitiesProvider.overrideWith(
+        (ref, entityIds) async => TestData.gbpNetWorthWithUsd(),
+      ),
+      netWorthHistoryProvider.overrideWith(
+        (ref, range) async => _historyFor(range.granularity),
       ),
     ],
     child: MaterialApp.router(

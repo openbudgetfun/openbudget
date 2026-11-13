@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_list_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dart';
 import 'package:openbudget_app/src/features/settings/providers/reporting_currency_provider.dart';
@@ -108,6 +109,22 @@ void main() {
                 ? TestData.gbpNetWorthWithUsd()
                 : _usdView(),
           ),
+          entityListProvider.overrideWith(
+            (ref) async => [
+              TestData.gbpEntity(),
+            ],
+          ),
+          netWorthForEntitiesProvider.overrideWith(
+            (ref, entityIds) async => reportingCurrency == 'GBP'
+                ? TestData.gbpNetWorthWithUsd()
+                : _usdView(),
+          ),
+          netWorthHistoryProvider.overrideWith(
+            (ref, range) async => _historyFor(
+              reportingCurrency,
+              range.granularity,
+            ),
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -157,6 +174,37 @@ void main() {
         findsOneWidget,
       );
     },
+  );
+}
+
+/// Two-point history matching the flow's net worth fixture so the screen's
+/// history section has data without a server round trip.
+NetWorthHistoryView _historyFor(
+  String reportingCurrency,
+  NetWorthGranularity granularity,
+) {
+  final view = reportingCurrency == 'GBP'
+      ? TestData.gbpNetWorthWithUsd()
+      : _usdView();
+  return NetWorthHistoryView(
+    currencyCode: view.currencyCode,
+    granularity: granularity,
+    points: [
+      NetWorthPoint(
+        date: DateTime.utc(2026, 11, 4),
+        assetsMinor: view.assetsMinor ~/ 2,
+        liabilitiesMinor: view.liabilitiesMinor,
+        netWorthMinor: view.netWorthMinor ~/ 2,
+        isComplete: true,
+      ),
+      NetWorthPoint(
+        date: view.asOf,
+        assetsMinor: view.assetsMinor,
+        liabilitiesMinor: view.liabilitiesMinor,
+        netWorthMinor: view.netWorthMinor,
+        isComplete: true,
+      ),
+    ],
   );
 }
 

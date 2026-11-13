@@ -159,6 +159,31 @@ class _UnavailablePlaidAccountLink extends PlaidAccountLink {
   @override
   FutureOr<void> build() {}
 
+  /// Every link operation throws so a tap lands in the screen's fallback:
+  /// the unlinked-account flow with the "Add an unlinked account instead"
+  /// toast, exactly as when the Plaid service is unreachable in production.
+  @override
+  Future<String> createLinkToken({required String entityId}) =>
+      throw Exception('Bank linking is unavailable in this fixture.');
+
+  @override
+  Future<PlaidConnection> exchangePublicToken({
+    required String entityId,
+    required String publicToken,
+  }) => throw Exception('Bank linking is unavailable in this fixture.');
+
+  @override
+  Future<PlaidConnection> syncConnection({
+    required String connectionId,
+    required String entityId,
+  }) => throw Exception('Bank linking is unavailable in this fixture.');
+
+  @override
+  Future<void> removeConnection({
+    required String connectionId,
+    required String entityId,
+  }) => throw Exception('Bank linking is unavailable in this fixture.');
+
   @override
   Future<PlaidConnection> importSandboxAccounts({
     required String entityId,
