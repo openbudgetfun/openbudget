@@ -143,6 +143,51 @@ void main() {
       expect(report.sources, isNotEmpty);
     });
 
+    test('then the report carries the caveats it touched and the figures '
+        'its lines quote', () async {
+      final account = await book.addAccount();
+      await addLine(
+        account,
+        amountMinor: 5_000_000,
+        date: DateTime.utc(2026, 6, 10),
+      );
+
+      final report = await endpoint.getReport(
+        book.session,
+        book.entity.id!,
+        startYear: 2026,
+      );
+
+      // The individual return touched the personal-return caveats only:
+      // every caveat is a GB one that names that section.
+      expect(report.caveats, isNotEmpty);
+      for (final caveat in report.caveats) {
+        expect(caveat.id, startsWith('gb.'));
+        expect(caveat.text, isNotEmpty);
+        expect(caveat.grade, anyOf('primary', 'secondary', 'inferred'));
+        expect(caveat.sections, contains('personalReturn'));
+        expect(caveat.recheckBy, isNotNull);
+      }
+      // The personal-allowance line quotes its named figure, which arrives
+      // with its grade for the secondary-source badge.
+      final allowanceLine = report.lines.firstWhere(
+        (line) => line.figureId == 'personalAllowance',
+      );
+      expect(allowanceLine.amountMinor, 1_257_000);
+      final allowance = report.figures.firstWhere(
+        (figure) => figure.id == 'personalAllowance',
+      );
+      expect(allowance.grade, 'primary');
+      expect(allowance.unit, 'currencyMinor');
+      expect(allowance.source, isNotEmpty);
+      expect(allowance.verifiedOn, report.rulesVerifiedOn);
+      // No caveat about the payroll section, which the report never used.
+      expect(
+        report.caveats.any((caveat) => caveat.sections.contains('payroll')),
+        isFalse,
+      );
+    });
+
     test('then the year window follows the jurisdiction boundary', () async {
       final account = await book.addAccount();
       for (final date in [

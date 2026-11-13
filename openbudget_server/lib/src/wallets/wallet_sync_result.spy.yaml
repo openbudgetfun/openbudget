@@ -12,6 +12,11 @@ fields:
   pricedNftHoldingCount: int
   cachedNftHoldingCount: int
   unpricedNftHoldingCount: int
+  ### The networks this sync read successfully.
+  readNetworks: List<WalletNetwork>
+  ### The networks this sync could not read. Their holdings keep their
+  ### quantities and their wallet_network_state rows carry the reason.
+  failedNetworks: List<WalletNetwork>
   ### Share of holdings with a price, 0.0-1.0. Not money.
   valuationCoverageRatio: double?
   ### Sum of priced holdings, in valuationCurrencyCode minor units.

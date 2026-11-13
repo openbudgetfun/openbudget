@@ -303,5 +303,110 @@ void main() {
       expect(find.text('No other income outside OpenBudget.'), findsOneWidget);
       expect(find.text('https://www.gov.uk/income-tax-rates'), findsOneWidget);
     });
+
+    testWidgets('lists the caveats the report touched', (tester) async {
+      await tester.pumpWidget(
+        _buildApp(
+          FakeTaxRepository(
+            profile: taxProfileRecord(),
+            defaultReport: taxReportView(
+              caveats: [
+                taxCaveat(),
+                taxCaveat(
+                  id: 'gb.announced-2027-changes',
+                  text:
+                      'Savings and property rates of 24, 44 and 49 per cent '
+                      'from April 2027 are announced but not yet law.',
+                  announced: true,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('What we could not verify'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('What we could not verify'), findsOneWidget);
+      expect(
+        find.byKey(const Key('tax-caveat-gb.hmrc-rounding-inferences')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('per-slice rounding'), findsOneWidget);
+      expect(find.byKey(const Key('tax-announced-badge')), findsOneWidget);
+      expect(find.text('Announced, not yet law'), findsOneWidget);
+    });
+
+    testWidgets('hides the unverified section when nothing is caveated', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildApp(FakeTaxRepository(profile: taxProfileRecord())),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('What we could not verify'), findsNothing);
+    });
+
+    testWidgets('badges lines computed from a secondary-source figure', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildApp(
+          FakeTaxRepository(
+            profile: taxProfileRecord(),
+            defaultReport: taxReportView(
+              lines: [
+                taxLine(
+                  label: 'Consolidated relief allowance',
+                  code: null,
+                  reportReference: null,
+                  entryCount: 0,
+                  figureId: 'consolidatedReliefAllowanceFloor',
+                ),
+                taxLine(
+                  label: 'Total income',
+                  code: null,
+                  reportReference: null,
+                  entryCount: 0,
+                  figureId: 'personalAllowance',
+                ),
+              ],
+              figures: [
+                taxFigure(
+                  id: 'consolidatedReliefAllowanceFloor',
+                  value: 20000000,
+                  grade: 'secondary',
+                  source:
+                      'https://taxsummaries.pwc.com/nigeria/individual/'
+                      'significant-developments',
+                ),
+                taxFigure(),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Only the secondary-grade line carries the badge.
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('tax-secondary-source-badge')),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('tax-secondary-source-badge')),
+        findsOneWidget,
+      );
+      expect(find.text('From a secondary source'), findsOneWidget);
+    });
   });
 }

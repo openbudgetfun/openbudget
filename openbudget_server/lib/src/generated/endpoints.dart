@@ -3776,6 +3776,31 @@ class Endpoints extends _is.EndpointDispatch {
                 startYear: params['startYear'],
               ),
         ),
+        'createExportLink': _is.MethodConnector(
+          name: 'createExportLink',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'startYear': _is.ParameterDescription(
+              name: 'startYear',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['tax'] as _i34kr7gr.TaxEndpoint).createExportLink(
+                    session,
+                    params['entityId'],
+                    startYear: params['startYear'],
+                  ),
+        ),
       },
     );
     connectors['transactionRule'] = _is.EndpointConnector(
@@ -4278,6 +4303,11 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<String?>(),
               nullable: true,
             ),
+            'scanNetworks': _is.ParameterDescription(
+              name: 'scanNetworks',
+              type: _is.getType<List<_ifz8weqz.WalletNetwork>?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -4291,6 +4321,86 @@ class Endpoints extends _is.EndpointDispatch {
                     params['address'],
                     label: params['label'],
                     accountName: params['accountName'],
+                    scanNetworks: params['scanNetworks'],
+                  ),
+        ),
+        'preview': _is.MethodConnector(
+          name: 'preview',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'address': _is.ParameterDescription(
+              name: 'address',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['wallet'] as _i1ub0otr.WalletEndpoint).preview(
+                    session,
+                    params['entityId'],
+                    params['address'],
+                  ),
+        ),
+        'supportedNetworks': _is.MethodConnector(
+          name: 'supportedNetworks',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['wallet'] as _i1ub0otr.WalletEndpoint)
+                  .supportedNetworks(session),
+        ),
+        'setScanNetworks': _is.MethodConnector(
+          name: 'setScanNetworks',
+          params: {
+            'walletId': _is.ParameterDescription(
+              name: 'walletId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'networks': _is.ParameterDescription(
+              name: 'networks',
+              type: _is.getType<List<_ifz8weqz.WalletNetwork>?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['wallet'] as _i1ub0otr.WalletEndpoint)
+                  .setScanNetworks(
+                    session,
+                    params['walletId'],
+                    params['networks'],
+                  ),
+        ),
+        'listNetworkStates': _is.MethodConnector(
+          name: 'listNetworkStates',
+          params: {
+            'walletId': _is.ParameterDescription(
+              name: 'walletId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['wallet'] as _i1ub0otr.WalletEndpoint)
+                  .listNetworkStates(
+                    session,
+                    params['walletId'],
                   ),
         ),
         'list': _is.MethodConnector(

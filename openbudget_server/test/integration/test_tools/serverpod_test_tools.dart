@@ -139,6 +139,10 @@ import 'package:openbudget_server/src/generated/wallets/wallet.dart'
     as _igcr1vxe;
 import 'package:openbudget_server/src/generated/wallets/wallet_holding.dart'
     as _icu5m6lt;
+import 'package:openbudget_server/src/generated/wallets/wallet_network_state.dart'
+    as _inqpauom;
+import 'package:openbudget_server/src/generated/wallets/wallet_preview.dart'
+    as _iqr3brjs;
 import 'package:openbudget_server/src/generated/wallets/wallet_sync_result.dart'
     as _izzuzifg;
 import 'package:openbudget_server/src/generated/wallets/wallet_tax_year_summary.dart'
@@ -5043,6 +5047,39 @@ class _TaxEndpoint {
       }
     });
   }
+
+  _ida.Future<String> createExportLink(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue entityId, {
+    int? startYear,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'tax',
+            method: 'createExportLink',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'tax',
+          methodName: 'createExportLink',
+          parameters: _ist.testObjectToJson({
+            'entityId': entityId,
+            'startYear': startYear,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _TransactionRuleEndpoint {
@@ -5656,6 +5693,7 @@ class _WalletEndpoint {
     String address, {
     String? label,
     String? accountName,
+    List<_ifz8weqz.WalletNetwork>? scanNetworks,
   }) async {
     return _ist.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -5674,6 +5712,7 @@ class _WalletEndpoint {
             'address': address,
             'label': label,
             'accountName': accountName,
+            'scanNetworks': scanNetworks,
           }),
           serializationManager: _serializationManager,
         );
@@ -5681,6 +5720,129 @@ class _WalletEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _ida.Future<_igcr1vxe.Wallet>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_iqr3brjs.WalletPreview> preview(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue entityId,
+    String address,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'wallet',
+            method: 'preview',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'wallet',
+          methodName: 'preview',
+          parameters: _ist.testObjectToJson({
+            'entityId': entityId,
+            'address': address,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_iqr3brjs.WalletPreview>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_ifz8weqz.WalletNetwork>> supportedNetworks(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'wallet',
+            method: 'supportedNetworks',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'wallet',
+          methodName: 'supportedNetworks',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<List<_ifz8weqz.WalletNetwork>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_igcr1vxe.Wallet> setScanNetworks(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue walletId,
+    List<_ifz8weqz.WalletNetwork>? networks,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'wallet',
+            method: 'setScanNetworks',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'wallet',
+          methodName: 'setScanNetworks',
+          parameters: _ist.testObjectToJson({
+            'walletId': walletId,
+            'networks': networks,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_igcr1vxe.Wallet>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_inqpauom.WalletNetworkState>> listNetworkStates(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue walletId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'wallet',
+            method: 'listNetworkStates',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'wallet',
+          methodName: 'listNetworkStates',
+          parameters: _ist.testObjectToJson({'walletId': walletId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<List<_inqpauom.WalletNetworkState>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

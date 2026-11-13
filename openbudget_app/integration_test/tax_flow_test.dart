@@ -63,6 +63,20 @@ TaxReportView _makeReport(int startYear) => TaxReportView(
   rulesVersion: 'gb-$startYear-r1',
   maturity: 'preview',
   coverage: const {'personalReturn': 'full'},
+  caveats: [
+    TaxRuleCaveatView(
+      id: 'gb.hmrc-rounding-inferences',
+      text:
+          'HMRC does not publish its per-slice rounding, so the pack infers '
+          'it from guidance.',
+      grade: 'inferred',
+      sections: const ['personalReturn'],
+      keys: const [],
+      recheckBy: DateTime.utc(2027, 1, 30),
+      announced: false,
+    ),
+  ],
+  figures: const [],
   uncategorizedCount: 0,
   convertedEntryCount: 0,
   opportunities: const [],
@@ -217,6 +231,15 @@ void main() {
       expect(find.text(TestData.taxBalanceDue), findsOneWidget);
       expect(find.text('Income tax'), findsOneWidget);
       expect(find.text(TestData.taxDisclaimer), findsOneWidget);
+
+      // The unverified list shows the caveat the fake report carries.
+      await tester.scrollUntilVisible(
+        find.text('What we could not verify'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('What we could not verify'), findsOneWidget);
+      expect(find.textContaining('per-slice rounding'), findsOneWidget);
     },
   );
 }

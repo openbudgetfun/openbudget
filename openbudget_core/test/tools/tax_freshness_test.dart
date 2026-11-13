@@ -281,6 +281,71 @@ void main() {
     });
   });
 
+  group('ruleSetCaveatRecheckItems', () {
+    final packs = TaxJurisdiction.values.map(TaxRules.forJurisdiction);
+
+    test('maps every caveat of every year onto a caveat item', () {
+      final items = ruleSetCaveatRecheckItems(packs);
+      expect(items, isNotEmpty);
+      var expected = 0;
+      for (final pack in packs) {
+        for (final startYear in pack.supportedStartYears) {
+          expected += pack.ruleSet(startYear).caveats.length;
+        }
+      }
+      expect(items, hasLength(expected));
+      for (final item in items) {
+        expect(item.kind, 'caveat');
+        expect(item.title, isNotEmpty);
+        expect(item.verifiedOn, isNotNull);
+        expect(item.key, matches(RegExp(r'^[A-Z]{2}/\d{4}/[a-z]{2}\..+$')));
+      }
+      // Keys are unique: one item per caveat per year.
+      expect(items.map((item) => item.key).toSet(), hasLength(items.length));
+    });
+
+    test('an overdue caveat is reported given an as-of past its recheckBy', () {
+      final items = [
+        ...countryRecheckItems(Countries.all),
+        ...ruleSetCaveatRecheckItems(packs),
+      ];
+      // The GB company caveats are due 1 December 2026; a June 2027 report
+      // must carry them.
+      final report = freshnessReport(items: items, asOf: asOf);
+      final overdueCaveats = report.overdue
+          .where((entry) => entry.item.kind == 'caveat')
+          .map((entry) => entry.item.key)
+          .toList();
+      expect(
+        overdueCaveats,
+        containsAll([
+          for (final item in items)
+            if (item.kind == 'caveat' &&
+                item.recheckBy.isBefore(DateTime.utc(2026, 12, 2)) &&
+                item.key.startsWith('GB/'))
+              item.key,
+        ]),
+      );
+      expect(
+        report.overdue
+            .where((entry) => entry.item.kind == 'country')
+            .isNotEmpty,
+        isTrue,
+        reason: 'countries still share the same report',
+      );
+    });
+
+    test('no caveat is due before the pack was verified', () {
+      for (final item in ruleSetCaveatRecheckItems(packs)) {
+        expect(
+          item.recheckBy.isAfter(item.verifiedOn!),
+          isTrue,
+          reason: item.key,
+        );
+      }
+    });
+  });
+
   group('the real dataset', () {
     test('reports exactly the items due by the as-of day', () {
       // A report over all of `Countries.all` must contain exactly the

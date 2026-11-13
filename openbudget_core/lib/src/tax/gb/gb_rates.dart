@@ -584,13 +584,338 @@ final List<Uri> gbRateSources = List.unmodifiable(<Uri>[
 /// The day the figures in [gbRatesByStartYear] were last checked.
 final DateTime gbRulesVerifiedOn = DateTime.utc(2026, 11, 4);
 
-/// The version, sources and verification date of each supported year.
+Uri _gbSource(String url) => Uri.parse(url);
+
+/// The named figures knowledge cards quote for [rates]'s year, each with
+/// the gov.uk page it came from. The values are the tables' own; naming
+/// them adds no new number.
+Map<String, TaxFigure> gbFiguresFor(GbTaxYearRates rates) => Map.unmodifiable({
+  for (final figure in [
+    TaxFigure(
+      id: 'personalAllowance',
+      value: rates.personalAllowanceMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: _gbSource('https://www.gov.uk/income-tax-rates'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'personalAllowanceTaperThreshold',
+      value: rates.personalAllowanceIncomeLimitMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: _gbSource('https://www.gov.uk/income-tax-rates'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'basicRateLimit',
+      value: rates.basicRateLimitMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: _gbSource('https://www.gov.uk/income-tax-rates'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'higherRateLimit',
+      value: rates.higherRateLimitMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: _gbSource('https://www.gov.uk/income-tax-rates'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'additionalRate',
+      value: rates.rukBands.last.rateBasisPoints,
+      unit: TaxFigureUnit.rateBasisPoints,
+      source: _gbSource('https://www.gov.uk/income-tax-rates'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'dividendAllowance',
+      value: rates.dividendAllowanceMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: _gbSource('https://www.gov.uk/tax-on-dividends'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'capitalGainsAnnualExemptAmount',
+      value: rates.capitalGainsAnnualExemptAmountMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: _gbSource(
+        'https://www.gov.uk/guidance/capital-gains-tax-rates-and-allowances',
+      ),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'tradingAllowance',
+      value: rates.tradingAllowanceMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: _gbSource(
+        'https://www.gov.uk/guidance/tax-free-allowances-on-property-and-'
+        'trading-income',
+      ),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'class2WeeklyRate',
+      value: rates.class2WeeklyRateMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: _gbSource(
+        'https://www.gov.uk/self-employed-national-insurance-'
+        'rates',
+      ),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'vatRegistrationThreshold',
+      value: rates.vatRegistrationThresholdMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: _gbSource('https://www.gov.uk/vat-registration/when-to-register'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'vatStandardRate',
+      value: rates.vatStandardRateBasisPoints,
+      unit: TaxFigureUnit.rateBasisPoints,
+      source: _gbSource('https://www.gov.uk/vat-rates'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'annualInvestmentAllowance',
+      value: rates.annualInvestmentAllowanceCapMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: _gbSource(
+        'https://www.gov.uk/capital-allowances/annual-investment-allowance',
+      ),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'corporationTaxMainRate',
+      value: rates.corporationTaxMainRateBasisPoints,
+      unit: TaxFigureUnit.rateBasisPoints,
+      source: _gbSource('https://www.gov.uk/corporation-tax-rates'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'corporationTaxSmallProfitsRate',
+      value: rates.corporationTaxSmallProfitsRateBasisPoints,
+      unit: TaxFigureUnit.rateBasisPoints,
+      source: _gbSource('https://www.gov.uk/corporation-tax-rates'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'isaAllowance',
+      value: rates.isaAllowanceMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: _gbSource('https://www.gov.uk/individual-savings-accounts'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'pensionAnnualAllowance',
+      value: rates.pensionAnnualAllowanceMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: _gbSource(
+        'https://www.gov.uk/tax-on-your-private-pension/annual-allowance',
+      ),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: gbRulesVerifiedOn,
+    ),
+  ])
+    figure.id: figure,
+});
+
+/// What the uk-personal-tax, uk-company-tax and uk-vat-payroll skills could
+/// not verify, as data (their "Unverified and changing" lists). Re-check
+/// dates follow those lists.
+final List<TaxRuleCaveat> gbRuleCaveats = [
+  TaxRuleCaveat(
+    id: 'gb.announced-2027-changes',
+    text:
+        'Savings and property rates of 24, 44 and 49 per cent from April '
+        '2027, a 3,000 pound trading allowance, a 500,000 pound BADR limit '
+        'and several 2027/28 allowances are announced but not yet law.',
+    grade: TaxEvidenceGrade.primary,
+    sections: const {TaxSection.personalReturn, TaxSection.selfEmployment},
+    recheckBy: DateTime.utc(2027, 1, 30),
+    announced: true,
+  ),
+  TaxRuleCaveat(
+    id: 'gb.sa-forms-2025-26',
+    text:
+        'Return box numbers follow the 2025/26 Self Assessment forms; the '
+        '2026/27 forms appear from April 2027 and may renumber them.',
+    grade: TaxEvidenceGrade.primary,
+    sections: const {
+      TaxSection.personalReturn,
+      TaxSection.selfEmployment,
+      TaxSection.filingCalendar,
+    },
+    recheckBy: DateTime.utc(2027, 4, 30),
+  ),
+  TaxRuleCaveat(
+    id: 'gb.welsh-and-scottish-2027',
+    text:
+        'The Welsh rate table and the 2027/28 Scottish property and savings '
+        'rates were not researched; the pack applies rUK rates outside '
+        'Scotland.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.personalReturn},
+    recheckBy: DateTime.utc(2027, 1, 30),
+  ),
+  TaxRuleCaveat(
+    id: 'gb.student-loan-unearned-threshold',
+    text:
+        'The student-loan repayment base counts unearned income only above '
+        'a threshold whose exact SA110 working-sheet mechanics need '
+        'confirmation.',
+    grade: TaxEvidenceGrade.inferred,
+    keys: const {'studentLoans'},
+    recheckBy: DateTime.utc(2027, 1, 30),
+  ),
+  TaxRuleCaveat(
+    id: 'gb.hmrc-rounding-inferences',
+    text:
+        'HMRC does not publish its per-slice rounding, the exact adjusted '
+        'net income definition or the HICBC rounding convention, so the pack '
+        'infers each from guidance.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.personalReturn},
+    recheckBy: DateTime.utc(2027, 1, 30),
+  ),
+  TaxRuleCaveat(
+    id: 'gb.class4-annual-maximum',
+    text:
+        'The Class 4 maximum for people who also pay Class 1 National '
+        'Insurance was not researched, so the pack does not cap Class 4.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.selfEmployment},
+    recheckBy: DateTime.utc(2027, 1, 30),
+  ),
+  TaxRuleCaveat(
+    id: 'gb.mtd-and-penalties',
+    text:
+        'Making Tax Digital thresholds, the penalty regime for a non-MTD '
+        'filer and the interest day-count basis were not confirmed, and the '
+        '7.75 per cent late-payment interest rate is only dated to late '
+        '2026.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {TaxSection.filingCalendar},
+    recheckBy: DateTime.utc(2027, 1, 30),
+  ),
+  TaxRuleCaveat(
+    id: 'gb.ct-announced-allowances',
+    text:
+        'Budget 2026 announced a 12 per cent writing-down allowance and a '
+        '50 per cent special-rate first-year allowance; they are not law '
+        'yet, and their interaction with the AIA is unstated.',
+    grade: TaxEvidenceGrade.primary,
+    sections: const {TaxSection.companyReturn},
+    recheckBy: DateTime.utc(2026, 12),
+    announced: true,
+  ),
+  TaxRuleCaveat(
+    id: 'gb.ct-unmodelled-reliefs',
+    text:
+        'Pre-trading expenses, the full disallowable-expense list, loss '
+        'relief beyond the restriction, group relief and the R&D PAYE cap '
+        'step order were not sourced and are not modelled.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.companyReturn},
+    recheckBy: DateTime.utc(2026, 12),
+  ),
+  TaxRuleCaveat(
+    id: 'gb.ct600-boxes',
+    text:
+        'CT600 box references cover only the boxes the research read; '
+        'boxes 170 and 205 that filings use were not in the research notes.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.companyReturn},
+    recheckBy: DateTime.utc(2026, 12),
+  ),
+  TaxRuleCaveat(
+    id: 'gb.ct-associates-and-distributions',
+    text:
+        'Whether dormant associates count in the associates divisor, the '
+        'leap-year days denominator and exempt-distribution treatment are '
+        'not confirmed.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.companyReturn},
+    recheckBy: DateTime.utc(2026, 12),
+  ),
+  TaxRuleCaveat(
+    id: 'gb.companies-house-deadlines',
+    text:
+        'The nine-month Companies House accounts deadline (21 months for '
+        'first accounts) is user-stated, and the accounting reference date '
+        'rules were not read.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.filingCalendar},
+    recheckBy: DateTime.utc(2026, 12),
+  ),
+  TaxRuleCaveat(
+    id: 'gb.vat-mechanics',
+    text:
+        'VAT registration timing, the partial exemption de minimis, fuel '
+        'scale charges, bad debt relief timing, blocked VAT in box 7 and '
+        'box 6 to 9 rounding follow Notices that were read only in part.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.indirectTax},
+    recheckBy: DateTime.utc(2027, 4, 5),
+  ),
+  TaxRuleCaveat(
+    id: 'gb.vat-rates-and-schemes',
+    text:
+        'The effective date of the 3 and 10 per cent VAT late-payment '
+        'rates differs between GOV.UK and secondary summaries, and the '
+        'flat-rate sector table stored in the research is only partial.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {TaxSection.indirectTax},
+    recheckBy: DateTime.utc(2027, 4, 5),
+  ),
+  TaxRuleCaveat(
+    id: 'gb.payroll-spec-gaps',
+    text:
+        'HMRC publishes no vectors for the 50 per cent regulatory limit, '
+        'payrolled benefits, negative pay or week 53, and the per-band NIC '
+        'truncation and half-down rounding were inferred from test data.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.payroll},
+    recheckBy: DateTime.utc(2027, 4, 5),
+  ),
+  TaxRuleCaveat(
+    id: 'gb.payroll-admin',
+    text:
+        'RTI field-level rules, P45 handling, National Living Wage '
+        'figures, the SMP recovery rate (sources differ between 108.5 and '
+        '109 per cent), SSP criteria and auto-enrolment details were not '
+        'sourced.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {TaxSection.payroll},
+    recheckBy: DateTime.utc(2027, 4, 5),
+  ),
+];
+
+/// The version, sources, verification date, caveats and named figures of
+/// each supported year.
 final Map<int, TaxRuleSet> gbRuleSetsByStartYear = Map.unmodifiable({
-  for (final startYear in gbRatesByStartYear.keys)
-    startYear: TaxRuleSet(
-      startYear: startYear,
+  for (final entry in gbRatesByStartYear.entries)
+    entry.key: TaxRuleSet(
+      startYear: entry.key,
       revision: 1,
       verifiedOn: gbRulesVerifiedOn,
       sources: gbRateSources,
+      caveats: gbRuleCaveats,
+      figures: gbFiguresFor(entry.value),
     ),
 });

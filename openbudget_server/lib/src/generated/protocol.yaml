@@ -155,6 +155,7 @@ tax:
   - setLineTax:
   - getReport:
   - getSummary:
+  - createExportLink:
 transactionRule:
   - create:
   - list:
@@ -177,6 +178,10 @@ transaction:
   - findDuplicates:
 wallet:
   - connect:
+  - preview:
+  - supportedNetworks:
+  - setScanNetworks:
+  - listNetworkStates:
   - list:
   - getForAccount:
   - sync:

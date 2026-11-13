@@ -20,6 +20,8 @@ class TaxEntrySourceLine {
     this.salesTaxMinor,
     this.businessUsePercent,
     this.taxCategoryCode,
+    this.envelopeName,
+    this.payeeName,
     this.isTransfer = false,
   });
 
@@ -48,6 +50,12 @@ class TaxEntrySourceLine {
 
   /// The envelope's default tax category.
   final String? envelopeTaxCategoryCode;
+
+  /// The envelope the line is assigned to, for the export's envelope column.
+  final String? envelopeName;
+
+  /// The transaction's payee, for the export's payee column.
+  final String? payeeName;
 
   /// A transfer leg is outside tax, as it always was.
   final bool isTransfer;

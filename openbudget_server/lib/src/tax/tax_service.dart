@@ -468,6 +468,7 @@ class TaxService {
           return _toView(
             report,
             opportunities,
+            ruleSet: pack.ruleSet(input.year.startYear),
             uncategorizedCount: uncategorizedCount,
             convertedCount: convertedCount,
             unmappedUniversalCount: unmappedUniversalCount,
@@ -687,6 +688,8 @@ class TaxService {
           taxCategoryCode: row[8] as String?,
           envelopeTaxCategoryCode: row[9] as String?,
           isTransfer: row[10] as bool,
+          envelopeName: row[11] as String?,
+          payeeName: row[12] as String?,
         ),
       );
     }
@@ -941,78 +944,113 @@ class TaxService {
   static TaxReportView _toView(
     TaxReport report,
     List<TaxOpportunity> opportunities, {
+    required TaxRuleSet ruleSet,
     required int uncategorizedCount,
     required int convertedCount,
     int unmappedUniversalCount = 0,
-  }) => TaxReportView(
-    jurisdiction: report.year.jurisdiction.countryCode,
-    startYear: report.year.startYear,
-    yearLabel: report.year.label,
-    yearStart: report.year.start,
-    yearEnd: report.year.end,
-    entityKind: report.entityKind,
-    currencyCode: report.currencyCode,
-    lines: [
-      for (final line in report.lines)
-        TaxReportLineView(
-          label: line.label,
-          amountMinor: line.amountMinor,
-          code: line.code,
-          reportReference: line.reportReference,
-          entryCount: line.entryCount,
-        ),
-    ],
-    liabilities: [
-      for (final liability in report.liabilities)
-        TaxLiabilityView(
-          label: liability.label,
-          amountMinor: liability.amountMinor,
-          bands: [
-            for (final band in liability.bands)
-              TaxBandSliceView(
-                label: band.label,
-                baseMinor: band.baseMinor,
-                rateBasisPoints: band.rateBasisPoints,
-                taxMinor: band.taxMinor,
-              ),
-          ],
-        ),
-    ],
-    totalLiabilityMinor: report.totalLiabilityMinor,
-    alreadyPaidMinor: report.alreadyPaidMinor,
-    balanceDueMinor: report.balanceDueMinor,
-    assumptions: [
-      ...report.assumptions,
-      if (convertedCount > 0) _conversionAssumption,
-      if (unmappedUniversalCount > 0)
-        _unmappedUniversalCaveat(
+  }) {
+    // Only the figures this report's lines quote travel to the app, each
+    // with its grade so a secondary figure can carry its badge.
+    final quotedFigureIds = <String>{
+      for (final line in report.lines) ?line.figureId,
+    };
+    return TaxReportView(
+      jurisdiction: report.year.jurisdiction.countryCode,
+      startYear: report.year.startYear,
+      yearLabel: report.year.label,
+      yearStart: report.year.start,
+      yearEnd: report.year.end,
+      entityKind: report.entityKind,
+      currencyCode: report.currencyCode,
+      lines: [
+        for (final line in report.lines)
+          TaxReportLineView(
+            label: line.label,
+            amountMinor: line.amountMinor,
+            code: line.code,
+            reportReference: line.reportReference,
+            entryCount: line.entryCount,
+            figureId: line.figureId,
+          ),
+      ],
+      liabilities: [
+        for (final liability in report.liabilities)
+          TaxLiabilityView(
+            label: liability.label,
+            amountMinor: liability.amountMinor,
+            bands: [
+              for (final band in liability.bands)
+                TaxBandSliceView(
+                  label: band.label,
+                  baseMinor: band.baseMinor,
+                  rateBasisPoints: band.rateBasisPoints,
+                  taxMinor: band.taxMinor,
+                ),
+            ],
+          ),
+      ],
+      totalLiabilityMinor: report.totalLiabilityMinor,
+      alreadyPaidMinor: report.alreadyPaidMinor,
+      balanceDueMinor: report.balanceDueMinor,
+      assumptions: [
+        ...report.assumptions,
+        if (convertedCount > 0) _conversionAssumption,
+        if (unmappedUniversalCount > 0)
+          _unmappedUniversalCaveat(
+            unmappedUniversalCount,
+            report.year.jurisdiction,
+          ),
+      ],
+      sources: [for (final source in report.sources) source.toString()],
+      caveats: [
+        for (final caveat in report.caveats)
+          TaxRuleCaveatView(
+            id: caveat.id,
+            text: caveat.text,
+            grade: caveat.grade.name,
+            sections: [for (final section in caveat.sections) section.name],
+            keys: [for (final key in caveat.keys) key],
+            recheckBy: caveat.recheckBy,
+            announced: caveat.announced,
+          ),
+      ],
+      figures: [
+        for (final figureId in quotedFigureIds)
+          if (ruleSet.figures[figureId] case final figure?)
+            TaxFigureView(
+              id: figure.id,
+              value: figure.value,
+              unit: figure.unit.name,
+              grade: figure.grade.name,
+              verifiedOn: figure.verifiedOn,
+              source: figure.source.toString(),
+            ),
+      ],
+      rulesVerifiedOn: report.rulesVerifiedOn,
+      rulesVersion: report.rulesVersion,
+      maturity: report.maturity.name,
+      coverage: {
+        for (final entry in report.coverage.entries)
+          entry.key.name: entry.value.name,
+      },
+      uncategorizedCount:
+          report.uncategorizedCount +
+          uncategorizedCount +
           unmappedUniversalCount,
-          report.year.jurisdiction,
-        ),
-    ],
-    sources: [for (final source in report.sources) source.toString()],
-    rulesVerifiedOn: report.rulesVerifiedOn,
-    rulesVersion: report.rulesVersion,
-    maturity: report.maturity.name,
-    coverage: {
-      for (final entry in report.coverage.entries)
-        entry.key.name: entry.value.name,
-    },
-    uncategorizedCount:
-        report.uncategorizedCount + uncategorizedCount + unmappedUniversalCount,
-    convertedEntryCount: convertedCount,
-    opportunities: [
-      for (final opportunity in opportunities)
-        TaxOpportunityView(
-          id: opportunity.id,
-          title: opportunity.title,
-          explanation: opportunity.explanation,
-          estimatedSavingMinor: opportunity.estimatedSavingMinor,
-          deadline: opportunity.deadline,
-          source: opportunity.source.toString(),
-        ),
-    ],
-  );
+      convertedEntryCount: convertedCount,
+      opportunities: [
+        for (final opportunity in opportunities)
+          TaxOpportunityView(
+            id: opportunity.id,
+            title: opportunity.title,
+            explanation: opportunity.explanation,
+            estimatedSavingMinor: opportunity.estimatedSavingMinor,
+            deadline: opportunity.deadline,
+            source: opportunity.source.toString(),
+          ),
+      ],
+    );
+  }
 }
 
 /// One row per stored transaction line inside the entity and year window.
@@ -1030,11 +1068,14 @@ SELECT
   l."businessUsePercent",
   l."taxCategoryCode",
   e."taxCategoryCode",
-  tr.id IS NOT NULL
+  tr.id IS NOT NULL,
+  e.name,
+  p.name
 FROM transaction_line l
 JOIN "transaction" t ON t.id = l."transactionId"
 JOIN account a ON a.id = t."accountId"
 LEFT JOIN envelope e ON e.id = l."envelopeId"
+LEFT JOIN payee p ON p.id = t."payeeId"
 LEFT JOIN transfer tr
   ON tr."fromTransactionId" = t.id OR tr."toTransactionId" = t.id
 WHERE t."entityId" = ANY(@entityIds::uuid[])

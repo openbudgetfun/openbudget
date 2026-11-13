@@ -134,6 +134,10 @@ import 'package:openbudget_client/src/protocol/wallets/wallet.dart'
     as _igzh8mor;
 import 'package:openbudget_client/src/protocol/wallets/wallet_holding.dart'
     as _izm3e498;
+import 'package:openbudget_client/src/protocol/wallets/wallet_network_state.dart'
+    as _i9c4hszu;
+import 'package:openbudget_client/src/protocol/wallets/wallet_preview.dart'
+    as _intcqihn;
 import 'package:openbudget_client/src/protocol/wallets/wallet_sync_result.dart'
     as _idhyojww;
 import 'package:openbudget_client/src/protocol/wallets/wallet_tax_year_summary.dart'
@@ -2138,6 +2142,25 @@ class EndpointTax extends _isc.EndpointRef {
       'startYear': startYear,
     },
   );
+
+  /// Creates a short-lived signed download link for the entity's tax
+  /// summary export for the year starting in [startYear].
+  ///
+  /// When [startYear] is null the year containing the entity's local today
+  /// is used. The link carries only opaque ids, the year and an expiry
+  /// inside its HMAC token — no name, email or entity name — and stops
+  /// working after ten minutes. The app opens it with `url_launcher`.
+  _ida.Future<String> createExportLink(
+    _isc.UuidValue entityId, {
+    int? startYear,
+  }) => caller.callServerEndpoint<String>(
+    'tax',
+    'createExportLink',
+    {
+      'entityId': entityId,
+      'startYear': startYear,
+    },
+  );
 }
 
 /// API surface for transaction rule operations.
@@ -2390,12 +2413,17 @@ class EndpointWallet extends _isc.EndpointRef {
   String get name => 'wallet';
 
   /// Creates the wallet and its crypto account in one transaction, then syncs.
+  ///
+  /// The address is validated through the core parser before anything is
+  /// stored or read. EVM wallets pass [scanNetworks], the networks each read
+  /// covers; every other family reads its one network.
   _ida.Future<_igzh8mor.Wallet> connect(
     _isc.UuidValue entityId,
     _ifz8weqz.WalletNetwork network,
     String address, {
     String? label,
     String? accountName,
+    List<_ifz8weqz.WalletNetwork>? scanNetworks,
   }) => caller.callServerEndpoint<_igzh8mor.Wallet>(
     'wallet',
     'connect',
@@ -2405,7 +2433,56 @@ class EndpointWallet extends _isc.EndpointRef {
       'address': address,
       'label': label,
       'accountName': accountName,
+      'scanNetworks': scanNetworks,
     },
+  );
+
+  /// Reads what one address holds across its family's supported networks,
+  /// before connecting. Nothing is written. Rate limited to 20 reads an
+  /// hour per user; the 21st is rejected.
+  _ida.Future<_intcqihn.WalletPreview> preview(
+    _isc.UuidValue entityId,
+    String address,
+  ) => caller.callServerEndpoint<_intcqihn.WalletPreview>(
+    'wallet',
+    'preview',
+    {
+      'entityId': entityId,
+      'address': address,
+    },
+  );
+
+  /// The networks that can be read now: each one's family has a registered
+  /// provider and its secret is present.
+  _ida.Future<List<_ifz8weqz.WalletNetwork>> supportedNetworks() =>
+      caller.callServerEndpoint<List<_ifz8weqz.WalletNetwork>>(
+        'wallet',
+        'supportedNetworks',
+        {},
+      );
+
+  /// Replaces the networks an EVM wallet reads on its next sync; null reads
+  /// its home network only.
+  _ida.Future<_igzh8mor.Wallet> setScanNetworks(
+    _isc.UuidValue walletId,
+    List<_ifz8weqz.WalletNetwork>? networks,
+  ) => caller.callServerEndpoint<_igzh8mor.Wallet>(
+    'wallet',
+    'setScanNetworks',
+    {
+      'walletId': walletId,
+      'networks': networks,
+    },
+  );
+
+  /// One row per network of the wallet: when its holdings were last read
+  /// and why the last read failed.
+  _ida.Future<List<_i9c4hszu.WalletNetworkState>> listNetworkStates(
+    _isc.UuidValue walletId,
+  ) => caller.callServerEndpoint<List<_i9c4hszu.WalletNetworkState>>(
+    'wallet',
+    'listNetworkStates',
+    {'walletId': walletId},
   );
 
   /// Lists the wallets of one owned entity.

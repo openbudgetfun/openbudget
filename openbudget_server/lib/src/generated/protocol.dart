@@ -73,6 +73,8 @@ import 'package:openbudget_server/src/generated/wallets/wallet.dart'
     as _igcr1vxe;
 import 'package:openbudget_server/src/generated/wallets/wallet_holding.dart'
     as _icu5m6lt;
+import 'package:openbudget_server/src/generated/wallets/wallet_network_state.dart'
+    as _inqpauom;
 import 'package:openbudget_server/src/generated/wallets/wallet_tax_year_summary.dart'
     as _ilgsya0a;
 import 'package:openbudget_server/src/generated/wallets/wallet_transaction.dart'
@@ -141,6 +143,7 @@ import 'exceptions/fx_rate_unavailable_exception.dart' as _if5umnl3;
 import 'exceptions/not_found_exception.dart' as _izob2ctl;
 import 'exceptions/tax_rules_unavailable_exception.dart' as _i4yu9vcq;
 import 'exceptions/validation_exception.dart' as _igpdbyom;
+import 'exceptions/wallet_preview_rate_limited_exception.dart' as _i4nmh6wd;
 import 'future_calls_generated_models/fx_backfill_future_call_fetch_model.dart'
     as _iuflqeka;
 import 'fx_rates/fx_latest_snapshot.dart' as _i8cxakqz;
@@ -173,11 +176,13 @@ import 'reports/spending_row.dart' as _ikppksh7;
 import 'settings/user_settings.dart' as _i99f9doz;
 import 'tax/tax_band_slice_view.dart' as _ic4zfx3b;
 import 'tax/tax_category_view.dart' as _iv5oayw3;
+import 'tax/tax_figure_view.dart' as _ixm9q9lk;
 import 'tax/tax_liability_view.dart' as _ivss6b81;
 import 'tax/tax_opportunity_view.dart' as _iuft4v7q;
 import 'tax/tax_profile.dart' as _i20z9jax;
 import 'tax/tax_report_line_view.dart' as _i6llsezf;
 import 'tax/tax_report_view.dart' as _inb54q20;
+import 'tax/tax_rule_caveat_view.dart' as _i97pej5a;
 import 'tax/tax_summary_category_total_view.dart' as _ilbx4erh;
 import 'tax/tax_summary_fx_note_view.dart' as _iok5qj2e;
 import 'tax/tax_summary_sales_tax_quarter_view.dart' as _it9yyajv;
@@ -209,6 +214,8 @@ import 'wallets/spam_verdict.dart' as _i4uehszw;
 import 'wallets/wallet.dart' as _ilu5i0rn;
 import 'wallets/wallet_holding.dart' as _iqqppnaa;
 import 'wallets/wallet_network_state.dart' as _i73xhbar;
+import 'wallets/wallet_preview.dart' as _iuw2colh;
+import 'wallets/wallet_preview_network.dart' as _icbqx9y3;
 import 'wallets/wallet_sync_result.dart' as _ipdq2p58;
 import 'wallets/wallet_tax_year_summary.dart' as _ivsmsmw6;
 import 'wallets/wallet_transaction.dart' as _i6m1jx15;
@@ -269,6 +276,7 @@ export 'exceptions/fx_rate_unavailable_exception.dart';
 export 'exceptions/not_found_exception.dart';
 export 'exceptions/tax_rules_unavailable_exception.dart';
 export 'exceptions/validation_exception.dart';
+export 'exceptions/wallet_preview_rate_limited_exception.dart';
 export 'fx_rates/fx_latest_snapshot.dart';
 export 'fx_rates/fx_provider.dart';
 export 'fx_rates/fx_quote_view.dart';
@@ -299,11 +307,13 @@ export 'reports/spending_row.dart';
 export 'settings/user_settings.dart';
 export 'tax/tax_band_slice_view.dart';
 export 'tax/tax_category_view.dart';
+export 'tax/tax_figure_view.dart';
 export 'tax/tax_liability_view.dart';
 export 'tax/tax_opportunity_view.dart';
 export 'tax/tax_profile.dart';
 export 'tax/tax_report_line_view.dart';
 export 'tax/tax_report_view.dart';
+export 'tax/tax_rule_caveat_view.dart';
 export 'tax/tax_summary_category_total_view.dart';
 export 'tax/tax_summary_fx_note_view.dart';
 export 'tax/tax_summary_sales_tax_quarter_view.dart';
@@ -335,6 +345,8 @@ export 'wallets/spam_verdict.dart';
 export 'wallets/wallet.dart';
 export 'wallets/wallet_holding.dart';
 export 'wallets/wallet_network_state.dart';
+export 'wallets/wallet_preview.dart';
+export 'wallets/wallet_preview_network.dart';
 export 'wallets/wallet_sync_result.dart';
 export 'wallets/wallet_tax_year_summary.dart';
 export 'wallets/wallet_transaction.dart';
@@ -409,6 +421,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_izob2ctl.NotFoundException>,
           _is.getType<_i4yu9vcq.TaxRulesUnavailableException>,
           _is.getType<_igpdbyom.ValidationException>,
+          _is.getType<_i4nmh6wd.WalletPreviewRateLimitedException>,
           _is.getType<_iuflqeka.FxBackfillFutureCallFetchModel>,
           _is.getType<_i8cxakqz.FxLatestSnapshot>,
           _is.getType<_ifsg8hc8.FxProvider>,
@@ -440,11 +453,13 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i99f9doz.UserSettings>,
           _is.getType<_ic4zfx3b.TaxBandSliceView>,
           _is.getType<_iv5oayw3.TaxCategoryView>,
+          _is.getType<_ixm9q9lk.TaxFigureView>,
           _is.getType<_ivss6b81.TaxLiabilityView>,
           _is.getType<_iuft4v7q.TaxOpportunityView>,
           _is.getType<_i20z9jax.TaxProfileRecord>,
           _is.getType<_i6llsezf.TaxReportLineView>,
           _is.getType<_inb54q20.TaxReportView>,
+          _is.getType<_i97pej5a.TaxRuleCaveatView>,
           _is.getType<_ilbx4erh.TaxSummaryCategoryTotalView>,
           _is.getType<_iok5qj2e.TaxSummaryFxNoteView>,
           _is.getType<_it9yyajv.TaxSummarySalesTaxQuarterView>,
@@ -476,6 +491,8 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_ilu5i0rn.Wallet>,
           _is.getType<_iqqppnaa.WalletHolding>,
           _is.getType<_i73xhbar.WalletNetworkState>,
+          _is.getType<_iuw2colh.WalletPreview>,
+          _is.getType<_icbqx9y3.WalletPreviewNetwork>,
           _is.getType<_ipdq2p58.WalletSyncResult>,
           _is.getType<_ivsmsmw6.WalletTaxYearSummary>,
           _is.getType<_i6m1jx15.WalletTransaction>,
@@ -536,6 +553,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_izob2ctl.NotFoundException?>,
           _is.getType<_i4yu9vcq.TaxRulesUnavailableException?>,
           _is.getType<_igpdbyom.ValidationException?>,
+          _is.getType<_i4nmh6wd.WalletPreviewRateLimitedException?>,
           _is.getType<_iuflqeka.FxBackfillFutureCallFetchModel?>,
           _is.getType<_i8cxakqz.FxLatestSnapshot?>,
           _is.getType<_ifsg8hc8.FxProvider?>,
@@ -567,11 +585,13 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i99f9doz.UserSettings?>,
           _is.getType<_ic4zfx3b.TaxBandSliceView?>,
           _is.getType<_iv5oayw3.TaxCategoryView?>,
+          _is.getType<_ixm9q9lk.TaxFigureView?>,
           _is.getType<_ivss6b81.TaxLiabilityView?>,
           _is.getType<_iuft4v7q.TaxOpportunityView?>,
           _is.getType<_i20z9jax.TaxProfileRecord?>,
           _is.getType<_i6llsezf.TaxReportLineView?>,
           _is.getType<_inb54q20.TaxReportView?>,
+          _is.getType<_i97pej5a.TaxRuleCaveatView?>,
           _is.getType<_ilbx4erh.TaxSummaryCategoryTotalView?>,
           _is.getType<_iok5qj2e.TaxSummaryFxNoteView?>,
           _is.getType<_it9yyajv.TaxSummarySalesTaxQuarterView?>,
@@ -603,6 +623,8 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_ilu5i0rn.Wallet?>,
           _is.getType<_iqqppnaa.WalletHolding?>,
           _is.getType<_i73xhbar.WalletNetworkState?>,
+          _is.getType<_iuw2colh.WalletPreview?>,
+          _is.getType<_icbqx9y3.WalletPreviewNetwork?>,
           _is.getType<_ipdq2p58.WalletSyncResult?>,
           _is.getType<_ivsmsmw6.WalletTaxYearSummary?>,
           _is.getType<_i6m1jx15.WalletTransaction?>,
@@ -618,6 +640,8 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_ic4zfx3b.TaxBandSliceView>>,
           _is.getType<List<_i6llsezf.TaxReportLineView>>,
           _is.getType<List<_ivss6b81.TaxLiabilityView>>,
+          _is.getType<List<_i97pej5a.TaxRuleCaveatView>>,
+          _is.getType<List<_ixm9q9lk.TaxFigureView>>,
           _is.getType<Map<String, String>>,
           _is.getType<List<_iuft4v7q.TaxOpportunityView>>,
           _is.getType<List<_ilbx4erh.TaxSummaryCategoryTotalView>>,
@@ -630,6 +654,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_ipio7ws3.TransactionLine>>,
           _is.getType<List<_ifz8weqz.WalletNetwork>>,
           _is.getType<List<_ifz8weqz.WalletNetwork>?>,
+          _is.getType<List<_icbqx9y3.WalletPreviewNetwork>>,
           _is.getType<List<String>?>,
           _is.getType<List<_i3fh9aci.Account>>,
           _is.getType<List<_is.UuidValue>>,
@@ -662,6 +687,9 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_i4wqhpw2.TransactionRule>>,
           _is.getType<List<_iw07wj0h.TransactionView>>,
           _is.getType<List<_iyod81ld.ImportRow>>,
+          _is.getType<List<_ifz8weqz.WalletNetwork>>,
+          _is.getType<List<_ifz8weqz.WalletNetwork>?>,
+          _is.getType<List<_inqpauom.WalletNetworkState>>,
           _is.getType<List<_igcr1vxe.Wallet>>,
           _is.getType<List<_icu5m6lt.WalletHolding>>,
           _is.getType<List<_imzwq91q.WalletTransaction>>,
@@ -733,6 +761,7 @@ class Protocol extends _is.DatabaseSerializationManager
           'NotFoundException',
           'TaxRulesUnavailableException',
           'ValidationException',
+          'WalletPreviewRateLimitedException',
           'FxBackfillFutureCallFetchModel',
           'FxLatestSnapshot',
           'FxProvider',
@@ -764,11 +793,13 @@ class Protocol extends _is.DatabaseSerializationManager
           'UserSettings',
           'TaxBandSliceView',
           'TaxCategoryView',
+          'TaxFigureView',
           'TaxLiabilityView',
           'TaxOpportunityView',
           'TaxProfileRecord',
           'TaxReportLineView',
           'TaxReportView',
+          'TaxRuleCaveatView',
           'TaxSummaryCategoryTotalView',
           'TaxSummaryFxNoteView',
           'TaxSummarySalesTaxQuarterView',
@@ -800,6 +831,8 @@ class Protocol extends _is.DatabaseSerializationManager
           'Wallet',
           'WalletHolding',
           'WalletNetworkState',
+          'WalletPreview',
+          'WalletPreviewNetwork',
           'WalletSyncResult',
           'WalletTaxYearSummary',
           'WalletTransaction',
@@ -5779,6 +5812,9 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _igpdbyom.ValidationException) {
       return _igpdbyom.ValidationException.fromJson(data) as T;
     }
+    if (t == _i4nmh6wd.WalletPreviewRateLimitedException) {
+      return _i4nmh6wd.WalletPreviewRateLimitedException.fromJson(data) as T;
+    }
     if (t == _iuflqeka.FxBackfillFutureCallFetchModel) {
       return _iuflqeka.FxBackfillFutureCallFetchModel.fromJson(data) as T;
     }
@@ -5872,6 +5908,9 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _iv5oayw3.TaxCategoryView) {
       return _iv5oayw3.TaxCategoryView.fromJson(data) as T;
     }
+    if (t == _ixm9q9lk.TaxFigureView) {
+      return _ixm9q9lk.TaxFigureView.fromJson(data) as T;
+    }
     if (t == _ivss6b81.TaxLiabilityView) {
       return _ivss6b81.TaxLiabilityView.fromJson(data) as T;
     }
@@ -5886,6 +5925,9 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (t == _inb54q20.TaxReportView) {
       return _inb54q20.TaxReportView.fromJson(data) as T;
+    }
+    if (t == _i97pej5a.TaxRuleCaveatView) {
+      return _i97pej5a.TaxRuleCaveatView.fromJson(data) as T;
     }
     if (t == _ilbx4erh.TaxSummaryCategoryTotalView) {
       return _ilbx4erh.TaxSummaryCategoryTotalView.fromJson(data) as T;
@@ -5979,6 +6021,12 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (t == _i73xhbar.WalletNetworkState) {
       return _i73xhbar.WalletNetworkState.fromJson(data) as T;
+    }
+    if (t == _iuw2colh.WalletPreview) {
+      return _iuw2colh.WalletPreview.fromJson(data) as T;
+    }
+    if (t == _icbqx9y3.WalletPreviewNetwork) {
+      return _icbqx9y3.WalletPreviewNetwork.fromJson(data) as T;
     }
     if (t == _ipdq2p58.WalletSyncResult) {
       return _ipdq2p58.WalletSyncResult.fromJson(data) as T;
@@ -6237,6 +6285,12 @@ class Protocol extends _is.DatabaseSerializationManager
               : null)
           as T;
     }
+    if (t == _is.getType<_i4nmh6wd.WalletPreviewRateLimitedException?>()) {
+      return (data != null
+              ? _i4nmh6wd.WalletPreviewRateLimitedException.fromJson(data)
+              : null)
+          as T;
+    }
     if (t == _is.getType<_iuflqeka.FxBackfillFutureCallFetchModel?>()) {
       return (data != null
               ? _iuflqeka.FxBackfillFutureCallFetchModel.fromJson(data)
@@ -6364,6 +6418,10 @@ class Protocol extends _is.DatabaseSerializationManager
       return (data != null ? _iv5oayw3.TaxCategoryView.fromJson(data) : null)
           as T;
     }
+    if (t == _is.getType<_ixm9q9lk.TaxFigureView?>()) {
+      return (data != null ? _ixm9q9lk.TaxFigureView.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_ivss6b81.TaxLiabilityView?>()) {
       return (data != null ? _ivss6b81.TaxLiabilityView.fromJson(data) : null)
           as T;
@@ -6382,6 +6440,10 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (t == _is.getType<_inb54q20.TaxReportView?>()) {
       return (data != null ? _inb54q20.TaxReportView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i97pej5a.TaxRuleCaveatView?>()) {
+      return (data != null ? _i97pej5a.TaxRuleCaveatView.fromJson(data) : null)
           as T;
     }
     if (t == _is.getType<_ilbx4erh.TaxSummaryCategoryTotalView?>()) {
@@ -6511,6 +6573,16 @@ class Protocol extends _is.DatabaseSerializationManager
       return (data != null ? _i73xhbar.WalletNetworkState.fromJson(data) : null)
           as T;
     }
+    if (t == _is.getType<_iuw2colh.WalletPreview?>()) {
+      return (data != null ? _iuw2colh.WalletPreview.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_icbqx9y3.WalletPreviewNetwork?>()) {
+      return (data != null
+              ? _icbqx9y3.WalletPreviewNetwork.fromJson(data)
+              : null)
+          as T;
+    }
     if (t == _is.getType<_ipdq2p58.WalletSyncResult?>()) {
       return (data != null ? _ipdq2p58.WalletSyncResult.fromJson(data) : null)
           as T;
@@ -6594,6 +6666,18 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
+    if (t == List<_i97pej5a.TaxRuleCaveatView>) {
+      return (data as List)
+              .map((e) => deserialize<_i97pej5a.TaxRuleCaveatView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ixm9q9lk.TaxFigureView>) {
+      return (data as List)
+              .map((e) => deserialize<_ixm9q9lk.TaxFigureView>(e))
+              .toList()
+          as T;
+    }
     if (t == Map<String, String>) {
       return (data as Map).map(
         (k, v) => MapEntry(deserialize<String>(k), deserialize<String>(v)),
@@ -6667,6 +6751,12 @@ class Protocol extends _is.DatabaseSerializationManager
                     .map((e) => deserialize<_ifz8weqz.WalletNetwork>(e))
                     .toList()
               : null)
+          as T;
+    }
+    if (t == List<_icbqx9y3.WalletPreviewNetwork>) {
+      return (data as List)
+              .map((e) => deserialize<_icbqx9y3.WalletPreviewNetwork>(e))
+              .toList()
           as T;
     }
     if (t == _is.getType<List<String>?>()) {
@@ -6859,6 +6949,26 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
+    if (t == List<_ifz8weqz.WalletNetwork>) {
+      return (data as List)
+              .map((e) => deserialize<_ifz8weqz.WalletNetwork>(e))
+              .toList()
+          as T;
+    }
+    if (t == _is.getType<List<_ifz8weqz.WalletNetwork>?>()) {
+      return (data != null
+              ? (data as List)
+                    .map((e) => deserialize<_ifz8weqz.WalletNetwork>(e))
+                    .toList()
+              : null)
+          as T;
+    }
+    if (t == List<_inqpauom.WalletNetworkState>) {
+      return (data as List)
+              .map((e) => deserialize<_inqpauom.WalletNetworkState>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_igcr1vxe.Wallet>) {
       return (data as List)
               .map((e) => deserialize<_igcr1vxe.Wallet>(e))
@@ -6968,6 +7078,8 @@ class Protocol extends _is.DatabaseSerializationManager
       _izob2ctl.NotFoundException => 'NotFoundException',
       _i4yu9vcq.TaxRulesUnavailableException => 'TaxRulesUnavailableException',
       _igpdbyom.ValidationException => 'ValidationException',
+      _i4nmh6wd.WalletPreviewRateLimitedException =>
+        'WalletPreviewRateLimitedException',
       _iuflqeka.FxBackfillFutureCallFetchModel =>
         'FxBackfillFutureCallFetchModel',
       _i8cxakqz.FxLatestSnapshot => 'FxLatestSnapshot',
@@ -7000,11 +7112,13 @@ class Protocol extends _is.DatabaseSerializationManager
       _i99f9doz.UserSettings => 'UserSettings',
       _ic4zfx3b.TaxBandSliceView => 'TaxBandSliceView',
       _iv5oayw3.TaxCategoryView => 'TaxCategoryView',
+      _ixm9q9lk.TaxFigureView => 'TaxFigureView',
       _ivss6b81.TaxLiabilityView => 'TaxLiabilityView',
       _iuft4v7q.TaxOpportunityView => 'TaxOpportunityView',
       _i20z9jax.TaxProfileRecord => 'TaxProfileRecord',
       _i6llsezf.TaxReportLineView => 'TaxReportLineView',
       _inb54q20.TaxReportView => 'TaxReportView',
+      _i97pej5a.TaxRuleCaveatView => 'TaxRuleCaveatView',
       _ilbx4erh.TaxSummaryCategoryTotalView => 'TaxSummaryCategoryTotalView',
       _iok5qj2e.TaxSummaryFxNoteView => 'TaxSummaryFxNoteView',
       _it9yyajv.TaxSummarySalesTaxQuarterView =>
@@ -7037,6 +7151,8 @@ class Protocol extends _is.DatabaseSerializationManager
       _ilu5i0rn.Wallet => 'Wallet',
       _iqqppnaa.WalletHolding => 'WalletHolding',
       _i73xhbar.WalletNetworkState => 'WalletNetworkState',
+      _iuw2colh.WalletPreview => 'WalletPreview',
+      _icbqx9y3.WalletPreviewNetwork => 'WalletPreviewNetwork',
       _ipdq2p58.WalletSyncResult => 'WalletSyncResult',
       _ivsmsmw6.WalletTaxYearSummary => 'WalletTaxYearSummary',
       _i6m1jx15.WalletTransaction => 'WalletTransaction',
@@ -7168,6 +7284,8 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'TaxRulesUnavailableException';
       case _igpdbyom.ValidationException():
         return 'ValidationException';
+      case _i4nmh6wd.WalletPreviewRateLimitedException():
+        return 'WalletPreviewRateLimitedException';
       case _iuflqeka.FxBackfillFutureCallFetchModel():
         return 'FxBackfillFutureCallFetchModel';
       case _i8cxakqz.FxLatestSnapshot():
@@ -7230,6 +7348,8 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'TaxBandSliceView';
       case _iv5oayw3.TaxCategoryView():
         return 'TaxCategoryView';
+      case _ixm9q9lk.TaxFigureView():
+        return 'TaxFigureView';
       case _ivss6b81.TaxLiabilityView():
         return 'TaxLiabilityView';
       case _iuft4v7q.TaxOpportunityView():
@@ -7240,6 +7360,8 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'TaxReportLineView';
       case _inb54q20.TaxReportView():
         return 'TaxReportView';
+      case _i97pej5a.TaxRuleCaveatView():
+        return 'TaxRuleCaveatView';
       case _ilbx4erh.TaxSummaryCategoryTotalView():
         return 'TaxSummaryCategoryTotalView';
       case _iok5qj2e.TaxSummaryFxNoteView():
@@ -7302,6 +7424,10 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'WalletHolding';
       case _i73xhbar.WalletNetworkState():
         return 'WalletNetworkState';
+      case _iuw2colh.WalletPreview():
+        return 'WalletPreview';
+      case _icbqx9y3.WalletPreviewNetwork():
+        return 'WalletPreviewNetwork';
       case _ipdq2p58.WalletSyncResult():
         return 'WalletSyncResult';
       case _ivsmsmw6.WalletTaxYearSummary():
@@ -7517,6 +7643,11 @@ class Protocol extends _is.DatabaseSerializationManager
     if (dataClassName == 'ValidationException') {
       return deserialize<_igpdbyom.ValidationException>(data['data']);
     }
+    if (dataClassName == 'WalletPreviewRateLimitedException') {
+      return deserialize<_i4nmh6wd.WalletPreviewRateLimitedException>(
+        data['data'],
+      );
+    }
     if (dataClassName == 'FxBackfillFutureCallFetchModel') {
       return deserialize<_iuflqeka.FxBackfillFutureCallFetchModel>(
         data['data'],
@@ -7612,6 +7743,9 @@ class Protocol extends _is.DatabaseSerializationManager
     if (dataClassName == 'TaxCategoryView') {
       return deserialize<_iv5oayw3.TaxCategoryView>(data['data']);
     }
+    if (dataClassName == 'TaxFigureView') {
+      return deserialize<_ixm9q9lk.TaxFigureView>(data['data']);
+    }
     if (dataClassName == 'TaxLiabilityView') {
       return deserialize<_ivss6b81.TaxLiabilityView>(data['data']);
     }
@@ -7626,6 +7760,9 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (dataClassName == 'TaxReportView') {
       return deserialize<_inb54q20.TaxReportView>(data['data']);
+    }
+    if (dataClassName == 'TaxRuleCaveatView') {
+      return deserialize<_i97pej5a.TaxRuleCaveatView>(data['data']);
     }
     if (dataClassName == 'TaxSummaryCategoryTotalView') {
       return deserialize<_ilbx4erh.TaxSummaryCategoryTotalView>(data['data']);
@@ -7719,6 +7856,12 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (dataClassName == 'WalletNetworkState') {
       return deserialize<_i73xhbar.WalletNetworkState>(data['data']);
+    }
+    if (dataClassName == 'WalletPreview') {
+      return deserialize<_iuw2colh.WalletPreview>(data['data']);
+    }
+    if (dataClassName == 'WalletPreviewNetwork') {
+      return deserialize<_icbqx9y3.WalletPreviewNetwork>(data['data']);
     }
     if (dataClassName == 'WalletSyncResult') {
       return deserialize<_ipdq2p58.WalletSyncResult>(data['data']);

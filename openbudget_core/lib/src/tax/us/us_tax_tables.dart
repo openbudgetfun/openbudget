@@ -65,14 +65,205 @@ final List<Uri> usTaxSources = List.unmodifiable(<Uri>[
   ),
 ]);
 
-/// The version, sources and verification date of each supported year.
+/// The named figures knowledge cards quote for [table]'s year, each with
+/// the IRS page it came from. The values are the tables' own; naming them
+/// adds no new number.
+Map<String, TaxFigure> usFiguresFor(UsTaxYearTable table) => Map.unmodifiable({
+  for (final figure in [
+    TaxFigure(
+      id: 'standardDeductionSingle',
+      value: table.standardDeductionFor(UsFilingStatus.single),
+      unit: TaxFigureUnit.currencyMinor,
+      source: Uri.parse('https://www.irs.gov/pub/irs-drop/rp-25-32.pdf'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: usRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'standardDeductionJoint',
+      value: table.standardDeductionFor(UsFilingStatus.marriedFilingJointly),
+      unit: TaxFigureUnit.currencyMinor,
+      source: Uri.parse('https://www.irs.gov/pub/irs-drop/rp-25-32.pdf'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: usRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'saltCap',
+      value: table.saltCapMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: Uri.parse('https://www.irs.gov/pub/irs-pdf/i1040gi.pdf'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: usRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'socialSecurityWageBase',
+      value: table.socialSecurityWageBaseMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: Uri.parse('https://www.irs.gov/taxtopics/tc559'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: usRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'childTaxCreditPerChild',
+      value: table.childTaxCreditPerChildMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: Uri.parse(
+        'https://www.irs.gov/credits-deductions/individuals/child-tax-credit',
+      ),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: usRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'qbiThresholdJoint',
+      value: table.qualifiedBusinessIncomeThresholdFor(
+        UsFilingStatus.marriedFilingJointly,
+      ),
+      unit: TaxFigureUnit.currencyMinor,
+      source: Uri.parse('https://www.irs.gov/pub/irs-pdf/f8995.pdf'),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: usRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'iraContributionLimit',
+      value: table.iraLimitMinor,
+      unit: TaxFigureUnit.currencyMinor,
+      source: Uri.parse(
+        'https://www.irs.gov/newsroom/'
+        '401k-limit-increases-to-24500-for-2026-ira-limit-increases-to-7500',
+      ),
+      grade: TaxEvidenceGrade.primary,
+      verifiedOn: usRulesVerifiedOn,
+    ),
+    TaxFigure(
+      id: 'corporateTaxRate',
+      value: 2100,
+      unit: TaxFigureUnit.rateBasisPoints,
+      source: Uri.parse('https://www.irs.gov/pub/irs-pdf/f1120.pdf'),
+      grade: TaxEvidenceGrade.inferred,
+      verifiedOn: usRulesVerifiedOn,
+    ),
+  ])
+    figure.id: figure,
+});
+
+/// What the us-federal-tax skill could not verify, as data (its
+/// "Unverified and changing" list). Re-check dates follow that list.
+final List<TaxRuleCaveat> usRuleCaveats = [
+  TaxRuleCaveat(
+    id: 'us.2027-inflation-adjustments',
+    text:
+        'The 2027 inflation-adjusted figures are not published; the 2027 '
+        'Social Security wage base of 192,300 dollars was seen only in a '
+        'search result.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.personalReturn, TaxSection.selfEmployment},
+    recheckBy: DateTime.utc(2026, 12),
+  ),
+  TaxRuleCaveat(
+    id: 'us.schedule-1a-mechanics',
+    text:
+        'The Schedule 1-A line mechanics, including whether the senior '
+        'phase-out applies per person or on the couple\u2019s aggregate and '
+        'how "or portion thereof" rounds, were not retrieved from IRS '
+        'pages.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.personalReturn},
+    recheckBy: DateTime.utc(2027, 1, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'us.ctc-actc-formula',
+    text:
+        'The child tax credit phase-out rate and the additional child tax '
+        'credit earned-income formula rest on statute that was not read.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.personalReturn},
+    recheckBy: DateTime.utc(2027, 1, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'us.itemized-reduction',
+    text:
+        'The 5.4 per cent itemized-deduction reduction base and the 35 '
+        'per cent cap rest on IRS forms found through search summaries and '
+        'a CRS report, not on pages read directly.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {TaxSection.personalReturn},
+    recheckBy: DateTime.utc(2027, 1, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'us.international-mechanics',
+    text:
+        'The foreign earned income exclusion stacking rule, the Form 1116 '
+        'limitation formula and carryover periods, and the housing base '
+        'amount were not confirmed from IRS pages.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.personalReturn},
+    recheckBy: DateTime.utc(2027, 1, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'us.unread-thresholds',
+    text:
+        'The Schedule B interest threshold, Form 8949 box codes, the '
+        '27.5-year rental depreciation, the QBI rental safe harbour, the '
+        'de minimis safe harbour, Form 7004 and the late-filing penalties '
+        'were not read.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.personalReturn, TaxSection.companyReturn},
+    recheckBy: DateTime.utc(2027, 1, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'us.mileage-and-hsa',
+    text:
+        'The 2025 standard mileage rate was derived from the 2026 notice '
+        'and Schedule E instructions, and the HSA limits were not in the '
+        'research notes.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.selfEmployment},
+    recheckBy: DateTime.utc(2027, 1, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'us.estimated-tax-and-forms',
+    text:
+        'The 2026 excess business loss threshold, Form 2210 and Schedule '
+        'AI mechanics, FBAR penalty amounts, FUTA credit-reduction states '
+        'and deposit schedules were not researched.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.personalReturn},
+    recheckBy: DateTime.utc(2027, 1, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'us.state-data-secondary',
+    text:
+        'The state data behind state-return detection, such as the nine '
+        'no-wage-tax states and the flat-rate list, is from the Tax '
+        'Foundation and not from each state revenue department.',
+    grade: TaxEvidenceGrade.secondary,
+    sections: const {TaxSection.personalReturn},
+    recheckBy: DateTime.utc(2027, 1, 31),
+  ),
+  TaxRuleCaveat(
+    id: 'us.information-return-penalties',
+    text:
+        'Information-return penalty amounts, 1099-K payee reporting and '
+        'the 2026 1099-K form revision were not read.',
+    grade: TaxEvidenceGrade.inferred,
+    sections: const {TaxSection.selfEmployment, TaxSection.companyReturn},
+    recheckBy: DateTime.utc(2027, 1, 31),
+  ),
+];
+
+/// The version, sources, verification date, caveats and named figures of
+/// each supported year.
 final Map<int, TaxRuleSet> usRuleSetsByStartYear = Map.unmodifiable({
-  for (final startYear in const [2025, 2026])
+  for (final (startYear, table) in const [
+    (2025, usTaxYear2025),
+    (2026, usTaxYear2026),
+  ])
     startYear: TaxRuleSet(
       startYear: startYear,
       revision: 1,
       verifiedOn: usRulesVerifiedOn,
       sources: usTaxSources,
+      caveats: usRuleCaveats,
+      figures: usFiguresFor(table),
     ),
 });
 

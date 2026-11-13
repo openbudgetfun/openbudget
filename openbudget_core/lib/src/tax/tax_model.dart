@@ -92,6 +92,133 @@ final class TaxPackManifest {
       sections[section] ?? TaxSectionCoverage.notBuilt;
 }
 
+/// How well sourced a figure or rule is (docs/tax-jurisdictions.md,
+/// section 5.1).
+enum TaxEvidenceGrade {
+  /// Statute, official gazette, the authority's own page, form or
+  /// instructions, or the authority's published calculator.
+  primary,
+
+  /// A Big Four or law-firm summary, a reputable tax publisher, or an
+  /// intergovernmental compilation for figures it does not itself enact.
+  secondary,
+
+  /// Derived by the researcher from primary or secondary material, or a
+  /// design inference.
+  inferred,
+}
+
+/// The unit a [TaxFigure]'s value is counted in.
+enum TaxFigureUnit {
+  /// Minor units of the jurisdiction's currency, such as pence.
+  currencyMinor,
+
+  /// Basis points: 2000 is 20%.
+  rateBasisPoints,
+
+  /// A plain percentage, such as a share of income.
+  percent,
+
+  /// A counted number, such as a kilometre allowance step.
+  count,
+}
+
+/// One named figure of a rule set, such as the personal allowance.
+///
+/// Knowledge cards quote named figures by id
+/// (docs/money-guide.md, section 4.1), so a report and an answer can never
+/// disagree on a headline number. The value is whatever the pack's tables
+/// already carried; naming it adds the source, grade and verified-on date.
+@immutable
+final class TaxFigure {
+  const TaxFigure({
+    required this.id,
+    required this.value,
+    required this.unit,
+    required this.source,
+    required this.grade,
+    required this.verifiedOn,
+  });
+
+  /// Stable identifier, unique in its rule set: `personalAllowance`.
+  final String id;
+
+  /// The figure in [unit]; a secondary-grade figure computes a liability
+  /// only with a visible caveat.
+  final int value;
+
+  final TaxFigureUnit unit;
+
+  /// The authority page the figure came from.
+  final Uri source;
+
+  final TaxEvidenceGrade grade;
+
+  /// When the figure was last checked against [source].
+  final DateTime verifiedOn;
+}
+
+/// One thing a rule pack could not verify, in plain language
+/// (docs/tax-jurisdictions.md, section 5.4).
+///
+/// Caveats are data ported from the country skills' "Unverified and
+/// changing" lists. A report carries only the caveats that touch the
+/// sections and rule keys it used.
+@immutable
+final class TaxRuleCaveat {
+  const TaxRuleCaveat({
+    required this.id,
+    required this.text,
+    required this.grade,
+    required this.recheckBy,
+    this.sections = const {},
+    this.keys = const {},
+    this.announced = false,
+  });
+
+  /// Stable identifier, unique in its pack and prefixed by country:
+  /// `gb.student-loan-unearned-threshold`.
+  final String id;
+
+  /// One plain sentence saying what could not be verified.
+  final String text;
+
+  /// How well sourced the statement behind the caveat is.
+  final TaxEvidenceGrade grade;
+
+  /// The last day the caveat is trusted without a re-check.
+  final DateTime recheckBy;
+
+  /// The report sections the caveat touches.
+  final Set<TaxSection> sections;
+
+  /// The rule keys and figure ids the caveat touches, such as
+  /// `studentLoans` or `personalAllowance`.
+  final Set<String> keys;
+
+  /// True when the caveat describes a change that is announced but not
+  /// yet law.
+  final bool announced;
+
+  /// Whether this caveat touches any of the used [sections] or [keys].
+  bool touches({
+    Set<TaxSection> sections = const {},
+    Set<String> keys = const {},
+  }) {
+    for (final section in this.sections) {
+      if (sections.contains(section)) {
+        return true;
+      }
+    }
+    for (final key in this.keys) {
+      if (keys.contains(key)) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
 /// The version, sources and verification date of one year's figures.
 @immutable
 final class TaxRuleSet {
@@ -100,6 +227,8 @@ final class TaxRuleSet {
     required this.revision,
     required this.verifiedOn,
     required this.sources,
+    this.caveats = const [],
+    this.figures = const {},
   });
 
   final int startYear;
@@ -112,6 +241,23 @@ final class TaxRuleSet {
 
   /// The authority pages the figures came from.
   final List<Uri> sources;
+
+  /// What could not be verified, ported from the country skill's
+  /// "Unverified and changing" list.
+  final List<TaxRuleCaveat> caveats;
+
+  /// The named figures knowledge cards quote, keyed by id.
+  final Map<String, TaxFigure> figures;
+
+  /// The caveats that touch any of the used [sections] or [keys]; a report
+  /// carries only these.
+  List<TaxRuleCaveat> caveatsTouching({
+    Set<TaxSection> sections = const {},
+    Set<String> keys = const {},
+  }) => [
+    for (final caveat in caveats)
+      if (caveat.touches(sections: sections, keys: keys)) caveat,
+  ];
 
   /// The version recorded on reports, exports and proposals: `gb-2026-r1`.
   String versionFor(TaxJurisdiction jurisdiction) =>
@@ -294,6 +440,7 @@ class TaxReportLine {
     this.code,
     this.reportReference,
     this.entryCount = 0,
+    this.figureId,
   });
 
   final String label;
@@ -304,6 +451,11 @@ class TaxReportLine {
 
   final String? reportReference;
   final int entryCount;
+
+  /// The [TaxFigure.id] this line presents, when it presents one. Lines
+  /// whose figure is secondary-grade show a "from a secondary source"
+  /// badge.
+  final String? figureId;
 }
 
 /// One tax a report computes, such as income tax or Class 4 NICs.
@@ -387,6 +539,7 @@ class TaxReport {
     required this.rulesVersion,
     required this.maturity,
     required this.coverage,
+    this.caveats = const [],
     this.uncategorizedCount = 0,
   });
 
@@ -419,6 +572,11 @@ class TaxReport {
 
   /// How completely the pack covers each section.
   final Map<TaxSection, TaxSectionCoverage> coverage;
+
+  /// The rule-set caveats that touch the sections and rule keys this
+  /// report used: "what we could not verify" (docs/tax-jurisdictions.md,
+  /// section 5.4).
+  final List<TaxRuleCaveat> caveats;
 
   /// Entries whose category this rule pack does not know.
   final int uncategorizedCount;

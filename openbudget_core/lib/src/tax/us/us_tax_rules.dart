@@ -921,6 +921,13 @@ final class UsTaxRules implements TaxRulePack {
           label: 'Standard deduction',
           amountMinor: computation.standardDeduction,
           reportReference: 'Form 1040, line 12e',
+          figureId: switch (status) {
+            UsFilingStatus.marriedFilingJointly ||
+            UsFilingStatus.qualifyingSurvivingSpouse =>
+              'standardDeductionJoint',
+            UsFilingStatus.single => 'standardDeductionSingle',
+            _ => null,
+          },
         ),
       if (computation.usingItemized && computation.saltClaimed > 0)
         TaxReportLine(
@@ -1070,6 +1077,17 @@ final class UsTaxRules implements TaxRulePack {
       rulesVersion: rules.versionFor(TaxJurisdiction.us),
       maturity: manifest.maturity,
       coverage: manifest.sections,
+      caveats: rules.caveatsTouching(
+        sections: {
+          TaxSection.personalReturn,
+          // Schedule C profit and the self-employment tax it creates flow
+          // into the 1040 through linked businesses.
+          if (computation.seTax.tax > 0 || computation.linkedBusinessCount > 0)
+            TaxSection.selfEmployment,
+          if (computation.capitalGainsSlices.isNotEmpty)
+            TaxSection.capitalGains,
+        },
+      ),
       uncategorizedCount: uncategorizedCount,
     );
   }
@@ -1120,6 +1138,9 @@ final class UsTaxRules implements TaxRulePack {
       rulesVersion: rules.versionFor(TaxJurisdiction.us),
       maturity: manifest.maturity,
       coverage: manifest.sections,
+      caveats: rules.caveatsTouching(
+        sections: {TaxSection.selfEmployment},
+      ),
       uncategorizedCount: computation.totals.uncategorizedCount,
     );
   }
@@ -1199,6 +1220,9 @@ final class UsTaxRules implements TaxRulePack {
       rulesVersion: rules.versionFor(TaxJurisdiction.us),
       maturity: manifest.maturity,
       coverage: manifest.sections,
+      caveats: rules.caveatsTouching(
+        sections: {TaxSection.companyReturn},
+      ),
       uncategorizedCount: computation.totals.uncategorizedCount,
     );
   }

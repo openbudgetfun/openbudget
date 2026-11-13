@@ -52,6 +52,98 @@ void main() {
           }
         });
 
+        test('every caveat has a unique id, a grade and a recheck date', () {
+          final recheckById = <String, DateTime>{};
+          for (final startYear in pack.supportedStartYears) {
+            final ruleSet = pack.ruleSet(startYear);
+            expect(ruleSet.caveats, isNotEmpty, reason: '$startYear');
+            final idsThisYear = <String>{};
+            for (final caveat in ruleSet.caveats) {
+              final reason =
+                  '${jurisdiction.countryCode} ${caveat.id} $startYear';
+              expect(
+                caveat.id,
+                startsWith('${jurisdiction.countryCode.toLowerCase()}.'),
+                reason: 'caveat ids carry the country prefix ($reason)',
+              );
+              expect(
+                idsThisYear.add(caveat.id),
+                isTrue,
+                reason: '$reason is unique in its year',
+              );
+              expect(caveat.text, isNotEmpty, reason: reason);
+              expect(
+                caveat.recheckBy.isAfter(ruleSet.verifiedOn),
+                isTrue,
+                reason: '$reason recheckBy follows verifiedOn',
+              );
+              expect(
+                caveat.sections.isNotEmpty || caveat.keys.isNotEmpty,
+                isTrue,
+                reason: '$reason touches something',
+              );
+              // The same caveat shared across years keeps its recheck date.
+              final known = recheckById[caveat.id];
+              if (known != null) {
+                expect(known, caveat.recheckBy, reason: caveat.id);
+              } else {
+                recheckById[caveat.id] = caveat.recheckBy;
+              }
+            }
+          }
+        });
+
+        test('every named figure is complete and unique in its year', () {
+          final ids = <String>{};
+          for (final startYear in pack.supportedStartYears) {
+            final ruleSet = pack.ruleSet(startYear);
+            expect(ruleSet.figures, isNotEmpty, reason: '$startYear');
+            for (final figure in ruleSet.figures.values) {
+              final reason =
+                  '${jurisdiction.countryCode} ${figure.id} $startYear';
+              expect(
+                ids.add('${figure.id}_$startYear'),
+                isTrue,
+                reason: '$reason is unique',
+              );
+              expect(figure.value, greaterThanOrEqualTo(0), reason: reason);
+              expect(figure.source, isNotNull, reason: reason);
+              expect(figure.grade, isNotNull, reason: reason);
+              expect(
+                figure.verifiedOn,
+                ruleSet.verifiedOn,
+                reason: '$reason was checked with the rule set',
+              );
+            }
+          }
+        });
+
+        test('every report line that names a figure the rule set carries', () {
+          for (final startYear in pack.supportedStartYears) {
+            final figures = pack.ruleSet(startYear).figures;
+            for (final kind in EntityKind.values) {
+              final report = pack.report(
+                TaxInput(
+                  profile: _profileFor(jurisdiction, kind),
+                  year: pack.taxYear(startYear),
+                  entries: const [],
+                ),
+              );
+              for (final line in report.lines) {
+                final figureId = line.figureId;
+                if (figureId == null) continue;
+                expect(
+                  figures.containsKey(figureId),
+                  isTrue,
+                  reason:
+                      '$figureId on a ${kind.name} $startYear line must be a '
+                      'figure of that year',
+                );
+              }
+            }
+          }
+        });
+
         test('versions are unique per supported year', () {
           final versions = {
             for (final startYear in pack.supportedStartYears)
@@ -132,6 +224,14 @@ void main() {
                 report.rulesVerifiedOn,
                 ruleSet.verifiedOn,
                 reason: reason,
+              );
+              // Every report touches at least one section with caveats, so
+              // a report with none means the pack forgot to wire them.
+              expect(report.caveats, isNotEmpty, reason: reason);
+              expect(
+                report.caveats.toSet().difference(ruleSet.caveats.toSet()),
+                isEmpty,
+                reason: "$reason carries only its rule set's caveats",
               );
             }
           }
