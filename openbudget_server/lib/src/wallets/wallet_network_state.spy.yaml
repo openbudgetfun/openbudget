@@ -1,0 +1,20 @@
+### One network's read state for one wallet: when its holdings were last read,
+### why the last read failed, and where history sync stopped.
+class: WalletNetworkState
+table: wallet_network_state
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  walletId: UuidValue, relation(parent=wallet, onDelete=Cascade)
+  network: WalletNetwork
+  ### When holdings on this network were last read successfully.
+  lastReadAt: DateTime?
+  ### The last read's failure in plain words, cleared by the next success.
+  lastError: String?
+  ### Provider-defined history position (a block number, ledger index, page
+  ### key or transaction id). Null until history sync covers this network.
+  historyCursor: String?, scope=serverOnly
+  updatedAt: DateTime, default=now
+indexes:
+  wallet_network_state_wallet_network_unique_idx:
+    fields: walletId, network
+    unique: true

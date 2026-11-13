@@ -4,13 +4,21 @@ table: wallet_transaction
 fields:
   id: UuidValue?, defaultPersist=random_v7
   walletId: UuidValue, relation(parent=wallet, onDelete=Cascade)
+  ### The network the transaction is on.
+  network: WalletNetwork
+  ### The transaction id: a Solana signature, an EVM or Tron hash, a Bitcoin
+  ### txid or an XRP Ledger hash.
   signature: String
+  ### Solana slot, block height or ledger index; orders transactions within
+  ### one network.
   slot: int
   occurredAt: DateTime?
   description: String
-  ### Helius transaction type, such as `SWAP`. External vocabulary.
+  ### The provider's transaction type vocabulary, such as Helius `SWAP`.
+  ### External vocabulary.
   txType: String
-  ### Helius source, such as `JUPITER`. External vocabulary.
+  ### The provider's source vocabulary, such as Helius `JUPITER`. External
+  ### vocabulary.
   source: String
   interpretationConfidence: Confidence?
   ### JSON list of program ids the transaction invoked.
@@ -26,13 +34,13 @@ fields:
   category: String?
   tags: List<String>?
   memo: String?
-  ### Raw enhanced transaction payload from Helius.
+  ### Raw provider payload.
   rawJson: String?, scope=serverOnly
   createdAt: DateTime, default=now
   updatedAt: DateTime, default=now
 indexes:
   wallet_transaction_wallet_signature_unique_idx:
-    fields: walletId, signature
+    fields: walletId, network, signature
     unique: true
   wallet_transaction_wallet_time_idx:
     fields: walletId, occurredAt

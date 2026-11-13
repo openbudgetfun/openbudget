@@ -440,6 +440,7 @@ abstract final class MultiCurrencyData {
   static List<WalletHolding> walletHoldings() => [
     WalletHolding(
       walletId: UuidValue.fromString(walletId),
+      network: WalletNetwork.solanaMainnet,
       assetId: 'So11111111111111111111111111111111111111112',
       symbol: 'SOL',
       name: 'Solana',
@@ -451,6 +452,7 @@ abstract final class MultiCurrencyData {
     ),
     WalletHolding(
       walletId: UuidValue.fromString(walletId),
+      network: WalletNetwork.solanaMainnet,
       assetId: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
       symbol: 'USDC',
       name: 'USD Coin',

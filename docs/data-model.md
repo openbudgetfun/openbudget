@@ -1662,12 +1662,16 @@ Plaid balances:
 - Investment, loan and mortgage accounts from Plaid are `valuations` accounts, and each sync upserts today's `account_valuation` (source `plaid`).
 - Amounts are converted with `parseMinorUnits(value.toString(), decimals)`, never `* 100`.
 
-**`wallet`: NEW** (merges `solana_wallet` and `wallet_connection`). A wallet always has a `crypto` account with `balanceSource: valuations`, created by `wallet.connect`. Its currency is the price currency, USD today (Q8). Each sync upserts today's valuation (source `wallet`) for the sum of the priced holdings' `valueMinor`.
+**`wallet`: NEW** (merges `solana_wallet` and `wallet_connection`). A wallet always has a `crypto` account with `balanceSource: valuations`, created by `wallet.connect`. Its currency is the price currency, USD today (Q8). Each sync upserts today's valuation (source `wallet`) for the sum of the priced holdings' `valueMinor`. One wallet is one address, or one HD key, in one chain family: `network` is the wallet's home network, and an EVM wallet lists every network it reads in `scanNetworks`.
 
 `wallets/wallet.spy.yaml`:
 
 ```yaml
 ### A read-only blockchain wallet whose holdings value one crypto account.
+###
+### One wallet is one address, or one HD key, in one chain family. An EVM
+### wallet reads every network in scanNetworks; any other wallet reads its
+### one network.
 class: Wallet
 table: wallet
 fields:
@@ -1675,11 +1679,24 @@ fields:
   entityId: UuidValue, relation(parent=entity, onDelete=Cascade)
   ### The crypto account carrying the wallet's value into net worth.
   accountId: UuidValue, relation(parent=account, onDelete=Cascade)
+  ### The wallet's home network, which fixes its chain family. Every EVM
+  ### wallet uses ethereumMainnet here, so one EVM address is one wallet,
+  ### and lists the networks it reads in scanNetworks.
   network: WalletNetwork
-  ### Base58 address.
+  ### The address in its family's canonical form (core WalletAddressParser).
+  ### For an HD wallet, `hd:` and the first 40 hex digits of the SHA-256 of
+  ### its canonical descriptor, so the key is never stored in clear.
   address: String
+  ### EVM wallets: the networks each read covers, in display order. Null for
+  ### every other family.
+  scanNetworks: List<WalletNetwork>?
+  ### HD wallets: the BIP 380 output descriptor, sealed with SecretBox.
+  ### Written together with descriptorNonce or not at all.
+  descriptorCiphertext: String?, scope=serverOnly
+  descriptorNonce: String?, scope=serverOnly
   label: String?
-  ### Newest signature already processed, for incremental sync.
+  ### Solana only: the newest signature already processed. Other families
+  ### keep history positions in wallet_network_state.
   lastSignature: String?
   syncStatus: SyncStatus, default=pending
   lastSyncedAt: DateTime?
@@ -1697,18 +1714,36 @@ indexes:
     fields: address
 ```
 
-`wallets/wallet_network.spy.yaml`:
+`openbudget_core/lib/src/models/wallet_network.spy.yaml` (shared with the server and the app; `ChainFamily`, the chain catalogue and the per-network rules are derived from it in core, never stored):
 
 ```yaml
-### Which chain and cluster a wallet lives on.
+### Which chain and network a wallet, holding, transaction or price is on.
+### Stored by name: append values, never rename one.
 enum: WalletNetwork
 serialized: byName
 values:
   - solanaMainnet
   - solanaDevnet
+  - bitcoinMainnet
+  - ethereumMainnet
+  - baseMainnet
+  - arbitrumOne
+  - opMainnet
+  - polygonPos
+  - bnbSmartChain
+  - avalancheCChain
+  - tronMainnet
+  - xrplMainnet
+  - hyperliquid
+  - dogecoinMainnet
+  - litecoinMainnet
+  - cardanoMainnet
+  - tonMainnet
+  - suiMainnet
+  - aptosMainnet
 ```
 
-**`wallet_holding`: CHANGE** (merges `solana_wallet_holding` with the old `wallet_holding`).
+**`wallet_holding`: CHANGE** (merges `solana_wallet_holding` with the old `wallet_holding`; multichain). Every holding carries its `network` and a `position` (spendable, staked or unclaimed), so one wallet can hold one asset on several networks and in several positions; `spamVerdict` decides whether it counts toward net worth.
 
 - `balanceRaw: String` becomes `quantityRaw: BigInt`.
 - `balanceUi` and `quantityDisplay` are dropped: they are derived from `quantityRaw` and `decimals`.
@@ -1719,22 +1754,35 @@ values:
 `wallets/wallet_holding.spy.yaml`:
 
 ```yaml
-### The current quantity and valuation of one asset in a wallet.
+### The current quantity and valuation of one asset in a wallet, on one
+### network and in one position.
 class: WalletHolding
 table: wallet_holding
 fields:
   id: UuidValue?, defaultPersist=random_v7
   walletId: UuidValue, relation(parent=wallet, onDelete=Cascade)
-  ### Mint address, or `native` for the chain's own token.
+  ### The network the asset is on. A single-network wallet's holdings use the
+  ### wallet's network.
+  network: WalletNetwork
+  ### The asset on that network: `native`, or the contract, mint, coin type,
+  ### jetton master or policy-and-name unit (multichain-wallets.md 7.2).
   assetId: String
+  ### Spendable, staked or unclaimed. Each position of an asset is its own
+  ### holding.
+  position: HoldingPosition, default=available
   symbol: String?
   name: String?
-  ### Token program id, such as Tokenkeg... or TokenzQd...
+  ### The token standard or program: a Solana token program id, or erc20,
+  ### trc20, trc10, xrplIou, jetton, cardanoNative, suiCoin or aptosFa.
   tokenProgram: String?
   decimals: int
-  ### Quantity in the asset's base units (lamports for SOL).
+  ### Quantity in the asset's base units (lamports, wei, satoshis, sun,
+  ### drops).
   quantityRaw: BigInt
   isNft: bool, default=false
+  ### Whether the holding counts toward net worth. The classifier sets clean
+  ### or suspected; a user choice overrides it and survives syncs.
+  spamVerdict: SpamVerdict, default=clean
   ### ISO 4217 code that unitPrice and every *Minor field here are in.
   priceCurrencyCode: String?
   ### Price of one whole token, exact decimal string.
@@ -1755,10 +1803,70 @@ fields:
   updatedAt: DateTime, default=now
 indexes:
   wallet_holding_wallet_asset_unique_idx:
-    fields: walletId, assetId
+    fields: walletId, network, assetId, position
     unique: true
   wallet_holding_asset_idx:
-    fields: assetId
+    fields: network, assetId
+```
+
+`wallets/holding_position.spy.yaml`:
+
+```yaml
+### Whether a holding is spendable now, or staked or unclaimed. Every
+### position counts toward net worth; the app shows them apart.
+enum: HoldingPosition
+serialized: byName
+values:
+  ### Spendable now.
+  - available
+  ### Staked, frozen or delegated: still owned, not spendable now.
+  - staked
+  ### Rewards earned but not yet claimed or withdrawn.
+  - unclaimedRewards
+```
+
+`wallets/spam_verdict.spy.yaml`:
+
+```yaml
+### Whether a holding counts toward net worth.
+enum: SpamVerdict
+serialized: byName
+values:
+  ### Counted when priced.
+  - clean
+  ### Matched a spam rule; not counted until the user allows it.
+  - suspected
+  ### The user hid it; never counted.
+  - hiddenByUser
+  ### The user allowed it; counted when priced, whatever the rules say.
+  - allowedByUser
+```
+
+**`wallet_network_state`: NEW.** One network's read state for one wallet: when its holdings were last read, why the last read failed, and where history sync stopped.
+
+`wallets/wallet_network_state.spy.yaml`:
+
+```yaml
+### One network's read state for one wallet: when its holdings were last read,
+### why the last read failed, and where history sync stopped.
+class: WalletNetworkState
+table: wallet_network_state
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  walletId: UuidValue, relation(parent=wallet, onDelete=Cascade)
+  network: WalletNetwork
+  ### When holdings on this network were last read successfully.
+  lastReadAt: DateTime?
+  ### The last read's failure in plain words, cleared by the next success.
+  lastError: String?
+  ### Provider-defined history position (a block number, ledger index, page
+  ### key or transaction id). Null until history sync covers this network.
+  historyCursor: String?, scope=serverOnly
+  updatedAt: DateTime, default=now
+indexes:
+  wallet_network_state_wallet_network_unique_idx:
+    fields: walletId, network
+    unique: true
 ```
 
 `wallets/price_source.spy.yaml`:
@@ -1773,6 +1881,8 @@ values:
   - magicEden
   ### Computed from a related asset or pool.
   - derived
+  - coingecko
+  - defillama
 ```
 
 `wallets/price_quality.spy.yaml`:
@@ -1822,13 +1932,21 @@ table: wallet_transaction
 fields:
   id: UuidValue?, defaultPersist=random_v7
   walletId: UuidValue, relation(parent=wallet, onDelete=Cascade)
+  ### The network the transaction is on.
+  network: WalletNetwork
+  ### The transaction id: a Solana signature, an EVM or Tron hash, a Bitcoin
+  ### txid or an XRP Ledger hash.
   signature: String
+  ### Solana slot, block height or ledger index; orders transactions within
+  ### one network.
   slot: int
   occurredAt: DateTime?
   description: String
-  ### Helius transaction type, such as `SWAP`. External vocabulary.
+  ### The provider's transaction type vocabulary, such as Helius `SWAP`.
+  ### External vocabulary.
   txType: String
-  ### Helius source, such as `JUPITER`. External vocabulary.
+  ### The provider's source vocabulary, such as Helius `JUPITER`. External
+  ### vocabulary.
   source: String
   interpretationConfidence: Confidence?
   ### JSON list of program ids the transaction invoked.
@@ -1844,13 +1962,13 @@ fields:
   category: String?
   tags: List<String>?
   memo: String?
-  ### Raw enhanced transaction payload from Helius.
-  rawJson: String, scope=serverOnly
+  ### Raw provider payload.
+  rawJson: String?, scope=serverOnly
   createdAt: DateTime, default=now
   updatedAt: DateTime, default=now
 indexes:
   wallet_transaction_wallet_signature_unique_idx:
-    fields: walletId, signature
+    fields: walletId, network, signature
     unique: true
   wallet_transaction_wallet_time_idx:
     fields: walletId, occurredAt

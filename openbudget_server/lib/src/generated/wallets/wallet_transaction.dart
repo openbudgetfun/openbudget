@@ -12,6 +12,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:openbudget_server/src/generated/protocol.dart' as _is0sbm8r;
 import 'package:serverpod/serverpod.dart' as _is;
 
@@ -23,6 +24,7 @@ abstract class WalletTransaction
   WalletTransaction._({
     this.id,
     required this.walletId,
+    required this.network,
     required this.signature,
     required this.slot,
     this.occurredAt,
@@ -49,6 +51,7 @@ abstract class WalletTransaction
   factory WalletTransaction({
     _is.UuidValue? id,
     required _is.UuidValue walletId,
+    required _ifz8weqz.WalletNetwork network,
     required String signature,
     required int slot,
     DateTime? occurredAt,
@@ -78,6 +81,9 @@ abstract class WalletTransaction
           : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       walletId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['walletId'],
+      ),
+      network: _ifz8weqz.WalletNetwork.fromJson(
+        (jsonSerialization['network'] as String),
       ),
       signature: jsonSerialization['signature'] as String,
       slot: jsonSerialization['slot'] as int,
@@ -126,18 +132,27 @@ abstract class WalletTransaction
 
   _is.UuidValue walletId;
 
+  /// The network the transaction is on.
+  _ifz8weqz.WalletNetwork network;
+
+  /// The transaction id: a Solana signature, an EVM or Tron hash, a Bitcoin
+  /// txid or an XRP Ledger hash.
   String signature;
 
+  /// Solana slot, block height or ledger index; orders transactions within
+  /// one network.
   int slot;
 
   DateTime? occurredAt;
 
   String description;
 
-  /// Helius transaction type, such as `SWAP`. External vocabulary.
+  /// The provider's transaction type vocabulary, such as Helius `SWAP`.
+  /// External vocabulary.
   String txType;
 
-  /// Helius source, such as `JUPITER`. External vocabulary.
+  /// The provider's source vocabulary, such as Helius `JUPITER`. External
+  /// vocabulary.
   String source;
 
   _itaosqa4.Confidence? interpretationConfidence;
@@ -165,7 +180,7 @@ abstract class WalletTransaction
 
   String? memo;
 
-  /// Raw enhanced transaction payload from Helius.
+  /// Raw provider payload.
   String? rawJson;
 
   DateTime createdAt;
@@ -181,6 +196,7 @@ abstract class WalletTransaction
   WalletTransaction copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
     _is.UuidValue? walletId,
+    _ifz8weqz.WalletNetwork? network,
     String? signature,
     int? slot,
     DateTime? occurredAt = const _is.$UndefinedDateTime(),
@@ -208,6 +224,7 @@ abstract class WalletTransaction
       '__className__': 'WalletTransaction',
       if (id != null) 'id': id?.toJson(),
       'walletId': walletId.toJson(),
+      'network': network.toJson(),
       'signature': signature,
       'slot': slot,
       if (occurredAt != null) 'occurredAt': occurredAt?.toJson(),
@@ -239,6 +256,7 @@ abstract class WalletTransaction
       '__className__': 'WalletTransaction',
       if (id != null) 'id': id?.toJson(),
       'walletId': walletId.toJson(),
+      'network': network.toJson(),
       'signature': signature,
       'slot': slot,
       if (occurredAt != null) 'occurredAt': occurredAt?.toJson(),
@@ -297,6 +315,7 @@ class _WalletTransactionImpl extends WalletTransaction {
   _WalletTransactionImpl({
     _is.UuidValue? id,
     required _is.UuidValue walletId,
+    required _ifz8weqz.WalletNetwork network,
     required String signature,
     required int slot,
     DateTime? occurredAt,
@@ -320,6 +339,7 @@ class _WalletTransactionImpl extends WalletTransaction {
   }) : super._(
          id: id,
          walletId: walletId,
+         network: network,
          signature: signature,
          slot: slot,
          occurredAt: occurredAt,
@@ -349,6 +369,7 @@ class _WalletTransactionImpl extends WalletTransaction {
   WalletTransaction copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
     _is.UuidValue? walletId,
+    _ifz8weqz.WalletNetwork? network,
     String? signature,
     int? slot,
     DateTime? occurredAt = const _is.$UndefinedDateTime(),
@@ -373,6 +394,7 @@ class _WalletTransactionImpl extends WalletTransaction {
     return WalletTransaction(
       id: id is _is.UndefinedSentinel ? this.id : id,
       walletId: walletId ?? this.walletId,
+      network: network ?? this.network,
       signature: signature ?? this.signature,
       slot: slot ?? this.slot,
       occurredAt: occurredAt is _is.UndefinedSentinel
@@ -423,6 +445,13 @@ class WalletTransactionUpdateTable
         table.walletId,
         value,
       );
+
+  _is.ColumnValue<_ifz8weqz.WalletNetwork, _ifz8weqz.WalletNetwork> network(
+    _ifz8weqz.WalletNetwork value,
+  ) => _is.ColumnValue(
+    table.network,
+    value,
+  );
 
   _is.ColumnValue<String, String> signature(String value) => _is.ColumnValue(
     table.signature,
@@ -542,6 +571,11 @@ class WalletTransactionTable extends _is.Table<_is.UuidValue?> {
       'walletId',
       this,
     );
+    network = _is.ColumnEnum(
+      'network',
+      this,
+      _is.EnumSerialization.byName,
+    );
     signature = _is.ColumnString(
       'signature',
       this,
@@ -631,18 +665,27 @@ class WalletTransactionTable extends _is.Table<_is.UuidValue?> {
 
   late final _is.ColumnUuid walletId;
 
+  /// The network the transaction is on.
+  late final _is.ColumnEnum<_ifz8weqz.WalletNetwork> network;
+
+  /// The transaction id: a Solana signature, an EVM or Tron hash, a Bitcoin
+  /// txid or an XRP Ledger hash.
   late final _is.ColumnString signature;
 
+  /// Solana slot, block height or ledger index; orders transactions within
+  /// one network.
   late final _is.ColumnInt slot;
 
   late final _is.ColumnDateTime occurredAt;
 
   late final _is.ColumnString description;
 
-  /// Helius transaction type, such as `SWAP`. External vocabulary.
+  /// The provider's transaction type vocabulary, such as Helius `SWAP`.
+  /// External vocabulary.
   late final _is.ColumnString txType;
 
-  /// Helius source, such as `JUPITER`. External vocabulary.
+  /// The provider's source vocabulary, such as Helius `JUPITER`. External
+  /// vocabulary.
   late final _is.ColumnString source;
 
   late final _is.ColumnEnum<_itaosqa4.Confidence> interpretationConfidence;
@@ -670,7 +713,7 @@ class WalletTransactionTable extends _is.Table<_is.UuidValue?> {
 
   late final _is.ColumnString memo;
 
-  /// Raw enhanced transaction payload from Helius.
+  /// Raw provider payload.
   late final _is.ColumnString rawJson;
 
   late final _is.ColumnDateTime createdAt;
@@ -681,6 +724,7 @@ class WalletTransactionTable extends _is.Table<_is.UuidValue?> {
   List<_is.Column> get columns => [
     id,
     walletId,
+    network,
     signature,
     slot,
     occurredAt,

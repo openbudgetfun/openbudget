@@ -11,6 +11,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:openbudget_client/src/protocol/protocol.dart' as _irkl4crj;
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 import '../common/confidence.dart' as _itaosqa4;
@@ -21,6 +22,7 @@ abstract class WalletTransaction
   WalletTransaction._({
     this.id,
     required this.walletId,
+    required this.network,
     required this.signature,
     required this.slot,
     this.occurredAt,
@@ -46,6 +48,7 @@ abstract class WalletTransaction
   factory WalletTransaction({
     _isc.UuidValue? id,
     required _isc.UuidValue walletId,
+    required _ifz8weqz.WalletNetwork network,
     required String signature,
     required int slot,
     DateTime? occurredAt,
@@ -74,6 +77,9 @@ abstract class WalletTransaction
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       walletId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['walletId'],
+      ),
+      network: _ifz8weqz.WalletNetwork.fromJson(
+        (jsonSerialization['network'] as String),
       ),
       signature: jsonSerialization['signature'] as String,
       slot: jsonSerialization['slot'] as int,
@@ -121,18 +127,27 @@ abstract class WalletTransaction
 
   _isc.UuidValue walletId;
 
+  /// The network the transaction is on.
+  _ifz8weqz.WalletNetwork network;
+
+  /// The transaction id: a Solana signature, an EVM or Tron hash, a Bitcoin
+  /// txid or an XRP Ledger hash.
   String signature;
 
+  /// Solana slot, block height or ledger index; orders transactions within
+  /// one network.
   int slot;
 
   DateTime? occurredAt;
 
   String description;
 
-  /// Helius transaction type, such as `SWAP`. External vocabulary.
+  /// The provider's transaction type vocabulary, such as Helius `SWAP`.
+  /// External vocabulary.
   String txType;
 
-  /// Helius source, such as `JUPITER`. External vocabulary.
+  /// The provider's source vocabulary, such as Helius `JUPITER`. External
+  /// vocabulary.
   String source;
 
   _itaosqa4.Confidence? interpretationConfidence;
@@ -170,6 +185,7 @@ abstract class WalletTransaction
   WalletTransaction copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     _isc.UuidValue? walletId,
+    _ifz8weqz.WalletNetwork? network,
     String? signature,
     int? slot,
     DateTime? occurredAt = const _isc.$UndefinedDateTime(),
@@ -196,6 +212,7 @@ abstract class WalletTransaction
       '__className__': 'WalletTransaction',
       if (id != null) 'id': id?.toJson(),
       'walletId': walletId.toJson(),
+      'network': network.toJson(),
       'signature': signature,
       'slot': slot,
       if (occurredAt != null) 'occurredAt': occurredAt?.toJson(),
@@ -226,6 +243,7 @@ abstract class WalletTransaction
       '__className__': 'WalletTransaction',
       if (id != null) 'id': id?.toJson(),
       'walletId': walletId.toJson(),
+      'network': network.toJson(),
       'signature': signature,
       'slot': slot,
       if (occurredAt != null) 'occurredAt': occurredAt?.toJson(),
@@ -262,6 +280,7 @@ class _WalletTransactionImpl extends WalletTransaction {
   _WalletTransactionImpl({
     _isc.UuidValue? id,
     required _isc.UuidValue walletId,
+    required _ifz8weqz.WalletNetwork network,
     required String signature,
     required int slot,
     DateTime? occurredAt,
@@ -284,6 +303,7 @@ class _WalletTransactionImpl extends WalletTransaction {
   }) : super._(
          id: id,
          walletId: walletId,
+         network: network,
          signature: signature,
          slot: slot,
          occurredAt: occurredAt,
@@ -312,6 +332,7 @@ class _WalletTransactionImpl extends WalletTransaction {
   WalletTransaction copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     _isc.UuidValue? walletId,
+    _ifz8weqz.WalletNetwork? network,
     String? signature,
     int? slot,
     DateTime? occurredAt = const _isc.$UndefinedDateTime(),
@@ -335,6 +356,7 @@ class _WalletTransactionImpl extends WalletTransaction {
     return WalletTransaction(
       id: id is _isc.UndefinedSentinel ? this.id : id,
       walletId: walletId ?? this.walletId,
+      network: network ?? this.network,
       signature: signature ?? this.signature,
       slot: slot ?? this.slot,
       occurredAt: occurredAt is _isc.UndefinedSentinel

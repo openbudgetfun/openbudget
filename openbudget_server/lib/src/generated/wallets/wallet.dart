@@ -13,11 +13,16 @@
 import 'dart:async' as _ida;
 
 import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
+import 'package:openbudget_server/src/generated/protocol.dart' as _is0sbm8r;
 import 'package:serverpod/serverpod.dart' as _is;
 
 import '../common/sync_status.dart' as _ijl385hj;
 
 /// A read-only blockchain wallet whose holdings value one crypto account.
+///
+/// One wallet is one address, or one HD key, in one chain family. An EVM
+/// wallet reads every network in scanNetworks; any other wallet reads its
+/// one network.
 abstract class Wallet
     implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   Wallet._({
@@ -26,6 +31,9 @@ abstract class Wallet
     required this.accountId,
     required this.network,
     required this.address,
+    this.scanNetworks,
+    this.descriptorCiphertext,
+    this.descriptorNonce,
     this.label,
     this.lastSignature,
     _ijl385hj.SyncStatus? syncStatus,
@@ -43,6 +51,9 @@ abstract class Wallet
     required _is.UuidValue accountId,
     required _ifz8weqz.WalletNetwork network,
     required String address,
+    List<_ifz8weqz.WalletNetwork>? scanNetworks,
+    String? descriptorCiphertext,
+    String? descriptorNonce,
     String? label,
     String? lastSignature,
     _ijl385hj.SyncStatus? syncStatus,
@@ -67,6 +78,14 @@ abstract class Wallet
         (jsonSerialization['network'] as String),
       ),
       address: jsonSerialization['address'] as String,
+      scanNetworks: jsonSerialization['scanNetworks'] == null
+          ? null
+          : _is0sbm8r.Protocol().deserialize<List<_ifz8weqz.WalletNetwork>>(
+              jsonSerialization['scanNetworks'],
+            ),
+      descriptorCiphertext:
+          jsonSerialization['descriptorCiphertext'] as String?,
+      descriptorNonce: jsonSerialization['descriptorNonce'] as String?,
       label: jsonSerialization['label'] as String?,
       lastSignature: jsonSerialization['lastSignature'] as String?,
       syncStatus: jsonSerialization['syncStatus'] == null
@@ -101,14 +120,30 @@ abstract class Wallet
   /// The crypto account carrying the wallet's value into net worth.
   _is.UuidValue accountId;
 
+  /// The wallet's home network, which fixes its chain family. Every EVM
+  /// wallet uses ethereumMainnet here, so one EVM address is one wallet,
+  /// and lists the networks it reads in scanNetworks.
   _ifz8weqz.WalletNetwork network;
 
-  /// Base58 address.
+  /// The address in its family's canonical form (core WalletAddressParser).
+  /// For an HD wallet, `hd:` and the first 40 hex digits of the SHA-256 of
+  /// its canonical descriptor, so the key is never stored in clear.
   String address;
+
+  /// EVM wallets: the networks each read covers, in display order. Null for
+  /// every other family.
+  List<_ifz8weqz.WalletNetwork>? scanNetworks;
+
+  /// HD wallets: the BIP 380 output descriptor, sealed with SecretBox.
+  /// Written together with descriptorNonce or not at all.
+  String? descriptorCiphertext;
+
+  String? descriptorNonce;
 
   String? label;
 
-  /// Newest signature already processed, for incremental sync.
+  /// Solana only: the newest signature already processed. Other families
+  /// keep history positions in wallet_network_state.
   String? lastSignature;
 
   _ijl385hj.SyncStatus syncStatus;
@@ -133,6 +168,10 @@ abstract class Wallet
     _is.UuidValue? accountId,
     _ifz8weqz.WalletNetwork? network,
     String? address,
+    List<_ifz8weqz.WalletNetwork>? scanNetworks =
+        const _is.$UndefinedList<_ifz8weqz.WalletNetwork>(),
+    String? descriptorCiphertext,
+    String? descriptorNonce,
     String? label,
     String? lastSignature,
     _ijl385hj.SyncStatus? syncStatus,
@@ -150,6 +189,11 @@ abstract class Wallet
       'accountId': accountId.toJson(),
       'network': network.toJson(),
       'address': address,
+      if (scanNetworks != null)
+        'scanNetworks': scanNetworks?.toJson(valueToJson: (v) => v.toJson()),
+      if (descriptorCiphertext != null)
+        'descriptorCiphertext': descriptorCiphertext,
+      if (descriptorNonce != null) 'descriptorNonce': descriptorNonce,
       if (label != null) 'label': label,
       if (lastSignature != null) 'lastSignature': lastSignature,
       'syncStatus': syncStatus.toJson(),
@@ -169,6 +213,8 @@ abstract class Wallet
       'accountId': accountId.toJson(),
       'network': network.toJson(),
       'address': address,
+      if (scanNetworks != null)
+        'scanNetworks': scanNetworks?.toJson(valueToJson: (v) => v.toJson()),
       if (label != null) 'label': label,
       if (lastSignature != null) 'lastSignature': lastSignature,
       'syncStatus': syncStatus.toJson(),
@@ -216,6 +262,9 @@ class _WalletImpl extends Wallet {
     required _is.UuidValue accountId,
     required _ifz8weqz.WalletNetwork network,
     required String address,
+    List<_ifz8weqz.WalletNetwork>? scanNetworks,
+    String? descriptorCiphertext,
+    String? descriptorNonce,
     String? label,
     String? lastSignature,
     _ijl385hj.SyncStatus? syncStatus,
@@ -229,6 +278,9 @@ class _WalletImpl extends Wallet {
          accountId: accountId,
          network: network,
          address: address,
+         scanNetworks: scanNetworks,
+         descriptorCiphertext: descriptorCiphertext,
+         descriptorNonce: descriptorNonce,
          label: label,
          lastSignature: lastSignature,
          syncStatus: syncStatus,
@@ -248,6 +300,10 @@ class _WalletImpl extends Wallet {
     _is.UuidValue? accountId,
     _ifz8weqz.WalletNetwork? network,
     String? address,
+    List<_ifz8weqz.WalletNetwork>? scanNetworks =
+        const _is.$UndefinedList<_ifz8weqz.WalletNetwork>(),
+    Object? descriptorCiphertext = _Undefined,
+    Object? descriptorNonce = _Undefined,
     Object? label = _Undefined,
     Object? lastSignature = _Undefined,
     _ijl385hj.SyncStatus? syncStatus,
@@ -262,6 +318,15 @@ class _WalletImpl extends Wallet {
       accountId: accountId ?? this.accountId,
       network: network ?? this.network,
       address: address ?? this.address,
+      scanNetworks: scanNetworks is _is.UndefinedSentinel
+          ? this.scanNetworks?.map((e0) => e0).toList()
+          : scanNetworks,
+      descriptorCiphertext: descriptorCiphertext is String?
+          ? descriptorCiphertext
+          : this.descriptorCiphertext,
+      descriptorNonce: descriptorNonce is String?
+          ? descriptorNonce
+          : this.descriptorNonce,
       label: label is String? ? label : this.label,
       lastSignature: lastSignature is String?
           ? lastSignature
@@ -306,6 +371,24 @@ class WalletUpdateTable extends _is.UpdateTable<WalletTable> {
     table.address,
     value,
   );
+
+  _is.ColumnValue<List<_ifz8weqz.WalletNetwork>, List<_ifz8weqz.WalletNetwork>>
+  scanNetworks(List<_ifz8weqz.WalletNetwork>? value) => _is.ColumnValue(
+    table.scanNetworks,
+    value,
+  );
+
+  _is.ColumnValue<String, String> descriptorCiphertext(String? value) =>
+      _is.ColumnValue(
+        table.descriptorCiphertext,
+        value,
+      );
+
+  _is.ColumnValue<String, String> descriptorNonce(String? value) =>
+      _is.ColumnValue(
+        table.descriptorNonce,
+        value,
+      );
 
   _is.ColumnValue<String, String> label(String? value) => _is.ColumnValue(
     table.label,
@@ -370,6 +453,18 @@ class WalletTable extends _is.Table<_is.UuidValue?> {
       'address',
       this,
     );
+    scanNetworks = _is.ColumnSerializable<List<_ifz8weqz.WalletNetwork>>(
+      'scanNetworks',
+      this,
+    );
+    descriptorCiphertext = _is.ColumnString(
+      'descriptorCiphertext',
+      this,
+    );
+    descriptorNonce = _is.ColumnString(
+      'descriptorNonce',
+      this,
+    );
     label = _is.ColumnString(
       'label',
       this,
@@ -411,14 +506,30 @@ class WalletTable extends _is.Table<_is.UuidValue?> {
   /// The crypto account carrying the wallet's value into net worth.
   late final _is.ColumnUuid accountId;
 
+  /// The wallet's home network, which fixes its chain family. Every EVM
+  /// wallet uses ethereumMainnet here, so one EVM address is one wallet,
+  /// and lists the networks it reads in scanNetworks.
   late final _is.ColumnEnum<_ifz8weqz.WalletNetwork> network;
 
-  /// Base58 address.
+  /// The address in its family's canonical form (core WalletAddressParser).
+  /// For an HD wallet, `hd:` and the first 40 hex digits of the SHA-256 of
+  /// its canonical descriptor, so the key is never stored in clear.
   late final _is.ColumnString address;
+
+  /// EVM wallets: the networks each read covers, in display order. Null for
+  /// every other family.
+  late final _is.ColumnSerializable<List<_ifz8weqz.WalletNetwork>> scanNetworks;
+
+  /// HD wallets: the BIP 380 output descriptor, sealed with SecretBox.
+  /// Written together with descriptorNonce or not at all.
+  late final _is.ColumnString descriptorCiphertext;
+
+  late final _is.ColumnString descriptorNonce;
 
   late final _is.ColumnString label;
 
-  /// Newest signature already processed, for incremental sync.
+  /// Solana only: the newest signature already processed. Other families
+  /// keep history positions in wallet_network_state.
   late final _is.ColumnString lastSignature;
 
   late final _is.ColumnEnum<_ijl385hj.SyncStatus> syncStatus;
@@ -438,6 +549,9 @@ class WalletTable extends _is.Table<_is.UuidValue?> {
     accountId,
     network,
     address,
+    scanNetworks,
+    descriptorCiphertext,
+    descriptorNonce,
     label,
     lastSignature,
     syncStatus,
