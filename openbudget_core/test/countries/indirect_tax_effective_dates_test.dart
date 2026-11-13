@@ -18,19 +18,31 @@ void main() {
   ];
 
   test('every researched country carries indirect-tax rates', () {
-    // 43 countries were filled by the EU/EEA/OECD research task; this guards
-    // against a file silently losing its rates.
-    expect(withIndirectTax.length, greaterThanOrEqualTo(43));
+    // 43 countries were filled by the EU/EEA/OECD research task (U3) and 71
+    // more by the Americas / Asia-Pacific task (U4); this guards against a
+    // file silently losing its rates.
+    expect(withIndirectTax.length, greaterThanOrEqualTo(114));
   });
 
   group('effective-dated rates', () {
     for (final country in withIndirectTax) {
       final tax = country.indirectTax!;
+      // Regimes that began inside the coverage window (Anguilla's July 2022
+      // GST, Palau's January 2023 PGST, Bhutan's January 2026 GST) cannot
+      // have rates before their first `from`, so coverage is only required
+      // from the date the country's earliest rate row starts.
+      final firstRate = [
+        for (final rate in tax.rates) rate.from,
+      ].reduce((a, b) => a.isBefore(b) ? a : b);
+      final datesFromRegimeStart = [
+        for (final date in coverageDates)
+          if (!date.isBefore(firstRate)) date,
+      ];
 
       test(
         '${country.code} applies a standard rate on every coverage date',
         () {
-          for (final date in coverageDates) {
+          for (final date in datesFromRegimeStart) {
             final standard = _rateOn(tax.rates, 'standard', date);
             expect(
               standard,
@@ -44,15 +56,20 @@ void main() {
       );
 
       test('${country.code} rate rows of one label never overlap', () {
-        final rows = [
-          ...tax.rates,
-          for (final subdivision in tax.subdivisions) ...subdivision.rates,
-        ];
-        final byLabel = <String, List<IndirectTaxRate>>{};
-        for (final rate in rows) {
-          byLabel.putIfAbsent(rate.label, () => []).add(rate);
+        // National rows are keyed by label alone; subdivision rows by their
+        // ISO 3166-2 code and label, so two states that both label their
+        // base rate "standard" are checked separately.
+        final rows = <String, List<IndirectTaxRate>>{};
+        for (final rate in tax.rates) {
+          rows.putIfAbsent(rate.label, () => []).add(rate);
         }
-        for (final entry in byLabel.entries) {
+        for (final subdivision in tax.subdivisions) {
+          for (final rate in subdivision.rates) {
+            final key = '${subdivision.code} ${rate.label}';
+            rows.putIfAbsent(key, () => []).add(rate);
+          }
+        }
+        for (final entry in rows.entries) {
           final sorted = entry.value.toList()
             ..sort((a, b) => a.from.compareTo(b.from));
           for (var i = 1; i < sorted.length; i++) {
@@ -78,7 +95,11 @@ void main() {
       });
 
       test('${country.code} rate rows reference real sources', () {
-        for (final rate in tax.rates) {
+        final rows = [
+          ...tax.rates,
+          for (final subdivision in tax.subdivisions) ...subdivision.rates,
+        ];
+        for (final rate in rows) {
           expect(
             rate.source,
             lessThan(country.sources.length),
@@ -89,6 +110,38 @@ void main() {
         }
       });
     }
+
+    test('subdivisions apply a base rate on every coverage date', () {
+      for (final country in Countries.all) {
+        final tax = country.indirectTax;
+        if (tax == null) {
+          continue;
+        }
+        for (final subdivision in tax.subdivisions) {
+          final firstRate = [
+            for (final rate in subdivision.rates) rate.from,
+          ].reduce((a, b) => a.isBefore(b) ? a : b);
+          for (final date in coverageDates) {
+            if (date.isBefore(firstRate)) {
+              continue;
+            }
+            final inForce = subdivision.rates.any(
+              (rate) =>
+                  (rate.from.isBefore(date) ||
+                      rate.from.isAtSameMomentAs(date)) &&
+                  (rate.to == null || rate.to!.isAfter(date)),
+            );
+            expect(
+              inForce,
+              isTrue,
+              reason:
+                  '${country.code} subdivision ${subdivision.code} has no '
+                  'rate in force on ${date.toIso8601String().substring(0, 10)}',
+            );
+          }
+        }
+      }
+    });
   });
 }
 
