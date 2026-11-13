@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "services tax",
@@ -31,7 +31,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 250,
+        "ratePerMillion": 25000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "import duty on goods",

@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2018-10-01",
         "to": null,
         "appliesTo": "gross receipts of most businesses (wholesale and manufacturing exemptions apply)",

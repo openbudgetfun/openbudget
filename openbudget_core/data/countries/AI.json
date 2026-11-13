@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1300,
+        "ratePerMillion": 130000,
         "from": "2022-07-01",
         "to": "2025-08-01",
         "appliesTo": "goods and services tax on goods and services",
@@ -31,7 +31,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1300,
+        "ratePerMillion": 130000,
         "from": "2025-08-01",
         "to": null,
         "appliesTo": "general services tax on services (retailers, wholesalers, manufacturers, restaurants and bars exempt)",
@@ -39,7 +39,7 @@
       },
       {
         "label": "goods",
-        "basisPoints": 900,
+        "ratePerMillion": 90000,
         "from": "2025-08-01",
         "to": null,
         "appliesTo": "import goods tax on goods and at the port",

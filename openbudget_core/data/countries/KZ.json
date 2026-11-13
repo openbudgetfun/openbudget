@@ -29,7 +29,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1200,
+        "ratePerMillion": 120000,
         "from": "2018-01-01",
         "to": "2026-01-01",
         "appliesTo": null,
@@ -37,7 +37,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1600,
+        "ratePerMillion": 160000,
         "from": "2026-01-01",
         "to": null,
         "appliesTo": null,
@@ -45,7 +45,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2026-01-01",
         "to": null,
         "appliesTo": "medicines, medical devices and licensed medical services (rises to 10% from 1 January 2027)",
@@ -53,7 +53,7 @@
       },
       {
         "label": "reduced2",
-        "basisPoints": 1000,
+        "ratePerMillion": 100000,
         "from": "2026-01-01",
         "to": null,
         "appliesTo": "domestically produced periodical print publications",

@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1600,
+        "ratePerMillion": 160000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 800,
+        "ratePerMillion": 80000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "foodstuffs, professional services, domestic air travel, construction",

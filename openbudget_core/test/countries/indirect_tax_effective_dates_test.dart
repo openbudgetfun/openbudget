@@ -181,7 +181,7 @@ IndirectTaxRate? _rateOn(
 String _describe(IndirectTaxRate rate) {
   final from = _day(rate.from);
   final to = rate.to == null ? 'open' : _day(rate.to!);
-  return '${rate.basisPoints / 100}% [$from, $to)';
+  return '${rate.ratePerMillion / 10000}% [$from, $to)';
 }
 
 String _day(DateTime date) =>

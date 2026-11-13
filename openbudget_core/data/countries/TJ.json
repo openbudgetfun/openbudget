@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1500,
+        "ratePerMillion": 150000,
         "from": "2022-01-01",
         "to": "2024-01-01",
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1400,
+        "ratePerMillion": 140000,
         "from": "2024-01-01",
         "to": "2027-01-01",
         "appliesTo": null,
@@ -39,7 +39,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1300,
+        "ratePerMillion": 130000,
         "from": "2027-01-01",
         "to": null,
         "appliesTo": null,
@@ -47,7 +47,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 700,
+        "ratePerMillion": 70000,
         "from": "2024-01-01",
         "to": null,
         "appliesTo": "construction work, hotel services and catering",
@@ -55,7 +55,7 @@
       },
       {
         "label": "reduced2",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2024-01-01",
         "to": null,
         "appliesTo": "domestic agricultural products, processing, training and sanatorium medical services",

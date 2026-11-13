@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1000,
+        "ratePerMillion": 100000,
         "from": "2019-10-01",
         "to": null,
         "appliesTo": "national 7.8% plus local 2.2%",
@@ -31,7 +31,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 800,
+        "ratePerMillion": 80000,
         "from": "2019-10-01",
         "to": null,
         "appliesTo": "basic foodstuffs and newspapers; national 6.24% plus local 1.76%",
@@ -62,18 +62,6 @@
     {
       "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-      "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-      "url": "https://vatcalc.com/vat-rates/",
-      "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-      "url": "https://vatcalc.com/vat-rates/",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
     },

@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1100,
+        "ratePerMillion": 110000,
         "from": "2018-10-01",
         "to": null,
         "appliesTo": "taxe normale",
@@ -31,7 +31,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 300,
+        "ratePerMillion": 30000,
         "from": "2018-10-01",
         "to": null,
         "appliesTo": "locally produced or transformed goods, passenger transport and reimbursed medicines",
@@ -39,7 +39,7 @@
       },
       {
         "label": "specific",
-        "basisPoints": 600,
+        "ratePerMillion": 60000,
         "from": "2018-10-01",
         "to": null,
         "appliesTo": "services generally",
@@ -47,7 +47,7 @@
       },
       {
         "label": "higher",
-        "basisPoints": 2200,
+        "ratePerMillion": 220000,
         "from": "2018-10-01",
         "to": null,
         "appliesTo": "alcohol, sugary drinks, tobacco, jewellery, vehicles and other listed goods",

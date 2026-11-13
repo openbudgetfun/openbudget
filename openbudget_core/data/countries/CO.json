@@ -23,19 +23,19 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1900,
+        "ratePerMillion": 190000,
         "from": "2017-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "reduced",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "basic raw materials; agricultural supplies",
-        "source": 6
+        "source": 4
       }
     ],
     "registrationThreshold": null,
@@ -62,18 +62,6 @@
     {
       "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-      "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-      "url": "https://vatcalc.com/vat-rates/",
-      "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-      "url": "https://vatcalc.com/vat-rates/",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
     },

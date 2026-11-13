@@ -23,15 +23,15 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 770,
+        "ratePerMillion": 77000,
         "from": "2018-01-01",
         "to": "2024-01-01",
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "standard",
-        "basisPoints": 810,
+        "ratePerMillion": 81000,
         "from": "2024-01-01",
         "to": null,
         "appliesTo": null,
@@ -39,15 +39,15 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 250,
+        "ratePerMillion": 25000,
         "from": "2018-01-01",
         "to": "2024-01-01",
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "reduced",
-        "basisPoints": 260,
+        "ratePerMillion": 26000,
         "from": "2024-01-01",
         "to": null,
         "appliesTo": null,
@@ -55,15 +55,15 @@
       },
       {
         "label": "special",
-        "basisPoints": 370,
+        "ratePerMillion": 37000,
         "from": "2018-01-01",
         "to": "2024-01-01",
         "appliesTo": "accommodation (Sondersatz)",
-        "source": 6
+        "source": 4
       },
       {
         "label": "special",
-        "basisPoints": 380,
+        "ratePerMillion": 38000,
         "from": "2024-01-01",
         "to": null,
         "appliesTo": "accommodation (Sondersatz)",
@@ -95,18 +95,6 @@
       "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Eidgenoessische Steuerverwaltung (ESTV): Mehrwertsteuersaetze",
-      "url": "https://www.estv.admin.ch/estv/de/home/mehrwertsteuer/mwst-steuersaetze.html",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Eidgenoessische Steuerverwaltung (ESTV): Mehrwertsteuersaetze",
-      "url": "https://www.estv.admin.ch/estv/de/home/mehrwertsteuer/mwst-steuersaetze.html",
-      "grade": "primary",
       "retrievedOn": "2026-11-13"
     },
     {

@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1200,
+        "ratePerMillion": 120000,
         "from": "2022-01-01",
         "to": "2023-01-01",
         "appliesTo": "turnover tax (omzetbelasting) — goods and services",
@@ -31,7 +31,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1000,
+        "ratePerMillion": 100000,
         "from": "2023-01-01",
         "to": null,
         "appliesTo": "value added tax (BTW)",
@@ -39,7 +39,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2023-01-01",
         "to": null,
         "appliesTo": "gasoline",
@@ -47,7 +47,7 @@
       },
       {
         "label": "higher",
-        "basisPoints": 2500,
+        "ratePerMillion": 250000,
         "from": "2023-01-01",
         "to": null,
         "appliesTo": "luxury goods (annex 3)",

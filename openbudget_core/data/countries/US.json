@@ -35,11 +35,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 0,
+            "ratePerMillion": 0,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -48,11 +48,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 400,
+            "ratePerMillion": 40000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -61,11 +61,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 650,
+            "ratePerMillion": 65000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -74,11 +74,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 560,
+            "ratePerMillion": 56000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -87,11 +87,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 725,
+            "ratePerMillion": 72500,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -100,11 +100,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 290,
+            "ratePerMillion": 29000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -113,11 +113,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 635,
+            "ratePerMillion": 63500,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -126,11 +126,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 600,
+            "ratePerMillion": 60000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -139,11 +139,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 0,
+            "ratePerMillion": 0,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -152,11 +152,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 600,
+            "ratePerMillion": 60000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -165,11 +165,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 400,
+            "ratePerMillion": 40000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -178,11 +178,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 400,
+            "ratePerMillion": 40000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -191,11 +191,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 600,
+            "ratePerMillion": 60000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -204,11 +204,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 600,
+            "ratePerMillion": 60000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -217,11 +217,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 625,
+            "ratePerMillion": 62500,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -230,11 +230,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 700,
+            "ratePerMillion": 70000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -243,11 +243,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 650,
+            "ratePerMillion": 65000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -256,11 +256,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 600,
+            "ratePerMillion": 60000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -269,19 +269,19 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 445,
+            "ratePerMillion": 44500,
             "from": "2022-01-01",
             "to": "2025-01-01",
             "appliesTo": null,
-            "source": 18
+            "source": 6
           },
           {
             "label": "standard",
-            "basisPoints": 500,
+            "ratePerMillion": 50000,
             "from": "2025-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 18
+            "source": 6
           }
         ]
       },
@@ -290,11 +290,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 625,
+            "ratePerMillion": 62500,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -303,11 +303,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 600,
+            "ratePerMillion": 60000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -316,11 +316,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 550,
+            "ratePerMillion": 55000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -329,11 +329,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 600,
+            "ratePerMillion": 60000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -342,11 +342,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 688,
+            "ratePerMillion": 68750,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -355,11 +355,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 423,
+            "ratePerMillion": 42250,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -368,11 +368,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 700,
+            "ratePerMillion": 70000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -381,11 +381,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 0,
+            "ratePerMillion": 0,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -394,11 +394,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 475,
+            "ratePerMillion": 47500,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -407,11 +407,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 500,
+            "ratePerMillion": 50000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -420,11 +420,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 550,
+            "ratePerMillion": 55000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -433,11 +433,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 0,
+            "ratePerMillion": 0,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -446,11 +446,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 663,
+            "ratePerMillion": 66250,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -459,27 +459,27 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 513,
+            "ratePerMillion": 51250,
             "from": "2022-01-01",
             "to": "2022-07-01",
-            "appliesTo": "state GRT including the pre-cut 5.125% rounded to 513bp (schema stores integer hundredths)",
-            "source": 17
+            "appliesTo": "state GRT including the pre-cut 5.125%",
+            "source": 5
           },
           {
             "label": "standard",
-            "basisPoints": 500,
+            "ratePerMillion": 50000,
             "from": "2022-07-01",
             "to": "2023-07-01",
             "appliesTo": null,
-            "source": 17
+            "source": 5
           },
           {
             "label": "standard",
-            "basisPoints": 488,
+            "ratePerMillion": 48750,
             "from": "2023-07-01",
             "to": null,
-            "appliesTo": "state GRT of 4.875% rounded to 488bp (schema stores integer hundredths)",
-            "source": 17
+            "appliesTo": "state GRT of 4.875%",
+            "source": 5
           }
         ]
       },
@@ -488,11 +488,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 685,
+            "ratePerMillion": 68500,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -501,11 +501,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 400,
+            "ratePerMillion": 40000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -514,11 +514,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 575,
+            "ratePerMillion": 57500,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -527,11 +527,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 450,
+            "ratePerMillion": 45000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -540,11 +540,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 0,
+            "ratePerMillion": 0,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -553,11 +553,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 600,
+            "ratePerMillion": 60000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -566,11 +566,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 700,
+            "ratePerMillion": 70000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -579,11 +579,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 600,
+            "ratePerMillion": 60000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -592,19 +592,19 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 450,
+            "ratePerMillion": 45000,
             "from": "2022-01-01",
             "to": "2023-07-01",
             "appliesTo": null,
-            "source": 16
+            "source": 4
           },
           {
             "label": "standard",
-            "basisPoints": 420,
+            "ratePerMillion": 42000,
             "from": "2023-07-01",
             "to": null,
             "appliesTo": "reduced by HB 1137; rises back to 4.5% on 1 July 2027 under its sunset clause",
-            "source": 16
+            "source": 4
           }
         ]
       },
@@ -613,11 +613,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 700,
+            "ratePerMillion": 70000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -626,11 +626,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 625,
+            "ratePerMillion": 62500,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -639,11 +639,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 610,
+            "ratePerMillion": 61000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -652,11 +652,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 530,
+            "ratePerMillion": 53000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -665,11 +665,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 600,
+            "ratePerMillion": 60000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -678,11 +678,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 650,
+            "ratePerMillion": 65000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -691,11 +691,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 500,
+            "ratePerMillion": 50000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -704,11 +704,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 600,
+            "ratePerMillion": 60000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       },
@@ -717,11 +717,11 @@
         "rates": [
           {
             "label": "standard",
-            "basisPoints": 400,
+            "ratePerMillion": 40000,
             "from": "2022-01-01",
             "to": null,
             "appliesTo": null,
-            "source": 15
+            "source": 3
           }
         ]
       }
@@ -773,78 +773,6 @@
       "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
       "grade": "primary",
       "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Tax Foundation: State and Local Sales Tax Rates, Midyear 2026 (state-level rates as of 1 July 2026, including mandatory statewide add-ons; cross-checked against the Index 2024 Table 16 rates as of 1 July 2023, which confirm the pre-change value for every state that moved after 2022)",
-      "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",
-      "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "South Dakota Department of Revenue: Department of Revenue Updates Tax System for Decrease in State Tax Rate (HB 1137: 4.5% to 4.2% from 1 July 2023, sunset 30 June 2027)",
-      "url": "https://dor.sd.gov/newsroom/department-of-revenue-updates-tax-system-for-decrease-in-state-tax-rate/",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "New Mexico Taxation and Revenue Department: State portion of Gross Receipts Tax drops to 4.875% (two-step cut from 5.125% under 2022 legislation; second step 1 July 2023)",
-      "url": "https://www.tax.newmexico.gov/wp-content/uploads/2023/06/July-1-tax-changes.pdf",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Louisiana Department of Revenue, Revenue Information Bulletin 25-007: state sales tax rate 5% from 1 January 2025 (Act 11 of the 2024 Third Extraordinary Session)",
-      "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Tax Foundation: State and Local Sales Tax Rates, Midyear 2026 (state-level rates as of 1 July 2026, including mandatory statewide add-ons; cross-checked against the Index 2024 Table 16 rates as of 1 July 2023, which confirm the pre-change value for every state that moved after 2022)",
-      "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",
-      "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "South Dakota Department of Revenue: Department of Revenue Updates Tax System for Decrease in State Tax Rate (HB 1137: 4.5% to 4.2% from 1 July 2023, sunset 30 June 2027)",
-      "url": "https://dor.sd.gov/newsroom/department-of-revenue-updates-tax-system-for-decrease-in-state-tax-rate/",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "New Mexico Taxation and Revenue Department: State portion of Gross Receipts Tax drops to 4.875% (two-step cut from 5.125% under 2022 legislation; second step 1 July 2023)",
-      "url": "https://www.tax.newmexico.gov/wp-content/uploads/2023/06/July-1-tax-changes.pdf",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Louisiana Department of Revenue, Revenue Information Bulletin 25-007: state sales tax rate 5% from 1 January 2025 (Act 11 of the 2024 Third Extraordinary Session)",
-      "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Tax Foundation: State and Local Sales Tax Rates, Midyear 2026 (state-level rates as of 1 July 2026, including mandatory statewide add-ons; cross-checked against the Index 2024 Table 16 rates as of 1 July 2023, which confirm the pre-change value for every state that moved after 2022)",
-      "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",
-      "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "South Dakota Department of Revenue: Department of Revenue Updates Tax System for Decrease in State Tax Rate (HB 1137: 4.5% to 4.2% from 1 July 2023, sunset 30 June 2027)",
-      "url": "https://dor.sd.gov/newsroom/department-of-revenue-updates-tax-system-for-decrease-in-state-tax-rate/",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "New Mexico Taxation and Revenue Department: State portion of Gross Receipts Tax drops to 4.875% (two-step cut from 5.125% under 2022 legislation; second step 1 July 2023)",
-      "url": "https://www.tax.newmexico.gov/wp-content/uploads/2023/06/July-1-tax-changes.pdf",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Louisiana Department of Revenue, Revenue Information Bulletin 25-007: state sales tax rate 5% from 1 January 2025 (Act 11 of the 2024 Third Extraordinary Session)",
-      "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
@@ -854,7 +782,6 @@
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
     "State base-rate changes inside the window, dated from primary sources: New Mexico 5.125% to 5% on 1 July 2022 and to 4.875% on 1 July 2023; South Dakota 4.5% to 4.2% on 1 July 2023 (sunsets 30 June 2027); Louisiana 4.45% to 5% on 1 January 2025 (Act 11 of 2024; drops to 4.75% on 1 January 2030).",
-    "Non-integer state rates are rounded to whole basis points: Minnesota 6.875% (688), Missouri 4.225% (423), New Jersey 6.625% (663), New Mexico 5.125%/4.875% (513/488).",
     "Lower-bound rows: unchanged states start at 2022-01-01 — the two Tax Foundation tables (as of 1 July 2023 and 1 July 2026) agree on every other state, so those rates are treated as in force throughout the window. Category-specific rates (grocery reductions in Illinois, Kansas, Oklahoma, Mississippi, Virginia and elsewhere) are not modelled."
   ]
 }

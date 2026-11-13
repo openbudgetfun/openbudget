@@ -24,11 +24,11 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1500,
+        "ratePerMillion": 150000,
         "from": "2011-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 6
+        "source": 4
       }
     ],
     "registrationThreshold": null,
@@ -56,18 +56,6 @@
       "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Inland Revenue (New Zealand): GST - goods and services tax, charged at 15%",
-      "url": "https://www.ird.govt.nz/gst",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Inland Revenue (New Zealand): GST - goods and services tax, charged at 15%",
-      "url": "https://www.ird.govt.nz/gst",
-      "grade": "primary",
       "retrievedOn": "2026-11-13"
     },
     {
