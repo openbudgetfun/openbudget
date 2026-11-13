@@ -1,10 +1,12 @@
+import 'package:openbudget_core/src/generated/wallet_network.dart';
 import 'package:openbudget_core/src/wallets/address/base58.dart';
 import 'package:openbudget_core/src/wallets/address/bech32.dart';
 import 'package:openbudget_core/src/wallets/address/evm_address.dart';
 import 'package:openbudget_core/src/wallets/address/hd_key.dart';
 import 'package:openbudget_core/src/wallets/address/ton_friendly_address.dart';
-import 'package:openbudget_core/src/wallets/address/wallet_address_family.dart';
 import 'package:openbudget_core/src/wallets/address/wallet_address_result.dart';
+import 'package:openbudget_core/src/wallets/chain_family.dart';
+import 'package:openbudget_core/src/wallets/wallet_network_rules.dart';
 
 /// Parses wallet addresses for every launch chain family.
 ///
@@ -138,8 +140,8 @@ abstract final class WalletAddressParser {
     return WalletAddressMatch(
       candidates: [
         WalletAddressCandidate(
-          family: WalletAddressFamily.bitcoin,
-          networks: const ['bitcoinMainnet'],
+          family: ChainFamily.bitcoin,
+          networks: _networksFor(ChainFamily.bitcoin),
           canonical: hdIdentity(descriptor ?? xpub),
           display: _shorten(xpub),
           kind: WalletAddressKind.hdKey,
@@ -169,8 +171,8 @@ abstract final class WalletAddressParser {
     return WalletAddressMatch(
       candidates: [
         WalletAddressCandidate(
-          family: WalletAddressFamily.evm,
-          networks: _evmNetworks,
+          family: ChainFamily.evm,
+          networks: _networksFor(ChainFamily.evm),
           canonical: '0x$lower',
           display: checksummed,
           kind: WalletAddressKind.address,
@@ -197,8 +199,8 @@ abstract final class WalletAddressParser {
     return WalletAddressMatch(
       candidates: [
         WalletAddressCandidate(
-          family: WalletAddressFamily.bitcoin,
-          networks: const ['bitcoinMainnet'],
+          family: ChainFamily.bitcoin,
+          networks: _networksFor(ChainFamily.bitcoin),
           canonical: canonical,
           display: _shorten(canonical),
           kind: WalletAddressKind.address,
@@ -257,8 +259,8 @@ abstract final class WalletAddressParser {
     return WalletAddressMatch(
       candidates: [
         WalletAddressCandidate(
-          family: WalletAddressFamily.xrpl,
-          networks: const ['xrplMainnet'],
+          family: ChainFamily.xrpl,
+          networks: _networksFor(ChainFamily.xrpl),
           canonical: classic,
           display: classic,
           kind: WalletAddressKind.address,
@@ -280,8 +282,8 @@ abstract final class WalletAddressParser {
       return WalletAddressMatch(
         candidates: [
           WalletAddressCandidate(
-            family: WalletAddressFamily.tron,
-            networks: const ['tronMainnet'],
+            family: ChainFamily.tron,
+            networks: _networksFor(ChainFamily.tron),
             canonical: canonical,
             display: canonical,
             kind: WalletAddressKind.address,
@@ -307,8 +309,8 @@ abstract final class WalletAddressParser {
     return WalletAddressMatch(
       candidates: [
         WalletAddressCandidate(
-          family: WalletAddressFamily.tron,
-          networks: const ['tronMainnet'],
+          family: ChainFamily.tron,
+          networks: _networksFor(ChainFamily.tron),
           canonical: value,
           display: value,
           kind: WalletAddressKind.address,
@@ -336,8 +338,8 @@ abstract final class WalletAddressParser {
     return WalletAddressMatch(
       candidates: [
         WalletAddressCandidate(
-          family: WalletAddressFamily.xrpl,
-          networks: const ['xrplMainnet'],
+          family: ChainFamily.xrpl,
+          networks: _networksFor(ChainFamily.xrpl),
           canonical: value,
           display: value,
           kind: WalletAddressKind.address,
@@ -366,8 +368,8 @@ abstract final class WalletAddressParser {
       0x00 || 0x05 => WalletAddressMatch(
         candidates: [
           WalletAddressCandidate(
-            family: WalletAddressFamily.bitcoin,
-            networks: const ['bitcoinMainnet'],
+            family: ChainFamily.bitcoin,
+            networks: _networksFor(ChainFamily.bitcoin),
             canonical: value,
             display: _shorten(value),
             kind: WalletAddressKind.address,
@@ -384,8 +386,8 @@ abstract final class WalletAddressParser {
   static WalletAddressParseResult _solana(String value) => WalletAddressMatch(
     candidates: [
       WalletAddressCandidate(
-        family: WalletAddressFamily.solana,
-        networks: const ['solanaMainnet'],
+        family: ChainFamily.solana,
+        networks: _networksFor(ChainFamily.solana),
         canonical: value,
         display: _shorten(value),
         kind: WalletAddressKind.address,
@@ -454,14 +456,22 @@ const _unknownKeyHint = "That extended key isn't one OpenBudget recognises.";
 const _xAddressMainnetPrefix = 0x0544;
 const _xAddressTestnetPrefix = 0x0493;
 const _recoveryWordCounts = {12, 15, 18, 21, 24};
-const _evmNetworks = [
-  'ethereumMainnet',
-  'baseMainnet',
-  'arbitrumOne',
-  'opMainnet',
-  'polygonPos',
-  'bnbSmartChain',
-  'avalancheCChain',
-];
+
+/// The networks a [ChainFamily] address can be read on: every mainnet of the
+/// family, from the shared network rules, so a new network needs no change
+/// here. Test networks are never offered (section 5.3).
+final Map<ChainFamily, List<WalletNetwork>> _mainnetNetworks = Map.unmodifiable(
+  {
+    for (final family in ChainFamily.values)
+      family: List<WalletNetwork>.unmodifiable([
+        for (final network in WalletNetwork.values)
+          if (network.family == family && !network.isTestnet) network,
+      ]),
+  },
+);
+
+List<WalletNetwork> _networksFor(ChainFamily family) =>
+    _mainnetNetworks[family]!;
+
 final _recoveryWord = RegExp(r'^[a-z]{3,8}$');
 final _hex42 = RegExp(r'^[0-9a-fA-F]{42}$');

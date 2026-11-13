@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'package:openbudget_core/src/wallets/address/wallet_address_family.dart';
+import 'package:openbudget_core/src/generated/wallet_network.dart';
+import 'package:openbudget_core/src/wallets/chain_family.dart';
 
 part 'wallet_address_result.freezed.dart';
 
@@ -33,14 +34,13 @@ sealed class WalletAddressParseResult with _$WalletAddressParseResult {
 @freezed
 abstract class WalletAddressCandidate with _$WalletAddressCandidate {
   const factory WalletAddressCandidate({
-    required WalletAddressFamily family,
+    /// The chain family whose rules parsed this address.
+    required ChainFamily family,
 
-    /// The serialized `WalletNetwork` names this candidate can be read on.
-    ///
-    /// Task W1.1 moves `WalletNetwork` into core. Until it lands, the parser
-    /// uses the names it will serialise as, so it does not create a second
-    /// network enum.
-    required List<String> networks,
+    /// The mainnet networks this candidate can be read on, from the shared
+    /// network rules. More than one means one address on several chains, as
+    /// an EVM address is (section 5.5).
+    required List<WalletNetwork> networks,
 
     /// The form to store, per `docs/multichain-wallets.md` section 5.2.
     required String canonical,

@@ -35,7 +35,7 @@ bool _parserAcceptsSolana(String input) {
   final result = WalletAddressParser.parse(input);
   return result is WalletAddressMatch &&
       result.candidates.any(
-        (candidate) => candidate.family == WalletAddressFamily.solana,
+        (candidate) => candidate.family == ChainFamily.solana,
       );
 }
 

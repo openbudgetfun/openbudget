@@ -20,6 +20,16 @@ void _expectNoMatch(String input) {
   );
 }
 
+/// A candidate names mainnet networks of its own family: one address is read
+/// on that family's chains, and never on a test network.
+void _expectConsistentNetworks(WalletAddressCandidate candidate) {
+  expect(candidate.networks, isNotEmpty);
+  for (final network in candidate.networks) {
+    expect(network.family, candidate.family, reason: '$network in $candidate');
+    expect(network.isTestnet, isFalse, reason: '$network is a test network');
+  }
+}
+
 void main() {
   group('BIP 173 test vectors', () {
     // Source: https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki
@@ -37,12 +47,13 @@ void main() {
 
     test('accepts the version 0 addresses and refuses the testnet ones', () {
       final first = _match(validSegwit[0]);
-      expect(first.candidate.family, WalletAddressFamily.bitcoin);
+      expect(first.candidate.family, ChainFamily.bitcoin);
       expect(
         first.candidate.canonical,
         'bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4',
       );
-      expect(first.candidate.networks, ['bitcoinMainnet']);
+      expect(first.candidate.networks, [WalletNetwork.bitcoinMainnet]);
+      _expectConsistentNetworks(first.candidate);
 
       expect(
         WalletAddressParser.parse(validSegwit[1]),
@@ -132,19 +143,19 @@ void main() {
       // forward-compatible. P2TR is v1; v2 and v16 exercise the same path.
       expect(
         _match(validSegwit[2]).candidate.family,
-        WalletAddressFamily.bitcoin,
+        ChainFamily.bitcoin,
       );
       expect(
         _match(validSegwit[3]).candidate.family,
-        WalletAddressFamily.bitcoin,
+        ChainFamily.bitcoin,
       );
       expect(
         _match(validSegwit[4]).candidate.family,
-        WalletAddressFamily.bitcoin,
+        ChainFamily.bitcoin,
       );
       expect(
         _match(validSegwit[7]).candidate.family,
-        WalletAddressFamily.bitcoin,
+        ChainFamily.bitcoin,
       );
       expect(
         _match(validSegwit[7]).candidate.canonical,
@@ -159,7 +170,7 @@ void main() {
       }
       expect(
         _match(validSegwit[0]).candidate.family,
-        WalletAddressFamily.bitcoin,
+        ChainFamily.bitcoin,
       );
     });
 
@@ -225,11 +236,13 @@ void main() {
     test('accepts P2PKH and P2SH', () {
       const p2pkh = '1BoatSLRHtKNngkdXEeobR76b53LETtpyT';
       const p2sh = '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy';
-      expect(_match(p2pkh).candidate.family, WalletAddressFamily.bitcoin);
-      expect(_match(p2sh).candidate.family, WalletAddressFamily.bitcoin);
+      expect(_match(p2pkh).candidate.family, ChainFamily.bitcoin);
+      expect(_match(p2sh).candidate.family, ChainFamily.bitcoin);
       expect(_match(p2pkh).candidate.canonical, p2pkh);
       expect(_match(p2sh).candidate.canonical, p2sh);
       expect(_match(p2pkh).candidate.display, '1Boa...tpyT');
+      _expectConsistentNetworks(_match(p2pkh).candidate);
+      _expectConsistentNetworks(_match(p2sh).candidate);
     });
 
     test('rejects one changed character in a P2PKH address', () {
@@ -257,12 +270,13 @@ void main() {
     test('accepts every checksummed example and shows EIP-55', () {
       for (final input in checksummed) {
         final candidate = _match(input).candidate;
-        expect(candidate.family, WalletAddressFamily.evm);
-        expect(candidate.networks, contains('ethereumMainnet'));
+        expect(candidate.family, ChainFamily.evm);
+        expect(candidate.networks, contains(WalletNetwork.ethereumMainnet));
         expect(candidate.networks, hasLength(7));
         expect(candidate.canonical, input.toLowerCase());
         expect(candidate.display, input);
         expect(candidate.kind, WalletAddressKind.address);
+        _expectConsistentNetworks(candidate);
       }
     });
 
@@ -297,10 +311,11 @@ void main() {
 
     test('accepts a Base58Check T address', () {
       final candidate = _match(usdt).candidate;
-      expect(candidate.family, WalletAddressFamily.tron);
-      expect(candidate.networks, ['tronMainnet']);
+      expect(candidate.family, ChainFamily.tron);
+      expect(candidate.networks, [WalletNetwork.tronMainnet]);
       expect(candidate.canonical, usdt);
       expect(candidate.display, usdt);
+      _expectConsistentNetworks(candidate);
     });
 
     test('accepts the 42-digit hex form and canonicalises it', () {
@@ -323,10 +338,11 @@ void main() {
 
     test('accepts a classic r address', () {
       final candidate = _match(genesis).candidate;
-      expect(candidate.family, WalletAddressFamily.xrpl);
-      expect(candidate.networks, ['xrplMainnet']);
+      expect(candidate.family, ChainFamily.xrpl);
+      expect(candidate.networks, [WalletNetwork.xrplMainnet]);
       expect(candidate.canonical, genesis);
       expect(candidate.display, genesis);
+      _expectConsistentNetworks(candidate);
     });
 
     test('accepts a mainnet X-address with no tag and decodes it', () {
@@ -355,8 +371,8 @@ void main() {
 
     test('recognises xpub as an ambiguous HD key', () {
       final candidate = _match(xpub).candidate;
-      expect(candidate.family, WalletAddressFamily.bitcoin);
-      expect(candidate.networks, ['bitcoinMainnet']);
+      expect(candidate.family, ChainFamily.bitcoin);
+      expect(candidate.networks, [WalletNetwork.bitcoinMainnet]);
       expect(candidate.kind, WalletAddressKind.hdKey);
       expect(candidate.isHdKey, isTrue);
       expect(candidate.isScriptTypeAmbiguous, isTrue);
@@ -364,6 +380,7 @@ void main() {
       expect(candidate.canonical, hdIdentity(xpub));
       expect(candidate.canonical, hasLength(43));
       expect(candidate.display, startsWith('xpub'));
+      _expectConsistentNetworks(candidate);
     });
 
     test('recognises zpub as native SegWit and ypub as wrapped SegWit', () {

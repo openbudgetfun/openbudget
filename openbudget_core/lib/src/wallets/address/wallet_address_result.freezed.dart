@@ -391,12 +391,11 @@ as String,
 /// @nodoc
 mixin _$WalletAddressCandidate {
 
- WalletAddressFamily get family;/// The serialized `WalletNetwork` names this candidate can be read on.
-///
-/// Task W1.1 moves `WalletNetwork` into core. Until it lands, the parser
-/// uses the names it will serialise as, so it does not create a second
-/// network enum.
- List<String> get networks;/// The form to store, per `docs/multichain-wallets.md` section 5.2.
+/// The chain family whose rules parsed this address.
+ ChainFamily get family;/// The mainnet networks this candidate can be read on, from the shared
+/// network rules. More than one means one address on several chains, as
+/// an EVM address is (section 5.5).
+ List<WalletNetwork> get networks;/// The form to store, per `docs/multichain-wallets.md` section 5.2.
  String get canonical;/// The form to show in the app.
  String get display; WalletAddressKind get kind;/// The HD key's script type, or null when a bare `xpub` still has to be
 /// probed for one (section 5.4).
@@ -436,7 +435,7 @@ abstract mixin class $WalletAddressCandidateCopyWith<$Res>  {
   factory $WalletAddressCandidateCopyWith(WalletAddressCandidate value, $Res Function(WalletAddressCandidate) _then) = _$WalletAddressCandidateCopyWithImpl;
 @useResult
 $Res call({
- WalletAddressFamily family, List<String> networks, String canonical, String display, WalletAddressKind kind, WalletAddressHdScriptType? hdScriptType
+ ChainFamily family, List<WalletNetwork> networks, String canonical, String display, WalletAddressKind kind, WalletAddressHdScriptType? hdScriptType
 });
 
 
@@ -456,8 +455,8 @@ class _$WalletAddressCandidateCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? family = null,Object? networks = null,Object? canonical = null,Object? display = null,Object? kind = null,Object? hdScriptType = freezed,}) {
   return _then(WalletAddressCandidate(
 family: null == family ? _self.family : family // ignore: cast_nullable_to_non_nullable
-as WalletAddressFamily,networks: null == networks ? _self.networks : networks // ignore: cast_nullable_to_non_nullable
-as List<String>,canonical: null == canonical ? _self.canonical : canonical // ignore: cast_nullable_to_non_nullable
+as ChainFamily,networks: null == networks ? _self.networks : networks // ignore: cast_nullable_to_non_nullable
+as List<WalletNetwork>,canonical: null == canonical ? _self.canonical : canonical // ignore: cast_nullable_to_non_nullable
 as String,display: null == display ? _self.display : display // ignore: cast_nullable_to_non_nullable
 as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as WalletAddressKind,hdScriptType: freezed == hdScriptType ? _self.hdScriptType : hdScriptType // ignore: cast_nullable_to_non_nullable
@@ -546,7 +545,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( WalletAddressFamily family,  List<String> networks,  String canonical,  String display,  WalletAddressKind kind,  WalletAddressHdScriptType? hdScriptType)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ChainFamily family,  List<WalletNetwork> networks,  String canonical,  String display,  WalletAddressKind kind,  WalletAddressHdScriptType? hdScriptType)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WalletAddressCandidate() when $default != null:
 return $default(_that.family,_that.networks,_that.canonical,_that.display,_that.kind,_that.hdScriptType);case _:
@@ -567,7 +566,7 @@ return $default(_that.family,_that.networks,_that.canonical,_that.display,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( WalletAddressFamily family,  List<String> networks,  String canonical,  String display,  WalletAddressKind kind,  WalletAddressHdScriptType? hdScriptType)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ChainFamily family,  List<WalletNetwork> networks,  String canonical,  String display,  WalletAddressKind kind,  WalletAddressHdScriptType? hdScriptType)  $default,) {final _that = this;
 switch (_that) {
 case _WalletAddressCandidate():
 return $default(_that.family,_that.networks,_that.canonical,_that.display,_that.kind,_that.hdScriptType);case _:
@@ -587,7 +586,7 @@ return $default(_that.family,_that.networks,_that.canonical,_that.display,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( WalletAddressFamily family,  List<String> networks,  String canonical,  String display,  WalletAddressKind kind,  WalletAddressHdScriptType? hdScriptType)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ChainFamily family,  List<WalletNetwork> networks,  String canonical,  String display,  WalletAddressKind kind,  WalletAddressHdScriptType? hdScriptType)?  $default,) {final _that = this;
 switch (_that) {
 case _WalletAddressCandidate() when $default != null:
 return $default(_that.family,_that.networks,_that.canonical,_that.display,_that.kind,_that.hdScriptType);case _:
@@ -602,22 +601,19 @@ return $default(_that.family,_that.networks,_that.canonical,_that.display,_that.
 
 
 class _WalletAddressCandidate implements WalletAddressCandidate {
-  const _WalletAddressCandidate({required this.family, required  List<String> networks, required this.canonical, required this.display, required this.kind, this.hdScriptType}): _networks = networks;
+  const _WalletAddressCandidate({required this.family, required  List<WalletNetwork> networks, required this.canonical, required this.display, required this.kind, this.hdScriptType}): _networks = networks;
   
 
-@override final  WalletAddressFamily family;
-/// The serialized `WalletNetwork` names this candidate can be read on.
-///
-/// Task W1.1 moves `WalletNetwork` into core. Until it lands, the parser
-/// uses the names it will serialise as, so it does not create a second
-/// network enum.
- final  List<String> _networks;
-/// The serialized `WalletNetwork` names this candidate can be read on.
-///
-/// Task W1.1 moves `WalletNetwork` into core. Until it lands, the parser
-/// uses the names it will serialise as, so it does not create a second
-/// network enum.
-@override List<String> get networks {
+/// The chain family whose rules parsed this address.
+@override final  ChainFamily family;
+/// The mainnet networks this candidate can be read on, from the shared
+/// network rules. More than one means one address on several chains, as
+/// an EVM address is (section 5.5).
+ final  List<WalletNetwork> _networks;
+/// The mainnet networks this candidate can be read on, from the shared
+/// network rules. More than one means one address on several chains, as
+/// an EVM address is (section 5.5).
+@override List<WalletNetwork> get networks {
   if (_networks is EqualUnmodifiableListView) return _networks;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_networks);
@@ -664,7 +660,7 @@ abstract mixin class _$WalletAddressCandidateCopyWith<$Res> implements $WalletAd
   factory _$WalletAddressCandidateCopyWith(_WalletAddressCandidate value, $Res Function(_WalletAddressCandidate) _then) = __$WalletAddressCandidateCopyWithImpl;
 @override @useResult
 $Res call({
- WalletAddressFamily family, List<String> networks, String canonical, String display, WalletAddressKind kind, WalletAddressHdScriptType? hdScriptType
+ ChainFamily family, List<WalletNetwork> networks, String canonical, String display, WalletAddressKind kind, WalletAddressHdScriptType? hdScriptType
 });
 
 
@@ -684,8 +680,8 @@ class __$WalletAddressCandidateCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? family = null,Object? networks = null,Object? canonical = null,Object? display = null,Object? kind = null,Object? hdScriptType = freezed,}) {
   return _then(_WalletAddressCandidate(
 family: null == family ? _self.family : family // ignore: cast_nullable_to_non_nullable
-as WalletAddressFamily,networks: null == networks ? _self._networks : networks // ignore: cast_nullable_to_non_nullable
-as List<String>,canonical: null == canonical ? _self.canonical : canonical // ignore: cast_nullable_to_non_nullable
+as ChainFamily,networks: null == networks ? _self._networks : networks // ignore: cast_nullable_to_non_nullable
+as List<WalletNetwork>,canonical: null == canonical ? _self.canonical : canonical // ignore: cast_nullable_to_non_nullable
 as String,display: null == display ? _self.display : display // ignore: cast_nullable_to_non_nullable
 as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as WalletAddressKind,hdScriptType: freezed == hdScriptType ? _self.hdScriptType : hdScriptType // ignore: cast_nullable_to_non_nullable
