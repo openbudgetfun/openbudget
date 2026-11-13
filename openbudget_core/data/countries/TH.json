@@ -8,10 +8,36 @@
   "timeZones": [
     "Asia/Bangkok"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "ภาษีมูลค่าเพิ่ม (VAT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 700,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "6.3% VAT plus 0.7% municipal tax; statutory rate 10% reduced by royal decree",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "The Revenue Department (Thailand)",
+    "url": "https://www.rd.go.th"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +56,26 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Royal Thai Government press release, 27 July 2026: Cabinet extends the reduced 7% VAT rate (6.3% plus 0.7% local tax) to 30 September 2027 by Royal Decree No. 807",
+      "url": "https://www.thaigov.go.th/th/news/166956",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "KPMG tax news flash: Thailand — reduced 7% VAT rate extended through September 2027 (Royal Decree No. 807 of 20 August 2026)",
+      "url": "https://kpmg.com/us/en/taxnewsflash/news/2026/09/thailand-reduced-7-percent-vat-rate-extended-through-september-2027.html",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-09-15",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The statutory VAT rate is 10%; successive royal decrees have reduced it to 7% (6.3% plus 0.7% municipal tax) continuously since 1999, most recently to 30 September 2027 (Royal Decree No. 807). The medium-term fiscal framework plans a rise from fiscal 2028.",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
+  ]
 }

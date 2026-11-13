@@ -8,10 +8,36 @@
   "timeZones": [
     "Asia/Kathmandu"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 7,
+    "startDay": 17,
+    "calendar": "bikram-sambat"
+  },
+  "companyYearEndDefault": {
+    "month": 7,
+    "day": 16
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "मूल्य अभिवृद्धि कर (VAT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1300,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Inland Revenue Department (Nepal)",
+    "url": "https://ird.gov.np"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +56,20 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+      "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear follows the Bikram Sambat fiscal year starting Shrawan 1, which falls on 16 or 17 July; the model pins 17 July (grade I, the recent-year start date).",
+    "companyYearEndDefault approximates the fiscal year end at 16 July (grade I); the true date alternates between 15/16 and 16/17 July.",
+    "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
+  ]
 }

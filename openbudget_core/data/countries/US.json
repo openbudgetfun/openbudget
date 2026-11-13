@@ -29,7 +29,703 @@
     "rates": [],
     "registrationThreshold": null,
     "returnFrequency": null,
-    "subdivisions": []
+    "subdivisions": [
+      {
+        "code": "US-AK",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 0,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-AL",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 400,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-AR",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 650,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-AZ",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 560,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-CA",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 725,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-CO",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 290,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-CT",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 635,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-DC",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 600,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-DE",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 0,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-FL",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 600,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-GA",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 400,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-HI",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 400,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-IA",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 600,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-ID",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 600,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-IL",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 625,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-IN",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 700,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-KS",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 650,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-KY",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 600,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-LA",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 445,
+            "from": "2022-01-01",
+            "to": "2025-01-01",
+            "appliesTo": null,
+            "source": 18
+          },
+          {
+            "label": "standard",
+            "basisPoints": 500,
+            "from": "2025-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 18
+          }
+        ]
+      },
+      {
+        "code": "US-MA",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 625,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-MD",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 600,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-ME",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 550,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-MI",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 600,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-MN",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 688,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-MO",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 423,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-MS",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 700,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-MT",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 0,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-NC",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 475,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-ND",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 500,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-NE",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 550,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-NH",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 0,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-NJ",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 663,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-NM",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 513,
+            "from": "2022-01-01",
+            "to": "2022-07-01",
+            "appliesTo": "state GRT including the pre-cut 5.125% rounded to 513bp (schema stores integer hundredths)",
+            "source": 17
+          },
+          {
+            "label": "standard",
+            "basisPoints": 500,
+            "from": "2022-07-01",
+            "to": "2023-07-01",
+            "appliesTo": null,
+            "source": 17
+          },
+          {
+            "label": "standard",
+            "basisPoints": 488,
+            "from": "2023-07-01",
+            "to": null,
+            "appliesTo": "state GRT of 4.875% rounded to 488bp (schema stores integer hundredths)",
+            "source": 17
+          }
+        ]
+      },
+      {
+        "code": "US-NV",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 685,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-NY",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 400,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-OH",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 575,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-OK",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 450,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-OR",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 0,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-PA",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 600,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-RI",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 700,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-SC",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 600,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-SD",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 450,
+            "from": "2022-01-01",
+            "to": "2023-07-01",
+            "appliesTo": null,
+            "source": 16
+          },
+          {
+            "label": "standard",
+            "basisPoints": 420,
+            "from": "2023-07-01",
+            "to": null,
+            "appliesTo": "reduced by HB 1137; rises back to 4.5% on 1 July 2027 under its sunset clause",
+            "source": 16
+          }
+        ]
+      },
+      {
+        "code": "US-TN",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 700,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-TX",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 625,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-UT",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 610,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-VA",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 530,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-VT",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 600,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-WA",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 650,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-WI",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 500,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-WV",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 600,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      },
+      {
+        "code": "US-WY",
+        "rates": [
+          {
+            "label": "standard",
+            "basisPoints": 400,
+            "from": "2022-01-01",
+            "to": null,
+            "appliesTo": null,
+            "source": 15
+          }
+        ]
+      }
+    ]
   },
   "authority": {
     "name": "Internal Revenue Service (IRS)",
@@ -53,13 +749,112 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: State and Local Sales Tax Rates, Midyear 2026 (state-level rates as of 1 July 2026, including mandatory statewide add-ons; cross-checked against the Index 2024 Table 16 rates as of 1 July 2023, which confirm the pre-change value for every state that moved after 2022)",
+      "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "South Dakota Department of Revenue: Department of Revenue Updates Tax System for Decrease in State Tax Rate (HB 1137: 4.5% to 4.2% from 1 July 2023, sunset 30 June 2027)",
+      "url": "https://dor.sd.gov/newsroom/department-of-revenue-updates-tax-system-for-decrease-in-state-tax-rate/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "New Mexico Taxation and Revenue Department: State portion of Gross Receipts Tax drops to 4.875% (two-step cut from 5.125% under 2022 legislation; second step 1 July 2023)",
+      "url": "https://www.tax.newmexico.gov/wp-content/uploads/2023/06/July-1-tax-changes.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Louisiana Department of Revenue, Revenue Information Bulletin 25-007: state sales tax rate 5% from 1 January 2025 (Act 11 of the 2024 Third Extraordinary Session)",
+      "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: State and Local Sales Tax Rates, Midyear 2026 (state-level rates as of 1 July 2026, including mandatory statewide add-ons; cross-checked against the Index 2024 Table 16 rates as of 1 July 2023, which confirm the pre-change value for every state that moved after 2022)",
+      "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "South Dakota Department of Revenue: Department of Revenue Updates Tax System for Decrease in State Tax Rate (HB 1137: 4.5% to 4.2% from 1 July 2023, sunset 30 June 2027)",
+      "url": "https://dor.sd.gov/newsroom/department-of-revenue-updates-tax-system-for-decrease-in-state-tax-rate/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "New Mexico Taxation and Revenue Department: State portion of Gross Receipts Tax drops to 4.875% (two-step cut from 5.125% under 2022 legislation; second step 1 July 2023)",
+      "url": "https://www.tax.newmexico.gov/wp-content/uploads/2023/06/July-1-tax-changes.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Louisiana Department of Revenue, Revenue Information Bulletin 25-007: state sales tax rate 5% from 1 January 2025 (Act 11 of the 2024 Third Extraordinary Session)",
+      "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: State and Local Sales Tax Rates, Midyear 2026 (state-level rates as of 1 July 2026, including mandatory statewide add-ons; cross-checked against the Index 2024 Table 16 rates as of 1 July 2023, which confirm the pre-change value for every state that moved after 2022)",
+      "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "South Dakota Department of Revenue: Department of Revenue Updates Tax System for Decrease in State Tax Rate (HB 1137: 4.5% to 4.2% from 1 July 2023, sunset 30 June 2027)",
+      "url": "https://dor.sd.gov/newsroom/department-of-revenue-updates-tax-system-for-decrease-in-state-tax-rate/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "New Mexico Taxation and Revenue Department: State portion of Gross Receipts Tax drops to 4.875% (two-step cut from 5.125% under 2022 legislation; second step 1 July 2023)",
+      "url": "https://www.tax.newmexico.gov/wp-content/uploads/2023/06/July-1-tax-changes.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Louisiana Department of Revenue, Revenue Information Bulletin 25-007: state sales tax rate 5% from 1 January 2025 (Act 11 of the 2024 Third Extraordinary Session)",
+      "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: State and Local Sales Tax Rates, Midyear 2026 (state-level rates as of 1 July 2026, including mandatory statewide add-ons; cross-checked against the Index 2024 Table 16 rates as of 1 July 2023, which confirm the pre-change value for every state that moved after 2022)",
+      "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "South Dakota Department of Revenue: Department of Revenue Updates Tax System for Decrease in State Tax Rate (HB 1137: 4.5% to 4.2% from 1 July 2023, sunset 30 June 2027)",
+      "url": "https://dor.sd.gov/newsroom/department-of-revenue-updates-tax-system-for-decrease-in-state-tax-rate/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "New Mexico Taxation and Revenue Department: State portion of Gross Receipts Tax drops to 4.875% (two-step cut from 5.125% under 2022 legislation; second step 1 July 2023)",
+      "url": "https://www.tax.newmexico.gov/wp-content/uploads/2023/06/July-1-tax-changes.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Louisiana Department of Revenue, Revenue Information Bulletin 25-007: state sales tax rate 5% from 1 January 2025 (Act 11 of the 2024 Third Extraordinary Session)",
+      "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
   "verifiedOn": "2026-11-13",
   "recheckBy": "2027-05-13",
   "caveats": [
-    "The United States has no federal VAT or sales tax (grade I); state and local sales-tax base rates are subdivision data and arrive with task U4.",
+    "The United States has no federal VAT or sales tax (grade I); subdivision data records each state's base sales-tax rate only (Tax Foundation convention: mandatory statewide add-ons counted as state rate — California 7.25%, Utah 6.1%, Virginia 5.3%, Nevada 6.85%). Local county and city rates are not recorded; the user enters the combined rate on the receipt.",
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law."
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "State base-rate changes inside the window, dated from primary sources: New Mexico 5.125% to 5% on 1 July 2022 and to 4.875% on 1 July 2023; South Dakota 4.5% to 4.2% on 1 July 2023 (sunsets 30 June 2027); Louisiana 4.45% to 5% on 1 January 2025 (Act 11 of 2024; drops to 4.75% on 1 January 2030).",
+    "Non-integer state rates are rounded to whole basis points: Minnesota 6.875% (688), Missouri 4.225% (423), New Jersey 6.625% (663), New Mexico 5.125%/4.875% (513/488).",
+    "Lower-bound rows: unchanged states start at 2022-01-01 — the two Tax Foundation tables (as of 1 July 2023 and 1 July 2026) agree on every other state, so those rates are treated as in force throughout the window. Category-specific rates (grocery reductions in Illinois, Kansas, Oklahoma, Mississippi, Virginia and elsewhere) are not modelled."
   ]
 }

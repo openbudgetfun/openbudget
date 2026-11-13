@@ -8,10 +8,36 @@
   "timeZones": [
     "Pacific/Guam"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "salesTax",
+    "localName": "Business Privilege Tax (BPT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 500,
+        "from": "2018-10-01",
+        "to": null,
+        "appliesTo": "gross receipts of most businesses (wholesale and manufacturing exemptions apply)",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Department of Revenue and Taxation, Government of Guam",
+    "url": "https://www.revandtaxe.guam.gov"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +56,25 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Guam Code Annotated title 11, chapter 26 (Business Privilege Tax Law) — 5% on gross proceeds of sales and gross income, in force since 1 October 2018 (Public Law 34-116)",
+      "url": "https://law.justia.com/codes/guam/2022/title-11/division-2/chapter-26/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Guam Department of Revenue and Taxation, Director's Announcement 18-05: Business Privilege Tax at 5 percent (extended from 1 October 2018, continuing indefinitely)",
+      "url": "https://www.guamtax.com/notices/DirectorsAnnouncement18-05-BusinessPrivilegeTaxat5percent.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Guam's BPT is a gross receipts tax rather than a sales tax: 5% since 1 October 2018 (8% on poker machines and 12% on boxing events). Some secondary tables record lower wholesale-activity rates; the 5% general rate is statutory."
+  ]
 }

@@ -8,10 +8,36 @@
   "timeZones": [
     "Pacific/Rarotonga"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 4,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 3,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Value Added Tax (VAT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2014-04-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Revenue Management Division, Ministry of Finance and Economic Management (Cook Islands)",
+    "url": "https://www.mfem.gov.ck"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +56,25 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Cook Islands MFEM: Value Added Tax Amendment Bill 2014 explanatory note and the Value Added Tax Act 1997 (consolidated) — rate raised from 12.5% to 15% from 1 April 2014",
+      "url": "https://cook-islands.tradeportal.org/media/VAT_Act_Consolidated_to_March_2019_2.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Cook Islands Business Trade and Investment Board: tax registration — VAT charged and accounted for at 15%",
+      "url": "https://btib.gov.ck/business-one-stop-shop/tax-registration/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear runs 1 April to 31 March (grade I, from the Cook Islands assessment cycle; the MFEM page confirms the value added tax year but not the individual year directly).",
+    "companyYearEndDefault is a 31 March app default for new entities (grade I), matching the tax year.",
+    "The 15% rate has applied since 1 April 2014 (VAT Act s.11 as amended by No. 1 of 2014)."
+  ]
 }

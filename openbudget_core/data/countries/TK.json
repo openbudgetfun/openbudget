@@ -8,10 +8,27 @@
   "timeZones": [
     "Pacific/Fakaofo"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 4,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 3,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "none",
+    "localName": null,
+    "rates": [],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Tokelau Administration (Government of New Zealand)",
+    "url": "https://www.tokelau.org.nz"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +47,19 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "New Zealand Ministry of Foreign Affairs and Trade: Tokelau (administered by New Zealand; no VAT, GST or income tax)",
+      "url": "https://www.mfat.govt.nz/en/countries-and-regions/pacific/tokelau/",
+      "grade": "inferred",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is modelled as 1 April to 31 March, following New Zealand's tax year (grade I); Tokelau itself levies no income tax.",
+    "companyYearEndDefault is a 31 March app default for new entities (grade I).",
+    "Tokelau levies no VAT, GST or sales tax; services are funded by New Zealand appropriations, fisheries fees and stamps (grade I)."
+  ]
 }
