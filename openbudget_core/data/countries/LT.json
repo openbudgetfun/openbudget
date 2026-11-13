@@ -8,10 +8,60 @@
   "timeZones": [
     "Europe/Vilnius"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "PVM (VAT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2100,
+        "from": "2014-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 7
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 500,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 8
+      },
+      {
+        "label": "reduced2",
+        "basisPoints": 900,
+        "from": "2022-01-01",
+        "to": "2026-01-01",
+        "appliesTo": null,
+        "source": 8
+      },
+      {
+        "label": "reduced2",
+        "basisPoints": 1200,
+        "from": "2026-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 6
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "State Tax Inspectorate (VMI)",
+    "url": "https://www.vmi.lt"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +80,52 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "State Tax Inspectorate (VMI), Lithuania: VAT rates (12% reduced rate from 1 January 2026, 9% until 31 December 2025)",
+      "url": "https://www.vmi.lt/evmi/pvm-tarifai",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "OECD Consumption Tax Trends 2024: Annex Table 2.A.1 VAT rates (standard rate at benchmark years 2005-2024)",
+      "url": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2024/11/consumption-tax-trends-2024_57c7322a/dcd4dd36-en.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: 2022 VAT Rates in Europe (table as of January 2022, sourced from the European Commission's Taxes in Europe Database)",
+      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-2022-vat-rates-in-europe/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The authority site (vmi.lt) was blocked to automated fetches this session; rates rest on the Commission's table.",
+    "From 1 January 2026 (Law XV-287) the 9% reduced rate was abolished: accommodation, passenger transport and cultural visits rose to 12%, and books and non-periodical publications moved to 5% (per the State Tax Inspectorate). The superseded 9% row is a lower bound.",
+    "Lower-bound rows - standard (2014-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed at the earliest OECD Consumption Tax Trends benchmark year in which the value appears).",
+    "Lower-bound rows - reduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed applying on 1 January 2022 by the Tax Foundation's January 2022 table of VAT rates (sourced from the Commission's Taxes in Europe Database))."
+  ]
 }

@@ -11,6 +11,26 @@ import 'package:openbudget_core/src/tax/tax_model.dart';
 import 'package:openbudget_core/src/tax/tax_profile.dart';
 import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 
+/// What the United Kingdom pack covers, and how mature it is.
+///
+/// The company return, indirect tax, capital gains and filing calendar are
+/// partial: pools and writing-down allowances, VAT return boxes and schemes,
+/// capital losses and share matching, and the full deadline calendar are not
+/// modelled yet.
+const TaxPackManifest gbTaxManifest = TaxPackManifest(
+  maturity: TaxPackMaturity.preview,
+  sections: {
+    TaxSection.personalReturn: TaxSectionCoverage.full,
+    TaxSection.selfEmployment: TaxSectionCoverage.full,
+    TaxSection.companyReturn: TaxSectionCoverage.partial,
+    TaxSection.indirectTax: TaxSectionCoverage.partial,
+    TaxSection.capitalGains: TaxSectionCoverage.partial,
+    TaxSection.digitalAssets: TaxSectionCoverage.notBuilt,
+    TaxSection.filingCalendar: TaxSectionCoverage.partial,
+    TaxSection.payroll: TaxSectionCoverage.notBuilt,
+  },
+);
+
 /// The United Kingdom rule pack: HMRC Income Tax, National Insurance,
 /// Capital Gains Tax, Corporation Tax and VAT.
 ///
@@ -33,7 +53,19 @@ final class GbTaxRules implements TaxRulePack {
   TaxJurisdiction get jurisdiction => TaxJurisdiction.gb;
 
   @override
+  TaxPackManifest get manifest => gbTaxManifest;
+
+  @override
   Set<int> get supportedStartYears => gbRatesByStartYear.keys.toSet();
+
+  @override
+  TaxRuleSet ruleSet(int startYear) {
+    final ruleSet = gbRuleSetsByStartYear[startYear];
+    if (ruleSet == null) {
+      throw UnsupportedTaxYearException(TaxJurisdiction.gb, startYear);
+    }
+    return ruleSet;
+  }
 
   @override
   TaxYear taxYearFor(DateTime date) {
@@ -111,6 +143,7 @@ final class GbTaxRules implements TaxRulePack {
     TaxInput input,
     GbTaxYearRates rates,
   ) {
+    final rules = ruleSet(input.year.startYear);
     final figures = _individualFigures(profile, input, rates);
     final totals = figures.totals;
     final taxPaid = totals['gb.ind.tax_paid'];
@@ -251,6 +284,9 @@ final class GbTaxRules implements TaxRulePack {
       ),
       sources: gbRateSources,
       rulesVerifiedOn: gbRulesVerifiedOn,
+      rulesVersion: rules.versionFor(TaxJurisdiction.gb),
+      maturity: manifest.maturity,
+      coverage: manifest.sections,
       uncategorizedCount: figures.uncategorizedCount,
     );
   }
@@ -260,6 +296,7 @@ final class GbTaxRules implements TaxRulePack {
     TaxInput input,
     GbTaxYearRates rates,
   ) {
+    final rules = ruleSet(input.year.startYear);
     final figures = _soleTraderFigures(input.entries, rates);
     final totals = figures.totals;
     final taxPaid = totals['gb.se.tax_paid'];
@@ -377,6 +414,9 @@ final class GbTaxRules implements TaxRulePack {
       assumptions: _soleTraderAssumptions(profile, rates),
       sources: gbRateSources,
       rulesVerifiedOn: gbRulesVerifiedOn,
+      rulesVersion: rules.versionFor(TaxJurisdiction.gb),
+      maturity: manifest.maturity,
+      coverage: manifest.sections,
       uncategorizedCount: figures.uncategorizedCount,
     );
   }
@@ -386,6 +426,7 @@ final class GbTaxRules implements TaxRulePack {
     TaxInput input,
     GbTaxYearRates rates,
   ) {
+    final rules = ruleSet(input.year.startYear);
     final figures = _companyFigures(input, rates);
     final totals = figures.totals;
     final taxPaid = totals['gb.co.tax_paid'];
@@ -505,6 +546,9 @@ final class GbTaxRules implements TaxRulePack {
       ),
       sources: gbRateSources,
       rulesVerifiedOn: gbRulesVerifiedOn,
+      rulesVersion: rules.versionFor(TaxJurisdiction.gb),
+      maturity: manifest.maturity,
+      coverage: manifest.sections,
       uncategorizedCount: figures.uncategorizedCount,
     );
   }

@@ -583,3 +583,14 @@ final List<Uri> gbRateSources = List.unmodifiable(<Uri>[
 
 /// The day the figures in [gbRatesByStartYear] were last checked.
 final DateTime gbRulesVerifiedOn = DateTime.utc(2026, 11, 4);
+
+/// The version, sources and verification date of each supported year.
+final Map<int, TaxRuleSet> gbRuleSetsByStartYear = Map.unmodifiable({
+  for (final startYear in gbRatesByStartYear.keys)
+    startYear: TaxRuleSet(
+      startYear: startYear,
+      revision: 1,
+      verifiedOn: gbRulesVerifiedOn,
+      sources: gbRateSources,
+    ),
+});

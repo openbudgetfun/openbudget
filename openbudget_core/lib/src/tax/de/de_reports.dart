@@ -634,6 +634,11 @@ TaxReport _individualReport(
     ),
     sources: deSources,
     rulesVerifiedOn: deRulesVerifiedOn,
+    rulesVersion: deRuleSetFor(
+      input.year.startYear,
+    ).versionFor(TaxJurisdiction.de),
+    maturity: deTaxManifest.maturity,
+    coverage: deTaxManifest.sections,
     uncategorizedCount: _uncategorizedCount(input),
   );
 }
@@ -730,6 +735,11 @@ TaxReport _soleTraderReport(
     ],
     sources: deSources,
     rulesVerifiedOn: deRulesVerifiedOn,
+    rulesVersion: deRuleSetFor(
+      input.year.startYear,
+    ).versionFor(TaxJurisdiction.de),
+    maturity: deTaxManifest.maturity,
+    coverage: deTaxManifest.sections,
     uncategorizedCount: _uncategorizedCount(input),
   );
 }
@@ -831,6 +841,11 @@ TaxReport _companyReport(
     ],
     sources: deSources,
     rulesVerifiedOn: deRulesVerifiedOn,
+    rulesVersion: deRuleSetFor(
+      input.year.startYear,
+    ).versionFor(TaxJurisdiction.de),
+    maturity: deTaxManifest.maturity,
+    coverage: deTaxManifest.sections,
     uncategorizedCount: _uncategorizedCount(input),
   );
 }

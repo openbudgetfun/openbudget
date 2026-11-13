@@ -8,10 +8,76 @@
   "timeZones": [
     "Europe/Tallinn"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Kaibemaks (VAT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2000,
+        "from": "2022-01-01",
+        "to": "2024-01-01",
+        "appliesTo": null,
+        "source": 7
+      },
+      {
+        "label": "standard",
+        "basisPoints": 2200,
+        "from": "2024-01-01",
+        "to": "2025-07-01",
+        "appliesTo": null,
+        "source": 6
+      },
+      {
+        "label": "standard",
+        "basisPoints": 2400,
+        "from": "2025-07-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 6
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 900,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 7
+      },
+      {
+        "label": "reduced2",
+        "basisPoints": 1300,
+        "from": "2025-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 6
+      },
+      {
+        "label": "reduced3",
+        "basisPoints": 500,
+        "from": "2024-01-01",
+        "to": "2025-01-01",
+        "appliesTo": "press publications",
+        "source": 6
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Estonian Tax and Customs Board (MTA)",
+    "url": "https://www.emta.ee"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +96,44 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Estonian Tax and Customs Board: Changes in the Estonian Value Added Tax Act (20% to 22% on 1 Jan 2024, 24% from 1 Jul 2025; 13% accommodation and 5% press rates)",
+      "url": "https://www.emta.ee/en/business-client/taxes-and-payment/value-added-tax",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: 2022 VAT Rates in Europe (table as of January 2022, sourced from the European Commission's Taxes in Europe Database)",
+      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-2022-vat-rates-in-europe/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Effective dates primary from the Estonian Tax and Customs Board: the standard rate rose from 20% to 22% on 1 January 2024 and to 24% on 1 July 2025 (security financing); accommodation services moved from 9% to 13% on 1 January 2025; press publications were cut from 9% to 5% for 2024 and returned to 9% on 1 January 2025. The 20% row is a lower bound (its true start, 2009, was not sourced this pass).",
+    "Lower-bound rows - reduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed applying on 1 January 2022 by the Tax Foundation's January 2022 table of VAT rates (sourced from the Commission's Taxes in Europe Database))."
+  ]
 }

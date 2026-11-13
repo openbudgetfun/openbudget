@@ -28,7 +28,13 @@ final class DeTaxRules implements TaxRulePack {
   TaxJurisdiction get jurisdiction => TaxJurisdiction.de;
 
   @override
+  TaxPackManifest get manifest => deTaxManifest;
+
+  @override
   Set<int> get supportedStartYears => Set.unmodifiable(deTaxTables.keys);
+
+  @override
+  TaxRuleSet ruleSet(int startYear) => deRuleSetFor(startYear);
 
   @override
   TaxYear taxYearFor(DateTime date) => taxYear(date.year);

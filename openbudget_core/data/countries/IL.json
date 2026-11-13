@@ -8,10 +8,44 @@
   "timeZones": [
     "Asia/Jerusalem"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Ma'am (VAT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1700,
+        "from": "2015-10-01",
+        "to": "2025-01-01",
+        "appliesTo": null,
+        "source": 6
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1800,
+        "from": "2025-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Israel Tax Authority",
+    "url": "https://www.gov.il/en/departments/tax_authority"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +64,38 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "OECD Consumption Tax Trends: key findings for Israel (standard rate changed to 17% in October 2015)",
+      "url": "https://www.oecd.org/content/dam/oecd/en/topics/policy-sub-issues/consumption-tax-trends/consumption-tax-trends-israel.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Rate secondary (grade S): 18% from 1 January 2025 (17% until 31 December 2024) from VATCalc's 2026 table; gov.il blocked automated fetches this session.",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The 17% rate applied from 1 October 2015 (VAT Order published 10 September 2015; OECD Consumption Tax Trends dates the change to October 2015) until the rise to 18% on 1 January 2025."
+  ]
 }

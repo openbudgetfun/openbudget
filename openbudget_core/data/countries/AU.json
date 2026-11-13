@@ -19,10 +19,44 @@
     "Australia/Perth",
     "Australia/Eucla"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 7,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 6,
+    "day": 30
+  },
+  "indirectTax": {
+    "kind": "gst",
+    "localName": "GST",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1000,
+        "from": "2000-07-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 6
+      },
+      {
+        "label": "zero",
+        "basisPoints": 0,
+        "from": "2000-07-01",
+        "to": null,
+        "appliesTo": "GST-free supplies: exports, most basic food, health, education",
+        "source": 6
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Australian Taxation Office (ATO)",
+    "url": "https://www.ato.gov.au"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -41,9 +75,38 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "OECD Consumption Tax Trends 2024: Annex Table 2.A.1 VAT rates (standard rate at benchmark years 2005-2024)",
+      "url": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2024/11/consumption-tax-trends-2024_57c7322a/dcd4dd36-en.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Rate secondary (grade S): GST of 10% from VATCalc's 2026 table; ato.gov.au blocked automated fetches this session.",
+    "individualTaxYear runs 1 July to 30 June (grade I, inferred from the financial-year cycle; the ATO page was unreachable).",
+    "companyYearEndDefault is the 30 June financial-year end (grade I, the common Australian default; ASIC filings allow other dates).",
+    "Lower-bound rows - standard (2000-07-01), zero (2000-07-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (the OECD records the GST as introduced in 2000 at 10% and the cited secondary source marks its 25th anniversary in July 2025; no fetched source states the commencement day, so 1 July 2000 is the widely recorded date pending confirmation against the ATO)."
+  ]
 }
