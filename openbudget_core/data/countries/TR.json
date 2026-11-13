@@ -23,43 +23,43 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1800,
+        "ratePerMillion": 180000,
         "from": "2008-01-01",
         "to": "2023-07-10",
         "appliesTo": null,
-        "source": 7
+        "source": 5
       },
       {
         "label": "standard",
-        "basisPoints": 2000,
+        "ratePerMillion": 200000,
         "from": "2023-07-10",
         "to": null,
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "reduced",
-        "basisPoints": 800,
+        "ratePerMillion": 80000,
         "from": "2008-01-01",
         "to": "2023-07-10",
         "appliesTo": null,
-        "source": 7
+        "source": 5
       },
       {
         "label": "reduced",
-        "basisPoints": 1000,
+        "ratePerMillion": 100000,
         "from": "2023-07-10",
         "to": null,
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "superReduced",
-        "basisPoints": 100,
+        "ratePerMillion": 10000,
         "from": "2008-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 7
+        "source": 5
       }
     ],
     "registrationThreshold": null,
@@ -86,18 +86,6 @@
     {
       "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-      "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Tax Foundation: 2026 VAT Rates in Europe (secondary; authority rate pages unreachable this session)",
-      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-vat-rates-europe/",
-      "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Tax Foundation: 2026 VAT Rates in Europe (secondary; authority rate pages unreachable this session)",
-      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-vat-rates-europe/",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
     },

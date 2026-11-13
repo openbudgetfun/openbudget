@@ -23,19 +23,19 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1900,
+        "ratePerMillion": 190000,
         "from": "2008-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 12
+        "source": 6
       },
       {
         "label": "reduced",
-        "basisPoints": 700,
+        "ratePerMillion": 70000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 13
+        "source": 7
       }
     ],
     "registrationThreshold": null,
@@ -63,42 +63,6 @@
       "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Umsatzsteuergesetz (UStG), section 12 - Steuersaetze (gesetze-im-internet.de)",
-      "url": "https://www.gesetze-im-internet.de/ustg_1980/__12.html",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Einkommensteuergesetz (EStG), section 2(7) - Jahressteuer und Kalenderjahr (gesetze-im-internet.de)",
-      "url": "https://www.gesetze-im-internet.de/estg/__2.html",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Umsatzsteuergesetz (UStG), section 12 - Steuersaetze (gesetze-im-internet.de)",
-      "url": "https://www.gesetze-im-internet.de/ustg_1980/__12.html",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Einkommensteuergesetz (EStG), section 2(7) - Jahressteuer und Kalenderjahr (gesetze-im-internet.de)",
-      "url": "https://www.gesetze-im-internet.de/estg/__2.html",
-      "grade": "primary",
       "retrievedOn": "2026-11-13"
     },
     {

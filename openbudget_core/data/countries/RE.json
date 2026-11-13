@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 850,
+        "ratePerMillion": 85000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 210,
+        "ratePerMillion": 21000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "goods and services qualifying for 5.5% or 10% in metropolitan France",
@@ -39,7 +39,7 @@
       },
       {
         "label": "superReduced",
-        "basisPoints": 175,
+        "ratePerMillion": 17500,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "particular rate (press, first performances)",

@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 700,
+        "ratePerMillion": 70000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "most goods and services; rice, flour, sugar, cooking oils and other essentials exempt",

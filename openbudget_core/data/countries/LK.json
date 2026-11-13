@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 800,
+        "ratePerMillion": 80000,
         "from": "2022-01-01",
         "to": "2022-06-01",
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1200,
+        "ratePerMillion": 120000,
         "from": "2022-06-01",
         "to": "2022-09-01",
         "appliesTo": null,
@@ -39,7 +39,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1500,
+        "ratePerMillion": 150000,
         "from": "2022-09-01",
         "to": "2024-01-01",
         "appliesTo": null,
@@ -47,7 +47,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1800,
+        "ratePerMillion": 180000,
         "from": "2024-01-01",
         "to": null,
         "appliesTo": null,
@@ -55,7 +55,7 @@
       },
       {
         "label": "financial",
-        "basisPoints": 1800,
+        "ratePerMillion": 180000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "supply of financial services by specified institutions",

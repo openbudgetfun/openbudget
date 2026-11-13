@@ -23,27 +23,27 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 2200,
+        "ratePerMillion": 220000,
         "from": "2013-07-01",
         "to": null,
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "reduced",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2020-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 7
+        "source": 5
       },
       {
         "label": "reduced2",
-        "basisPoints": 950,
+        "ratePerMillion": 95000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 8
+        "source": 6
       }
     ],
     "registrationThreshold": null,
@@ -71,18 +71,6 @@
       "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-      "grade": "primary",
       "retrievedOn": "2026-11-13"
     },
     {

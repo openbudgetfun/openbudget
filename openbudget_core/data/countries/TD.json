@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1800,
+        "ratePerMillion": 180000,
         "from": "2016-01-01",
         "to": "2024-01-01",
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1750,
+        "ratePerMillion": 175000,
         "from": "2024-01-01",
         "to": null,
         "appliesTo": null,
@@ -39,7 +39,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 900,
+        "ratePerMillion": 90000,
         "from": "2024-01-01",
         "to": null,
         "appliesTo": "listed local products (sugar, oil, soap, textiles, local agri-food products)",

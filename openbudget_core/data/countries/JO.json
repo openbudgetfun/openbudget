@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1600,
+        "ratePerMillion": 160000,
         "from": "2010-01-01",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 400,
+        "ratePerMillion": 40000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "certain agricultural products and listed goods",

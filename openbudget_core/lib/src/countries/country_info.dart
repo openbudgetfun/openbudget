@@ -33,8 +33,10 @@ final class CountryInfo {
   /// Parses one `data/countries/<CC>.json` file, strictly.
   ///
   /// Throws [ArgumentError] naming the offending key when the value violates
-  /// the schema, so bad reference data fails loudly instead of quietly
-  /// producing a default nobody asked for.
+  /// the schema — including a repeated caveat, the same source listed twice
+  /// or an unknown tax-year calendar, each error naming the country — so bad
+  /// reference data fails loudly instead of quietly producing a default
+  /// nobody asked for.
   factory CountryInfo.fromJson(Object? json) {
     final map = _object(json, 'country');
     for (final key in map.keys) {
@@ -42,8 +44,12 @@ final class CountryInfo {
         throw ArgumentError('unknown country key "$key"');
       }
     }
+    final code = _code(_present(map, 'code'), 'code');
+    final sources = _list(_present(map, 'sources'), SourceInfo.fromJson);
+    final caveats = _stringList(_present(map, 'caveats'), 'caveats');
+    _rejectDuplicates(code, sources, caveats);
     return CountryInfo(
-      code: _code(_present(map, 'code'), 'code'),
+      code: code,
       name: _nonEmptyString(_present(map, 'name'), 'name'),
       servable: _boolean(_present(map, 'servable'), 'servable'),
       currencies: _currencyList(_present(map, 'currencies')),
@@ -51,7 +57,9 @@ final class CountryInfo {
       individualTaxYear: _optional(
         map,
         'individualTaxYear',
-        IndividualTaxYear.fromJson,
+        (
+          value,
+        ) => IndividualTaxYear.fromJson(value, country: code),
       ),
       companyYearEndDefault: _optional(
         map,
@@ -60,10 +68,10 @@ final class CountryInfo {
       ),
       indirectTax: _optional(map, 'indirectTax', IndirectTaxInfo.fromJson),
       authority: _optional(map, 'authority', TaxAuthorityInfo.fromJson),
-      sources: _list(_present(map, 'sources'), SourceInfo.fromJson),
+      sources: sources,
       verifiedOn: _optionalDate(map, 'verifiedOn'),
       recheckBy: _optionalDate(map, 'recheckBy'),
-      caveats: _stringList(_present(map, 'caveats'), 'caveats'),
+      caveats: caveats,
     );
   }
 
@@ -175,12 +183,15 @@ final class IndividualTaxYear {
     required this.calendar,
   });
 
-  factory IndividualTaxYear.fromJson(Object? json) {
+  factory IndividualTaxYear.fromJson(Object? json, {String? country}) {
     final map = _object(json, 'individualTaxYear');
     return IndividualTaxYear(
       startMonth: _month(_present(map, 'startMonth')),
       startDay: _day(_present(map, 'startDay')),
-      calendar: _nonEmptyString(_present(map, 'calendar'), 'calendar'),
+      calendar: TaxYearCalendar.fromJsonName(
+        _nonEmptyString(_present(map, 'calendar'), 'calendar'),
+        country: country,
+      ),
     );
   }
 
@@ -190,14 +201,75 @@ final class IndividualTaxYear {
   /// The day of [startMonth] a tax year starts on.
   final int startDay;
 
-  /// The calendar the year follows, `gregorian` for almost every country.
-  final String calendar;
+  /// The calendar the year follows, [TaxYearCalendar.gregorian] for almost
+  /// every country.
+  final TaxYearCalendar calendar;
 
   Map<String, Object?> toJsonObject() => {
     'startMonth': startMonth,
     'startDay': startDay,
-    'calendar': calendar,
+    'calendar': calendar.jsonName,
   };
+}
+
+/// The calendar an individual tax year follows.
+///
+/// Every JSON name is a CLDR calendar identifier (UTS #35) except
+/// [bikramSambat]: Nepal's calendar has no CLDR identifier, so it carries the
+/// schema's own `bikram-sambat` spelling. [TaxYearCalendar.fromJsonName]
+/// rejects anything else, so a typo or an unresearched calendar fails the
+/// generator, CI and the tests instead of silently parsing as text.
+enum TaxYearCalendar {
+  gregorian('gregorian'),
+  buddhist('buddhist'),
+  chinese('chinese'),
+  coptic('coptic'),
+  dangi('dangi'),
+  ethiopic('ethiopic'),
+  hebrew('hebrew'),
+  indian('indian'),
+  islamic('islamic'),
+  islamicCivil('islamic-civil'),
+  islamicRgsa('islamic-rgsa'),
+  islamicTbla('islamic-tbla'),
+  islamicUmalqura('islamic-umalqura'),
+  japanese('japanese'),
+  persian('persian'),
+  roc('roc'),
+
+  /// Nepal's calendar; CLDR defines no identifier for it.
+  bikramSambat('bikram-sambat');
+
+  const TaxYearCalendar(this.jsonName);
+
+  /// The identifier used in `data/countries/<CC>.json`.
+  final String jsonName;
+
+  /// Parses a `calendar` value, rejecting unknown spellings. When [country]
+  /// is given — the ISO code of the file being parsed — the error names it.
+  static TaxYearCalendar fromJsonName(String name, {String? country}) =>
+      switch (name) {
+        'gregorian' => gregorian,
+        'buddhist' => buddhist,
+        'chinese' => chinese,
+        'coptic' => coptic,
+        'dangi' => dangi,
+        'ethiopic' => ethiopic,
+        'hebrew' => hebrew,
+        'indian' => indian,
+        'islamic' => islamic,
+        'islamic-civil' => islamicCivil,
+        'islamic-rgsa' => islamicRgsa,
+        'islamic-tbla' => islamicTbla,
+        'islamic-umalqura' => islamicUmalqura,
+        'japanese' => japanese,
+        'persian' => persian,
+        'roc' => roc,
+        'bikram-sambat' => bikramSambat,
+        _ => throw ArgumentError(
+          '${country ?? 'country'}: unknown tax-year calendar "$name"',
+        ),
+      };
 }
 
 /// The kind of indirect tax a country levies.
@@ -290,7 +362,7 @@ final class IndirectTaxInfo {
 final class IndirectTaxRate {
   const IndirectTaxRate({
     required this.label,
-    required this.basisPoints,
+    required this.ratePerMillion,
     required this.from,
     required this.source,
     this.to,
@@ -301,7 +373,7 @@ final class IndirectTaxRate {
     final map = _object(json, 'rate');
     return IndirectTaxRate(
       label: _nonEmptyString(_present(map, 'label'), 'label'),
-      basisPoints: _basisPoints(_present(map, 'basisPoints')),
+      ratePerMillion: _ratePerMillion(_present(map, 'ratePerMillion')),
       from: _civilDate(_present(map, 'from'), 'from'),
       to: _optionalDate(map, 'to'),
       appliesTo: _optionalString(map['appliesTo'], 'appliesTo'),
@@ -312,8 +384,9 @@ final class IndirectTaxRate {
   /// What the rate applies to, such as `standard`.
   final String label;
 
-  /// The rate in hundredths of a percent: 20% is `2000`.
-  final int basisPoints;
+  /// The exact rate in millionths of the taxed amount: 1% is `10000`, so
+  /// Québec's 9.975% QST is `99750` with no value rounded away.
+  final int ratePerMillion;
 
   /// The first day the rate applies.
   final DateTime from;
@@ -330,7 +403,7 @@ final class IndirectTaxRate {
 
   Map<String, Object?> toJsonObject() => {
     'label': label,
-    'basisPoints': basisPoints,
+    'ratePerMillion': ratePerMillion,
     'from': _civilDateString(from),
     'to': to == null ? null : _civilDateString(to),
     'appliesTo': appliesTo,
@@ -527,6 +600,29 @@ T? _optional<T>(
   return parse(value);
 }
 
+/// Rejects a source list or caveat list that repeats an entry.
+void _rejectDuplicates(
+  String code,
+  List<SourceInfo> sources,
+  List<String> caveats,
+) {
+  final seenSources = <String>{};
+  for (final source in sources) {
+    if (!seenSources.add('${source.url}\n${source.title}')) {
+      throw ArgumentError(
+        '$code lists the source "${source.title}" at ${source.url} '
+        'more than once',
+      );
+    }
+  }
+  final seenCaveats = <String>{};
+  for (final caveat in caveats) {
+    if (!seenCaveats.add(caveat)) {
+      throw ArgumentError('$code repeats the caveat "$caveat"');
+    }
+  }
+}
+
 ({int month, int day}) _yearEnd(Object? value) {
   final map = _object(value, 'companyYearEndDefault');
   return (
@@ -622,7 +718,8 @@ int _month(Object? value) => _intIn(value, 'month', 1, 12);
 
 int _day(Object? value) => _intIn(value, 'day', 1, 31);
 
-int _basisPoints(Object? value) => _intIn(value, 'basisPoints', 0, 10000);
+int _ratePerMillion(Object? value) =>
+    _intIn(value, 'ratePerMillion', 0, 1000000);
 
 int _amountMinor(Object? value) {
   if (value is int && value >= 0) {

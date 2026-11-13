@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 300,
+        "ratePerMillion": 30000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "hotel and tourism services; construction and sale of buildings",
@@ -39,7 +39,7 @@
       },
       {
         "label": "higher",
-        "basisPoints": 1500,
+        "ratePerMillion": 150000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "internet services",
@@ -47,7 +47,7 @@
       },
       {
         "label": "reduced2",
-        "basisPoints": 100,
+        "ratePerMillion": 10000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "importation and sale of gold jewellery",

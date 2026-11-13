@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1500,
+        "ratePerMillion": 150000,
         "from": "2018-04-01",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "zero",
-        "basisPoints": 0,
+        "ratePerMillion": 0,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "basic foodstuffs and other zero-rated schedule items",

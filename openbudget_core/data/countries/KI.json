@@ -25,7 +25,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1250,
+        "ratePerMillion": 125000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": null,

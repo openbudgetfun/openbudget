@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 2000,
+        "ratePerMillion": 200000,
         "from": "1996-01-01",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 1400,
+        "ratePerMillion": 140000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "listed goods and services",
@@ -39,7 +39,7 @@
       },
       {
         "label": "reduced2",
-        "basisPoints": 1000,
+        "ratePerMillion": 100000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "listed goods and services",
@@ -47,7 +47,7 @@
       },
       {
         "label": "superReduced",
-        "basisPoints": 700,
+        "ratePerMillion": 70000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "listed essential goods and services",

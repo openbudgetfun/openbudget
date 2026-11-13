@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 450,
+        "ratePerMillion": 45000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 100,
+        "ratePerMillion": 10000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "basic foodstuffs (bread, milk)",
@@ -39,7 +39,7 @@
       },
       {
         "label": "reduced2",
-        "basisPoints": 250,
+        "ratePerMillion": 25000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "public transport, newspapers and culture",

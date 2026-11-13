@@ -23,11 +23,11 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1000,
+        "ratePerMillion": 100000,
         "from": "2005-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 6
+        "source": 4
       }
     ],
     "registrationThreshold": null,
@@ -54,18 +54,6 @@
     {
       "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-      "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-      "url": "https://vatcalc.com/vat-rates/",
-      "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-      "url": "https://vatcalc.com/vat-rates/",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
     },

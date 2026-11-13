@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 700,
+        "ratePerMillion": 70000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "6.3% VAT plus 0.7% municipal tax; statutory rate 10% reduced by royal decree",

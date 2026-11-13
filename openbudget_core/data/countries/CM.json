@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1925,
+        "ratePerMillion": 192500,
         "from": "2005-01-01",
         "to": null,
         "appliesTo": null,
