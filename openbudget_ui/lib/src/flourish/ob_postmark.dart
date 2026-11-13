@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:openbudget_core/openbudget_core.dart' show ChainFamily;
 import 'package:openbudget_ui/src/motion/ob_motion.dart';
 import 'package:openbudget_ui/src/theme/ob_palette.dart';
 import 'package:openbudget_ui/src/theme/ob_pen.dart';
@@ -379,6 +380,32 @@ class ObCurrencyStamp extends HookWidget {
   }
 }
 
+/// The body of a postage stamp: a rectangle with a row of perforation holes
+/// punched along each edge.
+Path _perforatedBody(Size size) {
+  const hole = 1.6;
+  const pitch = 5.0;
+  final body = Path()..addRect(Offset.zero & size);
+  final holes = Path();
+  void row(double y) {
+    for (var x = pitch / 2; x < size.width; x += pitch) {
+      holes.addOval(Rect.fromCircle(center: Offset(x, y), radius: hole));
+    }
+  }
+
+  void column(double x) {
+    for (var y = pitch / 2; y < size.height; y += pitch) {
+      holes.addOval(Rect.fromCircle(center: Offset(x, y), radius: hole));
+    }
+  }
+
+  row(0);
+  row(size.height);
+  column(0);
+  column(size.width);
+  return Path.combine(PathOperation.difference, body, holes);
+}
+
 class _PerforatedPainter extends CustomPainter {
   const _PerforatedPainter({required this.fill, required this.ink});
 
@@ -390,31 +417,8 @@ class _PerforatedPainter extends CustomPainter {
     if (size.isEmpty) {
       return;
     }
-    const hole = 1.6;
-    const pitch = 5.0;
-    final body = Path()..addRect(Offset.zero & size);
-    final holes = Path();
-    void row(double y) {
-      for (var x = pitch / 2; x < size.width; x += pitch) {
-        holes.addOval(Rect.fromCircle(center: Offset(x, y), radius: hole));
-      }
-    }
-
-    void column(double x) {
-      for (var y = pitch / 2; y < size.height; y += pitch) {
-        holes.addOval(Rect.fromCircle(center: Offset(x, y), radius: hole));
-      }
-    }
-
-    row(0);
-    row(size.height);
-    column(0);
-    column(size.width);
     canvas
-      ..drawPath(
-        Path.combine(PathOperation.difference, body, holes),
-        Paint()..color = fill,
-      )
+      ..drawPath(_perforatedBody(size), Paint()..color = fill)
       ..drawRect(
         (Offset.zero & size).deflate(3.2),
         Paint()
@@ -427,4 +431,307 @@ class _PerforatedPainter extends CustomPainter {
   @override
   bool shouldRepaint(_PerforatedPainter oldDelegate) =>
       fill != oldDelegate.fill || ink != oldDelegate.ink;
+}
+
+/// The words a screen reader says for the state of an [ObChainStamp] or
+/// [ObChainStampToggle].
+///
+/// This package has no localisations, so the app passes its own. The
+/// defaults are English.
+@immutable
+class ObChainStampWords {
+  const ObChainStampWords({
+    this.inked = 'inked',
+    this.outline = 'outline',
+    this.selected = 'selected',
+    this.unselected = 'not selected',
+  });
+
+  /// A filled stamp: the chain is found, or holds value.
+  final String inked;
+
+  /// An outline stamp: the chain is empty, or not picked.
+  final String outline;
+
+  /// A picker stamp that is on.
+  final String selected;
+
+  /// A picker stamp that is off.
+  final String unselected;
+}
+
+/// A blockchain shown as a postage stamp: its name lettered on a perforated
+/// stamp in the family's own spot ink.
+///
+/// Like [ObCurrencyStamp], every chain family always prints in the same ink
+/// (Bitcoin tangerine, EVM lilac, Solana teal, Tron pink, XRP Ledger sky;
+/// later families spread over the six), so a wallet's chains are easy to
+/// tell apart. The ink never carries the meaning: the chain's [label] is
+/// always lettered on the stamp, and there are no chain logos.
+///
+/// An [inked] stamp is filled; an outline stamp is an unprinted stamp framed
+/// in the family's ink, for a chain that is empty or not picked. A [value]
+/// line sets a figure, such as a balance, in tabular figures. For a picker
+/// whose stamps toggle, use [ObChainStampToggle].
+class ObChainStamp extends HookWidget {
+  const ObChainStamp({
+    required this.family,
+    required this.label,
+    this.detail,
+    this.value,
+    this.inked = true,
+    this.words = const ObChainStampWords(),
+    super.key,
+  });
+
+  /// The chain family, which fixes the ink.
+  final ChainFamily family;
+
+  /// The chain's name, such as "Bitcoin". It is lettered on the stamp.
+  final String label;
+
+  /// A second, smaller line: a script type ("zpub") or "+ 6".
+  final String? detail;
+
+  /// A third line set in tabular figures, such as a balance.
+  final String? value;
+
+  /// Whether the stamp is filled, rather than an outline.
+  final bool inked;
+
+  /// What a screen reader says for the stamp's state.
+  final ObChainStampWords words;
+
+  /// The index into [ObPalette.spots] that [family] prints in.
+  static int inkIndex(ChainFamily family) => switch (family) {
+    ChainFamily.tron => 0,
+    ChainFamily.solana || ChainFamily.hyperliquid || ChainFamily.sui => 1,
+    ChainFamily.dogecoin || ChainFamily.litecoin => 2,
+    ChainFamily.xrpl || ChainFamily.cardano => 3,
+    ChainFamily.bitcoin || ChainFamily.aptos => 4,
+    ChainFamily.evm || ChainFamily.ton => 5,
+  };
+
+  /// The spot ink [family] prints in, for [palette]'s print run.
+  static Color inkOf(ChainFamily family, ObPalette palette) =>
+      palette.spot(inkIndex(family));
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: [
+      label,
+      ?detail,
+      ?value,
+      if (inked) words.inked else words.outline,
+    ].join(', '),
+    excludeSemantics: true,
+    child: _ChainStampFace(
+      family: family,
+      label: label,
+      detail: detail,
+      value: value,
+      inked: inked,
+    ),
+  );
+}
+
+/// A pickable [ObChainStamp]: tap to toggle a chain on or off.
+///
+/// The stamp is inked while [selected] and an outline when not, and a screen
+/// reader hears the chain, its detail and value, and whether it is selected.
+/// The touch target is at least 48 by 48, however short the stamp.
+class ObChainStampToggle extends HookWidget {
+  const ObChainStampToggle({
+    required this.family,
+    required this.label,
+    required this.selected,
+    required this.onChanged,
+    this.detail,
+    this.value,
+    this.words = const ObChainStampWords(),
+    super.key,
+  });
+
+  final ChainFamily family;
+  final String label;
+  final String? detail;
+  final String? value;
+
+  /// Whether the chain is picked. A picked stamp is inked.
+  final bool selected;
+
+  /// Called with the new state on a tap. Null disables the stamp.
+  final ValueChanged<bool>? onChanged;
+
+  final ObChainStampWords words;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = Theme.of(context).ob;
+    final onChanged = this.onChanged;
+    // The ink well keeps the tap and focus actions; the merged node adds the
+    // chain's words and state, and the stamp's own lettering stays silent.
+    return MergeSemantics(
+      child: Semantics(
+        button: true,
+        enabled: onChanged != null,
+        selected: selected,
+        label: [label, ?detail, ?value].join(', '),
+        value: selected ? words.selected : words.unselected,
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: onChanged == null ? null : () => onChanged(!selected),
+            borderRadius: BorderRadius.circular(4),
+            focusColor: palette.highlight,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              child: Center(
+                widthFactor: 1,
+                heightFactor: 1,
+                child: ExcludeSemantics(
+                  child: _ChainStampFace(
+                    family: family,
+                    label: label,
+                    detail: detail,
+                    value: value,
+                    inked: selected,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The paper and print of a chain stamp, with no semantics of its own.
+class _ChainStampFace extends HookWidget {
+  const _ChainStampFace({
+    required this.family,
+    required this.label,
+    required this.detail,
+    required this.value,
+    required this.inked,
+  });
+
+  final ChainFamily family;
+  final String label;
+  final String? detail;
+  final String? value;
+  final bool inked;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    final spot = ObChainStamp.inkOf(family, palette);
+    // On the fill the word is the action ink; on bare paper it is the page ink.
+    final text = inked ? palette.onAction : palette.ink;
+    final style = ObTextStyles.stamp(
+      theme.textTheme.labelSmall,
+    ).copyWith(color: text, fontSize: 12);
+    return CustomPaint(
+      painter: _ChainStampPainter(
+        paper: inked ? spot : palette.surface,
+        frame: inked ? palette.onAction.withValues(alpha: 0.7) : spot,
+        edge: inked ? null : palette.quietPen,
+        seed: family.index + 11,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 11, 16, 11),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
+              style: style,
+            ),
+            if (detail case final line?) ...[
+              const SizedBox(height: 3),
+              Text(
+                line.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+                style: style.copyWith(fontSize: 10.5),
+              ),
+            ],
+            if (value case final figure?) ...[
+              const SizedBox(height: 4),
+              Text(
+                figure,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+                style: ObTextStyles.amount(
+                  theme.textTheme.labelSmall,
+                ).copyWith(color: text, fontSize: 12),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Paints a chain stamp: the perforated [paper], and inside it a frame drawn
+/// with the Skribble pen. An outline stamp also draws an [edge] along the
+/// perforations so the stamp reads against the page.
+class _ChainStampPainter extends CustomPainter {
+  const _ChainStampPainter({
+    required this.paper,
+    required this.frame,
+    required this.edge,
+    required this.seed,
+  });
+
+  final Color paper;
+  final Color frame;
+  final Color? edge;
+  final int seed;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) {
+      return;
+    }
+    final body = _perforatedBody(size);
+    canvas.drawPath(body, Paint()..color = paper);
+    if (edge case final pen?) {
+      canvas.drawPath(
+        body,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2
+          ..color = pen,
+      );
+    }
+    const margin = 3.0;
+    canvas
+      ..save()
+      ..translate(margin, margin);
+    ObPen.outline(
+      canvas,
+      Size(size.width - margin * 2, size.height - margin * 2),
+      color: frame,
+      radius: 3,
+      strokeWidth: edge == null ? 1.2 : 2,
+      seed: seed,
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_ChainStampPainter oldDelegate) =>
+      paper != oldDelegate.paper ||
+      frame != oldDelegate.frame ||
+      edge != oldDelegate.edge ||
+      seed != oldDelegate.seed;
 }
