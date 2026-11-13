@@ -57,6 +57,13 @@ abstract interface class TaxRulePack {
   /// The category with [code], or null when this pack does not know it.
   TaxCategory? category(String code);
 
+  /// Maps a universal category code onto this pack's own code for books
+  /// of [kind], or returns null when the pack has no home for it. A
+  /// universal entry whose code maps lands in the report under the pack's
+  /// code; one that does not map counts as uncategorised. Codes outside
+  /// the universal catalogue return null.
+  String? mapUniversalCategory(String universalCode, EntityKind kind);
+
   /// Computes the position for [input].
   ///
   /// Throws [UnsupportedTaxYearException] when the year's rates are not in

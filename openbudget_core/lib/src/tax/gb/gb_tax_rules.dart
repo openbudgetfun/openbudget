@@ -98,6 +98,10 @@ final class GbTaxRules implements TaxRulePack {
   TaxCategory? category(String code) => gbCategoriesByCode[code];
 
   @override
+  String? mapUniversalCategory(String universalCode, EntityKind kind) =>
+      gbMapUniversalCategory(universalCode, kind);
+
+  @override
   TaxReport report(TaxInput input) {
     final rates = _ratesFor(input);
     final profile = _profileFor(input);

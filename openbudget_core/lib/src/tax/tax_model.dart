@@ -158,6 +158,7 @@ class TaxCategory {
     required this.label,
     required this.kind,
     required this.entityKinds,
+    this.labelKey,
     this.reportReference,
     this.description,
   });
@@ -172,6 +173,11 @@ class TaxCategory {
 
   /// The kinds of books this category may appear in.
   final Set<EntityKind> entityKinds;
+
+  /// The ARB key that localises this category in the app, when the
+  /// catalogue is not written in the authority's own wording. Universal
+  /// categories carry one; country packs label themselves.
+  final String? labelKey;
 
   /// Where the total lands on the official return, such as
   /// `SA103F box 20` or `Schedule C line 18`.

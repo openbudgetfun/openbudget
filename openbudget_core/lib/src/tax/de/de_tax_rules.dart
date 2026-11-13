@@ -64,6 +64,10 @@ final class DeTaxRules implements TaxRulePack {
   TaxCategory? category(String code) => deCategories[code];
 
   @override
+  String? mapUniversalCategory(String universalCode, EntityKind kind) =>
+      deMapUniversalCategory(universalCode, kind);
+
+  @override
   TaxReport report(TaxInput input) =>
       deReport(input, _tableFor(input.year.startYear));
 
