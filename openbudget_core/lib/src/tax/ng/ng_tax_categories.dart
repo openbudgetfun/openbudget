@@ -833,6 +833,106 @@ abstract final class _NgTaxCategories {
       category.code: category,
   });
 
+  /// The universal catalogue mapped onto Nigeria's codes, per book kind
+  /// (`docs/tax-jurisdictions.md` sections 4.7 and 8.6). An absent code is
+  /// a deliberate gap, not an oversight: the entry counts as
+  /// uncategorised rather than land on a line its NTA rules may not
+  /// allow.
+  ///
+  /// Notable gaps: dividends (the Nigerian categories split franked
+  /// dividends taxed finally at source from taxable foreign dividends,
+  /// and a generic tag cannot decide), digital-asset rules (not built
+  /// yet), reliefs outside pension and owner-occupied housing-loan
+  /// interest, meals (entertainment is disallowable), and PAYE versus
+  /// withholding tax for sole traders and companies is resolved to the
+  /// withholding-tax credit, the only withheld-tax category those books
+  /// have.
+  static const Map<EntityKind, Map<String, String>> universalMap = {
+    EntityKind.individual: {
+      'universal.income.employment': 'ng.ind.employment.salary',
+      'universal.income.interest': 'ng.ind.investment.interest',
+      'universal.income.rent': 'ng.ind.investment.rent',
+      'universal.income.pension': 'ng.ind.employment.pension',
+      'universal.income.capital_gains_proceeds': 'ng.ind.gain.proceeds',
+      'universal.income.capital_gains_cost': 'ng.ind.gain.cost',
+      'universal.income.other': 'ng.ind.other_income',
+      'universal.relief.pension': 'ng.ind.relief.pension',
+      'universal.relief.mortgage_interest':
+          'ng.ind.relief.housing_loan_interest',
+      'universal.tax.income_tax_withheld': 'ng.ind.tax.paye',
+      'universal.out_of_scope.transfers': 'ng.ind.out_of_scope',
+      'universal.out_of_scope.loans': 'ng.ind.out_of_scope',
+      'universal.out_of_scope.gifts_received': 'ng.ind.out_of_scope',
+    },
+    EntityKind.soleTrader: {
+      'universal.income.self_employment': 'ng.biz.revenue.sales',
+      'universal.income.interest': 'ng.biz.revenue.other',
+      'universal.income.other': 'ng.biz.revenue.other',
+      'universal.expense.cost_of_goods': 'ng.biz.expense.cost_of_sales',
+      'universal.expense.wages': 'ng.biz.expense.salaries',
+      'universal.expense.rent': 'ng.biz.expense.rent',
+      'universal.expense.utilities': 'ng.biz.expense.utilities',
+      'universal.expense.office': 'ng.biz.expense.other',
+      'universal.expense.phone_and_internet': 'ng.biz.expense.other',
+      'universal.expense.professional_fees': 'ng.biz.expense.professional_fees',
+      'universal.expense.insurance': 'ng.biz.expense.insurance',
+      'universal.expense.travel': 'ng.biz.expense.transport',
+      'universal.expense.vehicle': 'ng.biz.expense.transport',
+      // Equipment and software are relieved through the First Schedule
+      // capital allowances in this pack.
+      'universal.expense.software': 'ng.biz.capital.software',
+      'universal.expense.equipment': 'ng.biz.capital.other_equipment',
+      'universal.expense.bank_fees': 'ng.biz.expense.bank_charges',
+      'universal.expense.marketing': 'ng.biz.expense.advertising',
+      'universal.expense.training': 'ng.biz.expense.other',
+      'universal.expense.other': 'ng.biz.expense.other',
+      'universal.tax.income_tax_withheld': 'ng.biz.tax.wht',
+      'universal.tax.sales_tax_collected': 'ng.biz.vat.output',
+      'universal.tax.sales_tax_paid': 'ng.biz.vat.input',
+      'universal.out_of_scope.transfers': 'ng.biz.out_of_scope',
+      'universal.out_of_scope.loans': 'ng.biz.out_of_scope',
+      'universal.out_of_scope.gifts_received': 'ng.biz.out_of_scope',
+      'universal.out_of_scope.owner_capital_and_drawings':
+          'ng.biz.out_of_scope',
+    },
+    EntityKind.company: {
+      'universal.income.self_employment': 'ng.co.revenue.sales',
+      'universal.income.interest': 'ng.co.revenue.other',
+      'universal.income.rent': 'ng.co.revenue.other',
+      'universal.income.capital_gains_proceeds': 'ng.co.gain.proceeds',
+      'universal.income.capital_gains_cost': 'ng.co.gain.cost',
+      'universal.income.other': 'ng.co.revenue.other',
+      'universal.expense.cost_of_goods': 'ng.co.expense.cost_of_sales',
+      'universal.expense.wages': 'ng.co.expense.salaries',
+      'universal.expense.rent': 'ng.co.expense.rent',
+      'universal.expense.utilities': 'ng.co.expense.utilities',
+      'universal.expense.office': 'ng.co.expense.other',
+      'universal.expense.phone_and_internet': 'ng.co.expense.other',
+      'universal.expense.professional_fees': 'ng.co.expense.professional_fees',
+      'universal.expense.insurance': 'ng.co.expense.insurance',
+      'universal.expense.travel': 'ng.co.expense.transport',
+      'universal.expense.vehicle': 'ng.co.expense.transport',
+      'universal.expense.software': 'ng.co.capital.software',
+      'universal.expense.equipment': 'ng.co.capital.other_equipment',
+      'universal.expense.bank_fees': 'ng.co.expense.bank_charges',
+      'universal.expense.marketing': 'ng.co.expense.advertising',
+      'universal.expense.training': 'ng.co.expense.other',
+      'universal.expense.other': 'ng.co.expense.other',
+      'universal.tax.income_tax_withheld': 'ng.co.tax.wht',
+      'universal.tax.instalments': 'ng.co.tax.instalment',
+      'universal.tax.sales_tax_collected': 'ng.co.vat.output',
+      'universal.tax.sales_tax_paid': 'ng.co.vat.input',
+      'universal.out_of_scope.transfers': 'ng.co.out_of_scope',
+      'universal.out_of_scope.loans': 'ng.co.out_of_scope',
+      'universal.out_of_scope.gifts_received': 'ng.co.out_of_scope',
+      'universal.out_of_scope.owner_capital_and_drawings': 'ng.co.out_of_scope',
+    },
+  };
+
+  /// [TaxRulePack.mapUniversalCategory] for the Nigeria pack.
+  static String? mapUniversal(String universalCode, EntityKind kind) =>
+      universalMap[kind]?[universalCode];
+
   /// The First Schedule Table I rates, in basis points.
   static const Map<String, int> capitalAllowanceRates = {
     'ng.biz.capital.building': 1000,

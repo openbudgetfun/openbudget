@@ -133,13 +133,34 @@ class TaxService {
   }
 
   /// Lists the tax categories available to the entity's kind.
+  ///
+  /// An entity whose country has no rule pack lists the universal
+  /// catalogue, and needs no tax profile: profiles are pack-shaped, so
+  /// none can exist for that country yet. Pack countries keep their own
+  /// catalogue after the entity has set up its profile.
   static Future<List<TaxCategoryView>> listCategories(
     Session session, {
     required UuidValue entityId,
   }) async {
     final entity = await EntityAccess.requireOwned(session, entityId);
+    final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+    if (jurisdiction == null) {
+      return [
+        for (final category in UniversalTaxCategories.categoriesFor(
+          entity.kind,
+        ))
+          TaxCategoryView(
+            code: category.code,
+            label: category.label,
+            kind: category.kind.name,
+            reportReference: category.reportReference,
+            description: category.description,
+          ),
+      ];
+    }
+
     await _requireProfile(session, entity);
-    final pack = _requirePack(_requireJurisdiction(entity));
+    final pack = _requirePack(jurisdiction);
 
     return [
       for (final category in pack.categoriesFor(entity.kind))
@@ -403,6 +424,7 @@ class TaxService {
           final mainBuilt = built[entity.id!]!;
           var uncategorizedCount = mainBuilt.uncategorizedCount;
           var convertedCount = mainBuilt.convertedCount;
+          var unmappedUniversalCount = 0;
           final linkedInputs = <TaxInput>[];
           for (final linked in includedLinked) {
             final linkedBuilt = built[linked.id!]!;
@@ -410,7 +432,12 @@ class TaxService {
               TaxInput(
                 profile: profiles[linked.id!]!.profile,
                 year: year,
-                entries: linkedBuilt.entries,
+                entries: _mapUniversalEntries(
+                  linkedBuilt.entries,
+                  pack: pack,
+                  kind: linked.kind,
+                  onUnmapped: () => unmappedUniversalCount++,
+                ),
               ),
             );
             uncategorizedCount += linkedBuilt.uncategorizedCount;
@@ -420,7 +447,12 @@ class TaxService {
           final input = TaxInput(
             profile: mainProfile.profile,
             year: year,
-            entries: mainBuilt.entries,
+            entries: _mapUniversalEntries(
+              mainBuilt.entries,
+              pack: pack,
+              kind: entity.kind,
+              onUnmapped: () => unmappedUniversalCount++,
+            ),
             linked: linkedInputs,
           );
 
@@ -437,6 +469,7 @@ class TaxService {
             opportunities,
             uncategorizedCount: uncategorizedCount,
             convertedCount: convertedCount,
+            unmappedUniversalCount: unmappedUniversalCount,
           );
         },
         settings: const TransactionSettings(
@@ -838,11 +871,67 @@ class TaxService {
   static String _uuidArrayLiteral(Iterable<UuidValue> ids) =>
       '{${ids.map((id) => id.uuid).join(',')}}';
 
+  /// Maps universal category codes through [pack] for one entity's
+  /// entries, before they reach the report computation.
+  ///
+  /// A mapped entry keeps its figures under the pack's own code. An entry
+  /// whose universal code has no home in the pack is dropped and reported
+  /// through [onUnmapped]: it counts as uncategorised on the report with
+  /// a caveat, rather than land somewhere its rules may not allow.
+  static List<TaxEntry> _mapUniversalEntries(
+    List<TaxEntry> entries, {
+    required TaxRulePack pack,
+    required EntityKind kind,
+    required void Function() onUnmapped,
+  }) {
+    final mapped = <TaxEntry>[];
+    for (final entry in entries) {
+      final code = entry.categoryCode;
+      if (!UniversalTaxCategories.isUniversalCode(code)) {
+        mapped.add(entry);
+        continue;
+      }
+      final packCode = pack.mapUniversalCategory(code, kind);
+      if (packCode == null) {
+        onUnmapped();
+        continue;
+      }
+      if (packCode == code) {
+        mapped.add(entry);
+        continue;
+      }
+      mapped.add(
+        TaxEntry(
+          date: entry.date,
+          amountMinor: entry.amountMinor,
+          categoryCode: packCode,
+          businessUsePercent: entry.businessUsePercent,
+          salesTaxMinor: entry.salesTaxMinor,
+          sourceId: entry.sourceId,
+          note: entry.note,
+        ),
+      );
+    }
+    return mapped;
+  }
+
+  /// Caveat for entries whose universal code this report cannot place.
+  static String _unmappedUniversalCaveat(
+    int count,
+    TaxJurisdiction jurisdiction,
+  ) {
+    final entries = count == 1 ? 'entry' : 'entries';
+    return 'Caveat: $count tagged $entries use universal tax categories '
+        'with no ${jurisdiction.countryCode} return box, so they are '
+        'counted as uncategorised.';
+  }
+
   static TaxReportView _toView(
     TaxReport report,
     List<TaxOpportunity> opportunities, {
     required int uncategorizedCount,
     required int convertedCount,
+    int unmappedUniversalCount = 0,
   }) => TaxReportView(
     jurisdiction: report.year.jurisdiction.countryCode,
     startYear: report.year.startYear,
@@ -883,6 +972,11 @@ class TaxService {
     assumptions: [
       ...report.assumptions,
       if (convertedCount > 0) _conversionAssumption,
+      if (unmappedUniversalCount > 0)
+        _unmappedUniversalCaveat(
+          unmappedUniversalCount,
+          report.year.jurisdiction,
+        ),
     ],
     sources: [for (final source in report.sources) source.toString()],
     rulesVerifiedOn: report.rulesVerifiedOn,
@@ -892,7 +986,8 @@ class TaxService {
       for (final entry in report.coverage.entries)
         entry.key.name: entry.value.name,
     },
-    uncategorizedCount: report.uncategorizedCount + uncategorizedCount,
+    uncategorizedCount:
+        report.uncategorizedCount + uncategorizedCount + unmappedUniversalCount,
     convertedEntryCount: convertedCount,
     opportunities: [
       for (final opportunity in opportunities)

@@ -110,6 +110,15 @@ class FakeTaxPack implements TaxRulePack {
   }
 
   @override
+  String? mapUniversalCategory(String universalCode, EntityKind kind) =>
+      switch (universalCode) {
+        'universal.income.employment' =>
+          kind == EntityKind.individual ? FakeTaxPack.employment.code : null,
+        'universal.expense.office' => FakeTaxPack.officeCosts.code,
+        _ => null,
+      };
+
+  @override
   TaxReport report(TaxInput input) => TaxReport(
     year: input.year,
     entityKind: input.profile.entityKind,

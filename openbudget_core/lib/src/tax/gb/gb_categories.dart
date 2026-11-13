@@ -1,4 +1,5 @@
 import 'package:openbudget_core/src/tax/tax_model.dart';
+import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 
 /// Every category the United Kingdom pack knows, in return order.
 ///
@@ -401,3 +402,96 @@ const List<TaxCategory> gbCategories = <TaxCategory>[
 final Map<String, TaxCategory> gbCategoriesByCode = Map.unmodifiable({
   for (final category in gbCategories) category.code: category,
 });
+
+/// The universal catalogue mapped onto GB codes, per book kind
+/// (`docs/tax-jurisdictions.md` sections 4.7 and 8.6). An absent code is a
+/// deliberate gap, not an oversight: the entry counts as uncategorised
+/// rather than land in a box its GB rules may not allow.
+///
+/// Notable gaps: capital gains and digital-asset entries for sole traders
+/// and companies (SA103F and CT600 carry no proceeds box), business
+/// expenses for individuals, digital-asset rules (not built yet), and
+/// meals everywhere (client hospitality is disallowable and staff
+/// entertainment is capped, so a generic meals tag cannot be placed).
+const Map<EntityKind, Map<String, String>> gbUniversalCategoryMap = {
+  EntityKind.individual: {
+    'universal.income.employment': 'gb.ind.employment',
+    'universal.income.interest': 'gb.ind.savings',
+    'universal.income.dividends': 'gb.ind.dividends',
+    'universal.income.rent': 'gb.ind.property',
+    'universal.income.pension': 'gb.ind.other_income',
+    'universal.income.capital_gains_proceeds': 'gb.ind.capital_gains_proceeds',
+    'universal.income.capital_gains_cost': 'gb.ind.capital_gains_cost',
+    'universal.income.other': 'gb.ind.other_income',
+    'universal.relief.pension': 'gb.ind.pension_contributions',
+    'universal.relief.charitable': 'gb.ind.gift_aid',
+    'universal.tax.income_tax_withheld': 'gb.ind.tax_paid',
+    'universal.tax.instalments': 'gb.ind.tax_paid',
+    'universal.out_of_scope.transfers': 'gb.ind.out_of_scope',
+    'universal.out_of_scope.loans': 'gb.ind.out_of_scope',
+    'universal.out_of_scope.gifts_received': 'gb.ind.out_of_scope',
+  },
+  EntityKind.soleTrader: {
+    'universal.income.self_employment': 'gb.se.turnover',
+    'universal.income.other': 'gb.se.other_income',
+    'universal.expense.cost_of_goods': 'gb.se.cost_of_goods',
+    'universal.expense.wages': 'gb.se.wages',
+    'universal.expense.travel': 'gb.se.car_van_travel',
+    'universal.expense.vehicle': 'gb.se.car_van_travel',
+    'universal.expense.rent': 'gb.se.rent_rates_power',
+    'universal.expense.utilities': 'gb.se.rent_rates_power',
+    'universal.expense.insurance': 'gb.se.rent_rates_power',
+    'universal.expense.office': 'gb.se.phone_office',
+    'universal.expense.phone_and_internet': 'gb.se.phone_office',
+    'universal.expense.software': 'gb.se.phone_office',
+    'universal.expense.professional_fees': 'gb.se.professional_fees',
+    'universal.expense.bank_fees': 'gb.se.bank_charges',
+    'universal.expense.marketing': 'gb.se.advertising',
+    'universal.expense.training': 'gb.se.other_expenses',
+    'universal.expense.other': 'gb.se.other_expenses',
+    // Plant and machinery bought for the business is relieved at 100%
+    // through the Annual Investment Allowance.
+    'universal.expense.equipment': 'gb.se.capital_allowances',
+    'universal.tax.income_tax_withheld': 'gb.se.tax_paid',
+    'universal.tax.instalments': 'gb.se.tax_paid',
+    'universal.tax.sales_tax_collected': 'gb.vat.output',
+    'universal.tax.sales_tax_paid': 'gb.vat.input',
+    'universal.out_of_scope.transfers': 'gb.se.out_of_scope',
+    'universal.out_of_scope.loans': 'gb.se.out_of_scope',
+    'universal.out_of_scope.gifts_received': 'gb.se.out_of_scope',
+    'universal.out_of_scope.owner_capital_and_drawings': 'gb.se.out_of_scope',
+  },
+  EntityKind.company: {
+    'universal.income.self_employment': 'gb.co.turnover',
+    'universal.income.interest': 'gb.co.interest_received',
+    'universal.income.other': 'gb.co.other_income',
+    'universal.expense.cost_of_goods': 'gb.co.cost_of_sales',
+    'universal.expense.wages': 'gb.co.wages',
+    'universal.expense.travel': 'gb.co.car_van_travel',
+    'universal.expense.vehicle': 'gb.co.car_van_travel',
+    'universal.expense.rent': 'gb.co.rent_rates_power',
+    'universal.expense.utilities': 'gb.co.rent_rates_power',
+    'universal.expense.insurance': 'gb.co.insurance',
+    'universal.expense.office': 'gb.co.phone_office',
+    'universal.expense.phone_and_internet': 'gb.co.phone_office',
+    'universal.expense.software': 'gb.co.phone_office',
+    'universal.expense.professional_fees': 'gb.co.professional_fees',
+    'universal.expense.bank_fees': 'gb.co.bank_charges',
+    'universal.expense.marketing': 'gb.co.advertising',
+    'universal.expense.training': 'gb.co.other_expenses',
+    'universal.expense.other': 'gb.co.other_expenses',
+    'universal.expense.equipment': 'gb.co.capital_allowances',
+    'universal.tax.income_tax_withheld': 'gb.co.tax_paid',
+    'universal.tax.instalments': 'gb.co.tax_paid',
+    'universal.tax.sales_tax_collected': 'gb.vat.output',
+    'universal.tax.sales_tax_paid': 'gb.vat.input',
+    'universal.out_of_scope.transfers': 'gb.co.out_of_scope',
+    'universal.out_of_scope.loans': 'gb.co.out_of_scope',
+    'universal.out_of_scope.gifts_received': 'gb.co.out_of_scope',
+    'universal.out_of_scope.owner_capital_and_drawings': 'gb.co.out_of_scope',
+  },
+};
+
+/// [TaxRulePack.mapUniversalCategory] for the GB pack.
+String? gbMapUniversalCategory(String universalCode, EntityKind kind) =>
+    gbUniversalCategoryMap[kind]?[universalCode];
