@@ -12,6 +12,27 @@ part 'ng_reports.dart';
 part 'ng_tax_categories.dart';
 part 'ng_tax_rates.dart';
 
+/// What the Nigeria pack covers, and how mature it is.
+///
+/// The personal return leaves out the minimum-wage exemption and state and
+/// local levies, the business reports do not model prior-year capital
+/// allowances, and the company return does not compute the minimum effective
+/// tax rate for large groups. Capital gains, digital assets and the filing
+/// calendar are not built.
+const TaxPackManifest ngTaxManifest = TaxPackManifest(
+  maturity: TaxPackMaturity.preview,
+  sections: {
+    TaxSection.personalReturn: TaxSectionCoverage.partial,
+    TaxSection.selfEmployment: TaxSectionCoverage.partial,
+    TaxSection.companyReturn: TaxSectionCoverage.partial,
+    TaxSection.indirectTax: TaxSectionCoverage.partial,
+    TaxSection.capitalGains: TaxSectionCoverage.notBuilt,
+    TaxSection.digitalAssets: TaxSectionCoverage.notBuilt,
+    TaxSection.filingCalendar: TaxSectionCoverage.notBuilt,
+    TaxSection.payroll: TaxSectionCoverage.notBuilt,
+  },
+);
+
 /// Nigeria's tax rules, under the regime the year of assessment selects.
 ///
 /// The pack supports the 2025 and 2026 calendar years of assessment. Amounts
@@ -55,7 +76,13 @@ final class NgTaxRules implements TaxRulePack {
   TaxJurisdiction get jurisdiction => TaxJurisdiction.ng;
 
   @override
+  TaxPackManifest get manifest => ngTaxManifest;
+
+  @override
   Set<int> get supportedStartYears => _supportedStartYears;
+
+  @override
+  TaxRuleSet ruleSet(int startYear) => _ngRuleSetFor(startYear);
 
   @override
   TaxYear taxYearFor(DateTime date) => taxYear(date.year);
@@ -102,6 +129,15 @@ final class NgTaxRules implements TaxRulePack {
       EntityKind.company => _companyOpportunities(input, table),
     };
   }
+}
+
+/// The rule set for [startYear], or the unsupported-year error.
+TaxRuleSet _ngRuleSetFor(int startYear) {
+  final ruleSet = _ngRuleSetsByStartYear[startYear];
+  if (ruleSet == null) {
+    throw UnsupportedTaxYearException(TaxJurisdiction.ng, startYear);
+  }
+  return ruleSet;
 }
 
 /// Validates [input] and returns the rate table for its year.
