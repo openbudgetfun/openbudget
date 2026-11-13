@@ -26,6 +26,26 @@ void main() {
     );
 
     test(
+      'when XRPL is asked for then it is supported with no secret at all',
+      () {
+        expect(
+          WalletProviderRegistry.defaultRegistry.registrationFor(
+            ChainFamily.xrpl,
+          ),
+          isNotNull,
+        );
+        expect(
+          WalletProviderRegistry.defaultRegistry.isSupported(
+            passwords: emptyPasswords,
+            environment: emptyEnvironment,
+            family: ChainFamily.xrpl,
+          ),
+          isTrue,
+        );
+      },
+    );
+
+    test(
       'when the family secret is set through passwords then Solana is '
       'supported',
       () {
@@ -82,6 +102,7 @@ void main() {
       () {
         for (final family in ChainFamily.values) {
           if (family == ChainFamily.solana) continue;
+          if (family == ChainFamily.xrpl) continue;
           if (family == ChainFamily.bitcoin) continue;
           expect(
             WalletProviderRegistry.defaultRegistry.isSupported(
@@ -107,7 +128,7 @@ void main() {
         );
         expect(
           WalletProviderRegistry.defaultRegistry.registrationFor(
-            ChainFamily.bitcoin,
+            ChainFamily.xrpl,
           ),
           isNotNull,
         );
@@ -121,22 +142,22 @@ void main() {
     );
 
     test(
-      'when listing supported families then Solana appears while its '
-      'secret is present and Bitcoin always',
+      'when listing supported families then Solana appears while its secret '
+      'is present and XRPL and Bitcoin always',
       () {
         expect(
           WalletProviderRegistry.defaultRegistry.supportedFamilies(
             passwords: passwords,
             environment: emptyEnvironment,
           ),
-          [ChainFamily.solana, ChainFamily.bitcoin],
+          [ChainFamily.solana, ChainFamily.bitcoin, ChainFamily.xrpl],
         );
         expect(
           WalletProviderRegistry.defaultRegistry.supportedFamilies(
             passwords: emptyPasswords,
             environment: emptyEnvironment,
           ),
-          [ChainFamily.bitcoin],
+          [ChainFamily.bitcoin, ChainFamily.xrpl],
         );
       },
     );
