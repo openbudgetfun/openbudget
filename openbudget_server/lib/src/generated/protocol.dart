@@ -196,10 +196,13 @@ import 'transactions/transfer.dart' as _ign516jt;
 import 'transactions/transfer_input.dart' as _iah0rmrk;
 import 'transactions/transfer_peer_view.dart' as _i3n9n3ej;
 import 'wallets/asset_price.dart' as _iw6q2afx;
+import 'wallets/holding_position.dart' as _iq0sbxsc;
 import 'wallets/price_quality.dart' as _i6j30n20;
 import 'wallets/price_source.dart' as _iu1a5mev;
+import 'wallets/spam_verdict.dart' as _i4uehszw;
 import 'wallets/wallet.dart' as _ilu5i0rn;
 import 'wallets/wallet_holding.dart' as _iqqppnaa;
+import 'wallets/wallet_network_state.dart' as _i73xhbar;
 import 'wallets/wallet_sync_result.dart' as _ipdq2p58;
 import 'wallets/wallet_tax_year_summary.dart' as _ivsmsmw6;
 import 'wallets/wallet_transaction.dart' as _i6m1jx15;
@@ -313,10 +316,13 @@ export 'transactions/transfer.dart';
 export 'transactions/transfer_input.dart';
 export 'transactions/transfer_peer_view.dart';
 export 'wallets/asset_price.dart';
+export 'wallets/holding_position.dart';
 export 'wallets/price_quality.dart';
 export 'wallets/price_source.dart';
+export 'wallets/spam_verdict.dart';
 export 'wallets/wallet.dart';
 export 'wallets/wallet_holding.dart';
+export 'wallets/wallet_network_state.dart';
 export 'wallets/wallet_sync_result.dart';
 export 'wallets/wallet_tax_year_summary.dart';
 export 'wallets/wallet_transaction.dart';
@@ -445,10 +451,13 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_iah0rmrk.TransferInput>,
           _is.getType<_i3n9n3ej.TransferPeerView>,
           _is.getType<_iw6q2afx.AssetPrice>,
+          _is.getType<_iq0sbxsc.HoldingPosition>,
           _is.getType<_i6j30n20.PriceQuality>,
           _is.getType<_iu1a5mev.PriceSource>,
+          _is.getType<_i4uehszw.SpamVerdict>,
           _is.getType<_ilu5i0rn.Wallet>,
           _is.getType<_iqqppnaa.WalletHolding>,
+          _is.getType<_i73xhbar.WalletNetworkState>,
           _is.getType<_ipdq2p58.WalletSyncResult>,
           _is.getType<_ivsmsmw6.WalletTaxYearSummary>,
           _is.getType<_i6m1jx15.WalletTransaction>,
@@ -563,10 +572,13 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_iah0rmrk.TransferInput?>,
           _is.getType<_i3n9n3ej.TransferPeerView?>,
           _is.getType<_iw6q2afx.AssetPrice?>,
+          _is.getType<_iq0sbxsc.HoldingPosition?>,
           _is.getType<_i6j30n20.PriceQuality?>,
           _is.getType<_iu1a5mev.PriceSource?>,
+          _is.getType<_i4uehszw.SpamVerdict?>,
           _is.getType<_ilu5i0rn.Wallet?>,
           _is.getType<_iqqppnaa.WalletHolding?>,
+          _is.getType<_i73xhbar.WalletNetworkState?>,
           _is.getType<_ipdq2p58.WalletSyncResult?>,
           _is.getType<_ivsmsmw6.WalletTaxYearSummary?>,
           _is.getType<_i6m1jx15.WalletTransaction?>,
@@ -586,6 +598,8 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_imsv7m6w.TransactionLineInput>>,
           _is.getType<List<_ilixdhed.TransactionView>>,
           _is.getType<List<_ipio7ws3.TransactionLine>>,
+          _is.getType<List<_ifz8weqz.WalletNetwork>>,
+          _is.getType<List<_ifz8weqz.WalletNetwork>?>,
           _is.getType<List<String>?>,
           _is.getType<List<_i3fh9aci.Account>>,
           _is.getType<List<_is.UuidValue>>,
@@ -743,10 +757,13 @@ class Protocol extends _is.DatabaseSerializationManager
           'TransferInput',
           'TransferPeerView',
           'AssetPrice',
+          'HoldingPosition',
           'PriceQuality',
           'PriceSource',
+          'SpamVerdict',
           'Wallet',
           'WalletHolding',
+          'WalletNetworkState',
           'WalletSyncResult',
           'WalletTaxYearSummary',
           'WalletTransaction',
@@ -4861,6 +4878,24 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'String',
         ),
         _isp.ColumnDefinition(
+          name: 'scanNetworks',
+          columnType: _isp.ColumnType.json,
+          isNullable: true,
+          dartType: 'List<openbudget_core:WalletNetwork>?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'descriptorCiphertext',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'descriptorNonce',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
           name: 'label',
           columnType: _isp.ColumnType.text,
           isNullable: true,
@@ -4999,10 +5034,23 @@ class Protocol extends _is.DatabaseSerializationManager
           dartType: 'UuidValue',
         ),
         _isp.ColumnDefinition(
+          name: 'network',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'openbudget_core:WalletNetwork',
+        ),
+        _isp.ColumnDefinition(
           name: 'assetId',
           columnType: _isp.ColumnType.text,
           isNullable: false,
           dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'position',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:HoldingPosition',
+          columnDefault: '\'available\'',
         ),
         _isp.ColumnDefinition(
           name: 'symbol',
@@ -5040,6 +5088,13 @@ class Protocol extends _is.DatabaseSerializationManager
           isNullable: false,
           dartType: 'bool',
           columnDefault: 'false',
+        ),
+        _isp.ColumnDefinition(
+          name: 'spamVerdict',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:SpamVerdict',
+          columnDefault: '\'clean\'',
         ),
         _isp.ColumnDefinition(
           name: 'priceCurrencyCode',
@@ -5139,7 +5194,15 @@ class Protocol extends _is.DatabaseSerializationManager
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
+              definition: 'network',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
               definition: 'assetId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'position',
             ),
           ],
           type: 'btree',
@@ -5152,11 +5215,99 @@ class Protocol extends _is.DatabaseSerializationManager
           elements: [
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
+              definition: 'network',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
               definition: 'assetId',
             ),
           ],
           type: 'btree',
           isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'wallet_network_state',
+      dartName: 'WalletNetworkState',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'walletId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'network',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'openbudget_core:WalletNetwork',
+        ),
+        _isp.ColumnDefinition(
+          name: 'lastReadAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'lastError',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'historyCursor',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'wallet_network_state_fk_0',
+          columns: ['walletId'],
+          referenceTable: 'wallet',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'wallet_network_state_wallet_network_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'walletId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'network',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
           isPrimary: false,
         ),
       ],
@@ -5180,6 +5331,12 @@ class Protocol extends _is.DatabaseSerializationManager
           columnType: _isp.ColumnType.uuid,
           isNullable: false,
           dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'network',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'openbudget_core:WalletNetwork',
         ),
         _isp.ColumnDefinition(
           name: 'signature',
@@ -5324,6 +5481,10 @@ class Protocol extends _is.DatabaseSerializationManager
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'walletId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'network',
             ),
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
@@ -5720,17 +5881,26 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _iw6q2afx.AssetPrice) {
       return _iw6q2afx.AssetPrice.fromJson(data) as T;
     }
+    if (t == _iq0sbxsc.HoldingPosition) {
+      return _iq0sbxsc.HoldingPosition.fromJson(data) as T;
+    }
     if (t == _i6j30n20.PriceQuality) {
       return _i6j30n20.PriceQuality.fromJson(data) as T;
     }
     if (t == _iu1a5mev.PriceSource) {
       return _iu1a5mev.PriceSource.fromJson(data) as T;
     }
+    if (t == _i4uehszw.SpamVerdict) {
+      return _i4uehszw.SpamVerdict.fromJson(data) as T;
+    }
     if (t == _ilu5i0rn.Wallet) {
       return _ilu5i0rn.Wallet.fromJson(data) as T;
     }
     if (t == _iqqppnaa.WalletHolding) {
       return _iqqppnaa.WalletHolding.fromJson(data) as T;
+    }
+    if (t == _i73xhbar.WalletNetworkState) {
+      return _i73xhbar.WalletNetworkState.fromJson(data) as T;
     }
     if (t == _ipdq2p58.WalletSyncResult) {
       return _ipdq2p58.WalletSyncResult.fromJson(data) as T;
@@ -6205,17 +6375,28 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _is.getType<_iw6q2afx.AssetPrice?>()) {
       return (data != null ? _iw6q2afx.AssetPrice.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_iq0sbxsc.HoldingPosition?>()) {
+      return (data != null ? _iq0sbxsc.HoldingPosition.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_i6j30n20.PriceQuality?>()) {
       return (data != null ? _i6j30n20.PriceQuality.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_iu1a5mev.PriceSource?>()) {
       return (data != null ? _iu1a5mev.PriceSource.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_i4uehszw.SpamVerdict?>()) {
+      return (data != null ? _i4uehszw.SpamVerdict.fromJson(data) : null) as T;
+    }
     if (t == _is.getType<_ilu5i0rn.Wallet?>()) {
       return (data != null ? _ilu5i0rn.Wallet.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_iqqppnaa.WalletHolding?>()) {
       return (data != null ? _iqqppnaa.WalletHolding.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i73xhbar.WalletNetworkState?>()) {
+      return (data != null ? _i73xhbar.WalletNetworkState.fromJson(data) : null)
           as T;
     }
     if (t == _is.getType<_ipdq2p58.WalletSyncResult?>()) {
@@ -6323,6 +6504,20 @@ class Protocol extends _is.DatabaseSerializationManager
       return (data as List)
               .map((e) => deserialize<_ipio7ws3.TransactionLine>(e))
               .toList()
+          as T;
+    }
+    if (t == List<_ifz8weqz.WalletNetwork>) {
+      return (data as List)
+              .map((e) => deserialize<_ifz8weqz.WalletNetwork>(e))
+              .toList()
+          as T;
+    }
+    if (t == _is.getType<List<_ifz8weqz.WalletNetwork>?>()) {
+      return (data != null
+              ? (data as List)
+                    .map((e) => deserialize<_ifz8weqz.WalletNetwork>(e))
+                    .toList()
+              : null)
           as T;
     }
     if (t == _is.getType<List<String>?>()) {
@@ -6679,10 +6874,13 @@ class Protocol extends _is.DatabaseSerializationManager
       _iah0rmrk.TransferInput => 'TransferInput',
       _i3n9n3ej.TransferPeerView => 'TransferPeerView',
       _iw6q2afx.AssetPrice => 'AssetPrice',
+      _iq0sbxsc.HoldingPosition => 'HoldingPosition',
       _i6j30n20.PriceQuality => 'PriceQuality',
       _iu1a5mev.PriceSource => 'PriceSource',
+      _i4uehszw.SpamVerdict => 'SpamVerdict',
       _ilu5i0rn.Wallet => 'Wallet',
       _iqqppnaa.WalletHolding => 'WalletHolding',
+      _i73xhbar.WalletNetworkState => 'WalletNetworkState',
       _ipdq2p58.WalletSyncResult => 'WalletSyncResult',
       _ivsmsmw6.WalletTaxYearSummary => 'WalletTaxYearSummary',
       _i6m1jx15.WalletTransaction => 'WalletTransaction',
@@ -6922,14 +7120,20 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'TransferPeerView';
       case _iw6q2afx.AssetPrice():
         return 'AssetPrice';
+      case _iq0sbxsc.HoldingPosition():
+        return 'HoldingPosition';
       case _i6j30n20.PriceQuality():
         return 'PriceQuality';
       case _iu1a5mev.PriceSource():
         return 'PriceSource';
+      case _i4uehszw.SpamVerdict():
+        return 'SpamVerdict';
       case _ilu5i0rn.Wallet():
         return 'Wallet';
       case _iqqppnaa.WalletHolding():
         return 'WalletHolding';
+      case _i73xhbar.WalletNetworkState():
+        return 'WalletNetworkState';
       case _ipdq2p58.WalletSyncResult():
         return 'WalletSyncResult';
       case _ivsmsmw6.WalletTaxYearSummary():
@@ -7309,17 +7513,26 @@ class Protocol extends _is.DatabaseSerializationManager
     if (dataClassName == 'AssetPrice') {
       return deserialize<_iw6q2afx.AssetPrice>(data['data']);
     }
+    if (dataClassName == 'HoldingPosition') {
+      return deserialize<_iq0sbxsc.HoldingPosition>(data['data']);
+    }
     if (dataClassName == 'PriceQuality') {
       return deserialize<_i6j30n20.PriceQuality>(data['data']);
     }
     if (dataClassName == 'PriceSource') {
       return deserialize<_iu1a5mev.PriceSource>(data['data']);
     }
+    if (dataClassName == 'SpamVerdict') {
+      return deserialize<_i4uehszw.SpamVerdict>(data['data']);
+    }
     if (dataClassName == 'Wallet') {
       return deserialize<_ilu5i0rn.Wallet>(data['data']);
     }
     if (dataClassName == 'WalletHolding') {
       return deserialize<_iqqppnaa.WalletHolding>(data['data']);
+    }
+    if (dataClassName == 'WalletNetworkState') {
+      return deserialize<_i73xhbar.WalletNetworkState>(data['data']);
     }
     if (dataClassName == 'WalletSyncResult') {
       return deserialize<_ipdq2p58.WalletSyncResult>(data['data']);
@@ -7469,6 +7682,8 @@ class Protocol extends _is.DatabaseSerializationManager
         return _ilu5i0rn.Wallet.t;
       case _iqqppnaa.WalletHolding:
         return _iqqppnaa.WalletHolding.t;
+      case _i73xhbar.WalletNetworkState:
+        return _i73xhbar.WalletNetworkState.t;
       case _i6m1jx15.WalletTransaction:
         return _i6m1jx15.WalletTransaction.t;
     }

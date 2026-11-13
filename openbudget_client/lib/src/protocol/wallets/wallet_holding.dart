@@ -10,25 +10,32 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 import '../common/confidence.dart' as _itaosqa4;
+import '../wallets/holding_position.dart' as _i33owk26;
 import '../wallets/price_quality.dart' as _iy1clnxb;
 import '../wallets/price_source.dart' as _ip9y7dom;
+import '../wallets/spam_verdict.dart' as _ioka4inn;
 
-/// The current quantity and valuation of one asset in a wallet.
+/// The current quantity and valuation of one asset in a wallet, on one
+/// network and in one position.
 abstract class WalletHolding
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   WalletHolding._({
     this.id,
     required this.walletId,
+    required this.network,
     required this.assetId,
+    _i33owk26.HoldingPosition? position,
     this.symbol,
     this.name,
     this.tokenProgram,
     required this.decimals,
     required this.quantityRaw,
     bool? isNft,
+    _ioka4inn.SpamVerdict? spamVerdict,
     this.priceCurrencyCode,
     this.unitPrice,
     this.valueMinor,
@@ -41,20 +48,25 @@ abstract class WalletHolding
     this.pnlAsOf,
     this.metadataJson,
     DateTime? updatedAt,
-  }) : isNft = isNft ?? false,
+  }) : position = position ?? _i33owk26.HoldingPosition.available,
+       isNft = isNft ?? false,
+       spamVerdict = spamVerdict ?? _ioka4inn.SpamVerdict.clean,
        priceQuality = priceQuality ?? _iy1clnxb.PriceQuality.unpriced,
        updatedAt = updatedAt ?? DateTime.now();
 
   factory WalletHolding({
     _isc.UuidValue? id,
     required _isc.UuidValue walletId,
+    required _ifz8weqz.WalletNetwork network,
     required String assetId,
+    _i33owk26.HoldingPosition? position,
     String? symbol,
     String? name,
     String? tokenProgram,
     required int decimals,
     required BigInt quantityRaw,
     bool? isNft,
+    _ioka4inn.SpamVerdict? spamVerdict,
     String? priceCurrencyCode,
     String? unitPrice,
     int? valueMinor,
@@ -77,7 +89,15 @@ abstract class WalletHolding
       walletId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['walletId'],
       ),
+      network: _ifz8weqz.WalletNetwork.fromJson(
+        (jsonSerialization['network'] as String),
+      ),
       assetId: jsonSerialization['assetId'] as String,
+      position: jsonSerialization['position'] == null
+          ? null
+          : _i33owk26.HoldingPosition.fromJson(
+              (jsonSerialization['position'] as String),
+            ),
       symbol: jsonSerialization['symbol'] as String?,
       name: jsonSerialization['name'] as String?,
       tokenProgram: jsonSerialization['tokenProgram'] as String?,
@@ -88,6 +108,11 @@ abstract class WalletHolding
       isNft: jsonSerialization['isNft'] == null
           ? null
           : _isc.BoolJsonExtension.fromJson(jsonSerialization['isNft']),
+      spamVerdict: jsonSerialization['spamVerdict'] == null
+          ? null
+          : _ioka4inn.SpamVerdict.fromJson(
+              (jsonSerialization['spamVerdict'] as String),
+            ),
       priceCurrencyCode: jsonSerialization['priceCurrencyCode'] as String?,
       unitPrice: jsonSerialization['unitPrice'] as String?,
       valueMinor: jsonSerialization['valueMinor'] as int?,
@@ -128,22 +153,37 @@ abstract class WalletHolding
 
   _isc.UuidValue walletId;
 
-  /// Mint address, or `native` for the chain's own token.
+  /// The network the asset is on. A single-network wallet's holdings use the
+  /// wallet's network.
+  _ifz8weqz.WalletNetwork network;
+
+  /// The asset on that network: `native`, or the contract, mint, coin type,
+  /// jetton master or policy-and-name unit (multichain-wallets.md 7.2).
   String assetId;
+
+  /// Spendable, staked or unclaimed. Each position of an asset is its own
+  /// holding.
+  _i33owk26.HoldingPosition position;
 
   String? symbol;
 
   String? name;
 
-  /// Token program id, such as Tokenkeg... or TokenzQd...
+  /// The token standard or program: a Solana token program id, or erc20,
+  /// trc20, trc10, xrplIou, jetton, cardanoNative, suiCoin or aptosFa.
   String? tokenProgram;
 
   int decimals;
 
-  /// Quantity in the asset's base units (lamports for SOL).
+  /// Quantity in the asset's base units (lamports, wei, satoshis, sun,
+  /// drops).
   BigInt quantityRaw;
 
   bool isNft;
+
+  /// Whether the holding counts toward net worth. The classifier sets clean
+  /// or suspected; a user choice overrides it and survives syncs.
+  _ioka4inn.SpamVerdict spamVerdict;
 
   /// ISO 4217 code that unitPrice and every *Minor field here are in.
   String? priceCurrencyCode;
@@ -181,13 +221,16 @@ abstract class WalletHolding
   WalletHolding copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     _isc.UuidValue? walletId,
+    _ifz8weqz.WalletNetwork? network,
     String? assetId,
+    _i33owk26.HoldingPosition? position,
     String? symbol,
     String? name,
     String? tokenProgram,
     int? decimals,
     BigInt? quantityRaw,
     bool? isNft,
+    _ioka4inn.SpamVerdict? spamVerdict,
     String? priceCurrencyCode,
     String? unitPrice,
     int? valueMinor,
@@ -207,13 +250,16 @@ abstract class WalletHolding
       '__className__': 'WalletHolding',
       if (id != null) 'id': id?.toJson(),
       'walletId': walletId.toJson(),
+      'network': network.toJson(),
       'assetId': assetId,
+      'position': position.toJson(),
       if (symbol != null) 'symbol': symbol,
       if (name != null) 'name': name,
       if (tokenProgram != null) 'tokenProgram': tokenProgram,
       'decimals': decimals,
       'quantityRaw': quantityRaw.toJson(),
       'isNft': isNft,
+      'spamVerdict': spamVerdict.toJson(),
       if (priceCurrencyCode != null) 'priceCurrencyCode': priceCurrencyCode,
       if (unitPrice != null) 'unitPrice': unitPrice,
       if (valueMinor != null) 'valueMinor': valueMinor,
@@ -235,13 +281,16 @@ abstract class WalletHolding
       '__className__': 'WalletHolding',
       if (id != null) 'id': id?.toJson(),
       'walletId': walletId.toJson(),
+      'network': network.toJson(),
       'assetId': assetId,
+      'position': position.toJson(),
       if (symbol != null) 'symbol': symbol,
       if (name != null) 'name': name,
       if (tokenProgram != null) 'tokenProgram': tokenProgram,
       'decimals': decimals,
       'quantityRaw': quantityRaw.toJson(),
       'isNft': isNft,
+      'spamVerdict': spamVerdict.toJson(),
       if (priceCurrencyCode != null) 'priceCurrencyCode': priceCurrencyCode,
       if (unitPrice != null) 'unitPrice': unitPrice,
       if (valueMinor != null) 'valueMinor': valueMinor,
@@ -269,13 +318,16 @@ class _WalletHoldingImpl extends WalletHolding {
   _WalletHoldingImpl({
     _isc.UuidValue? id,
     required _isc.UuidValue walletId,
+    required _ifz8weqz.WalletNetwork network,
     required String assetId,
+    _i33owk26.HoldingPosition? position,
     String? symbol,
     String? name,
     String? tokenProgram,
     required int decimals,
     required BigInt quantityRaw,
     bool? isNft,
+    _ioka4inn.SpamVerdict? spamVerdict,
     String? priceCurrencyCode,
     String? unitPrice,
     int? valueMinor,
@@ -291,13 +343,16 @@ class _WalletHoldingImpl extends WalletHolding {
   }) : super._(
          id: id,
          walletId: walletId,
+         network: network,
          assetId: assetId,
+         position: position,
          symbol: symbol,
          name: name,
          tokenProgram: tokenProgram,
          decimals: decimals,
          quantityRaw: quantityRaw,
          isNft: isNft,
+         spamVerdict: spamVerdict,
          priceCurrencyCode: priceCurrencyCode,
          unitPrice: unitPrice,
          valueMinor: valueMinor,
@@ -319,13 +374,16 @@ class _WalletHoldingImpl extends WalletHolding {
   WalletHolding copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     _isc.UuidValue? walletId,
+    _ifz8weqz.WalletNetwork? network,
     String? assetId,
+    _i33owk26.HoldingPosition? position,
     Object? symbol = _Undefined,
     Object? name = _Undefined,
     Object? tokenProgram = _Undefined,
     int? decimals,
     BigInt? quantityRaw,
     bool? isNft,
+    _ioka4inn.SpamVerdict? spamVerdict,
     Object? priceCurrencyCode = _Undefined,
     Object? unitPrice = _Undefined,
     Object? valueMinor = _Undefined,
@@ -342,13 +400,16 @@ class _WalletHoldingImpl extends WalletHolding {
     return WalletHolding(
       id: id is _isc.UndefinedSentinel ? this.id : id,
       walletId: walletId ?? this.walletId,
+      network: network ?? this.network,
       assetId: assetId ?? this.assetId,
+      position: position ?? this.position,
       symbol: symbol is String? ? symbol : this.symbol,
       name: name is String? ? name : this.name,
       tokenProgram: tokenProgram is String? ? tokenProgram : this.tokenProgram,
       decimals: decimals ?? this.decimals,
       quantityRaw: quantityRaw ?? this.quantityRaw,
       isNft: isNft ?? this.isNft,
+      spamVerdict: spamVerdict ?? this.spamVerdict,
       priceCurrencyCode: priceCurrencyCode is String?
           ? priceCurrencyCode
           : this.priceCurrencyCode,
