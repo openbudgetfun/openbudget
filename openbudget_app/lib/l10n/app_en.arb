@@ -1817,6 +1817,185 @@
     }
   },
   "taxOpportunitySource": "Guidance",
+  "taxExportTitle": "Take it to your accountant",
+  "@taxExportTitle": {
+    "description": "Heading of the card that offers the tax summary download."
+  },
+  "taxExportMessage": "A ZIP with this tax year's summary and every line behind it. The download link works for 10 minutes.",
+  "taxExportButton": "Export tax summary",
+  "@taxExportButton": {
+    "description": "Button that makes a signed download link for the tax summary and opens it."
+  },
+  "taxExportPreparing": "Preparing your download",
+  "@taxExportPreparing": {
+    "description": "Spoken while the export button is busy."
+  },
+  "taxExportFailed": "We couldn't prepare your download. Check your connection and try again.",
+  "taxExportOpenFailed": "Your download is ready, but this device wouldn't open it. Try again in a moment.",
+  "taxUniversalIntroTitle": "No full tax rules for {country} yet",
+  "@taxUniversalIntroTitle": {
+    "description": "Heading of the panel shown for a country without a tax rule pack.",
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "taxUniversalIntroMessage": "OpenBudget can't work out what you owe here yet. It can show your tax year, the rates we know about, and a summary of your records to hand to an accountant.",
+  "taxUniversalYearLabel": "Tax year {label}",
+  "@taxUniversalYearLabel": {
+    "description": "The tax year, written as the country writes it, such as 2026 or 2026/27.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "taxUniversalYearPeriod": "{start} to {end}",
+  "@taxUniversalYearPeriod": {
+    "description": "The first and last day of the tax year.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "taxUniversalYearLoading": "Finding your tax year",
+  "taxSummaryTitle": "Your year so far",
+  "taxSummaryIncome": "Income this tax year",
+  "taxSummaryExpenses": "Expenses",
+  "taxSummaryReliefs": "Reliefs",
+  "taxSummaryTaxPaid": "Tax already paid",
+  "taxSummarySalesTaxCollected": "{tax} collected",
+  "@taxSummarySalesTaxCollected": {
+    "description": "A tile in the summary; the placeholder is the country's indirect tax, such as VAT.",
+    "placeholders": {
+      "tax": {
+        "type": "String"
+      }
+    }
+  },
+  "taxSummarySalesTaxPaid": "{tax} paid",
+  "@taxSummarySalesTaxPaid": {
+    "description": "A tile in the summary; the placeholder is the country's indirect tax, such as VAT.",
+    "placeholders": {
+      "tax": {
+        "type": "String"
+      }
+    }
+  },
+  "taxSummaryLoadError": "We couldn't load your summary.",
+  "taxSummaryDisclaimer": "This summarises what you've recorded in OpenBudget. It is not a tax return. Guidance only, not tax advice. Check figures with a qualified adviser before filing.",
+  "taxIndirectTitle": "{tax} rates",
+  "@taxIndirectTitle": {
+    "description": "Heading over a country's indirect-tax rates.",
+    "placeholders": {
+      "tax": {
+        "type": "String"
+      }
+    }
+  },
+  "taxIndirectKindVat": "VAT",
+  "taxIndirectKindGst": "GST",
+  "taxIndirectKindSalesTax": "Sales tax",
+  "taxIndirectKindConsumptionTax": "Consumption tax",
+  "taxIndirectKindNone": "VAT or sales tax",
+  "taxIndirectLocalName": "Known locally as {name}",
+  "@taxIndirectLocalName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taxIndirectNone": "{country} doesn't charge VAT or sales tax.",
+  "@taxIndirectNone": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "taxIndirectUnknown": "We haven't looked up the VAT or sales tax rates for this country yet.",
+  "taxIndirectNoRateForYear": "We don't have a rate for this tax year.",
+  "taxRatePercent": "{rate}%",
+  "@taxRatePercent": {
+    "description": "A rate with its percent sign; the placeholder is already written in the reader's decimal style.",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "taxRateAppliesTo": "Applies to {scope}",
+  "@taxRateAppliesTo": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "taxRateSince": "In force since {date}",
+  "@taxRateSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "taxRateSource": "Source: {title}",
+  "@taxRateSource": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "taxRateSourceOpen": "Open source: {title}",
+  "@taxRateSourceOpen": {
+    "description": "Spoken label of the link that opens a rate's source.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "taxGradePrimaryBadge": "From the tax authority",
+  "@taxGradePrimaryBadge": {
+    "description": "Badge on a figure taken from the authority's own publication."
+  },
+  "taxGradeInferredBadge": "Our best estimate",
+  "@taxGradeInferredBadge": {
+    "description": "Badge on a figure worked out from other facts, not published as stated."
+  },
+  "taxGradeBackgroundBadge": "Background information",
+  "@taxGradeBackgroundBadge": {
+    "description": "Badge on a figure from general reference material."
+  },
+  "taxRegionalRatesTitle": "Rates by region",
+  "taxRegionalRatesHint": "Some regions add their own tax on top.",
+  "taxAuthorityTitle": "Tax authority",
+  "taxAuthorityOpen": "Open the {name} website",
+  "@taxAuthorityOpen": {
+    "description": "Spoken label and tooltip of the link to a tax authority's website.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taxLinkOpenFailed": "We couldn't open that page. Try again in a moment.",
+  "taxUniversalVerifiedOn": "Country facts checked on {date}",
+  "@taxUniversalVerifiedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "taxHowWorkedOutTitle": "How this was worked out",
   "taxRulesVerifiedOn": "Rates checked on {date}",
   "@taxRulesVerifiedOn": {

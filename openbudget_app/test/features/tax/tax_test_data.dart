@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:openbudget_app/src/features/tax/providers/tax_repository.dart';
+import 'package:openbudget_app/src/features/tax/providers/tax_url_launcher_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 
@@ -252,6 +253,88 @@ TransactionView taxTransactionView({
   accountName: 'Current account',
 );
 
+/// A tax-ready summary for [countryCode], with the totals a Kenyan sole trader
+/// would see by default.
+TaxSummaryView taxSummaryView({
+  String countryCode = 'KE',
+  String currencyCode = 'KES',
+  EntityKind entityKind = EntityKind.individual,
+  int startYear = 2026,
+  String? yearLabel,
+  DateTime? yearStart,
+  DateTime? yearEnd,
+  bool isUniversal = true,
+  int totalIncomeMinor = 120000000,
+  int totalExpenseMinor = 45000000,
+  int totalReliefMinor = 0,
+  int totalTaxPaidMinor = 8000000,
+  int salesTaxCollectedMinor = 0,
+  int salesTaxPaidMinor = 0,
+  int uncategorizedCount = 0,
+  String disclaimerKey = 'taxSummaryDisclaimer',
+}) => TaxSummaryView(
+  entityId: UuidValue.fromString(testEntityId),
+  entityKind: entityKind,
+  countryCode: countryCode,
+  currencyCode: currencyCode,
+  startYear: startYear,
+  yearLabel: yearLabel ?? '$startYear',
+  yearStart: yearStart ?? DateTime.utc(startYear),
+  yearEnd: yearEnd ?? DateTime.utc(startYear + 1),
+  generatedAt: DateTime.utc(2026, 11, 13),
+  isUniversal: isUniversal,
+  rulesVerifiedOn: DateTime.utc(2026, 11, 13),
+  disclaimerKey: disclaimerKey,
+  incomeTotals: const [],
+  expenseTotals: const [],
+  reliefTotals: const [],
+  taxPaidTotals: const [],
+  totalIncomeMinor: totalIncomeMinor,
+  totalExpenseMinor: totalExpenseMinor,
+  totalReliefMinor: totalReliefMinor,
+  totalTaxPaidMinor: totalTaxPaidMinor,
+  salesTaxCollectedMinor: salesTaxCollectedMinor,
+  salesTaxPaidMinor: salesTaxPaidMinor,
+  salesTaxByRate: const [],
+  salesTaxByQuarter: const [],
+  wallets: const [],
+  fxNotes: const [],
+  rateSourcesUsed: const [],
+  uncategorizedCount: uncategorizedCount,
+);
+
+/// A signed export link as the server hands it out.
+const testExportLink =
+    'https://api.openbudget.test/tax/export?token=signed-token-for-tests';
+
+/// A [TaxUrlLauncher] that records what it was asked to open.
+class FakeTaxUrlLauncher implements TaxUrlLauncher {
+  FakeTaxUrlLauncher({this.opens = true, this.error});
+
+  /// What opening reports: false means the device had nothing to open it.
+  bool opens;
+
+  /// When set, opening throws it.
+  Exception? error;
+
+  final List<Uri> openedPages = [];
+  final List<Uri> openedDownloads = [];
+
+  @override
+  Future<bool> openPage(Uri url) async {
+    if (error != null) throw error!;
+    openedPages.add(url);
+    return opens;
+  }
+
+  @override
+  Future<bool> openDownload(Uri url) async {
+    if (error != null) throw error!;
+    openedDownloads.add(url);
+    return opens;
+  }
+}
+
 /// An in-memory [TaxRepository] for widget and provider tests.
 class FakeTaxRepository implements TaxRepository {
   FakeTaxRepository({
@@ -265,6 +348,10 @@ class FakeTaxRepository implements TaxRepository {
     this.saveError,
     this.envelopeError,
     this.lineError,
+    this.defaultSummary,
+    this.summaryError,
+    this.exportLink = testExportLink,
+    this.exportError,
   }) : reports = reports ?? {};
 
   TaxProfileRecord? profile;
@@ -277,8 +364,14 @@ class FakeTaxRepository implements TaxRepository {
   Exception? saveError;
   Exception? envelopeError;
   Exception? lineError;
+  TaxSummaryView? defaultSummary;
+  Exception? summaryError;
+  String exportLink;
+  Exception? exportError;
 
   final List<({String entityId, int startYear})> reportCalls = [];
+  final List<({String entityId, int? startYear})> summaryCalls = [];
+  final List<({String entityId, int? startYear})> exportCalls = [];
   final List<
     ({
       String entityId,
@@ -383,6 +476,27 @@ class FakeTaxRepository implements TaxRepository {
     return reports[startYear] ??
         defaultReport ??
         taxReportView(startYear: startYear);
+  }
+
+  @override
+  Future<TaxSummaryView> getSummary(String entityId, {int? startYear}) async {
+    summaryCalls.add((entityId: entityId, startYear: startYear));
+    if (summaryError != null) throw summaryError!;
+    final summary = defaultSummary ?? taxSummaryView();
+    return startYear == null || startYear == summary.startYear
+        ? summary
+        : taxSummaryView(
+            countryCode: summary.countryCode,
+            currencyCode: summary.currencyCode,
+            startYear: startYear,
+          );
+  }
+
+  @override
+  Future<String> createExportLink(String entityId, {int? startYear}) async {
+    exportCalls.add((entityId: entityId, startYear: startYear));
+    if (exportError != null) throw exportError!;
+    return exportLink;
   }
 }
 
