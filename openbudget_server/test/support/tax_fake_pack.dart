@@ -42,11 +42,41 @@ class FakeTaxPack implements TaxRulePack {
     employment,
   ];
 
+  static const TaxPackManifest fakeManifest = TaxPackManifest(
+    maturity: TaxPackMaturity.preview,
+    sections: {
+      TaxSection.personalReturn: TaxSectionCoverage.partial,
+      TaxSection.selfEmployment: TaxSectionCoverage.partial,
+      TaxSection.companyReturn: TaxSectionCoverage.partial,
+      TaxSection.indirectTax: TaxSectionCoverage.notBuilt,
+      TaxSection.capitalGains: TaxSectionCoverage.notBuilt,
+      TaxSection.digitalAssets: TaxSectionCoverage.notBuilt,
+      TaxSection.filingCalendar: TaxSectionCoverage.notBuilt,
+      TaxSection.payroll: TaxSectionCoverage.notBuilt,
+    },
+  );
+
   @override
   TaxJurisdiction get jurisdiction => TaxJurisdiction.gb;
 
   @override
+  TaxPackManifest get manifest => fakeManifest;
+
+  @override
   final Set<int> supportedStartYears;
+
+  @override
+  TaxRuleSet ruleSet(int startYear) {
+    if (!supportedStartYears.contains(startYear)) {
+      throw UnsupportedTaxYearException(jurisdiction, startYear);
+    }
+    return TaxRuleSet(
+      startYear: startYear,
+      revision: 1,
+      verifiedOn: DateTime.utc(2026, 4, 6),
+      sources: [Uri.parse('https://example.test/fake-tax')],
+    );
+  }
 
   @override
   TaxYear taxYearFor(DateTime date) => taxYear(date.toUtc().year);
@@ -102,6 +132,9 @@ class FakeTaxPack implements TaxRulePack {
     assumptions: const ['Test pack assumption.'],
     sources: [Uri.parse('https://example.test/fake-tax')],
     rulesVerifiedOn: DateTime.utc(2026, 4, 6),
+    rulesVersion: ruleSet(input.year.startYear).versionFor(jurisdiction),
+    maturity: manifest.maturity,
+    coverage: manifest.sections,
     uncategorizedCount: input.entries
         .where((entry) => category(entry.categoryCode) == null)
         .length,

@@ -328,3 +328,16 @@ const _ngTables = <int, _NgTaxTable>{2025: _ngTable2025, 2026: _ngTable2026};
 /// The date the tables above were last checked against the gazetted texts
 /// and the cited secondary sources.
 final DateTime _ngRulesVerifiedOn = DateTime.utc(2026, 11, 5);
+
+/// The version, sources and verification date of each supported year.
+final Map<int, TaxRuleSet> _ngRuleSetsByStartYear = Map.unmodifiable({
+  for (final entry in _ngTables.entries)
+    entry.key: TaxRuleSet(
+      startYear: entry.key,
+      revision: 1,
+      verifiedOn: _ngRulesVerifiedOn,
+      sources: [
+        for (final url in entry.value.sourceUrls) Uri.parse(url),
+      ],
+    ),
+});
