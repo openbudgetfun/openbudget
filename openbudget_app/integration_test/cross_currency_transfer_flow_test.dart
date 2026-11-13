@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/features/transfers/screens/create_transfer_screen.dart';
@@ -42,6 +43,9 @@ void main() {
             (ref) async => ref.watch(accounts.provider),
           ),
           transactionActionsProvider.overrideWith(() => transfers),
+          budgetMonthGroupsProvider.overrideWith(
+            (ref, entityId) async => const [],
+          ),
           fxQuoteProvider.overrideWith((ref, currencies) async {
             final (from, to, _) = currencies;
             return FxQuoteView(
