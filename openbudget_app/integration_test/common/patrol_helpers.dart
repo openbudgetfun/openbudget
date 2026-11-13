@@ -910,6 +910,47 @@ class TaxOverviewPage {
     'Guidance only, not tax advice. Check figures with a qualified adviser '
     'before filing.',
   );
+  Finder get exportButton => find.byKey(const Key('tax-export-button'));
+  Finder get exportError => find.byKey(const Key('tax-export-error'));
+
+  /// Makes the export link and opens it, scrolling to the button first.
+  Future<void> export() async {
+    await scrollIntoView(tester, exportButton);
+    await tester.tap(exportButton);
+    await tester.pumpAndSettle();
+  }
+}
+
+/// Page object for the tax overview of a country with no tax pack.
+class UniversalTaxPage {
+  UniversalTaxPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get introTitle => find.text(TaxExportData.kenyaIntroTitle);
+  Finder get yearLabel => find.byKey(const Key('tax-year-label'));
+  Finder get summaryHero => find.byKey(const Key('tax-summary-hero'));
+  Finder get ratesTitle => find.text(TaxExportData.vatRatesTitle);
+  Finder get standardRate => find.text(TaxExportData.kenyaStandardRate);
+  Finder get secondaryBadge =>
+      find.byKey(const Key('tax-secondary-source-badge'));
+  Finder get authorityLink => find.byKey(const Key('tax-authority-link'));
+  Finder get exportButton => find.byKey(const Key('tax-export-button'));
+  Finder get exportError => find.byKey(const Key('tax-export-error'));
+
+  /// Makes the export link and opens it, scrolling to the button first.
+  Future<void> export() async {
+    await scrollIntoView(tester, exportButton);
+    await tester.tap(exportButton);
+    await tester.pumpAndSettle();
+  }
+
+  /// Opens the tax authority's website, scrolling to the link first.
+  Future<void> openAuthority() async {
+    await scrollIntoView(tester, authorityLink);
+    await tester.tap(authorityLink);
+    await tester.pumpAndSettle();
+  }
 }
 
 /// Page object for the tax profile form.
