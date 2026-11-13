@@ -3986,25 +3986,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taxJurisdictionDe => 'Germany';
 
   @override
-  String get taxSalesTaxRegistered => 'Registered for sales tax or VAT';
-
-  @override
-  String get taxSalesTaxRegisteredHint =>
-      'Turn this on if you charge and reclaim sales tax on these books.';
-
-  @override
-  String get taxGbScottishTaxpayer => 'Scottish taxpayer';
-
-  @override
-  String get taxGbScottishTaxpayerHint => 'Use Scottish income tax rates.';
-
-  @override
-  String get taxGbStudentLoanPlan => 'Student loan plan';
-
-  @override
-  String get taxGbStudentLoanNone => 'No student loan';
-
-  @override
   String get taxGbStudentLoanPlan1 => 'Plan 1';
 
   @override
@@ -4018,37 +3999,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taxGbStudentLoanPostgraduate => 'Postgraduate loan';
-
-  @override
-  String get taxGbPostgraduateLoanHint =>
-      'Repay 6% of income above £21,000 on top of any undergraduate plan.';
-
-  @override
-  String get taxGbAccountingPeriodEnd => 'Accounting period end';
-
-  @override
-  String get taxGbAccountingPeriodEndHint =>
-      'The company\'s year end. Corporation Tax runs on these periods, not the tax year.';
-
-  @override
-  String get taxGbAccountingPeriodMonth => 'Month';
-
-  @override
-  String get taxGbAccountingPeriodDay => 'Day';
-
-  @override
-  String get taxGbAssociatedCompanies => 'Associated companies';
-
-  @override
-  String get taxGbAssociatedCompaniesHint =>
-      'Other companies under common control. Each one divides the £50,000 and £250,000 limits.';
-
-  @override
-  String get taxGbAssociatedCompaniesError =>
-      'Enter the number of associated companies as a whole number, such as 0.';
-
-  @override
-  String get taxUsFilingStatus => 'Filing status';
 
   @override
   String get taxUsFilingSingle => 'Single';
@@ -4067,138 +4017,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Qualifying surviving spouse';
 
   @override
-  String get taxUsForeignEarnedIncomeExclusion =>
-      'Foreign earned income exclusion';
-
-  @override
-  String get taxUsForeignEarnedIncomeExclusionHint =>
-      'The amount you excluded on Form 2555 this year. It is added back when the investment income and deduction phase-outs check your income.';
-
-  @override
-  String get taxUsDependentsUnder17 => 'Dependents under 17';
-
-  @override
-  String get taxUsDependents17OrOlder => 'Dependents 17 or older';
-
-  @override
-  String get taxUsDependentsCountHint =>
-      'The number of people you claim as dependents.';
-
-  @override
-  String get taxUsDependentsSsn => 'All dependents have an SSN';
-
-  @override
-  String get taxUsDependentsSsnHint =>
-      'Only dependents with an SSN valid for employment earn a credit.';
-
-  @override
-  String get taxUsTaxpayer65OrOlder => 'You are 65 or older';
-
-  @override
-  String get taxUsSpouse65OrOlder => 'Your spouse is 65 or older';
-
-  @override
-  String get taxUsTaxpayerHasSsn => 'You have an SSN';
-
-  @override
-  String get taxUsSpouseHasSsn => 'Your spouse has an SSN';
-
-  @override
-  String get taxUsSsnHint =>
-      'Required for the tips, overtime, and senior deductions.';
-
-  @override
-  String get taxUsHomeOfficeMethod => 'Home office method';
-
-  @override
   String get taxUsHomeOfficeSimplified => 'Simplified (\$5 per square foot)';
 
   @override
   String get taxUsHomeOfficeRegular => 'Regular (Form 8829)';
-
-  @override
-  String get taxUsSpecifiedServiceTrade => 'Specified service business';
-
-  @override
-  String get taxUsSpecifiedServiceTradeHint =>
-      'Consulting, law, health and similar businesses phase out of the qualified business income deduction.';
-
-  @override
-  String get taxNgAnnualRent => 'Annual rent paid';
-
-  @override
-  String get taxNgAnnualRentHint =>
-      'Used for rent relief under the Nigeria Tax Act.';
-
-  @override
-  String get taxNgAnnualRentError =>
-      'Enter the annual rent as a number, such as 1200000.';
-
-  @override
-  String get taxNgSmallCompanyCeiling => 'Small company turnover ceiling';
-
-  @override
-  String get taxNgSmallCompanyCeilingHint =>
-      'The two Nigerian Acts disagree: the Nigeria Tax Act gazette says N50,000,000 and the Administration Act says N100,000,000. Pick the figure that should decide your company\'s small company status.';
-
-  @override
-  String get taxNgSmallCompanyCeilingGazette =>
-      'N50,000,000 (Nigeria Tax Act gazette)';
-
-  @override
-  String get taxNgSmallCompanyCeilingIntended =>
-      'N100,000,000 (Administration Act)';
-
-  @override
-  String get taxNgMneGroupMember => 'Member of a multinational group';
-
-  @override
-  String get taxNgMneGroupMemberHint =>
-      'Multinational group members may owe the 15% minimum effective tax rate whatever their turnover.';
-
-  @override
-  String get taxDeJointAssessment => 'Joint assessment';
-
-  @override
-  String get taxDeJointAssessmentHint =>
-      'Spouses assessed together with income splitting.';
-
-  @override
-  String get taxDeSpouseEmployed => 'Spouse also earns wages';
-
-  @override
-  String get taxDeSpouseEmployedHint =>
-      'Each employed spouse claims their own worker\'s flat-rate allowance and files their own Anlage N.';
-
-  @override
-  String get taxDeChurchTax => 'Church tax';
-
-  @override
-  String get taxDeChurchTaxHint => 'Kirchensteuer on top of income tax.';
-
-  @override
-  String get taxDeChurchState => 'State (Land) of the church tax';
-
-  @override
-  String get taxDeChurchStateHint =>
-      'Sets the rate: 8% in Bavaria and Baden-Württemberg, 9% elsewhere. Leave it out to assume 9%.';
-
-  @override
-  String get taxDeChurchStateNone => 'Not specified (assume 9%)';
-
-  @override
-  String get taxDeChildren => 'Children (Kindergeld)';
-
-  @override
-  String get taxDeChildrenHint =>
-      'Children you receive Kindergeld for; a full twelve months per child is assumed.';
-
-  @override
-  String get taxDeEinkunftsArt => 'Type of self-employment';
-
-  @override
-  String get taxDeEinkunftsArtHint =>
-      'Freiberufler owe no trade tax and file Anlage S; Gewerbetreibende owe Gewerbesteuer and file Anlage G.';
 
   @override
   String get taxDeEinkunftsArtFreiberuflich =>
@@ -4206,40 +4028,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taxDeEinkunftsArtGewerblich => 'Gewerbetreibender (trade)';
-
-  @override
-  String get taxDeStatutoryPension => 'Statutory pension contributions';
-
-  @override
-  String get taxDeStatutoryPensionHint =>
-      'Employee and employer share per year; they reduce the Rürup (Basisrente) deduction.';
-
-  @override
-  String get taxDePriorTurnover => 'Previous year\'s turnover';
-
-  @override
-  String get taxDePriorTurnoverHint =>
-      'Total turnover of last year; it decides the Kleinunternehmer test (at most €25,000 prior year, €100,000 this year).';
-
-  @override
-  String get taxDeCommuteKm => 'Commute: one-way distance (km)';
-
-  @override
-  String get taxDeCommuteKmHint =>
-      'Full kilometres to your first workplace, shortest route (Anlage N).';
-
-  @override
-  String get taxDeCommuteDays => 'Commute: days travelled';
-
-  @override
-  String get taxDeCommuteDaysHint =>
-      'Days you actually visited the workplace; illness, holiday and home-office days do not count.';
-
-  @override
-  String get taxDeNumberError => 'Enter a whole number of 0 or more.';
-
-  @override
-  String get taxDeAmountError => 'Enter the amount as a number, such as 4800.';
 
   @override
   String get taxDeBundeslandBw => 'Baden-Württemberg';
@@ -4290,11 +4078,344 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taxDeBundeslandTh => 'Thuringia';
 
   @override
-  String get taxDeSmallBusinessExemption => 'Small business VAT exemption';
+  String get taxProfileCountError => 'Enter a whole number of 0 or more.';
 
   @override
-  String get taxDeSmallBusinessExemptionHint =>
+  String get taxProfileAmountError =>
+      'Enter the amount as a number, such as 4800.';
+
+  @override
+  String get taxQCommonEntityKind => 'Entity kind';
+
+  @override
+  String get taxQCommonEntityKindIndividual => 'Individual';
+
+  @override
+  String get taxQCommonEntityKindSoleTrader => 'Sole trader';
+
+  @override
+  String get taxQCommonEntityKindCompany => 'Company';
+
+  @override
+  String get taxQCommonSalesTaxRegistered => 'Registered for sales tax or VAT';
+
+  @override
+  String get taxQCommonSalesTaxRegisteredHelp =>
+      'Turn this on if you charge and reclaim sales tax on these books.';
+
+  @override
+  String get taxQCommonTaxResident => 'Tax resident of this country';
+
+  @override
+  String get taxQCommonTaxResidentHelp =>
+      'Residence decides which rules apply to you. Tax-saving ideas wait until you answer this.';
+
+  @override
+  String get taxQCommonUsPerson => 'US person';
+
+  @override
+  String get taxQCommonUsPersonHelp =>
+      'US citizens, green card holders and people who meet the substantial presence test owe US filings wherever they live.';
+
+  @override
+  String get taxQGbScottishTaxpayer => 'Scottish taxpayer';
+
+  @override
+  String get taxQGbScottishTaxpayerHelp => 'Use Scottish income tax rates.';
+
+  @override
+  String get taxQGbStudentLoanPlan => 'Student loan plan';
+
+  @override
+  String get taxQGbStudentLoanPlanPlan1 => 'Plan 1';
+
+  @override
+  String get taxQGbStudentLoanPlanPlan2 => 'Plan 2';
+
+  @override
+  String get taxQGbStudentLoanPlanPlan4 => 'Plan 4';
+
+  @override
+  String get taxQGbStudentLoanPlanPlan5 => 'Plan 5';
+
+  @override
+  String get taxQGbStudentLoanPlanNone => 'No student loan';
+
+  @override
+  String get taxQGbPostgraduateLoan => 'Postgraduate loan';
+
+  @override
+  String get taxQGbPostgraduateLoanHelp =>
+      'Repay 6% of income above £21,000 on top of any undergraduate plan.';
+
+  @override
+  String get taxQGbAccountingPeriodEnd => 'Accounting period end';
+
+  @override
+  String get taxQGbAccountingPeriodEndHelp =>
+      'The company\'s year end. Corporation Tax runs on these periods, not the tax year.';
+
+  @override
+  String get taxQGbAccountingPeriodMonth => 'Month';
+
+  @override
+  String get taxQGbAccountingPeriodDay => 'Day';
+
+  @override
+  String get taxQGbAssociatedCompanies => 'Associated companies';
+
+  @override
+  String get taxQGbAssociatedCompaniesHelp =>
+      'Other companies under common control. Each one divides the £50,000 and £250,000 limits.';
+
+  @override
+  String get taxQUsFilingStatus => 'Filing status';
+
+  @override
+  String get taxQUsFilingStatusSingle => 'Single';
+
+  @override
+  String get taxQUsFilingStatusMarriedFilingJointly => 'Married filing jointly';
+
+  @override
+  String get taxQUsFilingStatusMarriedFilingSeparately =>
+      'Married filing separately';
+
+  @override
+  String get taxQUsFilingStatusHeadOfHousehold => 'Head of household';
+
+  @override
+  String get taxQUsFilingStatusQualifyingSurvivingSpouse =>
+      'Qualifying surviving spouse';
+
+  @override
+  String get taxQUsTaxpayerHasSsn => 'You have an SSN';
+
+  @override
+  String get taxQUsTaxpayerHasSsnHelp =>
+      'Required for the tips, overtime, and senior deductions.';
+
+  @override
+  String get taxQUsSpouseHasSsn => 'Your spouse has an SSN';
+
+  @override
+  String get taxQUsSpouseHasSsnHelp =>
+      'Required for the tips, overtime, and senior deductions.';
+
+  @override
+  String get taxQUsTaxpayer65OrOlder => 'You are 65 or older';
+
+  @override
+  String get taxQUsSpouse65OrOlder => 'Your spouse is 65 or older';
+
+  @override
+  String get taxQUsDependentsUnder17 => 'Dependents under 17';
+
+  @override
+  String get taxQUsDependentsUnder17Help =>
+      'The number of people you claim as dependents.';
+
+  @override
+  String get taxQUsDependents17OrOlder => 'Dependents 17 or older';
+
+  @override
+  String get taxQUsDependents17OrOlderHelp =>
+      'The number of people you claim as dependents.';
+
+  @override
+  String get taxQUsDependentsHaveSsn => 'All dependents have an SSN';
+
+  @override
+  String get taxQUsDependentsHaveSsnHelp =>
+      'Only dependents with an SSN valid for employment earn a credit.';
+
+  @override
+  String get taxQUsForeignEarnedIncomeExclusion =>
+      'Foreign earned income exclusion';
+
+  @override
+  String get taxQUsForeignEarnedIncomeExclusionHelp =>
+      'The amount you excluded on Form 2555 this year. It is added back when the investment income and deduction phase-outs check your income.';
+
+  @override
+  String get taxQUsSpecifiedServiceTrade => 'Specified service business';
+
+  @override
+  String get taxQUsSpecifiedServiceTradeHelp =>
+      'Consulting, law, health and similar businesses phase out of the qualified business income deduction.';
+
+  @override
+  String get taxQUsHomeOfficeMethod => 'Home office method';
+
+  @override
+  String get taxQUsHomeOfficeMethodSimplified =>
+      'Simplified (\$5 per square foot)';
+
+  @override
+  String get taxQUsHomeOfficeMethodRegular => 'Regular (Form 8829)';
+
+  @override
+  String get taxQNgAnnualRent => 'Annual rent paid';
+
+  @override
+  String get taxQNgAnnualRentHelp =>
+      'Used for rent relief under the Nigeria Tax Act.';
+
+  @override
+  String get taxQNgSmallCompanyCeiling => 'Small company turnover ceiling';
+
+  @override
+  String get taxQNgSmallCompanyCeilingHelp =>
+      'The two Nigerian Acts disagree: the Nigeria Tax Act gazette says N50,000,000 and the Administration Act says N100,000,000. Pick the figure that should decide your company\'s small company status.';
+
+  @override
+  String get taxQNgSmallCompanyCeilingGazette =>
+      'N50,000,000 (Nigeria Tax Act gazette)';
+
+  @override
+  String get taxQNgSmallCompanyCeilingIntended =>
+      'N100,000,000 (Administration Act)';
+
+  @override
+  String get taxQNgMneGroupMember => 'Member of a multinational group';
+
+  @override
+  String get taxQNgMneGroupMemberHelp =>
+      'Multinational group members may owe the 15% minimum effective tax rate whatever their turnover.';
+
+  @override
+  String get taxQDeJointAssessment => 'Joint assessment';
+
+  @override
+  String get taxQDeJointAssessmentHelp =>
+      'Spouses assessed together with income splitting.';
+
+  @override
+  String get taxQDeSpouseEmployed => 'Spouse also earns wages';
+
+  @override
+  String get taxQDeSpouseEmployedHelp =>
+      'Each employed spouse claims their own worker\'s flat-rate allowance and files their own Anlage N.';
+
+  @override
+  String get taxQDeChurchTax => 'Church tax';
+
+  @override
+  String get taxQDeChurchTaxHelp => 'Kirchensteuer on top of income tax.';
+
+  @override
+  String get taxQDeChurchState => 'State (Land) of the church tax';
+
+  @override
+  String get taxQDeChurchStateHelp =>
+      'Sets the rate: 8% in Bavaria and Baden-Württemberg, 9% elsewhere. Leave it out to assume 9%.';
+
+  @override
+  String get taxQDeChurchStateBadenWuerttemberg => 'Baden-Württemberg';
+
+  @override
+  String get taxQDeChurchStateBayern => 'Bavaria';
+
+  @override
+  String get taxQDeChurchStateBerlin => 'Berlin';
+
+  @override
+  String get taxQDeChurchStateBrandenburg => 'Brandenburg';
+
+  @override
+  String get taxQDeChurchStateBremen => 'Bremen';
+
+  @override
+  String get taxQDeChurchStateHamburg => 'Hamburg';
+
+  @override
+  String get taxQDeChurchStateHessen => 'Hesse';
+
+  @override
+  String get taxQDeChurchStateMecklenburgVorpommern => 'Mecklenburg-Vorpommern';
+
+  @override
+  String get taxQDeChurchStateNiedersachsen => 'Lower Saxony';
+
+  @override
+  String get taxQDeChurchStateNordrheinWestfalen => 'North Rhine-Westphalia';
+
+  @override
+  String get taxQDeChurchStateRheinlandPfalz => 'Rhineland-Palatinate';
+
+  @override
+  String get taxQDeChurchStateSaarland => 'Saarland';
+
+  @override
+  String get taxQDeChurchStateSachsen => 'Saxony';
+
+  @override
+  String get taxQDeChurchStateSachsenAnhalt => 'Saxony-Anhalt';
+
+  @override
+  String get taxQDeChurchStateSchleswigHolstein => 'Schleswig-Holstein';
+
+  @override
+  String get taxQDeChurchStateThueringen => 'Thuringia';
+
+  @override
+  String get taxQDeChurchStateNone => 'Not specified (assume 9%)';
+
+  @override
+  String get taxQDeChildren => 'Children (Kindergeld)';
+
+  @override
+  String get taxQDeChildrenHelp =>
+      'Children you receive Kindergeld for; a full twelve months per child is assumed.';
+
+  @override
+  String get taxQDeStatutoryPension => 'Statutory pension contributions';
+
+  @override
+  String get taxQDeStatutoryPensionHelp =>
+      'Employee and employer share per year; they reduce the Rürup (Basisrente) deduction.';
+
+  @override
+  String get taxQDeCommuteKm => 'Commute: one-way distance (km)';
+
+  @override
+  String get taxQDeCommuteKmHelp =>
+      'Full kilometres to your first workplace, shortest route (Anlage N).';
+
+  @override
+  String get taxQDeCommuteDays => 'Commute: days travelled';
+
+  @override
+  String get taxQDeCommuteDaysHelp =>
+      'Days you actually visited the workplace; illness, holiday and home-office days do not count.';
+
+  @override
+  String get taxQDeSmallBusinessExemption => 'Small business VAT exemption';
+
+  @override
+  String get taxQDeSmallBusinessExemptionHelp =>
       'Kleinunternehmerregelung: no VAT charged or reclaimed.';
+
+  @override
+  String get taxQDeEinkunftsArt => 'Type of self-employment';
+
+  @override
+  String get taxQDeEinkunftsArtHelp =>
+      'Freiberufler owe no trade tax and file Anlage S; Gewerbetreibende owe Gewerbesteuer and file Anlage G.';
+
+  @override
+  String get taxQDeEinkunftsArtFreiberuflich =>
+      'Freiberufler (liberal profession)';
+
+  @override
+  String get taxQDeEinkunftsArtGewerblich => 'Gewerbetreibender (trade)';
+
+  @override
+  String get taxQDePriorTurnover => 'Previous year\'s turnover';
+
+  @override
+  String get taxQDePriorTurnoverHelp =>
+      'Total turnover of last year; it decides the Kleinunternehmer test (at most €25,000 prior year, €100,000 this year).';
 
   @override
   String get taxLinkedBudget => 'Linked personal budget';
