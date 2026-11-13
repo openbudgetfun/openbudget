@@ -6228,6 +6228,306 @@ abstract class AppLocalizations {
   /// **'Guidance'**
   String get taxOpportunitySource;
 
+  /// Heading of the card that offers the tax summary download.
+  ///
+  /// In en, this message translates to:
+  /// **'Take it to your accountant'**
+  String get taxExportTitle;
+
+  /// No description provided for @taxExportMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A ZIP with this tax year\'s summary and every line behind it. The download link works for 10 minutes.'**
+  String get taxExportMessage;
+
+  /// Button that makes a signed download link for the tax summary and opens it.
+  ///
+  /// In en, this message translates to:
+  /// **'Export tax summary'**
+  String get taxExportButton;
+
+  /// Spoken while the export button is busy.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing your download'**
+  String get taxExportPreparing;
+
+  /// No description provided for @taxExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t prepare your download. Check your connection and try again.'**
+  String get taxExportFailed;
+
+  /// No description provided for @taxExportOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your download is ready, but this device wouldn\'t open it. Try again in a moment.'**
+  String get taxExportOpenFailed;
+
+  /// Heading of the panel shown for a country without a tax rule pack.
+  ///
+  /// In en, this message translates to:
+  /// **'No full tax rules for {country} yet'**
+  String taxUniversalIntroTitle(String country);
+
+  /// No description provided for @taxUniversalIntroMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget can\'t work out what you owe here yet. It can show your tax year, the rates we know about, and a summary of your records to hand to an accountant.'**
+  String get taxUniversalIntroMessage;
+
+  /// The tax year, written as the country writes it, such as 2026 or 2026/27.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax year {label}'**
+  String taxUniversalYearLabel(String label);
+
+  /// The first and last day of the tax year.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} to {end}'**
+  String taxUniversalYearPeriod(String start, String end);
+
+  /// No description provided for @taxUniversalYearLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding your tax year'**
+  String get taxUniversalYearLoading;
+
+  /// No description provided for @taxSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your year so far'**
+  String get taxSummaryTitle;
+
+  /// No description provided for @taxSummaryIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income this tax year'**
+  String get taxSummaryIncome;
+
+  /// No description provided for @taxSummaryExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get taxSummaryExpenses;
+
+  /// No description provided for @taxSummaryReliefs.
+  ///
+  /// In en, this message translates to:
+  /// **'Reliefs'**
+  String get taxSummaryReliefs;
+
+  /// No description provided for @taxSummaryTaxPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax already paid'**
+  String get taxSummaryTaxPaid;
+
+  /// A tile in the summary; the placeholder is the country's indirect tax, such as VAT.
+  ///
+  /// In en, this message translates to:
+  /// **'{tax} collected'**
+  String taxSummarySalesTaxCollected(String tax);
+
+  /// A tile in the summary; the placeholder is the country's indirect tax, such as VAT.
+  ///
+  /// In en, this message translates to:
+  /// **'{tax} paid'**
+  String taxSummarySalesTaxPaid(String tax);
+
+  /// No description provided for @taxSummaryLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your summary.'**
+  String get taxSummaryLoadError;
+
+  /// No description provided for @taxSummaryDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'This summarises what you\'ve recorded in OpenBudget. It is not a tax return. Guidance only, not tax advice. Check figures with a qualified adviser before filing.'**
+  String get taxSummaryDisclaimer;
+
+  /// Heading over a country's indirect-tax rates.
+  ///
+  /// In en, this message translates to:
+  /// **'{tax} rates'**
+  String taxIndirectTitle(String tax);
+
+  /// No description provided for @taxIndirectKindVat.
+  ///
+  /// In en, this message translates to:
+  /// **'VAT'**
+  String get taxIndirectKindVat;
+
+  /// No description provided for @taxIndirectKindGst.
+  ///
+  /// In en, this message translates to:
+  /// **'GST'**
+  String get taxIndirectKindGst;
+
+  /// No description provided for @taxIndirectKindSalesTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales tax'**
+  String get taxIndirectKindSalesTax;
+
+  /// No description provided for @taxIndirectKindConsumptionTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Consumption tax'**
+  String get taxIndirectKindConsumptionTax;
+
+  /// No description provided for @taxIndirectKindNone.
+  ///
+  /// In en, this message translates to:
+  /// **'VAT or sales tax'**
+  String get taxIndirectKindNone;
+
+  /// No description provided for @taxIndirectLocalName.
+  ///
+  /// In en, this message translates to:
+  /// **'Known locally as {name}'**
+  String taxIndirectLocalName(String name);
+
+  /// No description provided for @taxIndirectNone.
+  ///
+  /// In en, this message translates to:
+  /// **'{country} doesn\'t charge VAT or sales tax.'**
+  String taxIndirectNone(String country);
+
+  /// No description provided for @taxIndirectUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'We haven\'t looked up the VAT or sales tax rates for this country yet.'**
+  String get taxIndirectUnknown;
+
+  /// No description provided for @taxIndirectNoRateForYear.
+  ///
+  /// In en, this message translates to:
+  /// **'We don\'t have a rate for this tax year.'**
+  String get taxIndirectNoRateForYear;
+
+  /// A rate with its percent sign; the placeholder is already written in the reader's decimal style.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}%'**
+  String taxRatePercent(String rate);
+
+  /// No description provided for @taxRateAppliesTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to {scope}'**
+  String taxRateAppliesTo(String scope);
+
+  /// No description provided for @taxRateSince.
+  ///
+  /// In en, this message translates to:
+  /// **'In force since {date}'**
+  String taxRateSince(String date);
+
+  /// Short link text for a figure's source: the source's website, such as afriref.dev.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {name}'**
+  String taxRateSource(String name);
+
+  /// Spoken label of the link that opens a rate's source.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source: {title}'**
+  String taxRateSourceOpen(String title);
+
+  /// Heading of the card with the turnover above which a business must register for VAT or sales tax.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration threshold'**
+  String get taxRegistrationThresholdTitle;
+
+  /// What a registration threshold is counted over, said after the amount.
+  ///
+  /// In en, this message translates to:
+  /// **'{period, select, annualTurnover{a year in turnover} rolling12Months{in turnover over any 12 months} calendarYear{in turnover in a calendar year} fourConsecutiveQuarters{in turnover over four quarters in a row} annualTurnoverGoodsOnly{a year in turnover from goods} annualTurnoverSmallBusinessExclusion{a year in turnover, with a small-business exclusion} other{in turnover}}'**
+  String taxRegistrationThresholdPeriod(String period);
+
+  /// Badge on a figure taken from the authority's own publication.
+  ///
+  /// In en, this message translates to:
+  /// **'From the tax authority'**
+  String get taxGradePrimaryBadge;
+
+  /// Badge on a figure worked out from other facts, not published as stated.
+  ///
+  /// In en, this message translates to:
+  /// **'Our best estimate'**
+  String get taxGradeInferredBadge;
+
+  /// Badge on a figure from general reference material.
+  ///
+  /// In en, this message translates to:
+  /// **'Background information'**
+  String get taxGradeBackgroundBadge;
+
+  /// No description provided for @taxRegionalRatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rates by region'**
+  String get taxRegionalRatesTitle;
+
+  /// No description provided for @taxRegionalRatesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Some regions add their own tax on top.'**
+  String get taxRegionalRatesHint;
+
+  /// No description provided for @taxAuthorityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax authority'**
+  String get taxAuthorityTitle;
+
+  /// Spoken label and tooltip of the link to a tax authority's website.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the {name} website'**
+  String taxAuthorityOpen(String name);
+
+  /// No description provided for @taxLinkOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t open that page. Try again in a moment.'**
+  String get taxLinkOpenFailed;
+
+  /// First line of the summary card under What we could not verify: how many of the shown figures are not from the tax authority itself.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One of the figures above comes from a secondary source, not the tax authority\'s own pages.} other{{count} of the figures above come from secondary sources, not the tax authority\'s own pages.}}'**
+  String taxUniversalCaveatSecondary(int count);
+
+  /// No description provided for @taxUniversalCaveatAssumed.
+  ///
+  /// In en, this message translates to:
+  /// **'The tax year and, for companies, the year-end date are defaults OpenBudget assumed for {country}. Check them with the tax authority before you file.'**
+  String taxUniversalCaveatAssumed(String country);
+
+  /// No description provided for @taxResearchNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Research notes'**
+  String get taxResearchNotesTitle;
+
+  /// No description provided for @taxResearchNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The notes behind these figures, as our researchers wrote them.'**
+  String get taxResearchNotesHint;
+
+  /// No description provided for @taxUniversalVerifiedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Country facts checked on {date}'**
+  String taxUniversalVerifiedOn(String date);
+
   /// No description provided for @taxHowWorkedOutTitle.
   ///
   /// In en, this message translates to:

@@ -3693,6 +3693,221 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taxOpportunitySource => 'Guidance';
 
   @override
+  String get taxExportTitle => 'Take it to your accountant';
+
+  @override
+  String get taxExportMessage =>
+      'A ZIP with this tax year\'s summary and every line behind it. The download link works for 10 minutes.';
+
+  @override
+  String get taxExportButton => 'Export tax summary';
+
+  @override
+  String get taxExportPreparing => 'Preparing your download';
+
+  @override
+  String get taxExportFailed =>
+      'We couldn\'t prepare your download. Check your connection and try again.';
+
+  @override
+  String get taxExportOpenFailed =>
+      'Your download is ready, but this device wouldn\'t open it. Try again in a moment.';
+
+  @override
+  String taxUniversalIntroTitle(String country) {
+    return 'No full tax rules for $country yet';
+  }
+
+  @override
+  String get taxUniversalIntroMessage =>
+      'OpenBudget can\'t work out what you owe here yet. It can show your tax year, the rates we know about, and a summary of your records to hand to an accountant.';
+
+  @override
+  String taxUniversalYearLabel(String label) {
+    return 'Tax year $label';
+  }
+
+  @override
+  String taxUniversalYearPeriod(String start, String end) {
+    return '$start to $end';
+  }
+
+  @override
+  String get taxUniversalYearLoading => 'Finding your tax year';
+
+  @override
+  String get taxSummaryTitle => 'Your year so far';
+
+  @override
+  String get taxSummaryIncome => 'Income this tax year';
+
+  @override
+  String get taxSummaryExpenses => 'Expenses';
+
+  @override
+  String get taxSummaryReliefs => 'Reliefs';
+
+  @override
+  String get taxSummaryTaxPaid => 'Tax already paid';
+
+  @override
+  String taxSummarySalesTaxCollected(String tax) {
+    return '$tax collected';
+  }
+
+  @override
+  String taxSummarySalesTaxPaid(String tax) {
+    return '$tax paid';
+  }
+
+  @override
+  String get taxSummaryLoadError => 'We couldn\'t load your summary.';
+
+  @override
+  String get taxSummaryDisclaimer =>
+      'This summarises what you\'ve recorded in OpenBudget. It is not a tax return. Guidance only, not tax advice. Check figures with a qualified adviser before filing.';
+
+  @override
+  String taxIndirectTitle(String tax) {
+    return '$tax rates';
+  }
+
+  @override
+  String get taxIndirectKindVat => 'VAT';
+
+  @override
+  String get taxIndirectKindGst => 'GST';
+
+  @override
+  String get taxIndirectKindSalesTax => 'Sales tax';
+
+  @override
+  String get taxIndirectKindConsumptionTax => 'Consumption tax';
+
+  @override
+  String get taxIndirectKindNone => 'VAT or sales tax';
+
+  @override
+  String taxIndirectLocalName(String name) {
+    return 'Known locally as $name';
+  }
+
+  @override
+  String taxIndirectNone(String country) {
+    return '$country doesn\'t charge VAT or sales tax.';
+  }
+
+  @override
+  String get taxIndirectUnknown =>
+      'We haven\'t looked up the VAT or sales tax rates for this country yet.';
+
+  @override
+  String get taxIndirectNoRateForYear =>
+      'We don\'t have a rate for this tax year.';
+
+  @override
+  String taxRatePercent(String rate) {
+    return '$rate%';
+  }
+
+  @override
+  String taxRateAppliesTo(String scope) {
+    return 'Applies to $scope';
+  }
+
+  @override
+  String taxRateSince(String date) {
+    return 'In force since $date';
+  }
+
+  @override
+  String taxRateSource(String name) {
+    return 'Source: $name';
+  }
+
+  @override
+  String taxRateSourceOpen(String title) {
+    return 'Open source: $title';
+  }
+
+  @override
+  String get taxRegistrationThresholdTitle => 'Registration threshold';
+
+  @override
+  String taxRegistrationThresholdPeriod(String period) {
+    String _temp0 = intl.Intl.selectLogic(
+      period,
+      {
+        'annualTurnover': 'a year in turnover',
+        'rolling12Months': 'in turnover over any 12 months',
+        'calendarYear': 'in turnover in a calendar year',
+        'fourConsecutiveQuarters': 'in turnover over four quarters in a row',
+        'annualTurnoverGoodsOnly': 'a year in turnover from goods',
+        'annualTurnoverSmallBusinessExclusion':
+            'a year in turnover, with a small-business exclusion',
+        'other': 'in turnover',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get taxGradePrimaryBadge => 'From the tax authority';
+
+  @override
+  String get taxGradeInferredBadge => 'Our best estimate';
+
+  @override
+  String get taxGradeBackgroundBadge => 'Background information';
+
+  @override
+  String get taxRegionalRatesTitle => 'Rates by region';
+
+  @override
+  String get taxRegionalRatesHint => 'Some regions add their own tax on top.';
+
+  @override
+  String get taxAuthorityTitle => 'Tax authority';
+
+  @override
+  String taxAuthorityOpen(String name) {
+    return 'Open the $name website';
+  }
+
+  @override
+  String get taxLinkOpenFailed =>
+      'We couldn\'t open that page. Try again in a moment.';
+
+  @override
+  String taxUniversalCaveatSecondary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count of the figures above come from secondary sources, not the tax authority\'s own pages.',
+      one: 'One of the figures above comes from a secondary source, not the tax authority\'s own pages.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String taxUniversalCaveatAssumed(String country) {
+    return 'The tax year and, for companies, the year-end date are defaults OpenBudget assumed for $country. Check them with the tax authority before you file.';
+  }
+
+  @override
+  String get taxResearchNotesTitle => 'Research notes';
+
+  @override
+  String get taxResearchNotesHint =>
+      'The notes behind these figures, as our researchers wrote them.';
+
+  @override
+  String taxUniversalVerifiedOn(String date) {
+    return 'Country facts checked on $date';
+  }
+
+  @override
   String get taxHowWorkedOutTitle => 'How this was worked out';
 
   @override
