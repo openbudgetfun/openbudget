@@ -309,6 +309,19 @@ class _TaxReportBody extends HookConsumerWidget {
                         currency: report.currencyCode,
                       ),
                   ],
+                  if (report.caveats.isNotEmpty) ...[
+                    ObSectionHeader(
+                      title: l10n.taxUnverifiedTitle,
+                      padding: const EdgeInsets.fromLTRB(
+                        0,
+                        SpacingTokens.lg,
+                        0,
+                        SpacingTokens.xs,
+                      ),
+                    ),
+                    for (final caveat in report.caveats)
+                      _CaveatCard(caveat: caveat),
+                  ],
                   const SizedBox(height: SpacingTokens.md),
                   _HowWorkedOutCard(report: report),
                 ],
@@ -704,6 +717,19 @@ class _ReportLinesCard extends HookWidget {
                                   color: palette.ink,
                                 ),
                               ),
+                              if (_isSecondaryFigure(report, line))
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: SpacingTokens.xs,
+                                  ),
+                                  child: ObToneChip(
+                                    key: const Key(
+                                      'tax-secondary-source-badge',
+                                    ),
+                                    label: l10n.taxSecondarySourceBadge,
+                                    tone: ObTone.review,
+                                  ),
+                                ),
                               if (line.reportReference case final reference?)
                                 Text(
                                   reference,
@@ -734,6 +760,17 @@ class _ReportLinesCard extends HookWidget {
             ),
     );
   }
+}
+
+/// Whether [line] presents a figure whose evidence grade is secondary.
+bool _isSecondaryFigure(TaxReportView report, TaxReportLineView line) {
+  final figureId = line.figureId;
+  if (figureId == null) {
+    return false;
+  }
+  return report.figures.any(
+    (figure) => figure.id == figureId && figure.grade == 'secondary',
+  );
 }
 
 class _OpportunityCard extends HookWidget {
@@ -804,6 +841,58 @@ class _OpportunityCard extends HookWidget {
           SelectableText(
             opportunity.source,
             style: theme.textTheme.bodySmall?.copyWith(color: palette.brand),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One "what we could not verify" entry, from the rule pack's caveat data.
+class _CaveatCard extends HookWidget {
+  const _CaveatCard({required this.caveat});
+
+  final TaxRuleCaveatView caveat;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+
+    return ObCard(
+      key: Key('tax-caveat-${caveat.id}'),
+      margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SkribbleIcon(
+            data: OpenBudgetIcons.warning,
+            size: 20,
+            color: palette.mutedInk,
+          ),
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  caveat.text,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: palette.ink,
+                  ),
+                ),
+                if (caveat.announced) ...[
+                  const SizedBox(height: SpacingTokens.xs),
+                  ObToneChip(
+                    key: const Key('tax-announced-badge'),
+                    label: l10n.taxAnnouncedBadge,
+                    tone: ObTone.review,
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
       ),

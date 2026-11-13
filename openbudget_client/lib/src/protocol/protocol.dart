@@ -168,11 +168,13 @@ import 'reports/spending_row.dart' as _ikppksh7;
 import 'settings/user_settings.dart' as _i99f9doz;
 import 'tax/tax_band_slice_view.dart' as _ic4zfx3b;
 import 'tax/tax_category_view.dart' as _iv5oayw3;
+import 'tax/tax_figure_view.dart' as _ixm9q9lk;
 import 'tax/tax_liability_view.dart' as _ivss6b81;
 import 'tax/tax_opportunity_view.dart' as _iuft4v7q;
 import 'tax/tax_profile.dart' as _i20z9jax;
 import 'tax/tax_report_line_view.dart' as _i6llsezf;
 import 'tax/tax_report_view.dart' as _inb54q20;
+import 'tax/tax_rule_caveat_view.dart' as _i97pej5a;
 import 'tax/tax_summary_category_total_view.dart' as _ilbx4erh;
 import 'tax/tax_summary_fx_note_view.dart' as _iok5qj2e;
 import 'tax/tax_summary_sales_tax_quarter_view.dart' as _it9yyajv;
@@ -291,11 +293,13 @@ export 'reports/spending_row.dart';
 export 'settings/user_settings.dart';
 export 'tax/tax_band_slice_view.dart';
 export 'tax/tax_category_view.dart';
+export 'tax/tax_figure_view.dart';
 export 'tax/tax_liability_view.dart';
 export 'tax/tax_opportunity_view.dart';
 export 'tax/tax_profile.dart';
 export 'tax/tax_report_line_view.dart';
 export 'tax/tax_report_view.dart';
+export 'tax/tax_rule_caveat_view.dart';
 export 'tax/tax_summary_category_total_view.dart';
 export 'tax/tax_summary_fx_note_view.dart';
 export 'tax/tax_summary_sales_tax_quarter_view.dart';
@@ -429,11 +433,13 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i99f9doz.UserSettings>,
           _isc.getType<_ic4zfx3b.TaxBandSliceView>,
           _isc.getType<_iv5oayw3.TaxCategoryView>,
+          _isc.getType<_ixm9q9lk.TaxFigureView>,
           _isc.getType<_ivss6b81.TaxLiabilityView>,
           _isc.getType<_iuft4v7q.TaxOpportunityView>,
           _isc.getType<_i20z9jax.TaxProfileRecord>,
           _isc.getType<_i6llsezf.TaxReportLineView>,
           _isc.getType<_inb54q20.TaxReportView>,
+          _isc.getType<_i97pej5a.TaxRuleCaveatView>,
           _isc.getType<_ilbx4erh.TaxSummaryCategoryTotalView>,
           _isc.getType<_iok5qj2e.TaxSummaryFxNoteView>,
           _isc.getType<_it9yyajv.TaxSummarySalesTaxQuarterView>,
@@ -552,11 +558,13 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i99f9doz.UserSettings?>,
           _isc.getType<_ic4zfx3b.TaxBandSliceView?>,
           _isc.getType<_iv5oayw3.TaxCategoryView?>,
+          _isc.getType<_ixm9q9lk.TaxFigureView?>,
           _isc.getType<_ivss6b81.TaxLiabilityView?>,
           _isc.getType<_iuft4v7q.TaxOpportunityView?>,
           _isc.getType<_i20z9jax.TaxProfileRecord?>,
           _isc.getType<_i6llsezf.TaxReportLineView?>,
           _isc.getType<_inb54q20.TaxReportView?>,
+          _isc.getType<_i97pej5a.TaxRuleCaveatView?>,
           _isc.getType<_ilbx4erh.TaxSummaryCategoryTotalView?>,
           _isc.getType<_iok5qj2e.TaxSummaryFxNoteView?>,
           _isc.getType<_it9yyajv.TaxSummarySalesTaxQuarterView?>,
@@ -604,6 +612,8 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<List<_ic4zfx3b.TaxBandSliceView>>,
           _isc.getType<List<_i6llsezf.TaxReportLineView>>,
           _isc.getType<List<_ivss6b81.TaxLiabilityView>>,
+          _isc.getType<List<_i97pej5a.TaxRuleCaveatView>>,
+          _isc.getType<List<_ixm9q9lk.TaxFigureView>>,
           _isc.getType<Map<String, String>>,
           _isc.getType<List<_iuft4v7q.TaxOpportunityView>>,
           _isc.getType<List<_ilbx4erh.TaxSummaryCategoryTotalView>>,
@@ -748,11 +758,13 @@ class Protocol extends _isc.SerializationManager
           'UserSettings',
           'TaxBandSliceView',
           'TaxCategoryView',
+          'TaxFigureView',
           'TaxLiabilityView',
           'TaxOpportunityView',
           'TaxProfileRecord',
           'TaxReportLineView',
           'TaxReportView',
+          'TaxRuleCaveatView',
           'TaxSummaryCategoryTotalView',
           'TaxSummaryFxNoteView',
           'TaxSummarySalesTaxQuarterView',
@@ -1064,6 +1076,9 @@ class Protocol extends _isc.SerializationManager
     if (t == _iv5oayw3.TaxCategoryView) {
       return _iv5oayw3.TaxCategoryView.fromJson(data) as T;
     }
+    if (t == _ixm9q9lk.TaxFigureView) {
+      return _ixm9q9lk.TaxFigureView.fromJson(data) as T;
+    }
     if (t == _ivss6b81.TaxLiabilityView) {
       return _ivss6b81.TaxLiabilityView.fromJson(data) as T;
     }
@@ -1078,6 +1093,9 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _inb54q20.TaxReportView) {
       return _inb54q20.TaxReportView.fromJson(data) as T;
+    }
+    if (t == _i97pej5a.TaxRuleCaveatView) {
+      return _i97pej5a.TaxRuleCaveatView.fromJson(data) as T;
     }
     if (t == _ilbx4erh.TaxSummaryCategoryTotalView) {
       return _ilbx4erh.TaxSummaryCategoryTotalView.fromJson(data) as T;
@@ -1536,6 +1554,10 @@ class Protocol extends _isc.SerializationManager
       return (data != null ? _iv5oayw3.TaxCategoryView.fromJson(data) : null)
           as T;
     }
+    if (t == _isc.getType<_ixm9q9lk.TaxFigureView?>()) {
+      return (data != null ? _ixm9q9lk.TaxFigureView.fromJson(data) : null)
+          as T;
+    }
     if (t == _isc.getType<_ivss6b81.TaxLiabilityView?>()) {
       return (data != null ? _ivss6b81.TaxLiabilityView.fromJson(data) : null)
           as T;
@@ -1554,6 +1576,10 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _isc.getType<_inb54q20.TaxReportView?>()) {
       return (data != null ? _inb54q20.TaxReportView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i97pej5a.TaxRuleCaveatView?>()) {
+      return (data != null ? _i97pej5a.TaxRuleCaveatView.fromJson(data) : null)
           as T;
     }
     if (t == _isc.getType<_ilbx4erh.TaxSummaryCategoryTotalView?>()) {
@@ -1770,6 +1796,18 @@ class Protocol extends _isc.SerializationManager
     if (t == List<_ivss6b81.TaxLiabilityView>) {
       return (data as List)
               .map((e) => deserialize<_ivss6b81.TaxLiabilityView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i97pej5a.TaxRuleCaveatView>) {
+      return (data as List)
+              .map((e) => deserialize<_i97pej5a.TaxRuleCaveatView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ixm9q9lk.TaxFigureView>) {
+      return (data as List)
+              .map((e) => deserialize<_ixm9q9lk.TaxFigureView>(e))
               .toList()
           as T;
     }
@@ -2200,11 +2238,13 @@ class Protocol extends _isc.SerializationManager
       _i99f9doz.UserSettings => 'UserSettings',
       _ic4zfx3b.TaxBandSliceView => 'TaxBandSliceView',
       _iv5oayw3.TaxCategoryView => 'TaxCategoryView',
+      _ixm9q9lk.TaxFigureView => 'TaxFigureView',
       _ivss6b81.TaxLiabilityView => 'TaxLiabilityView',
       _iuft4v7q.TaxOpportunityView => 'TaxOpportunityView',
       _i20z9jax.TaxProfileRecord => 'TaxProfileRecord',
       _i6llsezf.TaxReportLineView => 'TaxReportLineView',
       _inb54q20.TaxReportView => 'TaxReportView',
+      _i97pej5a.TaxRuleCaveatView => 'TaxRuleCaveatView',
       _ilbx4erh.TaxSummaryCategoryTotalView => 'TaxSummaryCategoryTotalView',
       _iok5qj2e.TaxSummaryFxNoteView => 'TaxSummaryFxNoteView',
       _it9yyajv.TaxSummarySalesTaxQuarterView =>
@@ -2421,6 +2461,8 @@ class Protocol extends _isc.SerializationManager
         return 'TaxBandSliceView';
       case _iv5oayw3.TaxCategoryView():
         return 'TaxCategoryView';
+      case _ixm9q9lk.TaxFigureView():
+        return 'TaxFigureView';
       case _ivss6b81.TaxLiabilityView():
         return 'TaxLiabilityView';
       case _iuft4v7q.TaxOpportunityView():
@@ -2431,6 +2473,8 @@ class Protocol extends _isc.SerializationManager
         return 'TaxReportLineView';
       case _inb54q20.TaxReportView():
         return 'TaxReportView';
+      case _i97pej5a.TaxRuleCaveatView():
+        return 'TaxRuleCaveatView';
       case _ilbx4erh.TaxSummaryCategoryTotalView():
         return 'TaxSummaryCategoryTotalView';
       case _iok5qj2e.TaxSummaryFxNoteView():
@@ -2786,6 +2830,9 @@ class Protocol extends _isc.SerializationManager
     if (dataClassName == 'TaxCategoryView') {
       return deserialize<_iv5oayw3.TaxCategoryView>(data['data']);
     }
+    if (dataClassName == 'TaxFigureView') {
+      return deserialize<_ixm9q9lk.TaxFigureView>(data['data']);
+    }
     if (dataClassName == 'TaxLiabilityView') {
       return deserialize<_ivss6b81.TaxLiabilityView>(data['data']);
     }
@@ -2800,6 +2847,9 @@ class Protocol extends _isc.SerializationManager
     }
     if (dataClassName == 'TaxReportView') {
       return deserialize<_inb54q20.TaxReportView>(data['data']);
+    }
+    if (dataClassName == 'TaxRuleCaveatView') {
+      return deserialize<_i97pej5a.TaxRuleCaveatView>(data['data']);
     }
     if (dataClassName == 'TaxSummaryCategoryTotalView') {
       return deserialize<_ilbx4erh.TaxSummaryCategoryTotalView>(data['data']);

@@ -1833,6 +1833,18 @@
   "@taxPreviewBanner": {
     "description": "Banner on the tax overview when the country pack is still in preview."
   },
+  "taxUnverifiedTitle": "What we could not verify",
+  "@taxUnverifiedTitle": {
+    "description": "Section header for the rule-pack caveats the report touched."
+  },
+  "taxSecondarySourceBadge": "From a secondary source",
+  "@taxSecondarySourceBadge": {
+    "description": "Badge on a report line computed from a secondary-source figure."
+  },
+  "taxAnnouncedBadge": "Announced, not yet law",
+  "@taxAnnouncedBadge": {
+    "description": "Badge on a caveat describing a change that is announced but not enacted."
+  },
   "taxProfileTitle": "Tax profile",
   "taxProfileLoading": "Loading your tax profile",
   "taxProfileSave": "Save profile",

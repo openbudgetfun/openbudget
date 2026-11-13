@@ -223,6 +223,12 @@ TaxReport _companyReport(TaxInput input, _NgTaxTable table) {
     ).versionFor(TaxJurisdiction.ng),
     maturity: ngTaxManifest.maturity,
     coverage: ngTaxManifest.sections,
+    caveats: _ngRuleSetFor(input.year.startYear).caveatsTouching(
+      sections: {
+        TaxSection.companyReturn,
+        if (input.profile.salesTaxRegistered) TaxSection.indirectTax,
+      },
+    ),
     uncategorizedCount: position.uncategorized,
   );
 }

@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:openbudget_core/src/countries/country_info.dart';
 import 'package:openbudget_core/src/countries/tax_freshness.dart';
+import 'package:openbudget_core/src/tax/tax_model.dart';
+import 'package:openbudget_core/src/tax/tax_rules.dart';
 
 const _usage =
     'Lists the tax reference data due for a re-check '
@@ -18,8 +20,9 @@ const _usage =
     'work queue, not a build failure.';
 
 /// The command line over the freshness logic in `tax_freshness.dart`. It
-/// reads the country dataset, lists every `recheckBy` date on or before the
-/// as-of day with the overdue count, and exits 0 either way.
+/// reads the country dataset and every rule pack's caveats, lists each
+/// `recheckBy` date on or before the as-of day with the overdue count, and
+/// exits 0 either way.
 void main(List<String> args) {
   var asOf = todayAsCivilDate();
   var json = false;
@@ -45,10 +48,14 @@ void main(List<String> args) {
     }
   }
 
-  final items = countryRecheckItems(Countries.all);
-  // Task C2 (docs/tax-jurisdictions.md, 9.3) extends the report to rule-set
-  // caveats: map each TaxRuleCaveat.recheckBy onto a RecheckItem of a new
-  // kind and concatenate those items here.
+  final items = [
+    ...countryRecheckItems(Countries.all),
+    // Rule-set caveats join the countries (task C2): each caveat's
+    // recheckBy is a work-queue item in the same weekly report.
+    ...ruleSetCaveatRecheckItems(
+      TaxJurisdiction.values.map(TaxRules.forJurisdiction),
+    ),
+  ];
   final report = freshnessReport(items: items, asOf: asOf);
   stdout.writeln(
     json ? formatFreshnessJson(report) : formatFreshnessText(report),

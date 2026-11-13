@@ -359,6 +359,12 @@ TaxReport _soleTraderReport(TaxInput input, _NgTaxTable table) {
     ).versionFor(TaxJurisdiction.ng),
     maturity: ngTaxManifest.maturity,
     coverage: ngTaxManifest.sections,
+    caveats: _ngRuleSetFor(input.year.startYear).caveatsTouching(
+      sections: {
+        TaxSection.selfEmployment,
+        if (registered) TaxSection.indirectTax,
+      },
+    ),
     uncategorizedCount: position.uncategorized,
   );
 }

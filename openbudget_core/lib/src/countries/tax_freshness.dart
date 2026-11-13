@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:openbudget_core/src/countries/country_info.dart';
+import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 import 'package:openbudget_core/src/time/civil_date.dart';
 
 // Re-check scheduling for the tax reference data (docs/tax-jurisdictions.md,
@@ -14,9 +15,9 @@ import 'package:openbudget_core/src/time/civil_date.dart';
 
 /// One item in the tax reference data that must be re-checked by a date.
 ///
-/// Countries are the only kind today. Task C2 (docs/tax-jurisdictions.md,
-/// 9.3) adds rule-set caveats, whose `TaxRuleCaveat.recheckBy` dates map onto
-/// this same shape and join the report input alongside the countries.
+/// Countries and rule-set caveats are the two kinds today: a caveat's
+/// `TaxRuleCaveat.recheckBy` maps onto this same shape and joins the
+/// report input alongside the countries.
 final class RecheckItem {
   const RecheckItem({
     required this.kind,
@@ -67,6 +68,33 @@ List<RecheckItem> countryRecheckItems(List<CountryInfo> countries) {
           recheckBy: recheckBy,
         ),
       );
+    }
+  }
+  return UnmodifiableListView(items);
+}
+
+/// The rule-set caveats of [packs], as re-check items (task C2,
+/// docs/tax-jurisdictions.md section 9.4).
+///
+/// One item per caveat per supported year, keyed
+/// `<cc>/<startYear>/<caveat id>` and verified with its rule set, so the
+/// weekly report joins them alongside the countries.
+List<RecheckItem> ruleSetCaveatRecheckItems(Iterable<TaxRulePack> packs) {
+  final items = <RecheckItem>[];
+  for (final pack in packs) {
+    for (final startYear in pack.supportedStartYears) {
+      final ruleSet = pack.ruleSet(startYear);
+      for (final caveat in ruleSet.caveats) {
+        items.add(
+          RecheckItem(
+            kind: 'caveat',
+            key: '${pack.jurisdiction.countryCode}/$startYear/${caveat.id}',
+            title: caveat.text,
+            verifiedOn: ruleSet.verifiedOn,
+            recheckBy: caveat.recheckBy,
+          ),
+        );
+      }
     }
   }
   return UnmodifiableListView(items);
