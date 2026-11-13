@@ -194,6 +194,10 @@ class _TaxReportBody extends HookConsumerWidget {
                   SpacingTokens.xl,
                 ),
                 children: [
+                  if (report.maturity == TaxPackMaturity.preview.name) ...[
+                    const _PreviewBanner(),
+                    const SizedBox(height: SpacingTokens.sm),
+                  ],
                   Wrap(
                     spacing: SpacingTokens.xs,
                     runSpacing: SpacingTokens.xs,
@@ -355,6 +359,41 @@ class _YearSwitcher extends HookWidget {
             tooltip: l10n.taxNextYear,
             onPressed: onNext,
             icon: const SkribbleIcon(data: OpenBudgetIcons.chevronRight),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The preview warning shown while a country pack awaits review.
+class _PreviewBanner extends HookWidget {
+  const _PreviewBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+
+    return ObCard(
+      key: const Key('tax-preview-banner'),
+      tone: ObTone.review,
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SkribbleIcon(
+            data: OpenBudgetIcons.warning,
+            size: 20,
+            color: palette.hue(ObTone.review),
+          ),
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(
+            child: Text(
+              l10n.taxPreviewBanner,
+              style: theme.textTheme.bodyMedium?.copyWith(color: palette.ink),
+            ),
           ),
         ],
       ),
