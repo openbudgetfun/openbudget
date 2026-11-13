@@ -6264,6 +6264,24 @@ abstract class AppLocalizations {
   /// **'Preview: these figures have not yet been checked by a tax professional.'**
   String get taxPreviewBanner;
 
+  /// Section header for the rule-pack caveats the report touched.
+  ///
+  /// In en, this message translates to:
+  /// **'What we could not verify'**
+  String get taxUnverifiedTitle;
+
+  /// Badge on a report line computed from a secondary-source figure.
+  ///
+  /// In en, this message translates to:
+  /// **'From a secondary source'**
+  String get taxSecondarySourceBadge;
+
+  /// Badge on a caveat describing a change that is announced but not enacted.
+  ///
+  /// In en, this message translates to:
+  /// **'Announced, not yet law'**
+  String get taxAnnouncedBadge;
+
   /// No description provided for @taxProfileTitle.
   ///
   /// In en, this message translates to:
