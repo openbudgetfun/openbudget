@@ -35,6 +35,89 @@ enum TaxJurisdiction {
   }
 }
 
+/// One part of a country's tax system a rule pack may compute.
+enum TaxSection {
+  personalReturn,
+  selfEmployment,
+  companyReturn,
+  indirectTax,
+  capitalGains,
+  digitalAssets,
+  filingCalendar,
+  payroll,
+}
+
+/// How completely a pack covers one [TaxSection].
+enum TaxSectionCoverage {
+  /// The section computes everything the pack contract requires.
+  full,
+
+  /// The section computes, but leaves named parts out.
+  partial,
+
+  /// The pack explains the section and points to a professional, and
+  /// computes nothing.
+  signpostOnly,
+
+  /// The tax does not exist for the entity kind in this country.
+  notApplicable,
+
+  /// The pack does not cover the section yet.
+  notBuilt,
+}
+
+/// Whether a pack's figures have been checked by a tax professional.
+enum TaxPackMaturity {
+  /// New packs ship here: the figures are sourced but not yet reviewed.
+  preview,
+
+  /// A qualified professional has checked one year of output for each entity
+  /// kind the pack covers.
+  reviewed,
+}
+
+/// What a rule pack covers, per section, and how mature it is.
+@immutable
+final class TaxPackManifest {
+  const TaxPackManifest({required this.maturity, required this.sections});
+
+  final TaxPackMaturity maturity;
+
+  /// Every [TaxSection] the pack knows about, with its coverage.
+  final Map<TaxSection, TaxSectionCoverage> sections;
+
+  /// The coverage of [section], or [TaxSectionCoverage.notBuilt] when the
+  /// manifest does not name it.
+  TaxSectionCoverage coverageOf(TaxSection section) =>
+      sections[section] ?? TaxSectionCoverage.notBuilt;
+}
+
+/// The version, sources and verification date of one year's figures.
+@immutable
+final class TaxRuleSet {
+  const TaxRuleSet({
+    required this.startYear,
+    required this.revision,
+    required this.verifiedOn,
+    required this.sources,
+  });
+
+  final int startYear;
+
+  /// Bumped whenever any figure in the year changes.
+  final int revision;
+
+  /// When the figures were last checked against [sources].
+  final DateTime verifiedOn;
+
+  /// The authority pages the figures came from.
+  final List<Uri> sources;
+
+  /// The version recorded on reports, exports and proposals: `gb-2026-r1`.
+  String versionFor(TaxJurisdiction jurisdiction) =>
+      '${jurisdiction.countryCode.toLowerCase()}-$startYear-r$revision';
+}
+
 /// What a tax category does in a computation.
 enum TaxCategoryKind {
   /// Taxable income or turnover.
@@ -295,6 +378,9 @@ class TaxReport {
     required this.assumptions,
     required this.sources,
     required this.rulesVerifiedOn,
+    required this.rulesVersion,
+    required this.maturity,
+    required this.coverage,
     this.uncategorizedCount = 0,
   });
 
@@ -318,6 +404,15 @@ class TaxReport {
 
   /// When the rule figures were last checked against [sources].
   final DateTime rulesVerifiedOn;
+
+  /// The rule pack version that produced this report: `gb-2026-r1`.
+  final String rulesVersion;
+
+  /// Whether the pack's figures have been checked by a tax professional.
+  final TaxPackMaturity maturity;
+
+  /// How completely the pack covers each section.
+  final Map<TaxSection, TaxSectionCoverage> coverage;
 
   /// Entries whose category this rule pack does not know.
   final int uncategorizedCount;

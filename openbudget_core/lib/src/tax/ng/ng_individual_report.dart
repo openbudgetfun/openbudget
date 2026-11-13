@@ -333,6 +333,11 @@ TaxReport _individualReport(TaxInput input, _NgTaxTable table) {
     assumptions: assumptions,
     sources: [for (final url in table.sourceUrls) Uri.parse(url)],
     rulesVerifiedOn: _ngRulesVerifiedOn,
+    rulesVersion: _ngRuleSetFor(
+      input.year.startYear,
+    ).versionFor(TaxJurisdiction.ng),
+    maturity: ngTaxManifest.maturity,
+    coverage: ngTaxManifest.sections,
     uncategorizedCount: position.uncategorized,
   );
 }

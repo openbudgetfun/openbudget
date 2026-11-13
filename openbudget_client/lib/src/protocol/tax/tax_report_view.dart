@@ -37,6 +37,9 @@ abstract class TaxReportView
     required this.assumptions,
     required this.sources,
     required this.rulesVerifiedOn,
+    required this.rulesVersion,
+    required this.maturity,
+    required this.coverage,
     required this.uncategorizedCount,
     required this.convertedEntryCount,
     required this.opportunities,
@@ -58,6 +61,9 @@ abstract class TaxReportView
     required List<String> assumptions,
     required List<String> sources,
     required DateTime rulesVerifiedOn,
+    required String rulesVersion,
+    required String maturity,
+    required Map<String, String> coverage,
     required int uncategorizedCount,
     required int convertedEntryCount,
     required List<_i7gx5xr1.TaxOpportunityView> opportunities,
@@ -97,6 +103,11 @@ abstract class TaxReportView
       ),
       rulesVerifiedOn: _isc.DateTimeJsonExtension.fromJson(
         jsonSerialization['rulesVerifiedOn'],
+      ),
+      rulesVersion: jsonSerialization['rulesVersion'] as String,
+      maturity: jsonSerialization['maturity'] as String,
+      coverage: _irkl4crj.Protocol().deserialize<Map<String, String>>(
+        jsonSerialization['coverage'],
       ),
       uncategorizedCount: jsonSerialization['uncategorizedCount'] as int,
       convertedEntryCount: jsonSerialization['convertedEntryCount'] as int,
@@ -147,6 +158,15 @@ abstract class TaxReportView
   /// When the rule figures were last checked against the sources.
   DateTime rulesVerifiedOn;
 
+  /// The rule pack version that produced the report: `gb-2026-r1`.
+  String rulesVersion;
+
+  /// Whether the pack's figures have been checked by a tax professional.
+  String maturity;
+
+  /// How completely the pack covers each section, by section name.
+  Map<String, String> coverage;
+
   /// Entries the rule pack does not know, plus transactions with no category.
   int uncategorizedCount;
 
@@ -174,6 +194,9 @@ abstract class TaxReportView
     List<String>? assumptions,
     List<String>? sources,
     DateTime? rulesVerifiedOn,
+    String? rulesVersion,
+    String? maturity,
+    Map<String, String>? coverage,
     int? uncategorizedCount,
     int? convertedEntryCount,
     List<_i7gx5xr1.TaxOpportunityView>? opportunities,
@@ -197,6 +220,9 @@ abstract class TaxReportView
       'assumptions': assumptions.toJson(),
       'sources': sources.toJson(),
       'rulesVerifiedOn': rulesVerifiedOn.toJson(),
+      'rulesVersion': rulesVersion,
+      'maturity': maturity,
+      'coverage': coverage.toJson(),
       'uncategorizedCount': uncategorizedCount,
       'convertedEntryCount': convertedEntryCount,
       'opportunities': opportunities.toJson(valueToJson: (v) => v.toJson()),
@@ -224,6 +250,9 @@ abstract class TaxReportView
       'assumptions': assumptions.toJson(),
       'sources': sources.toJson(),
       'rulesVerifiedOn': rulesVerifiedOn.toJson(),
+      'rulesVersion': rulesVersion,
+      'maturity': maturity,
+      'coverage': coverage.toJson(),
       'uncategorizedCount': uncategorizedCount,
       'convertedEntryCount': convertedEntryCount,
       'opportunities': opportunities.toJson(
@@ -255,6 +284,9 @@ class _TaxReportViewImpl extends TaxReportView {
     required List<String> assumptions,
     required List<String> sources,
     required DateTime rulesVerifiedOn,
+    required String rulesVersion,
+    required String maturity,
+    required Map<String, String> coverage,
     required int uncategorizedCount,
     required int convertedEntryCount,
     required List<_i7gx5xr1.TaxOpportunityView> opportunities,
@@ -274,6 +306,9 @@ class _TaxReportViewImpl extends TaxReportView {
          assumptions: assumptions,
          sources: sources,
          rulesVerifiedOn: rulesVerifiedOn,
+         rulesVersion: rulesVersion,
+         maturity: maturity,
+         coverage: coverage,
          uncategorizedCount: uncategorizedCount,
          convertedEntryCount: convertedEntryCount,
          opportunities: opportunities,
@@ -299,6 +334,9 @@ class _TaxReportViewImpl extends TaxReportView {
     List<String>? assumptions,
     List<String>? sources,
     DateTime? rulesVerifiedOn,
+    String? rulesVersion,
+    String? maturity,
+    Map<String, String>? coverage,
     int? uncategorizedCount,
     int? convertedEntryCount,
     List<_i7gx5xr1.TaxOpportunityView>? opportunities,
@@ -320,6 +358,19 @@ class _TaxReportViewImpl extends TaxReportView {
       assumptions: assumptions ?? this.assumptions.map((e0) => e0).toList(),
       sources: sources ?? this.sources.map((e0) => e0).toList(),
       rulesVerifiedOn: rulesVerifiedOn ?? this.rulesVerifiedOn,
+      rulesVersion: rulesVersion ?? this.rulesVersion,
+      maturity: maturity ?? this.maturity,
+      coverage:
+          coverage ??
+          this.coverage.map(
+            (
+              key0,
+              value0,
+            ) => MapEntry(
+              key0,
+              value0,
+            ),
+          ),
       uncategorizedCount: uncategorizedCount ?? this.uncategorizedCount,
       convertedEntryCount: convertedEntryCount ?? this.convertedEntryCount,
       opportunities:
