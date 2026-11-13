@@ -1,0 +1,60 @@
+{
+  "code": "CA",
+  "name": "Canada",
+  "servable": true,
+  "currencies": [
+    "CAD"
+  ],
+  "timeZones": [
+    "America/Toronto",
+    "America/St_Johns",
+    "America/Halifax",
+    "America/Glace_Bay",
+    "America/Moncton",
+    "America/Goose_Bay",
+    "America/Blanc-Sablon",
+    "America/Iqaluit",
+    "America/Atikokan",
+    "America/Winnipeg",
+    "America/Resolute",
+    "America/Rankin_Inlet",
+    "America/Regina",
+    "America/Swift_Current",
+    "America/Edmonton",
+    "America/Cambridge_Bay",
+    "America/Inuvik",
+    "America/Vancouver",
+    "America/Creston",
+    "America/Dawson_Creek",
+    "America/Fort_Nelson",
+    "America/Whitehorse",
+    "America/Dawson"
+  ],
+  "individualTaxYear": null,
+  "companyYearEndDefault": null,
+  "indirectTax": null,
+  "authority": null,
+  "sources": [
+    {
+      "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
+      "url": "https://raw.githubusercontent.com/eggert/tz/2026f/iso3166.tab",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "IANA Time Zone Database 2026f: zone.tab (country time zones)",
+      "url": "https://raw.githubusercontent.com/eggert/tz/2026f/zone.tab",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    }
+  ],
+  "verifiedOn": null,
+  "recheckBy": null,
+  "caveats": []
+}
