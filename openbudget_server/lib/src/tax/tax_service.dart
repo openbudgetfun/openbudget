@@ -388,10 +388,11 @@ class TaxService {
 
           final included = [entity, ...includedLinked];
           final entityIds = {for (final row in included) row.id!};
-          final linesByEntity = await _loadTaxLines(
+          final linesByEntity = await loadTaxLines(
             session,
             entityIds,
-            year,
+            year.start,
+            year.end,
             tx,
           );
           final allLines = [
@@ -402,7 +403,7 @@ class TaxService {
             year: year,
             targetCurrencyCode: jurisdiction.currencyCode,
           ).toList();
-          final rates = await _loadTaxFxRates(
+          final rates = await loadTaxFxRates(
             session,
             requests,
             tx,
@@ -640,15 +641,21 @@ class TaxService {
     }
   }
 
-  /// Loads every in-year line for [entityIds] in one query.
+  /// Loads every in-period line for [entityIds] in one query.
   ///
-  /// The account join supplies the line's currency, the envelope join its
-  /// default tax code and the transfer join marks legs that are outside tax.
-  /// No daily FX request leaves this method; the caller loads all rates once.
-  static Future<Map<UuidValue, List<TaxEntrySourceLine>>> _loadTaxLines(
+  /// The period is the half-open range `[periodStart, periodEnd)` of civil
+  /// dates. The account join supplies the line's currency, the envelope
+  /// join its default tax code and the transfer join marks legs that are
+  /// outside tax. No daily FX request leaves this method; the caller loads
+  /// all rates once.
+  ///
+  /// Shared with the tax-ready summary service, so a report and a summary
+  /// can never disagree about which lines a period contains.
+  static Future<Map<UuidValue, List<TaxEntrySourceLine>>> loadTaxLines(
     Session session,
     Set<UuidValue> entityIds,
-    TaxYear year,
+    DateTime periodStart,
+    DateTime periodEnd,
     Transaction transaction,
   ) async {
     if (entityIds.isEmpty) return const {};
@@ -657,8 +664,8 @@ class TaxService {
       _taxLinesSql,
       parameters: QueryParameters.named({
         'entityIds': _uuidArrayLiteral(entityIds),
-        'yearStart': year.start,
-        'yearEnd': year.end,
+        'yearStart': periodStart,
+        'yearEnd': periodEnd,
       }),
       transaction: transaction,
     );
@@ -686,7 +693,12 @@ class TaxService {
     return grouped;
   }
 
-  static Future<TaxFxRates> _loadTaxFxRates(
+  /// Loads the stored daily rows the given requests' conversions read.
+  ///
+  /// Shared with the tax-ready summary service, which reports the rate
+  /// facts behind its converted lines from the same rows the report
+  /// converts with.
+  static Future<TaxFxRates> loadTaxFxRates(
     Session session,
     List<TaxFxRequest> requests,
     Transaction transaction, {

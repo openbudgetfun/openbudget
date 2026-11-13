@@ -3752,6 +3752,30 @@ class Endpoints extends _is.EndpointDispatch {
                 startYear: params['startYear'],
               ),
         ),
+        'getSummary': _is.MethodConnector(
+          name: 'getSummary',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'startYear': _is.ParameterDescription(
+              name: 'startYear',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['tax'] as _i34kr7gr.TaxEndpoint).getSummary(
+                session,
+                params['entityId'],
+                startYear: params['startYear'],
+              ),
+        ),
       },
     );
     connectors['transactionRule'] = _is.EndpointConnector(

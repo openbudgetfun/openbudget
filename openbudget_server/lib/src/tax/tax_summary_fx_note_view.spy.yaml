@@ -1,0 +1,21 @@
+### One exchange rate a summary's converted lines used.
+###
+### The rate facts are the exact daily quotes the tax conversion applied,
+### mirroring how a net-worth row reports its own rates. The rate text is
+### the summary currency per one unit of [currencyCode].
+class: TaxSummaryFxNoteView
+fields:
+  ### ISO 4217 code the lines were converted from.
+  currencyCode: String
+  ### The exact decimal rate the conversion applied.
+  fxRate: String
+  ### The quote's date, which may fall back within seven days of a line.
+  fxRateDate: DateTime
+  ### Where the quote came from: `market` or `identity`.
+  fxRateSource: FxRateSource
+  ### True when the quote is older than the staleness rule allows.
+  isStale: bool
+  ### The converted lines that used this rate.
+  lineCount: int
+  ### The lines' converted magnitudes added together.
+  convertedMinor: int

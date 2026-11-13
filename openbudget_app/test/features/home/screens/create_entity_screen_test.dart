@@ -264,20 +264,13 @@ void main() {
         expect(row('Côte d’Ivoire'), findsOneWidget);
       });
 
-      testWidgets('a currency OpenBudget cannot book falls back to USD', (
-        tester,
-      ) async {
-        // The dataset still lists Bulgaria's retired lev.
-        expect(CurrencyCode.tryParse('BGN'), isNull);
+      testWidgets('Bulgaria books in euros', (tester) async {
         await pumpPhone(tester);
         await pickCountry(tester, 'bulgaria');
         await tester.tap(row('Bulgaria'));
         await tester.pumpAndSettle();
 
-        expect(
-          rowValue(tester, 'create-entity-currency-row'),
-          'US Dollar (USD)',
-        );
+        expect(rowValue(tester, 'create-entity-currency-row'), 'Euro (EUR)');
       });
 
       testWidgets('the currency can still be changed after the country', (

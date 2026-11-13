@@ -1840,7 +1840,7 @@ const Map<String, Map<String, Object?>> countryData = {
     "name": "Bulgaria",
     "servable": true,
     "currencies": [
-      "BGN",
+      "EUR",
     ],
     "timeZones": [
       "Europe/Sofia",
@@ -1903,6 +1903,12 @@ const Map<String, Map<String, Object?>> countryData = {
         "retrievedOn": "2026-11-13",
       },
       {
+        "title": "European Central Bank: Bulgaria joins the euro area (joined on 1 January 2026; conversion rate BGN 1.95583 = EUR 1)",
+        "url": "https://www.ecb.europa.eu/euro/changeover/bulgaria/html/index.en.html",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
         "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
         "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
         "grade": "primary",
@@ -1918,6 +1924,7 @@ const Map<String, Map<String, Object?>> countryData = {
     "verifiedOn": "2026-11-13",
     "recheckBy": "2027-05-13",
     "caveats": [
+      "currencies lists the euro: the lev (BGN) was replaced by the euro on 1 January 2026 (European Central Bank, BGN 1.95583 = EUR 1); historical BGN amounts are out of scope for this field.",
       "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
       "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
       "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed applying on 1 January 2022 by the Tax Foundation's January 2022 table of VAT rates (sourced from the Commission's Taxes in Europe Database)).",
