@@ -7737,7 +7737,7 @@ abstract class AppLocalizations {
   /// No description provided for @plusPriceAmount.
   ///
   /// In en, this message translates to:
-  /// **'\$10'**
+  /// **'\$20'**
   String get plusPriceAmount;
 
   /// No description provided for @plusPricePeriod.
@@ -7755,7 +7755,7 @@ abstract class AppLocalizations {
   /// No description provided for @plusIncludedUsage.
   ///
   /// In en, this message translates to:
-  /// **'\$1 of assistant usage included every month'**
+  /// **'\$5 of assistant usage included every month'**
   String get plusIncludedUsage;
 
   /// No description provided for @plusBenefitsTitle.
@@ -7785,7 +7785,7 @@ abstract class AppLocalizations {
   /// No description provided for @plusBenefitAssistantBody.
   ///
   /// In en, this message translates to:
-  /// **'Ask questions about your money, with \$1 of usage included each month.'**
+  /// **'Ask questions about your money, with \$5 of usage included each month.'**
   String get plusBenefitAssistantBody;
 
   /// No description provided for @plusBenefitAgentTitle.

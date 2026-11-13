@@ -8,13 +8,13 @@ touching any of this work.
 
 ## Scope decisions
 
-| Decision      | Choice                                                                                       |
-| ------------- | -------------------------------------------------------------------------------------------- |
-| Jurisdictions | UK, US (federal), Nigeria and Germany                                                        |
-| Entities      | Individuals, sole traders and limited companies in each                                      |
-| Xero jobs     | Bookkeeping, invoices and bills, VAT and sales tax returns, payroll                          |
-| Filing        | **Prepare only.** The app produces the figures and a box-by-box checklist; the user submits. |
-| Migration     | Import Xero CSV and report exports; no Xero API connection                                   |
+| Decision      | Choice                                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Jurisdictions | UK, US (federal), Nigeria and Germany; growing to 20 countries plus a universal layer (`docs/tax-jurisdictions.md`) |
+| Entities      | Individuals, sole traders and limited companies in each                                                             |
+| Xero jobs     | Bookkeeping, invoices and bills, VAT and sales tax returns, payroll                                                 |
+| Filing        | **Prepare only.** The app produces the figures and a box-by-box checklist; the user submits.                        |
+| Migration     | Import Xero CSV and report exports; no Xero API connection                                                          |
 
 ## What "prepare only" leaves to the user
 
@@ -69,7 +69,8 @@ Each phase ships as its own stack of pull requests, with unit, widget and Patrol
    bank tie-outs as hard gates.
 8. **Assistant guardrails** (`tax-planning-guardrails`). Per-country perimeter rules,
    wording rules and the never-suggest list in the system prompt and MCP instructions,
-   disclaimers on every opportunity, and rule versions recorded on proposals.
+   disclaimers on every opportunity, and rule versions recorded on proposals. This phase
+   is now milestone M3 of the Money guide (`docs/money-guide.md`).
 
 ## Audit findings in the current tax packs
 

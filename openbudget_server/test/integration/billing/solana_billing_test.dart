@@ -133,7 +133,7 @@ void main() {
 
       expect(chain.transfers, hasLength(1));
       expect(chain.transfers.single.subscriptionAddress, subscription);
-      expect(chain.transfers.single.amountBaseUnits, 10_000_000);
+      expect(chain.transfers.single.amountBaseUnits, 20_000_000);
       expect(entitlement.source, EntitlementSource.solana);
       expect(entitlement.externalId, subscription);
       expect(entitlement.status, EntitlementStatus.active);
@@ -534,7 +534,7 @@ void main() {
       expect(report.processed, 1);
       expect(report.collected, 1);
       expect(chain.transfers, hasLength(1));
-      expect(chain.transfers.single.amountBaseUnits, 10_000_000);
+      expect(chain.transfers.single.amountBaseUnits, 20_000_000);
       final row = await Entitlement.db.findFirstRow(
         sessionBuilder.build(),
         where: (t) => t.externalId.equals(externalId),

@@ -4524,7 +4524,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tax reports, a built-in assistant that knows your budget, and room to bring your own agent.';
 
   @override
-  String get plusPriceAmount => '\$10';
+  String get plusPriceAmount => '\$20';
 
   @override
   String get plusPricePeriod => 'a month';
@@ -4533,7 +4533,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get plusPriceNote => 'Cancel whenever you like.';
 
   @override
-  String get plusIncludedUsage => '\$1 of assistant usage included every month';
+  String get plusIncludedUsage => '\$5 of assistant usage included every month';
 
   @override
   String get plusBenefitsTitle => 'What you get';
@@ -4550,7 +4550,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plusBenefitAssistantBody =>
-      'Ask questions about your money, with \$1 of usage included each month.';
+      'Ask questions about your money, with \$5 of usage included each month.';
 
   @override
   String get plusBenefitAgentTitle => 'Bring your own agent';

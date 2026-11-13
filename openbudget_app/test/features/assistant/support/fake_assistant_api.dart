@@ -31,7 +31,7 @@ AgentEvent agentEvent(
 
 AgentUsageView testUsage({
   AgentProvider provider = AgentProvider.zen,
-  int allowanceMicroUsd = 1000000,
+  int allowanceMicroUsd = 5000000,
   int usedMicroUsd = 420000,
 }) => AgentUsageView(
   provider: provider,

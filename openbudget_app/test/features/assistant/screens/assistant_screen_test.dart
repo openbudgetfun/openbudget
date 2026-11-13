@@ -233,7 +233,7 @@ void main() {
       usage: testUsage(),
     );
 
-    expect(find.text(r'$0.42 of $1.00 used this month'), findsOneWidget);
+    expect(find.text(r'$0.42 of $5.00 used this month'), findsOneWidget);
     expect(find.byType(ObEnvelopeGauge), findsOneWidget);
   });
 

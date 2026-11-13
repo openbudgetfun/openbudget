@@ -623,7 +623,7 @@ class PlusPage {
 
   Finder get settingsRow => find.text('OpenBudget Plus');
   Finder get title => find.text('OpenBudget Plus').first;
-  Finder get price => find.text(r'$10');
+  Finder get price => find.text(r'$20');
   Finder get planTitle => find.text('Your OpenBudget Plus plan');
   Finder get activeChip => find.text('Active');
   Finder get storeButton => find.text('Subscribe in the App Store');

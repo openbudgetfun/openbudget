@@ -32,7 +32,7 @@ class FakePlusBillingBackend implements PlusBillingApi {
     planAddress: '11111111111111111111111111111112',
     programAddress: 'De1egAFMkMWZSN5rYXRj9CAdheBamobVNubTsi9avR44',
     usdcMint: '11111111111111111111111111111113',
-    amountBaseUnits: 10000000,
+    amountBaseUnits: 20000000,
     periodSeconds: 2592000,
   );
 
