@@ -34,6 +34,8 @@ import 'package:openbudget_server/src/generated/transactions/transaction_status.
     as _i54b59qp;
 import 'package:openbudget_server/src/generated/transactions/transfer_input.dart'
     as _i7e3qnpf;
+import 'package:openbudget_server/src/generated/wallets/spam_verdict.dart'
+    as _i2db4e6h;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
@@ -4475,6 +4477,31 @@ class Endpoints extends _is.EndpointDispatch {
                   .listHoldings(
                     session,
                     params['walletId'],
+                  ),
+        ),
+        'setHoldingVerdict': _is.MethodConnector(
+          name: 'setHoldingVerdict',
+          params: {
+            'walletHoldingId': _is.ParameterDescription(
+              name: 'walletHoldingId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'verdict': _is.ParameterDescription(
+              name: 'verdict',
+              type: _is.getType<_i2db4e6h.SpamVerdict?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['wallet'] as _i1ub0otr.WalletEndpoint)
+                  .setHoldingVerdict(
+                    session,
+                    params['walletHoldingId'],
+                    params['verdict'],
                   ),
         ),
         'listTransactions': _is.MethodConnector(

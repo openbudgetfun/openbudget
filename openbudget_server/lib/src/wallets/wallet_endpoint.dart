@@ -82,6 +82,18 @@ class WalletEndpoint extends Endpoint {
     UuidValue walletId,
   ) => WalletService.listHoldings(session, walletId);
 
+  /// Sets a user verdict on one holding: hide it, allow it, or clear the
+  /// override and let the classifier decide.
+  Future<WalletHolding> setHoldingVerdict(
+    Session session,
+    UuidValue walletHoldingId,
+    SpamVerdict? verdict,
+  ) => WalletService.setHoldingVerdict(
+    session,
+    walletHoldingId,
+    verdict,
+  );
+
   /// Lists the wallet's transactions, newest first.
   Future<List<WalletTransaction>> listTransactions(
     Session session,

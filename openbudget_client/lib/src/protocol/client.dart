@@ -130,6 +130,8 @@ import 'package:openbudget_client/src/protocol/transactions/transaction_view.dar
     as _irfj6dpt;
 import 'package:openbudget_client/src/protocol/transactions/transfer_input.dart'
     as _i4fjyt55;
+import 'package:openbudget_client/src/protocol/wallets/spam_verdict.dart'
+    as _i096eook;
 import 'package:openbudget_client/src/protocol/wallets/wallet.dart'
     as _igzh8mor;
 import 'package:openbudget_client/src/protocol/wallets/wallet_holding.dart'
@@ -2516,6 +2518,20 @@ class EndpointWallet extends _isc.EndpointRef {
     'wallet',
     'listHoldings',
     {'walletId': walletId},
+  );
+
+  /// Sets a user verdict on one holding: hide it, allow it, or clear the
+  /// override and let the classifier decide.
+  _ida.Future<_izm3e498.WalletHolding> setHoldingVerdict(
+    _isc.UuidValue walletHoldingId,
+    _i096eook.SpamVerdict? verdict,
+  ) => caller.callServerEndpoint<_izm3e498.WalletHolding>(
+    'wallet',
+    'setHoldingVerdict',
+    {
+      'walletHoldingId': walletHoldingId,
+      'verdict': verdict,
+    },
   );
 
   /// Lists the wallet's transactions, newest first.
