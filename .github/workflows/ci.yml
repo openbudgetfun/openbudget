@@ -55,6 +55,12 @@ jobs:
         run: cd openbudget_core && dart run tool/generate_currencies.dart --check
         shell: devenv shell -- bash -e {0}
 
+      # The knowledge cards are generated from knowledge/*.md; fail when the
+      # committed Dart drifts from the cards.
+      - name: check generated knowledge cards
+        run: cd openbudget_server && dart run tool/generate_knowledge.dart --check
+        shell: devenv shell -- bash -e {0}
+
   analyze:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
