@@ -161,6 +161,8 @@ class FakeTaxPack implements TaxRulePack {
       estimatedSavingMinor: 1234,
       deadline: input.year.end,
       source: Uri.parse('https://example.test/fake-tax/opportunity'),
+      ruleYear: input.year.label,
+      assumptions: const ['A test-only assumption.'],
     ),
   ];
 }

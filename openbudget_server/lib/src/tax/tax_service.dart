@@ -1047,6 +1047,14 @@ class TaxService {
             estimatedSavingMinor: opportunity.estimatedSavingMinor,
             deadline: opportunity.deadline,
             source: opportunity.source.toString(),
+            ruleYear: opportunity.ruleYear,
+            grade: opportunity.grade.name,
+            announced: opportunity.announced,
+            signpostOnly: opportunity.signpostOnly,
+            needsEvidence: opportunity.needsEvidence,
+            assumptions: [
+              for (final assumption in opportunity.assumptions) assumption,
+            ],
           ),
       ],
     );

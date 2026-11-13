@@ -17,6 +17,13 @@ List<TaxOpportunity> _individualOpportunities(
     NgTaxProfile(:final annualRentMinor) => math.max(0, annualRentMinor),
     _ => 0,
   };
+  // 2026 follows the gazetted Nigeria Tax Act (primary); 2025 follows the
+  // repealed PITA and CITA, known only through secondary summaries.
+  final figuresPrimary = table.regime == _NgRegime.nta;
+  final figureGrade = figuresPrimary
+      ? TaxEvidenceGrade.primary
+      : TaxEvidenceGrade.secondary;
+  final ruleYear = input.year.label;
   final opportunities = <TaxOpportunity>[];
 
   // Rent relief is an NTA s.30 relief; the old regime has the consolidated
@@ -26,13 +33,19 @@ List<TaxOpportunity> _individualOpportunities(
       opportunities.add(
         TaxOpportunity(
           id: 'ng.rent_relief',
-          title: 'Claim rent relief',
+          title: 'Rent relief',
           explanation:
               'Rent relief is 20% of the annual rent you pay, capped at '
               'N500,000. Add your annual rent to the Nigeria tax profile so '
               'the return can claim it, and keep the tenancy agreement and '
               'receipts.',
           source: _ntaUri,
+          ruleYear: ruleYear,
+          needsEvidence: true,
+          assumptions: const [
+            'The relief needs the tenancy agreement and rent receipts as evidence.',
+            'The cap is per year of assessment on rent for your home.',
+          ],
         ),
       );
     } else {
@@ -44,13 +57,19 @@ List<TaxOpportunity> _individualOpportunities(
       opportunities.add(
         TaxOpportunity(
           id: 'ng.rent_relief',
-          title: 'Rent relief claimed',
+          title: 'Rent relief',
           explanation:
               'The return claims ${_naira(position.statutoryRelief)} of rent '
               'relief: 20% of ${_naira(annualRent)}, within the N500,000 cap. '
               'Keep the tenancy agreement and rent receipts as evidence.',
           estimatedSavingMinor: taxWithoutRelief - taxWithRelief,
           source: _ntaUri,
+          ruleYear: ruleYear,
+          needsEvidence: true,
+          assumptions: const [
+            'The rent recorded on the tax profile is the annual rent for your home.',
+            'The relief needs the tenancy agreement and rent receipts as evidence.',
+          ],
         ),
       );
     }
@@ -77,8 +96,20 @@ List<TaxOpportunity> _individualOpportunities(
             'deducted from total income. Additional voluntary contributions '
             'may also qualify; confirm the limits with your pension '
             'administrator.',
-        estimatedSavingMinor: taxWithoutRelief - taxWithRelief,
+        // The saving is recomputed with the year's bands, which are only
+        // secondary-sourced under the old regime: no number until the Act
+        // texts are read.
+        estimatedSavingMinor: figuresPrimary
+            ? taxWithoutRelief - taxWithRelief
+            : null,
         source: _ntaUri,
+        ruleYear: ruleYear,
+        grade: figureGrade,
+        needsEvidence: true,
+        assumptions: const [
+          'Contributions are to a Pension Reform Act scheme; the scheme statement is the evidence.',
+          'Additional voluntary contributions have separate limits set by the pension administrator.',
+        ],
       ),
     );
   } else {
@@ -91,6 +122,8 @@ List<TaxOpportunity> _individualOpportunities(
             'total income. Confirm the approved scheme and limits with your '
             'pension administrator before contributing.',
         source: _ntaUri,
+        ruleYear: ruleYear,
+        grade: figureGrade,
       ),
     );
   }
@@ -102,12 +135,17 @@ List<TaxOpportunity> _individualOpportunities(
   opportunities.add(
     TaxOpportunity(
       id: 'ng.annual_return',
-      title: 'File your annual return',
+      title: 'Annual return filing',
       explanation:
           'Every taxable person files an annual return, even when no tax is '
           'due. The Nigeria Tax Administration Act 2025 sets no federal filing '
           'date; your state internal revenue service publishes it.$credit',
       source: _ntaaUri,
+      ruleYear: ruleYear,
+      grade: figureGrade,
+      assumptions: const [
+        'The federal law sets no single filing date; the state internal revenue service publishes it.',
+      ],
     ),
   );
 
@@ -124,12 +162,16 @@ List<TaxOpportunity> _soleTraderOpportunities(
     kind: EntityKind.soleTrader,
     reclaimVat: input.profile.salesTaxRegistered,
   );
+  final figuresPrimary = table.regime == _NgRegime.nta;
+  final ruleYear = input.year.label;
   final opportunities = <TaxOpportunity>[
     _vatOpportunity(
       position: position,
       table: table,
       registered: input.profile.salesTaxRegistered,
       professionalServicesCode: 'ng.biz.revenue.professional_services',
+      ruleYear: ruleYear,
+      figuresPrimary: figuresPrimary,
     ),
   ];
 
@@ -144,6 +186,15 @@ List<TaxOpportunity> _soleTraderOpportunities(
             'Schedule Table I rates. The tax saved depends on the owner '
             'marginal rate on the personal return.',
         source: _ntaUri,
+        ruleYear: ruleYear,
+        grade: figuresPrimary
+            ? TaxEvidenceGrade.primary
+            : TaxEvidenceGrade.secondary,
+        needsEvidence: true,
+        assumptions: const [
+          'The allowance method and the notional carry forward follow the First Schedule Table I rates and are not yet confirmed against the enacted text.',
+          'Purchase invoices for the assets are the evidence.',
+        ],
       ),
     );
   }
@@ -158,6 +209,8 @@ List<TaxOpportunity> _companyOpportunities(TaxInput input, _NgTaxTable table) {
     kind: EntityKind.company,
     reclaimVat: input.profile.salesTaxRegistered,
   );
+  final figuresPrimary = table.regime == _NgRegime.nta;
+  final ruleYear = input.year.label;
   final small = switch (table.regime) {
     _NgRegime.nta => _isSmallCompany(position, table, input.profile),
     _NgRegime.pitaCita =>
@@ -166,13 +219,6 @@ List<TaxOpportunity> _companyOpportunities(TaxInput input, _NgTaxTable table) {
   final opportunities = <TaxOpportunity>[];
 
   if (small) {
-    final citRate = _citRateBasisPoints(position.turnover, table);
-    final citSaving = position.totalProfit * citRate ~/ 10000;
-    final levyRate = switch (table.regime) {
-      _NgRegime.nta => table.developmentLevyBasisPoints,
-      _NgRegime.pitaCita => table.tertiaryEducationTaxBasisPoints,
-    };
-    final levySaving = position.assessableProfit * levyRate ~/ 10000;
     final String smallExplanation;
     final String levyTitle;
     switch (table.regime) {
@@ -182,14 +228,19 @@ List<TaxOpportunity> _companyOpportunities(TaxInput input, _NgTaxTable table) {
             '${_naira(_smallCompanyCeilingMinor(table, input.profile))} '
             'ceiling, the company does not provide professional services, and '
             'fixed assets are assumed below N250,000,000. The company pays '
-            '0% instead of 30% companies income tax.';
+            '0% instead of 30% companies income tax. Exempt status holds '
+            'only if the turnover and fixed-asset conditions are both met; '
+            'the two 2025 Acts disagree on the turnover figure, so no '
+            'saving is quantified until the enacted text is confirmed.';
         levyTitle = 'Small companies are outside the development levy';
       case _NgRegime.pitaCita:
         smallExplanation =
             'Turnover of ${_naira(position.turnover)} is within the '
             '${_naira(table.mediumCompanyTurnoverFloorMinor)} small company '
             'ceiling under the old Companies Income Tax Act. The company pays '
-            '0% companies income tax instead of the 20% or 30% tiers.';
+            '0% companies income tax instead of the 20% or 30% tiers. The '
+            '2025 old-regime figures come from secondary summaries, so no '
+            'saving is quantified until the Act texts are read.';
         levyTitle = 'Small companies are outside the tertiary education tax';
     }
     opportunities
@@ -198,8 +249,16 @@ List<TaxOpportunity> _companyOpportunities(TaxInput input, _NgTaxTable table) {
           id: 'ng.small_company',
           title: 'Small company status',
           explanation: smallExplanation,
-          estimatedSavingMinor: citSaving,
+          // The status turns on the small-company turnover ceiling, which
+          // the two 2025 Acts dispute (secondary): no number until the
+          // enacted correction is read.
           source: _ntaUri,
+          ruleYear: ruleYear,
+          grade: TaxEvidenceGrade.secondary,
+          assumptions: const [
+            'Exempt status holds only if the turnover and fixed-asset conditions are both met.',
+            'The Nigeria Tax Act and the Tax Administration Act disagree on the turnover ceiling; the profile chooses which applies.',
+          ],
         ),
       )
       ..add(
@@ -208,9 +267,12 @@ List<TaxOpportunity> _companyOpportunities(TaxInput input, _NgTaxTable table) {
           title: levyTitle,
           explanation:
               'The levy is charged on the assessable profits of companies '
-              'other than small companies. The report does not charge it.',
-          estimatedSavingMinor: levySaving,
+              'other than small companies. The report does not charge it; '
+              'the exemption follows the same disputed small-company '
+              'ceiling, so no amount is quantified here.',
           source: _ntaUri,
+          ruleYear: ruleYear,
+          grade: TaxEvidenceGrade.secondary,
         ),
       );
   } else {
@@ -240,6 +302,8 @@ List<TaxOpportunity> _companyOpportunities(TaxInput input, _NgTaxTable table) {
         title: 'Small company status not available',
         explanation: reason,
         source: _ntaUri,
+        ruleYear: ruleYear,
+        grade: TaxEvidenceGrade.secondary,
       ),
     );
   }
@@ -251,12 +315,14 @@ List<TaxOpportunity> _companyOpportunities(TaxInput input, _NgTaxTable table) {
         table: table,
         registered: input.profile.salesTaxRegistered,
         professionalServicesCode: 'ng.co.revenue.professional_services',
+        ruleYear: ruleYear,
+        figuresPrimary: figuresPrimary,
       ),
     )
     ..add(
       TaxOpportunity(
         id: 'ng.company_return',
-        title: 'File the company return within six months of the year end',
+        title: 'Company return filing deadline',
         explanation:
             'A company in business for more than 18 months files its return '
             'within six months after the end of its accounting year. With a 31 '
@@ -264,6 +330,13 @@ List<TaxOpportunity> _companyOpportunities(TaxInput input, _NgTaxTable table) {
             'June ${input.year.startYear + 1}.',
         deadline: DateTime.utc(input.year.startYear + 1, 6, 30),
         source: _ntaaUri,
+        ruleYear: ruleYear,
+        grade: figuresPrimary
+            ? TaxEvidenceGrade.primary
+            : TaxEvidenceGrade.secondary,
+        assumptions: const [
+          'The deadline counts six months from the end of the accounting year, assuming a 31 December year end.',
+        ],
       ),
     );
 
@@ -277,6 +350,8 @@ TaxOpportunity _vatOpportunity({
   required _NgTaxTable table,
   required bool registered,
   required String professionalServicesCode,
+  required String ruleYear,
+  required bool figuresPrimary,
 }) {
   final professional = position.amounts.containsKey(professionalServicesCode);
   final small =
@@ -290,7 +365,7 @@ TaxOpportunity _vatOpportunity({
   final String explanation;
   if (small) {
     title = registered
-        ? 'Small business VAT: consider opting out'
+        ? 'Small business VAT opt-out'
         : 'Small business VAT exemption';
     explanation = registered
         ? 'Turnover of ${_naira(position.turnover)} is within the '
@@ -303,17 +378,17 @@ TaxOpportunity _vatOpportunity({
               'below N250,000,000. A small business need not register for '
               'VAT, charge VAT or file monthly returns.';
   } else {
-    title = registered ? 'VAT returns are due monthly' : 'Register for VAT';
+    title = registered ? 'VAT returns are due monthly' : 'VAT registration';
     explanation = registered
         ? 'The business is above the small business ceiling, provides '
               'professional services, or has fixed assets above N250,000,000. '
-              'File VAT returns by the 21st day of the following month and '
+              'VAT returns are due by the 21st day of the following month and '
               'remit output tax less input tax.'
         : 'The business is above the $ceiling small business ceiling, '
               'provides professional services, or has fixed assets above '
-              'N250,000,000. Register for VAT, charge ${_percent(
+              'N250,000,000. VAT registration brings ${_percent(
                 table.vatBasisPoints,
-              )} on taxable supplies and file returns by the 21st day of the '
+              )} on taxable supplies and returns due by the 21st day of the '
               'following month.';
   }
 
@@ -322,5 +397,13 @@ TaxOpportunity _vatOpportunity({
     title: title,
     explanation: explanation,
     source: _ntaaUri,
+    ruleYear: ruleYear,
+    grade: figuresPrimary
+        ? TaxEvidenceGrade.primary
+        : TaxEvidenceGrade.secondary,
+    assumptions: const [
+      'The small business ceiling is the rolling 12-month gross turnover test with the fixed-asset limit.',
+      'Professional services companies are outside the small business rules regardless of turnover.',
+    ],
   );
 }
