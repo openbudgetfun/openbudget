@@ -14,6 +14,12 @@ Future<TaxProfileRecord?> taxProfile(Ref ref, String entityId) =>
 Future<TaxReportView> taxReport(Ref ref, String entityId, int startYear) =>
     ref.watch(taxRepositoryProvider).getReport(entityId, startYear);
 
+/// The tax-ready summary for the year starting in [startYear], or for the
+/// year containing the entity's today when [startYear] is null.
+@riverpod
+Future<TaxSummaryView> taxSummary(Ref ref, String entityId, int? startYear) =>
+    ref.watch(taxRepositoryProvider).getSummary(entityId, startYear: startYear);
+
 /// The categories available to the budget's entity kind.
 @riverpod
 Future<List<TaxCategoryView>> taxCategories(Ref ref, String entityId) =>

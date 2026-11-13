@@ -841,3 +841,21 @@ abstract final class AnyCountryData {
   /// The entity id the fake creator hands back.
   static const String createdEntityId = TestData.gbpEntityId;
 }
+
+/// What the tax export flow shows and opens: a Kenyan individual, a country
+/// with no tax pack, whose summary is the universal panel's.
+abstract final class TaxExportData {
+  static const kenyaIntroTitle = 'No full tax rules for Kenya yet';
+  static const vatRatesTitle = 'VAT rates';
+  static const kenyaStandardRate = '16%';
+  static const kenyaAuthorityUrl = 'https://www.kra.go.ke';
+  static const exportButtonLabel = 'Export tax summary';
+
+  /// The signed link the fake server hands out.
+  static const exportLink =
+      'https://api.openbudget.test/tax/export?token=signed-token-for-flow';
+
+  /// The tax year the fake summary reports.
+  static const taxYear = 2026;
+  static const taxYearLabel = 'Tax year 2026';
+}

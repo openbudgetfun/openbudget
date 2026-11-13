@@ -178,6 +178,95 @@ final class TaxReportFamily extends $Family
   String toString() => r'taxReportProvider';
 }
 
+/// The tax-ready summary for the year starting in [startYear], or for the
+/// year containing the entity's today when [startYear] is null.
+
+@ProviderFor(taxSummary)
+final taxSummaryProvider = TaxSummaryFamily._();
+
+/// The tax-ready summary for the year starting in [startYear], or for the
+/// year containing the entity's today when [startYear] is null.
+
+final class TaxSummaryProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<TaxSummaryView>,
+          TaxSummaryView,
+          FutureOr<TaxSummaryView>
+        >
+    with $FutureModifier<TaxSummaryView>, $FutureProvider<TaxSummaryView> {
+  /// The tax-ready summary for the year starting in [startYear], or for the
+  /// year containing the entity's today when [startYear] is null.
+  TaxSummaryProvider._({
+    required TaxSummaryFamily super.from,
+    required (String, int?) super.argument,
+  }) : super(
+         retry: null,
+         name: r'taxSummaryProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$taxSummaryHash();
+
+  @override
+  String toString() {
+    return r'taxSummaryProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<TaxSummaryView> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<TaxSummaryView> create(Ref ref) {
+    final argument = this.argument as (String, int?);
+    return taxSummary(ref, argument.$1, argument.$2);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TaxSummaryProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$taxSummaryHash() => r'49f00892b7f900f16aeb0c564c27c56d291339cb';
+
+/// The tax-ready summary for the year starting in [startYear], or for the
+/// year containing the entity's today when [startYear] is null.
+
+final class TaxSummaryFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<TaxSummaryView>, (String, int?)> {
+  TaxSummaryFamily._()
+    : super(
+        retry: null,
+        name: r'taxSummaryProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The tax-ready summary for the year starting in [startYear], or for the
+  /// year containing the entity's today when [startYear] is null.
+
+  TaxSummaryProvider call(String entityId, int? startYear) =>
+      TaxSummaryProvider._(argument: (entityId, startYear), from: this);
+
+  @override
+  String toString() => r'taxSummaryProvider';
+}
+
 /// The categories available to the budget's entity kind.
 
 @ProviderFor(taxCategories)
