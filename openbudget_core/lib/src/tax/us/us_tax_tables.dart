@@ -65,6 +65,17 @@ final List<Uri> usTaxSources = List.unmodifiable(<Uri>[
   ),
 ]);
 
+/// The version, sources and verification date of each supported year.
+final Map<int, TaxRuleSet> usRuleSetsByStartYear = Map.unmodifiable({
+  for (final startYear in const [2025, 2026])
+    startYear: TaxRuleSet(
+      startYear: startYear,
+      revision: 1,
+      verifiedOn: usRulesVerifiedOn,
+      sources: usTaxSources,
+    ),
+});
+
 /// The inflation-adjusted federal figures for one calendar tax year.
 final class UsTaxYearTable {
   const UsTaxYearTable({

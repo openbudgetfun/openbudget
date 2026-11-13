@@ -6258,6 +6258,12 @@ abstract class AppLocalizations {
   /// **'Guidance only, not tax advice. Check figures with a qualified adviser before filing.'**
   String get taxDisclaimer;
 
+  /// Banner on the tax overview when the country pack is still in preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview: these figures have not yet been checked by a tax professional.'**
+  String get taxPreviewBanner;
+
   /// No description provided for @taxProfileTitle.
   ///
   /// In en, this message translates to:

@@ -886,6 +886,12 @@ class TaxService {
     ],
     sources: [for (final source in report.sources) source.toString()],
     rulesVerifiedOn: report.rulesVerifiedOn,
+    rulesVersion: report.rulesVersion,
+    maturity: report.maturity.name,
+    coverage: {
+      for (final entry in report.coverage.entries)
+        entry.key.name: entry.value.name,
+    },
     uncategorizedCount: report.uncategorizedCount + uncategorizedCount,
     convertedEntryCount: convertedCount,
     opportunities: [

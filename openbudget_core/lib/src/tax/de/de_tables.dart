@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 import 'package:openbudget_core/src/tax/de/de_tariff.dart';
+import 'package:openbudget_core/src/tax/tax_model.dart';
+import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 
 /// Pauschbeträge and caps that § 32a EStG leaves out of the tariff itself.
 @immutable
@@ -395,6 +397,47 @@ final List<Uri> deSources = List.unmodifiable([
   Uri.parse('https://www.gesetze-im-internet.de/rvbeitrsbek_2025/----.html'),
   Uri.parse('https://www.gesetze-im-internet.de/rvbeitrsbek_2026/----.html'),
 ]);
+
+/// The version, sources and verification date of each supported year.
+final Map<int, TaxRuleSet> deRuleSetsByStartYear = Map.unmodifiable({
+  for (final startYear in deTaxTables.keys)
+    startYear: TaxRuleSet(
+      startYear: startYear,
+      revision: 1,
+      verifiedOn: deRulesVerifiedOn,
+      sources: deSources,
+    ),
+});
+
+/// The rule set for [startYear], or the unsupported-year error.
+TaxRuleSet deRuleSetFor(int startYear) {
+  final ruleSet = deRuleSetsByStartYear[startYear];
+  if (ruleSet == null) {
+    throw UnsupportedTaxYearException(TaxJurisdiction.de, startYear);
+  }
+  return ruleSet;
+}
+
+/// What the German pack covers, and how mature it is.
+///
+/// The company return covers Körperschaftsteuer, Gewerbesteuer and
+/// Solidaritätszuschlag but not a full tax balance sheet. Indirect tax
+/// covers the Umsatzsteuer from line data and the Kleinunternehmer test, not
+/// every Voranmeldung box. Capital gains cover investment income, not share
+/// disposals. Digital assets and payroll are not built.
+const TaxPackManifest deTaxManifest = TaxPackManifest(
+  maturity: TaxPackMaturity.preview,
+  sections: {
+    TaxSection.personalReturn: TaxSectionCoverage.full,
+    TaxSection.selfEmployment: TaxSectionCoverage.full,
+    TaxSection.companyReturn: TaxSectionCoverage.partial,
+    TaxSection.indirectTax: TaxSectionCoverage.partial,
+    TaxSection.capitalGains: TaxSectionCoverage.partial,
+    TaxSection.digitalAssets: TaxSectionCoverage.notBuilt,
+    TaxSection.filingCalendar: TaxSectionCoverage.partial,
+    TaxSection.payroll: TaxSectionCoverage.notBuilt,
+  },
+);
 
 /// § 149 Abs. 2 AO: seven months after the end of the calendar year, moved
 /// forward by [deRollForward] when it falls on a weekend or holiday.

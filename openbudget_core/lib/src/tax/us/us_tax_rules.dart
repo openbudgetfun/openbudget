@@ -7,6 +7,26 @@ import 'package:openbudget_core/src/tax/us/us_tax_tables.dart';
 export 'package:openbudget_core/src/tax/us/us_tax_categories.dart';
 export 'package:openbudget_core/src/tax/us/us_tax_tables.dart';
 
+/// What the United States federal pack covers, and how mature it is.
+///
+/// State income and sales taxes, the alternative minimum tax and several
+/// credits are outside the pack, so the personal and company returns are
+/// partial. The federal government levies no general sales tax, so indirect
+/// tax is not applicable.
+const TaxPackManifest usTaxManifest = TaxPackManifest(
+  maturity: TaxPackMaturity.preview,
+  sections: {
+    TaxSection.personalReturn: TaxSectionCoverage.partial,
+    TaxSection.selfEmployment: TaxSectionCoverage.full,
+    TaxSection.companyReturn: TaxSectionCoverage.partial,
+    TaxSection.indirectTax: TaxSectionCoverage.notApplicable,
+    TaxSection.capitalGains: TaxSectionCoverage.partial,
+    TaxSection.digitalAssets: TaxSectionCoverage.notBuilt,
+    TaxSection.filingCalendar: TaxSectionCoverage.notBuilt,
+    TaxSection.payroll: TaxSectionCoverage.notBuilt,
+  },
+);
+
 /// The United States federal tax rules.
 ///
 /// The pack covers calendar years 2025 and 2026, using the figures in
@@ -25,7 +45,19 @@ final class UsTaxRules implements TaxRulePack {
   TaxJurisdiction get jurisdiction => TaxJurisdiction.us;
 
   @override
+  TaxPackManifest get manifest => usTaxManifest;
+
+  @override
   Set<int> get supportedStartYears => const {2025, 2026};
+
+  @override
+  TaxRuleSet ruleSet(int startYear) {
+    final ruleSet = usRuleSetsByStartYear[startYear];
+    if (ruleSet == null) {
+      throw UnsupportedTaxYearException(TaxJurisdiction.us, startYear);
+    }
+    return ruleSet;
+  }
 
   @override
   TaxYear taxYear(int startYear) => TaxYear(
@@ -832,6 +864,7 @@ final class UsTaxRules implements TaxRulePack {
     UsTaxYearTable table,
     UsFilingStatus status,
   ) {
+    final rules = ruleSet(input.year.startYear);
     final computation = _individualComputation(input, table);
     final uncategorizedCount =
         computation.totals.uncategorizedCount +
@@ -1018,11 +1051,15 @@ final class UsTaxRules implements TaxRulePack {
       ),
       sources: usTaxSources,
       rulesVerifiedOn: usRulesVerifiedOn,
+      rulesVersion: rules.versionFor(TaxJurisdiction.us),
+      maturity: manifest.maturity,
+      coverage: manifest.sections,
       uncategorizedCount: uncategorizedCount,
     );
   }
 
   TaxReport _soleTraderReport(TaxInput input) {
+    final rules = ruleSet(input.year.startYear);
     final computation = _scheduleCComputation(input);
     final lines = <TaxReportLine>[
       ..._categoryLines(computation.totals, usScheduleCCategories),
@@ -1064,11 +1101,15 @@ final class UsTaxRules implements TaxRulePack {
       ),
       sources: usTaxSources,
       rulesVerifiedOn: usRulesVerifiedOn,
+      rulesVersion: rules.versionFor(TaxJurisdiction.us),
+      maturity: manifest.maturity,
+      coverage: manifest.sections,
       uncategorizedCount: computation.totals.uncategorizedCount,
     );
   }
 
   TaxReport _companyReport(TaxInput input) {
+    final rules = ruleSet(input.year.startYear);
     final computation = _companyComputation(input);
     final balanceDue = computation.tax - computation.alreadyPaid;
     final lines = <TaxReportLine>[
@@ -1139,6 +1180,9 @@ final class UsTaxRules implements TaxRulePack {
       assumptions: _companyAssumptions(computation.totals.uncategorizedCount),
       sources: usTaxSources,
       rulesVerifiedOn: usRulesVerifiedOn,
+      rulesVersion: rules.versionFor(TaxJurisdiction.us),
+      maturity: manifest.maturity,
+      coverage: manifest.sections,
       uncategorizedCount: computation.totals.uncategorizedCount,
     );
   }
