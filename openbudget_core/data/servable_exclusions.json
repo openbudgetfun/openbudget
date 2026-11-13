@@ -1,0 +1,26 @@
+{
+  "comment": "Countries OpenBudget does not serve: the placeholder for open question Q1 (docs/tax-jurisdictions.md section 10). Which jurisdictions to block outright is a legal decision for counsel; until counsel answers, the default is every country under comprehensive UK, EU or US sanctions, plus Russia and Belarus, which sit under broad sectoral sanctions. The bootstrap tool reads this file to set each country's servable flag, and the countries schema test keeps the file and the generated flags in step. Syria (SY) was reviewed on 2026-11-13: the UK, EU and US lifted their comprehensive measures during 2025, so it is not in this list — revisit if measures return.",
+  "reviewedOn": "2026-11-13",
+  "excluded": [
+    {
+      "code": "BY",
+      "reason": "Broad sectoral UK, EU and US sanctions. Placeholder pending counsel's answer to Q1."
+    },
+    {
+      "code": "CU",
+      "reason": "Comprehensive US embargo (the UK and EU run targeted measures only). Placeholder pending counsel's answer to Q1."
+    },
+    {
+      "code": "IR",
+      "reason": "Comprehensive UK, EU and US sanctions. Placeholder pending counsel's answer to Q1."
+    },
+    {
+      "code": "KP",
+      "reason": "Comprehensive UK, EU and US sanctions. Placeholder pending counsel's answer to Q1."
+    },
+    {
+      "code": "RU",
+      "reason": "Broad sectoral UK, EU and US sanctions. Placeholder pending counsel's answer to Q1."
+    }
+  ]
+}

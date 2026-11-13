@@ -43,6 +43,12 @@ jobs:
         run: cd openbudget_ui && dart run tool/generate_openbudget_icons.dart --check
         shell: devenv shell -- bash -e {0}
 
+      # The country dataset is generated from data/countries/*.json; fail when
+      # the committed Dart drifts from the generator.
+      - name: check generated country data
+        run: cd openbudget_core && dart run tool/generate_country_data.dart --check
+        shell: devenv shell -- bash -e {0}
+
   analyze:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
