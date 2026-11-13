@@ -107,6 +107,10 @@ final class NgTaxRules implements TaxRulePack {
   TaxCategory? category(String code) => _NgTaxCategories.byCode[code];
 
   @override
+  String? mapUniversalCategory(String universalCode, EntityKind kind) =>
+      _NgTaxCategories.mapUniversal(universalCode, kind);
+
+  @override
   TaxReport report(TaxInput input) {
     final table = _tableFor(input);
     return switch (input.profile.entityKind) {
