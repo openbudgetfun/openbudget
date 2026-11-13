@@ -9,6 +9,7 @@ environment:
 resolution: workspace
 
 dependencies:
+  archive: ^4.6.0
   crypto: ^3.0.8
   cryptography: ^2.9.0
   http: ^1.6.0
