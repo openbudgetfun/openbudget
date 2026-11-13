@@ -8,6 +8,7 @@ export 'src/budgeting/month_key.dart';
 export 'src/budgeting/recurrence.dart';
 export 'src/constants/currencies.dart';
 export 'src/countries/country_info.dart';
+export 'src/countries/tax_freshness.dart';
 export 'src/generated/protocol.dart';
 export 'src/ledger/chart_of_accounts.dart';
 export 'src/ledger/exchange_rate.dart';
