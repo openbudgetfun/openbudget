@@ -128,6 +128,7 @@ WalletHolding _holding({
   String priceCurrencyCode = 'USD',
 }) => WalletHolding(
   walletId: UuidValue.fromString(_walletId),
+  network: WalletNetwork.solanaMainnet,
   assetId: 'So11111111111111111111111111111111111111112',
   symbol: symbol,
   decimals: decimals,

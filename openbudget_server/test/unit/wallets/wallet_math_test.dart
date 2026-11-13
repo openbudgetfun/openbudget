@@ -189,6 +189,7 @@ void main() {
   test('wallet raw JSON is excluded from the protocol payload', () {
     final transaction = WalletTransaction(
       walletId: UuidValue.fromString('10000000-0000-4000-a000-000000000001'),
+      network: WalletNetwork.solanaMainnet,
       signature: 'sig',
       slot: 1,
       description: 'Swap',

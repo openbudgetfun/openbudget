@@ -7,3 +7,5 @@ values:
   - magicEden
   ### Computed from a related asset or pool.
   - derived
+  - coingecko
+  - defillama
