@@ -36,6 +36,25 @@ abstract base class TaxProfile {
 
   Map<String, Object?> toJson();
 
+  /// The answers to this pack's questions that describe the profile, keyed
+  /// by [TaxProfileQuestion.key] (a month-and-day question by its
+  /// `<key>Month` and `<key>Day`), with a value for every question even
+  /// where [toJson] omits a default. The generic profile form starts from
+  /// these. Profiles whose questions are not one stored field each, or
+  /// that store a default as nothing, override it.
+  Map<String, Object?> toAnswers() => toJson();
+
+  /// This profile with [answers] applied, decoded through the pack so the
+  /// result is validated like any stored profile. Answers replace the
+  /// fields they name; every other field keeps its value. Keys are those
+  /// of [toAnswers].
+  ///
+  /// Throws [FormatException] naming the field when an answer is invalid.
+  TaxProfile withAnswers(Map<String, Object?> answers) =>
+      TaxRules.forJurisdiction(
+        jurisdiction,
+      ).profileFromJson({...toJson(), ...answers});
+
   /// Decodes a stored profile. The jurisdiction names the rule pack, and
   /// the pack's own decoder defines the fields, so the pack is the single
   /// source of truth for its stored shape.

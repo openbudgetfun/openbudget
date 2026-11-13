@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/main.dart';
 import 'package:openbudget_app/src/features/agent_access/screens/agent_access_screen.dart';
 import 'package:openbudget_app/src/features/assistant/screens/assistant_screen.dart';
-import 'package:openbudget_core/openbudget_core.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_question_field.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 import 'test_data.dart';
@@ -920,13 +920,30 @@ class TaxProfilePage {
 
   Finder get title => find.text('Tax profile').first;
 
+  /// A question's field is found by the question's key, not its wording,
+  /// so the same page object serves every country's questions.
+  Finder question(String key) => find.byKey(taxQuestionFieldKey(key));
+
   /// The jurisdiction comes from the entity now; the kind dropdown is the
   /// only entity-level control left on the form.
-  Finder get entityField => find.byType(DropdownButtonFormField<EntityKind>);
-  Finder get scottishTaxpayerToggle => find.text('Scottish taxpayer');
-  Finder get studentLoanField => find.byType(DropdownButtonFormField<String>);
-  Finder get annualRentField => find.byType(TextField).first;
+  Finder get entityField => question('entityKind');
+  Finder get scottishTaxpayerToggle => question('scottishTaxpayer');
+  Finder get taxResidentToggle => question('taxResident');
+  Finder get studentLoanField => question('studentLoanPlan');
+  Finder get annualRentField => question('annualRentMinor');
   Finder get saveButton => find.text('Save profile');
+
+  /// Scrolls [field] into view and taps it, for a switch or a dropdown.
+  Future<void> tapQuestion(Finder field) async {
+    await tester.scrollUntilVisible(
+      field,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(field);
+    await tester.pumpAndSettle();
+  }
 
   Future<void> save() async {
     await tester.scrollUntilVisible(
