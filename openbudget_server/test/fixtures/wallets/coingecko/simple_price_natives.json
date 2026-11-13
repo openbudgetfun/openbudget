@@ -1,0 +1,62 @@
+{
+  "bitcoin": {
+    "usd": 68830,
+    "last_updated_at": 1794595022
+  },
+  "ethereum": {
+    "usd": 1940.13,
+    "last_updated_at": 1794595041
+  },
+  "binancecoin": {
+    "usd": 635.35,
+    "last_updated_at": 1794595022
+  },
+  "avalanche-2": {
+    "usd": 8.41,
+    "last_updated_at": 1794595022
+  },
+  "polygon-ecosystem-token": {
+    "usd": 0.08597,
+    "last_updated_at": 1794595041
+  },
+  "tron": {
+    "usd": 0.312834,
+    "last_updated_at": 1794595022
+  },
+  "ripple": {
+    "usd": 1.024,
+    "last_updated_at": 1794595035
+  },
+  "hyperliquid": {
+    "usd": 72.61,
+    "last_updated_at": 1794595022
+  },
+  "dogecoin": {
+    "usd": 0.065451,
+    "last_updated_at": 1794595035
+  },
+  "litecoin": {
+    "usd": 49.7,
+    "last_updated_at": 1794595035
+  },
+  "cardano": {
+    "usd": 0.171538,
+    "last_updated_at": 1794595035
+  },
+  "the-open-network": {
+    "usd": 1.13,
+    "last_updated_at": 1794595041
+  },
+  "sui": {
+    "usd": 0.807345,
+    "last_updated_at": 1794595022
+  },
+  "aptos": {
+    "usd": 0.542736,
+    "last_updated_at": 1794595041
+  },
+  "solana": {
+    "usd": 79.97,
+    "last_updated_at": 1794595022
+  }
+}
