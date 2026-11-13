@@ -18,6 +18,7 @@ import 'package:openbudget_app/src/features/home/providers/entity_summary_provid
 import 'package:openbudget_app/src/features/home/screens/create_entity_screen.dart';
 import 'package:openbudget_app/src/features/home/screens/home_screen.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/crypto_breakdown_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dart';
 import 'package:openbudget_app/src/features/settings/providers/reporting_currency_provider.dart';
@@ -384,6 +385,9 @@ Future<void> _pumpTour(
           (ref, id) async => MultiCurrencyData.household(),
         ),
         reportingCurrencyProvider.overrideWith((ref) async => 'GBP'),
+        cryptoBreakdownProvider.overrideWith(
+          (ref, arg) async => TestData.noWalletsCryptoBreakdown(arg.$2),
+        ),
         netWorthProvider.overrideWith(
           (ref) async => MultiCurrencyData.netWorth(),
         ),

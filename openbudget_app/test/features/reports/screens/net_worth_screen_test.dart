@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/reports/providers/crypto_breakdown_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dart';
 import 'package:openbudget_app/src/features/settings/providers/reporting_currency_provider.dart';
@@ -10,6 +11,7 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 import '../../../fixtures/budget_month.dart';
+import '../../../fixtures/crypto_breakdown.dart';
 
 const String _entityId = fixtureEntityId;
 
@@ -36,18 +38,24 @@ NetWorthView _view({
   accounts: accounts,
 );
 
-Widget _buildSubject(NetWorthView view) => ProviderScope(
-  overrides: [
-    netWorthProvider.overrideWith((ref) async => view),
-    reportingCurrencyProvider.overrideWith((ref) async => 'USD'),
-  ],
-  child: MaterialApp(
-    theme: OpenBudgetTheme.light,
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    home: const NetWorthScreen(entityId: _entityId),
-  ),
-);
+Widget _buildSubject(NetWorthView view, {bool withWallets = false}) =>
+    ProviderScope(
+      overrides: [
+        netWorthProvider.overrideWith((ref) async => view),
+        cryptoBreakdownProvider.overrideWith(
+          (ref, arg) async => withWallets
+              ? cryptoBreakdownView(arg.$2)
+              : noWalletsBreakdown(arg.$2),
+        ),
+        reportingCurrencyProvider.overrideWith((ref) async => 'USD'),
+      ],
+      child: MaterialApp(
+        theme: OpenBudgetTheme.light,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const NetWorthScreen(entityId: _entityId),
+      ),
+    );
 
 void main() {
   testWidgets('renders single-currency net worth summary', (tester) async {
@@ -199,5 +207,48 @@ void main() {
     );
     expect(find.text('Some accounts are not included'), findsOneWidget);
     expect(find.textContaining('no rate'), findsOneWidget);
+  });
+
+  testWidgets('shows no Crypto section for an entity without wallets', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildSubject(_view()));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('crypto-breakdown-section')), findsNothing);
+    expect(find.text('Crypto'), findsNothing);
+  });
+
+  testWidgets('shows the Crypto section under the history chart when the '
+      'entity has wallets', (tester) async {
+    // Tall enough that the whole list is built and laid out at once.
+    tester.view
+      ..physicalSize = const Size(800, 4000)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(_buildSubject(_view(), withWallets: true));
+    await tester.pumpAndSettle();
+
+    final section = find.byKey(const Key('crypto-breakdown-section'));
+    expect(section, findsOneWidget);
+    expect(find.text('Across 2 wallets'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('crypto-breakdown-toggle-by-asset')));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('crypto-breakdown-row-asset:USDC')),
+      findsOneWidget,
+    );
+
+    // The history chart sits above it and the breakdown tabs below.
+    final sectionTop = tester.getTopLeft(section).dy;
+    expect(
+      tester.getTopLeft(find.text('History').first).dy,
+      lessThan(sectionTop),
+    );
+    expect(
+      tester.getTopLeft(find.byKey(const Key('net-worth-tab-by-entity'))).dy,
+      greaterThan(sectionTop),
+    );
   });
 }

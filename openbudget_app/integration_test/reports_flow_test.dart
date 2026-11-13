@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_list_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/crypto_breakdown_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
 import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dart';
@@ -166,6 +167,9 @@ Widget _buildApp({ThemeMode themeMode = ThemeMode.light}) {
         final (entityId, endMonth, monthCount) = args;
         return _reportForRange(endMonth, monthCount);
       }),
+      cryptoBreakdownProvider.overrideWith(
+        (ref, arg) async => TestData.noWalletsCryptoBreakdown(arg.$2),
+      ),
       netWorthProvider.overrideWith(
         (ref) async => TestData.gbpNetWorthWithUsd(),
       ),

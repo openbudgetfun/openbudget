@@ -2610,6 +2610,80 @@
   "netWorthTabByEntity": "By entity",
   "netWorthTabByCurrency": "By currency",
   "netWorthTabByAccount": "By account",
+  "cryptoBreakdownTitle": "Crypto",
+  "cryptoBreakdownByChain": "By chain",
+  "cryptoBreakdownByAsset": "By asset",
+  "cryptoBreakdownWallets": "{count, plural, =1{Across 1 wallet} other{Across {count} wallets}}",
+  "@cryptoBreakdownWallets": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cryptoBreakdownBarLabel": "{grouping}: {shares}",
+  "@cryptoBreakdownBarLabel": {
+    "description": "Text alternative for the crypto overprint bar. grouping is the selected toggle label; shares lists each row and its share.",
+    "placeholders": {
+      "grouping": {
+        "type": "String"
+      },
+      "shares": {
+        "type": "String"
+      }
+    }
+  },
+  "cryptoBreakdownBarShare": "{name} {share}",
+  "@cryptoBreakdownBarShare": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "share": {
+        "type": "String"
+      }
+    }
+  },
+  "cryptoBreakdownShareUnderOne": "<1%",
+  "cryptoBreakdownOther": "Other",
+  "cryptoBreakdownOtherHoldings": "{count, plural, =1{1 smaller holding} other{{count} smaller holdings}}",
+  "@cryptoBreakdownOtherHoldings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cryptoBreakdownChainHoldings": "{count, plural, =1{1 holding} other{{count} holdings}}",
+  "@cryptoBreakdownChainHoldings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cryptoBreakdownNetworksMore": "{names} +{count}",
+  "@cryptoBreakdownNetworksMore": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cryptoBreakdownEmpty": "Nothing is counted yet. Tokens without a price are left out until one is found.",
+  "cryptoBreakdownFootnote": "Tokens that look like scams and tokens without a price are left out.",
+  "cryptoBreakdownMissingRates": "No exchange rate for {currencies}, so those holdings are left out of this figure.",
+  "@cryptoBreakdownMissingRates": {
+    "placeholders": {
+      "currencies": {
+        "type": "String"
+      }
+    }
+  },
+  "cryptoBreakdownLoadError": "Couldn't load your crypto breakdown",
   "netWorthValuedOn": "Valued {date}",
   "@netWorthValuedOn": {
     "placeholders": {
