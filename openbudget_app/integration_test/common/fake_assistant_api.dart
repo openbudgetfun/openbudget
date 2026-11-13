@@ -18,7 +18,7 @@ class FakeAssistantApi implements AssistantApi {
            usage ??
            AgentUsageView(
              provider: AgentProvider.zen,
-             allowanceMicroUsd: 1000000,
+             allowanceMicroUsd: 5000000,
              usedMicroUsd: 420000,
            );
 

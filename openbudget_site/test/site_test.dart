@@ -40,7 +40,7 @@ void main() {
         (data['offers']! as List<Object?>).cast<Map<String, Object?>>().map(
           (offer) => offer['price'],
         ),
-        ['0', '10'],
+        ['0', '20'],
       );
     });
 
