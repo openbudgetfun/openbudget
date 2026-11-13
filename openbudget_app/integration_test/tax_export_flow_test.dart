@@ -184,7 +184,9 @@ void main() {
       await scrollIntoView(tester, panel.ratesTitle);
       expect(panel.ratesTitle, findsOneWidget);
       expect(panel.standardRate, findsOneWidget);
-      expect(panel.secondaryBadge, findsOneWidget);
+      // The standard rate and the registration threshold both cite a
+      // secondary source, so the badge shows on each.
+      expect(panel.secondaryBadge, findsWidgets);
       expect(panel.authorityLink, findsOneWidget);
 
       // The export opens the signed link the server made.
