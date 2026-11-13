@@ -1,13 +1,17 @@
 ### Sales tax grouped by the rate each line implies.
 ###
 ### The rate comes from the line: tax over the net amount it was charged
-### on, in basis points. A separate VAT line — one tagged with a
-### sales-tax category — carries no net amount, so its rate is unknown and
-### it is grouped under the null rate.
+### on, in millionths of the taxed amount — the same exact integer unit
+### the country dataset uses for `IndirectTaxRate.ratePerMillion`. A
+### separate VAT line — one tagged with a sales-tax category — carries
+### no net amount, so its rate is unknown and it is grouped under the
+### null rate.
 class: TaxSummarySalesTaxRateView
 fields:
-  ### 2000 is 20%. Null when the rate could not be derived from the line.
-  rateBasisPoints: int?
+  ### 200000 is 20%; the derived ratio is rounded half away from zero
+  ### at the millionth. Null when the rate could not be derived from
+  ### the line.
+  ratePerMillion: int?
   ### Tax charged to customers in this group, after business-use share.
   collectedMinor: int
   ### Tax paid on purchases in this group, after business-use share.

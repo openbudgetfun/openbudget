@@ -529,7 +529,9 @@ class TaxSummaryService {
             paidMinor: direction == _SalesTaxDirection.paid
                 ? apportionedTax
                 : 0,
-            rateBasisPoints: net > 0 ? salesTaxMinor * 10000 ~/ net : null,
+            ratePerMillion: net > 0
+                ? _derivedRatePerMillion(salesTaxMinor, net)
+                : null,
           );
           if (direction == _SalesTaxDirection.collected) {
             salesTaxCollectedMinor += recorded;
@@ -574,7 +576,7 @@ class TaxSummaryService {
     final salesTaxByRate = [
       for (final rate in rateKeys)
         TaxSummarySalesTaxRateView(
-          rateBasisPoints: rate,
+          ratePerMillion: rate,
           collectedMinor: byRate[rate]!.collectedMinor,
           paidMinor: byRate[rate]!.paidMinor,
         ),
@@ -686,17 +688,34 @@ class TaxSummaryService {
     TaxEntry entry, {
     int collectedMinor = 0,
     int paidMinor = 0,
-    int? rateBasisPoints,
+    int? ratePerMillion,
   }) {
     if (collectedMinor == 0 && paidMinor == 0) return 0;
 
-    byRate.putIfAbsent(rateBasisPoints, _SalesTaxBucket.new)
+    byRate.putIfAbsent(ratePerMillion, _SalesTaxBucket.new)
       ..collectedMinor += collectedMinor
       ..paidMinor += paidMinor;
     quarters[_quarterIndexOf(entry.date, period.start)]
       ..collectedMinor += collectedMinor
       ..paidMinor += paidMinor;
     return collectedMinor + paidMinor;
+  }
+
+  /// The rate [taxMinor] implies over [netMinor], in millionths of the
+  /// taxed amount — the same unit as `IndirectTaxRate.ratePerMillion`.
+  ///
+  /// A derived ratio of two minor-unit amounts is still inexact at any
+  /// fixed precision: the tax side is a whole minor unit, so a true
+  /// 9.975% rate on a £100 line implies £9.975 and stores £9.98. To
+  /// keep that error bounded the rule is round half away from zero at
+  /// the millionth. The scaling runs in BigInt arithmetic so the
+  /// product never overflows for safe minor-unit amounts; at this
+  /// precision the derivation is one BigInt multiply per line with
+  /// embedded tax.
+  static int _derivedRatePerMillion(int taxMinor, int netMinor) {
+    final scaled = BigInt.from(taxMinor) * BigInt.from(1000000);
+    final net = BigInt.from(netMinor);
+    return ((scaled * BigInt.two + net) ~/ (net * BigInt.two)).toInt();
   }
 
   /// The quarter of the summary period a civil date falls in.

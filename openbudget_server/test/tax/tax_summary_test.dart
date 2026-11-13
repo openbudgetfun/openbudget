@@ -344,7 +344,7 @@ void main() {
         expect(summary.salesTaxCollectedMinor, 20000);
         expect(summary.salesTaxPaidMinor, 9600);
         final rate = summary.salesTaxByRate.single;
-        expect(rate.rateBasisPoints, 2000);
+        expect(rate.ratePerMillion, 200000);
         expect(rate.collectedMinor, 20000);
         expect(rate.paidMinor, 9600);
         final quarter = summary.salesTaxByQuarter.single;
@@ -401,12 +401,77 @@ void main() {
 
       expect(summary.salesTaxCollectedMinor, 20000);
       expect(summary.salesTaxPaidMinor, 5000);
-      expect(summary.salesTaxByRate.single.rateBasisPoints, isNull);
+      expect(summary.salesTaxByRate.single.ratePerMillion, isNull);
       expect(summary.salesTaxByRate.single.collectedMinor, 20000);
       expect(summary.salesTaxByRate.single.paidMinor, 5000);
       // The tax lines are not income or expenses.
       expect(summary.totalIncomeMinor, 0);
       expect(summary.totalExpenseMinor, 0);
+    });
+
+    test('then a 9.975% line derives its rate in millionths', () async {
+      final gbp = await book.addAccount();
+      // A true 9.975% rate on a £100 sale implies £9.975 of tax, which
+      // the minor-unit line stores as £9.98: the derived ratio is
+      // 99800 per million, close to but not exactly the true 99750.
+      await createTaxTransaction(
+        book.session,
+        gbp,
+        amountMinor: 10998,
+        date: DateTime.utc(2026, 6, 10),
+        lines: [
+          TransactionLineInput(
+            amountMinor: 10998,
+            taxCategoryCode: 'universal.income.self_employment',
+            salesTaxMinor: 998,
+          ),
+        ],
+      );
+      // On a £4,000 sale the whole-unit tax £399 is the exact rate.
+      await createTaxTransaction(
+        book.session,
+        gbp,
+        amountMinor: 439900,
+        date: DateTime.utc(2026, 6, 11),
+        lines: [
+          TransactionLineInput(
+            amountMinor: 439900,
+            taxCategoryCode: 'universal.income.self_employment',
+            salesTaxMinor: 39900,
+          ),
+        ],
+      );
+      // £399.01 implies 99752.5 per million; rounding half away from
+      // zero at the millionth gives 99753.
+      await createTaxTransaction(
+        book.session,
+        gbp,
+        amountMinor: 439901,
+        date: DateTime.utc(2026, 6, 12),
+        lines: [
+          TransactionLineInput(
+            amountMinor: 439901,
+            taxCategoryCode: 'universal.income.self_employment',
+            salesTaxMinor: 39901,
+          ),
+        ],
+      );
+
+      final summary = await endpoint.getSummary(
+        book.session,
+        book.entity.id!,
+        startYear: 2026,
+      );
+
+      final rates = summary.salesTaxByRate;
+      expect(rates, hasLength(3));
+      expect(rates[0].ratePerMillion, 99750);
+      expect(rates[0].collectedMinor, 39900);
+      expect(rates[1].ratePerMillion, 99753);
+      expect(rates[1].collectedMinor, 39901);
+      expect(rates[2].ratePerMillion, 99800);
+      expect(rates[2].collectedMinor, 998);
+      expect(summary.salesTaxCollectedMinor, 80799);
     });
 
     test(
