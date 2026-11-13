@@ -186,6 +186,7 @@ wallet:
   - getForAccount:
   - sync:
   - listHoldings:
+  - setHoldingVerdict:
   - listTransactions:
   - listTaxYearSummaries:
   - updateTransactionMetadata:
