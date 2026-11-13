@@ -1287,10 +1287,13 @@ LIMIT @limit''',
   }
 
   static void _requireNetwork(WalletNetwork network) {
-    switch (network) {
-      case WalletNetwork.solanaMainnet:
-      case WalletNetwork.solanaDevnet:
-        return;
+    // The Solana provider is the only reader today; W1.5 replaces this gate
+    // with the core address parser and per-family providers.
+    if (network != WalletNetwork.solanaMainnet &&
+        network != WalletNetwork.solanaDevnet) {
+      throw ValidationException(
+        message: 'That network has no wallet reader yet',
+      );
     }
   }
 

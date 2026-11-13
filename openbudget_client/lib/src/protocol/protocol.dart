@@ -191,7 +191,6 @@ import 'wallets/price_quality.dart' as _i6j30n20;
 import 'wallets/price_source.dart' as _iu1a5mev;
 import 'wallets/wallet.dart' as _ilu5i0rn;
 import 'wallets/wallet_holding.dart' as _iqqppnaa;
-import 'wallets/wallet_network.dart' as _ifam4bx7;
 import 'wallets/wallet_sync_result.dart' as _ipdq2p58;
 import 'wallets/wallet_tax_year_summary.dart' as _ivsmsmw6;
 import 'wallets/wallet_transaction.dart' as _i6m1jx15;
@@ -303,7 +302,6 @@ export 'wallets/price_quality.dart';
 export 'wallets/price_source.dart';
 export 'wallets/wallet.dart';
 export 'wallets/wallet_holding.dart';
-export 'wallets/wallet_network.dart';
 export 'wallets/wallet_sync_result.dart';
 export 'wallets/wallet_tax_year_summary.dart';
 export 'wallets/wallet_transaction.dart';
@@ -430,7 +428,6 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_iu1a5mev.PriceSource>,
           _isc.getType<_ilu5i0rn.Wallet>,
           _isc.getType<_iqqppnaa.WalletHolding>,
-          _isc.getType<_ifam4bx7.WalletNetwork>,
           _isc.getType<_ipdq2p58.WalletSyncResult>,
           _isc.getType<_ivsmsmw6.WalletTaxYearSummary>,
           _isc.getType<_i6m1jx15.WalletTransaction>,
@@ -542,7 +539,6 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_iu1a5mev.PriceSource?>,
           _isc.getType<_ilu5i0rn.Wallet?>,
           _isc.getType<_iqqppnaa.WalletHolding?>,
-          _isc.getType<_ifam4bx7.WalletNetwork?>,
           _isc.getType<_ipdq2p58.WalletSyncResult?>,
           _isc.getType<_ivsmsmw6.WalletTaxYearSummary?>,
           _isc.getType<_i6m1jx15.WalletTransaction?>,
@@ -715,7 +711,6 @@ class Protocol extends _isc.SerializationManager
           'PriceSource',
           'Wallet',
           'WalletHolding',
-          'WalletNetwork',
           'WalletSyncResult',
           'WalletTaxYearSummary',
           'WalletTransaction',
@@ -1069,9 +1064,6 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _iqqppnaa.WalletHolding) {
       return _iqqppnaa.WalletHolding.fromJson(data) as T;
-    }
-    if (t == _ifam4bx7.WalletNetwork) {
-      return _ifam4bx7.WalletNetwork.fromJson(data) as T;
     }
     if (t == _ipdq2p58.WalletSyncResult) {
       return _ipdq2p58.WalletSyncResult.fromJson(data) as T;
@@ -1525,10 +1517,6 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _isc.getType<_iqqppnaa.WalletHolding?>()) {
       return (data != null ? _iqqppnaa.WalletHolding.fromJson(data) : null)
-          as T;
-    }
-    if (t == _isc.getType<_ifam4bx7.WalletNetwork?>()) {
-      return (data != null ? _ifam4bx7.WalletNetwork.fromJson(data) : null)
           as T;
     }
     if (t == _isc.getType<_ipdq2p58.WalletSyncResult?>()) {
@@ -1988,7 +1976,6 @@ class Protocol extends _isc.SerializationManager
       _iu1a5mev.PriceSource => 'PriceSource',
       _ilu5i0rn.Wallet => 'Wallet',
       _iqqppnaa.WalletHolding => 'WalletHolding',
-      _ifam4bx7.WalletNetwork => 'WalletNetwork',
       _ipdq2p58.WalletSyncResult => 'WalletSyncResult',
       _ivsmsmw6.WalletTaxYearSummary => 'WalletTaxYearSummary',
       _i6m1jx15.WalletTransaction => 'WalletTransaction',
@@ -2222,8 +2209,6 @@ class Protocol extends _isc.SerializationManager
         return 'Wallet';
       case _iqqppnaa.WalletHolding():
         return 'WalletHolding';
-      case _ifam4bx7.WalletNetwork():
-        return 'WalletNetwork';
       case _ipdq2p58.WalletSyncResult():
         return 'WalletSyncResult';
       case _ivsmsmw6.WalletTaxYearSummary():
@@ -2587,9 +2572,6 @@ class Protocol extends _isc.SerializationManager
     }
     if (dataClassName == 'WalletHolding') {
       return deserialize<_iqqppnaa.WalletHolding>(data['data']);
-    }
-    if (dataClassName == 'WalletNetwork') {
-      return deserialize<_ifam4bx7.WalletNetwork>(data['data']);
     }
     if (dataClassName == 'WalletSyncResult') {
       return deserialize<_ipdq2p58.WalletSyncResult>(data['data']);

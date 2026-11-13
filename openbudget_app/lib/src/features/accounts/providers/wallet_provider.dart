@@ -1,5 +1,6 @@
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'wallet_provider.g.dart';

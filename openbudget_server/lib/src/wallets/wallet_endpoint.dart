@@ -1,3 +1,4 @@
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/entities/entity_access.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/wallets/wallet_service.dart';

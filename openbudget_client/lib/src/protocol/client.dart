@@ -132,8 +132,6 @@ import 'package:openbudget_client/src/protocol/wallets/wallet.dart'
     as _igzh8mor;
 import 'package:openbudget_client/src/protocol/wallets/wallet_holding.dart'
     as _izm3e498;
-import 'package:openbudget_client/src/protocol/wallets/wallet_network.dart'
-    as _i8u1c0bj;
 import 'package:openbudget_client/src/protocol/wallets/wallet_sync_result.dart'
     as _idhyojww;
 import 'package:openbudget_client/src/protocol/wallets/wallet_tax_year_summary.dart'
@@ -2372,7 +2370,7 @@ class EndpointWallet extends _isc.EndpointRef {
   /// Creates the wallet and its crypto account in one transaction, then syncs.
   _ida.Future<_igzh8mor.Wallet> connect(
     _isc.UuidValue entityId,
-    _i8u1c0bj.WalletNetwork network,
+    _ifz8weqz.WalletNetwork network,
     String address, {
     String? label,
     String? accountName,
