@@ -8,10 +8,36 @@
   "timeZones": [
     "Asia/Aden"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "gst",
+    "localName": "General Sales Tax (GST)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 500,
+        "from": "2001-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Yemen Tax Authority",
+    "url": "https://www.tax.gov.ye"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +56,20 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Nomad Watch: Yemen tax profile (GST 5% under Law No. 19 of 2001; calendar tax year; monthly declarations within 21 days)",
+      "url": "https://nomad.watch/countries/YE/taxes",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (grade S; the tax year is the calendar year).",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Rates secondary (grade S): the general sales tax is 5% on most taxable supplies and imports under Law No. 19 of 2001 (a WTO accession text and Moore/Grant Thornton guides); a 10% rate on telecoms is reported but not separately recorded. The row's start is a lower bound - the 2001 law date; the exact first application of the 5% general rate is not pinned.",
+    "GST declarations are monthly, within the first 21 days of the following month (grade S)."
+  ]
 }

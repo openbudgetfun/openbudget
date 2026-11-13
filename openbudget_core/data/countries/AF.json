@@ -8,10 +8,27 @@
   "timeZones": [
     "Asia/Kabul"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 3,
+    "startDay": 21,
+    "calendar": "persian"
+  },
+  "companyYearEndDefault": {
+    "month": 3,
+    "day": 20
+  },
+  "indirectTax": {
+    "kind": "none",
+    "localName": null,
+    "rates": [],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Ministry of Finance",
+    "url": "https://mof.gov.af"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +47,25 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Afghanistan Income Tax Law 2009 (unofficial translation, Official Gazette 976, 18 March 2009), art. 3: the tax year is the solar (Hejiri Shamsi) year, 1 Hamal (21 March) to the last day of Hoot (20 March)",
+      "url": "https://www.wto.org/english/thewto_e/acc_e/afg_e/wtaccafg5a1_leg_1.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Islamic Republic of Afghanistan Ministry of Finance: Tax Overview for Businesses, Investors & Individuals (solar taxation year; business receipts tax; no VAT)",
+      "url": "https://mof.gov.af/sites/default/files/2019-03/Guide%2004%20-%20Tax%20Overview%20for%20Businesses%2C%20Investors%20%26%20Individuals-min.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Non-Gregorian tax year (grade P, Income Tax Law 2009, art. 3): the tax year is the solar (Hejiri Shamsi) year starting 1 Hamal (21 March) and ending the last day of Hoot (20 March). The Gregorian dates are the law's own translation; the solar year drifts against the Gregorian calendar.",
+    "companyYearEndDefault of 20 March follows the solar tax year (grade P, same article); a legal person may apply to the Ministry of Finance to use a different twelve-month year.",
+    "Afghanistan levies no VAT or GST (grade S): a narrow Business Receipts Tax and a 2% fixed business tax exist under the Income Tax Manual, but no general consumption tax (nomad.watch's reading of the MoF law; the Ministry's own overview guide)."
+  ]
 }

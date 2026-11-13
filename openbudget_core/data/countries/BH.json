@@ -8,10 +8,49 @@
   "timeZones": [
     "Asia/Bahrain"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 500,
+        "from": "2019-01-01",
+        "to": "2022-01-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1000,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 37500000,
+      "currency": "BHD",
+      "period": "annualTurnover",
+      "source": 4
+    },
+    "returnFrequency": "quarterly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "National Bureau for Revenue (NBR)",
+    "url": "https://www.nbr.gov.bh"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +69,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Bahrain NBR VAT Rate Change Transitional Provisions Guide and BDO Bahrain's Law No. 33 of 2021 summary: 5% from 1 January 2019, 10% from 1 January 2022",
+      "url": "https://www.bdo.bh/getattachment/Services/Tax-Legal/Indirect-Tax-VAT/VAT-INSIGHTS/BDO-publication_VAT-rate-change_24-december-2021.pdf.aspx?lang=en-GB",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "mearef: Bahrain — VAT rate (NBR VAT FAQs: 10% from 1 January 2022) and registration threshold (NBR VAT General Guide: BHD 37,500)",
+      "url": "https://mearef.dev/bh/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year as an app default (grade I); Bahrain levies no personal income tax, so no individual tax year is prescribed.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Effective dating (grade P for the law as summarised by the NBR's own transitional guide and BDO Bahrain): VAT was introduced on 1 January 2019 at 5%; Law No. 33 of 2021 doubled the standard rate to 10% from 1 January 2022, with transitional rules for pre-24 December 2021 contracts through 2022.",
+    "Registration threshold of BHD 37,500 annual supplies (voluntary at BHD 18,750; grade S, NBR VAT General Guide per mearef).",
+    "Returns are monthly or quarterly depending on NBR assignment (most SMEs quarterly; grade S)."
+  ]
 }

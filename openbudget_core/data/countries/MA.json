@@ -8,10 +8,65 @@
   "timeZones": [
     "Africa/Casablanca"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "TVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2000,
+        "from": "1996-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 1400,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "listed goods and services",
+        "source": 3
+      },
+      {
+        "label": "reduced2",
+        "basisPoints": 1000,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "listed goods and services",
+        "source": 3
+      },
+      {
+        "label": "superReduced",
+        "basisPoints": 700,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "listed essential goods and services",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 50000000,
+      "currency": "MAD",
+      "period": "annualTurnover",
+      "source": 3
+    },
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Direction Générale des Impôts (DGI)",
+    "url": "https://www.tax.gov.ma"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +85,21 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Morocco — VAT standard rate (CGI 2026, art. 99) and registration threshold",
+      "url": "https://afriref.dev/ma/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (1996-01-01): 20% since the TVA's introduction in 1993 and restated by the CGI 2026, art. 99 (grade S, afriref's citation of the official consolidated CGI).",
+    "Lower-bound rows - reduced (2022-01-01), reduced2 (2022-01-01), superReduced (2022-01-01): the 14%, 10% and 7% bands are listed in the CGI without dated histories; the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window).",
+    "Registration threshold of MAD 500,000 from 1 January 2023 (grade S, official consolidated CGI per afriref)."
+  ]
 }

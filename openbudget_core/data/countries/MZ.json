@@ -8,10 +8,36 @@
   "timeZones": [
     "Africa/Maputo"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "IVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1600,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Autoridade Tributária (AT)",
+    "url": "https://www.at.gov.mz"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +56,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Mozambique — VAT standard rate (Ministério da Economia e Finanças measures package)",
+      "url": "https://afriref.dev/mz/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "LookupTax: Worldwide tax rates table (VAT/GST with legal citations, checked October 2026)",
+      "url": "https://lookuptax.com/docs/worldwide-tax-rates",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-02-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (16% cited by afriref to the Ministério da Economia e Finanças measures package, last verified 24 July 2026).",
+    "Sources disagree (both grade S): one LookupTax table lists 17% for Mozambique without a date, while afriref's primary-cited reading gives 16% unchanged; recorded as 16% and flagged for early re-check.",
+    "No single registration threshold is published (grade S, afriref); left null rather than guessed."
+  ]
 }

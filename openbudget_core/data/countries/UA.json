@@ -9,10 +9,41 @@
     "Europe/Kyiv",
     "Europe/Simferopol"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "PDV",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2000,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 100000000,
+      "currency": "UAH",
+      "period": "calendarYear",
+      "source": 4
+    },
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "State Tax Service of Ukraine (DPS)",
+    "url": "https://tax.gov.ua"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -31,9 +62,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: 2022 VAT Rates in Europe (table as of January 2022, sourced from the European Commission's Taxes in Europe Database)",
+      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-2022-vat-rates-in-europe/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "1stopVAT: VAT in Europe — standard rates and registration thresholds (August 2024)",
+      "url": "https://1stopvat.com/vat-in-europe",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (20% confirmed applying from 1 January 2022 by the Tax Foundation's January 2022 table; the 20% rate dates back to 2014 per general references, unverified this pass).",
+    "Registration threshold of UAH 1,000,000 taxable turnover in a calendar year (grade S, 1stopVAT); VAT is generally monthly, quarterly for some small taxpayers (grade S).",
+    "Martial-law measures (reporting deadlines, penalties) change frequently; rates themselves have been stable."
+  ]
 }

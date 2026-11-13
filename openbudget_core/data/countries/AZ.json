@@ -8,10 +8,41 @@
   "timeZones": [
     "Asia/Baku"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT (ƏDV)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1800,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 20000000,
+      "currency": "AZN",
+      "period": "rolling12Months",
+      "source": 3
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "State Tax Service under the Ministry of Economy",
+    "url": "https://www.taxes.gov.az"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +61,26 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "1stopVAT: VAT in Europe — standard rates and registration thresholds (August 2024)",
+      "url": "https://1stopvat.com/vat-in-europe",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+      "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% unchanged, including throughout the window).",
+    "Registration threshold of AZN 200,000 over the previous 12 months (grade S)."
+  ]
 }

@@ -9,10 +9,49 @@
   "timeZones": [
     "Africa/Harare"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2022-01-01",
+        "to": "2026-01-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1550,
+        "from": "2026-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 2500000,
+      "currency": "USD",
+      "period": "rolling12Months",
+      "source": 3
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Zimbabwe Revenue Authority (ZIMRA)",
+    "url": "https://www.zimra.co.zw"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -31,9 +70,21 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "ZIMRA Public Notice No. 7 of 2026 (quoted by LookupTax): VAT rate rose from 15% to 15.5% from 1 January 2026 under Finance Act 2025 (No. 7 of 2025), s. 34",
+      "url": "https://www.lookuptax.com/tax-changes/zimbabwe/vat-rate-15-5",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year (grade S; ZIMRA Public Notice 58 of 2026, per a secondary reading of the notice).",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Effective dating (grade S, ZIMRA Public Notice No. 7 of 2026 quoting Finance Act, 2025 (No. 7 of 2025), s. 34): the general VAT rate rose from 15% to 15.5% from 1 January 2026, with transitional treatment for Category A filers on the combined December 2025/January 2026 return. The 15% row starts at the coverage window's lower bound.",
+    "Registration is compulsory once taxable supplies exceed USD 25,000 (or ZiG equivalent) in 12 months (grade S; ZIMRA registration guidance via secondary readings).",
+    "Filing frequency varies by VAT category (monthly, bi-monthly, or per ZIMRA allocation); left null rather than guessed."
+  ]
 }

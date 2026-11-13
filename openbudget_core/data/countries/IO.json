@@ -10,8 +10,18 @@
   ],
   "individualTaxYear": null,
   "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "indirectTax": {
+    "kind": "none",
+    "localName": null,
+    "rates": [],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "British Indian Ocean Territory Administration (FCDO)",
+    "url": "https://www.gov.uk/government/collections/british-indian-ocean-territory-territorial-waters-and-archipelago"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +40,18 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VatInfo.org: countries with no VAT in 2026 (Gibraltar Transaction Tax from 15 July 2026; Kuwait, Qatar, Greenland, San Marino, Syria, Afghanistan and others)",
+      "url": "https://vatinfo.org/countries-with-no-vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "The British Indian Ocean Territory has no permanent civilian population and no resident tax system (grade I); no VAT, GST or sales tax applies.",
+    "individualTaxYear and companyYearEndDefault are left null: there is no personal or corporate tax year to record (grade I, no primary source reachable)."
+  ]
 }

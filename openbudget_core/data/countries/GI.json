@@ -8,10 +8,27 @@
   "timeZones": [
     "Europe/Gibraltar"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 7,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 6,
+    "day": 30
+  },
+  "indirectTax": {
+    "kind": "none",
+    "localName": null,
+    "rates": [],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Income Tax Office",
+    "url": "https://www.gibraltar.gov.gi"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +47,25 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "EY Gibraltar Tax Facts 2025-2026 (tax year 1 July to 30 June; no VAT in Gibraltar)",
+      "url": "https://www.ey.com/content/dam/ey-unified-site/ey-com/en-gi/tax-alerts/documents/ey-gibraltar-tax-facts-2025-2026.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VatInfo.org: countries with no VAT in 2026 (Gibraltar Transaction Tax from 15 July 2026; Kuwait, Qatar, Greenland, San Marino, Syria, Afghanistan and others)",
+      "url": "https://vatinfo.org/countries-with-no-vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-02-13",
+  "caveats": [
+    "individualTaxYear runs 1 July to 30 June (grade S; EY Gibraltar Tax Facts and KPMG's Thinking Beyond Borders guide - returns due 30 November after the 30 June year end).",
+    "companyYearEndDefault is a 30 June default aligned to the year of assessment (grade S); companies may choose other year ends (tax returns due nine months after their own financial year end).",
+    "Gibraltar levies no VAT (grade S; EY: 'There is no VAT in Gibraltar'). Under the UK-EU treaty, a Transaction Tax replaced import duty on goods from 15 July 2026 - 15% in the first year rising to 16% - with alignment to follow (grade S, VatInfo September 2026); a goods-only border tax, not recorded as a VAT rate row."
+  ]
 }

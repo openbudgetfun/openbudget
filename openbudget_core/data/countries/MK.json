@@ -8,10 +8,49 @@
   "timeZones": [
     "Europe/Skopje"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "DDV",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1800,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 500,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "listed essential goods and services",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 200000000,
+      "currency": "MKD",
+      "period": "annualTurnover",
+      "source": 4
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Public Revenue Office (Uprava za javni prihodi)",
+    "url": "https://www.ujp.gov.mk"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +69,26 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+      "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "1stopVAT: VAT in Europe — standard rates and registration thresholds (August 2024)",
+      "url": "https://1stopvat.com/vat-in-europe",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - all rows start 2022-01-01: the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% standard and 5% reduced unchanged through the window; a temporary energy-crisis reduction on electricity ran during 2022-2023 and is not modelled).",
+    "Registration threshold of MKD 2,000,000 (grade S, 1stopVAT)."
+  ]
 }

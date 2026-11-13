@@ -8,10 +8,41 @@
   "timeZones": [
     "Asia/Beirut"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "TVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1100,
+        "from": "2017-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 500000000000,
+      "currency": "LBP",
+      "period": "fourConsecutiveQuarters",
+      "source": 3
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Ministry of Finance – Directorate of VAT",
+    "url": "https://www.mof.gov.lb"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +61,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "PwC Worldwide Tax Summaries: Lebanon — corporate other taxes (VAT 11%; threshold LL 5 billion from the 2024 Budget Law; last reviewed 1 July 2026)",
+      "url": "https://taxsummaries.pwc.com/lebanon/corporate/other-taxes",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "IMF Country Report No. 23/8: Lebanon Technical Assistance Report on Putting Tax Policy Back on Track (VAT raised to 11% in 2017 from 10% at introduction in 2002)",
+      "url": "https://www.elibrary.imf.org/downloadpdf/view/journals/002/2023/008/article-A001-en.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-02-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Rates secondary (grade S): VAT rose from 10% to 11% in 2017 (IMF technical assistance report 23/8, citing the rate change year); PwC (last reviewed 1 July 2026) still publishes 11%. A 12% rate passed by parliament in the 2024 budget was not implemented, and a 12% rise was again reported as pending parliamentary approval in late 2026 - re-check early.",
+    "Registration threshold raised from LBP 100 million to LBP 5 billion by the 2024 Budget Law (grade S, PwC); the exact commencement day of the 2024 change is not published, so the threshold carries no effective date in this dataset.",
+    "Exchange-rate collapse makes the LBP threshold's real value volatile; VAT on foreign-currency invoices uses the Sayrafa rate (grade S)."
+  ]
 }

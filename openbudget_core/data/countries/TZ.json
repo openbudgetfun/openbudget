@@ -8,10 +8,41 @@
   "timeZones": [
     "Africa/Dar_es_Salaam"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1800,
+        "from": "2009-07-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 200000000,
+      "currency": "TZS",
+      "period": "annualTurnover",
+      "source": 3
+    },
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Tanzania Revenue Authority (TRA)",
+    "url": "https://www.tra.go.tz"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +61,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Tanzania — VAT standard rate (Finance Act 2009) and registration threshold (GN No. 448Y of 30 June 2023)",
+      "url": "https://afriref.dev/tz/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "East African Community: Value Added Tax matrix (registration thresholds and return rules of the partner states)",
+      "url": "https://www.eac.int/financial/eac-tax-matrices/value-added-tax",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2009-07-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (18% set by the Finance Act 2009).",
+    "Registration threshold of TZS 200,000,000 from 1 July 2023 (grade S; GN No. 448Y of 30 June 2023 per afriref - raised from TZS 100,000,000, and far above the EAC matrix's older TZS 40,000,000 figure).",
+    "VAT returns are monthly (grade S)."
+  ]
 }

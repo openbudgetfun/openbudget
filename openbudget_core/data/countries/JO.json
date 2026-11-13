@@ -8,10 +8,49 @@
   "timeZones": [
     "Asia/Amman"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "General Sales Tax (GST)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1600,
+        "from": "2010-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 400,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "certain agricultural products and listed goods",
+        "source": 4
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 3000000,
+      "currency": "JOD",
+      "period": "annualTurnover",
+      "source": 3
+    },
+    "returnFrequency": "bimonthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Income and Sales Tax Department (ISTD)",
+    "url": "https://www.istd.gov.jo"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +69,34 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Jordan Income and Sales Tax Department: The General Sales Tax Law No. 6 of 1994 and its amendments (consolidated English text, 2023), art. 6(a) 16% (in force since Law No. 29 of 2009 commenced 1 January 2010) and art. 16 two-month returns",
+      "url": "https://istd.gov.jo/ebv4.0/root_storage/en/eb_list_page/general_sales_tax_law_and_its_amendments_2023-1.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Jordan ISTD notification guide under the General Sales Tax Law: general rate 16%, 4% band for listed goods",
+      "url": "https://istd.gov.jo/ebv4.0/root_storage/en/eb_list_page/notification_guide.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "asiaref: Jordan — General Sales Tax standard rate (16% since 1 January 2010, cited to the ISTD's consolidated law)",
+      "url": "https://asiaref.dev/jo/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Effective dating (grade P, the General Sales Tax Law's consolidated English text on istd.gov.jo): the general rate is 16% under art. 6(a), in force since 1 January 2010 when Law No. 29 of 2009 commenced; the rate has not moved since (WTO review 2023 corroborates).",
+    "A 4% band applies to listed goods by Council of Ministers decision (grade P, ISTD notification guide).",
+    "Registration threshold of JOD 30,000 annual taxable turnover (grade S, per the law and Deloitte).",
+    "Registered persons file a two-month tax return (grade P, art. 16 of the law)."
+  ]
 }

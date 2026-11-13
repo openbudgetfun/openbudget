@@ -8,10 +8,57 @@
   "timeZones": [
     "Europe/Podgorica"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "PDV",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2100,
+        "from": "2018-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 700,
+        "from": "2018-01-01",
+        "to": null,
+        "appliesTo": "basic foodstuffs, medicines, books, accommodation and public transport",
+        "source": 3
+      },
+      {
+        "label": "reduced2",
+        "basisPoints": 1500,
+        "from": "2025-01-01",
+        "to": null,
+        "appliesTo": "accommodation and hospitality services (new band)",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 3000000,
+      "currency": "EUR",
+      "period": "rolling12Months",
+      "source": 3
+    },
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Tax Administration of Montenegro (Poreska uprava)",
+    "url": "https://www.poreskauprava.gov.me"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +77,21 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "LookupTax: Montenegro VAT guidelines (quoting Sl. list CG 50/2017 — 21% from 1 January 2018; Sl. list CG 94/2024 — 15% band from 1 January 2025; EUR 30,000 threshold; the 2026 law applies only on EU accession)",
+      "url": "https://www.lookuptax.com/docs/country/montenegro-vat-guidelines-indirect-tax",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Effective dating (grade S, LookupTax quoting the Official Gazette texts): the standard rate rose from 19% to 21% from 1 January 2018 (Sl. list CG 50/2017 amending art. 24 and adding art. 71c) - not, as some tables state, in 2023; the 15% band for tourism and hospitality was added from 1 January 2025 (art. 24a restated by Sl. list CG 94/2024).",
+    "A wholly new VAT law (Sl. list CG 104/2026) entered force on 25 July 2026 but applies only from the day Montenegro joins the EU; the 2001 law with the rates above continues until then (grade S).",
+    "Registration threshold of EUR 30,000 in the last 12 months (grade S; raised from EUR 18,000 by Sl. list CG 59/2021). Monthly returns are due by the 15th (grade S)."
+  ]
 }
