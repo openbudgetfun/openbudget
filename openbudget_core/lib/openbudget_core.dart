@@ -32,3 +32,6 @@ export 'src/tax/tax_rules.dart';
 export 'src/tax/us/us_tax_rules.dart';
 export 'src/time/civil_date.dart';
 export 'src/time/default_time_zone.dart';
+export 'src/wallets/address/wallet_address_family.dart';
+export 'src/wallets/address/wallet_address_parser.dart';
+export 'src/wallets/address/wallet_address_result.dart';
