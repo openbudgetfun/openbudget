@@ -109,4 +109,17 @@ void main() {
     expect(uri.queryParameters['currencies'], 'USD,GBP');
     expect(uri.queryParameters['apikey'], 'key');
   });
+
+  test('asks for every priced currency when no filter is given', () {
+    final uri = currencyApiUri(
+      baseUrl: 'https://example.test/v3',
+      path: 'latest',
+      apiKey: 'key',
+      baseCurrencyCode: 'USD',
+      currencies: null,
+    );
+
+    expect(uri.path, '/v3/latest');
+    expect(uri.queryParameters.containsKey('currencies'), isFalse);
+  });
 }
