@@ -144,6 +144,9 @@ class FakeTaxPack implements TaxRulePack {
     rulesVersion: ruleSet(input.year.startYear).versionFor(jurisdiction),
     maturity: manifest.maturity,
     coverage: manifest.sections,
+    caveats: ruleSet(input.year.startYear).caveatsTouching(
+      sections: {TaxSection.personalReturn},
+    ),
     uncategorizedCount: input.entries
         .where((entry) => category(entry.categoryCode) == null)
         .length,

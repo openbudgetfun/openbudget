@@ -1,0 +1,18 @@
+### One named figure of a rule set, such as the personal allowance, that
+### reports and knowledge cards quote by id.
+class: TaxFigureView
+fields:
+  ### Stable identifier, unique in its rule set: `personalAllowance`.
+  id: String
+  ### The figure in [unit].
+  value: int
+  ### `currencyMinor`, `rateBasisPoints`, `percent` or `count`.
+  unit: String
+  ### `primary`, `secondary` or `inferred`. A secondary-grade figure
+  ### computes a liability only with a visible caveat, and its lines carry
+  ### a "from a secondary source" badge.
+  grade: String
+  ### When the figure was last checked against its source.
+  verifiedOn: DateTime
+  ### The authority page the figure came from.
+  source: String
