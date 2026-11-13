@@ -15,19 +15,21 @@ import 'package:serverpod_client/serverpod_client.dart' as _isc;
 /// Sales tax grouped by the rate each line implies.
 ///
 /// The rate comes from the line: tax over the net amount it was charged
-/// on, in basis points. A separate VAT line — one tagged with a
-/// sales-tax category — carries no net amount, so its rate is unknown and
-/// it is grouped under the null rate.
+/// on, in millionths of the taxed amount — the same exact integer unit
+/// the country dataset uses for `IndirectTaxRate.ratePerMillion`. A
+/// separate VAT line — one tagged with a sales-tax category — carries
+/// no net amount, so its rate is unknown and it is grouped under the
+/// null rate.
 abstract class TaxSummarySalesTaxRateView
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   TaxSummarySalesTaxRateView._({
-    this.rateBasisPoints,
+    this.ratePerMillion,
     required this.collectedMinor,
     required this.paidMinor,
   });
 
   factory TaxSummarySalesTaxRateView({
-    int? rateBasisPoints,
+    int? ratePerMillion,
     required int collectedMinor,
     required int paidMinor,
   }) = _TaxSummarySalesTaxRateViewImpl;
@@ -36,14 +38,16 @@ abstract class TaxSummarySalesTaxRateView
     Map<String, dynamic> jsonSerialization,
   ) {
     return TaxSummarySalesTaxRateView(
-      rateBasisPoints: jsonSerialization['rateBasisPoints'] as int?,
+      ratePerMillion: jsonSerialization['ratePerMillion'] as int?,
       collectedMinor: jsonSerialization['collectedMinor'] as int,
       paidMinor: jsonSerialization['paidMinor'] as int,
     );
   }
 
-  /// 2000 is 20%. Null when the rate could not be derived from the line.
-  int? rateBasisPoints;
+  /// 200000 is 20%; the derived ratio is rounded half away from zero
+  /// at the millionth. Null when the rate could not be derived from
+  /// the line.
+  int? ratePerMillion;
 
   /// Tax charged to customers in this group, after business-use share.
   int collectedMinor;
@@ -55,7 +59,7 @@ abstract class TaxSummarySalesTaxRateView
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
   TaxSummarySalesTaxRateView copyWith({
-    int? rateBasisPoints,
+    int? ratePerMillion,
     int? collectedMinor,
     int? paidMinor,
   });
@@ -63,7 +67,7 @@ abstract class TaxSummarySalesTaxRateView
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'TaxSummarySalesTaxRateView',
-      if (rateBasisPoints != null) 'rateBasisPoints': rateBasisPoints,
+      if (ratePerMillion != null) 'ratePerMillion': ratePerMillion,
       'collectedMinor': collectedMinor,
       'paidMinor': paidMinor,
     };
@@ -73,7 +77,7 @@ abstract class TaxSummarySalesTaxRateView
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'TaxSummarySalesTaxRateView',
-      if (rateBasisPoints != null) 'rateBasisPoints': rateBasisPoints,
+      if (ratePerMillion != null) 'ratePerMillion': ratePerMillion,
       'collectedMinor': collectedMinor,
       'paidMinor': paidMinor,
     };
@@ -89,11 +93,11 @@ class _Undefined {}
 
 class _TaxSummarySalesTaxRateViewImpl extends TaxSummarySalesTaxRateView {
   _TaxSummarySalesTaxRateViewImpl({
-    int? rateBasisPoints,
+    int? ratePerMillion,
     required int collectedMinor,
     required int paidMinor,
   }) : super._(
-         rateBasisPoints: rateBasisPoints,
+         ratePerMillion: ratePerMillion,
          collectedMinor: collectedMinor,
          paidMinor: paidMinor,
        );
@@ -103,14 +107,14 @@ class _TaxSummarySalesTaxRateViewImpl extends TaxSummarySalesTaxRateView {
   @_isc.useResult
   @override
   TaxSummarySalesTaxRateView copyWith({
-    Object? rateBasisPoints = _Undefined,
+    Object? ratePerMillion = _Undefined,
     int? collectedMinor,
     int? paidMinor,
   }) {
     return TaxSummarySalesTaxRateView(
-      rateBasisPoints: rateBasisPoints is int?
-          ? rateBasisPoints
-          : this.rateBasisPoints,
+      ratePerMillion: ratePerMillion is int?
+          ? ratePerMillion
+          : this.ratePerMillion,
       collectedMinor: collectedMinor ?? this.collectedMinor,
       paidMinor: paidMinor ?? this.paidMinor,
     );
