@@ -12,6 +12,7 @@ import 'package:openbudget_app/src/features/transactions/providers/duplicate_che
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/date_labels.dart';
 import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -282,7 +283,9 @@ class AddIncomeScreen extends HookConsumerWidget {
                           data: OpenBudgetIcons.calendar,
                         ),
                         title: Text(l10n.transactionDateLabel),
-                        subtitle: Text(_formatDate(selectedDate.value)),
+                        subtitle: Text(
+                          DateLabels.full(context, selectedDate.value),
+                        ),
                         onTap: () async {
                           final picked = await showDatePicker(
                             context: context,
@@ -437,9 +440,6 @@ class AddIncomeScreen extends HookConsumerWidget {
       ),
     );
   }
-
-  static String _formatDate(DateTime date) =>
-      '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 }
 
 class _ModeChip extends HookWidget {

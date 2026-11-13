@@ -165,7 +165,9 @@ void main() {
       await _pumpExpense(tester, routed: true);
 
       expect(find.text('Add Transaction'), findsOneWidget);
-      expect(find.text('Add Expense'), findsNWidgets(2));
+      // The mode chip names the form; the old caption under the amount
+      // repeated it.
+      expect(find.text('Add Expense'), findsOneWidget);
       expect(
         find.byWidgetPredicate(
           (widget) =>
@@ -187,7 +189,9 @@ void main() {
       expect(find.text('Add a note (optional)'), findsOneWidget);
       expect(find.text('Payee'), findsOneWidget);
       expect(find.text('No Payee'), findsOneWidget);
-      expect(find.text('Unassigned'), findsNWidgets(2));
+      // The envelope field is labelled Category; Unassigned is its value.
+      expect(find.text('Category'), findsOneWidget);
+      expect(find.text('Unassigned'), findsOneWidget);
     });
 
     testWidgets('lists the entity payees in the payee dropdown', (
@@ -216,7 +220,7 @@ void main() {
       await tester.tap(
         find.byWidgetPredicate(
           (widget) =>
-              widget is ObDropdown<String> && widget.labelText == 'Unassigned',
+              widget is ObDropdown<String> && widget.labelText == 'Category',
         ),
       );
       await tester.pumpAndSettle();
@@ -412,12 +416,15 @@ void main() {
       await tester.enterText(_field('Amount'), '100');
       await tester.pumpAndSettle();
 
-      final line = find.textContaining('1 USD = 0.7891 GBP');
-      expect(line, findsOneWidget);
-      final text = tester.widget<Text>(line).data!;
-      expect(text, contains('≈ £78.91'));
-      expect(text, contains('6 Nov 2026'));
-      expect(text, contains('market'));
+      // The converted figure leads; the rate, its own date and its source
+      // sit under it.
+      expect(find.text('≈ £78.91'), findsOneWidget);
+      expect(
+        find.text(
+          '1 USD = 0.7891 GBP · Nov\u00a06,\u00a02026 · market\u00a0rate',
+        ),
+        findsOneWidget,
+      );
       expect(find.widgetWithText(TextButton, 'Set rate'), findsOneWidget);
     });
 

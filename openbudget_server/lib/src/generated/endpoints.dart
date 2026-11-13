@@ -34,8 +34,6 @@ import 'package:openbudget_server/src/generated/transactions/transaction_status.
     as _i54b59qp;
 import 'package:openbudget_server/src/generated/transactions/transfer_input.dart'
     as _i7e3qnpf;
-import 'package:openbudget_server/src/generated/wallets/wallet_network.dart'
-    as _i48ucni2;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
@@ -4238,7 +4236,7 @@ class Endpoints extends _is.EndpointDispatch {
             ),
             'network': _is.ParameterDescription(
               name: 'network',
-              type: _is.getType<_i48ucni2.WalletNetwork>(),
+              type: _is.getType<_ifz8weqz.WalletNetwork>(),
               nullable: false,
             ),
             'address': _is.ParameterDescription(

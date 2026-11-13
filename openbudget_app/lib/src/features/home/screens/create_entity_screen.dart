@@ -130,20 +130,24 @@ class CreateEntityScreen extends HookConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: SpacingTokens.xs),
+                    // The highlighter fill marks the choice, so the check
+                    // glyph goes: at 360pt it pushed "Personal" and "Sole
+                    // trader" onto two lines. Labels shrink rather than wrap.
                     SegmentedButton<EntityKind>(
+                      showSelectedIcon: false,
                       segments: [
-                        ButtonSegment(
-                          value: EntityKind.individual,
-                          label: Text(l10n.entityKindPersonal),
-                        ),
-                        ButtonSegment(
-                          value: EntityKind.soleTrader,
-                          label: Text(l10n.entityKindSoleTrader),
-                        ),
-                        ButtonSegment(
-                          value: EntityKind.company,
-                          label: Text(l10n.entityKindCompany),
-                        ),
+                        for (final (kind, label) in [
+                          (EntityKind.individual, l10n.entityKindPersonal),
+                          (EntityKind.soleTrader, l10n.entityKindSoleTrader),
+                          (EntityKind.company, l10n.entityKindCompany),
+                        ])
+                          ButtonSegment(
+                            value: kind,
+                            label: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(label, maxLines: 1, softWrap: false),
+                            ),
+                          ),
                       ],
                       selected: {selectedKind.value},
                       onSelectionChanged: (kinds) => pickKind(kinds.first),

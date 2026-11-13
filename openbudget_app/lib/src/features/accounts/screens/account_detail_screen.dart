@@ -16,6 +16,7 @@ import 'package:openbudget_app/src/features/transactions/providers/transaction_p
 import 'package:openbudget_app/src/features/transactions/widgets/transaction_row.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/date_labels.dart';
 import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -101,240 +102,144 @@ class AccountDetailScreen extends HookConsumerWidget {
               account.balanceSource == AccountBalanceSource.valuations;
           final isClosed = account.closedAt != null;
 
-          return ListView(
+          return ObReadableWidth(
             padding: const EdgeInsets.fromLTRB(
               SpacingTokens.md,
               SpacingTokens.md,
               SpacingTokens.md,
               SpacingTokens.xl,
             ),
-            children: [
-              ObCard(
-                padding: const EdgeInsets.all(SpacingTokens.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+            builder: (context, padding) => ListView(
+              padding: padding,
+              children: [
+                _BalanceCard(
+                  account: account,
+                  balances: balances,
+                  tone: balanceTone,
+                  isValuation: isValuation,
+                  baseEquivalent:
+                      convertedMinor != null &&
+                          isForeignAccountOf(account, baseCurrencyCode)
+                      ? formatMinorForCode(convertedMinor, baseCurrencyCode!)
+                      : null,
+                  onReconcile: balances == null
+                      ? null
+                      : () => _openReconcileSheet(
+                          context,
+                          ref,
+                          account: account,
+                          balances: balances,
+                        ),
+                ),
+                if (isClosed) ...[
+                  const SizedBox(height: SpacingTokens.md),
+                  ObCard(
+                    tone: ObTone.neutral,
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: Row(
                       children: [
-                        ObAmount(
-                          formatMinorForCode(
-                            account.balanceMinor,
-                            currencyCode,
-                          ),
-                          tone: balanceTone,
-                          style: theme.textTheme.headlineSmall,
+                        SkribbleIcon(
+                          data: OpenBudgetIcons.lock,
+                          size: 18,
+                          color: palette.mutedInk,
                         ),
                         const SizedBox(width: SpacingTokens.sm),
-                        ObToneChip(label: currencyCode),
+                        Expanded(
+                          child: Text(
+                            l10n.accountsClosedBadge,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: palette.mutedInk,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            await ref
+                                .read(accountActionsProvider.notifier)
+                                .reopenAccount(
+                                  accountId: accountId,
+                                  entityId: entityId,
+                                );
+                          },
+                          child: Text(l10n.accountReopenButton),
+                        ),
                       ],
                     ),
-                    if (balances != null) ...[
-                      const SizedBox(height: SpacingTokens.sm),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            l10n.accountDetailClearedLabel(
-                              formatMinorForCode(
-                                balances.clearedMinor,
-                                currencyCode,
-                              ),
-                            ),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: palette.mutedInk,
-                            ),
-                          ),
-                          const SizedBox(width: SpacingTokens.md),
-                          Text(
-                            l10n.accountDetailUnclearedLabel(
-                              formatMinorForCode(
-                                balances.unclearedMinor,
-                                currencyCode,
-                              ),
-                            ),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: palette.mutedInk,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                    if (!isValuation &&
-                        balances?.reportedBalanceMinor != null) ...[
-                      const SizedBox(height: SpacingTokens.xs),
-                      Text(
-                        l10n.accountDetailReportedBalance(
-                          formatMinorForCode(
-                            balances!.reportedBalanceMinor!,
-                            currencyCode,
-                          ),
-                        ),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: palette.mutedInk,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                    if (convertedMinor != null &&
-                        isForeignAccountOf(account, baseCurrencyCode)) ...[
-                      const SizedBox(height: SpacingTokens.xs),
-                      Text(
-                        l10n.accountBaseEquivalent(
-                          formatMinorForCode(convertedMinor, baseCurrencyCode!),
-                        ),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: palette.mutedInk,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                    const SizedBox(height: SpacingTokens.md),
-                    if (!isValuation)
-                      FilledButton.icon(
-                        onPressed: balances == null
-                            ? null
-                            : () => _openReconcileSheet(
-                                context,
-                                ref,
-                                account: account,
-                                balances: balances,
-                              ),
-                        icon: const SkribbleIcon(
-                          data: OpenBudgetIcons.checkAll,
-                        ),
-                        label: Text(l10n.accountDetailReconcile),
-                      ),
-                  ],
-                ),
-              ),
-              if (isClosed) ...[
-                const SizedBox(height: SpacingTokens.md),
-                ObCard(
-                  tone: ObTone.neutral,
-                  padding: const EdgeInsets.all(SpacingTokens.md),
-                  child: Row(
-                    children: [
-                      SkribbleIcon(
-                        data: OpenBudgetIcons.lock,
-                        size: 18,
-                        color: palette.mutedInk,
-                      ),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Expanded(
-                        child: Text(
-                          l10n.accountsClosedBadge,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: palette.mutedInk,
-                          ),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          await ref
-                              .read(accountActionsProvider.notifier)
-                              .reopenAccount(
-                                accountId: accountId,
-                                entityId: entityId,
-                              );
-                        },
-                        child: Text(l10n.accountReopenButton),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-              if (isValuation) ...[
-                const SizedBox(height: SpacingTokens.md),
-                ObSectionHeader(
-                  title: l10n.accountDetailValuationsTitle,
-                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-                ),
-                FilledButton.icon(
-                  onPressed: () => _openValuationSheet(
-                    context,
-                    ref,
-                    account: account,
-                  ),
-                  icon: const SkribbleIcon(data: OpenBudgetIcons.priceChange),
-                  label: Text(l10n.accountDetailUpdateValue),
-                ),
-                const SizedBox(height: SpacingTokens.sm),
-                valuationsAsync.maybeWhen(
-                  data: (valuations) => Column(
-                    children: [
-                      for (final valuation in valuations)
-                        ObCard(
-                          margin: const EdgeInsets.only(
-                            bottom: SpacingTokens.xs,
-                          ),
-                          child: ListTile(
-                            title: Text(
-                              formatMinorForCode(
-                                valuation.valueMinor,
-                                currencyCode,
-                              ),
-                              style: theme.textTheme.titleMedium,
-                            ),
-                            subtitle: Text(
-                              l10n.accountDetailValuedOn(
-                                _dateLabel(valuation.valuationDate),
-                              ),
-                              style: theme.textTheme.bodySmall,
-                            ),
-                          ),
-                        ),
-                      if (valuations.isEmpty)
-                        ObStatePanel.empty(
-                          title: l10n.accountDetailValuationsTitle,
-                          message: l10n.accountEditNotesHint,
-                        ),
-                    ],
-                  ),
-                  orElse: () => const SizedBox.shrink(),
-                ),
-              ] else ...[
-                if (walletId != null) ...[
-                  _WalletHoldingsSection(
-                    walletId: walletId,
-                    fallbackCurrencyCode: currencyCode,
                   ),
                 ],
-                const SizedBox(height: SpacingTokens.md),
-                ObSectionHeader(
-                  title: l10n.accountDetailTransactionsTitle,
-                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-                ),
-                ...pagesAsync.maybeWhen(
-                  data: (state) => state.items
-                      .map(
-                        (view) => TransactionRow(
-                          view: view,
-                          currencyCode: currencyCode,
-                          baseCurrencyCode: baseCurrencyCode,
-                        ),
-                      )
-                      .toList(),
-                  orElse: () => <Widget>[
-                    const Padding(
-                      padding: EdgeInsets.all(SpacingTokens.lg),
-                      child: Center(child: CircularProgressIndicator()),
+                if (isValuation) ...[
+                  const SizedBox(height: SpacingTokens.md),
+                  ObSectionHeader(
+                    title: l10n.accountDetailValuationsTitle,
+                    padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => _openValuationSheet(
+                      context,
+                      ref,
+                      account: account,
+                    ),
+                    icon: const SkribbleIcon(data: OpenBudgetIcons.priceChange),
+                    label: Text(l10n.accountDetailUpdateValue),
+                  ),
+                  const SizedBox(height: SpacingTokens.sm),
+                  valuationsAsync.maybeWhen(
+                    data: (valuations) => valuations.isEmpty
+                        ? ObStatePanel.empty(
+                            title: l10n.accountDetailValuationsTitle,
+                            message: l10n.accountEditNotesHint,
+                          )
+                        : _ValuationList(
+                            valuations: valuations,
+                            currencyCode: currencyCode,
+                          ),
+                    orElse: () => const SizedBox.shrink(),
+                  ),
+                ] else ...[
+                  if (walletId != null) ...[
+                    _WalletHoldingsSection(
+                      walletId: walletId,
+                      fallbackCurrencyCode: currencyCode,
                     ),
                   ],
-                ),
-                pagesAsync.maybeWhen(
-                  data: (state) => state.hasMore
-                      ? TextButton(
-                          onPressed: () => ref
-                              .read(transactionPagesProvider(entityId).notifier)
-                              .loadMore(),
-                          child: Text(l10n.transactionLoadMore),
+                  const SizedBox(height: SpacingTokens.md),
+                  ObSectionHeader(
+                    title: l10n.accountDetailTransactionsTitle,
+                    padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                  ),
+                  ...pagesAsync.maybeWhen(
+                    data: (state) => state.items
+                        .map(
+                          (view) => TransactionRow(
+                            view: view,
+                            currencyCode: currencyCode,
+                            baseCurrencyCode: baseCurrencyCode,
+                          ),
                         )
-                      : const SizedBox.shrink(),
-                  orElse: () => const SizedBox.shrink(),
-                ),
+                        .toList(),
+                    orElse: () => <Widget>[
+                      const Padding(
+                        padding: EdgeInsets.all(SpacingTokens.lg),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    ],
+                  ),
+                  pagesAsync.maybeWhen(
+                    data: (state) => state.hasMore
+                        ? TextButton(
+                            onPressed: () => ref
+                                .read(
+                                  transactionPagesProvider(entityId).notifier,
+                                )
+                                .loadMore(),
+                            child: Text(l10n.transactionLoadMore),
+                          )
+                        : const SizedBox.shrink(),
+                    orElse: () => const SizedBox.shrink(),
+                  ),
+                ],
               ],
-            ],
+            ),
           );
         },
       ),
@@ -384,19 +289,302 @@ bool isForeignAccountOf(Account account, String? baseCurrencyCode) =>
     baseCurrencyCode.isNotEmpty &&
     baseCurrencyCode != account.currencyCode;
 
-String _dateLabel(DateTime date) =>
-    '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-
 DateTime _today() {
   final now = DateTime.now();
   return DateTime.utc(now.year, now.month, now.day);
 }
 
-/// One wallet holding: quantity in the asset's decimals, value and P&L in
-/// the price currency. Unrealised P&L is `valueMinor − costBasisMinor`,
-/// computed here in the view model from the sync's stored figures.
-class _HoldingTile extends HookWidget {
-  const _HoldingTile({
+/// The balance card: the figure as a hero with its currency, the server's
+/// base-currency equivalent for a foreign account, the cleared and
+/// uncleared split and the bank's own figure, and the reconcile action.
+class _BalanceCard extends HookWidget {
+  const _BalanceCard({
+    required this.account,
+    required this.balances,
+    required this.tone,
+    required this.isValuation,
+    required this.baseEquivalent,
+    required this.onReconcile,
+  });
+
+  final Account account;
+  final AccountBalancesView? balances;
+  final ObTone tone;
+  final bool isValuation;
+
+  /// The formatted base-currency figure, or null when the account is in
+  /// the base currency or the server has no rate.
+  final String? baseEquivalent;
+  final VoidCallback? onReconcile;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    final currencyCode = account.currencyCode;
+    final balances = this.balances;
+
+    return ObCard(
+      raised: true,
+      padding: const EdgeInsets.fromLTRB(
+        SpacingTokens.lg,
+        SpacingTokens.md,
+        SpacingTokens.lg,
+        SpacingTokens.lg,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  isValuation
+                      ? l10n.accountDetailValueEyebrow
+                      : l10n.accountDetailBalanceEyebrow,
+                  style: ObTextStyles.eyebrow(
+                    theme.textTheme.labelSmall,
+                  ).copyWith(color: palette.mutedInk),
+                ),
+              ),
+              ObToneChip(label: currencyCode),
+            ],
+          ),
+          const SizedBox(height: SpacingTokens.sm),
+          ObHeroAmount(
+            formatMinorForCode(account.balanceMinor, currencyCode),
+            tone: tone,
+            style: theme.textTheme.displaySmall,
+          ),
+          if (baseEquivalent case final equivalent?) ...[
+            const SizedBox(height: SpacingTokens.xs),
+            Text(
+              l10n.accountBaseEquivalent(equivalent),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: palette.brand,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+          // Cleared and uncleared mean nothing for an account tracked by
+          // its value, so only transaction accounts show them.
+          if (!isValuation && balances != null) ...[
+            const SizedBox(height: SpacingTokens.md),
+            Divider(height: 1, thickness: 1.4, color: palette.line),
+            const SizedBox(height: SpacingTokens.sm),
+            Wrap(
+              spacing: SpacingTokens.md,
+              runSpacing: SpacingTokens.xs,
+              children: [
+                _BalanceFact(
+                  icon: OpenBudgetIcons.checkCircle,
+                  color: palette.funded,
+                  text: l10n.accountDetailClearedLabel(
+                    formatMinorForCode(balances.clearedMinor, currencyCode),
+                  ),
+                ),
+                _BalanceFact(
+                  icon: OpenBudgetIcons.circle,
+                  color: palette.mutedInk,
+                  text: l10n.accountDetailUnclearedLabel(
+                    formatMinorForCode(balances.unclearedMinor, currencyCode),
+                  ),
+                ),
+                if (balances.reportedBalanceMinor case final reported?)
+                  _BalanceFact(
+                    icon: OpenBudgetIcons.bank,
+                    color: palette.mutedInk,
+                    text: l10n.accountDetailReportedBalance(
+                      formatMinorForCode(reported, currencyCode),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+          if (!isValuation) ...[
+            const SizedBox(height: SpacingTokens.md),
+            FilledButton.icon(
+              onPressed: onReconcile,
+              icon: const SkribbleIcon(data: OpenBudgetIcons.checkAll),
+              label: Text(l10n.accountDetailReconcile),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// One fact under the balance: a small glyph and its line of text.
+class _BalanceFact extends HookWidget {
+  const _BalanceFact({
+    required this.icon,
+    required this.color,
+    required this.text,
+  });
+
+  final WiredSvgIconData icon;
+  final Color color;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SkribbleIcon(data: icon, size: 14, color: color),
+        const SizedBox(width: SpacingTokens.xs),
+        Text(
+          text,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.ob.mutedInk,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The value history on one sheet: newest first, each valuation's date
+/// against its figure and the change since the one before it. The change
+/// is a subtraction in the account's own currency, never a conversion.
+class _ValuationList extends HookWidget {
+  const _ValuationList({required this.valuations, required this.currencyCode});
+
+  final List<AccountValuation> valuations;
+  final String currencyCode;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+
+    return ObCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          for (final (index, valuation) in valuations.indexed) ...[
+            if (index > 0)
+              Divider(
+                height: 1,
+                indent: SpacingTokens.md,
+                endIndent: SpacingTokens.md,
+                color: palette.line,
+              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SpacingTokens.md,
+                vertical: SpacingTokens.sm,
+              ),
+              // The change sits under the date, so the date keeps the width
+              // it needs and the value column holds only the value.
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: SkribbleIcon(
+                      data: OpenBudgetIcons.calendar,
+                      size: 16,
+                      color: palette.mutedInk,
+                    ),
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.accountDetailValuedOn(
+                            DateLabels.full(context, valuation.valuationDate),
+                          ),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: palette.ink,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (index + 1 < valuations.length)
+                          _ValuationChange(
+                            changeMinor:
+                                valuation.valueMinor -
+                                valuations[index + 1].valueMinor,
+                            currencyCode: currencyCode,
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  ObAmount(
+                    formatMinorForCode(valuation.valueMinor, currencyCode),
+                    style: theme.textTheme.titleSmall,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ValuationChange extends HookWidget {
+  const _ValuationChange({
+    required this.changeMinor,
+    required this.currencyCode,
+  });
+
+  final int changeMinor;
+  final String currencyCode;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    final tone = changeMinor > 0
+        ? ObTone.funded
+        : changeMinor < 0
+        ? ObTone.overspent
+        : ObTone.neutral;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (changeMinor != 0) ...[
+          SkribbleIcon(
+            data: changeMinor > 0
+                ? OpenBudgetIcons.trendingUp
+                : OpenBudgetIcons.trendingDown,
+            size: 12,
+            color: palette.hue(tone),
+          ),
+          const SizedBox(width: 2),
+        ],
+        Flexible(
+          child: Text(
+            l10n.accountValuationChange(
+              formatMinorForCode(changeMinor.abs(), currencyCode),
+            ),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: palette.hue(tone),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// One wallet holding: name, symbol and quantity in the asset's decimals on
+/// the left; value and unrealised P&L in the price currency on the right.
+/// Unrealised P&L is `valueMinor − costBasisMinor`, computed here in the
+/// view model from the sync's stored figures.
+class _HoldingRow extends HookWidget {
+  const _HoldingRow({
     required this.holding,
     required this.priceCurrencyCode,
   });
@@ -415,45 +603,89 @@ class _HoldingTile extends HookWidget {
     final pnlMinor = valueMinor != null && costMinor != null
         ? valueMinor - costMinor
         : null;
+    final name = holding.name ?? holding.symbol ?? holding.assetId;
+    final symbol = holding.name != null ? holding.symbol : null;
+    final pnlTone = switch (pnlMinor) {
+      null || 0 => ObTone.neutral,
+      > 0 => ObTone.funded,
+      _ => ObTone.overspent,
+    };
 
-    return ObCard(
-      margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
-      child: ListTile(
-        title: Text(
-          holding.name ?? holding.symbol ?? holding.assetId,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.accountHoldingsQuantityLabel(quantity),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: palette.mutedInk,
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.md,
+        vertical: SpacingTokens.sm,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        name,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: palette.ink,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (symbol != null) ...[
+                      const SizedBox(width: SpacingTokens.xs),
+                      Text(
+                        symbol,
+                        style: ObTextStyles.stamp(
+                          theme.textTheme.labelSmall,
+                        ).copyWith(color: palette.brand),
+                      ),
+                    ],
+                  ],
+                ),
+                Text(
+                  l10n.accountHoldingsQuantityLabel(quantity),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: palette.mutedInk,
+                  ),
+                ),
+              ],
             ),
-            if (valueMinor != null)
-              Text(
-                l10n.accountHoldingsValueLabel(
+          ),
+          const SizedBox(width: SpacingTokens.sm),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (valueMinor != null)
+                ObAmount(
                   formatMinorForCode(valueMinor, priceCurrencyCode),
+                  semanticsLabel: l10n.accountHoldingsValueLabel(
+                    formatMinorForCode(valueMinor, priceCurrencyCode),
+                  ),
+                  style: theme.textTheme.titleSmall,
+                )
+              else
+                Text(
+                  l10n.accountHoldingsUnpriced,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: palette.mutedInk,
+                  ),
                 ),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: palette.mutedInk,
+              if (pnlMinor != null)
+                Text(
+                  l10n.accountHoldingsPnlLabel(
+                    formatMinorForCode(pnlMinor, priceCurrencyCode),
+                  ),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: palette.hue(pnlTone),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            if (pnlMinor != null)
-              Text(
-                l10n.accountHoldingsPnlLabel(
-                  formatMinorForCode(pnlMinor, priceCurrencyCode),
-                ),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: pnlMinor >= 0 ? palette.funded : palette.overspent,
-                ),
-              ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -467,7 +699,8 @@ class _HoldingTile extends HookWidget {
     final padded = raw.padLeft(decimals + 1, '0');
     final whole = padded.substring(0, padded.length - decimals);
     final fraction = padded.substring(padded.length - decimals);
-    return '$whole.${fraction.replaceAll(RegExp(r'0+$'), '')}';
+    final trimmed = fraction.replaceAll(RegExp(r'0+$'), '');
+    return trimmed.isEmpty ? whole : '$whole.$trimmed';
   }
 }
 
@@ -511,41 +744,108 @@ class _ReconcileSheet extends HookConsumerWidget {
         ? null
         : statementMinor - balances.clearedMinor;
 
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    final matches = differenceMinor == 0;
+
     return Padding(
+      key: const Key('account-reconcile-sheet'),
       padding: EdgeInsets.only(
-        left: SpacingTokens.md,
-        right: SpacingTokens.md,
+        left: SpacingTokens.lg,
+        right: SpacingTokens.lg,
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.accountReconcileTitle(account.name),
-            style: Theme.of(context).textTheme.titleMedium,
+          Row(
+            children: [
+              const ObIconBadge(
+                icon: SkribbleIcon(data: OpenBudgetIcons.checkAll),
+                spot: 1,
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: Text(
+                  l10n.accountReconcileTitle(account.name),
+                  style: theme.textTheme.titleLarge,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: SpacingTokens.md),
           TextField(
             controller: statementController,
             autofocus: true,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            style: ObTextStyles.amount(theme.textTheme.titleLarge),
             decoration: InputDecoration(
               labelText: l10n.accountReconcileStatementField,
+              prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.receipt),
               prefixText: '$currencyCode ',
             ),
           ),
-          const SizedBox(height: SpacingTokens.sm),
-          Text(
-            differenceMinor == null
-                ? ''
-                : l10n.accountReconcileDifference(
-                    formatMinorForCode(differenceMinor, currencyCode),
+          const SizedBox(height: SpacingTokens.md),
+          ObCard(
+            tone: matches ? ObTone.funded : ObTone.neutral,
+            padding: const EdgeInsets.all(SpacingTokens.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.accountReconcileClearedNow,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: palette.mutedInk,
+                        ),
+                      ),
+                    ),
+                    ObAmount(
+                      formatMinorForCode(balances.clearedMinor, currencyCode),
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
+                if (differenceMinor != null) ...[
+                  const SizedBox(height: SpacingTokens.sm),
+                  // The difference gets the full width: beside a chip it
+                  // broke mid-word at 360pt. A mismatch reads in the
+                  // caution tone; a match earns the chip under it.
+                  Text(
+                    key: const Key('account-reconcile-difference'),
+                    l10n.accountReconcileDifference(
+                      formatMinorForCode(differenceMinor, currencyCode),
+                    ),
+                    style: ObTextStyles.amount(theme.textTheme.titleMedium)
+                        .copyWith(
+                          color: matches ? palette.ink : palette.underfunded,
+                        ),
                   ),
-            style: Theme.of(context).textTheme.bodyMedium,
+                  if (matches) ...[
+                    const SizedBox(height: SpacingTokens.xs),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: ObToneChip(
+                        label: l10n.accountReconcileMatches,
+                        tone: ObTone.funded,
+                      ),
+                    ),
+                  ],
+                ],
+              ],
+            ),
           ),
+          const SizedBox(height: SpacingTokens.xs),
           SwitchListTile(
-            title: Text(l10n.accountReconcileCreateAdjustment),
+            title: Text(
+              l10n.accountReconcileCreateAdjustment,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: matches ? palette.mutedInk : palette.ink,
+              ),
+            ),
             value: createAdjustment.value,
             onChanged: (value) => createAdjustment.value = value,
             contentPadding: EdgeInsets.zero,
@@ -595,7 +895,7 @@ class _ReconcileSheet extends HookConsumerWidget {
                   },
             child: Text(l10n.accountReconcileSubmit),
           ),
-          const SizedBox(height: SpacingTokens.md),
+          const SizedBox(height: SpacingTokens.lg),
         ],
       ),
     );
@@ -649,7 +949,7 @@ class _ValuationSheet extends HookConsumerWidget {
           const SizedBox(height: SpacingTokens.sm),
           Row(
             children: [
-              Expanded(child: Text(_dateLabel(date.value))),
+              Expanded(child: Text(DateLabels.full(context, date.value))),
               TextButton(
                 onPressed: () async {
                   final picked = await showDatePicker(
@@ -712,7 +1012,7 @@ class _ValuationSheet extends HookConsumerWidget {
 }
 
 /// Holdings of the account's wallet, loaded directly from `client.wallet`.
-class _WalletHoldingsSection extends ConsumerWidget {
+class _WalletHoldingsSection extends HookConsumerWidget {
   const _WalletHoldingsSection({
     required this.walletId,
     required this.fallbackCurrencyCode,
@@ -724,28 +1024,46 @@ class _WalletHoldingsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final palette = Theme.of(context).ob;
     // The cached provider, not a hand-rolled client call: reading the
     // client from a hook's init state crashes with "Cannot listen to
     // inherited widgets inside HookState.initState", and the provider is
     // what the test overrides.
     final holdingsAsync = ref.watch(walletHoldingsProvider(walletId));
     final list = holdingsAsync.value ?? const <WalletHolding>[];
-    if (holdingsAsync.hasValue && list.isEmpty) return const SizedBox.shrink();
-    if (!holdingsAsync.hasValue) return const SizedBox.shrink();
+    if (!holdingsAsync.hasValue || list.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const SizedBox(height: SpacingTokens.md),
         ObSectionHeader(
           title: l10n.accountDetailHoldingsTitle,
           padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
         ),
-        for (final holding in list)
-          _HoldingTile(
-            holding: holding,
-            priceCurrencyCode:
-                holding.priceCurrencyCode ?? fallbackCurrencyCode,
+        ObCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              for (final (index, holding) in list.indexed) ...[
+                if (index > 0)
+                  Divider(
+                    height: 1,
+                    indent: SpacingTokens.md,
+                    endIndent: SpacingTokens.md,
+                    color: palette.line,
+                  ),
+                _HoldingRow(
+                  holding: holding,
+                  priceCurrencyCode:
+                      holding.priceCurrencyCode ?? fallbackCurrencyCode,
+                ),
+              ],
+            ],
           ),
+        ),
       ],
     );
   }

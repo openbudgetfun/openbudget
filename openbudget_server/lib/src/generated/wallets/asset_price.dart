@@ -12,10 +12,10 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod/serverpod.dart' as _is;
 
 import '../wallets/price_source.dart' as _ip9y7dom;
-import '../wallets/wallet_network.dart' as _ilag50y5;
 
 /// Cached price of one on-chain asset.
 abstract class AssetPrice
@@ -34,7 +34,7 @@ abstract class AssetPrice
 
   factory AssetPrice({
     _is.UuidValue? id,
-    required _ilag50y5.WalletNetwork network,
+    required _ifz8weqz.WalletNetwork network,
     required String assetId,
     String? symbol,
     required String currencyCode,
@@ -49,7 +49,7 @@ abstract class AssetPrice
       id: jsonSerialization['id'] == null
           ? null
           : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      network: _ilag50y5.WalletNetwork.fromJson(
+      network: _ifz8weqz.WalletNetwork.fromJson(
         (jsonSerialization['network'] as String),
       ),
       assetId: jsonSerialization['assetId'] as String,
@@ -75,7 +75,7 @@ abstract class AssetPrice
   @override
   _is.UuidValue? id;
 
-  _ilag50y5.WalletNetwork network;
+  _ifz8weqz.WalletNetwork network;
 
   String assetId;
 
@@ -101,7 +101,7 @@ abstract class AssetPrice
   @_is.useResult
   AssetPrice copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    _ilag50y5.WalletNetwork? network,
+    _ifz8weqz.WalletNetwork? network,
     String? assetId,
     String? symbol,
     String? currencyCode,
@@ -164,7 +164,7 @@ class _Undefined {}
 class _AssetPriceImpl extends AssetPrice {
   _AssetPriceImpl({
     _is.UuidValue? id,
-    required _ilag50y5.WalletNetwork network,
+    required _ifz8weqz.WalletNetwork network,
     required String assetId,
     String? symbol,
     required String currencyCode,
@@ -190,7 +190,7 @@ class _AssetPriceImpl extends AssetPrice {
   @override
   AssetPrice copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    _ilag50y5.WalletNetwork? network,
+    _ifz8weqz.WalletNetwork? network,
     String? assetId,
     Object? symbol = _Undefined,
     String? currencyCode,
@@ -216,8 +216,8 @@ class _AssetPriceImpl extends AssetPrice {
 class AssetPriceUpdateTable extends _is.UpdateTable<AssetPriceTable> {
   AssetPriceUpdateTable(super.table);
 
-  _is.ColumnValue<_ilag50y5.WalletNetwork, _ilag50y5.WalletNetwork> network(
-    _ilag50y5.WalletNetwork value,
+  _is.ColumnValue<_ifz8weqz.WalletNetwork, _ifz8weqz.WalletNetwork> network(
+    _ifz8weqz.WalletNetwork value,
   ) => _is.ColumnValue(
     table.network,
     value,
@@ -304,7 +304,7 @@ class AssetPriceTable extends _is.Table<_is.UuidValue?> {
 
   late final AssetPriceUpdateTable updateTable;
 
-  late final _is.ColumnEnum<_ilag50y5.WalletNetwork> network;
+  late final _is.ColumnEnum<_ifz8weqz.WalletNetwork> network;
 
   late final _is.ColumnString assetId;
 

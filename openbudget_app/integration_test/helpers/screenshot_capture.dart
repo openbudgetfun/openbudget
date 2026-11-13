@@ -226,12 +226,29 @@ Future<Uint8List?> _captureViaRenderView(WidgetTester tester) async {
     return null;
   }
 
-  final pixelRatio = tester.view.devicePixelRatio > 0
+  // The root layer is already in physical pixels: the view configuration's
+  // matrix scales the logical app into the window. With `setSurfaceSize`
+  // the test binding letterboxes the surface into the window, so the
+  // painted area is smaller than `paintBounds`. Capture exactly the painted
+  // rectangle and rescale it so the image is the logical size times the
+  // device pixel ratio, never the window plus empty margins.
+  final logicalSize = renderView.size;
+  if (logicalSize.isEmpty || !logicalSize.isFinite) {
+    return null;
+  }
+  final paintedRect = MatrixUtils.transformRect(
+    renderView.configuration.toMatrix(),
+    Offset.zero & logicalSize,
+  );
+  if (paintedRect.isEmpty) {
+    return null;
+  }
+  final devicePixelRatio = tester.view.devicePixelRatio > 0
       ? tester.view.devicePixelRatio
       : 1.0;
   final image = await layer.toImage(
-    renderView.paintBounds,
-    pixelRatio: pixelRatio,
+    paintedRect,
+    pixelRatio: logicalSize.width * devicePixelRatio / paintedRect.width,
   );
   final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
   if (bytes == null) {
@@ -247,4 +264,32 @@ class _CaptureResult {
 
   final Uint8List? bytes;
   final String backend;
+}
+
+/// The surfaces review screenshots are captured on.
+enum ScreenshotSurface {
+  /// A narrow phone: 360 logical pixels wide, the width overflow shows at.
+  phone(Size(360, 780), 3),
+
+  /// A laptop window.
+  desktop(Size(1280, 800), 2);
+
+  const ScreenshotSurface(this.logicalSize, this.devicePixelRatio);
+
+  final Size logicalSize;
+  final double devicePixelRatio;
+}
+
+/// Sizes the test view to [surface] for the rest of the test.
+///
+/// This sets the view itself rather than calling `setSurfaceSize`, so the
+/// app fills the whole capture with no letterboxing.
+Future<void> useScreenshotSurface(
+  WidgetTester tester,
+  ScreenshotSurface surface,
+) async {
+  tester.view
+    ..physicalSize = surface.logicalSize * surface.devicePixelRatio
+    ..devicePixelRatio = surface.devicePixelRatio;
+  addTearDown(tester.view.reset);
 }

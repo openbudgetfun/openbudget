@@ -2509,7 +2509,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'A credit account lets you spend borrowed money that you\'ll need to repay later, often with interest.';
 
   @override
-  String get addAccountTypeLineOfCredit => 'Add Account Type Line Of Credit';
+  String get addAccountTypeLineOfCredit => 'Line of Credit';
 
   @override
   String get addAccountSectionMortgagesAndLoans => 'Mortgages and Loans';
@@ -2519,22 +2519,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Accounts that have an outstanding balance you\'re currently paying off, and aren\'t spending from.';
 
   @override
-  String get addAccountTypeMortgage => 'Add Account Type Mortgage';
+  String get addAccountTypeMortgage => 'Mortgage';
 
   @override
-  String get addAccountTypeAutoLoan => 'Add Account Type Auto Loan';
+  String get addAccountTypeAutoLoan => 'Auto Loan';
 
   @override
-  String get addAccountTypeStudentLoan => 'Add Account Type Student Loan';
+  String get addAccountTypeStudentLoan => 'Student Loan';
 
   @override
-  String get addAccountTypePersonalLoan => 'Add Account Type Personal Loan';
+  String get addAccountTypePersonalLoan => 'Personal Loan';
 
   @override
-  String get addAccountTypeMedicalDebt => 'Add Account Type Medical Debt';
+  String get addAccountTypeMedicalDebt => 'Medical Debt';
 
   @override
-  String get addAccountTypeOtherDebt => 'Add Account Type Other Debt';
+  String get addAccountTypeOtherDebt => 'Other Debt';
 
   @override
   String get addAccountSectionTrackingAccounts => 'Tracking Accounts';
@@ -2547,7 +2547,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addAccountTypeAssetExample => 'Asset (e.g. Investment)';
 
   @override
-  String get addAccountTypeLiability => 'Add Account Type Liability';
+  String get addAccountTypeLiability => 'Liability';
 
   @override
   String get addAccountSectionDigitalAssets => 'Digital Assets';
@@ -2557,7 +2557,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Track a Solana wallet with automatic transaction history and asset valuations.';
 
   @override
-  String get addAccountTypeSolanaWallet => 'Add Account Type Solana Wallet';
+  String get addAccountTypeSolanaWallet => 'Solana Wallet';
 
   @override
   String get accountEditNicknameLabel => 'Account Nickname';
@@ -5225,7 +5225,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String netWorthRatesFrom(String date) {
-    return 'Rates from $date';
+    return 'Rates as of $date';
   }
 
   @override
@@ -5274,8 +5274,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get netWorthHistoryAll => 'All';
 
   @override
-  String netWorthAccountsCount(Object count) {
-    return '$count accounts';
+  String netWorthAccountsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count accounts',
+      one: '1 account',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -5484,7 +5490,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fxRateUseThisRate => 'Use this rate';
 
   @override
-  String get fxRateStale => 'stale';
+  String get fxRateStale => 'Stale';
 
   @override
   String fxRateApproximate(String amount) {
@@ -5519,8 +5525,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String transactionDateFullLabel(int year, int month, int day) {
-    return '$year-$month-$day';
+  String transactionDateFullLabel(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
   }
 
   @override
@@ -5610,4 +5619,78 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get envelopeDeleteMoveHistoryTitle =>
       'Move its history to which envelope?';
+
+  @override
+  String get netWorthHeadlineEyebrow => 'Combined net worth';
+
+  @override
+  String get netWorthHistoryTitle => 'History';
+
+  @override
+  String get netWorthIncompleteLegend => 'Dashed where a currency has no rate';
+
+  @override
+  String netWorthNoRate(String currency) {
+    return 'No $currency rate · not counted';
+  }
+
+  @override
+  String get netWorthEntityIncomplete => 'Leaves out unconverted accounts';
+
+  @override
+  String netWorthRateDated(String rateLine, String date) {
+    return '$rateLine · $date';
+  }
+
+  @override
+  String get fxRateSourceMarket => 'market rate';
+
+  @override
+  String get fxRateSourceImplied => 'implied rate';
+
+  @override
+  String get fxRateSourceManual => 'your rate';
+
+  @override
+  String get fxRateSourceIdentity => 'same currency';
+
+  @override
+  String fxRateConvertsTo(String amount) {
+    return 'Converts to about $amount';
+  }
+
+  @override
+  String get accountDetailBalanceEyebrow => 'Balance';
+
+  @override
+  String get accountDetailValueEyebrow => 'Current value';
+
+  @override
+  String get accountReconcileClearedNow => 'Cleared in OpenBudget';
+
+  @override
+  String get accountReconcileMatches => 'Matches your statement';
+
+  @override
+  String accountValuationChange(String amount) {
+    return '$amount since the last valuation';
+  }
+
+  @override
+  String get accountHoldingsUnpriced => 'No price yet';
+
+  @override
+  String transactionDetailAndDate(String detail, String date) {
+    return '$detail · $date';
+  }
+
+  @override
+  String netWorthChangeSince(String date) {
+    return 'since $date';
+  }
+
+  @override
+  String accountNoRateShort(String currency) {
+    return 'No $currency rate';
+  }
 }

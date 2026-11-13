@@ -14,6 +14,7 @@ import 'package:openbudget_app/src/features/transactions/providers/transaction_a
 import 'package:openbudget_app/src/features/transactions/widgets/fx_rate_line.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/date_labels.dart';
 import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -243,6 +244,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                           }
                         },
                         child: TextField(
+                          key: const Key('expense-amount-field'),
                           controller: amountController,
                           keyboardType: TextInputType.numberWithOptions(
                             decimal: amountDecimals > 0,
@@ -261,7 +263,16 @@ class AddExpenseScreen extends HookConsumerWidget {
                             prefixIcon: const ObFieldIcon(
                               data: OpenBudgetIcons.money,
                             ),
+                            // Frameless: the card is the frame. The theme
+                            // draws a rough outline on enabled and focused
+                            // fields, which the floating label struck
+                            // through, so every state opts out.
                             border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            focusedErrorBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
                             filled: false,
                             isDense: true,
                             contentPadding: EdgeInsets.zero,
@@ -277,16 +288,9 @@ class AddExpenseScreen extends HookConsumerWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(height: SpacingTokens.xs),
-                      Text(
-                        l10n.transactionAddExpense,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: palette.ink,
-                        ),
-                      ),
                       if (amountText.isNotEmpty)
                         Padding(
-                          padding: const EdgeInsets.only(top: 2),
+                          padding: const EdgeInsets.only(top: SpacingTokens.xs),
                           child: ObAmount(
                             formattedAmount,
                             tone: ObTone.overspent,
@@ -377,7 +381,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                             child: ObDropdown<String>(
                               value: selectedEnvelopeId.value ?? '',
                               items: envelopeItems,
-                              labelText: l10n.transactionUnassigned,
+                              labelText: l10n.transactionCategoryLabel,
                               onChanged: (value) {
                                 selectedEnvelopeId.value = (value ?? '').isEmpty
                                     ? null
@@ -394,7 +398,9 @@ class AddExpenseScreen extends HookConsumerWidget {
                           data: OpenBudgetIcons.calendar,
                         ),
                         title: Text(l10n.transactionDateLabel),
-                        subtitle: Text(_formatDate(selectedDate.value)),
+                        subtitle: Text(
+                          DateLabels.full(context, selectedDate.value),
+                        ),
                         onTap: () async {
                           final picked = await showDatePicker(
                             context: context,
@@ -596,9 +602,6 @@ class AddExpenseScreen extends HookConsumerWidget {
       ),
     );
   }
-
-  static String _formatDate(DateTime date) =>
-      '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 }
 
 /// One line of the split.
@@ -644,6 +647,7 @@ class _LinesEditor extends HookWidget {
 
     if (lines.isEmpty) {
       return OutlinedButton.icon(
+        key: const Key('expense-split-button'),
         onPressed: amountMinor == null || amountMinor == 0
             ? null
             : () {
@@ -657,6 +661,7 @@ class _LinesEditor extends HookWidget {
     }
 
     return ObCard(
+      key: const Key('expense-lines-editor'),
       padding: const EdgeInsets.all(SpacingTokens.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -678,79 +683,83 @@ class _LinesEditor extends HookWidget {
             ],
           ),
           const SizedBox(height: SpacingTokens.sm),
-          for (var i = 0; i < lines.length; i++)
+          // Each line stacks: amount and remove on top, category under it.
+          // Side by side, both fields truncated at 360pt.
+          for (var i = 0; i < lines.length; i++) ...[
+            if (i > 0) Divider(height: SpacingTokens.lg, color: palette.line),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    key: ValueKey('line-amount-$i'),
+                    initialValue: formatMinorUnits(
+                      lines[i].amountMinor,
+                      decimals,
+                    ),
+                    keyboardType: TextInputType.numberWithOptions(
+                      decimal: decimals > 0,
+                    ),
+                    style: ObTextStyles.amount(theme.textTheme.titleMedium),
+                    decoration: InputDecoration(
+                      labelText: l10n.linesEditorLineAmount(i + 1),
+                      prefixText: '$currencyCode ',
+                      errorText: lines[i].hasError
+                          ? l10n.amountInvalidFormat(decimals)
+                          : null,
+                    ),
+                    onChanged: (text) {
+                      final value = parseMoneyInput(
+                        text,
+                        decimals: decimals,
+                      );
+                      final updated = [...lines];
+                      updated[i] = _ExpenseLine(
+                        amountMinor: value ?? updated[i].amountMinor,
+                        envelopeId: updated[i].envelopeId,
+                        hasError: value == null && text.trim().isNotEmpty,
+                      );
+                      onChanged(updated);
+                    },
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => onChanged([
+                    for (var j = 0; j < lines.length; j++)
+                      if (j != i) lines[j],
+                  ]),
+                  icon: const SkribbleIcon(data: OpenBudgetIcons.remove),
+                  tooltip: MaterialLocalizations.of(
+                    context,
+                  ).deleteButtonTooltip,
+                ),
+              ],
+            ),
+            const SizedBox(height: SpacingTokens.sm),
             Padding(
-              padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: TextFormField(
-                      key: ValueKey('line-amount-$i'),
-                      initialValue: formatMinorUnits(
-                        lines[i].amountMinor,
-                        decimals,
-                      ),
-                      keyboardType: TextInputType.numberWithOptions(
-                        decimal: decimals > 0,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: l10n.linesEditorLineAmount(i + 1),
-                        prefixText: '$currencyCode ',
-                        errorText: lines[i].hasError
-                            ? l10n.amountInvalidFormat(decimals)
-                            : null,
-                      ),
-                      onChanged: (text) {
-                        final value = parseMoneyInput(
-                          text,
-                          decimals: decimals,
-                        );
-                        final updated = [...lines];
-                        updated[i] = _ExpenseLine(
-                          amountMinor: value ?? updated[i].amountMinor,
-                          envelopeId: updated[i].envelopeId,
-                          hasError: value == null && text.trim().isNotEmpty,
-                        );
-                        onChanged(updated);
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: SpacingTokens.sm),
-                  Expanded(
-                    flex: 3,
-                    child: DropdownButtonFormField<String>(
-                      initialValue: lines[i].envelopeId.isEmpty
-                          ? ''
-                          : lines[i].envelopeId,
-                      isExpanded: true,
-                      items: envelopeItems,
-                      decoration: InputDecoration(
-                        labelText: l10n.transactionUnassigned,
-                      ),
-                      onChanged: (value) {
-                        final updated = [...lines];
-                        updated[i] = _ExpenseLine(
-                          amountMinor: updated[i].amountMinor,
-                          envelopeId: value ?? '',
-                        );
-                        onChanged(updated);
-                      },
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => onChanged([
-                      for (var j = 0; j < lines.length; j++)
-                        if (j != i) lines[j],
-                    ]),
-                    icon: const SkribbleIcon(data: OpenBudgetIcons.remove),
-                    tooltip: MaterialLocalizations.of(
-                      context,
-                    ).deleteButtonTooltip,
-                  ),
-                ],
+              // Line up with the amount field, clear of the remove button.
+              padding: const EdgeInsets.only(right: 48),
+              child: DropdownButtonFormField<String>(
+                initialValue: lines[i].envelopeId.isEmpty
+                    ? ''
+                    : lines[i].envelopeId,
+                isExpanded: true,
+                items: envelopeItems,
+                decoration: InputDecoration(
+                  labelText: l10n.transactionCategoryLabel,
+                ),
+                onChanged: (value) {
+                  final updated = [...lines];
+                  updated[i] = _ExpenseLine(
+                    amountMinor: updated[i].amountMinor,
+                    envelopeId: value ?? '',
+                  );
+                  onChanged(updated);
+                },
               ),
             ),
+          ],
+          const SizedBox(height: SpacingTokens.xs),
           TextButton.icon(
             onPressed: () => onChanged(<_ExpenseLine>[
               ...lines,

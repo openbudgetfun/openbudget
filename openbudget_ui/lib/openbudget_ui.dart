@@ -39,6 +39,7 @@ export 'src/widgets/ob_field_icon.dart';
 export 'src/widgets/ob_highlighter.dart';
 export 'src/widgets/ob_list_row.dart';
 export 'src/widgets/ob_mark.dart';
+export 'src/widgets/ob_readable_width.dart';
 export 'src/widgets/ob_section_header.dart';
 export 'src/widgets/ob_state_panel.dart';
 export 'src/widgets/ob_text_field.dart';
