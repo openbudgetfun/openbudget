@@ -119,7 +119,65 @@ final class UsTaxProfile extends TaxProfile {
     'spouseHasSsn': spouseHasSsn,
     'dependents': [for (final dependent in dependents) dependent.toJson()],
   };
+
+  /// The stored `dependents` list as the three dependents questions ask it:
+  /// the counts under and over 17, and one SSN answer that is true only
+  /// when there are dependents and every one has a valid SSN.
+  @override
+  Map<String, Object?> toAnswers() => {
+    ...toJson()..remove('dependents'),
+    _dependentsUnder17Key: dependents
+        .where((dependent) => dependent.underSeventeen)
+        .length,
+    _dependents17OrOlderKey: dependents
+        .where((dependent) => !dependent.underSeventeen)
+        .length,
+    _dependentsHaveSsnKey:
+        dependents.isNotEmpty &&
+        dependents.every((dependent) => dependent.hasValidSsn),
+  };
+
+  /// Composes the `dependents` list from the three dependents answers,
+  /// then applies the rest like any other profile. Answers that match the
+  /// current ones keep the stored list as it is, so dependents with mixed
+  /// SSN answers, which the three answers cannot express, are not flattened
+  /// by a save that did not touch them.
+  @override
+  UsTaxProfile withAnswers(Map<String, Object?> answers) {
+    final current = toAnswers();
+    final merged = {...current, ...answers};
+    final unchanged = _dependentsAnswerKeys.every(
+      (key) => merged[key] == current[key],
+    );
+    final hasSsn = merged[_dependentsHaveSsnKey] == true;
+    return usProfileFromJson({
+      ...toJson(),
+      for (final entry in merged.entries)
+        if (!_dependentsAnswerKeys.contains(entry.key)) entry.key: entry.value,
+      if (!unchanged)
+        'dependents': [
+          for (var i = 0; i < _count(merged, _dependentsUnder17Key); i++)
+            UsDependent(underSeventeen: true, hasValidSsn: hasSsn).toJson(),
+          for (var i = 0; i < _count(merged, _dependents17OrOlderKey); i++)
+            UsDependent(underSeventeen: false, hasValidSsn: hasSsn).toJson(),
+        ],
+    });
+  }
 }
+
+const _dependentsUnder17Key = 'dependentsUnder17';
+const _dependents17OrOlderKey = 'dependents17OrOlder';
+const _dependentsHaveSsnKey = 'dependentsHaveSsn';
+const _dependentsAnswerKeys = <String>{
+  _dependentsUnder17Key,
+  _dependents17OrOlderKey,
+  _dependentsHaveSsnKey,
+};
+
+/// The count answered under [key]: a non-negative whole number, or a
+/// [FormatException] naming the key.
+int _count(Map<String, Object?> answers, String key) =>
+    taxProfileNonNegativeInt(answers, key) ?? 0;
 
 /// Decodes a US profile.
 UsTaxProfile usProfileFromJson(Map<String, Object?> json) {

@@ -61,6 +61,13 @@ jobs:
         run: cd openbudget_server && dart run tool/generate_knowledge.dart --check
         shell: devenv shell -- bash -e {0}
 
+      # The tax question labels are generated from the profile questions the
+      # rule packs declare; fail when a pack names text the ARB file lacks or
+      # the committed Dart drifts from the packs.
+      - name: check generated tax question labels
+        run: cd openbudget_app && dart run tool/generate_tax_question_labels.dart --check
+        shell: devenv shell -- bash -e {0}
+
   analyze:
     runs-on: ubuntu-24.04
     timeout-minutes: 60

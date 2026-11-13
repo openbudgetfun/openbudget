@@ -213,8 +213,8 @@ void main() {
       expect(find.text('United Kingdom'), findsWidgets);
       expect(find.text('Individual'), findsOneWidget);
 
-      await tester.tap(profile.scottishTaxpayerToggle);
-      await tester.pumpAndSettle();
+      await profile.tapQuestion(profile.scottishTaxpayerToggle);
+      await profile.tapQuestion(profile.taxResidentToggle);
       await profile.save();
 
       expect(repository.savedProfiles, hasLength(1));
@@ -224,6 +224,11 @@ void main() {
       expect(
         repository.savedProfiles.single.profileJson,
         contains('"scottishTaxpayer":true'),
+      );
+      // The residence guardrail question is asked in every country.
+      expect(
+        repository.savedProfiles.single.profileJson,
+        contains('"taxResident":true'),
       );
 
       expect(overview.yearLabel, findsOneWidget);
