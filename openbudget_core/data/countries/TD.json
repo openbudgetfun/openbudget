@@ -8,10 +8,57 @@
   "timeZones": [
     "Africa/Ndjamena"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "TVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1800,
+        "from": "2016-01-01",
+        "to": "2024-01-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1750,
+        "from": "2024-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 900,
+        "from": "2024-01-01",
+        "to": null,
+        "appliesTo": "listed local products (sugar, oil, soap, textiles, local agri-food products)",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 50000000,
+      "currency": "XAF",
+      "period": "annualTurnover",
+      "source": 3
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Ministère des Finances et du Budget (Direction Générale des Impôts)",
+    "url": "https://finances.gouv.td"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +77,21 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Chad — VAT standard rate (verbatim article 26 of the 2024 finance law: 18% replaced by 17.5% from 1 January 2024) and registration threshold",
+      "url": "https://afriref.dev/td/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Effective dating (grade S, verbatim from the enacted law quoted by afriref): article 26 of the 2024 finance law (Loi n°031/PT/2023) replaced '18%' with '17,5%' in CGI art. 238-I-1° from 1 January 2024; the 9% reduced band on listed local products was introduced at the same time.",
+    "Stale secondary tables (including PwC, last reviewed August 2024) still publish 18% for Chad; afriref re-extracted the enacted 17.5% text from the CABRI budget-library PDF and the earlier 18% from the 2016 CGI.",
+    "Registration threshold of XAF 50,000,000 (grade S, CGI 2025 per afriref)."
+  ]
 }

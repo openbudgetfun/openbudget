@@ -8,10 +8,36 @@
   "timeZones": [
     "Africa/Banjul"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2013-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Gambia Revenue Authority (GRA)",
+    "url": "https://www.gra.gm"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +56,32 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "CalcBright: VAT and sales tax rates in 177 countries (updated October 2026)",
+      "url": "https://calcbright.com/blog/vat-rates-by-country-2026",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+      "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "TaxProsRated: Gambia jurisdiction overview (VAT 15% under the Income and VAT Act 2012; reviewed against the GRA)",
+      "url": "https://taxprosrated.com/global/jurisdictions/country/gm",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2013-01-01): VAT was introduced in 2013 at 15% under the Income and VAT Act 2012 (grade S; CalcBright citing gra.gm, AfroTools March 2026 and a GRA-reviewed secondary summary).",
+    "VAT-registered businesses file monthly returns (grade S). No registration threshold figure was sourced this pass; left null rather than guessed."
+  ]
 }

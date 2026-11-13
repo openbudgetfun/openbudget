@@ -8,10 +8,27 @@
   "timeZones": [
     "Europe/Vatican"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "none",
+    "localName": null,
+    "rates": [],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Governatorato dello Stato della Città del Vaticano",
+    "url": "https://www.vatican.va"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +47,19 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VatInfo.org: countries with no VAT in 2026 (Gibraltar Transaction Tax from 15 July 2026; Kuwait, Qatar, Greenland, San Marino, Syria, Afghanistan and others)",
+      "url": "https://vatinfo.org/countries-with-no-vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (grade I; the Vatican City State has no general income tax - employees of the Holy See are exempt under the Lateran instruments).",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The Vatican City levies no VAT or sales tax (grade I; it is outside the EU VAT area and purchases flow through Italian arrangements - not confirmed on a primary page this session)."
+  ]
 }

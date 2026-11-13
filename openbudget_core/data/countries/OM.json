@@ -8,10 +8,41 @@
   "timeZones": [
     "Asia/Muscat"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 500,
+        "from": "2021-04-16",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 38500000,
+      "currency": "OMR",
+      "period": "rolling12Months",
+      "source": 4
+    },
+    "returnFrequency": "quarterly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Oman Tax Authority (OTA)",
+    "url": "https://www.taxoman.gov.om"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +61,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Oman Tax Authority: VAT FAQs ('the standard rate of tax will be 5%'), in force since 16 April 2021 (cited by mearef)",
+      "url": "https://www.taxoman.gov.om",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "mearef: Oman — VAT rate (OTA VAT FAQs) and registration threshold (OTA Chairman's Decision: OMR 38,500)",
+      "url": "https://mearef.dev/om/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year as an app default (grade I); Oman levies no personal income tax today - a personal income tax on high earners was announced for 2028 and is not yet in force (grade S caveat).",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "VAT 5% since introduction on 16 April 2021 (grade P, OTA VAT FAQs and the VAT Royal Decree 121/2020 regime, cited by mearef).",
+    "Registration threshold of OMR 38,500 over 12 months (voluntary at OMR 19,250; grade S, OTA Chairman's decision per mearef).",
+    "Returns are quarterly, due within 30 days of quarter end (grade S)."
+  ]
 }

@@ -8,10 +8,49 @@
   "timeZones": [
     "Africa/Algiers"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "TVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1900,
+        "from": "2017-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 900,
+        "from": "2017-01-01",
+        "to": null,
+        "appliesTo": "essential goods",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 800000000,
+      "currency": "DZD",
+      "period": "annualTurnover",
+      "source": 3
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Direction Générale des Impôts (DGI)",
+    "url": "https://www.mfdgi.gov.dz"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +69,21 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Algeria — VAT standard rate and registration threshold (cited to the DGI's Code des taxes sur le chiffre d'affaires)",
+      "url": "https://afriref.dev/dz/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Rates secondary (grade S): 19% standard and 9% reduced since 1 January 2017, cited by afriref to the 2017 finance law amendment of the Code des taxes sur le chiffre d'affaires; mfdgi.gov.dz was not reachable this session.",
+    "Lower-bound rows - standard (2017-01-01), reduced (2017-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window); the 19% rate was set by the loi de finances 2017.",
+    "Registration threshold of DZD 8,000,000 (annual turnover) from 1 January 2022, cited by afriref to CIDTA art. 282 ter (grade S); afriref records no earlier threshold value."
+  ]
 }

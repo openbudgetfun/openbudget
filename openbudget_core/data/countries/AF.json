@@ -11,7 +11,7 @@
   "individualTaxYear": {
     "startMonth": 3,
     "startDay": 21,
-    "calendar": "solar-hijri"
+    "calendar": "persian"
   },
   "companyYearEndDefault": {
     "month": 3,

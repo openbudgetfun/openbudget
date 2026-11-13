@@ -8,10 +8,73 @@
   "timeZones": [
     "Asia/Dushanbe"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2022-01-01",
+        "to": "2024-01-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1400,
+        "from": "2024-01-01",
+        "to": "2027-01-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1300,
+        "from": "2027-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 700,
+        "from": "2024-01-01",
+        "to": null,
+        "appliesTo": "construction work, hotel services and catering",
+        "source": 3
+      },
+      {
+        "label": "reduced2",
+        "basisPoints": 500,
+        "from": "2024-01-01",
+        "to": null,
+        "appliesTo": "domestic agricultural products, processing, training and sanatorium medical services",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 100000000,
+      "currency": "TJS",
+      "period": "rolling12Months",
+      "source": 4
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Tax Committee under the President of the Republic of Tajikistan",
+    "url": "https://andoz.tj"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +93,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Code of the Republic of Tajikistan (unofficial English translation, consolidated to Law No. 2168 of 14 May 2025): heading note and art. 397(4) — 14% from 1 January 2024 to 31 December 2026, 13% from 1 January 2027",
+      "url": "https://andoz.tj/docs/kodex/Kodex_14_05_2025_Nav_ENG_en.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Grant Thornton: indirect tax guide — Tajikistan (14% standard with 7% and 5% reduced bands; TJS 1 million registration threshold)",
+      "url": "https://www.grantthornton.global/en/insights/indirect-tax-guide/indirect-tax---Tajikistan",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Effective dating (grade P, the Tax Code's own heading note, art. 397(4), consolidated to Law No. 2168 of 14 May 2025, published in English by the Tax Committee): the rate under art. 264(1)(1) is 14% for 1 January 2024 to 31 December 2026 and 13% from 1 January 2027. The 2022 Tax Code had cut the rate from 18% to 15% effective 1 January 2022; the 13% row is pre-recorded ahead of its 2027 start.",
+    "Reduced bands of 7% and 5% apply per art. 264(1) (grade P, Grant Thornton's snapshot of the same code).",
+    "Registration threshold of TJS 1,000,000 over the previous 12 months (grade S; Grant Thornton and VAT compliance trackers)."
+  ]
 }
