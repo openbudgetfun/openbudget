@@ -144,6 +144,55 @@ void main() {
       expect(find.text('Estimated saving £1,200.00'), findsOneWidget);
     });
 
+    testWidgets('lists the upcoming filing and payment dates', (tester) async {
+      final repository = FakeTaxRepository(
+        profile: taxProfileRecord(),
+        deadlines: testDeadlines(),
+      );
+      await tester.pumpWidget(_buildApp(repository));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Upcoming'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Upcoming'), findsOneWidget);
+      expect(
+        find.text('Self Assessment online return for tax-code collection'),
+        findsOneWidget,
+      );
+      expect(find.text('In 49 days'), findsOneWidget);
+      expect(repository.deadlineCalls, [testEntityId]);
+    });
+
+    testWidgets('keeps the report when the upcoming dates fail to load', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildApp(
+          FakeTaxRepository(
+            profile: taxProfileRecord(),
+            deadlinesError: Exception('server down'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Balance due'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text("We couldn't load your upcoming dates."),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(
+        find.text("We couldn't load your upcoming dates."),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('warns that preview figures are not professionally checked', (
       tester,
     ) async {

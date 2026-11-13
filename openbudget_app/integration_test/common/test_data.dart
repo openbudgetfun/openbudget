@@ -236,6 +236,93 @@ abstract final class TestData {
       'before filing.';
   static const taxYearLabel = 'Tax year 2026';
 
+  // Tax: the Upcoming list
+  static const taxUpcomingTitle = 'Upcoming';
+  static const taxUpcomingFirstTitle =
+      'Self Assessment online return for tax-code collection';
+  static const taxUpcomingFirstDate = 'Dec 30, 2026';
+  static const taxUpcomingFirstDaysLeft = 'In 49 days';
+  static const taxUpcomingReturnTitle = 'Self Assessment online return';
+  static const taxUpcomingReturnDate = 'Jan 31, 2027';
+  static const taxUpcomingReturnSource =
+      'Source: GOV.UK Self Assessment deadlines';
+  static const taxUpcomingFifthTitle = 'Second payment on account';
+  static const taxUpcomingShowAll = 'Show all 5 dates';
+
+  /// The fixed dates the fake tax server lists, soonest first.
+  static List<TaxDeadlineView> taxDeadlines() {
+    TaxDeadlineView deadline({
+      required String id,
+      required String title,
+      required String kind,
+      required DateTime dueDate,
+      required int daysLeft,
+      required String periodLabel,
+      String citation = 'GOV.UK Self Assessment deadlines',
+      String? note,
+    }) => TaxDeadlineView(
+      id: id,
+      title: title,
+      kind: kind,
+      dueDate: dueDate,
+      daysLeft: daysLeft,
+      periodStart: DateTime.utc(2025, 4, 6),
+      periodEnd: DateTime.utc(2026, 4, 6),
+      periodLabel: periodLabel,
+      source: 'https://www.gov.uk/self-assessment-tax-returns/deadlines',
+      citation: citation,
+      grade: 'primary',
+      dependsOnProfile: false,
+      note: note,
+    );
+
+    return [
+      deadline(
+        id: 'gb.sa.coding-out',
+        title: taxUpcomingFirstTitle,
+        kind: 'filing',
+        dueDate: DateTime.utc(2026, 12, 30),
+        daysLeft: 49,
+        periodLabel: '2025/26',
+        note:
+            'Filing online by this day lets a balance under £3,000 be '
+            'collected through the tax code.',
+      ),
+      deadline(
+        id: 'gb.sa.online-return',
+        title: taxUpcomingReturnTitle,
+        kind: 'filing',
+        dueDate: DateTime.utc(2027, 1, 31),
+        daysLeft: 81,
+        periodLabel: '2025/26',
+      ),
+      deadline(
+        id: 'gb.sa.balancing-payment',
+        title: 'Self Assessment balancing payment',
+        kind: 'payment',
+        dueDate: DateTime.utc(2027, 1, 31),
+        daysLeft: 81,
+        periodLabel: '2025/26',
+      ),
+      deadline(
+        id: 'gb.sa.payment-on-account-1',
+        title: 'First payment on account',
+        kind: 'payment',
+        dueDate: DateTime.utc(2027, 1, 31),
+        daysLeft: 81,
+        periodLabel: '2026/27',
+      ),
+      deadline(
+        id: 'gb.sa.payment-on-account-2',
+        title: taxUpcomingFifthTitle,
+        kind: 'payment',
+        dueDate: DateTime.utc(2027, 7, 31),
+        daysLeft: 262,
+        periodLabel: '2026/27',
+      ),
+    ];
+  }
+
   // Books (double-entry ledger)
   static const booksEnableTitle = 'Enable double-entry books';
   static const booksEnableConfirm = 'Enable books';
