@@ -1046,9 +1046,11 @@ WalletProviderSnapshot _snapshot({
   List<WalletProviderTransaction>? transactions,
   String? newestSignature,
   List<String> warnings = const [],
+  WalletNetwork network = WalletNetwork.solanaMainnet,
 }) {
   final txRows = transactions ?? const <WalletProviderTransaction>[];
   return WalletProviderSnapshot(
+    readNetworks: [network],
     holdings:
         holdings ??
         [
@@ -1072,7 +1074,9 @@ WalletProviderHolding _holding({
   String? symbol,
   String? name,
   String? metadataJson,
+  WalletNetwork network = WalletNetwork.solanaMainnet,
 }) => WalletProviderHolding(
+  network: network,
   assetId: assetId,
   decimals: decimals,
   quantityRaw: BigInt.parse(quantity),
@@ -1137,12 +1141,8 @@ final class _ScriptedProvider implements WalletProvider {
   final List<String?> untils = [];
 
   @override
-  Future<WalletProviderSnapshot> fetchSnapshot({
-    required WalletNetwork network,
-    required String address,
-    String? untilSignature,
-  }) {
-    untils.add(untilSignature);
-    return handler(untilSignature);
+  Future<WalletProviderSnapshot> fetchSnapshot(WalletReadRequest request) {
+    untils.add(request.untilSignature);
+    return handler(request.untilSignature);
   }
 }
