@@ -12,6 +12,7 @@ import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:openbudget_server/src/wallets/wallet_math.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider_registry.dart';
+import 'package:openbudget_server/src/wallets/wallet_spam_classifier.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
 
@@ -43,6 +44,10 @@ abstract final class WalletService {
       WalletProviderRegistry.defaultRegistry;
   static WalletChangePublisher _publisher = EntityRealtimeNotifier.notify;
   static final _previewRateLimiter = _PreviewRateLimiter();
+
+  /// The server clock used for the 7-day price rule and related stamps.
+  @visibleForTesting
+  static DateTime Function() clock = () => DateTime.now().toUtc();
 
   /// The chain provider used by [connect], [sync] and [preview].
   @visibleForTesting
@@ -83,6 +88,7 @@ abstract final class WalletService {
     _registry = WalletProviderRegistry.defaultRegistry;
     _publisher = EntityRealtimeNotifier.notify;
     _previewRateLimiter.reset();
+    clock = () => DateTime.now().toUtc();
   }
 
   /// Creates the wallet and its fixed crypto account in one transaction, then
@@ -151,7 +157,7 @@ abstract final class WalletService {
             session,
             current.copyWith(
               label: cleanLabel,
-              updatedAt: DateTime.now().toUtc(),
+              updatedAt: clock(),
             ),
             transaction: tx,
           );
@@ -161,7 +167,7 @@ abstract final class WalletService {
             session,
             account.copyWith(
               name: cleanAccountName,
-              updatedAt: DateTime.now().toUtc(),
+              updatedAt: clock(),
             ),
             transaction: tx,
           );
@@ -182,7 +188,7 @@ abstract final class WalletService {
         balanceSource: AccountBalanceSource.valuations,
         onBudget: false,
       );
-      final now = DateTime.now().toUtc();
+      final now = clock();
       return Wallet.db.insertRow(
         session,
         Wallet(
@@ -469,7 +475,7 @@ abstract final class WalletService {
         current.copyWith(
           // An explicit null clears the list, it does not keep it.
           scanNetworks: cleanNetworks,
-          updatedAt: DateTime.now().toUtc(),
+          updatedAt: clock(),
         ),
         transaction: tx,
       );
@@ -526,6 +532,85 @@ abstract final class WalletService {
       }
       return left.assetId.compareTo(right.assetId);
     });
+  }
+
+  /// Sets a user verdict on one holding.
+  ///
+  /// [verdict] of [SpamVerdict.hiddenByUser] or [SpamVerdict.allowedByUser]
+  /// overrides the classifier; [SpamVerdict.clean] (or null) clears the
+  /// override and re-runs the classifier on the holding. [SpamVerdict.suspected]
+  /// is stored as given.
+  static Future<WalletHolding> setHoldingVerdict(
+    Session session,
+    UuidValue walletHoldingId,
+    SpamVerdict? verdict,
+  ) async {
+    final discovered = await WalletHolding.db.findById(
+      session,
+      walletHoldingId,
+    );
+    if (discovered == null) throw NotFoundException();
+    final wallet = await Wallet.db.findById(session, discovered.walletId);
+    if (wallet == null) throw NotFoundException();
+    final entity = await EntityAccess.requireOwned(session, wallet.entityId);
+    _requireWritable(entity);
+
+    SpamVerdict newVerdict;
+    if (verdict == null || verdict == SpamVerdict.clean) {
+      final siblings = await WalletHolding.db.find(
+        session,
+        where: (t) => t.walletId.equals(wallet.id),
+      );
+      final total = siblings.fold<int>(
+        0,
+        (sum, holding) =>
+            holding.valueMinor == null ? sum : sum + holding.valueMinor!,
+      );
+      newVerdict = WalletSpamClassifier.classify(
+        holding: discovered,
+        walletTotalValueMinor: total,
+      );
+    } else {
+      newVerdict = verdict;
+    }
+
+    final updated = await session.db.transaction((tx) async {
+      await EntityAccess.requireOwned(
+        session,
+        wallet.entityId,
+        transaction: tx,
+        lockMode: LockMode.forNoKeyUpdate,
+      );
+      await Wallet.db.findById(
+        session,
+        wallet.id!,
+        transaction: tx,
+        lockMode: LockMode.forUpdate,
+      );
+      final current = await WalletHolding.db.findById(
+        session,
+        walletHoldingId,
+        transaction: tx,
+        lockMode: LockMode.forUpdate,
+      );
+      if (current == null) throw NotFoundException();
+      return WalletHolding.db.updateRow(
+        session,
+        current.copyWith(
+          spamVerdict: newVerdict,
+          updatedAt: clock(),
+        ),
+        transaction: tx,
+      );
+    });
+
+    await _publish(
+      session,
+      wallet.entityId,
+      ChangeScope.accounts,
+      accountId: wallet.accountId,
+    );
+    return updated;
   }
 
   /// Lists one wallet's transactions newest first.
@@ -688,7 +773,7 @@ LIMIT @limit''',
           category: category == null ? current.category : cleanCategory,
           tags: tags == null ? current.tags : cleanTags,
           memo: memo == null ? current.memo : cleanMemo,
-          updatedAt: DateTime.now().toUtc(),
+          updatedAt: clock(),
         ),
         transaction: tx,
       );
@@ -923,9 +1008,43 @@ LIMIT @limit''',
         }
       }
 
+      // Classify every resolved holding. User choices survive; the
+      // classifier only moves holdings between clean and suspected.
+      final pricedTotalMinor = resolved.fold<BigInt>(
+        BigInt.zero,
+        (sum, holding) => holding.valueMinor == null
+            ? sum
+            : sum + BigInt.from(holding.valueMinor!),
+      );
+      final verdicts =
+          <(WalletNetwork, String, HoldingPosition), SpamVerdict>{};
+      for (final holding in resolved) {
+        final key = (holding.network, holding.assetId, holding.position);
+        final existingVerdict = existingByKey[key]?.spamVerdict;
+        if (existingVerdict == SpamVerdict.hiddenByUser ||
+            existingVerdict == SpamVerdict.allowedByUser) {
+          verdicts[key] = existingVerdict!;
+        } else {
+          verdicts[key] = WalletSpamClassifier.classify(
+            network: holding.network,
+            assetId: holding.assetId,
+            symbol: holding.symbol,
+            name: holding.name,
+            priceSource: holding.source,
+            priceQuality: holding.quality,
+            valueMinor: holding.valueMinor,
+            walletTotalValueMinor: pricedTotalMinor.toInt(),
+          );
+        }
+      }
+
       var total = BigInt.zero;
       for (final holding in resolved) {
-        if (holding.valueMinor != null) {
+        final key = (holding.network, holding.assetId, holding.position);
+        final verdict = verdicts[key]!;
+        if (holding.valueMinor != null &&
+            (verdict == SpamVerdict.clean ||
+                verdict == SpamVerdict.allowedByUser)) {
           total += BigInt.from(holding.valueMinor!);
         }
       }
@@ -934,7 +1053,7 @@ LIMIT @limit''',
       final persistedHoldings =
           <(WalletNetwork, String, HoldingPosition), WalletHolding>{};
       final transactions = <String, WalletTransaction>{};
-      final now = DateTime.now().toUtc();
+      final now = clock();
       var insertedTransactions = 0;
       var updatedTransactions = 0;
 
@@ -1017,6 +1136,7 @@ LIMIT @limit''',
               decimals: holding.decimals,
               quantityRaw: holding.quantityRaw,
               isNft: holding.isNft,
+              spamVerdict: verdicts[key],
               priceCurrencyCode: holding.currencyCode,
               unitPrice: holding.unitPrice,
               valueMinor: holding.valueMinor,
@@ -1042,6 +1162,7 @@ LIMIT @limit''',
               decimals: holding.decimals,
               quantityRaw: holding.quantityRaw,
               isNft: holding.isNft,
+              spamVerdict: verdicts[key],
               priceCurrencyCode: holding.currencyCode,
               unitPrice: holding.unitPrice,
               valueMinor: holding.valueMinor,
@@ -1433,6 +1554,12 @@ LIMIT @limit''',
         WalletMath.parseUnitPrice(existing?.unitPrice) ??
         WalletMath.parseUnitPrice(cached?.unitPrice);
     if (cachedPrice == null) return null;
+    final asOf = existing?.priceAsOf ?? cached?.fetchedAt;
+    // A cached price counts for 7 days; older than that the holding is
+    // unpriced until a source quotes it again.
+    if (asOf == null || clock().difference(asOf) > const Duration(days: 7)) {
+      return null;
+    }
     warnings.add('Using cached price for asset ${holding.assetId}');
     return _PriceChoice(
       unitPrice: cachedPrice.toString(),
@@ -1441,7 +1568,7 @@ LIMIT @limit''',
       source: existing?.priceSource ?? cached?.source,
       quality: PriceQuality.cached,
       confidence: Confidence.low,
-      asOf: existing?.priceAsOf ?? cached?.fetchedAt,
+      asOf: asOf,
     );
   }
 
@@ -1522,7 +1649,7 @@ LIMIT @limit''',
           return;
         }
         final message = _capMessage(_userSafeFailureMessage(error));
-        final now = DateTime.now().toUtc();
+        final now = clock();
         await Wallet.db.updateRow(
           session,
           current.copyWith(
