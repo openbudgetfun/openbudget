@@ -1130,8 +1130,12 @@ void main() {
     await tester.pumpAndSettle();
 
     // The liability balance headlines the card; the activity follows in the
-    // same list, no tabs.
-    expect(find.textContaining('1.25'), findsWidgets);
+    // same list, no tabs. The hero figure draws its cents raised, so it is
+    // found by the label it is announced with.
+    expect(
+      find.bySemanticsLabel(RegExp(r'^-\$1\.25$', multiLine: true)),
+      findsOneWidget,
+    );
     await scrollIntoView(tester, find.text('Payment from Daily'));
     expect(find.text('Payment from Daily'), findsOneWidget);
     await scrollIntoView(tester, find.text('Initial Balance'));

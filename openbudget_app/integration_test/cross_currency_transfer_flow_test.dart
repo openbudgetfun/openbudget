@@ -102,7 +102,7 @@ void main() {
       // currency.
       expect(page.impliedRate, findsOneWidget);
       expect(find.textContaining('1 GBP = 0.79 USD'), findsOneWidget);
-      expect(find.textContaining('8 Nov'), findsOneWidget);
+      expect(find.textContaining('Nov\u00a08,\u00a02026'), findsOneWidget);
 
       await page.enterReceived('79.00');
       await tester.pumpAndSettle();

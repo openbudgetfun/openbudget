@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
@@ -159,10 +160,8 @@ void main() {
       tester,
     ) async {
       await _pumpIncome(tester);
-      final now = DateTime.now();
-      final today =
-          '${now.year}-${now.month.toString().padLeft(2, '0')}'
-          '-${now.day.toString().padLeft(2, '0')}';
+      // The date reads in the locale's words, e.g. "Nov 13, 2026".
+      final today = DateFormat.yMMMd('en').format(DateTime.now());
       expect(find.text(today), findsOneWidget);
 
       await tester.tap(find.text(today));

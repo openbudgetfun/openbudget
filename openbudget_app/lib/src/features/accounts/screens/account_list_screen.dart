@@ -175,74 +175,80 @@ class AccountListScreen extends HookConsumerWidget {
                 ..invalidate(accountListProvider(entityId))
                 ..invalidate(netWorthForEntitiesProvider({entityId}));
             },
-            child: ListView(
+            child: ObReadableWidth(
               padding: const EdgeInsets.fromLTRB(
                 SpacingTokens.md,
                 SpacingTokens.md,
                 SpacingTokens.md,
                 SpacingTokens.xl,
               ),
-              children: [
-                _NetWorthCard(view: netWorth),
-                const SizedBox(height: SpacingTokens.md),
-                if (assets.isNotEmpty) ...[
-                  ObSectionHeader(
-                    title: l10n.accountGroupAssets,
-                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
-                  ),
-                  ...assets.map(
-                    (account) => _AccountTile(
-                      account: account,
-                      entityId: entityId,
-                      convertedMinor: convertedById[account.id?.toString()],
-                      baseCurrencyCode:
-                          netWorth?.currencyCode ?? account.currencyCode,
-                    ),
-                  ),
+              builder: (context, padding) => ListView(
+                padding: padding,
+                children: [
+                  _NetWorthCard(view: netWorth),
                   const SizedBox(height: SpacingTokens.md),
-                ],
-                if (liabilities.isNotEmpty) ...[
-                  ObSectionHeader(
-                    title: l10n.accountGroupLiabilities,
-                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
-                  ),
-                  ...liabilities.map(
-                    (account) => _AccountTile(
-                      account: account,
-                      entityId: entityId,
-                      convertedMinor: convertedById[account.id?.toString()],
-                      baseCurrencyCode:
-                          netWorth?.currencyCode ?? account.currencyCode,
+                  if (assets.isNotEmpty) ...[
+                    ObSectionHeader(
+                      title: l10n.accountGroupAssets,
+                      padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
                     ),
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                ],
-                const SizedBox(height: SpacingTokens.lg),
-                OutlinedButton.icon(
-                  onPressed: () => context.goNamed(
-                    addAccountRoute,
-                    pathParameters: {'entityId': entityId},
-                  ),
-                  icon: const SkribbleIcon(data: OpenBudgetIcons.add),
-                  label: Text(l10n.accountAddButton),
-                ),
-                _PlaidConnectionsSection(entityId: entityId),
-                if (closed.isNotEmpty) ...[
-                  ObSectionHeader(
-                    title: l10n.accountClosed,
-                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
-                  ),
-                  ...closed.map(
-                    (account) => _AccountTile(
-                      account: account,
-                      entityId: entityId,
-                      convertedMinor: convertedById[account.id?.toString()],
-                      baseCurrencyCode:
-                          netWorth?.currencyCode ?? account.currencyCode,
+                    ...assets.map(
+                      (account) => _AccountTile(
+                        account: account,
+                        entityId: entityId,
+                        convertedMinor: convertedById[account.id?.toString()],
+                        baseCurrencyCode:
+                            netWorth?.currencyCode ?? account.currencyCode,
+                        ratesKnown: netWorth != null,
+                      ),
                     ),
+                    const SizedBox(height: SpacingTokens.md),
+                  ],
+                  if (liabilities.isNotEmpty) ...[
+                    ObSectionHeader(
+                      title: l10n.accountGroupLiabilities,
+                      padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
+                    ),
+                    ...liabilities.map(
+                      (account) => _AccountTile(
+                        account: account,
+                        entityId: entityId,
+                        convertedMinor: convertedById[account.id?.toString()],
+                        baseCurrencyCode:
+                            netWorth?.currencyCode ?? account.currencyCode,
+                        ratesKnown: netWorth != null,
+                      ),
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                  ],
+                  const SizedBox(height: SpacingTokens.lg),
+                  OutlinedButton.icon(
+                    onPressed: () => context.goNamed(
+                      addAccountRoute,
+                      pathParameters: {'entityId': entityId},
+                    ),
+                    icon: const SkribbleIcon(data: OpenBudgetIcons.add),
+                    label: Text(l10n.accountAddButton),
                   ),
+                  _PlaidConnectionsSection(entityId: entityId),
+                  if (closed.isNotEmpty) ...[
+                    ObSectionHeader(
+                      title: l10n.accountClosed,
+                      padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
+                    ),
+                    ...closed.map(
+                      (account) => _AccountTile(
+                        account: account,
+                        entityId: entityId,
+                        convertedMinor: convertedById[account.id?.toString()],
+                        baseCurrencyCode:
+                            netWorth?.currencyCode ?? account.currencyCode,
+                        ratesKnown: netWorth != null,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           );
         },
@@ -331,7 +337,7 @@ class _NetWorthCard extends HookWidget {
                 SkribbleIcon(
                   data: OpenBudgetIcons.warning,
                   size: 14,
-                  color: palette.hue(ObTone.overspent),
+                  color: palette.underfunded,
                 ),
                 const SizedBox(width: SpacingTokens.xs),
                 Flexible(
@@ -340,7 +346,8 @@ class _NetWorthCard extends HookWidget {
                       v.missingCurrencyCodes.join(', '),
                     ),
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: palette.hue(ObTone.overspent),
+                      color: palette.underfunded,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -392,15 +399,20 @@ class _AccountTile extends HookWidget {
     required this.entityId,
     required this.convertedMinor,
     required this.baseCurrencyCode,
+    required this.ratesKnown,
   });
 
   final Account account;
   final String entityId;
 
   /// The base-currency equivalent from the server's net worth rows; shown
-  /// as a secondary line when the account is in a foreign currency.
+  /// under the balance when the account is in a foreign currency.
   final int? convertedMinor;
   final String baseCurrencyCode;
+
+  /// Whether the server's net worth view has loaded, so a missing
+  /// [convertedMinor] means "no rate" rather than "not loaded yet".
+  final bool ratesKnown;
 
   @override
   Widget build(BuildContext context) {
@@ -416,6 +428,8 @@ class _AccountTile extends HookWidget {
         : ObTone.neutral;
     final isForeign = account.currencyCode != baseCurrencyCode;
     final isClosed = account.closedAt != null;
+    final converted = convertedMinor;
+    final muted = theme.textTheme.bodySmall?.copyWith(color: palette.mutedInk);
 
     return ObCard(
       margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
@@ -431,6 +445,10 @@ class _AccountTile extends HookWidget {
           builder: (_) =>
               EditAccountDialog(account: account, entityId: entityId),
         ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: SpacingTokens.md,
+        ),
+        horizontalTitleGap: SpacingTokens.sm,
         leading: Container(
           width: 40,
           height: 40,
@@ -446,59 +464,73 @@ class _AccountTile extends HookWidget {
             size: 20,
           ),
         ),
+        // The linear face: account names are row titles, and the display
+        // face is too wide to fit one beside a long balance at 360pt.
         title: Text(
           account.name,
-          style: theme.textTheme.titleMedium?.copyWith(color: palette.ink),
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: palette.ink,
+            fontWeight: FontWeight.w700,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      _labelForKind(account.kind, l10n),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: palette.mutedInk,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (isClosed) ...[
-                    const SizedBox(width: SpacingTokens.xs),
-                    ObToneChip(
-                      label: l10n.accountsClosedBadge,
-                      icon: const SkribbleIcon(
-                        data: OpenBudgetIcons.lock,
-                        size: 16,
-                      ),
-                    ),
-                  ],
-                ],
+        subtitle: Row(
+          children: [
+            Flexible(
+              child: Text(
+                _labelForKind(account.kind, l10n),
+                style: muted,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              if (isForeign && convertedMinor != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  l10n.accountBaseEquivalent(
-                    formatMinorForCode(convertedMinor!, baseCurrencyCode),
-                  ),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: palette.mutedInk,
-                  ),
+            ),
+            if (isClosed) ...[
+              const SizedBox(width: SpacingTokens.xs),
+              ObToneChip(
+                label: l10n.accountsClosedBadge,
+                icon: const SkribbleIcon(
+                  data: OpenBudgetIcons.lock,
+                  size: 16,
                 ),
-              ],
+              ),
             ],
-          ),
+          ],
         ),
-        trailing: ObAmount(
-          formatMinorForCode(account.balanceMinor, account.currencyCode),
-          tone: balanceTone,
-          style: theme.textTheme.titleMedium,
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            ObAmount(
+              formatMinorForCode(account.balanceMinor, account.currencyCode),
+              tone: balanceTone,
+              style: theme.textTheme.titleMedium,
+            ),
+            // Under the balance, where the converted figure sits on the
+            // other foreign rows, so the column always answers "in base?".
+            if (isForeign && ratesKnown && converted == null)
+              Text(
+                l10n.accountNoRateShort(account.currencyCode),
+                semanticsLabel: l10n.netWorthNoRate(account.currencyCode),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: palette.underfunded,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            if (isForeign && converted != null)
+              Text(
+                l10n.fxRateApproximate(
+                  formatMinorForCode(converted, baseCurrencyCode),
+                ),
+                semanticsLabel: l10n.accountBaseEquivalent(
+                  formatMinorForCode(converted, baseCurrencyCode),
+                ),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: palette.brand,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+          ],
         ),
       ),
     );

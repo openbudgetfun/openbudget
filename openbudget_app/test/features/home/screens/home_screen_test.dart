@@ -20,13 +20,14 @@ EntitySummaryView _summary({
   int uncategorizedCount = 0,
   int dueRecurringCount = 0,
   int pendingProposalCount = 0,
+  bool netWorthComplete = true,
 }) => EntitySummaryView(
   entity: entity ?? testEntity(),
   month: 202611,
   readyToAssignMinor: readyToAssignMinor,
   overspentEnvelopeCount: overspentEnvelopeCount,
   netWorthMinor: netWorthMinor,
-  netWorthComplete: true,
+  netWorthComplete: netWorthComplete,
   uncategorizedCount: uncategorizedCount,
   pendingProposalCount: pendingProposalCount,
   dueRecurringCount: dueRecurringCount,
@@ -181,6 +182,31 @@ void main() {
 
       expect(find.text('1 overspent'), findsOneWidget);
       expect(_skribbleIcon(OpenBudgetIcons.warning), findsOneWidget);
+    });
+
+    testWidgets('omits the overspent chip when nothing is overspent', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildSubject(summaries: [_summary()]));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('overspent'), findsNothing);
+      expect(_skribbleIcon(OpenBudgetIcons.warning), findsNothing);
+    });
+
+    testWidgets('flags an entity net worth that leaves out accounts', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildSubject(summaries: [_summary(netWorthComplete: false)]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(_skribbleIcon(OpenBudgetIcons.warning), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp('Leaves out unconverted accounts')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders net worth summary with assets and liabilities', (

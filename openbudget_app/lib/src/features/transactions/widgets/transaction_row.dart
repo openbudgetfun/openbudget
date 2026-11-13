@@ -54,6 +54,13 @@ class TransactionRow extends HookWidget {
         baseCurrencyCode != currencyCode &&
         transaction.baseAmountMinor != amount;
 
+    final dateText =
+        dateLabel ?? l10n.transactionDateFullLabel(transaction.date);
+    final subtitle = detail.isEmpty
+        ? dateText
+        : l10n.transactionDetailAndDate(detail, dateText);
+    final muted = theme.textTheme.bodySmall?.copyWith(color: palette.mutedInk);
+
     return ObCard(
       margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
       onTap: onOpen,
@@ -81,20 +88,11 @@ class TransactionRow extends HookWidget {
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (detail.isNotEmpty)
-                  Text(
-                    detail,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: palette.mutedInk,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
                 Text(
-                  dateLabel ?? _formatDate(transaction.date, l10n),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: palette.mutedInk,
-                  ),
+                  subtitle,
+                  style: muted,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 if (view.transferPeer != null) ...[
                   const SizedBox(height: 2),
@@ -112,9 +110,7 @@ class TransactionRow extends HookWidget {
                           l10n.transactionTransferPeer(
                             view.transferPeer!.accountName,
                           ),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: palette.mutedInk,
-                          ),
+                          style: muted,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -122,38 +118,34 @@ class TransactionRow extends HookWidget {
                     ],
                   ),
                 ],
-                if (showBase) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    l10n.transactionBaseAmount(
-                      formatMinorForCode(
-                        transaction.baseAmountMinor,
-                        baseCurrencyCode!,
-                      ),
-                    ),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: palette.mutedInk,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
           const SizedBox(width: SpacingTokens.sm),
-          ObAmount(
-            formatMinorForCode(amount, currencyCode),
-            tone: isInflow ? ObTone.funded : ObTone.overspent,
-            style: theme.textTheme.titleMedium,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              ObAmount(
+                formatMinorForCode(amount, currencyCode),
+                tone: isInflow ? ObTone.funded : ObTone.overspent,
+                style: theme.textTheme.titleMedium,
+              ),
+              // The server's base-currency figure sits under the native
+              // one, where the eye already is.
+              if (showBase)
+                Text(
+                  l10n.fxRateApproximate(
+                    formatMinorForCode(
+                      transaction.baseAmountMinor,
+                      baseCurrencyCode!,
+                    ),
+                  ),
+                  style: muted,
+                ),
+            ],
           ),
         ],
       ),
     );
   }
-
-  static String _formatDate(DateTime date, AppLocalizations l10n) =>
-      l10n.transactionDateFullLabel(
-        date.year,
-        date.month,
-        date.day,
-      );
 }

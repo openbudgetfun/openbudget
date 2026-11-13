@@ -319,8 +319,36 @@ void main() {
       await tester.pump();
 
       expect(find.text('EUR Checking'), findsOneWidget);
-      // The net worth card renders the converted total for the row.
-      expect(find.textContaining('in base currency'), findsOneWidget);
+      // The converted figure sits under the native balance, and reads in
+      // full to a screen reader.
+      expect(find.text('€1,000.00'), findsOneWidget);
+      expect(find.text(r'≈ $431.60'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp(r'431\.60 in base currency')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('says when no rate converts a foreign account row', (
+      tester,
+    ) async {
+      final accounts = [
+        _makeAccount(name: 'EUR Checking', currencyCode: 'EUR'),
+      ];
+
+      // Net worth has loaded but has no converted row for the account.
+      await tester.pumpWidget(
+        _buildSubject(accounts: accounts, netWorth: _netWorth()),
+      );
+      await tester.pumpAndSettle();
+      await tester.pump();
+
+      expect(find.text('No EUR rate'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp('No EUR rate · not counted')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('≈'), findsNothing);
     });
 
     testWidgets('in-list add account button appears under the accounts', (
