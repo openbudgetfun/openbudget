@@ -8,10 +8,41 @@
   "timeZones": [
     "Africa/Douala"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "TVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1925,
+        "from": "2005-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 50000000,
+      "currency": "XAF",
+      "period": "annualTurnover",
+      "source": 3
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Direction Générale des Impôts (DGI)",
+    "url": "https://www.impots.cm"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +61,21 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Cameroon — VAT standard rate and registration threshold (cited to the DGI fiche: 17.5% plus the 10% community surcharge = 19.25%)",
+      "url": "https://afriref.dev/cm/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The 19.25% standard rate comprises 17.5% VAT plus the 10% community integration surcharge (CEMAC) levied on the VAT itself; the Direction Générale des Impôts publishes it as a single 19.25% figure (grade S, via afriref's citation of the DGI fiche).",
+    "Lower-bound rows - standard (2005-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window); the DGI fiche dates the 19.25% figure to 2005.",
+    "Registration threshold of XAF 50,000,000 (grade S, CGI art. 127 per afriref)."
+  ]
 }

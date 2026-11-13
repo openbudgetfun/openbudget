@@ -8,10 +8,89 @@
   "timeZones": [
     "Africa/Accra"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT / NHIL / GETFund levy",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1250,
+        "from": "2018-08-01",
+        "to": "2023-01-01",
+        "appliesTo": null,
+        "source": 4
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2023-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "nhil",
+        "basisPoints": 250,
+        "from": "2018-08-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      },
+      {
+        "label": "getfund",
+        "basisPoints": 250,
+        "from": "2018-08-01",
+        "to": "2023-01-01",
+        "appliesTo": null,
+        "source": 4
+      },
+      {
+        "label": "getfund",
+        "basisPoints": 350,
+        "from": "2023-01-01",
+        "to": "2026-01-01",
+        "appliesTo": null,
+        "source": 4
+      },
+      {
+        "label": "getfund",
+        "basisPoints": 250,
+        "from": "2026-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "covidLevy",
+        "basisPoints": 100,
+        "from": "2021-05-01",
+        "to": "2026-01-01",
+        "appliesTo": "COVID-19 Health Recovery Levy, abolished from 1 January 2026",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 75000000,
+      "currency": "GHS",
+      "period": "annualTurnoverGoodsOnly",
+      "source": 3
+    },
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Ghana Revenue Authority (GRA)",
+    "url": "https://gra.gov.gh"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +109,34 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Ghana Revenue Authority: VAT — Value Added Tax Act, 2025 (Act 1151) reforms in effect from 1 January 2026 (rates, levies, threshold)",
+      "url": "https://gra.gov.gh/domestic-tax/tax-types/vat",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Ghana — VAT standard rate history (12.5% under Act 970 from 1 August 2018; 15% from 1 January 2023 by Act 1087) and thresholds",
+      "url": "https://afriref.dev/gh/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "BDO Indirect Tax News: International — VAT Rates and Other Indirect Tax Rate Changes for 2026 (15 January 2026)",
+      "url": "https://www.bdo.global/en-gb/insights/tax/indirect-tax/international-vat-and-excise-duty-changes-in-2026",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Effective dating of the components (grade P for the current structure from the GRA's own VAT page; grade S for the superseded rows via afriref's citation of the VAT (Amendment) (No. 2) Act 2022, Act 1087): VAT 12.5% from 1 August 2018, rising to 15% from 1 January 2023; GETFund levy 2.5% to 3.5% from 1 January 2023 and back to 2.5% from 1 January 2026; the 1% COVID-19 levy ran 1 May 2021 to 31 December 2025.",
+    "From 1 January 2026 the VAT Act, 2025 (Act 1151) charges VAT 15%, NHIL 2.5% and GETFund 2.5% on the same base — a 20% effective charge, down from about 21.9% under the old cascading structure, which charged VAT on top of the levies (grade P, GRA).",
+    "Registration threshold of GHS 750,000 (raised from GHS 200,000) applies to suppliers of goods only; every supplier of taxable services must register regardless of turnover (grade P, GRA; confirmed by the IFS survey of the Ghanaian tax system, August 2026).",
+    "The VAT Flat Rate Scheme (3% retailers, 5% real estate) was abolished from 1 January 2026 (grade P, GRA)."
+  ]
 }

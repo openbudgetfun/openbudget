@@ -8,10 +8,52 @@
   "timeZones": [
     "Asia/Kabul"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 3,
+    "startDay": 21,
+    "calendar": "persian"
+  },
+  "companyYearEndDefault": {
+    "month": 3,
+    "day": 20
+  },
+  "indirectTax": {
+    "kind": "salesTax",
+    "localName": "Business Receipts Tax (BRT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 400,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "higher",
+        "basisPoints": 500,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "larger hotels, large entertainment venues and domestic air transport",
+        "source": 3
+      },
+      {
+        "label": "higher2",
+        "basisPoints": 1000,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "luxury hotels and restaurants and telecommunications services",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Ministry of Finance (Islamic Emirate of Afghanistan)",
+    "url": "https://mof.gov.af"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +72,21 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+      "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear follows the Solar Hijri (Afghan) year, which starts on 1 Jawza (21 or 22 March); the Gregorian start date shifts by a day between years and the model pins 21 March (grade I).",
+    "companyYearEndDefault approximates the Solar Hijri year end at 20 March (grade I); the Gregorian date shifts by a day between years.",
+    "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+    "Afghanistan's BRT tiers (4% general, 5% and 10% higher tiers) are recorded from the cited secondary table; the Ministry of Finance site was unreachable in this session and post-2021 administration changes make re-checking important.",
+    "Lower-bound rows - standard (2022-01-01), higher (2022-01-01), higher2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
+  ]
 }

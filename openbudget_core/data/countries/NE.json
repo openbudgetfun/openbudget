@@ -8,10 +8,41 @@
   "timeZones": [
     "Africa/Niamey"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "TVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1900,
+        "from": "2000-06-21",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 50000000,
+      "currency": "XOF",
+      "period": "annualTurnover",
+      "source": 3
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Direction Générale des Impôts (DGI)",
+    "url": "https://www.dgi.ne"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +61,20 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Niger — VAT standard rate (CGI art. 226) and registration threshold (art. 328)",
+      "url": "https://afriref.dev/ne/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2000-06-21): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (19% cited to CGI art. 226; Niger's standard rate is 19%, above the UEMOA directive's 18%).",
+    "Registration threshold of XOF 50,000,000 (grade S, CGI art. 328). The authority URL could not be verified this session."
+  ]
 }

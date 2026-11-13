@@ -8,10 +8,68 @@
   "timeZones": [
     "Asia/Kolkata"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 4,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 3,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "gst",
+    "localName": "Goods and Services Tax (GST)",
+    "rates": [
+      {
+        "label": "merit",
+        "basisPoints": 500,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1800,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "main rate for goods and services",
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 1200,
+        "from": "2022-01-01",
+        "to": "2025-09-22",
+        "appliesTo": "12% slab (retained only for bricks after 22 September 2025)",
+        "source": 3
+      },
+      {
+        "label": "demerit",
+        "basisPoints": 2800,
+        "from": "2022-01-01",
+        "to": "2025-09-22",
+        "appliesTo": "28% slab",
+        "source": 3
+      },
+      {
+        "label": "demerit",
+        "basisPoints": 4000,
+        "from": "2025-09-22",
+        "to": null,
+        "appliesTo": "sin and demerit goods (pan masala, aerated drinks, larger vehicles) and online gaming, betting and casinos",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Central Board of Indirect Taxes and Customs (CBIC)",
+    "url": "https://cbic-gst.gov.in"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +88,20 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "GST Council (56th meeting, 3 September 2025): press release — two-slab structure of 5% and 18% with a 40% demerit rate, implemented from 22 September 2025; the 12% and 28% slabs withdrawn",
+      "url": "https://gstcouncil.gov.in/sites/default/files/2025-09/press_release_press_information_bureau_0.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear runs 1 April to 31 March (grade I, from the assessment cycle; the income tax department page was unreachable this session).",
+    "companyYearEndDefault is a 31 March app default for new entities (grade I), the common Indian financial year end.",
+    "Tobacco products remained in the old 28%-plus-cess structure after 22 September 2025 until compensation-cess obligations are discharged; gold and precious metals carry 3% and rough diamonds 0.25% (not modelled).",
+    "Lower-bound rows - merit (2022-01-01), standard (2022-01-01), reduced (2022-01-01), demerit (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
+  ]
 }

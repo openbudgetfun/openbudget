@@ -8,10 +8,44 @@
   "timeZones": [
     "Pacific/Guadalcanal"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "salesTax",
+    "localName": "Sales Tax and Goods Tax",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1000,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "sales tax on the scheduled services and goods tax on locally manufactured goods",
+        "source": 3
+      },
+      {
+        "label": "goodsImport",
+        "basisPoints": 1500,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "goods tax on imported goods (collected at the port)",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Inland Revenue Division, Ministry of Finance and Treasury (Solomon Islands)",
+    "url": "https://www.ird.gov.sb"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +64,26 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Solomon Islands Inland Revenue Division: tax legislation index (Goods Tax Act Cap 122 and Sales Tax Act Cap 125 in force; no VAT Act) with the published rate tables",
+      "url": "https://www.ird.gov.sb/tax-legislation/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "IMF Country Report 08/359 (Solomon Islands): goods tax 15% on imports and 10% on locally manufactured goods; sales tax 10% on a closed schedule of services",
+      "url": "https://www.imf.org/-/media/websites/imf/imported-full-text-pdf/external/pubs/ft/scr/2008/_cr08359.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Solomon Islands has no VAT: the Sales Tax Act charges 10% on a closed schedule of about 22 named services, and the Goods Tax Act charges 15% on imported goods and 10% on prescribed local manufactures at wholesale, unrecoverably. A 15% single-rate VAT Bill was before Parliament's committee as at March 2026 and is not law.",
+    "Lower-bound rows - standard (2022-01-01), goodsImport (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
+  ]
 }

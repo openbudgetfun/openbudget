@@ -8,10 +8,49 @@
   "timeZones": [
     "Africa/Lagos"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 750,
+        "from": "2020-02-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "zero",
+        "basisPoints": 0,
+        "from": "2026-01-01",
+        "to": null,
+        "appliesTo": "basic food, medicines, educational books, exports and other s.187 supplies",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 10000000000,
+      "currency": "NGN",
+      "period": "annualTurnoverSmallBusinessExclusion",
+      "source": 4
+    },
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Nigeria Revenue Service (NRS, formerly FIRS)",
+    "url": "https://www.nrs.gov.ng"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +69,34 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Nigeria Tax Act 2025 gazette (Act No. 7): s. 148 VAT 7.5%; ss. 186-187 exempt and zero-rated supplies (also mirrored on the NRS site)",
+      "url": "https://www.nrs.gov.ng/uploads/NIGERIA_TAX_ACT_2025_ef6bb812a5.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Nigeria Tax Administration Act 2025 gazette (small business rules; monthly VAT return by the 21st) as summarised in the nigeria-tax skill and afriref's NTAA citation",
+      "url": "https://afriref.dev/ng/vat-registration-threshold",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Nigeria — VAT standard rate (NTA 2025 s. 148; 7.5% since 1 February 2020)",
+      "url": "https://afriref.dev/ng/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year (grade P, cross-checked against the nigeria-tax skill: the year of assessment is the calendar year under both the old regime and the Nigeria Tax Act 2025).",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "VAT is 7.5% (grade P): 5% until 31 January 2020 and 7.5% from 1 February 2020 under the Finance Act 2019 VATA amendment; the Nigeria Tax Act 2025, s. 148 keeps 7.5% in force from 1 January 2026. Cross-checked against the nigeria-tax skill - no disagreement found.",
+    "Zero-rated and exempt supplies (ss. 186-187 NTA) apply from 1 January 2026; the zero-rate row's date is the NTA commencement, not a change in the underlying treatment of the listed goods.",
+    "Small businesses (turnover NGN 100,000,000 or less, fixed assets NGN 250,000,000 or less, no professional services) are outside VAT unless they opt in (grade P, NTAA-based small business rule as summarised in the nigeria-tax skill; afriref cites the NTAA gazette for the same figure from 1 January 2026).",
+    "Monthly VAT return by the 21st of the following month, even if nil (grade P, NTAA s. 22 per the nigeria-tax skill)."
+  ]
 }

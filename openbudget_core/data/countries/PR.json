@@ -8,10 +8,36 @@
   "timeZones": [
     "America/Puerto_Rico"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "salesTax",
+    "localName": "Impuesto sobre Ventas y Uso (SUT, sales and use tax)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1150,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "10.5% commonwealth rate plus 1% municipal rate",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Departamento de Hacienda de Puerto Rico",
+    "url": "https://hacienda.pr.gov"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +56,21 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+      "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+    "Puerto Rico runs its own sales and use tax (11.5% since July 2015) alongside United States federal taxes; a reduced 4% rate applies to professional services (grade S, not modelled).",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
+  ]
 }

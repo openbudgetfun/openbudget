@@ -8,10 +8,41 @@
   "timeZones": [
     "Africa/Kigali"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1800,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 20000000,
+      "currency": "RWF",
+      "period": "annualTurnover",
+      "source": 3
+    },
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Rwanda Revenue Authority (RRA)",
+    "url": "https://www.rra.gov.rw"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +61,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Rwanda — VAT standard rate (Law n° 049/2023, art. 4) and registration threshold (Law n° 020/2023)",
+      "url": "https://afriref.dev/rw/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "East African Community: Value Added Tax matrix (registration thresholds and return rules of the partner states)",
+      "url": "https://www.eac.int/financial/eac-tax-matrices/value-added-tax",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (18% was re-enacted by Law n° 049/2023 establishing VAT, art. 4, published 14 September 2023; the rate was 18% long before, including throughout the coverage window).",
+    "Registration threshold of RWF 20,000,000 (grade S; Law n° 020/2023 on tax procedures per afriref and the EAC VAT matrix).",
+    "VAT is declared monthly (or quarterly for taxpayers under RWF 200,000,000 turnover; grade S, EAC matrix)."
+  ]
 }

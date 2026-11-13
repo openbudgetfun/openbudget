@@ -8,10 +8,27 @@
   "timeZones": [
     "Asia/Baghdad"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "none",
+    "localName": null,
+    "rates": [],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Ministry of Finance – General Commission for Taxes",
+    "url": "https://mof.gov.iq"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +47,20 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "mearef: Iraq — VAT is a structural null (Federal Budget Law No. 13 of 2023, art. 20(First), Iraqi Gazette No. 4726: itemised sales taxes, no VAT law)",
+      "url": "https://mearef.dev/iq/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (the Iraqi tax year is generally the calendar year, grade S).",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Iraq levies no VAT or GST (grade S, mearef reading Federal Budget Law No. 13 of 2023 from the Iraqi Gazette): consumption taxes are itemised - 10% on hotel and restaurant services (extended to second-class establishments), 20% on mobile top-up and internet, 15% on car imports and travel tickets - none of which is a general consumption tax.",
+    "VAT-introduction proposals appear periodically in reform commentary; none has been enacted (grade S)."
+  ]
 }

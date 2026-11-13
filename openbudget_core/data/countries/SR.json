@@ -8,10 +8,60 @@
   "timeZones": [
     "America/Paramaribo"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Belasting over de Toegevoegde Waarde (BTW)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1200,
+        "from": "2022-01-01",
+        "to": "2023-01-01",
+        "appliesTo": "turnover tax (omzetbelasting) — goods and services",
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1000,
+        "from": "2023-01-01",
+        "to": null,
+        "appliesTo": "value added tax (BTW)",
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 500,
+        "from": "2023-01-01",
+        "to": null,
+        "appliesTo": "gasoline",
+        "source": 4
+      },
+      {
+        "label": "higher",
+        "basisPoints": 2500,
+        "from": "2023-01-01",
+        "to": null,
+        "appliesTo": "luxury goods (annex 3)",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Belastingdienst Suriname",
+    "url": "https://belastingdienst.sr"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +80,25 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Staatsblad 2022 No. 121: Wet Belasting over de Toegevoegde Waarde 2022 — 10% from 1 January 2023, 25% on annex-3 luxury goods, replacing the Wet Omzetbelasting 1997",
+      "url": "https://belastingdienst.sr/wp-content/uploads/2026/01/BTWS.B.-2022-no.-121-WET-BTW-2022.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Communicatiedienst Suriname: BTW in werking per 1 januari 2023 — general rate 10%, 5% on gasoline, 25% on luxury goods; turnover tax was 12%",
+      "url": "http://cds.gov.sr/de-boodschap/suriname-laatste-land-in-regio-met-btw/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Suriname replaced its 12% turnover tax with a 10% VAT on 1 January 2023 (Staatsblad 2022 No. 121); 0% applies to basic necessities, exports, and oil, gas and mining supplies (zero-rate rows not modelled)."
+  ]
 }

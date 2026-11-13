@@ -8,10 +8,41 @@
   "timeZones": [
     "Africa/Mbabane"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 7,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 6,
+    "day": 30
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2018-08-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 90000000,
+      "currency": "SZL",
+      "period": "annualTurnover",
+      "source": 3
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Eswatini Revenue Service (ERS)",
+    "url": "https://www.sra.org.sz"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +61,20 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Eswatini — VAT standard rate (Eswatini Revenue Service guidance) and registration threshold (VAT Act 2011, s.6(1))",
+      "url": "https://afriref.dev/sz/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear runs 1 July to 30 June (grade S; PwC Eswatini, 'the tax year runs from 1 July to 30 June', returns within 120 days of 30 June).",
+    "companyYearEndDefault is a 30 June default aligned to the tax year (grade S); companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2018-08-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (15% cited to the ERS taxpayer guidance per afriref).",
+    "Registration threshold of SZL 900,000 from 1 April 2024 (grade S; Value Added Tax Act 2011 s.6(1) per afriref)."
+  ]
 }

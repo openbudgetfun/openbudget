@@ -8,10 +8,20 @@
   "timeZones": [
     "Pacific/Wallis"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
   "indirectTax": null,
-  "authority": null,
+  "authority": {
+    "name": "Administration supérieure des îles Wallis-et-Futuna",
+    "url": "https://www.wallis-et-futuna.gouv.fr"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +40,19 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "No rate source found this session: the Wallis and Futuna administration publishes no consolidated consumption-tax rate table that was reachable",
+      "url": "https://www.wallis-et-futuna.gouv.fr",
+      "grade": "inferred",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "indirectTax left null: Wallis and Futuna levies no VAT; consumption is taxed through customs duties and small territorial levies, and no reliable rate table was reachable this session (grade I). Re-check before serving entities that need a rate."
+  ]
 }

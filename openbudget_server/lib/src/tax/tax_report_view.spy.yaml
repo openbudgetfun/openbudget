@@ -26,6 +26,12 @@ fields:
   sources: List<String>
   ### When the rule figures were last checked against the sources.
   rulesVerifiedOn: DateTime
+  ### The rule pack version that produced the report: `gb-2026-r1`.
+  rulesVersion: String
+  ### Whether the pack's figures have been checked by a tax professional.
+  maturity: String
+  ### How completely the pack covers each section, by section name.
+  coverage: Map<String, String>
   ### Entries the rule pack does not know, plus transactions with no category.
   uncategorizedCount: int
   ### Entries converted from another currency at their transaction date.

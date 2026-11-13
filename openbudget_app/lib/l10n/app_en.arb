@@ -1829,6 +1829,10 @@
   "taxAssumptionsTitle": "Assumptions",
   "taxSourcesTitle": "Sources",
   "taxDisclaimer": "Guidance only, not tax advice. Check figures with a qualified adviser before filing.",
+  "taxPreviewBanner": "Preview: these figures have not yet been checked by a tax professional.",
+  "@taxPreviewBanner": {
+    "description": "Banner on the tax overview when the country pack is still in preview."
+  },
   "taxProfileTitle": "Tax profile",
   "taxProfileLoading": "Loading your tax profile",
   "taxProfileSave": "Save profile",

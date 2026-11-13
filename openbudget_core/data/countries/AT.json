@@ -8,10 +8,60 @@
   "timeZones": [
     "Europe/Vienna"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Umsatzsteuer",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2000,
+        "from": "1984-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 7
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 1000,
+        "from": "1984-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 7
+      },
+      {
+        "label": "reduced2",
+        "basisPoints": 1300,
+        "from": "2016-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 6
+      },
+      {
+        "label": "parking",
+        "basisPoints": 1300,
+        "from": "2016-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 6
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Federal Ministry of Finance (BMF)",
+    "url": "https://www.bmf.gv.at"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +80,43 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "RIS (Austrian legal information system): UStG 1994, Annex 2 - items subject to the 13% rate, in force 1 January 2016",
+      "url": "https://www.ris.bka.gv.at/Dokumente/Bundesnormen/NOR40173897/NOR40173897.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "countryeconomy.com: Austria VAT rate history (20% standard and 10% reduced from 1 January 1984; 13% tier from 1 January 2016)",
+      "url": "https://countryeconomy.com/taxes/vat/austria",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Effective dates: the 13% second reduced and 13% parking rates were introduced on 1 January 2016 by the Steuerreformgesetz 2015/2016, replacing the 12% rate (RIS, UStG 1994 Annex 2); the 20% standard and 10% reduced rates' 1 January 1984 start is secondary (countryeconomy rate history), not from the authority."
+  ]
 }
