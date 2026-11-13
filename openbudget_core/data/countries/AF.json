@@ -87,21 +87,6 @@
     "companyYearEndDefault approximates the Solar Hijri year end at 20 March (grade I); the Gregorian date shifts by a day between years.",
     "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
     "Afghanistan's BRT tiers (4% general, 5% and 10% higher tiers) are recorded from the cited secondary table; the Ministry of Finance site was unreachable in this session and post-2021 administration changes make re-checking important.",
-    "Lower-bound rows - standard (2022-01-01), higher (2022-01-01), higher2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear follows the Solar Hijri (Afghan) year, which starts on 1 Jawza (21 or 22 March); the Gregorian start date shifts by a day between years and the model pins 21 March (grade I).",
-    "companyYearEndDefault approximates the Solar Hijri year end at 20 March (grade I); the Gregorian date shifts by a day between years.",
-    "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
-    "Afghanistan's BRT tiers (4% general, 5% and 10% higher tiers) are recorded from the cited secondary table; the Ministry of Finance site was unreachable in this session and post-2021 administration changes make re-checking important.",
-    "Lower-bound rows - standard (2022-01-01), higher (2022-01-01), higher2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear follows the Solar Hijri (Afghan) year, which starts on 1 Jawza (21 or 22 March); the Gregorian start date shifts by a day between years and the model pins 21 March (grade I).",
-    "companyYearEndDefault approximates the Solar Hijri year end at 20 March (grade I); the Gregorian date shifts by a day between years.",
-    "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
-    "Afghanistan's BRT tiers (4% general, 5% and 10% higher tiers) are recorded from the cited secondary table; the Ministry of Finance site was unreachable in this session and post-2021 administration changes make re-checking important.",
-    "Lower-bound rows - standard (2022-01-01), higher (2022-01-01), higher2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear follows the Solar Hijri (Afghan) year, which starts on 1 Jawza (21 or 22 March); the Gregorian start date shifts by a day between years and the model pins 21 March (grade I).",
-    "companyYearEndDefault approximates the Solar Hijri year end at 20 March (grade I); the Gregorian date shifts by a day between years.",
-    "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
-    "Afghanistan's BRT tiers (4% general, 5% and 10% higher tiers) are recorded from the cited secondary table; the Ministry of Finance site was unreachable in this session and post-2021 administration changes make re-checking important.",
     "Lower-bound rows - standard (2022-01-01), higher (2022-01-01), higher2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
   ]
 }

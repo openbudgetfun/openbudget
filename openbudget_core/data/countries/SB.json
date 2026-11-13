@@ -84,18 +84,6 @@
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
     "Solomon Islands has no VAT: the Sales Tax Act charges 10% on a closed schedule of about 22 named services, and the Goods Tax Act charges 15% on imported goods and 10% on prescribed local manufactures at wholesale, unrecoverably. A 15% single-rate VAT Bill was before Parliament's committee as at March 2026 and is not law.",
-    "Lower-bound rows - standard (2022-01-01), goodsImport (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Solomon Islands has no VAT: the Sales Tax Act charges 10% on a closed schedule of about 22 named services, and the Goods Tax Act charges 15% on imported goods and 10% on prescribed local manufactures at wholesale, unrecoverably. A 15% single-rate VAT Bill was before Parliament's committee as at March 2026 and is not law.",
-    "Lower-bound rows - standard (2022-01-01), goodsImport (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Solomon Islands has no VAT: the Sales Tax Act charges 10% on a closed schedule of about 22 named services, and the Goods Tax Act charges 15% on imported goods and 10% on prescribed local manufactures at wholesale, unrecoverably. A 15% single-rate VAT Bill was before Parliament's committee as at March 2026 and is not law.",
-    "Lower-bound rows - standard (2022-01-01), goodsImport (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Solomon Islands has no VAT: the Sales Tax Act charges 10% on a closed schedule of about 22 named services, and the Goods Tax Act charges 15% on imported goods and 10% on prescribed local manufactures at wholesale, unrecoverably. A 15% single-rate VAT Bill was before Parliament's committee as at March 2026 and is not law.",
     "Lower-bound rows - standard (2022-01-01), goodsImport (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
   ]
 }

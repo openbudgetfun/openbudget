@@ -75,15 +75,6 @@
   "caveats": [
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The 15% rate is confirmed on the Ministry for Revenue page and dates from 1 January 2016 under the VAGST Act 2015; the start date's act citation is secondary-graded.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The 15% rate is confirmed on the Ministry for Revenue page and dates from 1 January 2016 under the VAGST Act 2015; the start date's act citation is secondary-graded.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The 15% rate is confirmed on the Ministry for Revenue page and dates from 1 January 2016 under the VAGST Act 2015; the start date's act citation is secondary-graded.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
     "The 15% rate is confirmed on the Ministry for Revenue page and dates from 1 January 2016 under the VAGST Act 2015; the start date's act citation is secondary-graded."
   ]
 }

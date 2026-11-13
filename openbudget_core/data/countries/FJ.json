@@ -91,15 +91,6 @@
   "caveats": [
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Fiji's standard rate moved twice inside the window: 9% to 15% on 1 August 2023 and back down to 12.5% on 1 August 2025. The 9% row is a lower bound from the start of the window (9% had applied since 2016).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Fiji's standard rate moved twice inside the window: 9% to 15% on 1 August 2023 and back down to 12.5% on 1 August 2025. The 9% row is a lower bound from the start of the window (9% had applied since 2016).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Fiji's standard rate moved twice inside the window: 9% to 15% on 1 August 2023 and back down to 12.5% on 1 August 2025. The 9% row is a lower bound from the start of the window (9% had applied since 2016).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
     "Fiji's standard rate moved twice inside the window: 9% to 15% on 1 August 2023 and back down to 12.5% on 1 August 2025. The 9% row is a lower bound from the start of the window (9% had applied since 2016)."
   ]
 }

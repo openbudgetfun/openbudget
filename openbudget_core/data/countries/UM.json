@@ -60,12 +60,6 @@
   "recheckBy": "2027-05-13",
   "caveats": [
     "individualTaxYear and companyYearEndDefault are calendar defaults for want of any tax system (grade I); the territory has no resident taxpayers.",
-    "indirectTax is none: the islands have no permanent population and no taxes of their own (grade I).",
-    "individualTaxYear and companyYearEndDefault are calendar defaults for want of any tax system (grade I); the territory has no resident taxpayers.",
-    "indirectTax is none: the islands have no permanent population and no taxes of their own (grade I).",
-    "individualTaxYear and companyYearEndDefault are calendar defaults for want of any tax system (grade I); the territory has no resident taxpayers.",
-    "indirectTax is none: the islands have no permanent population and no taxes of their own (grade I).",
-    "individualTaxYear and companyYearEndDefault are calendar defaults for want of any tax system (grade I); the territory has no resident taxpayers.",
     "indirectTax is none: the islands have no permanent population and no taxes of their own (grade I)."
   ]
 }

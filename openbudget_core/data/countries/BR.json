@@ -75,15 +75,6 @@
   "caveats": [
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Brazil has no single national standard rate to record: consumption is taxed by the state-level ICMS (roughly 12% to 25% depending on state and transaction), the federal IPI, the municipal ISS and PIS/COFINS. No rate rows are recorded rather than guessing a national figure; the 2023 constitutional reform that replaces this system with CBS and IBS (transition to 2033) is not yet in its rated phase.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Brazil has no single national standard rate to record: consumption is taxed by the state-level ICMS (roughly 12% to 25% depending on state and transaction), the federal IPI, the municipal ISS and PIS/COFINS. No rate rows are recorded rather than guessing a national figure; the 2023 constitutional reform that replaces this system with CBS and IBS (transition to 2033) is not yet in its rated phase.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Brazil has no single national standard rate to record: consumption is taxed by the state-level ICMS (roughly 12% to 25% depending on state and transaction), the federal IPI, the municipal ISS and PIS/COFINS. No rate rows are recorded rather than guessing a national figure; the 2023 constitutional reform that replaces this system with CBS and IBS (transition to 2033) is not yet in its rated phase.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
     "Brazil has no single national standard rate to record: consumption is taxed by the state-level ICMS (roughly 12% to 25% depending on state and transaction), the federal IPI, the municipal ISS and PIS/COFINS. No rate rows are recorded rather than guessing a national figure; the 2023 constitutional reform that replaces this system with CBS and IBS (transition to 2033) is not yet in its rated phase."
   ]
 }

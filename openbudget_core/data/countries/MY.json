@@ -103,18 +103,6 @@
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
     "Malaysia's SST is a single-stage tax, not a VAT: the 8% service tax (from 1 March 2024, Budget 2024) and 10%/5% sales tax. New service categories added from 1 July 2025 (financial services 8%; construction, private healthcare, education and rental at 6%) are not modelled.",
-    "Lower-bound rows - service (2022-01-01), sales (2022-01-01), salesReduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Malaysia's SST is a single-stage tax, not a VAT: the 8% service tax (from 1 March 2024, Budget 2024) and 10%/5% sales tax. New service categories added from 1 July 2025 (financial services 8%; construction, private healthcare, education and rental at 6%) are not modelled.",
-    "Lower-bound rows - service (2022-01-01), sales (2022-01-01), salesReduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Malaysia's SST is a single-stage tax, not a VAT: the 8% service tax (from 1 March 2024, Budget 2024) and 10%/5% sales tax. New service categories added from 1 July 2025 (financial services 8%; construction, private healthcare, education and rental at 6%) are not modelled.",
-    "Lower-bound rows - service (2022-01-01), sales (2022-01-01), salesReduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Malaysia's SST is a single-stage tax, not a VAT: the 8% service tax (from 1 March 2024, Budget 2024) and 10%/5% sales tax. New service categories added from 1 July 2025 (financial services 8%; construction, private healthcare, education and rental at 6%) are not modelled.",
     "Lower-bound rows - service (2022-01-01), sales (2022-01-01), salesReduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
   ]
 }

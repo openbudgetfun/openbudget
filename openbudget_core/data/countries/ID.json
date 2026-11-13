@@ -94,15 +94,6 @@
   "caveats": [
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "From 1 January 2025 the nominal rate is 12%, but PMK 131/2024 charges it on an 11/12 base for everything except luxury goods, so the effective general rate stays 11%; luxury-goods supplies to end consumers paid the transitional effective 11% during January 2025 and the full 12% from 1 February 2025.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "From 1 January 2025 the nominal rate is 12%, but PMK 131/2024 charges it on an 11/12 base for everything except luxury goods, so the effective general rate stays 11%; luxury-goods supplies to end consumers paid the transitional effective 11% during January 2025 and the full 12% from 1 February 2025.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "From 1 January 2025 the nominal rate is 12%, but PMK 131/2024 charges it on an 11/12 base for everything except luxury goods, so the effective general rate stays 11%; luxury-goods supplies to end consumers paid the transitional effective 11% during January 2025 and the full 12% from 1 February 2025.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
     "From 1 January 2025 the nominal rate is 12%, but PMK 131/2024 charges it on an 11/12 base for everything except luxury goods, so the effective general rate stays 11%; luxury-goods supplies to end consumers paid the transitional effective 11% during January 2025 and the full 12% from 1 February 2025."
   ]
 }

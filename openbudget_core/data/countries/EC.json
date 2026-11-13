@@ -87,18 +87,6 @@
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
     "The standard IVA rate rose from 12% to 15% on 1 April 2024 (Executive Decree 198) to fund the internal armed conflict; the underlying law fixes 13% as the permanent rate once the temporary surcharge ends, so the 15% rate carries re-check risk.",
-    "Lower-bound rows - standard (2022-01-01), zero (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The standard IVA rate rose from 12% to 15% on 1 April 2024 (Executive Decree 198) to fund the internal armed conflict; the underlying law fixes 13% as the permanent rate once the temporary surcharge ends, so the 15% rate carries re-check risk.",
-    "Lower-bound rows - standard (2022-01-01), zero (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The standard IVA rate rose from 12% to 15% on 1 April 2024 (Executive Decree 198) to fund the internal armed conflict; the underlying law fixes 13% as the permanent rate once the temporary surcharge ends, so the 15% rate carries re-check risk.",
-    "Lower-bound rows - standard (2022-01-01), zero (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The standard IVA rate rose from 12% to 15% on 1 April 2024 (Executive Decree 198) to fund the internal armed conflict; the underlying law fixes 13% as the permanent rate once the temporary surcharge ends, so the 15% rate carries re-check risk.",
     "Lower-bound rows - standard (2022-01-01), zero (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
   ]
 }

@@ -75,15 +75,6 @@
   "caveats": [
     "individualTaxYear runs 1 April to 31 March (grade I, from the Cook Islands assessment cycle; the MFEM page confirms the value added tax year but not the individual year directly).",
     "companyYearEndDefault is a 31 March app default for new entities (grade I), matching the tax year.",
-    "The 15% rate has applied since 1 April 2014 (VAT Act s.11 as amended by No. 1 of 2014).",
-    "individualTaxYear runs 1 April to 31 March (grade I, from the Cook Islands assessment cycle; the MFEM page confirms the value added tax year but not the individual year directly).",
-    "companyYearEndDefault is a 31 March app default for new entities (grade I), matching the tax year.",
-    "The 15% rate has applied since 1 April 2014 (VAT Act s.11 as amended by No. 1 of 2014).",
-    "individualTaxYear runs 1 April to 31 March (grade I, from the Cook Islands assessment cycle; the MFEM page confirms the value added tax year but not the individual year directly).",
-    "companyYearEndDefault is a 31 March app default for new entities (grade I), matching the tax year.",
-    "The 15% rate has applied since 1 April 2014 (VAT Act s.11 as amended by No. 1 of 2014).",
-    "individualTaxYear runs 1 April to 31 March (grade I, from the Cook Islands assessment cycle; the MFEM page confirms the value added tax year but not the individual year directly).",
-    "companyYearEndDefault is a 31 March app default for new entities (grade I), matching the tax year.",
     "The 15% rate has applied since 1 April 2014 (VAT Act s.11 as amended by No. 1 of 2014)."
   ]
 }

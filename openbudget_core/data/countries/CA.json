@@ -370,9 +370,6 @@
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
     "Lower-bound rows - standard (2008-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed at the earliest OECD Consumption Tax Trends benchmark year in which the value appears).",
-    "Lower-bound subdivision rows: BC, Manitoba and Saskatchewan PST rows start at 2022-01-01 (the CRA table lists current values only; the 7%, 7% and 6% rates date from 2013, 2010 and 2017 respectively). Ontario HST 13% is recorded from 2013-04-01, the earliest date in the CRA historical table (the rate itself dates from 1 July 2010).",
-    "Lower-bound subdivision rows: BC, Manitoba and Saskatchewan PST rows start at 2022-01-01 (the CRA table lists current values only; the 7%, 7% and 6% rates date from 2013, 2010 and 2017 respectively). Ontario HST 13% is recorded from 2013-04-01, the earliest date in the CRA historical table (the rate itself dates from 1 July 2010).",
-    "Lower-bound subdivision rows: BC, Manitoba and Saskatchewan PST rows start at 2022-01-01 (the CRA table lists current values only; the 7%, 7% and 6% rates date from 2013, 2010 and 2017 respectively). Ontario HST 13% is recorded from 2013-04-01, the earliest date in the CRA historical table (the rate itself dates from 1 July 2010).",
     "Lower-bound subdivision rows: BC, Manitoba and Saskatchewan PST rows start at 2022-01-01 (the CRA table lists current values only; the 7%, 7% and 6% rates date from 2013, 2010 and 2017 respectively). Ontario HST 13% is recorded from 2013-04-01, the earliest date in the CRA historical table (the rate itself dates from 1 July 2010)."
   ]
 }

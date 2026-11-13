@@ -84,18 +84,6 @@
     "individualTaxYear runs 1 July to 30 June (grade I, from the assessment cycle; FBR's own page was unreachable this session).",
     "companyYearEndDefault is a 30 June app default for new entities (grade I), not a statutory requirement.",
     "The 18% rate is charged from 15 February 2023, the date S.R.O. 179(I)/2023 (dated 14 February) was published; a 25% higher rate applies to listed luxury goods and higher-value mobile phones from 8 March 2023 (not modelled). Provincial sales taxes on services are separate.",
-    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear runs 1 July to 30 June (grade I, from the assessment cycle; FBR's own page was unreachable this session).",
-    "companyYearEndDefault is a 30 June app default for new entities (grade I), not a statutory requirement.",
-    "The 18% rate is charged from 15 February 2023, the date S.R.O. 179(I)/2023 (dated 14 February) was published; a 25% higher rate applies to listed luxury goods and higher-value mobile phones from 8 March 2023 (not modelled). Provincial sales taxes on services are separate.",
-    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear runs 1 July to 30 June (grade I, from the assessment cycle; FBR's own page was unreachable this session).",
-    "companyYearEndDefault is a 30 June app default for new entities (grade I), not a statutory requirement.",
-    "The 18% rate is charged from 15 February 2023, the date S.R.O. 179(I)/2023 (dated 14 February) was published; a 25% higher rate applies to listed luxury goods and higher-value mobile phones from 8 March 2023 (not modelled). Provincial sales taxes on services are separate.",
-    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear runs 1 July to 30 June (grade I, from the assessment cycle; FBR's own page was unreachable this session).",
-    "companyYearEndDefault is a 30 June app default for new entities (grade I), not a statutory requirement.",
-    "The 18% rate is charged from 15 February 2023, the date S.R.O. 179(I)/2023 (dated 14 February) was published; a 25% higher rate applies to listed luxury goods and higher-value mobile phones from 8 March 2023 (not modelled). Provincial sales taxes on services are separate.",
     "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
   ]
 }

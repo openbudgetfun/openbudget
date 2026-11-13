@@ -70,18 +70,6 @@
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
     "The combined rate paid at the till is 18% throughout the window; Ley 32387 (published 16 June 2025) only shifts half a point a year between the IGV and the municipal IPM from 1 January 2026 (IGV 15.5% plus IPM 2.5% in 2026), so no rate row changes. A reduced 10.5% combined rate (2026) applies to qualifying micro/small restaurants and hotels (not modelled).",
-    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The combined rate paid at the till is 18% throughout the window; Ley 32387 (published 16 June 2025) only shifts half a point a year between the IGV and the municipal IPM from 1 January 2026 (IGV 15.5% plus IPM 2.5% in 2026), so no rate row changes. A reduced 10.5% combined rate (2026) applies to qualifying micro/small restaurants and hotels (not modelled).",
-    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The combined rate paid at the till is 18% throughout the window; Ley 32387 (published 16 June 2025) only shifts half a point a year between the IGV and the municipal IPM from 1 January 2026 (IGV 15.5% plus IPM 2.5% in 2026), so no rate row changes. A reduced 10.5% combined rate (2026) applies to qualifying micro/small restaurants and hotels (not modelled).",
-    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The combined rate paid at the till is 18% throughout the window; Ley 32387 (published 16 June 2025) only shifts half a point a year between the IGV and the municipal IPM from 1 January 2026 (IGV 15.5% plus IPM 2.5% in 2026), so no rate row changes. A reduced 10.5% combined rate (2026) applies to qualifying micro/small restaurants and hotels (not modelled).",
     "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
   ]
 }

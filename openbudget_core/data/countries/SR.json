@@ -99,15 +99,6 @@
   "caveats": [
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Suriname replaced its 12% turnover tax with a 10% VAT on 1 January 2023 (Staatsblad 2022 No. 121); 0% applies to basic necessities, exports, and oil, gas and mining supplies (zero-rate rows not modelled).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Suriname replaced its 12% turnover tax with a 10% VAT on 1 January 2023 (Staatsblad 2022 No. 121); 0% applies to basic necessities, exports, and oil, gas and mining supplies (zero-rate rows not modelled).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Suriname replaced its 12% turnover tax with a 10% VAT on 1 January 2023 (Staatsblad 2022 No. 121); 0% applies to basic necessities, exports, and oil, gas and mining supplies (zero-rate rows not modelled).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
     "Suriname replaced its 12% turnover tax with a 10% VAT on 1 January 2023 (Staatsblad 2022 No. 121); 0% applies to basic necessities, exports, and oil, gas and mining supplies (zero-rate rows not modelled)."
   ]
 }

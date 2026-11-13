@@ -60,15 +60,6 @@
   "caveats": [
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The Northern Mariana Islands levy no VAT or general sales tax (grade S); a business gross revenue tax and excise taxes apply instead.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The Northern Mariana Islands levy no VAT or general sales tax (grade S); a business gross revenue tax and excise taxes apply instead.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The Northern Mariana Islands levy no VAT or general sales tax (grade S); a business gross revenue tax and excise taxes apply instead.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
     "The Northern Mariana Islands levy no VAT or general sales tax (grade S); a business gross revenue tax and excise taxes apply instead."
   ]
 }

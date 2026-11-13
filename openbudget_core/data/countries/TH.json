@@ -76,18 +76,6 @@
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
     "The statutory VAT rate is 10%; successive royal decrees have reduced it to 7% (6.3% plus 0.7% municipal tax) continuously since 1999, most recently to 30 September 2027 (Royal Decree No. 807). The medium-term fiscal framework plans a rise from fiscal 2028.",
-    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The statutory VAT rate is 10%; successive royal decrees have reduced it to 7% (6.3% plus 0.7% municipal tax) continuously since 1999, most recently to 30 September 2027 (Royal Decree No. 807). The medium-term fiscal framework plans a rise from fiscal 2028.",
-    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The statutory VAT rate is 10%; successive royal decrees have reduced it to 7% (6.3% plus 0.7% municipal tax) continuously since 1999, most recently to 30 September 2027 (Royal Decree No. 807). The medium-term fiscal framework plans a rise from fiscal 2028.",
-    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "The statutory VAT rate is 10%; successive royal decrees have reduced it to 7% (6.3% plus 0.7% municipal tax) continuously since 1999, most recently to 30 September 2027 (Royal Decree No. 807). The medium-term fiscal framework plans a rise from fiscal 2028.",
     "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022)."
   ]
 }

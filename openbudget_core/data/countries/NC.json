@@ -99,15 +99,6 @@
   "caveats": [
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "TGC rates have applied since 1 October 2018. A simplification reform under consultation in October-November 2026 would replace the four rates with two (0% and 10%, or 2% and 9%); consultations closed 20 November 2026, so re-check before the rates move.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "TGC rates have applied since 1 October 2018. A simplification reform under consultation in October-November 2026 would replace the four rates with two (0% and 10%, or 2% and 9%); consultations closed 20 November 2026, so re-check before the rates move.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "TGC rates have applied since 1 October 2018. A simplification reform under consultation in October-November 2026 would replace the four rates with two (0% and 10%, or 2% and 9%); consultations closed 20 November 2026, so re-check before the rates move.",
-    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
-    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
     "TGC rates have applied since 1 October 2018. A simplification reform under consultation in October-November 2026 would replace the four rates with two (0% and 10%, or 2% and 9%); consultations closed 20 November 2026, so re-check before the rates move."
   ]
 }
