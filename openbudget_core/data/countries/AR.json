@@ -34,7 +34,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 2100,
+        "ratePerMillion": 210000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
@@ -42,7 +42,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 1050,
+        "ratePerMillion": 105000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "construction, medical supplies, taxi and public transport, certain loans",
@@ -50,7 +50,7 @@
       },
       {
         "label": "higher",
-        "basisPoints": 2700,
+        "ratePerMillion": 270000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "non-domestic power, energy and telecoms",

@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1000,
+        "ratePerMillion": 100000,
         "from": "2022-01-01",
         "to": "2022-02-01",
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 800,
+        "ratePerMillion": 80000,
         "from": "2022-02-01",
         "to": "2023-01-01",
         "appliesTo": "2-point cut under Resolution 43/2022/QH15 (Decree 15/2022)",
@@ -39,7 +39,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1000,
+        "ratePerMillion": 100000,
         "from": "2023-01-01",
         "to": "2023-07-01",
         "appliesTo": "cut lapsed 1 January 2023 until Resolution 101/2023/QH15",
@@ -47,7 +47,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 800,
+        "ratePerMillion": 80000,
         "from": "2023-07-01",
         "to": null,
         "appliesTo": "2-point cut under Resolutions 101/2023, 142/2024, 259/2024 and 204/2025 (Decrees 44, 72, 94, 204 and 174); lapses 31 December 2026 unless extended",
@@ -55,7 +55,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "essential goods and services (water, medical, education, public transport, and others)",
@@ -63,7 +63,7 @@
       },
       {
         "label": "standardExcluded",
-        "basisPoints": 1000,
+        "ratePerMillion": 100000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "telecommunications, financial activities, banking, securities, insurance, real estate, metal products, most mining, and goods and services subject to special consumption tax — never received the 2-point cut",

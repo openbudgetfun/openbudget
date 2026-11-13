@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1400,
+        "ratePerMillion": 140000,
         "from": "2020-04-01",
         "to": "2021-01-01",
         "appliesTo": "temporary COVID-19 reduction",
@@ -31,7 +31,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1600,
+        "ratePerMillion": 160000,
         "from": "2021-01-01",
         "to": null,
         "appliesTo": null,
@@ -39,7 +39,7 @@
       },
       {
         "label": "petroleum",
-        "basisPoints": 800,
+        "ratePerMillion": 80000,
         "from": "2022-01-01",
         "to": "2023-07-01",
         "appliesTo": "petroleum products band, deleted by the Finance Act 2023",

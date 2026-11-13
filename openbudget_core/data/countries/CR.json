@@ -23,51 +23,51 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1300,
+        "ratePerMillion": 130000,
         "from": "2019-07-01",
         "to": null,
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "reduced",
-        "basisPoints": 100,
+        "ratePerMillion": 10000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "basic foodstuffs and household supplies",
-        "source": 7
+        "source": 5
       },
       {
         "label": "reduced2",
-        "basisPoints": 400,
+        "ratePerMillion": 40000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "health services; domestic air travel",
-        "source": 7
+        "source": 5
       },
       {
         "label": "reduced3",
-        "basisPoints": 1000,
+        "ratePerMillion": 100000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "timber supplies",
-        "source": 7
+        "source": 5
       },
       {
         "label": "reduced4",
-        "basisPoints": 200,
+        "ratePerMillion": 20000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "private education; medicines; insurance premiums",
-        "source": 7
+        "source": 5
       },
       {
         "label": "zero",
-        "basisPoints": 0,
+        "ratePerMillion": 0,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "exports; books",
-        "source": 7
+        "source": 5
       }
     ],
     "registrationThreshold": null,
@@ -94,18 +94,6 @@
     {
       "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-      "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-      "url": "https://vatcalc.com/vat-rates/",
-      "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-      "url": "https://vatcalc.com/vat-rates/",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
     },

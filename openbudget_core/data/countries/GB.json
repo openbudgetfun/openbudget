@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 2000,
+        "ratePerMillion": 200000,
         "from": "2011-01-04",
         "to": null,
         "appliesTo": null,
@@ -31,19 +31,19 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 9
+        "source": 5
       },
       {
         "label": "zero",
-        "basisPoints": 0,
+        "ratePerMillion": 0,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "zero-rated goods and services, e.g. most food and children's clothes",
-        "source": 9
+        "source": 5
       }
     ],
     "registrationThreshold": null,
@@ -71,30 +71,6 @@
       "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "HM Revenue & Customs: VAT rates (gov.uk)",
-      "url": "https://www.gov.uk/vat-rates",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "HM Revenue & Customs: Income Tax rates (gov.uk, 'the current tax year is from 6 April 2026 to 5 April 2027')",
-      "url": "https://www.gov.uk/income-tax-rates",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "HM Revenue & Customs: VAT rates (gov.uk)",
-      "url": "https://www.gov.uk/vat-rates",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "HM Revenue & Customs: Income Tax rates (gov.uk, 'the current tax year is from 6 April 2026 to 5 April 2027')",
-      "url": "https://www.gov.uk/income-tax-rates",
-      "grade": "primary",
       "retrievedOn": "2026-11-13"
     },
     {

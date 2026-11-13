@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 800,
+        "ratePerMillion": 80000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "general expenditure tax on goods",
@@ -31,7 +31,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 600,
+        "ratePerMillion": 60000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "general expenditure tax on services",

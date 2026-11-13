@@ -23,15 +23,15 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 2400,
+        "ratePerMillion": 240000,
         "from": "2022-01-01",
         "to": "2024-09-01",
         "appliesTo": null,
-        "source": 9
+        "source": 5
       },
       {
         "label": "standard",
-        "basisPoints": 2550,
+        "ratePerMillion": 255000,
         "from": "2024-09-01",
         "to": null,
         "appliesTo": null,
@@ -39,15 +39,15 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 1400,
+        "ratePerMillion": 140000,
         "from": "2022-01-01",
         "to": "2026-01-01",
         "appliesTo": null,
-        "source": 9
+        "source": 5
       },
       {
         "label": "reduced",
-        "basisPoints": 1350,
+        "ratePerMillion": 135000,
         "from": "2026-01-01",
         "to": null,
         "appliesTo": null,
@@ -55,11 +55,11 @@
       },
       {
         "label": "reduced2",
-        "basisPoints": 1000,
+        "ratePerMillion": 100000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "second reduced rate (e.g. medicines, passenger transport, accommodation, books)",
-        "source": 9
+        "source": 5
       }
     ],
     "registrationThreshold": null,
@@ -87,30 +87,6 @@
       "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Finnish Tax Administration: Rates of VAT (vero.fi)",
-      "url": "https://www.vero.fi/en/businesses-and-corporations/taxes-and-charges/vat/rates-of-vat/",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Finnish Tax Administration: Rates of VAT (vero.fi)",
-      "url": "https://www.vero.fi/en/businesses-and-corporations/taxes-and-charges/vat/rates-of-vat/",
-      "grade": "primary",
       "retrievedOn": "2026-11-13"
     },
     {

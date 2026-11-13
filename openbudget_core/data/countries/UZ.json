@@ -24,7 +24,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1500,
+        "ratePerMillion": 150000,
         "from": "2019-10-01",
         "to": "2023-01-01",
         "appliesTo": null,
@@ -32,7 +32,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1200,
+        "ratePerMillion": 120000,
         "from": "2023-01-01",
         "to": null,
         "appliesTo": null,

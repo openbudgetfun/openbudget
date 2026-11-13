@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1400,
+        "ratePerMillion": 140000,
         "from": "2021-04-01",
         "to": "2022-08-03",
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1200,
+        "ratePerMillion": 120000,
         "from": "2022-08-03",
         "to": "2023-04-01",
         "appliesTo": null,
@@ -39,7 +39,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1400,
+        "ratePerMillion": 140000,
         "from": "2023-04-01",
         "to": null,
         "appliesTo": null,
@@ -47,7 +47,7 @@
       },
       {
         "label": "zero",
-        "basisPoints": 0,
+        "ratePerMillion": 0,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "basic foodstuffs and other listed schedule items",

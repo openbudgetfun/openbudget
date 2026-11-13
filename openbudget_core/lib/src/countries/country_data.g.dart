@@ -32,7 +32,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 450,
+          "ratePerMillion": 45000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -40,7 +40,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 100,
+          "ratePerMillion": 10000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "basic foodstuffs (bread, milk)",
@@ -48,7 +48,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced2",
-          "basisPoints": 250,
+          "ratePerMillion": 25000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "public transport, newspapers and culture",
@@ -134,7 +134,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2018-01-01",
           "to": null,
           "appliesTo": null,
@@ -221,7 +221,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 400,
+          "ratePerMillion": 40000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -229,7 +229,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "higher",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "larger hotels, large entertainment venues and domestic air transport",
@@ -237,7 +237,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "higher2",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "luxury hotels and restaurants and telecommunications services",
@@ -313,7 +313,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": "2024-01-01",
           "appliesTo": null,
@@ -321,7 +321,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1700,
+          "ratePerMillion": 170000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": null,
@@ -329,7 +329,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "hotel",
-          "basisPoints": 1400,
+          "ratePerMillion": 140000,
           "from": "2022-01-01",
           "to": "2024-01-01",
           "appliesTo": "hotel and holiday accommodation",
@@ -410,7 +410,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2022-07-01",
           "to": "2025-08-01",
           "appliesTo": "goods and services tax on goods and services",
@@ -418,7 +418,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2025-08-01",
           "to": null,
           "appliesTo": "general services tax on services (retailers, wholesalers, manufacturers, restaurants and bars exempt)",
@@ -426,7 +426,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "goods",
-          "basisPoints": 900,
+          "ratePerMillion": 90000,
           "from": "2025-08-01",
           "to": null,
           "appliesTo": "import goods tax on goods and at the port",
@@ -512,7 +512,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -520,7 +520,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "accommodation services",
@@ -528,7 +528,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced2",
-          "basisPoints": 600,
+          "ratePerMillion": 60000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "listed goods and services",
@@ -614,7 +614,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -700,7 +700,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1400,
+          "ratePerMillion": 140000,
           "from": "2019-10-01",
           "to": null,
           "appliesTo": null,
@@ -862,7 +862,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2100,
+          "ratePerMillion": 210000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -870,7 +870,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 1050,
+          "ratePerMillion": 105000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "construction, medical supplies, taxi and public transport, certain loans",
@@ -878,7 +878,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "higher",
-          "basisPoints": 2700,
+          "ratePerMillion": 270000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "non-domestic power, energy and telecoms",
@@ -1019,35 +1019,35 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "1984-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "1984-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2016-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "parking",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2016-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -1075,18 +1075,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -1152,19 +1140,19 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2000-07-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "zero",
-          "basisPoints": 0,
+          "ratePerMillion": 0,
           "from": "2000-07-01",
           "to": null,
           "appliesTo": "GST-free supplies: exports, most basic food, health, education",
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -1191,18 +1179,6 @@ const Map<String, Map<String, Object?>> countryData = {
       {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
@@ -1253,7 +1229,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 600,
+          "ratePerMillion": 60000,
           "from": "2022-01-01",
           "to": "2023-01-01",
           "appliesTo": null,
@@ -1261,7 +1237,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 700,
+          "ratePerMillion": 70000,
           "from": "2023-01-01",
           "to": null,
           "appliesTo": null,
@@ -1375,7 +1351,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -1461,7 +1437,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1700,
+          "ratePerMillion": 170000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -1542,7 +1518,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1750,
+          "ratePerMillion": 175000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -1617,7 +1593,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -1693,35 +1669,35 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2100,
+          "ratePerMillion": 210000,
           "from": "2005-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 600,
+          "ratePerMillion": 60000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "parking",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -1749,18 +1725,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -1816,7 +1780,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2018-01-01",
           "to": null,
           "appliesTo": null,
@@ -1896,19 +1860,19 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 900,
+          "ratePerMillion": 90000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -1936,18 +1900,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -1996,7 +1948,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2019-01-01",
           "to": "2022-01-01",
           "appliesTo": null,
@@ -2004,7 +1956,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -2091,7 +2043,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -2099,7 +2051,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "imported food products, agricultural inputs and listed goods processed in Burundi",
@@ -2186,7 +2138,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -2461,7 +2413,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -2536,7 +2488,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "general expenditure tax on goods",
@@ -2544,7 +2496,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 600,
+          "ratePerMillion": 60000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "general expenditure tax on services",
@@ -2699,7 +2651,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -2774,7 +2726,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2026-01-01",
           "to": null,
           "appliesTo": "single rate on all taxable supplies and imports (Schedule I, GST Amendment Act 2025)",
@@ -2782,7 +2734,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "zero",
-          "basisPoints": 0,
+          "ratePerMillion": 0,
           "from": "2026-01-01",
           "to": null,
           "appliesTo": "exports of goods and services",
@@ -2925,7 +2877,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1400,
+          "ratePerMillion": 140000,
           "from": "2021-04-01",
           "to": "2022-08-03",
           "appliesTo": null,
@@ -2933,7 +2885,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2022-08-03",
           "to": "2023-04-01",
           "appliesTo": null,
@@ -2941,7 +2893,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1400,
+          "ratePerMillion": 140000,
           "from": "2023-04-01",
           "to": null,
           "appliesTo": null,
@@ -2949,7 +2901,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "zero",
-          "basisPoints": 0,
+          "ratePerMillion": 0,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "basic foodstuffs and other listed schedule items",
@@ -3075,7 +3027,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1250,
+          "ratePerMillion": 125000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -3172,11 +3124,11 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2008-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -3187,11 +3139,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "gst",
-              "basisPoints": 500,
+              "ratePerMillion": 50000,
               "from": "2008-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 14,
+              "source": 6,
             },
           ],
         },
@@ -3200,19 +3152,19 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "gst",
-              "basisPoints": 500,
+              "ratePerMillion": 50000,
               "from": "2008-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 14,
+              "source": 6,
             },
             {
               "label": "pst",
-              "basisPoints": 700,
+              "ratePerMillion": 70000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 13,
+              "source": 5,
             },
           ],
         },
@@ -3221,19 +3173,19 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "gst",
-              "basisPoints": 500,
+              "ratePerMillion": 50000,
               "from": "2008-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 14,
+              "source": 6,
             },
             {
               "label": "pst",
-              "basisPoints": 700,
+              "ratePerMillion": 70000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": "retail sales tax (RST)",
-              "source": 13,
+              "source": 5,
             },
           ],
         },
@@ -3242,11 +3194,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "hst",
-              "basisPoints": 1500,
+              "ratePerMillion": 150000,
               "from": "2016-07-01",
               "to": null,
               "appliesTo": null,
-              "source": 13,
+              "source": 5,
             },
           ],
         },
@@ -3255,11 +3207,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "hst",
-              "basisPoints": 1500,
+              "ratePerMillion": 150000,
               "from": "2016-07-01",
               "to": null,
               "appliesTo": null,
-              "source": 13,
+              "source": 5,
             },
           ],
         },
@@ -3268,19 +3220,19 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "hst",
-              "basisPoints": 1500,
+              "ratePerMillion": 150000,
               "from": "2016-07-01",
               "to": "2025-04-01",
               "appliesTo": null,
-              "source": 13,
+              "source": 5,
             },
             {
               "label": "hst",
-              "basisPoints": 1400,
+              "ratePerMillion": 140000,
               "from": "2025-04-01",
               "to": null,
               "appliesTo": null,
-              "source": 13,
+              "source": 5,
             },
           ],
         },
@@ -3289,11 +3241,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "gst",
-              "basisPoints": 500,
+              "ratePerMillion": 50000,
               "from": "2008-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 14,
+              "source": 6,
             },
           ],
         },
@@ -3302,11 +3254,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "gst",
-              "basisPoints": 500,
+              "ratePerMillion": 50000,
               "from": "2008-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 14,
+              "source": 6,
             },
           ],
         },
@@ -3315,11 +3267,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "hst",
-              "basisPoints": 1300,
+              "ratePerMillion": 130000,
               "from": "2013-04-01",
               "to": null,
               "appliesTo": null,
-              "source": 13,
+              "source": 5,
             },
           ],
         },
@@ -3328,11 +3280,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "hst",
-              "basisPoints": 1500,
+              "ratePerMillion": 150000,
               "from": "2016-10-01",
               "to": null,
               "appliesTo": null,
-              "source": 13,
+              "source": 5,
             },
           ],
         },
@@ -3341,19 +3293,19 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "gst",
-              "basisPoints": 500,
+              "ratePerMillion": 50000,
               "from": "2008-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 14,
+              "source": 6,
             },
             {
               "label": "qst",
-              "basisPoints": 998,
+              "ratePerMillion": 99750,
               "from": "2013-01-01",
               "to": null,
-              "appliesTo": "9.975% QST rounded to 998bp (schema stores integer hundredths)",
-              "source": 14,
+              "appliesTo": null,
+              "source": 6,
             },
           ],
         },
@@ -3362,19 +3314,19 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "gst",
-              "basisPoints": 500,
+              "ratePerMillion": 50000,
               "from": "2008-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 14,
+              "source": 6,
             },
             {
               "label": "pst",
-              "basisPoints": 600,
+              "ratePerMillion": 60000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 13,
+              "source": 5,
             },
           ],
         },
@@ -3383,11 +3335,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "gst",
-              "basisPoints": 500,
+              "ratePerMillion": 50000,
               "from": "2008-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 14,
+              "source": 6,
             },
           ],
         },
@@ -3423,57 +3375,9 @@ const Map<String, Map<String, Object?>> countryData = {
         "retrievedOn": "2026-11-13",
       },
       {
-        "title": "Excise Tax Act (Canada), section 165 - GST 5% (Justice Laws)",
-        "url": "https://laws-lois.justice.gc.ca/eng/acts/e-15/section-165.html",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Excise Tax Act (Canada), section 165 - GST 5% (Justice Laws)",
-        "url": "https://laws-lois.justice.gc.ca/eng/acts/e-15/section-165.html",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
         "title": "OECD Consumption Tax Trends 2024: Annex Table 2.A.1 VAT rates (standard rate at benchmark years 2005-2024)",
         "url": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2024/11/consumption-tax-trends-2024_57c7322a/dcd4dd36-en.pdf",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Canada Revenue Agency: GST/HST calculator (and rates) — GST, HST and PST by province, including the Nova Scotia HST decrease to 14% on 1 April 2025",
-        "url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Revenu Québec: Tables of GST and QST rates (GST 5% since 1 January 2008; QST 9.975% since 1 January 2013)",
-        "url": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/basic-rules-for-applying-the-gsthst-and-qst/tables-of-gst-and-qst-rates/",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Canada Revenue Agency: GST/HST calculator (and rates) — GST, HST and PST by province, including the Nova Scotia HST decrease to 14% on 1 April 2025",
-        "url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Revenu Québec: Tables of GST and QST rates (GST 5% since 1 January 2008; QST 9.975% since 1 January 2013)",
-        "url": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/basic-rules-for-applying-the-gsthst-and-qst/tables-of-gst-and-qst-rates/",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Canada Revenue Agency: GST/HST calculator (and rates) — GST, HST and PST by province, including the Nova Scotia HST decrease to 14% on 1 April 2025",
-        "url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Revenu Québec: Tables of GST and QST rates (GST 5% since 1 January 2008; QST 9.975% since 1 January 2013)",
-        "url": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/basic-rules-for-applying-the-gsthst-and-qst/tables-of-gst-and-qst-rates/",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -3493,7 +3397,7 @@ const Map<String, Map<String, Object?>> countryData = {
     "recheckBy": "2027-05-13",
     "caveats": [
       "Rate primary from section 165 of the Excise Tax Act (5% GST, retrieved 2026-11-13); the act publishes no effective dates, so from records the retrieval date.",
-      "Provincial rates are primary from the CRA GST/HST calculator table and Revenu Québec's rate tables: HST 15% in New Brunswick, Newfoundland and Labrador and Prince Edward Island, 13% in Ontario; Nova Scotia's HST fell from 15% to 14% on 1 April 2025. Quebec charges GST 5% plus QST 9.975% (stored as 998bp — the schema stores integer hundredths of a percent). British Columbia, Manitoba and Saskatchewan charge GST 5% plus PST/RST (7%, 7%, 6%).",
+      "Provincial rates are primary from the CRA GST/HST calculator table and Revenu Québec's rate tables: HST 15% in New Brunswick, Newfoundland and Labrador and Prince Edward Island, 13% in Ontario; Nova Scotia's HST fell from 15% to 14% on 1 April 2025. Quebec charges GST 5% plus QST 9.975%. British Columbia, Manitoba and Saskatchewan charge GST 5% plus PST/RST (7%, 7%, 6%).",
       "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
       "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
       "Lower-bound rows - standard (2008-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed at the earliest OECD Consumption Tax Trends benchmark year in which the value appears).",
@@ -3590,7 +3494,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1600,
+          "ratePerMillion": 160000,
           "from": "2012-01-01",
           "to": null,
           "appliesTo": null,
@@ -3670,7 +3574,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1900,
+          "ratePerMillion": 190000,
           "from": "2019-01-01",
           "to": null,
           "appliesTo": null,
@@ -3751,7 +3655,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "1997-05-12",
           "to": null,
           "appliesTo": null,
@@ -3759,7 +3663,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "centimesAdditionnels",
-          "basisPoints": 90,
+          "ratePerMillion": 9000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "5% surcharge levied on the VAT itself (not deductible)",
@@ -3845,15 +3749,15 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 770,
+          "ratePerMillion": 77000,
           "from": "2018-01-01",
           "to": "2024-01-01",
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "standard",
-          "basisPoints": 810,
+          "ratePerMillion": 81000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": null,
@@ -3861,15 +3765,15 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 250,
+          "ratePerMillion": 25000,
           "from": "2018-01-01",
           "to": "2024-01-01",
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 260,
+          "ratePerMillion": 26000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": null,
@@ -3877,15 +3781,15 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "special",
-          "basisPoints": 370,
+          "ratePerMillion": 37000,
           "from": "2018-01-01",
           "to": "2024-01-01",
           "appliesTo": "accommodation (Sondersatz)",
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "special",
-          "basisPoints": 380,
+          "ratePerMillion": 38000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": "accommodation (Sondersatz)",
@@ -3917,18 +3821,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Eidgenoessische Steuerverwaltung (ESTV): Mehrwertsteuersaetze",
-        "url": "https://www.estv.admin.ch/estv/de/home/mehrwertsteuer/mwst-steuersaetze.html",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Eidgenoessische Steuerverwaltung (ESTV): Mehrwertsteuersaetze",
-        "url": "https://www.estv.admin.ch/estv/de/home/mehrwertsteuer/mwst-steuersaetze.html",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -3978,7 +3870,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2003-07-07",
           "to": null,
           "appliesTo": null,
@@ -4058,7 +3950,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2014-04-01",
           "to": null,
           "appliesTo": null,
@@ -4141,11 +4033,11 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1900,
+          "ratePerMillion": 190000,
           "from": "2005-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -4172,18 +4064,6 @@ const Map<String, Map<String, Object?>> countryData = {
       {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
@@ -4234,7 +4114,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1925,
+          "ratePerMillion": 192500,
           "from": "2005-01-01",
           "to": null,
           "appliesTo": null,
@@ -4316,7 +4196,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -4324,7 +4204,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 900,
+          "ratePerMillion": 90000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "transport, postal, construction, basic telecoms, real estate, books and newspapers, heating",
@@ -4332,7 +4212,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced2",
-          "basisPoints": 600,
+          "ratePerMillion": 60000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "financial services, IT and telecommunications services, consulting, R&D, logistics, education, tourism, hotels and catering",
@@ -4408,19 +4288,19 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1900,
+          "ratePerMillion": 190000,
           "from": "2017-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "basic raw materials; agricultural supplies",
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -4447,18 +4327,6 @@ const Map<String, Map<String, Object?>> countryData = {
       {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
@@ -4510,51 +4378,51 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2019-07-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 100,
+          "ratePerMillion": 10000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "basic foodstuffs and household supplies",
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 400,
+          "ratePerMillion": 40000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "health services; domestic air travel",
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced3",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "timber supplies",
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced4",
-          "basisPoints": 200,
+          "ratePerMillion": 20000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "private education; medicines; insurance premiums",
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "zero",
-          "basisPoints": 0,
+          "ratePerMillion": 0,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "exports; books",
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -4581,18 +4449,6 @@ const Map<String, Map<String, Object?>> countryData = {
       {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
@@ -4690,7 +4546,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -4770,7 +4626,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 600,
+          "ratePerMillion": 60000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -4778,7 +4634,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "higher",
-          "basisPoints": 700,
+          "ratePerMillion": 70000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "hotels and insurance",
@@ -4786,7 +4642,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "higher2",
-          "basisPoints": 900,
+          "ratePerMillion": 90000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "luxuries, motor vehicles, alcohol and tobacco",
@@ -4926,35 +4782,35 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1900,
+          "ratePerMillion": 190000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 900,
+          "ratePerMillion": 90000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "superReduced",
-          "basisPoints": 300,
+          "ratePerMillion": 30000,
           "from": "2023-07-21",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -4982,18 +4838,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -5050,43 +4894,43 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2100,
+          "ratePerMillion": 210000,
           "from": "2014-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": "2024-01-01",
           "appliesTo": null,
-          "source": 8,
+          "source": 6,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": "2024-01-01",
           "appliesTo": null,
-          "source": 8,
+          "source": 6,
         },
         {
           "label": "reduced",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "zero",
-          "basisPoints": 0,
+          "ratePerMillion": 0,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -5114,18 +4958,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -5188,19 +5020,19 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1900,
+          "ratePerMillion": 190000,
           "from": "2008-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 12,
+          "source": 6,
         },
         {
           "label": "reduced",
-          "basisPoints": 700,
+          "ratePerMillion": 70000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 13,
+          "source": 7,
         },
       ],
       "registrationThreshold": null,
@@ -5228,42 +5060,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Umsatzsteuergesetz (UStG), section 12 - Steuersaetze (gesetze-im-internet.de)",
-        "url": "https://www.gesetze-im-internet.de/ustg_1980/__12.html",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Einkommensteuergesetz (EStG), section 2(7) - Jahressteuer und Kalenderjahr (gesetze-im-internet.de)",
-        "url": "https://www.gesetze-im-internet.de/estg/__2.html",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Umsatzsteuergesetz (UStG), section 12 - Steuersaetze (gesetze-im-internet.de)",
-        "url": "https://www.gesetze-im-internet.de/ustg_1980/__12.html",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Einkommensteuergesetz (EStG), section 2(7) - Jahressteuer und Kalenderjahr (gesetze-im-internet.de)",
-        "url": "https://www.gesetze-im-internet.de/estg/__2.html",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -5332,7 +5128,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -5407,19 +5203,19 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2500,
+          "ratePerMillion": 250000,
           "from": "2005-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "zero",
-          "basisPoints": 0,
+          "ratePerMillion": 0,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -5447,18 +5243,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -5514,7 +5298,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -5590,7 +5374,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -5598,7 +5382,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 1600,
+          "ratePerMillion": 160000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "yoghurt and butter, coffee, edible fats, sugars, cocoa and chocolate",
@@ -5673,7 +5457,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1900,
+          "ratePerMillion": 190000,
           "from": "2017-01-01",
           "to": null,
           "appliesTo": null,
@@ -5681,7 +5465,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 900,
+          "ratePerMillion": 90000,
           "from": "2017-01-01",
           "to": null,
           "appliesTo": "essential goods",
@@ -5763,7 +5547,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2022-01-01",
           "to": "2024-04-01",
           "appliesTo": null,
@@ -5771,7 +5555,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2024-04-01",
           "to": null,
           "appliesTo": null,
@@ -5779,7 +5563,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "zero",
-          "basisPoints": 0,
+          "ratePerMillion": 0,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "basic basket goods and other zero-rated supplies",
@@ -5854,51 +5638,51 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "2022-01-01",
           "to": "2024-01-01",
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "standard",
-          "basisPoints": 2200,
+          "ratePerMillion": 220000,
           "from": "2024-01-01",
           "to": "2025-07-01",
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "standard",
-          "basisPoints": 2400,
+          "ratePerMillion": 240000,
           "from": "2025-07-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 900,
+          "ratePerMillion": 90000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2025-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced3",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2024-01-01",
           "to": "2025-01-01",
           "appliesTo": "press publications",
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -5926,18 +5710,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -5993,7 +5765,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1400,
+          "ratePerMillion": 140000,
           "from": "2017-07-01",
           "to": null,
           "appliesTo": null,
@@ -6001,7 +5773,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2026-07-29",
           "to": null,
           "appliesTo": "machinery and medical equipment (BDO summary of the July 2026 VAT package)",
@@ -6088,7 +5860,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "1996-01-01",
           "to": null,
           "appliesTo": null,
@@ -6232,27 +6004,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2100,
+          "ratePerMillion": 210000,
           "from": "2014-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "superReduced",
-          "basisPoints": 400,
+          "ratePerMillion": 40000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -6280,18 +6052,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -6348,7 +6108,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2003-01-01",
           "to": null,
           "appliesTo": null,
@@ -6435,15 +6195,15 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2400,
+          "ratePerMillion": 240000,
           "from": "2022-01-01",
           "to": "2024-09-01",
           "appliesTo": null,
-          "source": 9,
+          "source": 5,
         },
         {
           "label": "standard",
-          "basisPoints": 2550,
+          "ratePerMillion": 255000,
           "from": "2024-09-01",
           "to": null,
           "appliesTo": null,
@@ -6451,15 +6211,15 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 1400,
+          "ratePerMillion": 140000,
           "from": "2022-01-01",
           "to": "2026-01-01",
           "appliesTo": null,
-          "source": 9,
+          "source": 5,
         },
         {
           "label": "reduced",
-          "basisPoints": 1350,
+          "ratePerMillion": 135000,
           "from": "2026-01-01",
           "to": null,
           "appliesTo": null,
@@ -6467,11 +6227,11 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced2",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "second reduced rate (e.g. medicines, passenger transport, accommodation, books)",
-          "source": 9,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -6499,30 +6259,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Finnish Tax Administration: Rates of VAT (vero.fi)",
-        "url": "https://www.vero.fi/en/businesses-and-corporations/taxes-and-charges/vat/rates-of-vat/",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Finnish Tax Administration: Rates of VAT (vero.fi)",
-        "url": "https://www.vero.fi/en/businesses-and-corporations/taxes-and-charges/vat/rates-of-vat/",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -6579,7 +6315,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 900,
+          "ratePerMillion": 90000,
           "from": "2022-01-01",
           "to": "2023-08-01",
           "appliesTo": null,
@@ -6587,7 +6323,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2023-08-01",
           "to": "2025-08-01",
           "appliesTo": null,
@@ -6595,7 +6331,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1250,
+          "ratePerMillion": 125000,
           "from": "2025-08-01",
           "to": null,
           "appliesTo": null,
@@ -6807,7 +6543,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2500,
+          "ratePerMillion": 250000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -6882,35 +6618,35 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "2014-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 550,
+          "ratePerMillion": 55000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "superReduced",
-          "basisPoints": 210,
+          "ratePerMillion": 21000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -6938,18 +6674,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -7005,7 +6729,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "1995-04-01",
           "to": null,
           "appliesTo": null,
@@ -7085,7 +6809,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "2011-01-04",
           "to": null,
           "appliesTo": null,
@@ -7093,19 +6817,19 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 9,
+          "source": 5,
         },
         {
           "label": "zero",
-          "basisPoints": 0,
+          "ratePerMillion": 0,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "zero-rated goods and services, e.g. most food and children's clothes",
-          "source": 9,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -7133,30 +6857,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "HM Revenue & Customs: VAT rates (gov.uk)",
-        "url": "https://www.gov.uk/vat-rates",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "HM Revenue & Customs: Income Tax rates (gov.uk, 'the current tax year is from 6 April 2026 to 5 April 2027')",
-        "url": "https://www.gov.uk/income-tax-rates",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "HM Revenue & Customs: VAT rates (gov.uk)",
-        "url": "https://www.gov.uk/vat-rates",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "HM Revenue & Customs: Income Tax rates (gov.uk, 'the current tax year is from 6 April 2026 to 5 April 2027')",
-        "url": "https://www.gov.uk/income-tax-rates",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -7212,7 +6912,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -7287,7 +6987,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2004-01-01",
           "to": null,
           "appliesTo": null,
@@ -7374,7 +7074,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 850,
+          "ratePerMillion": 85000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -7382,7 +7082,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 210,
+          "ratePerMillion": 21000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "basic products",
@@ -7390,7 +7090,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced2",
-          "basisPoints": 105,
+          "ratePerMillion": 10500,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "newspapers",
@@ -7531,7 +7231,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1250,
+          "ratePerMillion": 125000,
           "from": "2018-08-01",
           "to": "2023-01-01",
           "appliesTo": null,
@@ -7539,7 +7239,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2023-01-01",
           "to": null,
           "appliesTo": null,
@@ -7547,7 +7247,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "nhil",
-          "basisPoints": 250,
+          "ratePerMillion": 25000,
           "from": "2018-08-01",
           "to": null,
           "appliesTo": null,
@@ -7555,7 +7255,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "getfund",
-          "basisPoints": 250,
+          "ratePerMillion": 25000,
           "from": "2018-08-01",
           "to": "2023-01-01",
           "appliesTo": null,
@@ -7563,7 +7263,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "getfund",
-          "basisPoints": 350,
+          "ratePerMillion": 35000,
           "from": "2023-01-01",
           "to": "2026-01-01",
           "appliesTo": null,
@@ -7571,7 +7271,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "getfund",
-          "basisPoints": 250,
+          "ratePerMillion": 25000,
           "from": "2026-01-01",
           "to": null,
           "appliesTo": null,
@@ -7579,7 +7279,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "covidLevy",
-          "basisPoints": 100,
+          "ratePerMillion": 10000,
           "from": "2021-05-01",
           "to": "2026-01-01",
           "appliesTo": "COVID-19 Health Recovery Levy, abolished from 1 January 2026",
@@ -7813,7 +7513,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2013-01-01",
           "to": null,
           "appliesTo": null,
@@ -7900,7 +7600,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -7974,7 +7674,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 850,
+          "ratePerMillion": 85000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -7982,7 +7682,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 210,
+          "ratePerMillion": 21000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "basic products",
@@ -7990,7 +7690,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced2",
-          "basisPoints": 105,
+          "ratePerMillion": 10500,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "newspapers",
@@ -8066,7 +7766,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2005-01-01",
           "to": null,
           "appliesTo": null,
@@ -8142,43 +7842,43 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2400,
+          "ratePerMillion": 240000,
           "from": "2016-06-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 600,
+          "ratePerMillion": 60000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced3",
-          "basisPoints": 1700,
+          "ratePerMillion": 170000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "superReduced",
-          "basisPoints": 400,
+          "ratePerMillion": 40000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -8206,18 +7906,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -8338,7 +8026,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -8413,7 +8101,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2018-10-01",
           "to": null,
           "appliesTo": "gross receipts of most businesses (wholesale and manufacturing exemptions apply)",
@@ -8493,7 +8181,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": "2025-01-01",
           "appliesTo": null,
@@ -8501,7 +8189,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1900,
+          "ratePerMillion": 190000,
           "from": "2025-01-01",
           "to": null,
           "appliesTo": null,
@@ -8582,7 +8270,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1400,
+          "ratePerMillion": 140000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -8784,7 +8472,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -8859,27 +8547,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2500,
+          "ratePerMillion": 250000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -8907,18 +8595,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -8968,7 +8644,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -9043,27 +8719,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2700,
+          "ratePerMillion": 270000,
           "from": "2014-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -9091,18 +8767,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -9161,7 +8825,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": "2022-04-01",
           "appliesTo": null,
@@ -9169,7 +8833,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1100,
+          "ratePerMillion": 110000,
           "from": "2022-04-01",
           "to": null,
           "appliesTo": "effective general rate; nominally 12% from 2025-01-01 charged on an 11/12 base",
@@ -9177,7 +8841,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "luxury",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2025-01-01",
           "to": null,
           "appliesTo": "luxury goods subject to the luxury-goods sales tax (LGST)",
@@ -9257,27 +8921,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2300,
+          "ratePerMillion": 230000,
           "from": "2014-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 900,
+          "ratePerMillion": 90000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1350,
+          "ratePerMillion": 135000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -9305,18 +8969,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -9372,15 +9024,15 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1700,
+          "ratePerMillion": 170000,
           "from": "2015-10-01",
           "to": "2025-01-01",
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2025-01-01",
           "to": null,
           "appliesTo": null,
@@ -9411,18 +9063,6 @@ const Map<String, Map<String, Object?>> countryData = {
       {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
@@ -9473,7 +9113,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "2011-01-04",
           "to": null,
           "appliesTo": null,
@@ -9559,7 +9199,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "merit",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -9567,7 +9207,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "main rate for goods and services",
@@ -9575,7 +9215,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2022-01-01",
           "to": "2025-09-22",
           "appliesTo": "12% slab (retained only for bricks after 22 September 2025)",
@@ -9583,7 +9223,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "demerit",
-          "basisPoints": 2800,
+          "ratePerMillion": 280000,
           "from": "2022-01-01",
           "to": "2025-09-22",
           "appliesTo": "28% slab",
@@ -9591,7 +9231,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "demerit",
-          "basisPoints": 4000,
+          "ratePerMillion": 400000,
           "from": "2025-09-22",
           "to": null,
           "appliesTo": "sin and demerit goods (pan masala, aerated drinks, larger vehicles) and online gaming, betting and casinos",
@@ -9829,19 +9469,19 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2400,
+          "ratePerMillion": 240000,
           "from": "2015-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 1100,
+          "ratePerMillion": 110000,
           "from": "2015-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -9869,18 +9509,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Skatturinn (Directorate of Internal Revenue, Iceland): Value Added Tax (VAT)",
-        "url": "https://www.skatturinn.is/english/companies/value-added-tax/",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Skatturinn (Directorate of Internal Revenue, Iceland): Value Added Tax (VAT)",
-        "url": "https://www.skatturinn.is/english/companies/value-added-tax/",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -9930,35 +9558,35 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2200,
+          "ratePerMillion": 220000,
           "from": "2014-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "superReduced",
-          "basisPoints": 400,
+          "ratePerMillion": 40000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -9986,18 +9614,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -10053,7 +9669,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2011-06-06",
           "to": null,
           "appliesTo": null,
@@ -10134,7 +9750,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -10210,7 +9826,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1600,
+          "ratePerMillion": 160000,
           "from": "2010-01-01",
           "to": null,
           "appliesTo": null,
@@ -10218,7 +9834,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 400,
+          "ratePerMillion": 40000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "certain agricultural products and listed goods",
@@ -10312,7 +9928,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2019-10-01",
           "to": null,
           "appliesTo": "national 7.8% plus local 2.2%",
@@ -10320,7 +9936,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2019-10-01",
           "to": null,
           "appliesTo": "basic foodstuffs and newspapers; national 6.24% plus local 1.76%",
@@ -10351,18 +9967,6 @@ const Map<String, Map<String, Object?>> countryData = {
       {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
@@ -10406,7 +10010,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1400,
+          "ratePerMillion": 140000,
           "from": "2020-04-01",
           "to": "2021-01-01",
           "appliesTo": "temporary COVID-19 reduction",
@@ -10414,7 +10018,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1600,
+          "ratePerMillion": 160000,
           "from": "2021-01-01",
           "to": null,
           "appliesTo": null,
@@ -10422,7 +10026,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "petroleum",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2022-01-01",
           "to": "2023-07-01",
           "appliesTo": "petroleum products band, deleted by the Finance Act 2023",
@@ -10503,7 +10107,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -10579,7 +10183,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -10656,7 +10260,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1250,
+          "ratePerMillion": 125000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -10732,7 +10336,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -10813,7 +10417,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1700,
+          "ratePerMillion": 170000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -10929,11 +10533,11 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2005-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -10960,18 +10564,6 @@ const Map<String, Map<String, Object?>> countryData = {
       {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
@@ -11164,7 +10756,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2018-01-01",
           "to": "2026-01-01",
           "appliesTo": null,
@@ -11172,7 +10764,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1600,
+          "ratePerMillion": 160000,
           "from": "2026-01-01",
           "to": null,
           "appliesTo": null,
@@ -11180,7 +10772,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2026-01-01",
           "to": null,
           "appliesTo": "medicines, medical devices and licensed medical services (rises to 10% from 1 January 2027)",
@@ -11188,7 +10780,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced2",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2026-01-01",
           "to": null,
           "appliesTo": "domestically produced periodical print publications",
@@ -11282,7 +10874,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 700,
+          "ratePerMillion": 70000,
           "from": "2022-01-01",
           "to": "2024-05-01",
           "appliesTo": null,
@@ -11290,7 +10882,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2024-05-01",
           "to": null,
           "appliesTo": null,
@@ -11364,7 +10956,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1100,
+          "ratePerMillion": 110000,
           "from": "2017-01-01",
           "to": null,
           "appliesTo": null,
@@ -11451,7 +11043,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1250,
+          "ratePerMillion": 125000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -11527,15 +11119,15 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 770,
+          "ratePerMillion": 77000,
           "from": "2018-01-01",
           "to": "2024-01-01",
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "standard",
-          "basisPoints": 810,
+          "ratePerMillion": 81000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": null,
@@ -11543,15 +11135,15 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 250,
+          "ratePerMillion": 25000,
           "from": "2018-01-01",
           "to": "2024-01-01",
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 260,
+          "ratePerMillion": 26000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": null,
@@ -11559,15 +11151,15 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "special",
-          "basisPoints": 370,
+          "ratePerMillion": 37000,
           "from": "2018-01-01",
           "to": "2024-01-01",
           "appliesTo": "accommodation (Sondersatz)",
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "special",
-          "basisPoints": 380,
+          "ratePerMillion": 38000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": "accommodation (Sondersatz)",
@@ -11599,18 +11191,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Eidgenoessische Steuerverwaltung (ESTV): Mehrwertsteuersaetze",
-        "url": "https://www.estv.admin.ch/estv/de/home/mehrwertsteuer/mwst-steuersaetze.html",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Eidgenoessische Steuerverwaltung (ESTV): Mehrwertsteuersaetze",
-        "url": "https://www.estv.admin.ch/estv/de/home/mehrwertsteuer/mwst-steuersaetze.html",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -11661,7 +11241,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2022-01-01",
           "to": "2022-06-01",
           "appliesTo": null,
@@ -11669,7 +11249,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2022-06-01",
           "to": "2022-09-01",
           "appliesTo": null,
@@ -11677,7 +11257,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-09-01",
           "to": "2024-01-01",
           "appliesTo": null,
@@ -11685,7 +11265,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": null,
@@ -11693,7 +11273,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "financial",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "supply of financial services by specified institutions",
@@ -11767,7 +11347,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": "2025-04-01",
           "appliesTo": null,
@@ -11775,7 +11355,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2025-04-01",
           "to": "2026-05-01",
           "appliesTo": null,
@@ -11783,7 +11363,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2026-05-01",
           "to": null,
           "appliesTo": null,
@@ -11872,7 +11452,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2018-04-01",
           "to": null,
           "appliesTo": null,
@@ -11958,35 +11538,35 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2100,
+          "ratePerMillion": 210000,
           "from": "2014-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
-          "to": null,
-          "appliesTo": null,
-          "source": 8,
-        },
-        {
-          "label": "reduced2",
-          "basisPoints": 900,
-          "from": "2022-01-01",
-          "to": "2026-01-01",
-          "appliesTo": null,
-          "source": 8,
-        },
-        {
-          "label": "reduced2",
-          "basisPoints": 1200,
-          "from": "2026-01-01",
           "to": null,
           "appliesTo": null,
           "source": 6,
+        },
+        {
+          "label": "reduced2",
+          "ratePerMillion": 90000,
+          "from": "2022-01-01",
+          "to": "2026-01-01",
+          "appliesTo": null,
+          "source": 6,
+        },
+        {
+          "label": "reduced2",
+          "ratePerMillion": 120000,
+          "from": "2026-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -12014,18 +11594,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -12089,83 +11657,83 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1700,
+          "ratePerMillion": 170000,
           "from": "2015-01-01",
           "to": "2023-01-01",
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "standard",
-          "basisPoints": 1600,
+          "ratePerMillion": 160000,
           "from": "2023-01-01",
           "to": "2024-01-01",
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "standard",
-          "basisPoints": 1700,
+          "ratePerMillion": 170000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2015-01-01",
           "to": "2023-01-01",
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced",
-          "basisPoints": 700,
+          "ratePerMillion": 70000,
           "from": "2023-01-01",
           "to": "2024-01-01",
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "superReduced",
-          "basisPoints": 300,
+          "ratePerMillion": 30000,
           "from": "2015-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "parking",
-          "basisPoints": 1400,
+          "ratePerMillion": 140000,
           "from": "2015-01-01",
           "to": "2023-01-01",
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "parking",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2023-01-01",
           "to": "2024-01-01",
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "parking",
-          "basisPoints": 1400,
+          "ratePerMillion": 140000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -12193,18 +11761,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -12260,27 +11816,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2100,
+          "ratePerMillion": 210000,
           "from": "2012-07-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -12308,18 +11864,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -12447,7 +11991,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "1996-01-01",
           "to": null,
           "appliesTo": null,
@@ -12455,7 +11999,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 1400,
+          "ratePerMillion": 140000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "listed goods and services",
@@ -12463,7 +12007,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced2",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "listed goods and services",
@@ -12471,7 +12015,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "superReduced",
-          "basisPoints": 700,
+          "ratePerMillion": 70000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "listed essential goods and services",
@@ -12552,7 +12096,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -12634,7 +12178,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -12642,7 +12186,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "listed goods and services",
@@ -12650,7 +12194,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced2",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "listed essential goods",
@@ -12736,7 +12280,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2100,
+          "ratePerMillion": 210000,
           "from": "2018-01-01",
           "to": null,
           "appliesTo": null,
@@ -12744,7 +12288,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 700,
+          "ratePerMillion": 70000,
           "from": "2018-01-01",
           "to": null,
           "appliesTo": "basic foodstuffs, medicines, books, accommodation and public transport",
@@ -12752,7 +12296,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced2",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2025-01-01",
           "to": null,
           "appliesTo": "accommodation and hospitality services (new band)",
@@ -12898,7 +12442,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -13038,7 +12582,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -13046,7 +12590,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "listed essential goods and services",
@@ -13132,7 +12676,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2007-01-01",
           "to": null,
           "appliesTo": null,
@@ -13212,7 +12756,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -13220,7 +12764,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 300,
+          "ratePerMillion": 30000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "hotel and tourism services; construction and sale of buildings",
@@ -13228,7 +12772,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "higher",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "internet services",
@@ -13236,7 +12780,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced2",
-          "basisPoints": 100,
+          "ratePerMillion": 10000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "importation and sale of gold jewellery",
@@ -13319,7 +12863,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -13524,7 +13068,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 850,
+          "ratePerMillion": 85000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -13532,7 +13076,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 210,
+          "ratePerMillion": 21000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "basic products",
@@ -13540,7 +13084,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced2",
-          "basisPoints": 105,
+          "ratePerMillion": 10500,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "newspapers",
@@ -13616,7 +13160,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1600,
+          "ratePerMillion": 160000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -13755,35 +13299,35 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2004-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 8,
+          "source": 6,
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
-          "to": null,
-          "appliesTo": null,
-          "source": 9,
-        },
-        {
-          "label": "reduced2",
-          "basisPoints": 700,
-          "from": "2011-01-01",
           "to": null,
           "appliesTo": null,
           "source": 7,
         },
         {
+          "label": "reduced2",
+          "ratePerMillion": 70000,
+          "from": "2011-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 5,
+        },
+        {
           "label": "parking",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -13811,18 +13355,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -13891,7 +13423,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2002-07-01",
           "to": null,
           "appliesTo": null,
@@ -13971,7 +13503,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 600,
+          "ratePerMillion": 60000,
           "from": "2022-01-01",
           "to": "2023-01-01",
           "appliesTo": "general sector supplies (tourism sector supplies carry the tourism rate)",
@@ -13979,7 +13511,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2023-01-01",
           "to": null,
           "appliesTo": "general sector supplies (tourism sector supplies carry the tourism rate)",
@@ -13987,7 +13519,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "tourism",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2022-01-01",
           "to": "2023-01-01",
           "appliesTo": null,
@@ -13995,7 +13527,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "tourism",
-          "basisPoints": 1600,
+          "ratePerMillion": 160000,
           "from": "2023-01-01",
           "to": "2025-07-01",
           "appliesTo": null,
@@ -14003,7 +13535,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "tourism",
-          "basisPoints": 1700,
+          "ratePerMillion": 170000,
           "from": "2025-07-01",
           "to": null,
           "appliesTo": null,
@@ -14078,7 +13610,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1650,
+          "ratePerMillion": 165000,
           "from": "2022-01-01",
           "to": "2026-01-01",
           "appliesTo": null,
@@ -14086,7 +13618,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1750,
+          "ratePerMillion": 175000,
           "from": "2026-01-01",
           "to": null,
           "appliesTo": null,
@@ -14184,19 +13716,19 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1600,
+          "ratePerMillion": 160000,
           "from": "2011-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "zero",
-          "basisPoints": 0,
+          "ratePerMillion": 0,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "exports; basic foodstuffs; medicines",
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -14223,18 +13755,6 @@ const Map<String, Map<String, Object?>> countryData = {
       {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
-        "url": "https://vatcalc.com/vat-rates/",
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
@@ -14287,7 +13807,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 600,
+          "ratePerMillion": 60000,
           "from": "2022-01-01",
           "to": "2024-03-01",
           "appliesTo": "service tax on taxable services",
@@ -14295,7 +13815,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2024-03-01",
           "to": null,
           "appliesTo": "service tax on taxable services; food and beverage, telecommunications, parking and logistics services remain at 6%",
@@ -14303,7 +13823,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "service",
-          "basisPoints": 600,
+          "ratePerMillion": 60000,
           "from": "2024-03-01",
           "to": null,
           "appliesTo": "food and beverage, telecommunications, parking and logistics services (retained 6% rate)",
@@ -14311,7 +13831,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "sales",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "sales tax on goods",
@@ -14319,7 +13839,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "salesReduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "certain goods including basic foodstuffs, construction supplies and telecoms/IT equipment",
@@ -14394,7 +13914,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1600,
+          "ratePerMillion": 160000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -14477,7 +13997,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2000-11-27",
           "to": null,
           "appliesTo": null,
@@ -14558,7 +14078,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1100,
+          "ratePerMillion": 110000,
           "from": "2018-10-01",
           "to": null,
           "appliesTo": "taxe normale",
@@ -14566,7 +14086,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 300,
+          "ratePerMillion": 30000,
           "from": "2018-10-01",
           "to": null,
           "appliesTo": "locally produced or transformed goods, passenger transport and reimbursed medicines",
@@ -14574,7 +14094,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "specific",
-          "basisPoints": 600,
+          "ratePerMillion": 60000,
           "from": "2018-10-01",
           "to": null,
           "appliesTo": "services generally",
@@ -14582,7 +14102,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "higher",
-          "basisPoints": 2200,
+          "ratePerMillion": 220000,
           "from": "2018-10-01",
           "to": null,
           "appliesTo": "alcohol, sugary drinks, tobacco, jewellery, vehicles and other listed goods",
@@ -14662,7 +14182,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1900,
+          "ratePerMillion": 190000,
           "from": "2000-06-21",
           "to": null,
           "appliesTo": null,
@@ -14807,7 +14327,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 750,
+          "ratePerMillion": 75000,
           "from": "2020-02-01",
           "to": null,
           "appliesTo": null,
@@ -14815,7 +14335,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "zero",
-          "basisPoints": 0,
+          "ratePerMillion": 0,
           "from": "2026-01-01",
           "to": null,
           "appliesTo": "basic food, medicines, educational books, exports and other s.187 supplies",
@@ -14909,7 +14429,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -14984,19 +14504,19 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2100,
+          "ratePerMillion": 210000,
           "from": "2014-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 900,
+          "ratePerMillion": 90000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -15024,18 +14544,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -15091,27 +14599,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2500,
+          "ratePerMillion": 250000,
           "from": "2005-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2012-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2021-10-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -15138,18 +14646,6 @@ const Map<String, Map<String, Object?>> countryData = {
       {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Tax Foundation: 2026 VAT Rates in Europe (secondary; authority rate pages unreachable this session)",
-        "url": "https://taxfoundation.org/data/all/eu/value-added-tax-vat-rates-europe/",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Tax Foundation: 2026 VAT Rates in Europe (secondary; authority rate pages unreachable this session)",
-        "url": "https://taxfoundation.org/data/all/eu/value-added-tax-vat-rates-europe/",
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
@@ -15199,7 +14695,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -15339,7 +14835,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1250,
+          "ratePerMillion": 125000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -15415,11 +14911,11 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2011-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -15447,18 +14943,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Inland Revenue (New Zealand): GST - goods and services tax, charged at 15%",
-        "url": "https://www.ird.govt.nz/gst",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Inland Revenue (New Zealand): GST - goods and services tax, charged at 15%",
-        "url": "https://www.ird.govt.nz/gst",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -15508,7 +14992,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2021-04-16",
           "to": null,
           "appliesTo": null,
@@ -15596,7 +15080,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 700,
+          "ratePerMillion": 70000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -15672,7 +15156,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "combined IGV and municipal promotion tax (IPM)",
@@ -15749,7 +15233,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1600,
+          "ratePerMillion": 160000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -15757,7 +15241,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "services",
@@ -15765,7 +15249,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced2",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "various services and imports",
@@ -15842,7 +15326,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -15918,7 +15402,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -15994,7 +15478,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1700,
+          "ratePerMillion": 170000,
           "from": "2022-01-01",
           "to": "2023-02-15",
           "appliesTo": null,
@@ -16002,7 +15486,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2023-02-15",
           "to": null,
           "appliesTo": null,
@@ -16083,27 +15567,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2300,
+          "ratePerMillion": 230000,
           "from": "2014-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -16131,18 +15615,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -16301,7 +15773,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1150,
+          "ratePerMillion": 115000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "10.5% commonwealth rate plus 1% municipal rate",
@@ -16379,7 +15851,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1600,
+          "ratePerMillion": 160000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -16456,35 +15928,35 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2300,
+          "ratePerMillion": 230000,
           "from": "2014-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 600,
+          "ratePerMillion": 60000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "parking",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -16512,18 +15984,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -16579,7 +16039,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2023-01-01",
           "to": null,
           "appliesTo": null,
@@ -16654,7 +16114,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -16662,7 +16122,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "basic foodstuffs, some real estate and financial services",
@@ -16803,7 +16263,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 850,
+          "ratePerMillion": 85000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -16811,7 +16271,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 210,
+          "ratePerMillion": 21000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "goods and services qualifying for 5.5% or 10% in metropolitan France",
@@ -16819,7 +16279,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "superReduced",
-          "basisPoints": 175,
+          "ratePerMillion": 17500,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "particular rate (press, first performances)",
@@ -16894,43 +16354,43 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1900,
+          "ratePerMillion": 190000,
           "from": "2022-01-01",
           "to": "2025-08-01",
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "standard",
-          "basisPoints": 2100,
+          "ratePerMillion": 210000,
           "from": "2025-08-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 1100,
+          "ratePerMillion": 110000,
           "from": "2025-08-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced2",
-          "basisPoints": 900,
+          "ratePerMillion": 90000,
           "from": "2022-01-01",
           "to": "2025-08-01",
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced3",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": "2025-08-01",
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -16958,18 +16418,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -17025,7 +16473,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -17033,7 +16481,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "listed goods and services",
@@ -17184,7 +16632,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -17271,7 +16719,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2018-01-01",
           "to": "2020-07-01",
           "appliesTo": null,
@@ -17279,7 +16727,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2020-07-01",
           "to": null,
           "appliesTo": null,
@@ -17378,7 +16826,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "sales tax on the scheduled services and goods tax on locally manufactured goods",
@@ -17386,7 +16834,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "goodsImport",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "goods tax on imported goods (collected at the port)",
@@ -17467,7 +16915,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -17541,7 +16989,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1700,
+          "ratePerMillion": 170000,
           "from": "2017-01-01",
           "to": null,
           "appliesTo": null,
@@ -17624,27 +17072,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2500,
+          "ratePerMillion": 250000,
           "from": "2005-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 600,
+          "ratePerMillion": 60000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -17672,18 +17120,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -17739,7 +17175,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 700,
+          "ratePerMillion": 70000,
           "from": "2022-01-01",
           "to": "2023-01-01",
           "appliesTo": null,
@@ -17747,7 +17183,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2023-01-01",
           "to": "2024-01-01",
           "appliesTo": null,
@@ -17755,7 +17191,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 900,
+          "ratePerMillion": 90000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": null,
@@ -17887,27 +17323,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2200,
+          "ratePerMillion": 220000,
           "from": "2013-07-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2020-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 950,
+          "ratePerMillion": 95000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 8,
+          "source": 6,
         },
       ],
       "registrationThreshold": null,
@@ -17935,18 +17371,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -18046,43 +17470,43 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "2022-01-01",
           "to": "2025-01-01",
           "appliesTo": null,
-          "source": 8,
+          "source": 6,
         },
         {
           "label": "standard",
-          "basisPoints": 2300,
+          "ratePerMillion": 230000,
           "from": "2025-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2023-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": "2025-01-01",
           "appliesTo": null,
-          "source": 8,
+          "source": 6,
         },
         {
           "label": "reduced2",
-          "basisPoints": 1900,
+          "ratePerMillion": 190000,
           "from": "2025-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
       ],
       "registrationThreshold": null,
@@ -18110,18 +17534,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
         "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-        "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-        "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
       {
@@ -18183,7 +17595,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -18257,7 +17669,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1700,
+          "ratePerMillion": 170000,
           "from": "2011-11-22",
           "to": null,
           "appliesTo": null,
@@ -18338,7 +17750,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2013-01-01",
           "to": null,
           "appliesTo": null,
@@ -18413,7 +17825,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -18488,7 +17900,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2022-01-01",
           "to": "2023-01-01",
           "appliesTo": "turnover tax (omzetbelasting) — goods and services",
@@ -18496,7 +17908,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2023-01-01",
           "to": null,
           "appliesTo": "value added tax (BTW)",
@@ -18504,7 +17916,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2023-01-01",
           "to": null,
           "appliesTo": "gasoline",
@@ -18512,7 +17924,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "higher",
-          "basisPoints": 2500,
+          "ratePerMillion": 250000,
           "from": "2023-01-01",
           "to": null,
           "appliesTo": "luxury goods (annex 3)",
@@ -18585,7 +17997,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -18660,7 +18072,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -18741,7 +18153,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -18816,7 +18228,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 600,
+          "ratePerMillion": 60000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -18963,7 +18375,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2018-08-01",
           "to": null,
           "appliesTo": null,
@@ -19108,7 +18520,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2016-01-01",
           "to": "2024-01-01",
           "appliesTo": null,
@@ -19116,7 +18528,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1750,
+          "ratePerMillion": 175000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": null,
@@ -19124,7 +18536,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 900,
+          "ratePerMillion": 90000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": "listed local products (sugar, oil, soap, textiles, local agri-food products)",
@@ -19269,7 +18681,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2019-01-01",
           "to": null,
           "appliesTo": null,
@@ -19349,7 +18761,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 700,
+          "ratePerMillion": 70000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "6.3% VAT plus 0.7% municipal tax; statutory rate 10% reduced by royal decree",
@@ -19430,7 +18842,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": "2024-01-01",
           "appliesTo": null,
@@ -19438,7 +18850,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1400,
+          "ratePerMillion": 140000,
           "from": "2024-01-01",
           "to": "2027-01-01",
           "appliesTo": null,
@@ -19446,7 +18858,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2027-01-01",
           "to": null,
           "appliesTo": null,
@@ -19454,7 +18866,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 700,
+          "ratePerMillion": 70000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": "construction work, hotel services and catering",
@@ -19462,7 +18874,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced2",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2024-01-01",
           "to": null,
           "appliesTo": "domestic agricultural products, processing, training and sanatorium medical services",
@@ -19614,7 +19026,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "services tax",
@@ -19622,7 +19034,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 250,
+          "ratePerMillion": 25000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "import duty on goods",
@@ -19698,7 +19110,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -19780,7 +19192,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1900,
+          "ratePerMillion": 190000,
           "from": "2018-01-01",
           "to": null,
           "appliesTo": null,
@@ -19788,7 +19200,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 1300,
+          "ratePerMillion": 130000,
           "from": "2018-01-01",
           "to": null,
           "appliesTo": null,
@@ -19796,7 +19208,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "superReduced",
-          "basisPoints": 700,
+          "ratePerMillion": 70000,
           "from": "2018-01-01",
           "to": null,
           "appliesTo": null,
@@ -19878,7 +19290,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -19953,43 +19365,43 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2008-01-01",
           "to": "2023-07-10",
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "2023-07-10",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "reduced",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2008-01-01",
           "to": "2023-07-10",
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
         {
           "label": "reduced",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2023-07-10",
           "to": null,
           "appliesTo": null,
-          "source": 6,
+          "source": 4,
         },
         {
           "label": "superReduced",
-          "basisPoints": 100,
+          "ratePerMillion": 10000,
           "from": "2008-01-01",
           "to": null,
           "appliesTo": null,
-          "source": 7,
+          "source": 5,
         },
       ],
       "registrationThreshold": null,
@@ -20016,18 +19428,6 @@ const Map<String, Map<String, Object?>> countryData = {
       {
         "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
         "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Tax Foundation: 2026 VAT Rates in Europe (secondary; authority rate pages unreachable this session)",
-        "url": "https://taxfoundation.org/data/all/eu/value-added-tax-vat-rates-europe/",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Tax Foundation: 2026 VAT Rates in Europe (secondary; authority rate pages unreachable this session)",
-        "url": "https://taxfoundation.org/data/all/eu/value-added-tax-vat-rates-europe/",
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
@@ -20084,7 +19484,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1250,
+          "ratePerMillion": 125000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -20159,7 +19559,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 700,
+          "ratePerMillion": 70000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "most goods and services; rice, flour, sugar, cooking oils and other essentials exempt",
@@ -20235,7 +19635,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -20311,7 +19711,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2009-07-01",
           "to": null,
           "appliesTo": null,
@@ -20399,7 +19799,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2000,
+          "ratePerMillion": 200000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -20486,7 +19886,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1800,
+          "ratePerMillion": 180000,
           "from": "2005-07-01",
           "to": null,
           "appliesTo": null,
@@ -20643,11 +20043,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 0,
+              "ratePerMillion": 0,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20656,11 +20056,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 400,
+              "ratePerMillion": 40000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20669,11 +20069,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 650,
+              "ratePerMillion": 65000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20682,11 +20082,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 560,
+              "ratePerMillion": 56000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20695,11 +20095,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 725,
+              "ratePerMillion": 72500,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20708,11 +20108,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 290,
+              "ratePerMillion": 29000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20721,11 +20121,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 635,
+              "ratePerMillion": 63500,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20734,11 +20134,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 600,
+              "ratePerMillion": 60000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20747,11 +20147,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 0,
+              "ratePerMillion": 0,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20760,11 +20160,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 600,
+              "ratePerMillion": 60000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20773,11 +20173,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 400,
+              "ratePerMillion": 40000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20786,11 +20186,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 400,
+              "ratePerMillion": 40000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20799,11 +20199,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 600,
+              "ratePerMillion": 60000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20812,11 +20212,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 600,
+              "ratePerMillion": 60000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20825,11 +20225,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 625,
+              "ratePerMillion": 62500,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20838,11 +20238,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 700,
+              "ratePerMillion": 70000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20851,11 +20251,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 650,
+              "ratePerMillion": 65000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20864,11 +20264,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 600,
+              "ratePerMillion": 60000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20877,19 +20277,19 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 445,
+              "ratePerMillion": 44500,
               "from": "2022-01-01",
               "to": "2025-01-01",
               "appliesTo": null,
-              "source": 18,
+              "source": 6,
             },
             {
               "label": "standard",
-              "basisPoints": 500,
+              "ratePerMillion": 50000,
               "from": "2025-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 18,
+              "source": 6,
             },
           ],
         },
@@ -20898,11 +20298,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 625,
+              "ratePerMillion": 62500,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20911,11 +20311,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 600,
+              "ratePerMillion": 60000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20924,11 +20324,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 550,
+              "ratePerMillion": 55000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20937,11 +20337,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 600,
+              "ratePerMillion": 60000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20950,11 +20350,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 688,
+              "ratePerMillion": 68750,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20963,11 +20363,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 423,
+              "ratePerMillion": 42250,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20976,11 +20376,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 700,
+              "ratePerMillion": 70000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -20989,11 +20389,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 0,
+              "ratePerMillion": 0,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21002,11 +20402,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 475,
+              "ratePerMillion": 47500,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21015,11 +20415,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 500,
+              "ratePerMillion": 50000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21028,11 +20428,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 550,
+              "ratePerMillion": 55000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21041,11 +20441,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 0,
+              "ratePerMillion": 0,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21054,11 +20454,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 663,
+              "ratePerMillion": 66250,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21067,27 +20467,27 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 513,
+              "ratePerMillion": 51250,
               "from": "2022-01-01",
               "to": "2022-07-01",
-              "appliesTo": "state GRT including the pre-cut 5.125% rounded to 513bp (schema stores integer hundredths)",
-              "source": 17,
+              "appliesTo": "state GRT including the pre-cut 5.125%",
+              "source": 5,
             },
             {
               "label": "standard",
-              "basisPoints": 500,
+              "ratePerMillion": 50000,
               "from": "2022-07-01",
               "to": "2023-07-01",
               "appliesTo": null,
-              "source": 17,
+              "source": 5,
             },
             {
               "label": "standard",
-              "basisPoints": 488,
+              "ratePerMillion": 48750,
               "from": "2023-07-01",
               "to": null,
-              "appliesTo": "state GRT of 4.875% rounded to 488bp (schema stores integer hundredths)",
-              "source": 17,
+              "appliesTo": "state GRT of 4.875%",
+              "source": 5,
             },
           ],
         },
@@ -21096,11 +20496,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 685,
+              "ratePerMillion": 68500,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21109,11 +20509,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 400,
+              "ratePerMillion": 40000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21122,11 +20522,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 575,
+              "ratePerMillion": 57500,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21135,11 +20535,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 450,
+              "ratePerMillion": 45000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21148,11 +20548,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 0,
+              "ratePerMillion": 0,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21161,11 +20561,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 600,
+              "ratePerMillion": 60000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21174,11 +20574,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 700,
+              "ratePerMillion": 70000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21187,11 +20587,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 600,
+              "ratePerMillion": 60000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21200,19 +20600,19 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 450,
+              "ratePerMillion": 45000,
               "from": "2022-01-01",
               "to": "2023-07-01",
               "appliesTo": null,
-              "source": 16,
+              "source": 4,
             },
             {
               "label": "standard",
-              "basisPoints": 420,
+              "ratePerMillion": 42000,
               "from": "2023-07-01",
               "to": null,
               "appliesTo": "reduced by HB 1137; rises back to 4.5% on 1 July 2027 under its sunset clause",
-              "source": 16,
+              "source": 4,
             },
           ],
         },
@@ -21221,11 +20621,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 700,
+              "ratePerMillion": 70000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21234,11 +20634,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 625,
+              "ratePerMillion": 62500,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21247,11 +20647,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 610,
+              "ratePerMillion": 61000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21260,11 +20660,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 530,
+              "ratePerMillion": 53000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21273,11 +20673,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 600,
+              "ratePerMillion": 60000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21286,11 +20686,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 650,
+              "ratePerMillion": 65000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21299,11 +20699,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 500,
+              "ratePerMillion": 50000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21312,11 +20712,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 600,
+              "ratePerMillion": 60000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21325,11 +20725,11 @@ const Map<String, Map<String, Object?>> countryData = {
           "rates": [
             {
               "label": "standard",
-              "basisPoints": 400,
+              "ratePerMillion": 40000,
               "from": "2022-01-01",
               "to": null,
               "appliesTo": null,
-              "source": 15,
+              "source": 3,
             },
           ],
         },
@@ -21382,78 +20782,6 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "primary",
         "retrievedOn": "2026-11-13",
       },
-      {
-        "title": "Tax Foundation: State and Local Sales Tax Rates, Midyear 2026 (state-level rates as of 1 July 2026, including mandatory statewide add-ons; cross-checked against the Index 2024 Table 16 rates as of 1 July 2023, which confirm the pre-change value for every state that moved after 2022)",
-        "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "South Dakota Department of Revenue: Department of Revenue Updates Tax System for Decrease in State Tax Rate (HB 1137: 4.5% to 4.2% from 1 July 2023, sunset 30 June 2027)",
-        "url": "https://dor.sd.gov/newsroom/department-of-revenue-updates-tax-system-for-decrease-in-state-tax-rate/",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "New Mexico Taxation and Revenue Department: State portion of Gross Receipts Tax drops to 4.875% (two-step cut from 5.125% under 2022 legislation; second step 1 July 2023)",
-        "url": "https://www.tax.newmexico.gov/wp-content/uploads/2023/06/July-1-tax-changes.pdf",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Louisiana Department of Revenue, Revenue Information Bulletin 25-007: state sales tax rate 5% from 1 January 2025 (Act 11 of the 2024 Third Extraordinary Session)",
-        "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Tax Foundation: State and Local Sales Tax Rates, Midyear 2026 (state-level rates as of 1 July 2026, including mandatory statewide add-ons; cross-checked against the Index 2024 Table 16 rates as of 1 July 2023, which confirm the pre-change value for every state that moved after 2022)",
-        "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "South Dakota Department of Revenue: Department of Revenue Updates Tax System for Decrease in State Tax Rate (HB 1137: 4.5% to 4.2% from 1 July 2023, sunset 30 June 2027)",
-        "url": "https://dor.sd.gov/newsroom/department-of-revenue-updates-tax-system-for-decrease-in-state-tax-rate/",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "New Mexico Taxation and Revenue Department: State portion of Gross Receipts Tax drops to 4.875% (two-step cut from 5.125% under 2022 legislation; second step 1 July 2023)",
-        "url": "https://www.tax.newmexico.gov/wp-content/uploads/2023/06/July-1-tax-changes.pdf",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Louisiana Department of Revenue, Revenue Information Bulletin 25-007: state sales tax rate 5% from 1 January 2025 (Act 11 of the 2024 Third Extraordinary Session)",
-        "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Tax Foundation: State and Local Sales Tax Rates, Midyear 2026 (state-level rates as of 1 July 2026, including mandatory statewide add-ons; cross-checked against the Index 2024 Table 16 rates as of 1 July 2023, which confirm the pre-change value for every state that moved after 2022)",
-        "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",
-        "grade": "secondary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "South Dakota Department of Revenue: Department of Revenue Updates Tax System for Decrease in State Tax Rate (HB 1137: 4.5% to 4.2% from 1 July 2023, sunset 30 June 2027)",
-        "url": "https://dor.sd.gov/newsroom/department-of-revenue-updates-tax-system-for-decrease-in-state-tax-rate/",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "New Mexico Taxation and Revenue Department: State portion of Gross Receipts Tax drops to 4.875% (two-step cut from 5.125% under 2022 legislation; second step 1 July 2023)",
-        "url": "https://www.tax.newmexico.gov/wp-content/uploads/2023/06/July-1-tax-changes.pdf",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Louisiana Department of Revenue, Revenue Information Bulletin 25-007: state sales tax rate 5% from 1 January 2025 (Act 11 of the 2024 Third Extraordinary Session)",
-        "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
     ],
     "verifiedOn": "2026-11-13",
     "recheckBy": "2027-05-13",
@@ -21462,7 +20790,6 @@ const Map<String, Map<String, Object?>> countryData = {
       "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
       "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
       "State base-rate changes inside the window, dated from primary sources: New Mexico 5.125% to 5% on 1 July 2022 and to 4.875% on 1 July 2023; South Dakota 4.5% to 4.2% on 1 July 2023 (sunsets 30 June 2027); Louisiana 4.45% to 5% on 1 January 2025 (Act 11 of 2024; drops to 4.75% on 1 January 2030).",
-      "Non-integer state rates are rounded to whole basis points: Minnesota 6.875% (688), Missouri 4.225% (423), New Jersey 6.625% (663), New Mexico 5.125%/4.875% (513/488).",
       "Lower-bound rows: unchanged states start at 2022-01-01 — the two Tax Foundation tables (as of 1 July 2023 and 1 July 2026) agree on every other state, so those rates are treated as in force throughout the window. Category-specific rates (grocery reductions in Illinois, Kansas, Oklahoma, Mississippi, Virginia and elsewhere) are not modelled.",
     ],
   },
@@ -21491,7 +20818,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 2200,
+          "ratePerMillion": 220000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -21499,7 +20826,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "basic foodstuffs, tourist-related services, medicines and health",
@@ -21576,7 +20903,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2019-10-01",
           "to": "2023-01-01",
           "appliesTo": null,
@@ -21584,7 +20911,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1200,
+          "ratePerMillion": 120000,
           "from": "2023-01-01",
           "to": null,
           "appliesTo": null,
@@ -21731,7 +21058,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -21806,7 +21133,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1600,
+          "ratePerMillion": 160000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -21814,7 +21141,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "foodstuffs, professional services, domestic air travel, construction",
@@ -22020,7 +21347,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": "2022-02-01",
           "appliesTo": null,
@@ -22028,7 +21355,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2022-02-01",
           "to": "2023-01-01",
           "appliesTo": "2-point cut under Resolution 43/2022/QH15 (Decree 15/2022)",
@@ -22036,7 +21363,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2023-01-01",
           "to": "2023-07-01",
           "appliesTo": "cut lapsed 1 January 2023 until Resolution 101/2023/QH15",
@@ -22044,7 +21371,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 800,
+          "ratePerMillion": 80000,
           "from": "2023-07-01",
           "to": null,
           "appliesTo": "2-point cut under Resolutions 101/2023, 142/2024, 259/2024 and 204/2025 (Decrees 44, 72, 94, 204 and 174); lapses 31 December 2026 unless extended",
@@ -22052,7 +21379,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "reduced",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "essential goods and services (water, medical, education, public transport, and others)",
@@ -22060,7 +21387,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standardExcluded",
-          "basisPoints": 1000,
+          "ratePerMillion": 100000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "telecommunications, financial activities, banking, securities, insurance, real estate, metal products, most mining, and goods and services subject to special consumption tax — never received the 2-point cut",
@@ -22147,7 +21474,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": null,
@@ -22280,7 +21607,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2016-01-01",
           "to": null,
           "appliesTo": null,
@@ -22360,7 +21687,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 500,
+          "ratePerMillion": 50000,
           "from": "2001-01-01",
           "to": null,
           "appliesTo": null,
@@ -22501,7 +21828,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2018-04-01",
           "to": null,
           "appliesTo": null,
@@ -22509,7 +21836,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "zero",
-          "basisPoints": 0,
+          "ratePerMillion": 0,
           "from": "2022-01-01",
           "to": null,
           "appliesTo": "basic foodstuffs and other zero-rated schedule items",
@@ -22590,7 +21917,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1600,
+          "ratePerMillion": 160000,
           "from": "2008-04-01",
           "to": null,
           "appliesTo": null,
@@ -22671,7 +21998,7 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [
         {
           "label": "standard",
-          "basisPoints": 1500,
+          "ratePerMillion": 150000,
           "from": "2022-01-01",
           "to": "2026-01-01",
           "appliesTo": null,
@@ -22679,7 +22006,7 @@ const Map<String, Map<String, Object?>> countryData = {
         },
         {
           "label": "standard",
-          "basisPoints": 1550,
+          "ratePerMillion": 155000,
           "from": "2026-01-01",
           "to": null,
           "appliesTo": null,

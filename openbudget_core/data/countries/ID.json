@@ -26,7 +26,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1000,
+        "ratePerMillion": 100000,
         "from": "2022-01-01",
         "to": "2022-04-01",
         "appliesTo": null,
@@ -34,7 +34,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1100,
+        "ratePerMillion": 110000,
         "from": "2022-04-01",
         "to": null,
         "appliesTo": "effective general rate; nominally 12% from 2025-01-01 charged on an 11/12 base",
@@ -42,7 +42,7 @@
       },
       {
         "label": "luxury",
-        "basisPoints": 1200,
+        "ratePerMillion": 120000,
         "from": "2025-01-01",
         "to": null,
         "appliesTo": "luxury goods subject to the luxury-goods sales tax (LGST)",

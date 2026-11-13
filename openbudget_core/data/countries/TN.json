@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1900,
+        "ratePerMillion": 190000,
         "from": "2018-01-01",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 1300,
+        "ratePerMillion": 130000,
         "from": "2018-01-01",
         "to": null,
         "appliesTo": null,
@@ -39,7 +39,7 @@
       },
       {
         "label": "superReduced",
-        "basisPoints": 700,
+        "ratePerMillion": 70000,
         "from": "2018-01-01",
         "to": null,
         "appliesTo": null,

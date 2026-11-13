@@ -24,7 +24,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2026-01-01",
         "to": null,
         "appliesTo": "single rate on all taxable supplies and imports (Schedule I, GST Amendment Act 2025)",
@@ -32,7 +32,7 @@
       },
       {
         "label": "zero",
-        "basisPoints": 0,
+        "ratePerMillion": 0,
         "from": "2026-01-01",
         "to": null,
         "appliesTo": "exports of goods and services",

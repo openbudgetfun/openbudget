@@ -24,7 +24,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 600,
+        "ratePerMillion": 60000,
         "from": "2022-01-01",
         "to": "2024-03-01",
         "appliesTo": "service tax on taxable services",
@@ -32,7 +32,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 800,
+        "ratePerMillion": 80000,
         "from": "2024-03-01",
         "to": null,
         "appliesTo": "service tax on taxable services; food and beverage, telecommunications, parking and logistics services remain at 6%",
@@ -40,7 +40,7 @@
       },
       {
         "label": "service",
-        "basisPoints": 600,
+        "ratePerMillion": 60000,
         "from": "2024-03-01",
         "to": null,
         "appliesTo": "food and beverage, telecommunications, parking and logistics services (retained 6% rate)",
@@ -48,7 +48,7 @@
       },
       {
         "label": "sales",
-        "basisPoints": 1000,
+        "ratePerMillion": 100000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "sales tax on goods",
@@ -56,7 +56,7 @@
       },
       {
         "label": "salesReduced",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "certain goods including basic foodstuffs, construction supplies and telecoms/IT equipment",

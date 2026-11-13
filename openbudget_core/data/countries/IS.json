@@ -23,19 +23,19 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 2400,
+        "ratePerMillion": 240000,
         "from": "2015-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "reduced",
-        "basisPoints": 1100,
+        "ratePerMillion": 110000,
         "from": "2015-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 6
+        "source": 4
       }
     ],
     "registrationThreshold": null,
@@ -63,18 +63,6 @@
       "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Skatturinn (Directorate of Internal Revenue, Iceland): Value Added Tax (VAT)",
-      "url": "https://www.skatturinn.is/english/companies/value-added-tax/",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "Skatturinn (Directorate of Internal Revenue, Iceland): Value Added Tax (VAT)",
-      "url": "https://www.skatturinn.is/english/companies/value-added-tax/",
-      "grade": "primary",
       "retrievedOn": "2026-11-13"
     },
     {

@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1800,
+        "ratePerMillion": 180000,
         "from": "1997-05-12",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "centimesAdditionnels",
-        "basisPoints": 90,
+        "ratePerMillion": 9000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "5% surcharge levied on the VAT itself (not deductible)",

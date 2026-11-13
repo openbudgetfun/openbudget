@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 750,
+        "ratePerMillion": 75000,
         "from": "2020-02-01",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "zero",
-        "basisPoints": 0,
+        "ratePerMillion": 0,
         "from": "2026-01-01",
         "to": null,
         "appliesTo": "basic food, medicines, educational books, exports and other s.187 supplies",

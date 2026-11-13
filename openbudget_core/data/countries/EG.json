@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1400,
+        "ratePerMillion": 140000,
         "from": "2017-07-01",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2026-07-29",
         "to": null,
         "appliesTo": "machinery and medical equipment (BDO summary of the July 2026 VAT package)",

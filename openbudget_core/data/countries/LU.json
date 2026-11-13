@@ -23,83 +23,83 @@
     "rates": [
       {
         "label": "standard",
-        "basisPoints": 1700,
+        "ratePerMillion": 170000,
         "from": "2015-01-01",
         "to": "2023-01-01",
         "appliesTo": null,
-        "source": 7
+        "source": 5
       },
       {
         "label": "standard",
-        "basisPoints": 1600,
+        "ratePerMillion": 160000,
         "from": "2023-01-01",
         "to": "2024-01-01",
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "standard",
-        "basisPoints": 1700,
+        "ratePerMillion": 170000,
         "from": "2024-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "reduced",
-        "basisPoints": 800,
+        "ratePerMillion": 80000,
         "from": "2015-01-01",
         "to": "2023-01-01",
         "appliesTo": null,
-        "source": 7
+        "source": 5
       },
       {
         "label": "reduced",
-        "basisPoints": 700,
+        "ratePerMillion": 70000,
         "from": "2023-01-01",
         "to": "2024-01-01",
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "reduced",
-        "basisPoints": 800,
+        "ratePerMillion": 80000,
         "from": "2024-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "superReduced",
-        "basisPoints": 300,
+        "ratePerMillion": 30000,
         "from": "2015-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 7
+        "source": 5
       },
       {
         "label": "parking",
-        "basisPoints": 1400,
+        "ratePerMillion": 140000,
         "from": "2015-01-01",
         "to": "2023-01-01",
         "appliesTo": null,
-        "source": 7
+        "source": 5
       },
       {
         "label": "parking",
-        "basisPoints": 1300,
+        "ratePerMillion": 130000,
         "from": "2023-01-01",
         "to": "2024-01-01",
         "appliesTo": null,
-        "source": 6
+        "source": 4
       },
       {
         "label": "parking",
-        "basisPoints": 1400,
+        "ratePerMillion": 140000,
         "from": "2024-01-01",
         "to": null,
         "appliesTo": null,
-        "source": 6
+        "source": 4
       }
     ],
     "registrationThreshold": null,
@@ -127,18 +127,6 @@
       "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-      "grade": "primary",
-      "retrievedOn": "2026-11-13"
-    },
-    {
-      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
-      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
-      "grade": "primary",
       "retrievedOn": "2026-11-13"
     },
     {

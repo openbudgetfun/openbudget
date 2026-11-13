@@ -23,7 +23,7 @@
     "rates": [
       {
         "label": "merit",
-        "basisPoints": 500,
+        "ratePerMillion": 50000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": null,
@@ -31,7 +31,7 @@
       },
       {
         "label": "standard",
-        "basisPoints": 1800,
+        "ratePerMillion": 180000,
         "from": "2022-01-01",
         "to": null,
         "appliesTo": "main rate for goods and services",
@@ -39,7 +39,7 @@
       },
       {
         "label": "reduced",
-        "basisPoints": 1200,
+        "ratePerMillion": 120000,
         "from": "2022-01-01",
         "to": "2025-09-22",
         "appliesTo": "12% slab (retained only for bricks after 22 September 2025)",
@@ -47,7 +47,7 @@
       },
       {
         "label": "demerit",
-        "basisPoints": 2800,
+        "ratePerMillion": 280000,
         "from": "2022-01-01",
         "to": "2025-09-22",
         "appliesTo": "28% slab",
@@ -55,7 +55,7 @@
       },
       {
         "label": "demerit",
-        "basisPoints": 4000,
+        "ratePerMillion": 400000,
         "from": "2025-09-22",
         "to": null,
         "appliesTo": "sin and demerit goods (pan masala, aerated drinks, larger vehicles) and online gaming, betting and casinos",
