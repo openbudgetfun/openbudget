@@ -155,6 +155,7 @@ tax:
   - setLineTax:
   - getReport:
   - getSummary:
+  - createExportLink:
 transactionRule:
   - create:
   - list:
