@@ -1320,6 +1320,7 @@ indexes:
 
 - `functionalDebitMinor` and `functionalCreditMinor` become `baseDebitMinor` and `baseCreditMinor`.
 - `exchangeRate`, `rateDate` and `rateSource` become `fxRate`, `fxRateDate` (now required) and `fxRateSource` (now an enum).
+- `lineNumber` is new: a zero-based position assigned in the order the caller supplied the lines, renumbered whenever a draft's lines are replaced. UUID ids sort only by their millisecond timestamp, so every read that returns a journal's lines orders by `lineNumber`; (`journalId`, `lineNumber`) is unique.
 - The index is renamed.
 
 `ledger/journal_line.spy.yaml`:
@@ -1330,6 +1331,10 @@ indexes:
 ### Each line carries the transaction-currency amount and the base amount
 ### with the exact rate that produced it. Exactly one of debitMinor and
 ### creditMinor is positive, and the base pair follows the same side.
+###
+### UUID ids sort only by their embedded millisecond timestamp, so lines
+### written in the same millisecond have no inherent order; lineNumber is
+### the stable, unique order the reads rely on.
 class: JournalLine
 table: journal_line
 fields:
@@ -1337,6 +1342,11 @@ fields:
   journalId: UuidValue, relation(parent=journal, onDelete=Cascade)
   ledgerAccountId: UuidValue, relation(parent=ledger_account, onDelete=NoAction)
   description: String?
+  ### Zero-based position of this line within its journal.
+  ###
+  ### Assigned in the order the caller supplied the lines and renumbered
+  ### whenever a draft's lines are replaced; reads order by it.
+  lineNumber: int, default=0
   ### Debit in transaction-currency minor units, or 0.
   debitMinor: int, default=0
   ### Credit in transaction-currency minor units, or 0.
@@ -1359,6 +1369,9 @@ indexes:
     fields: journalId
   journal_line_ledger_account_idx:
     fields: ledgerAccountId
+  journal_line_journal_line_number_idx:
+    fields: journalId, lineNumber
+    unique: true
 ```
 
 **`ledger_period_lock`: CHANGE** (keyed by entity). `ledger/ledger_period_lock.spy.yaml`:
