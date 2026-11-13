@@ -238,7 +238,7 @@ class _EntityCard extends HookConsumerWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(8),
                     decoration: ObRoughDecoration(
                       color: palette.wash(ObTone.brand),
                       outline: palette.quietPen,
@@ -247,19 +247,24 @@ class _EntityCard extends HookConsumerWidget {
                     child: SkribbleIcon(
                       data: OpenBudgetIcons.wallet,
                       color: palette.hue(ObTone.brand),
-                      size: 22,
+                      size: 20,
                     ),
                   ),
-                  const SizedBox(width: SpacingTokens.md),
+                  const SizedBox(width: SpacingTokens.sm),
+                  // Name and currency read as one label, so they share a
+                  // line instead of stacking with a gap.
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Text(
-                          summary.entity.name,
-                          style: theme.textTheme.titleMedium,
+                        Flexible(
+                          child: Text(
+                            summary.entity.name,
+                            style: theme.textTheme.titleMedium,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(width: SpacingTokens.sm),
                         ObToneChip(label: summary.entity.baseCurrencyCode),
                       ],
                     ),
@@ -282,7 +287,9 @@ class _EntityCard extends HookConsumerWidget {
                         color: palette.hue(readyTone),
                       ),
                       const SizedBox(width: SpacingTokens.xs),
-                      Expanded(
+                      // Flexible, not Expanded: the highlighter hugs the
+                      // words rather than running to the card edge.
+                      Flexible(
                         child: readyToAssign! > 0
                             ? ObHighlighter(
                                 padding: const EdgeInsets.symmetric(
@@ -313,24 +320,33 @@ class _EntityCard extends HookConsumerWidget {
                   spacing: SpacingTokens.md,
                   runSpacing: SpacingTokens.xs,
                   children: [
-                    _SummaryChip(
-                      icon: OpenBudgetIcons.warning,
-                      label: l10n.homeBudgetOverspent(
-                        summary.overspentEnvelopeCount,
+                    // Only problems earn a chip: "0 overspent" is noise.
+                    if (summary.overspentEnvelopeCount > 0)
+                      _SummaryChip(
+                        icon: OpenBudgetIcons.warning,
+                        label: l10n.homeBudgetOverspent(
+                          summary.overspentEnvelopeCount,
+                        ),
+                        color: palette.overspent,
                       ),
-                      color: summary.overspentEnvelopeCount > 0
-                          ? palette.overspent
-                          : palette.mutedInk,
-                    ),
+                    // A net worth that leaves out unconverted accounts is
+                    // flagged with the warning glyph and the caution tone.
                     _SummaryChip(
-                      icon: OpenBudgetIcons.bank,
+                      icon: summary.netWorthComplete
+                          ? OpenBudgetIcons.bank
+                          : OpenBudgetIcons.warning,
                       label: l10n.homeBudgetNetWorthShort(
                         formatMinorForCode(
                           summary.netWorthMinor,
                           summary.entity.baseCurrencyCode,
                         ),
                       ),
-                      color: summary.netWorthMinor >= 0
+                      semanticsLabel: summary.netWorthComplete
+                          ? null
+                          : l10n.netWorthEntityIncomplete,
+                      color: !summary.netWorthComplete
+                          ? palette.underfunded
+                          : summary.netWorthMinor >= 0
                           ? palette.mutedInk
                           : palette.overspent,
                     ),
@@ -392,6 +408,7 @@ class _CombinedNetWorthCard extends HookConsumerWidget {
                 : ObTone.overspent;
 
             return ObCard(
+              key: const Key('home-combined-net-worth'),
               tone: tone,
               raised: true,
               shadow: palette.overprint,
@@ -460,7 +477,7 @@ class _CombinedNetWorthCard extends HookConsumerWidget {
                         SkribbleIcon(
                           data: OpenBudgetIcons.warning,
                           size: 14,
-                          color: palette.hue(ObTone.overspent),
+                          color: palette.underfunded,
                         ),
                         const SizedBox(width: SpacingTokens.xs),
                         Flexible(
@@ -469,7 +486,8 @@ class _CombinedNetWorthCard extends HookConsumerWidget {
                               view.missingCurrencyCodes.join(', '),
                             ),
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: palette.hue(ObTone.overspent),
+                              color: palette.underfunded,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -490,21 +508,30 @@ class _SummaryChip extends HookWidget {
     required this.icon,
     required this.label,
     required this.color,
+    this.semanticsLabel,
   });
 
   final WiredSvgIconData icon;
   final String label;
   final Color color;
 
+  /// Extra context read after [label], e.g. why a figure is flagged.
+  final String? semanticsLabel;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final extra = semanticsLabel;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         SkribbleIcon(data: icon, size: 16, color: color),
         const SizedBox(width: SpacingTokens.xs),
-        Text(label, style: theme.textTheme.bodySmall?.copyWith(color: color)),
+        Text(
+          label,
+          semanticsLabel: extra == null ? null : '$label. $extra',
+          style: theme.textTheme.bodySmall?.copyWith(color: color),
+        ),
       ],
     );
   }

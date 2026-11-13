@@ -265,9 +265,49 @@ class AccountDetailPage {
     await tester.pumpAndSettle();
   }
 
+  Finder get reconcileSheet => find.byKey(const Key('account-reconcile-sheet'));
+  Finder get reconcileDifference =>
+      find.byKey(const Key('account-reconcile-difference'));
+
   Future<void> openReconcileSheet() async {
     await scrollAndTap(tester, reconcileButton);
   }
+}
+
+/// Page object for the account type picker inside add account.
+class AccountTypePickerPage {
+  AccountTypePickerPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get addUnlinkedButton =>
+      find.byKey(const Key('add-account-add-unlinked-button'));
+  Finder get typeTile =>
+      find.byKey(const Key('add-account-unlinked-type-tile'));
+
+  /// The picker row for an account type key such as `loan` or `crypto`.
+  Finder option(String key) =>
+      find.byKey(ValueKey('add-account-type-option-$key'));
+
+  /// Opens the unlinked-account form, then its type picker.
+  Future<void> open() async {
+    await scrollAndTap(tester, addUnlinkedButton);
+    await scrollAndTap(tester, typeTile);
+  }
+}
+
+/// Page object for the home screen's entity cards and combined net worth.
+class MultiCurrencyHomePage {
+  MultiCurrencyHomePage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get combinedNetWorth =>
+      find.byKey(const Key('home-combined-net-worth'));
+  Finder entityCard(String name) => find.text(name);
+
+  /// The note naming the currencies the server could not convert.
+  Finder missingCurrencies(String codes) => find.textContaining(codes);
 }
 
 /// Page object for the add transaction bottom sheet.
@@ -710,7 +750,9 @@ class NetWorthPage {
     const Key('net-worth-currency-chip'),
   );
   Finder get staleBadge => find.byKey(const Key('net-worth-stale-badge'));
-  Finder get trustLine => find.textContaining('Rates from');
+  Finder get incompleteCard =>
+      find.byKey(const Key('net-worth-incomplete-card'));
+  Finder get trustLine => find.textContaining('Rates as of');
   Finder get tabByEntity => find.byKey(const Key('net-worth-tab-by-entity'));
   Finder get tabByCurrency =>
       find.byKey(const Key('net-worth-tab-by-currency'));
@@ -845,6 +887,9 @@ class ExpenseFxPage {
   final WidgetTester tester;
 
   Finder get fxLine => find.byKey(const Key('expense-fx-line'));
+  Finder get amountField => find.byKey(const Key('expense-amount-field'));
+  Finder get splitButton => find.byKey(const Key('expense-split-button'));
+  Finder get linesEditor => find.byKey(const Key('expense-lines-editor'));
   Finder get setRateButton => find.text('Set rate').first;
   Finder get manualRateSheet => find.text('Use your own rate').first;
   Finder get manualRateField => find.byKey(const Key('manual-rate-field'));

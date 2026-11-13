@@ -236,7 +236,14 @@ void main() {
       await tester.pump();
 
       expect(find.text('Daily'), findsOneWidget);
-      expect(find.text(r'$52,020.00'), findsOneWidget);
+      // The hero balance draws its minor units raised, so it is found by
+      // the label it is announced with.
+      expect(
+        find.bySemanticsLabel(
+          RegExp(r'^\$52,020\.00$', multiLine: true),
+        ),
+        findsOneWidget,
+      );
       expect(find.text(r'Cleared $50,000.00'), findsOneWidget);
       expect(find.text(r'Uncleared $2,020.00'), findsOneWidget);
       expect(find.text(r'Bank says $51,990.00'), findsOneWidget);
@@ -489,7 +496,13 @@ void main() {
       expect(find.text('SOL'), findsOneWidget);
       // 9 decimals: 1500000000 raw = 1.5 SOL.
       expect(find.text('Quantity 1.5'), findsOneWidget);
-      expect(find.text(r'Value $280.00'), findsOneWidget);
+      expect(find.text(r'$280.00'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(
+          RegExp(r'^Value \$280\.00$', multiLine: true),
+        ),
+        findsOneWidget,
+      );
       expect(find.text(r'P&L $30.00'), findsOneWidget);
     });
 
@@ -532,6 +545,7 @@ void main() {
 
         expect(find.textContaining('Difference'), findsOneWidget);
         expect(find.textContaining(r'$0.00'), findsOneWidget);
+        expect(find.text('Matches your statement'), findsOneWidget);
       });
     });
   });
