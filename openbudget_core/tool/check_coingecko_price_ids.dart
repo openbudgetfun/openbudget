@@ -21,12 +21,20 @@ Future<void> main(List<String> args) async {
     final coinIds = await _fetchStringSet(
       client,
       Uri.parse('https://api.coingecko.com/api/v3/coins/list'),
-      (item) => (item as Map<String, dynamic>)['id'] as String?,
+      (item) {
+        if (item is! Map<String, dynamic>) return null;
+        final id = item['id'];
+        return id is String ? id : null;
+      },
     );
     final platforms = await _fetchStringSet(
       client,
       Uri.parse('https://api.coingecko.com/api/v3/asset_platforms'),
-      (item) => (item as Map<String, dynamic>)['id'] as String?,
+      (item) {
+        if (item is! Map<String, dynamic>) return null;
+        final id = item['id'];
+        return id is String ? id : null;
+      },
     );
 
     if (coinIds == null || platforms == null) {
@@ -74,7 +82,7 @@ Future<Set<String>?> _fetchStringSet(
     final decoded = jsonDecode(body);
     if (decoded is! List) return null;
     return decoded.map(pick).whereType<String>().toSet();
-  } catch (_) {
+  } on Object catch (_) {
     return null;
   }
 }

@@ -240,8 +240,9 @@ class CoinGeckoPriceClient {
         final price = _coerceDouble(
           value[vsCurrency] ?? value[vsCurrency.toLowerCase()],
         );
-        if (price != null && price.isFinite && price > 0)
+        if (price != null && price.isFinite && price > 0) {
           prices[contract] = price;
+        }
       }
     }
     return prices;
