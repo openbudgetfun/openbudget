@@ -4,13 +4,13 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/utils/account_kind_labels.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_list_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/reporting_currency_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/date_labels.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -38,12 +38,7 @@ class NetWorthScreen extends HookConsumerWidget {
       appBar: AppBar(
         backgroundColor: palette.canvas,
         surfaceTintColor: palette.canvas,
-        title: Text(
-          l10n.netWorthTitle,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        title: Text(l10n.netWorthTitle),
       ),
       body: viewAsync.when(
         loading: () =>
@@ -61,40 +56,41 @@ class NetWorthScreen extends HookConsumerWidget {
             ),
           ],
         ),
-        data: (view) => ListView(
+        data: (view) => ObReadableWidth(
           padding: const EdgeInsets.fromLTRB(
             SpacingTokens.md,
             SpacingTokens.sm,
             SpacingTokens.md,
             SpacingTokens.xl,
           ),
-          children: [
-            _NetWorthHeadline(view: view),
-            const SizedBox(height: SpacingTokens.sm),
-            _TrustLine(view: view),
-            if (!view.isComplete) ...[
-              const SizedBox(height: SpacingTokens.sm),
-              _IncompleteCurrenciesCard(view: view),
-            ],
-            const SizedBox(height: SpacingTokens.md),
-            _HistoryCard(
-              range: historyRange.value,
-              onRangeChanged: (range) {
-                historyRange.value = range;
+          builder: (context, padding) => ListView(
+            padding: padding,
+            children: [
+              _NetWorthHeadline(view: view),
+              if (!view.isComplete) ...[
+                const SizedBox(height: SpacingTokens.lg),
+                _IncompleteCurrenciesCard(view: view),
+              ],
+              const SizedBox(height: SpacingTokens.lg),
+              _HistoryCard(
+                range: historyRange.value,
+                onRangeChanged: (range) {
+                  historyRange.value = range;
+                },
+              ),
+              const SizedBox(height: SpacingTokens.lg),
+              _BreakdownTabs(
+                selected: breakdownTab.value,
+                onSelected: (tab) => breakdownTab.value = tab,
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              switch (breakdownTab.value) {
+                _NetWorthTab.byEntity => _ByEntityTab(view: view),
+                _NetWorthTab.byCurrency => _ByCurrencyTab(view: view),
+                _NetWorthTab.byAccount => _ByAccountTab(view: view),
               },
-            ),
-            const SizedBox(height: SpacingTokens.md),
-            _BreakdownTabs(
-              selected: breakdownTab.value,
-              onSelected: (tab) => breakdownTab.value = tab,
-            ),
-            const SizedBox(height: SpacingTokens.sm),
-            switch (breakdownTab.value) {
-              _NetWorthTab.byEntity => _ByEntityTab(view: view),
-              _NetWorthTab.byCurrency => _ByCurrencyTab(view: view),
-              _NetWorthTab.byAccount => _ByAccountTab(view: view),
-            },
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -103,8 +99,20 @@ class NetWorthScreen extends HookConsumerWidget {
 
 enum _NetWorthTab { byEntity, byCurrency, byAccount }
 
-/// The headline: net worth in the reporting currency with a chip that
-/// changes the reporting currency in place, then assets and liabilities.
+/// Sorts converted rows largest first and puts rows with no rate last: an
+/// unconverted native figure is in another unit, so it never competes with
+/// converted ones for the top of the list.
+int _byConvertedThenUnconverted(int? aConverted, int? bConverted) {
+  if (aConverted == null && bConverted == null) return 0;
+  if (aConverted == null) return 1;
+  if (bConverted == null) return -1;
+  return bConverted.compareTo(aConverted);
+}
+
+/// The headline: the combined figure under the highlighter, the currency
+/// chip that changes the reporting currency in place, assets against
+/// liabilities, and the trust line saying how fresh the rates are, kept on
+/// the same card as the number it vouches for.
 class _NetWorthHeadline extends HookConsumerWidget {
   const _NetWorthHeadline({required this.view});
 
@@ -116,11 +124,18 @@ class _NetWorthHeadline extends HookConsumerWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
     final reportingCurrency = ref.watch(reportingCurrencyProvider).value ?? '';
+    final positive = view.netWorthMinor >= 0;
 
     return ObCard(
       key: const Key('net-worth-headline'),
       raised: true,
-      padding: const EdgeInsets.all(SpacingTokens.lg),
+      shadow: palette.overprint,
+      padding: const EdgeInsets.fromLTRB(
+        SpacingTokens.lg,
+        SpacingTokens.md,
+        SpacingTokens.lg,
+        SpacingTokens.md,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -128,70 +143,125 @@ class _NetWorthHeadline extends HookConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  l10n.netWorthTitle,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: palette.mutedInk,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  l10n.netWorthHeadlineEyebrow,
+                  style: ObTextStyles.eyebrow(
+                    theme.textTheme.labelSmall,
+                  ).copyWith(color: palette.mutedInk),
                 ),
               ),
               _ReportingCurrencyChip(currencyCode: reportingCurrency),
             ],
           ),
-          const SizedBox(height: SpacingTokens.xs),
-          ObAmount(
-            formatMinorForCode(view.netWorthMinor, view.currencyCode),
-            highlighted: view.netWorthMinor >= 0,
-            tone: view.netWorthMinor >= 0 ? ObTone.neutral : ObTone.overspent,
-            style: theme.textTheme.headlineLarge,
-          ),
+          const SizedBox(height: SpacingTokens.sm),
+          // The highlighter marks the figure the screen is about; a
+          // negative total is set in its hue instead, never highlighted.
+          if (positive)
+            ObHighlighter(
+              child: ObHeroAmount(
+                formatMinorForCode(view.netWorthMinor, view.currencyCode),
+                style: theme.textTheme.displaySmall,
+              ),
+            )
+          else
+            ObHeroAmount(
+              formatMinorForCode(view.netWorthMinor, view.currencyCode),
+              tone: ObTone.overspent,
+              style: theme.textTheme.displaySmall,
+            ),
           const SizedBox(height: SpacingTokens.md),
           Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.netWorthAssets,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: palette.mutedInk,
-                      ),
-                    ),
-                    ObAmount(
-                      formatMinorForCode(view.assetsMinor, view.currencyCode),
-                      tone: ObTone.funded,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                  ],
+                child: _HeadlineMetric(
+                  icon: OpenBudgetIcons.coins,
+                  label: l10n.netWorthAssets,
+                  amount: formatMinorForCode(
+                    view.assetsMinor,
+                    view.currencyCode,
+                  ),
+                  tone: ObTone.funded,
                 ),
               ),
-              const SizedBox(width: SpacingTokens.md),
+              Container(
+                width: 1.4,
+                height: 36,
+                margin: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.sm,
+                ),
+                color: palette.line,
+              ),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.netWorthLiabilities,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: palette.mutedInk,
-                      ),
-                    ),
-                    ObAmount(
-                      formatMinorForCode(
-                        view.liabilitiesMinor,
-                        view.currencyCode,
-                      ),
-                      tone: ObTone.overspent,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                  ],
+                child: _HeadlineMetric(
+                  icon: OpenBudgetIcons.creditCard,
+                  label: l10n.netWorthLiabilities,
+                  amount: formatMinorForCode(
+                    view.liabilitiesMinor,
+                    view.currencyCode,
+                  ),
+                  tone: ObTone.overspent,
                 ),
               ),
             ],
           ),
+          const SizedBox(height: SpacingTokens.md),
+          Divider(height: 1, thickness: 1.4, color: palette.line),
+          const SizedBox(height: SpacingTokens.sm),
+          _TrustLine(view: view),
         ],
       ),
+    );
+  }
+}
+
+/// Assets or liabilities under the headline: a small glyph and label over
+/// the figure in its tone.
+class _HeadlineMetric extends HookWidget {
+  const _HeadlineMetric({
+    required this.icon,
+    required this.label,
+    required this.amount,
+    required this.tone,
+  });
+
+  final WiredSvgIconData icon;
+  final String label;
+  final String amount;
+  final ObTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            SkribbleIcon(data: icon, size: 14, color: palette.hue(tone)),
+            const SizedBox(width: SpacingTokens.xs),
+            Flexible(
+              child: Text(
+                label,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: palette.mutedInk,
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: AlignmentDirectional.centerStart,
+          child: ObAmount(
+            amount,
+            tone: tone,
+            style: theme.textTheme.titleMedium,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -282,8 +352,8 @@ class _ReportingCurrencyChip extends HookConsumerWidget {
   }
 }
 
-/// The trust line: where the rates came from, with a Stale badge when the
-/// server says the rates are old.
+/// The trust line: the date the rates are from, with a Stale badge when
+/// the server says the rates are old.
 class _TrustLine extends HookWidget {
   const _TrustLine({required this.view});
 
@@ -294,45 +364,41 @@ class _TrustLine extends HookWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final dateLabel = DateFormat.yMd().format(view.asOf);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xs),
-      child: Row(
-        children: [
-          SkribbleIcon(
-            data: OpenBudgetIcons.info,
-            size: 14,
-            color: palette.mutedInk,
-          ),
-          const SizedBox(width: SpacingTokens.xs),
-          Expanded(
-            child: Text(
-              l10n.netWorthRatesFrom(dateLabel),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: palette.mutedInk,
-              ),
+    return Row(
+      children: [
+        SkribbleIcon(
+          data: OpenBudgetIcons.info,
+          size: 14,
+          color: palette.mutedInk,
+        ),
+        const SizedBox(width: SpacingTokens.xs),
+        Expanded(
+          child: Text(
+            l10n.netWorthRatesFrom(DateLabels.full(context, view.asOf)),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: palette.mutedInk,
             ),
           ),
-          if (view.hasStaleRates)
-            ObToneChip(
-              key: const Key('net-worth-stale-badge'),
-              label: l10n.fxRateStale,
-              tone: ObTone.underfunded,
-              icon: SkribbleIcon(
-                data: OpenBudgetIcons.warning,
-                size: 14,
-                color: palette.underfunded,
-              ),
+        ),
+        if (view.hasStaleRates)
+          ObToneChip(
+            key: const Key('net-worth-stale-badge'),
+            label: l10n.fxRateStale,
+            tone: ObTone.underfunded,
+            icon: SkribbleIcon(
+              data: OpenBudgetIcons.warning,
+              size: 14,
+              color: palette.underfunded,
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }
 
-/// The warning card for incomplete conversions: which currencies were left
-/// out and how many accounts each holds.
+/// The note for incomplete conversions: which currencies were left out of
+/// the figure above and how many accounts each holds.
 class _IncompleteCurrenciesCard extends HookWidget {
   const _IncompleteCurrenciesCard({required this.view});
 
@@ -347,49 +413,47 @@ class _IncompleteCurrenciesCard extends HookWidget {
         .where((row) => row.convertedMinor == null)
         .toList();
 
-    return Container(
-      padding: const EdgeInsets.all(SpacingTokens.sm),
-      decoration: ObRoughDecoration(
-        color: palette.underfundedWash,
-        radius: 10,
-        seed: 31,
-      ),
-      child: Column(
+    return ObCard(
+      key: const Key('net-worth-incomplete-card'),
+      tone: ObTone.underfunded,
+      seed: 31,
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              SkribbleIcon(
-                data: OpenBudgetIcons.warning,
-                size: 16,
-                color: palette.underfunded,
-              ),
-              const SizedBox(width: SpacingTokens.xs),
-              Expanded(
-                child: Text(
+          SkribbleIcon(
+            data: OpenBudgetIcons.warning,
+            size: 20,
+            color: palette.underfunded,
+          ),
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
                   l10n.netWorthIncompleteTitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: theme.textTheme.titleSmall?.copyWith(
                     color: palette.ink,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: SpacingTokens.xs),
-          for (final row in incomplete)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                l10n.netWorthIncompleteLine(
-                  row.accountCount,
-                  row.currencyCode,
-                ),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: palette.ink,
-                ),
-              ),
+                for (final row in incomplete)
+                  Padding(
+                    padding: const EdgeInsets.only(top: SpacingTokens.xs),
+                    child: Text(
+                      l10n.netWorthIncompleteLine(
+                        row.accountCount,
+                        row.currencyCode,
+                      ),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: palette.ink,
+                      ),
+                    ),
+                  ),
+              ],
             ),
+          ),
         ],
       ),
     );
@@ -397,7 +461,8 @@ class _IncompleteCurrenciesCard extends HookWidget {
 }
 
 /// The history card: 3M / 1Y / All toggles over the server's daily, weekly
-/// and monthly points. Incomplete points are drawn hollow.
+/// and monthly points, the change across the range, and the chart with its
+/// high and low marked. Incomplete stretches are drawn dashed and hollow.
 class _HistoryCard extends HookConsumerWidget {
   const _HistoryCard({required this.range, required this.onRangeChanged});
 
@@ -410,6 +475,9 @@ class _HistoryCard extends HookConsumerWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
     final historyAsync = ref.watch(netWorthHistoryProvider(range));
+    final mutedSmall = theme.textTheme.bodySmall?.copyWith(
+      color: palette.mutedInk,
+    );
 
     return ObCard(
       padding: const EdgeInsets.all(SpacingTokens.md),
@@ -420,8 +488,8 @@ class _HistoryCard extends HookConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  l10n.netWorthTitle,
-                  style: theme.textTheme.titleSmall?.copyWith(
+                  l10n.netWorthHistoryTitle,
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -446,7 +514,7 @@ class _HistoryCard extends HookConsumerWidget {
           const SizedBox(height: SpacingTokens.sm),
           historyAsync.when(
             loading: () => SizedBox(
-              height: 140,
+              height: 168,
               child: Center(child: ObLoadingPanel(label: l10n.reportsLoading)),
             ),
             error: (error, _) => ObStatePanel.problem(
@@ -457,79 +525,132 @@ class _HistoryCard extends HookConsumerWidget {
               final points = history.points;
               if (points.length < 2) {
                 return SizedBox(
-                  height: 140,
+                  height: 168,
                   child: Center(
-                    child: Text(
-                      l10n.reportsEmptySubtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: palette.mutedInk,
-                      ),
-                    ),
+                    child: Text(l10n.reportsEmptySubtitle, style: mutedSmall),
                   ),
                 );
               }
               final currencyCode = history.currencyCode;
               final first = points.first;
               final last = points.last;
-              final up = last.netWorthMinor >= first.netWorthMinor;
+              // Same currency, exact minor units: a subtraction, not a
+              // conversion.
+              final changeMinor = last.netWorthMinor - first.netWorthMinor;
+              final up = changeMinor >= 0;
               final tone = up ? ObTone.funded : ObTone.overspent;
+              final values = points.map((point) => point.netWorthMinor);
+              final high = values.reduce(math.max);
+              final low = values.reduce(math.min);
+              final hasIncomplete = points.any((point) => !point.isComplete);
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    height: 140,
-                    width: double.infinity,
-                    child: CustomPaint(
-                      painter: _HistoryLinePainter(
-                        points: points,
-                        lineColor: palette.hue(tone),
-                        inkColor: palette.ink,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: SpacingTokens.sm),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        DateFormat.MMMd().format(first.date),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: palette.mutedInk,
-                        ),
+                      SkribbleIcon(
+                        data: up
+                            ? OpenBudgetIcons.trendingUp
+                            : OpenBudgetIcons.trendingDown,
+                        size: 18,
+                        color: palette.hue(tone),
                       ),
-                      Row(
-                        children: [
-                          Text(
-                            formatMinorForCode(
-                              last.netWorthMinor,
-                              currencyCode,
-                            ),
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              color: palette.hue(tone),
-                              fontWeight: FontWeight.w700,
-                            ),
+                      const SizedBox(width: SpacingTokens.xs),
+                      ObAmount(
+                        formatMinorForCode(changeMinor.abs(), currencyCode),
+                        tone: tone,
+                        style: theme.textTheme.titleSmall,
+                      ),
+                      const SizedBox(width: SpacingTokens.xs),
+                      Flexible(
+                        child: Text(
+                          l10n.netWorthChangeSince(
+                            DateLabels.short(context, first.date),
                           ),
-                          const SizedBox(width: SpacingTokens.xs),
-                          if (points.any((point) => !point.isComplete))
-                            Tooltip(
-                              message: l10n.netWorthIncompletePoint,
-                              child: Container(
-                                width: 10,
-                                height: 10,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: palette.hue(tone),
-                                    width: 1.6,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
+                          style: mutedSmall,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: SpacingTokens.sm),
+                  SizedBox(
+                    height: 168,
+                    width: double.infinity,
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: CustomPaint(
+                            painter: _HistoryLinePainter(
+                              points: points,
+                              lineColor: palette.hue(tone),
+                              washColor: palette.wash(tone),
+                              gridColor: palette.line,
+                            ),
+                          ),
+                        ),
+                        PositionedDirectional(
+                          top: 0,
+                          start: 0,
+                          child: Text(
+                            formatMinorForCode(high, currencyCode),
+                            style: mutedSmall,
+                          ),
+                        ),
+                        PositionedDirectional(
+                          bottom: 0,
+                          start: 0,
+                          child: Text(
+                            formatMinorForCode(low, currencyCode),
+                            style: mutedSmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: SpacingTokens.xs),
+                  Row(
+                    children: [
+                      Text(
+                        DateLabels.short(context, first.date),
+                        style: mutedSmall,
+                      ),
+                      const Spacer(),
+                      Text(
+                        DateLabels.short(context, last.date),
+                        style: mutedSmall,
+                      ),
+                    ],
+                  ),
+                  if (hasIncomplete) ...[
+                    const SizedBox(height: SpacingTokens.sm),
+                    Row(
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            for (var dash = 0; dash < 3; dash++)
+                              Container(
+                                width: 5,
+                                height: 2.6,
+                                margin: const EdgeInsetsDirectional.only(
+                                  end: 3,
+                                ),
+                                color: palette.hue(tone),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(width: SpacingTokens.xs),
+                        Expanded(
+                          child: Text(
+                            l10n.netWorthIncompleteLegend,
+                            style: mutedSmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               );
             },
@@ -540,18 +661,25 @@ class _HistoryCard extends HookConsumerWidget {
   }
 }
 
-/// The hand-drawn line: one ink polyline, filled dots for complete points
-/// and hollow rings for the incomplete ones.
+/// The history line over a wash of its own tone, with faint rules at the
+/// high and low. Complete stretches are one solid line; a stretch ending in
+/// an incomplete point is dashed, and the last point is a dot, hollow when
+/// it is incomplete.
 class _HistoryLinePainter extends CustomPainter {
   const _HistoryLinePainter({
     required this.points,
     required this.lineColor,
-    required this.inkColor,
+    required this.washColor,
+    required this.gridColor,
   });
 
   final List<NetWorthPoint> points;
   final Color lineColor;
-  final Color inkColor;
+  final Color washColor;
+  final Color gridColor;
+
+  // Room at the top and bottom for the high and low labels.
+  static const _labelBand = 20.0;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -561,46 +689,98 @@ class _HistoryLinePainter extends CustomPainter {
     final maxValue = values.reduce(math.max);
     final span = maxValue - minValue == 0 ? 1 : maxValue - minValue;
 
-    const leftPad = 6.0;
-    const rightPad = 6.0;
-    const topPad = 10.0;
-    const bottomPad = 10.0;
-    final drawableWidth = size.width - leftPad - rightPad;
-    final drawableHeight = size.height - topPad - bottomPad;
+    const sidePad = 6.0;
+    const top = _labelBand;
+    final bottom = size.height - _labelBand;
+    final drawableWidth = size.width - sidePad * 2;
+    final drawableHeight = bottom - top;
 
     Offset pointAt(int index) {
-      final x = leftPad + drawableWidth * index / (points.length - 1);
-      final y =
-          topPad + drawableHeight * (1 - (values[index] - minValue) / span);
+      final x = sidePad + drawableWidth * index / (points.length - 1);
+      final y = top + drawableHeight * (1 - (values[index] - minValue) / span);
       return Offset(x, y);
     }
 
-    final path = Path()..moveTo(pointAt(0).dx, pointAt(0).dy);
+    final gridPaint = Paint()
+      ..color = gridColor
+      ..strokeWidth = 1.2;
+    canvas
+      ..drawLine(const Offset(0, top), Offset(size.width, top), gridPaint)
+      ..drawLine(Offset(0, bottom), Offset(size.width, bottom), gridPaint);
+
+    final line = Path()..moveTo(pointAt(0).dx, pointAt(0).dy);
     for (var i = 1; i < points.length; i++) {
-      path.lineTo(pointAt(i).dx, pointAt(i).dy);
+      line.lineTo(pointAt(i).dx, pointAt(i).dy);
     }
+    final wash = Path.from(line)
+      ..lineTo(pointAt(points.length - 1).dx, bottom)
+      ..lineTo(pointAt(0).dx, bottom)
+      ..close();
+    canvas.drawPath(wash, Paint()..color = washColor);
 
     final linePaint = Paint()
       ..color = lineColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.4
+      ..strokeWidth = 2.6
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
-    canvas.drawPath(path, linePaint);
-
-    // Every sixth point gets a dot; incomplete ones stay hollow.
-    for (var i = 0; i < points.length; i++) {
-      final isSampled = i == 0 || i == points.length - 1 || i % 6 == 0;
-      if (!isSampled) continue;
-      final center = pointAt(i);
-      final complete = points[i].isComplete;
-      final dotPaint = Paint()
-        ..color = lineColor
-        ..style = complete ? PaintingStyle.fill : PaintingStyle.stroke;
-      if (!complete) {
-        dotPaint.strokeWidth = 1.8;
+    // Complete stretches are one solid path; each run of segments ending
+    // in an incomplete point is one dashed path, so the dashes keep their
+    // rhythm across the run however dense the points are.
+    final solid = Path();
+    Path? incompleteRun;
+    for (var i = 1; i < points.length; i++) {
+      final from = pointAt(i - 1);
+      final to = pointAt(i);
+      if (points[i].isComplete) {
+        if (incompleteRun != null) {
+          _drawDashed(canvas, incompleteRun, linePaint);
+          incompleteRun = null;
+        }
+        solid
+          ..moveTo(from.dx, from.dy)
+          ..lineTo(to.dx, to.dy);
+      } else {
+        (incompleteRun ??= Path()..moveTo(from.dx, from.dy)).lineTo(
+          to.dx,
+          to.dy,
+        );
       }
-      canvas.drawCircle(center, complete ? 3.2 : 4, dotPaint);
+    }
+    if (incompleteRun != null) _drawDashed(canvas, incompleteRun, linePaint);
+    canvas.drawPath(solid, linePaint);
+
+    final end = pointAt(points.length - 1);
+    final endComplete = points.last.isComplete;
+    canvas.drawCircle(
+      end,
+      endComplete ? 4.2 : 4.6,
+      Paint()
+        ..color = endComplete ? lineColor : washColor
+        ..style = PaintingStyle.fill,
+    );
+    if (!endComplete) {
+      canvas.drawCircle(
+        end,
+        4.6,
+        Paint()
+          ..color = lineColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2,
+      );
+    }
+  }
+
+  void _drawDashed(Canvas canvas, Path path, Paint paint) {
+    const dash = 7.0;
+    const gap = 5.0;
+    for (final metric in path.computeMetrics()) {
+      var travelled = 0.0;
+      while (travelled < metric.length) {
+        final end = math.min(travelled + dash, metric.length);
+        canvas.drawPath(metric.extractPath(travelled, end), paint);
+        travelled = end + gap;
+      }
     }
   }
 
@@ -608,7 +788,8 @@ class _HistoryLinePainter extends CustomPainter {
   bool shouldRepaint(covariant _HistoryLinePainter oldDelegate) =>
       oldDelegate.points != points ||
       oldDelegate.lineColor != lineColor ||
-      oldDelegate.inkColor != inkColor;
+      oldDelegate.washColor != washColor ||
+      oldDelegate.gridColor != gridColor;
 }
 
 class _RangeToggle extends HookWidget {
@@ -730,22 +911,27 @@ class _TabButton extends HookWidget {
           borderRadius: BorderRadius.circular(8),
           child: Container(
             margin: const EdgeInsets.all(2),
-            padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
             decoration: ObRoughDecoration(
-              color: selected ? palette.highlight : null,
-              outline: selected ? palette.quietPen : null,
+              color: selected ? palette.highlighter : null,
+              outline: selected ? palette.ink : null,
               radius: 8,
               strokeWidth: 1.4,
               seed: 73,
             ),
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected ? palette.ink : palette.mutedInk,
+            padding: const EdgeInsets.symmetric(
+              horizontal: SpacingTokens.xs,
+              vertical: SpacingTokens.sm,
+            ),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected ? palette.ink : palette.mutedInk,
+                ),
               ),
             ),
           ),
@@ -812,7 +998,13 @@ class _ByEntityTab extends HookConsumerWidget {
           child: Column(
             children: [
               for (final (index, row) in rows.indexed) ...[
-                if (index > 0) Divider(height: 1, color: palette.line),
+                if (index > 0)
+                  Divider(
+                    height: 1,
+                    indent: SpacingTokens.md,
+                    endIndent: SpacingTokens.md,
+                    color: palette.line,
+                  ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: SpacingTokens.md,
@@ -830,6 +1022,7 @@ class _ByEntityTab extends HookConsumerWidget {
                                 fontWeight: FontWeight.w600,
                                 color: palette.ink,
                               ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                             Text(
                               switch (row.kind) {
@@ -843,30 +1036,42 @@ class _ByEntityTab extends HookConsumerWidget {
                                 color: palette.mutedInk,
                               ),
                             ),
+                            // Under the name, not beside the amount: there
+                            // it squeezed the name to a few letters.
+                            if (!row.isComplete)
+                              Row(
+                                children: [
+                                  SkribbleIcon(
+                                    data: OpenBudgetIcons.warning,
+                                    size: 12,
+                                    color: palette.underfunded,
+                                  ),
+                                  const SizedBox(width: SpacingTokens.xs),
+                                  Flexible(
+                                    child: Text(
+                                      l10n.netWorthEntityIncomplete,
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: palette.underfunded,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                           ],
                         ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          ObAmount(
-                            formatMinorForCode(
-                              row.netWorthMinor,
-                              view.currencyCode,
-                            ),
-                            tone: row.netWorthMinor >= 0
-                                ? ObTone.funded
-                                : ObTone.overspent,
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          if (!row.isComplete)
-                            Text(
-                              l10n.netWorthIncompletePoint,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: palette.mutedInk,
-                              ),
-                            ),
-                        ],
+                      const SizedBox(width: SpacingTokens.sm),
+                      ObAmount(
+                        formatMinorForCode(
+                          row.netWorthMinor,
+                          view.currencyCode,
+                        ),
+                        tone: row.netWorthMinor >= 0
+                            ? ObTone.funded
+                            : ObTone.overspent,
+                        style: theme.textTheme.titleSmall,
                       ),
                     ],
                   ),
@@ -924,8 +1129,9 @@ class _ByCurrencyTab extends HookWidget {
     final palette = theme.ob;
     final rows = [...view.currencies]
       ..sort(
-        (a, b) => (b.convertedMinor ?? b.nativeMinor).compareTo(
-          a.convertedMinor ?? a.nativeMinor,
+        (a, b) => _byConvertedThenUnconverted(
+          a.convertedMinor,
+          b.convertedMinor,
         ),
       );
 
@@ -934,7 +1140,13 @@ class _ByCurrencyTab extends HookWidget {
       child: Column(
         children: [
           for (final (index, row) in rows.indexed) ...[
-            if (index > 0) Divider(height: 1, color: palette.line),
+            if (index > 0)
+              Divider(
+                height: 1,
+                indent: SpacingTokens.md,
+                endIndent: SpacingTokens.md,
+                color: palette.line,
+              ),
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: SpacingTokens.md,
@@ -962,13 +1174,29 @@ class _ByCurrencyTab extends HookWidget {
                         if (row.convertedMinor != null &&
                             row.currencyCode != view.currencyCode &&
                             row.fxRate != null)
-                          Text(
-                            '${l10n.netWorthRateLine(row.currencyCode, row.fxRate!, view.currencyCode)}'
-                            '${row.fxRateDate == null ? '' : ' \u00b7 ${DateFormat.MMMd().format(row.fxRateDate!)}'}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: palette.mutedInk,
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Wrap(
+                              spacing: SpacingTokens.xs,
+                              runSpacing: SpacingTokens.xs,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                Text(
+                                  _rateLine(context, row, view.currencyCode),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: palette.mutedInk,
+                                  ),
+                                ),
+                                if (row.isStale)
+                                  ObToneChip(
+                                    label: l10n.fxRateStale,
+                                    tone: ObTone.underfunded,
+                                  ),
+                              ],
                             ),
                           ),
+                        if (row.convertedMinor == null)
+                          _NoRateNote(currencyCode: row.currencyCode),
                       ],
                     ),
                   ),
@@ -988,11 +1216,6 @@ class _ByCurrencyTab extends HookWidget {
                           ),
                           tone: ObTone.brand,
                           style: theme.textTheme.bodySmall,
-                        ),
-                      if (row.isStale)
-                        ObToneChip(
-                          label: l10n.fxRateStale,
-                          tone: ObTone.underfunded,
                         ),
                     ],
                   ),
@@ -1021,14 +1244,16 @@ class _ByAccountTab extends HookWidget {
     final accounts = view.accounts;
     final assets = accounts.where((row) => !row.isLiability).toList()
       ..sort(
-        (a, b) => (b.convertedMinor ?? b.balanceMinor).compareTo(
-          a.convertedMinor ?? a.balanceMinor,
+        (a, b) => _byConvertedThenUnconverted(
+          a.convertedMinor,
+          b.convertedMinor,
         ),
       );
     final liabilities = accounts.where((row) => row.isLiability).toList()
       ..sort(
-        (a, b) => (b.convertedMinor ?? b.balanceMinor).compareTo(
-          a.convertedMinor ?? a.balanceMinor,
+        (a, b) => _byConvertedThenUnconverted(
+          a.convertedMinor,
+          b.convertedMinor,
         ),
       );
 
@@ -1056,7 +1281,13 @@ class _ByAccountTab extends HookWidget {
           child: Column(
             children: [
               for (final (index, row) in rows.indexed) ...[
-                if (index > 0) Divider(height: 1, color: palette.line),
+                if (index > 0)
+                  Divider(
+                    height: 1,
+                    indent: SpacingTokens.md,
+                    endIndent: SpacingTokens.md,
+                    color: palette.line,
+                  ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: SpacingTokens.md,
@@ -1091,7 +1322,8 @@ class _ByAccountTab extends HookWidget {
                                   Flexible(
                                     child: Text(
                                       l10n.netWorthValuedOn(
-                                        DateFormat.MMMd().format(
+                                        DateLabels.short(
+                                          context,
                                           row.valuationDate!,
                                         ),
                                       ),
@@ -1106,6 +1338,8 @@ class _ByAccountTab extends HookWidget {
                                 ],
                               ],
                             ),
+                            if (row.convertedMinor == null)
+                              _NoRateNote(currencyCode: row.currencyCode),
                           ],
                         ),
                       ),
@@ -1150,6 +1384,62 @@ class _ByAccountTab extends HookWidget {
         if (liabilities.isNotEmpty)
           group(l10n.netWorthLiabilities, liabilities),
       ],
+    );
+  }
+}
+
+/// "1 USD = 0.79 GBP · Nov 1": the rate behind a converted figure and the
+/// day it is from.
+String _rateLine(
+  BuildContext context,
+  NetWorthCurrencyRow row,
+  String reportingCurrencyCode,
+) {
+  final l10n = AppLocalizations.of(context);
+  final rateLine = l10n.netWorthRateLine(
+    row.currencyCode,
+    row.fxRate!,
+    reportingCurrencyCode,
+  );
+  final rateDate = row.fxRateDate;
+  if (rateDate == null) return rateLine;
+  return l10n.netWorthRateDated(rateLine, DateLabels.short(context, rateDate));
+}
+
+/// The note on a row the server could not convert: its figure stays in
+/// its own currency and is left out of the total.
+class _NoRateNote extends HookWidget {
+  const _NoRateNote({required this.currencyCode});
+
+  final String currencyCode;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    return Padding(
+      padding: const EdgeInsets.only(top: 2),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SkribbleIcon(
+            data: OpenBudgetIcons.warning,
+            size: 12,
+            color: palette.underfunded,
+          ),
+          const SizedBox(width: SpacingTokens.xs),
+          Flexible(
+            child: Text(
+              l10n.netWorthNoRate(currencyCode),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: palette.underfunded,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

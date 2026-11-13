@@ -4315,7 +4315,7 @@ abstract class AppLocalizations {
   /// No description provided for @addAccountTypeLineOfCredit.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Line Of Credit'**
+  /// **'Line of Credit'**
   String get addAccountTypeLineOfCredit;
 
   /// No description provided for @addAccountSectionMortgagesAndLoans.
@@ -4333,37 +4333,37 @@ abstract class AppLocalizations {
   /// No description provided for @addAccountTypeMortgage.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Mortgage'**
+  /// **'Mortgage'**
   String get addAccountTypeMortgage;
 
   /// No description provided for @addAccountTypeAutoLoan.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Auto Loan'**
+  /// **'Auto Loan'**
   String get addAccountTypeAutoLoan;
 
   /// No description provided for @addAccountTypeStudentLoan.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Student Loan'**
+  /// **'Student Loan'**
   String get addAccountTypeStudentLoan;
 
   /// No description provided for @addAccountTypePersonalLoan.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Personal Loan'**
+  /// **'Personal Loan'**
   String get addAccountTypePersonalLoan;
 
   /// No description provided for @addAccountTypeMedicalDebt.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Medical Debt'**
+  /// **'Medical Debt'**
   String get addAccountTypeMedicalDebt;
 
   /// No description provided for @addAccountTypeOtherDebt.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Other Debt'**
+  /// **'Other Debt'**
   String get addAccountTypeOtherDebt;
 
   /// No description provided for @addAccountSectionTrackingAccounts.
@@ -4387,7 +4387,7 @@ abstract class AppLocalizations {
   /// No description provided for @addAccountTypeLiability.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Liability'**
+  /// **'Liability'**
   String get addAccountTypeLiability;
 
   /// No description provided for @addAccountSectionDigitalAssets.
@@ -4405,7 +4405,7 @@ abstract class AppLocalizations {
   /// No description provided for @addAccountTypeSolanaWallet.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Solana Wallet'**
+  /// **'Solana Wallet'**
   String get addAccountTypeSolanaWallet;
 
   /// No description provided for @accountEditNicknameLabel.
@@ -8967,7 +8967,7 @@ abstract class AppLocalizations {
   /// No description provided for @netWorthRatesFrom.
   ///
   /// In en, this message translates to:
-  /// **'Rates from {date}'**
+  /// **'Rates as of {date}'**
   String netWorthRatesFrom(String date);
 
   /// No description provided for @netWorthIncompleteTitle.
@@ -9039,8 +9039,8 @@ abstract class AppLocalizations {
   /// No description provided for @netWorthAccountsCount.
   ///
   /// In en, this message translates to:
-  /// **'{count} accounts'**
-  String netWorthAccountsCount(Object count);
+  /// **'{count, plural, =1{1 account} other{{count} accounts}}'**
+  String netWorthAccountsCount(int count);
 
   /// No description provided for @entityCountInNetWorth.
   ///
@@ -9387,7 +9387,7 @@ abstract class AppLocalizations {
   /// No description provided for @fxRateStale.
   ///
   /// In en, this message translates to:
-  /// **'stale'**
+  /// **'Stale'**
   String get fxRateStale;
 
   /// No description provided for @fxRateApproximate.
@@ -9438,11 +9438,11 @@ abstract class AppLocalizations {
   /// **'{amount} left to allocate'**
   String linesEditorRemaining(String amount);
 
-  /// No description provided for @transactionDateFullLabel.
+  /// A transaction's calendar date, written the way the reader's locale writes dates.
   ///
   /// In en, this message translates to:
-  /// **'{year}-{month}-{day}'**
-  String transactionDateFullLabel(int year, int month, int day);
+  /// **'{date}'**
+  String transactionDateFullLabel(DateTime date);
 
   /// No description provided for @importTargetAccount.
   ///
@@ -9599,6 +9599,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Move its history to which envelope?'**
   String get envelopeDeleteMoveHistoryTitle;
+
+  /// No description provided for @netWorthHeadlineEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Combined net worth'**
+  String get netWorthHeadlineEyebrow;
+
+  /// No description provided for @netWorthHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get netWorthHistoryTitle;
+
+  /// No description provided for @netWorthIncompleteLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashed where a currency has no rate'**
+  String get netWorthIncompleteLegend;
+
+  /// No description provided for @netWorthNoRate.
+  ///
+  /// In en, this message translates to:
+  /// **'No {currency} rate · not counted'**
+  String netWorthNoRate(String currency);
+
+  /// No description provided for @netWorthEntityIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaves out unconverted accounts'**
+  String get netWorthEntityIncomplete;
+
+  /// No description provided for @netWorthRateDated.
+  ///
+  /// In en, this message translates to:
+  /// **'{rateLine} · {date}'**
+  String netWorthRateDated(String rateLine, String date);
+
+  /// No description provided for @fxRateSourceMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'market rate'**
+  String get fxRateSourceMarket;
+
+  /// No description provided for @fxRateSourceImplied.
+  ///
+  /// In en, this message translates to:
+  /// **'implied rate'**
+  String get fxRateSourceImplied;
+
+  /// No description provided for @fxRateSourceManual.
+  ///
+  /// In en, this message translates to:
+  /// **'your rate'**
+  String get fxRateSourceManual;
+
+  /// No description provided for @fxRateSourceIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'same currency'**
+  String get fxRateSourceIdentity;
+
+  /// No description provided for @fxRateConvertsTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Converts to about {amount}'**
+  String fxRateConvertsTo(String amount);
+
+  /// No description provided for @accountDetailBalanceEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get accountDetailBalanceEyebrow;
+
+  /// No description provided for @accountDetailValueEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Current value'**
+  String get accountDetailValueEyebrow;
+
+  /// No description provided for @accountReconcileClearedNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared in OpenBudget'**
+  String get accountReconcileClearedNow;
+
+  /// No description provided for @accountReconcileMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches your statement'**
+  String get accountReconcileMatches;
+
+  /// No description provided for @accountValuationChange.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} since the last valuation'**
+  String accountValuationChange(String amount);
+
+  /// No description provided for @accountHoldingsUnpriced.
+  ///
+  /// In en, this message translates to:
+  /// **'No price yet'**
+  String get accountHoldingsUnpriced;
+
+  /// A transaction row's second line: the payee or other detail, then the date.
+  ///
+  /// In en, this message translates to:
+  /// **'{detail} · {date}'**
+  String transactionDetailAndDate(String detail, String date);
+
+  /// After the change in net worth over the chart's range.
+  ///
+  /// In en, this message translates to:
+  /// **'since {date}'**
+  String netWorthChangeSince(String date);
+
+  /// Under a foreign account's balance when no rate converts it into the base currency.
+  ///
+  /// In en, this message translates to:
+  /// **'No {currency} rate'**
+  String accountNoRateShort(String currency);
 }
 
 class _AppLocalizationsDelegate

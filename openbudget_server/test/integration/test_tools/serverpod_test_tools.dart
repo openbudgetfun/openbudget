@@ -137,8 +137,6 @@ import 'package:openbudget_server/src/generated/wallets/wallet.dart'
     as _igcr1vxe;
 import 'package:openbudget_server/src/generated/wallets/wallet_holding.dart'
     as _icu5m6lt;
-import 'package:openbudget_server/src/generated/wallets/wallet_network.dart'
-    as _i48ucni2;
 import 'package:openbudget_server/src/generated/wallets/wallet_sync_result.dart'
     as _izzuzifg;
 import 'package:openbudget_server/src/generated/wallets/wallet_tax_year_summary.dart'
@@ -5619,7 +5617,7 @@ class _WalletEndpoint {
   _ida.Future<_igcr1vxe.Wallet> connect(
     _ist.TestSessionBuilder sessionBuilder,
     _is.UuidValue entityId,
-    _i48ucni2.WalletNetwork network,
+    _ifz8weqz.WalletNetwork network,
     String address, {
     String? label,
     String? accountName,

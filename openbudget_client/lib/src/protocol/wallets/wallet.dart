@@ -10,10 +10,10 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 import '../common/sync_status.dart' as _ijl385hj;
-import '../wallets/wallet_network.dart' as _ilag50y5;
 
 /// A read-only blockchain wallet whose holdings value one crypto account.
 abstract class Wallet
@@ -39,7 +39,7 @@ abstract class Wallet
     _isc.UuidValue? id,
     required _isc.UuidValue entityId,
     required _isc.UuidValue accountId,
-    required _ilag50y5.WalletNetwork network,
+    required _ifz8weqz.WalletNetwork network,
     required String address,
     String? label,
     String? lastSignature,
@@ -61,7 +61,7 @@ abstract class Wallet
       accountId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['accountId'],
       ),
-      network: _ilag50y5.WalletNetwork.fromJson(
+      network: _ifz8weqz.WalletNetwork.fromJson(
         (jsonSerialization['network'] as String),
       ),
       address: jsonSerialization['address'] as String,
@@ -97,7 +97,7 @@ abstract class Wallet
   /// The crypto account carrying the wallet's value into net worth.
   _isc.UuidValue accountId;
 
-  _ilag50y5.WalletNetwork network;
+  _ifz8weqz.WalletNetwork network;
 
   /// Base58 address.
   String address;
@@ -124,7 +124,7 @@ abstract class Wallet
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     _isc.UuidValue? entityId,
     _isc.UuidValue? accountId,
-    _ilag50y5.WalletNetwork? network,
+    _ifz8weqz.WalletNetwork? network,
     String? address,
     String? label,
     String? lastSignature,
@@ -185,7 +185,7 @@ class _WalletImpl extends Wallet {
     _isc.UuidValue? id,
     required _isc.UuidValue entityId,
     required _isc.UuidValue accountId,
-    required _ilag50y5.WalletNetwork network,
+    required _ifz8weqz.WalletNetwork network,
     required String address,
     String? label,
     String? lastSignature,
@@ -217,7 +217,7 @@ class _WalletImpl extends Wallet {
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     _isc.UuidValue? entityId,
     _isc.UuidValue? accountId,
-    _ilag50y5.WalletNetwork? network,
+    _ifz8weqz.WalletNetwork? network,
     String? address,
     Object? label = _Undefined,
     Object? lastSignature = _Undefined,

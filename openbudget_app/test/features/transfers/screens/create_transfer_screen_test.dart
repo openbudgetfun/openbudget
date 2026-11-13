@@ -263,15 +263,25 @@ void main() {
 
       final rateLine = find.byKey(const Key('transfer-implied-rate'));
       expect(rateLine, findsOneWidget);
-      final text = tester
-          .widget<Text>(
-            find.descendant(of: rateLine, matching: find.byType(Text)).first,
-          )
-          .data!;
-      expect(text, contains(r'≈ $127.00'));
-      expect(text, contains('1 GBP = 1.27 USD'));
-      expect(text, contains('6 Nov 2026'));
-      expect(text, contains('market'));
+      // The converted figure leads; the rate, its date and its source sit
+      // under it. The form's own "Use today's rate" is the only action.
+      expect(
+        find.descendant(of: rateLine, matching: find.text(r'≈ $127.00')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: rateLine,
+          matching: find.text(
+            '1 GBP = 1.27 USD · Nov\u00a06,\u00a02026 · market\u00a0rate',
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: rateLine, matching: find.byType(TextButton)),
+        findsNothing,
+      );
       expect(find.text("Use today's rate"), findsOneWidget);
     });
 
