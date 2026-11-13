@@ -51,6 +51,20 @@ abstract interface class TaxRulePack {
   /// this pack.
   TaxRuleSet ruleSet(int startYear);
 
+  /// Decodes this pack's profile from its stored JSON shape.
+  /// [TaxProfile.fromJson] delegates here, so this is the single
+  /// definition of which fields the pack stores.
+  ///
+  /// Throws [FormatException] naming the field for a wrong type, an
+  /// unknown enum value, a negative count or a missing required one.
+  TaxProfile profileFromJson(Map<String, Object?> json);
+
+  /// The questions the app asks to build the profile for books of [kind]:
+  /// [commonTaxProfileQuestions] first, then the pack's own, keeping only
+  /// the questions that kind answers, in form order. Each answer is stored
+  /// under the question's [TaxProfileQuestion.key].
+  List<TaxProfileQuestion> profileQuestions(EntityKind kind);
+
   /// Categories that may appear in books of [kind], in return order.
   List<TaxCategory> categoriesFor(EntityKind kind);
 

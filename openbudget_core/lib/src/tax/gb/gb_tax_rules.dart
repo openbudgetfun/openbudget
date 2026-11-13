@@ -6,6 +6,7 @@ import 'package:openbudget_core/src/tax/gb/gb_categories.dart';
 import 'package:openbudget_core/src/tax/gb/gb_corporation_tax.dart';
 import 'package:openbudget_core/src/tax/gb/gb_income_tax.dart';
 import 'package:openbudget_core/src/tax/gb/gb_payments_on_account.dart';
+import 'package:openbudget_core/src/tax/gb/gb_profile.dart';
 import 'package:openbudget_core/src/tax/gb/gb_rates.dart';
 import 'package:openbudget_core/src/tax/tax_model.dart';
 import 'package:openbudget_core/src/tax/tax_profile.dart';
@@ -66,6 +67,17 @@ final class GbTaxRules implements TaxRulePack {
     }
     return ruleSet;
   }
+
+  @override
+  TaxProfile profileFromJson(Map<String, Object?> json) =>
+      gbProfileFromJson(json);
+
+  @override
+  List<TaxProfileQuestion> profileQuestions(EntityKind kind) =>
+      taxProfileQuestionsFor(kind, [
+        ...commonTaxProfileQuestions,
+        ...gbTaxProfileQuestions,
+      ]);
 
   @override
   TaxYear taxYearFor(DateTime date) {

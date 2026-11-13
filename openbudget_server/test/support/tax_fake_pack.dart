@@ -63,6 +63,14 @@ class FakeTaxPack implements TaxRulePack {
   TaxPackManifest get manifest => fakeManifest;
 
   @override
+  TaxProfile profileFromJson(Map<String, Object?> json) =>
+      TaxRules.forJurisdiction(TaxJurisdiction.gb).profileFromJson(json);
+
+  @override
+  List<TaxProfileQuestion> profileQuestions(EntityKind kind) =>
+      TaxRules.forJurisdiction(TaxJurisdiction.gb).profileQuestions(kind);
+
+  @override
   final Set<int> supportedStartYears;
 
   @override

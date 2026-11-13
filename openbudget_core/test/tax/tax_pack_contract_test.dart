@@ -67,6 +67,39 @@ void main() {
           );
         });
 
+        test('decodes its own profiles through profileFromJson', () {
+          for (final kind in EntityKind.values) {
+            final json = {
+              'jurisdiction': jurisdiction.countryCode,
+              'entityKind': kind.name,
+            };
+            final fromPack = pack.profileFromJson(json);
+            final fromProfile = TaxProfile.fromJson(json);
+            expect(fromPack.runtimeType, fromProfile.runtimeType);
+            expect(fromPack.toJson(), fromProfile.toJson());
+            expect(
+              () => pack.profileFromJson({
+                'jurisdiction': jurisdiction.countryCode,
+                'entityKind': 'partnership',
+              }),
+              throwsFormatException,
+              reason: '${kind.name}: a bad entity kind is invalid input',
+            );
+          }
+        });
+
+        test('asks profile questions for every kind', () {
+          for (final kind in EntityKind.values) {
+            final questions = pack.profileQuestions(kind);
+            expect(questions, isNotEmpty, reason: kind.name);
+            final keys = [for (final question in questions) question.key];
+            expect(keys, contains('entityKind'), reason: kind.name);
+            expect(keys, contains('salesTaxRegistered'), reason: kind.name);
+            expect(keys, contains('taxResident'), reason: kind.name);
+            expect(keys, contains('usPerson'), reason: kind.name);
+          }
+        });
+
         test('every report carries its version, maturity and coverage', () {
           for (final startYear in pack.supportedStartYears) {
             final year = pack.taxYear(startYear);

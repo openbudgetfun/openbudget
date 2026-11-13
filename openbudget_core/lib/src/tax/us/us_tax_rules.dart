@@ -1,6 +1,7 @@
 import 'package:openbudget_core/src/tax/tax_model.dart';
 import 'package:openbudget_core/src/tax/tax_profile.dart';
 import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
+import 'package:openbudget_core/src/tax/us/us_profile.dart';
 import 'package:openbudget_core/src/tax/us/us_tax_categories.dart';
 import 'package:openbudget_core/src/tax/us/us_tax_tables.dart';
 
@@ -58,6 +59,17 @@ final class UsTaxRules implements TaxRulePack {
     }
     return ruleSet;
   }
+
+  @override
+  TaxProfile profileFromJson(Map<String, Object?> json) =>
+      usProfileFromJson(json);
+
+  @override
+  List<TaxProfileQuestion> profileQuestions(EntityKind kind) =>
+      taxProfileQuestionsFor(kind, [
+        ...commonTaxProfileQuestions,
+        ...usTaxProfileQuestions,
+      ]);
 
   @override
   TaxYear taxYear(int startYear) => TaxYear(

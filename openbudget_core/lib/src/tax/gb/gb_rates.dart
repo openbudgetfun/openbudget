@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
+import 'package:openbudget_core/src/tax/gb/gb_profile.dart';
 import 'package:openbudget_core/src/tax/tax_model.dart';
-import 'package:openbudget_core/src/tax/tax_profile.dart';
 import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 
 /// One pound in minor units, so the tables read in pounds.
