@@ -2,6 +2,7 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/wallets/bitcoin/bitcoin_wallet_provider.dart';
 import 'package:openbudget_server/src/wallets/solana_wallet_provider.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
+import 'package:openbudget_server/src/wallets/xrpl/xrpl_wallet_provider.dart';
 
 /// Whether a family's provider secret is present.
 ///
@@ -81,6 +82,10 @@ final class WalletProviderRegistry {
       ChainFamily.bitcoin: WalletProviderRegistration(
         factory: BitcoinWalletProvider.fromSession,
         hasSecret: BitcoinWalletProvider.hasSecret,
+      ),
+      ChainFamily.xrpl: WalletProviderRegistration(
+        factory: XrplWalletProvider.fromSession,
+        hasSecret: XrplWalletProvider.hasSecret,
       ),
     },
   );
