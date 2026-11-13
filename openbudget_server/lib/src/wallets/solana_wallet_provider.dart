@@ -27,11 +27,12 @@ final class SolanaWalletProvider implements WalletProvider {
   /// Builds a provider from the server's configured Helius key.
   factory SolanaWalletProvider.fromSession(
     Session session,
-    WalletNetwork network, {
-    HttpClient? httpClient,
-    DateTime Function() clock = DateTime.now,
-  }) {
-    final apiKey = _readHeliusApiKey(session);
+    WalletNetwork network,
+  ) {
+    final apiKey = heliusApiKeyFrom(
+      passwords: session.passwords,
+      environment: Platform.environment,
+    );
     if (apiKey == null) {
       throw const WalletProviderException(
         'Missing Helius API key. Set HELIUS_API_KEY or passwords.heliusApiKey.',
@@ -46,8 +47,6 @@ final class SolanaWalletProvider implements WalletProvider {
               : HeliusCluster.mainnet,
         ),
       ),
-      httpClient: httpClient,
-      clock: clock,
     );
   }
 
@@ -62,11 +61,14 @@ final class SolanaWalletProvider implements WalletProvider {
   final DateTime Function() clock;
 
   @override
-  Future<WalletProviderSnapshot> fetchSnapshot({
-    required WalletNetwork network,
-    required String address,
-    String? untilSignature,
-  }) async {
+  Future<WalletProviderSnapshot> fetchSnapshot(
+    WalletReadRequest request,
+  ) async {
+    // Solana reads its one network; a family provider that covers several
+    // networks, such as the future EVM provider, takes them from the request.
+    final network = request.networks.single;
+    final address = request.address;
+    final untilSignature = request.untilSignature;
     final warnings = <String>[];
     final historyFuture = _fetchHistory(
       address: address,
@@ -113,6 +115,7 @@ final class SolanaWalletProvider implements WalletProvider {
     );
 
     final holdings = _buildHoldings(
+      network: network,
       balances: balances,
       assetsById: assetsById,
       allAssets: assets.items,
@@ -122,6 +125,7 @@ final class SolanaWalletProvider implements WalletProvider {
     );
 
     return WalletProviderSnapshot(
+      readNetworks: [network],
       holdings: holdings,
       transactions: history,
       newestSignature: history.isEmpty ? null : history.first.signature,
@@ -239,6 +243,7 @@ final class SolanaWalletProvider implements WalletProvider {
   }
 
   List<WalletProviderHolding> _buildHoldings({
+    required WalletNetwork network,
     required WalletBalances balances,
     required Map<String, HeliusAsset> assetsById,
     required List<HeliusAsset> allAssets,
@@ -258,6 +263,7 @@ final class SolanaWalletProvider implements WalletProvider {
 
     holdings.add(
       WalletProviderHolding(
+        network: network,
         assetId: _nativeAssetId,
         symbol: 'SOL',
         name: 'Solana',
@@ -297,6 +303,7 @@ final class SolanaWalletProvider implements WalletProvider {
       final isNft = _isLikelyNft(asset);
       holdings.add(
         WalletProviderHolding(
+          network: network,
           assetId: token.mint,
           symbol:
               _trimToNull(asset?.content?.metadata?.symbol) ??
@@ -332,6 +339,7 @@ final class SolanaWalletProvider implements WalletProvider {
       }
       holdings.add(
         WalletProviderHolding(
+          network: network,
           assetId: asset.id,
           symbol: _trimToNull(asset.content?.metadata?.symbol),
           name: _trimToNull(asset.content?.metadata?.name),
@@ -507,10 +515,23 @@ final class SolanaWalletProvider implements WalletProvider {
         _ => Confidence.low,
       };
 
-  static String? _readHeliusApiKey(Session session) {
-    final fromPassword = _trimToNull(session.passwords['heliusApiKey']);
+  /// Whether a Helius key is configured: passwords first, then the
+  /// `HELIUS_API_KEY` environment fallback. A missing key turns Solana off.
+  static bool hasSecret(
+    Map<String, String> passwords,
+    Map<String, String> environment,
+  ) => heliusApiKeyFrom(passwords: passwords, environment: environment) != null;
+
+  /// The configured key: passwords first, then the environment fallback.
+  /// Pure in both maps so support reporting and tests never touch the real
+  /// environment.
+  static String? heliusApiKeyFrom({
+    required Map<String, String> passwords,
+    required Map<String, String> environment,
+  }) {
+    final fromPassword = _trimToNull(passwords['heliusApiKey']);
     if (fromPassword != null) return fromPassword;
-    return _trimToNull(Platform.environment['HELIUS_API_KEY']);
+    return _trimToNull(environment['HELIUS_API_KEY']);
   }
 
   static String? _trimToNull(String? input) {
