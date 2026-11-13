@@ -79,9 +79,26 @@ Iterable<TaxFxRequest> taxFxRequestsFor({
   required Iterable<TaxEntrySourceLine> lines,
   required TaxYear year,
   required String targetCurrencyCode,
+}) => taxFxRequestsInPeriod(
+  lines: lines,
+  periodStart: year.start,
+  periodEnd: year.end,
+  targetCurrencyCode: targetCurrencyCode,
+);
+
+/// The conversion requests for the half-open period `[periodStart,
+/// periodEnd)`.
+///
+/// Same rules as [taxFxRequestsFor], for callers whose period is not a
+/// rule pack's [TaxYear], such as the universal-layer summary.
+Iterable<TaxFxRequest> taxFxRequestsInPeriod({
+  required Iterable<TaxEntrySourceLine> lines,
+  required DateTime periodStart,
+  required DateTime periodEnd,
+  required String targetCurrencyCode,
 }) sync* {
   for (final line in lines) {
-    if (!_included(line, year: year)) continue;
+    if (!_inPeriod(line, periodStart, periodEnd)) continue;
     if (_categoryCode(line) == null) continue;
 
     yield TaxFxRequest(
@@ -103,13 +120,32 @@ TaxEntryBuildResult buildTaxEntries({
   required TaxYear year,
   required TaxFxRates rates,
   required String targetCurrencyCode,
+}) => buildTaxEntriesInPeriod(
+  lines: lines,
+  periodStart: year.start,
+  periodEnd: year.end,
+  rates: rates,
+  targetCurrencyCode: targetCurrencyCode,
+);
+
+/// The same reduction for the half-open period `[periodStart, periodEnd)`.
+///
+/// Used where the period is not a rule pack's [TaxYear], such as the
+/// universal-layer summary, so a report and a summary share one entry
+/// builder.
+TaxEntryBuildResult buildTaxEntriesInPeriod({
+  required List<TaxEntrySourceLine> lines,
+  required DateTime periodStart,
+  required DateTime periodEnd,
+  required TaxFxRates rates,
+  required String targetCurrencyCode,
 }) {
   final entries = <TaxEntry>[];
   var uncategorizedCount = 0;
   var convertedCount = 0;
 
   for (final line in lines) {
-    if (!_included(line, year: year)) continue;
+    if (!_inPeriod(line, periodStart, periodEnd)) continue;
 
     final categoryCode = _categoryCode(line);
     if (categoryCode == null) {
@@ -148,13 +184,18 @@ TaxEntryBuildResult buildTaxEntries({
   );
 }
 
-/// Whether a line can contribute to [year] at all.
+/// Whether a line can contribute to the period at all.
 ///
-/// Out-of-year lines are skipped before category counting, so moving a
-/// transaction outside the year removes it from every figure without leaving
-/// an uncategorized marker behind.
-bool _included(TaxEntrySourceLine line, {required TaxYear year}) =>
-    !line.isTransfer && year.contains(line.date);
+/// Out-of-period lines are skipped before category counting, so moving a
+/// transaction outside the period removes it from every figure without
+/// leaving an uncategorized marker behind. The date is normalised to UTC
+/// midnight exactly as [TaxYear.contains] does, so a [TaxYear] and its own
+/// start and end select the same lines.
+bool _inPeriod(TaxEntrySourceLine line, DateTime start, DateTime end) {
+  if (line.isTransfer) return false;
+  final day = DateTime.utc(line.date.year, line.date.month, line.date.day);
+  return !day.isBefore(start) && day.isBefore(end);
+}
 
 String? _categoryCode(TaxEntrySourceLine line) =>
     TaxCatalogueValidation.normalise(line.taxCategoryCode) ??
