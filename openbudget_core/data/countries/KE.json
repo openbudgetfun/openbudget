@@ -90,7 +90,7 @@
   "caveats": [
     "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
     "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
-    "Effective dating (grade S, KRA page cited by afriref): the temporary 14% COVID-19 rate ended 31 December 2020 and 16% was restored from 1 January 2021. The separate 8% petroleum band was deleted by the Finance Act 2023 from 1 July 2027 (moving petroleum to 16%); its row starts at the coverage window's lower bound because no source was reached for its 2018 start.",
+    "Effective dating (grade S, KRA page cited by afriref): the temporary 14% COVID-19 rate ended 31 December 2020 and 16% was restored from 1 January 2021. The separate 8% petroleum band was deleted by the Finance Act 2023 from 1 July 2023 (moving petroleum to 16%); its row starts at the coverage window's lower bound because no source was reached for its 2018 start.",
     "Finance Acts 2025 and 2026 reclassified specific supplies only; the standard rate is unchanged (grade S, afriref, last verified 15 October 2026).",
     "Registration threshold of KES 5,000,000 (grade S; VAT Act No. 35 of 2013, s. 34)."
   ]
