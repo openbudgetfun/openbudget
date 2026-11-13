@@ -7,6 +7,7 @@ export 'src/budgeting/goal_math.dart';
 export 'src/budgeting/month_key.dart';
 export 'src/budgeting/recurrence.dart';
 export 'src/constants/currencies.dart';
+export 'src/countries/country_display_name.dart';
 export 'src/countries/country_info.dart';
 export 'src/countries/tax_freshness.dart';
 export 'src/generated/protocol.dart';

@@ -2439,6 +2439,54 @@
       }
     }
   },
+  "createEntityTaxYear": "Tax year",
+  "createEntityTaxYearValue": "{start} to {end}",
+  "@createEntityTaxYearValue": {
+    "description": "A tax year as two dates, such as '6 Apr to 5 Apr'.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "createEntityPickCountry": "Choose a country",
+  "createEntityPickCurrency": "Choose a currency",
+  "createEntityPickTimeZone": "Choose a time zone",
+  "createEntitySearchCountries": "Search countries or codes",
+  "createEntitySearchCurrencies": "Search currencies or codes",
+  "createEntitySearchTimeZones": "Search time zones",
+  "createEntityClearSearch": "Clear search",
+  "createEntityPickerSelected": "Selected",
+  "createEntityResultCount": "{count, plural, =1{1 result} other{{count} results}}",
+  "@createEntityResultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createEntityNoMatch": "Nothing matches \u201c{query}\u201d",
+  "@createEntityNoMatch": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "createEntitySectionTaxRules": "With tax rules built in",
+  "createEntitySectionAllCountries": "All countries",
+  "createEntitySectionCountryCurrencies": "Used in {country}",
+  "@createEntitySectionCountryCurrencies": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "createEntitySectionAllCurrencies": "All currencies",
   "entityDeleteNameField": "Type the entity's name to confirm",
   "homeBudgetNetWorthShort": "Net worth {amount}",
   "@homeBudgetNetWorthShort": {
