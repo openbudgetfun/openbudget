@@ -95,6 +95,31 @@ void main() {
     });
   });
 
+  group('currency codes parse', () {
+    test(
+      'every servable country leads with a currency CurrencyCode offers',
+      () {
+        final stale = <String>[];
+        for (final country in Countries.all) {
+          if (!country.servable || country.currencies.isEmpty) {
+            continue;
+          }
+          final code = country.currencies.first;
+          if (CurrencyCode.tryParse(code) == null) {
+            stale.add('${country.code} $code');
+          }
+        }
+        expect(
+          stale,
+          isEmpty,
+          reason:
+              'a stale first currency falls back to USD on entity creation: '
+              '$stale',
+        );
+      },
+    );
+  });
+
   group('rate precision', () {
     /// Rates are exact integers in millionths, so no caveat needs to excuse a
     /// rounded value any more (the schema used to store whole basis points).
