@@ -3,6 +3,7 @@
 // assumption, and a sole trader without an Einkunftsart is gewerblich.
 import 'dart:convert';
 
+import 'package:openbudget_core/src/tax/de/de_profile.dart';
 import 'package:openbudget_core/src/tax/tax_model.dart';
 import 'package:openbudget_core/src/tax/tax_profile.dart';
 import 'package:test/test.dart';
