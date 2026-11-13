@@ -7,7 +7,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
+import 'package:openbudget_server/src/wallets/xrpl/xrpl_amount.dart';
 import 'package:openbudget_server/src/wallets/xrpl/xrpl_client.dart';
+import 'package:openbudget_server/src/wallets/xrpl/xrpl_currency.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// Decodes an XRP Ledger currency code. A three-character code is returned
@@ -15,60 +17,12 @@ import 'package:serverpod/serverpod.dart';
 /// human-readable) form, stripping the trailing zero padding. Encoding the
 /// result with [XrplCurrency.encode] reproduces the original 40 hex digits,
 /// so a 40-hex code round-trips.
-class XrplCurrency {
-  static final RegExp _hex = RegExp(r'^[0-9A-Fa-f]{40}$');
-
-  static String decode(String code) {
-    final trimmed = code.trim();
-    if (trimmed.length != 40 || !_hex.hasMatch(trimmed)) {
-      return trimmed;
-    }
-    final bytes = <int>[];
-    for (var i = 0; i < trimmed.length; i += 2) {
-      bytes.add(int.parse(trimmed.substring(i, i + 2), radix: 16));
-    }
-    var length = bytes.length;
-    while (length > 0 && bytes[length - 1] == 0) {
-      length--;
-    }
-    if (length == 0) return trimmed.toUpperCase();
-    for (var i = 0; i < length; i++) {
-      final byte = bytes[i];
-      if (byte < 0x20 || byte > 0x7E) {
-        return trimmed.toUpperCase();
-      }
-    }
-    return String.fromCharCodes(bytes.sublist(0, length));
-  }
-
-  static String encode(String code) {
-    final trimmed = code.trim();
-    if (trimmed.length == 40 && _hex.hasMatch(trimmed)) {
-      return trimmed.toUpperCase();
-    }
-    final bytes = List<int>.filled(20, 0);
-    final codeUnits = trimmed.codeUnits;
-    for (var i = 0; i < codeUnits.length && i < 20; i++) {
-      bytes[i] = codeUnits[i];
-    }
-    return bytes
-        .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
-        .join()
-        .toUpperCase();
-  }
-
-  static String decodeCurrency(String code) => decode(code);
-  static String encodeCurrency(String code) => encode(code);
-  static String canonical(String code) => decode(code);
-  static String fromHex(String code) => decode(code);
-  static String toHex(String code) => encode(code);
-}
 
 /// XRP Ledger provider.
 final class XrplWalletProvider implements WalletProvider {
   XrplWalletProvider({
     XrplClient? client,
-    XrplRpcClient? rpcClient,
+    XrplClient? rpcClient,
     Object? endpoints,
     Object? baseUrls,
     Object? urls,
@@ -95,8 +49,6 @@ final class XrplWalletProvider implements WalletProvider {
   static const _xrpName = 'XRP';
   static const _xrpDecimals = 6;
   static const _iouDecimals = 15;
-  static const _baseReserveDrops = 10000000;
-  static const _ownerReserveDrops = 2000000;
   static const _requireDestFlag = 0x00020000;
 
   final XrplClient _client;
@@ -150,7 +102,8 @@ final class XrplWalletProvider implements WalletProvider {
           'tag when sending to this account.',
         );
       }
-      final reserveDrops = _baseReserveDrops + _ownerReserveDrops * ownerCount;
+      final (baseReserveDrops, ownerReserveDrops) = await _readReserves();
+      final reserveDrops = baseReserveDrops + ownerReserveDrops * ownerCount;
       holdings.add(
         WalletProviderHolding(
           network: network,
@@ -206,12 +159,25 @@ final class XrplWalletProvider implements WalletProvider {
             );
             continue;
           }
-          final parsed = ExactDecimal.tryParse(balanceStr.trim());
-          if (parsed == null) continue;
-          final quantityRaw =
-              parsed.numerator *
-              BigInt.from(10).pow(_iouDecimals) ~/
-              parsed.denominator;
+          final quantityRaw = XrplAmount.tryParse(balanceStr.trim());
+          if (quantityRaw == null) {
+            warnings.add(
+              'Skipped trust line with an unreadable amount.',
+            );
+            continue;
+          }
+          if (quantityRaw == BigInt.zero) {
+            warnings.add(
+              'Skipped trust line amount that rounds to zero at 15 decimals.',
+            );
+            continue;
+          }
+          if (quantityRaw < BigInt.zero) {
+            warnings.add(
+              'Skipped trust line with a negative balance (owed to issuer).',
+            );
+            continue;
+          }
           if (quantityRaw <= BigInt.zero) continue;
           final currency = XrplCurrency.decode(currencyRaw);
           holdings.add(
@@ -240,24 +206,78 @@ final class XrplWalletProvider implements WalletProvider {
     );
   }
 
-  /// Bitcoin needs no secret, so the family is always supported once
+  Future<(int, int)> _readReserves() async {
+    // Read reserve_base / reserve_inc (in drops) from the server once per
+    // snapshot. Prefer server_state (drops); fall back to server_info
+    // (decimal XRP) when needed. See
+    // https://xrpl.org/docs/concepts/accounts/reserves and
+    // https://xrpl.org/docs/references/http-websocket-apis/public-api-methods/server-info-methods/server_state
+    int? base;
+    int? inc;
+    try {
+      final result = await _client.call('server_state', {});
+      final state = result['state'];
+      final validated = state is Map<String, dynamic>
+          ? state['validated_ledger']
+          : result['validated_ledger'];
+      if (validated is Map<String, dynamic>) {
+        base = _asInt(validated['reserve_base']);
+        inc = _asInt(validated['reserve_inc']);
+        if (base == null && validated['reserve_base_xrp'] != null) {
+          base = _xrpToDrops(validated['reserve_base_xrp']);
+        }
+        if (inc == null && validated['reserve_inc_xrp'] != null) {
+          inc = _xrpToDrops(validated['reserve_inc_xrp']);
+        }
+      }
+    } on Object catch (_) {
+      // Fall through to server_info.
+    }
+    if (base == null || inc == null) {
+      final result = await _client.call('server_info', {});
+      final info = result['info'];
+      final validated = info is Map<String, dynamic>
+          ? info['validated_ledger']
+          : result['validated_ledger'];
+      if (validated is Map<String, dynamic>) {
+        base ??= _asInt(validated['reserve_base']);
+        inc ??= _asInt(validated['reserve_inc']);
+        base ??= _xrpToDrops(validated['reserve_base_xrp']);
+        inc ??= _xrpToDrops(validated['reserve_inc_xrp']);
+      }
+    }
+    if (base == null || inc == null) {
+      throw const WalletProviderException(
+        'The XRP Ledger could not read reserve information. Try again later.',
+      );
+    }
+    return (base, inc);
+  }
+
+  static int? _asInt(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  static int? _xrpToDrops(Object? value) {
+    if (value == null) return null;
+    // Decimal XRP -> drops (6 decimals). Use string parsing to avoid doubles.
+    final text = value.toString().trim();
+    if (text.isEmpty) return null;
+    final parts = text.split('.');
+    final whole = parts.first;
+    final fraction = parts.length > 1 ? parts[1] : '';
+    final padded = fraction.padRight(6, '0').substring(0, 6);
+    final combined = '$whole$padded';
+    return int.tryParse(combined);
+  }
+
+  /// The XRP Ledger needs no secret, so the family is always supported once
   /// registered.
   static bool hasSecret(
     Map<String, String> passwords,
     Map<String, String> environment,
   ) => true;
-
-  // Currency helpers exposed on the provider too, for callers that reach
-  // them through the provider type.
-  static String decodeCurrency(String code) => XrplCurrency.decode(code);
-  static String encodeCurrency(String code) => XrplCurrency.encode(code);
-  static String decode40Hex(String code) => XrplCurrency.decode(code);
 }
-
-// Alias for callers expecting the RPC-flavoured name.
-typedef XrplRpcClient = XrplClient;
-
-// Alias type names some tests may use.
-typedef XrpLedgerWalletProvider = XrplWalletProvider;
-typedef XrplProvider = XrplWalletProvider;
-typedef XRPWalletProvider = XrplWalletProvider;
