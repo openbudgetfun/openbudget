@@ -33,11 +33,15 @@ abstract class FxRateProviderClient {
   String get providerName;
 
   /// Fetches the latest USD-based rates.
+  ///
+  /// [currencies] narrows the response to those codes. Omit it to ask for
+  /// every currency the provider prices: a filter containing a code the
+  /// provider does not list fails the whole request.
   Future<FxProviderResult> fetchLatest({
     required String apiKey,
     required String baseCurrencyCode,
-    required List<String> currencies,
     required String baseUrl,
+    List<String>? currencies,
   });
 
   /// Fetches the provider's historical snapshot for one calendar date.
@@ -47,9 +51,9 @@ abstract class FxRateProviderClient {
   Future<FxProviderResult> fetchHistorical({
     required String apiKey,
     required String baseCurrencyCode,
-    required List<String> currencies,
     required DateTime date,
     required String baseUrl,
+    List<String>? currencies,
   });
 }
 
@@ -63,8 +67,8 @@ class CurrencyApiProviderClient implements FxRateProviderClient {
   Future<FxProviderResult> fetchLatest({
     required String apiKey,
     required String baseCurrencyCode,
-    required List<String> currencies,
     required String baseUrl,
+    List<String>? currencies,
   }) async {
     final uri = currencyApiUri(
       baseUrl: baseUrl,
@@ -80,9 +84,9 @@ class CurrencyApiProviderClient implements FxRateProviderClient {
   Future<FxProviderResult> fetchHistorical({
     required String apiKey,
     required String baseCurrencyCode,
-    required List<String> currencies,
     required DateTime date,
     required String baseUrl,
+    List<String>? currencies,
   }) async {
     final uri = currencyApiUri(
       baseUrl: baseUrl,
@@ -117,21 +121,26 @@ class CurrencyApiProviderClient implements FxRateProviderClient {
 }
 
 /// Builds a currencyapi.com URL. Exposed for tests.
+///
+/// [currencies] is omitted when null: the provider then answers with every
+/// currency it prices, which is the only request OpenBudget can make once it
+/// supports currencies the provider does not list.
 Uri currencyApiUri({
   required String baseUrl,
   required String path,
   required String apiKey,
   required String baseCurrencyCode,
-  required List<String> currencies,
+  required List<String>? currencies,
   DateTime? date,
 }) {
   final trimmed = baseUrl.trim();
   final base = trimmed.isEmpty ? currencyApiDefaultBaseUrl : trimmed;
   final normalized = base.endsWith('/') ? '$base$path' : '$base/$path';
+  final codes = currencies?.join(',') ?? '';
   final query = <String, String>{
     'apikey': apiKey,
     'base_currency': baseCurrencyCode,
-    'currencies': currencies.join(','),
+    if (codes.isNotEmpty) 'currencies': codes,
     if (date != null) 'date': formatProviderDate(date),
   };
   return Uri.parse(normalized).replace(queryParameters: query);
