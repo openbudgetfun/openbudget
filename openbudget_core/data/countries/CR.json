@@ -8,10 +8,76 @@
   "timeZones": [
     "America/Costa_Rica"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "IVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1300,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 100,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": "basic foodstuffs and household supplies",
+        "source": 3
+      },
+      {
+        "label": "reduced2",
+        "basisPoints": 400,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": "health services; domestic air travel",
+        "source": 3
+      },
+      {
+        "label": "reduced3",
+        "basisPoints": 1000,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": "timber supplies",
+        "source": 3
+      },
+      {
+        "label": "reduced4",
+        "basisPoints": 200,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": "private education; medicines; insurance premiums",
+        "source": 3
+      },
+      {
+        "label": "zero",
+        "basisPoints": 0,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": "exports; books",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "General Directorate of Taxation, Ministry of Finance",
+    "url": "https://www.hacienda.go.cr"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +96,31 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Rates secondary (grade S): 13% standard plus tiered reduced rates from VATCalc's 2026 table; hacienda.go.cr blocked or scripted its rate pages this session.",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law."
+  ]
 }

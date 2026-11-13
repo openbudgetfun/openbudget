@@ -8,10 +8,44 @@
   "timeZones": [
     "Atlantic/Reykjavik"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Virdisaukaskattur (VSK)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2400,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 1100,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Directorate of Internal Revenue (Skatturinn)",
+    "url": "https://www.skatturinn.is"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +64,31 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Skatturinn (Directorate of Internal Revenue, Iceland): Value Added Tax (VAT)",
+      "url": "https://www.skatturinn.is/english/companies/value-added-tax/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Skatturinn (Directorate of Internal Revenue, Iceland): Value Added Tax (VAT)",
+      "url": "https://www.skatturinn.is/english/companies/value-added-tax/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Skatturinn (Directorate of Internal Revenue, Iceland): Value Added Tax (VAT)",
+      "url": "https://www.skatturinn.is/english/companies/value-added-tax/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Rates primary from Skatturinn's VAT page (24% and 11%, retrieved 2026-11-13); the page does not state effective dates, so from records the retrieval date.",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law."
+  ]
 }

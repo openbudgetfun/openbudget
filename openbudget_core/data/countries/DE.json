@@ -8,10 +8,44 @@
   "timeZones": [
     "Europe/Berlin"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Umsatzsteuer (Mehrwertsteuer)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1900,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 700,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Federal Central Tax Office (BZSt)",
+    "url": "https://www.bzst.de"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +64,69 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Umsatzsteuergesetz (UStG), section 12 - Steuersaetze (gesetze-im-internet.de)",
+      "url": "https://www.gesetze-im-internet.de/ustg_1980/__12.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Einkommensteuergesetz (EStG), section 2(7) - Jahressteuer und Kalenderjahr (gesetze-im-internet.de)",
+      "url": "https://www.gesetze-im-internet.de/estg/__2.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Umsatzsteuergesetz (UStG), section 12 - Steuersaetze (gesetze-im-internet.de)",
+      "url": "https://www.gesetze-im-internet.de/ustg_1980/__12.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Einkommensteuergesetz (EStG), section 2(7) - Jahressteuer und Kalenderjahr (gesetze-im-internet.de)",
+      "url": "https://www.gesetze-im-internet.de/estg/__2.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Umsatzsteuergesetz (UStG), section 12 - Steuersaetze (gesetze-im-internet.de)",
+      "url": "https://www.gesetze-im-internet.de/ustg_1980/__12.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Einkommensteuergesetz (EStG), section 2(7) - Jahressteuer und Kalenderjahr (gesetze-im-internet.de)",
+      "url": "https://www.gesetze-im-internet.de/estg/__2.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "VAT rates are primary from the European Commission's table of VAT rates applied in EU member countries (Your Europe page, Commission last checked 2026-07-13, retrieved 2026-11-13); the table publishes no effective dates, so each rate's from records the retrieval date.",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Rates also primary from section 12 UStG (statutory text, gesetze-im-internet.de, retrieved 2026-11-13); the statute publishes no effective dates, so from records the retrieval date.",
+    "Tax year primary from section 2(7) EStG: income tax is an annual tax assessed on the calendar year."
+  ]
 }

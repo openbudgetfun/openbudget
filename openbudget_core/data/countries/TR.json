@@ -8,10 +8,52 @@
   "timeZones": [
     "Europe/Istanbul"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "KDV",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2000,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 1000,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "superReduced",
+        "basisPoints": 100,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Revenue Administration (GIB)",
+    "url": "https://www.gib.gov.tr"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +72,31 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: 2026 VAT Rates in Europe (secondary; authority rate pages unreachable this session)",
+      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-vat-rates-europe/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: 2026 VAT Rates in Europe (secondary; authority rate pages unreachable this session)",
+      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-vat-rates-europe/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Tax Foundation: 2026 VAT Rates in Europe (secondary; authority rate pages unreachable this session)",
+      "url": "https://taxfoundation.org/data/all/eu/value-added-tax-vat-rates-europe/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Rates secondary (grade S): 20% standard, 10% reduced and 1% super-reduced from the Tax Foundation's 2026 table; gib.gov.tr renders rates through scripts that automated fetches cannot read this session.",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law."
+  ]
 }

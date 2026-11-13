@@ -19,10 +19,44 @@
     "America/Hermosillo",
     "America/Tijuana"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "IVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1600,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "zero",
+        "basisPoints": 0,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": "exports; basic foodstuffs; medicines",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Tax Administration Service (SAT)",
+    "url": "https://www.sat.gob.mx"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -41,9 +75,31 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 VAT & GST rates (secondary; the authority's rate pages were unreachable this session)",
+      "url": "https://vatcalc.com/vat-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Rates secondary (grade S): 16% standard from VATCalc's 2026 table; sat.gob.mx renders rates through scripts that automated fetches cannot read this session. The reduced 8% border-region rate is a zone rate, not recorded here.",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law."
+  ]
 }

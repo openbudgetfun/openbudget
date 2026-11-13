@@ -8,10 +8,44 @@
   "timeZones": [
     "Europe/Tallinn"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Kaibemaks (VAT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2400,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 900,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Estonian Tax and Customs Board (MTA)",
+    "url": "https://www.emta.ee"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +64,32 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "VAT rates are primary from the European Commission's table of VAT rates applied in EU member countries (Your Europe page, Commission last checked 2026-07-13, retrieved 2026-11-13); the table publishes no effective dates, so each rate's from records the retrieval date.",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Estonia's 24% standard and 9% reduced rates reflect the 2025-26 security-tax reform as listed by the Commission (table checked 2026-07-13); the authority's own rates page moved and was not re-reached this session."
+  ]
 }

@@ -9,10 +9,36 @@
     "Pacific/Auckland",
     "Pacific/Chatham"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 4,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 3,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "gst",
+    "localName": "GST",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Inland Revenue (Te Tari Taake)",
+    "url": "https://www.ird.govt.nz"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -31,9 +57,31 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Inland Revenue (New Zealand): GST - goods and services tax, charged at 15%",
+      "url": "https://www.ird.govt.nz/gst",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Inland Revenue (New Zealand): GST - goods and services tax, charged at 15%",
+      "url": "https://www.ird.govt.nz/gst",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Inland Revenue (New Zealand): GST - goods and services tax, charged at 15%",
+      "url": "https://www.ird.govt.nz/gst",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Rate primary from Inland Revenue ('GST is charged at a rate of 15%', retrieved 2026-11-13); the page does not state the effective date, so from records the retrieval date.",
+    "individualTaxYear runs 1 April to 31 March (grade I, the standard New Zealand balance date; not confirmed on an IRD page this session).",
+    "companyYearEndDefault is 31 March (grade I): the common New Zealand balance date; other dates are permitted."
+  ]
 }

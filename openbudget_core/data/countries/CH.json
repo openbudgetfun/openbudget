@@ -8,10 +8,52 @@
   "timeZones": [
     "Europe/Zurich"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Mehrwertsteuer / TVA / IVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 810,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 260,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "special",
+        "basisPoints": 380,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": "accommodation (Sondersatz)",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Federal Tax Administration (ESTV)",
+    "url": "https://www.estv.admin.ch"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +72,31 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Eidgenoessische Steuerverwaltung (ESTV): Mehrwertsteuersaetze",
+      "url": "https://www.estv.admin.ch/estv/de/home/mehrwertsteuer/mwst-steuersaetze.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Eidgenoessische Steuerverwaltung (ESTV): Mehrwertsteuersaetze",
+      "url": "https://www.estv.admin.ch/estv/de/home/mehrwertsteuer/mwst-steuersaetze.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Eidgenoessische Steuerverwaltung (ESTV): Mehrwertsteuersaetze",
+      "url": "https://www.estv.admin.ch/estv/de/home/mehrwertsteuer/mwst-steuersaetze.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Rates primary from the ESTV page (8.1% normal, 2.6% reduced, 3.8% accommodation, retrieved 2026-11-13); cantons levy no VAT.",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law."
+  ]
 }

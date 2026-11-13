@@ -8,10 +8,52 @@
   "timeZones": [
     "Europe/Stockholm"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Moms (VAT)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2500,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 600,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "reduced2",
+        "basisPoints": 1200,
+        "from": "2026-11-13",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Swedish Tax Agency (Skatteverket)",
+    "url": "https://www.skatteverket.se"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +72,31 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "VAT rates are primary from the European Commission's table of VAT rates applied in EU member countries (Your Europe page, Commission last checked 2026-07-13, retrieved 2026-11-13); the table publishes no effective dates, so each rate's from records the retrieval date.",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law."
+  ]
 }
