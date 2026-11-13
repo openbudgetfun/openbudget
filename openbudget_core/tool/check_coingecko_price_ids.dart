@@ -11,7 +11,9 @@ import 'package:openbudget_core/openbudget_core.dart';
 /// they are not a CI step.
 Future<void> main(List<String> args) async {
   if (!args.contains('--check')) {
-    stdout.writeln('Usage: dart run tool/check_coingecko_price_ids.dart --check');
+    stdout.writeln(
+      'Usage: dart run tool/check_coingecko_price_ids.dart --check',
+    );
     return;
   }
   final client = HttpClient();
@@ -28,7 +30,9 @@ Future<void> main(List<String> args) async {
     );
 
     if (coinIds == null || platforms == null) {
-      stdout.writeln('Could not reach CoinGecko endpoints; pinned ids remain unverified.');
+      stdout.writeln(
+        'Could not reach CoinGecko endpoints; pinned ids remain unverified.',
+      );
       return;
     }
 
@@ -45,9 +49,11 @@ Future<void> main(List<String> args) async {
         allOk = false;
       }
     }
-    stdout.writeln(allOk
-        ? 'All pinned CoinGecko ids and platforms verified.'
-        : 'Some pinned ids are unverified; update the catalogue.');
+    stdout.writeln(
+      allOk
+          ? 'All pinned CoinGecko ids and platforms verified.'
+          : 'Some pinned ids are unverified; update the catalogue.',
+    );
   } finally {
     client.close();
   }
