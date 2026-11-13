@@ -8,10 +8,60 @@
   "timeZones": [
     "Pacific/Noumea"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Taxe générale sur la consommation (TGC)",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1100,
+        "from": "2018-10-01",
+        "to": null,
+        "appliesTo": "taxe normale",
+        "source": 3
+      },
+      {
+        "label": "reduced",
+        "basisPoints": 300,
+        "from": "2018-10-01",
+        "to": null,
+        "appliesTo": "locally produced or transformed goods, passenger transport and reimbursed medicines",
+        "source": 4
+      },
+      {
+        "label": "specific",
+        "basisPoints": 600,
+        "from": "2018-10-01",
+        "to": null,
+        "appliesTo": "services generally",
+        "source": 4
+      },
+      {
+        "label": "higher",
+        "basisPoints": 2200,
+        "from": "2018-10-01",
+        "to": null,
+        "appliesTo": "alcohol, sugary drinks, tobacco, jewellery, vehicles and other listed goods",
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Direction des Services Fiscaux (New Caledonia)",
+    "url": "https://dsf.gouv.nc"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +80,25 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Direction des Services Fiscaux (New Caledonia): la Taxe générale sur la consommation (TGC) — VAT-type tax since 1 October 2018 with four rates (3%, 6%, 11%, 22%)",
+      "url": "https://dsf.gouv.nc/professionnels-impots-et-taxes/la-taxe-generale-sur-la-consommation-tgc",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "CCI Nouvelle-Calédonie: TGC rates — 3% reduced, 6% specific (services), 11% normal, 22% higher, definitive since 1 October 2018",
+      "url": "https://www.cci.nc/entreprises/creer-une-entreprise/connaitre-la-fiscalite-et-les-taux-de-la-tgc",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-02-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "TGC rates have applied since 1 October 2018. A simplification reform under consultation in October-November 2026 would replace the four rates with two (0% and 10%, or 2% and 9%); consultations closed 20 November 2026, so re-check before the rates move."
+  ]
 }

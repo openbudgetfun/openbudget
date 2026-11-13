@@ -216,15 +216,40 @@ const Map<String, Map<String, Object?>> countryData = {
       "day": 20,
     },
     "indirectTax": {
-      "kind": "none",
-      "localName": null,
-      "rates": [],
+      "kind": "salesTax",
+      "localName": "Business Receipts Tax (BRT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 400,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "higher",
+          "basisPoints": 500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "larger hotels, large entertainment venues and domestic air transport",
+          "source": 3,
+        },
+        {
+          "label": "higher2",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "luxury hotels and restaurants and telecommunications services",
+          "source": 3,
+        },
+      ],
       "registrationThreshold": null,
       "returnFrequency": null,
       "subdivisions": [],
     },
     "authority": {
-      "name": "Ministry of Finance",
+      "name": "Ministry of Finance (Islamic Emirate of Afghanistan)",
       "url": "https://mof.gov.af",
     },
     "sources": [
@@ -247,24 +272,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "retrievedOn": "2026-11-13",
       },
       {
-        "title": "Afghanistan Income Tax Law 2009 (unofficial translation, Official Gazette 976, 18 March 2009), art. 3: the tax year is the solar (Hejiri Shamsi) year, 1 Hamal (21 March) to the last day of Hoot (20 March)",
-        "url": "https://www.wto.org/english/thewto_e/acc_e/afg_e/wtaccafg5a1_leg_1.pdf",
-        "grade": "primary",
-        "retrievedOn": "2026-11-13",
-      },
-      {
-        "title": "Islamic Republic of Afghanistan Ministry of Finance: Tax Overview for Businesses, Investors & Individuals (solar taxation year; business receipts tax; no VAT)",
-        "url": "https://mof.gov.af/sites/default/files/2019-03/Guide%2004%20-%20Tax%20Overview%20for%20Businesses%2C%20Investors%20%26%20Individuals-min.pdf",
-        "grade": "primary",
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
     ],
     "verifiedOn": "2026-11-13",
     "recheckBy": "2027-05-13",
     "caveats": [
-      "Non-Gregorian tax year (grade P, Income Tax Law 2009, art. 3): the tax year is the solar (Hejiri Shamsi) year starting 1 Hamal (21 March) and ending the last day of Hoot (20 March). The Gregorian dates are the law's own translation; the solar year drifts against the Gregorian calendar.",
-      "companyYearEndDefault of 20 March follows the solar tax year (grade P, same article); a legal person may apply to the Ministry of Finance to use a different twelve-month year.",
-      "Afghanistan levies no VAT or GST (grade S): a narrow Business Receipts Tax and a 2% fixed business tax exist under the Income Tax Manual, but no general consumption tax (nomad.watch's reading of the MoF law; the Ministry's own overview guide).",
+      "individualTaxYear follows the Solar Hijri (Afghan) year, which starts on 1 Jawza (21 or 22 March); the Gregorian start date shifts by a day between years and the model pins 21 March (grade I).",
+      "companyYearEndDefault approximates the Solar Hijri year end at 20 March (grade I); the Gregorian date shifts by a day between years.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Afghanistan's BRT tiers (4% general, 5% and 10% higher tiers) are recorded from the cited secondary table; the Ministry of Finance site was unreachable in this session and post-2021 administration changes make re-checking important.",
+      "Lower-bound rows - standard (2022-01-01), higher (2022-01-01), higher2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
     ],
   },
   "AG": {
@@ -277,10 +298,52 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Antigua",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Antigua and Barbuda Sales Tax (ABST)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": "2024-01-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1700,
+          "from": "2024-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "hotel",
+          "basisPoints": 1400,
+          "from": "2022-01-01",
+          "to": "2024-01-01",
+          "appliesTo": "hotel and holiday accommodation",
+          "source": 4,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Department, Antigua and Barbuda",
+      "url": "https://abird.gov.ag",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -300,10 +363,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Antigua and Barbuda Inland Revenue Department notice of 1 January 2024: ABST increases from 15% to 17% under the Revenue (Miscellaneous Provisions) Act No. 13 of 2023 (reproduced by Antigua News Room)",
+        "url": "https://antiguanewsroom.com/abst-increases-from-15-to-17-from-today-january-1-2024-ird/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "PwC / EY iGuide tax summary for Antigua and Barbuda (ABST 17% from 1 January 2024; hotel accommodation 14% from 1 March 2020 to 31 December 2023)",
+        "url": "http://admin.theiguides.org/Media/Documents/AG%20TaxCorp%20-%20June%202024.pdf",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "ABST rose from 15% to 17% on 1 January 2024 (Revenue (Miscellaneous Provisions) Act No. 13 of 2023); the concessionary 14% hotel rate rose to 17% the same day and tourism concessions were repealed (grade S — IRD notice read via a reproduction, the IRD site itself was unreachable).",
+      "Lower-bound rows - standard (2022-01-01), hotel (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "AI": {
     "code": "AI",
@@ -315,10 +395,52 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Anguilla",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "General Services Tax (GST)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1300,
+          "from": "2022-07-01",
+          "to": "2025-08-01",
+          "appliesTo": "goods and services tax on goods and services",
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1300,
+          "from": "2025-08-01",
+          "to": null,
+          "appliesTo": "general services tax on services (retailers, wholesalers, manufacturers, restaurants and bars exempt)",
+          "source": 4,
+        },
+        {
+          "label": "goods",
+          "basisPoints": 900,
+          "from": "2025-08-01",
+          "to": null,
+          "appliesTo": "import goods tax on goods and at the port",
+          "source": 5,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Department, Anguilla",
+      "url": "https://ird.gov.ai",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -338,10 +460,32 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Inland Revenue Department Anguilla: Goods & Services Tax (came into force 1 July 2022, 13%)",
+        "url": "https://ird.gov.ai/Services/Tax/gst",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Inland Revenue Department Anguilla: General Services Tax (came into force 1 August 2025, 13% on services)",
+        "url": "https://ird.gov.ai/Services/Tax/GenST",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "KPMG tax news flash: Anguilla — implementation of general services tax from 1 August 2025, replacing the 2022 goods and services tax; 9% import goods tax on goods",
+        "url": "https://kpmg.com/us/en/taxnewsflash/news/2025/11/anguilla-implementation-gst-services.html",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Anguilla had no broad consumption tax before 1 July 2022, so rate coverage starts on that date. The 13% goods and services tax was repealed on 1 August 2025 and split into a 13% General Services Tax on services and a 9% import goods tax on goods.",
+    ],
   },
   "AL": {
     "code": "AL",
@@ -628,10 +772,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "Antarctica/Troll",
       "Antarctica/Vostok",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Antarctic Treaty Secretariat",
+      "url": "https://www.ats.aq",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -651,10 +812,19 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "No tax system: Antarctica has no permanent population or economy and no taxes of its own",
+        "url": "https://www.iso.org/obp/ui/#iso:code:3166:AQ",
+        "grade": "inferred",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear and companyYearEndDefault are calendar defaults for want of any tax system (grade I); the territory has no resident taxpayers.",
+      "indirectTax is none: no authority levies taxes in Antarctica (grade I).",
+    ],
   },
   "AR": {
     "code": "AR",
@@ -677,10 +847,52 @@ const Map<String, Map<String, Object?>> countryData = {
       "America/Argentina/Rio_Gallegos",
       "America/Argentina/Ushuaia",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Impuesto al Valor Agregado (IVA)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 2100,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 1050,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "construction, medical supplies, taxi and public transport, certain loans",
+          "source": 3,
+        },
+        {
+          "label": "higher",
+          "basisPoints": 2700,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "non-domestic power, energy and telecoms",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Agencia de Recaudación y Control Aduanero (ARCA)",
+      "url": "https://www.arca.gob.ar",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -700,10 +912,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "A 2.5% 'sobreimpuesto' and a 3% rate on digital services are not modelled (grade S).",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), higher (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "AS": {
     "code": "AS",
@@ -715,10 +939,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Pago_Pago",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Department of Revenue, American Samoa Government",
+      "url": "https://www.americansamoa.gov",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -738,10 +979,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "American Samoa levies no general sales tax or VAT (grade S); revenue comes from income taxes, excise taxes and customs duties.",
+    ],
   },
   "AT": {
     "code": "AT",
@@ -987,10 +1238,44 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Aruba",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Algemene Bestedingsbelasting (ABB)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 600,
+          "from": "2022-01-01",
+          "to": "2023-01-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 700,
+          "from": "2023-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Dienst Belastingen Aruba",
+      "url": "https://www.belastingdienst.aw",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -1010,10 +1295,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Aruba's expenditure tax (ABB/BBO) rose from a combined 6% (3% turnover tax plus 3% health tax) to 7% on 1 January 2023 (grade S).",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "AX": {
     "code": "AX",
@@ -1230,10 +1527,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Barbados",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value Added Tax (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1750,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Barbados Revenue Authority",
+      "url": "https://bra.gov.bb",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -1253,10 +1576,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "BD": {
     "code": "BD",
@@ -1268,10 +1602,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Dhaka",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 7,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 6,
+      "day": 30,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "মূল্য সংযোজন কর (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "National Board of Revenue (NBR)",
+      "url": "https://nbr.gov.bd",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -1291,10 +1651,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear runs 1 July to 30 June (grade I, from the assessment cycle; the NBR site was unreachable this session).",
+      "companyYearEndDefault is a 30 June app default for new entities (grade I), not a statutory requirement.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Multiple reduced VAT tiers (10%, 7.5%, 5% and 4.5% for listed goods and services) are not modelled (grade S).",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "BE": {
     "code": "BE",
@@ -1879,10 +2251,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/St_Barthelemy",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Service de la fiscalité de Saint-Barthélemy",
+      "url": "https://www.collectivite-saintbarth.com",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -1902,10 +2291,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "French customs (douane.gouv.fr): octroi de mer — the import levy that applies in the French overseas collectivities instead of VAT",
+        "url": "https://www.douane.gouv.fr/fiche/octroi-de-mer",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Saint-Barthélemy left the EU VAT territory in 2012 and applies no VAT; consumption is taxed through the octroi de mer import levy at product-specific rates (grade S, not modelled).",
+    ],
   },
   "BM": {
     "code": "BM",
@@ -1917,10 +2316,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Atlantic/Bermuda",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Office of the Tax Commissioner, Bermuda",
+      "url": "https://www.gov.bm/office-tax-commissioner",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -1940,10 +2356,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Bermuda levies no VAT, GST or sales tax; revenue comes from payroll tax, land tax, customs duties and licence fees (grade S).",
+    ],
   },
   "BN": {
     "code": "BN",
@@ -1955,10 +2381,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Brunei",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Finance and Economy, Brunei Darussalam",
+      "url": "https://www.mofe.gov.bn",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -1978,10 +2421,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Brunei levies no VAT, GST or sales tax (grade S); revenue comes from corporate income tax on oil and gas and duties.",
+    ],
   },
   "BO": {
     "code": "BO",
@@ -1993,10 +2446,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/La_Paz",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Impuesto al Valor Agregado (IVA)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1300,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Servicio de Impuestos Nacionales (SIN)",
+      "url": "https://impuestos.gob.bo",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -2016,10 +2495,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "PwC Worldwide Tax Summaries: Bolivia — corporate other taxes (VAT standard rate 13%, including definitive importations)",
+        "url": "https://taxsummaries.pwc.com/bolivia/corporate/other-taxes",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The 13% rate is charged on a grossed-up base for many transactions, producing an effective 14.94% on creditable transactions (grade S, not modelled).",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "BQ": {
     "code": "BQ",
@@ -2031,10 +2521,44 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Kralendijk",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Algemene bestedingsbelasting (ABB)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 800,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "general expenditure tax on goods",
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 600,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "general expenditure tax on services",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Belastingdienst Caribisch Nederland",
+      "url": "https://www.belastingdienst-cn.nl",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -2054,10 +2578,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "BR": {
     "code": "BR",
@@ -2084,10 +2619,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "America/Eirunepe",
       "America/Rio_Branco",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "consumptionTax",
+      "localName": "ICMS (estadual), IPI, ISS e PIS/COFINS",
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Secretaria Especial da Receita Federal do Brasil",
+      "url": "https://www.gov.br/receitafederal",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -2107,10 +2659,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Brazil has no single national standard rate to record: consumption is taxed by the state-level ICMS (roughly 12% to 25% depending on state and transaction), the federal IPI, the municipal ISS and PIS/COFINS. No rate rows are recorded rather than guessing a national figure; the 2023 constitutional reform that replaces this system with CBS and IBS (transition to 2033) is not yet in its rated phase.",
+    ],
   },
   "BS": {
     "code": "BS",
@@ -2122,10 +2684,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Nassau",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value Added Tax (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Department of Inland Revenue, Bahamas",
+      "url": "https://inlandrevenue.finance.gov.bs",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -2145,10 +2733,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Bahamas Department of Inland Revenue: VAT guidance on the 2021 amendments — VAT rate cut from 12% to 10% effective 1 January 2022 (Value Added Tax (Amendment) (No. 2) Act 2021)",
+        "url": "https://inlandrevenue.finance.gov.bs/wp-content/uploads/2021/12/VAT-Guidance-2021-Amendments.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The standard VAT rate fell from 12% to 10% on 1 January 2022 (Value Added Tax (Amendment) (No. 2) Act 2021 and Department of Inland Revenue guidance); the 12% rate is outside the coverage window. Most zero-rating was withdrawn at the same time.",
+    ],
   },
   "BT": {
     "code": "BT",
@@ -2161,10 +2759,44 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Thimphu",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "gst",
+      "localName": "Goods and Services Tax (GST)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 500,
+          "from": "2026-01-01",
+          "to": null,
+          "appliesTo": "single rate on all taxable supplies and imports (Schedule I, GST Amendment Act 2025)",
+          "source": 3,
+        },
+        {
+          "label": "zero",
+          "basisPoints": 0,
+          "from": "2026-01-01",
+          "to": null,
+          "appliesTo": "exports of goods and services",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Department of Revenue and Customs, Ministry of Finance (Bhutan)",
+      "url": "https://www.drc.gov.bt",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -2184,10 +2816,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Department of Revenue and Customs (Bhutan): GST frequently asked questions — 5% single rate implemented from 1 January 2026, replacing the Sales Tax regime",
+        "url": "https://www.drc.gov.bt/wp-content/uploads/2026/02/Frequently-Asked-Questions-3.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "DRC Public Notification DRC/STD/GST/50/2025 (19 December 2025): GST implemented with effect from 1 January 2026, replacing the existing Sales Tax regime",
+        "url": "https://www.drc.gov.bt/wp-content/uploads/2025/12/GST-Implementation.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Bhutan had no single-rate consumption tax before 1 January 2026: the Sales Tax, Customs and Excise framework taxed a schedule of goods at product-specific rates, so no pre-2026 standard rate can be recorded. The 5% GST was confirmed by the GST (Amendment) Act 2025 (reduced from the originally proposed 7%) after earlier 2022 and 2024 deferrals.",
+      "First-year regime: re-verify against DRC notices during 2026-27 as exemption schedules are still moving (Schedule IV additions in May and June 2026).",
+    ],
   },
   "BV": {
     "code": "BV",
@@ -2197,10 +2846,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "NOK",
     ],
     "timeZones": [],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Norwegian Polar Institute",
+      "url": "https://www.npolar.no",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -2220,10 +2886,19 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "No tax system: Bouvet Island has no permanent population or economy and no taxes of its own",
+        "url": "https://www.iso.org/obp/ui/#iso:code:3166:BV",
+        "grade": "inferred",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear and companyYearEndDefault are calendar defaults for want of any tax system (grade I); the territory has no resident taxpayers.",
+      "indirectTax is none: the uninhabited Norwegian dependency levies no taxes (grade I).",
+    ],
   },
   "BW": {
     "code": "BW",
@@ -2385,10 +3060,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Belize",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "General Sales Tax (GST)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1250,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Belize Tax Services Department",
+      "url": "https://belizetax.gov.bz",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -2408,10 +3109,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "CA": {
     "code": "CA",
@@ -2469,7 +3181,217 @@ const Map<String, Map<String, Object?>> countryData = {
       ],
       "registrationThreshold": null,
       "returnFrequency": null,
-      "subdivisions": [],
+      "subdivisions": [
+        {
+          "code": "CA-AB",
+          "rates": [
+            {
+              "label": "gst",
+              "basisPoints": 500,
+              "from": "2008-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 14,
+            },
+          ],
+        },
+        {
+          "code": "CA-BC",
+          "rates": [
+            {
+              "label": "gst",
+              "basisPoints": 500,
+              "from": "2008-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 14,
+            },
+            {
+              "label": "pst",
+              "basisPoints": 700,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 13,
+            },
+          ],
+        },
+        {
+          "code": "CA-MB",
+          "rates": [
+            {
+              "label": "gst",
+              "basisPoints": 500,
+              "from": "2008-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 14,
+            },
+            {
+              "label": "pst",
+              "basisPoints": 700,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": "retail sales tax (RST)",
+              "source": 13,
+            },
+          ],
+        },
+        {
+          "code": "CA-NB",
+          "rates": [
+            {
+              "label": "hst",
+              "basisPoints": 1500,
+              "from": "2016-07-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 13,
+            },
+          ],
+        },
+        {
+          "code": "CA-NL",
+          "rates": [
+            {
+              "label": "hst",
+              "basisPoints": 1500,
+              "from": "2016-07-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 13,
+            },
+          ],
+        },
+        {
+          "code": "CA-NS",
+          "rates": [
+            {
+              "label": "hst",
+              "basisPoints": 1500,
+              "from": "2016-07-01",
+              "to": "2025-04-01",
+              "appliesTo": null,
+              "source": 13,
+            },
+            {
+              "label": "hst",
+              "basisPoints": 1400,
+              "from": "2025-04-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 13,
+            },
+          ],
+        },
+        {
+          "code": "CA-NT",
+          "rates": [
+            {
+              "label": "gst",
+              "basisPoints": 500,
+              "from": "2008-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 14,
+            },
+          ],
+        },
+        {
+          "code": "CA-NU",
+          "rates": [
+            {
+              "label": "gst",
+              "basisPoints": 500,
+              "from": "2008-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 14,
+            },
+          ],
+        },
+        {
+          "code": "CA-ON",
+          "rates": [
+            {
+              "label": "hst",
+              "basisPoints": 1300,
+              "from": "2013-04-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 13,
+            },
+          ],
+        },
+        {
+          "code": "CA-PE",
+          "rates": [
+            {
+              "label": "hst",
+              "basisPoints": 1500,
+              "from": "2016-10-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 13,
+            },
+          ],
+        },
+        {
+          "code": "CA-QC",
+          "rates": [
+            {
+              "label": "gst",
+              "basisPoints": 500,
+              "from": "2008-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 14,
+            },
+            {
+              "label": "qst",
+              "basisPoints": 998,
+              "from": "2013-01-01",
+              "to": null,
+              "appliesTo": "9.975% QST rounded to 998bp (schema stores integer hundredths)",
+              "source": 14,
+            },
+          ],
+        },
+        {
+          "code": "CA-SK",
+          "rates": [
+            {
+              "label": "gst",
+              "basisPoints": 500,
+              "from": "2008-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 14,
+            },
+            {
+              "label": "pst",
+              "basisPoints": 600,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 13,
+            },
+          ],
+        },
+        {
+          "code": "CA-YT",
+          "rates": [
+            {
+              "label": "gst",
+              "basisPoints": 500,
+              "from": "2008-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 14,
+            },
+          ],
+        },
+      ],
     },
     "authority": {
       "name": "Canada Revenue Agency (CRA)",
@@ -2518,15 +3440,64 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Canada Revenue Agency: GST/HST calculator (and rates) — GST, HST and PST by province, including the Nova Scotia HST decrease to 14% on 1 April 2025",
+        "url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Revenu Québec: Tables of GST and QST rates (GST 5% since 1 January 2008; QST 9.975% since 1 January 2013)",
+        "url": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/basic-rules-for-applying-the-gsthst-and-qst/tables-of-gst-and-qst-rates/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Canada Revenue Agency: GST/HST calculator (and rates) — GST, HST and PST by province, including the Nova Scotia HST decrease to 14% on 1 April 2025",
+        "url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Revenu Québec: Tables of GST and QST rates (GST 5% since 1 January 2008; QST 9.975% since 1 January 2013)",
+        "url": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/basic-rules-for-applying-the-gsthst-and-qst/tables-of-gst-and-qst-rates/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Canada Revenue Agency: GST/HST calculator (and rates) — GST, HST and PST by province, including the Nova Scotia HST decrease to 14% on 1 April 2025",
+        "url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Revenu Québec: Tables of GST and QST rates (GST 5% since 1 January 2008; QST 9.975% since 1 January 2013)",
+        "url": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/basic-rules-for-applying-the-gsthst-and-qst/tables-of-gst-and-qst-rates/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Canada Revenue Agency: GST/HST calculator (and rates) — GST, HST and PST by province, including the Nova Scotia HST decrease to 14% on 1 April 2025",
+        "url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Revenu Québec: Tables of GST and QST rates (GST 5% since 1 January 2008; QST 9.975% since 1 January 2013)",
+        "url": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/basic-rules-for-applying-the-gsthst-and-qst/tables-of-gst-and-qst-rates/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
     "verifiedOn": "2026-11-13",
     "recheckBy": "2027-05-13",
     "caveats": [
       "Rate primary from section 165 of the Excise Tax Act (5% GST, retrieved 2026-11-13); the act publishes no effective dates, so from records the retrieval date.",
-      "Provincial HST/QST/PST rates are subdivision data and arrive with task U4.",
+      "Provincial rates are primary from the CRA GST/HST calculator table and Revenu Québec's rate tables: HST 15% in New Brunswick, Newfoundland and Labrador and Prince Edward Island, 13% in Ontario; Nova Scotia's HST fell from 15% to 14% on 1 April 2025. Quebec charges GST 5% plus QST 9.975% (stored as 998bp — the schema stores integer hundredths of a percent). British Columbia, Manitoba and Saskatchewan charge GST 5% plus PST/RST (7%, 7%, 6%).",
       "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
       "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
       "Lower-bound rows - standard (2008-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (confirmed at the earliest OECD Consumption Tax Trends benchmark year in which the value appears).",
+      "Lower-bound subdivision rows: BC, Manitoba and Saskatchewan PST rows start at 2022-01-01 (the CRA table lists current values only; the 7%, 7% and 6% rates date from 2013, 2010 and 2017 respectively). Ontario HST 13% is recorded from 2013-04-01, the earliest date in the CRA historical table (the rate itself dates from 1 July 2010).",
     ],
   },
   "CC": {
@@ -2539,10 +3510,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Indian/Cocos",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Australian Government, Department of Infrastructure, Transport, Regional Development, Communications and the Arts",
+      "url": "https://www.infrastructure.gov.au",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -2562,10 +3550,19 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "No tax system: Cocos (Keeling) Islands has no permanent population or economy and no taxes of its own",
+        "url": "https://www.iso.org/obp/ui/#iso:code:3166:CC",
+        "grade": "inferred",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear and companyYearEndDefault are calendar defaults for want of any tax system (grade I); the territory has no resident taxpayers.",
+      "indirectTax is none: the Australian external territory sits outside the Australian GST area and levies no broad consumption tax of its own (grade I).",
+    ],
   },
   "CD": {
     "code": "CD",
@@ -3046,10 +4043,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Rarotonga",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 4,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 3,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value Added Tax (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2014-04-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Revenue Management Division, Ministry of Finance and Economic Management (Cook Islands)",
+      "url": "https://www.mfem.gov.ck",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -3069,10 +4092,26 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Cook Islands MFEM: Value Added Tax Amendment Bill 2014 explanatory note and the Value Added Tax Act 1997 (consolidated) — rate raised from 12.5% to 15% from 1 April 2014",
+        "url": "https://cook-islands.tradeportal.org/media/VAT_Act_Consolidated_to_March_2019_2.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Cook Islands Business Trade and Investment Board: tax registration — VAT charged and accounted for at 15%",
+        "url": "https://btib.gov.ck/business-one-stop-shop/tax-registration/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear runs 1 April to 31 March (grade I, from the Cook Islands assessment cycle; the MFEM page confirms the value added tax year but not the individual year directly).",
+      "companyYearEndDefault is a 31 March app default for new entities (grade I), matching the tax year.",
+      "The 15% rate has applied since 1 April 2014 (VAT Act s.11 as amended by No. 1 of 2014).",
+    ],
   },
   "CL": {
     "code": "CL",
@@ -3262,10 +4301,52 @@ const Map<String, Map<String, Object?>> countryData = {
       "Asia/Shanghai",
       "Asia/Urumqi",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "增值税 (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1300,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 900,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "transport, postal, construction, basic telecoms, real estate, books and newspapers, heating",
+          "source": 3,
+        },
+        {
+          "label": "reduced2",
+          "basisPoints": 600,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "financial services, IT and telecommunications services, consulting, R&D, logistics, education, tourism, hotels and catering",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "State Taxation Administration (STA)",
+      "url": "https://www.chinatax.gov.cn",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -3285,10 +4366,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "The 13% standard rate has applied since 1 April 2019 (deepening the 2018 VAT reform); small-scale taxpayers use a 3% levy rate (not modelled).",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), reduced2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "CO": {
     "code": "CO",
@@ -3662,10 +4755,52 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Curacao",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Belasting op de Omzet (OB, sales tax)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 600,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "higher",
+          "basisPoints": 700,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "hotels and insurance",
+          "source": 3,
+        },
+        {
+          "label": "higher2",
+          "basisPoints": 900,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "luxuries, motor vehicles, alcohol and tobacco",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Belastingdienst Curaçao",
+      "url": "https://www.belastingdienst.cw",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -3685,10 +4820,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01), higher (2022-01-01), higher2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "CX": {
     "code": "CX",
@@ -3700,10 +4846,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Indian/Christmas",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Australian Government, Department of Infrastructure, Transport, Regional Development, Communications and the Arts",
+      "url": "https://www.infrastructure.gov.au",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -3723,10 +4886,19 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "No tax system: Christmas Island has no permanent population or economy and no taxes of its own",
+        "url": "https://www.iso.org/obp/ui/#iso:code:3166:CX",
+        "grade": "inferred",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear and companyYearEndDefault are calendar defaults for want of any tax system (grade I); the territory has no resident taxpayers.",
+      "indirectTax is none: the Australian external territory sits outside the Australian GST area and levies no broad consumption tax of its own (grade I).",
+    ],
   },
   "CY": {
     "code": "CY",
@@ -4327,10 +5499,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Dominica",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value Added Tax (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Division, Commonwealth of Dominica",
+      "url": "https://irdominica.dm",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -4350,10 +5548,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+      "A reduced 10% rate applies to hotel services (grade S, not modelled).",
+    ],
   },
   "DO": {
     "code": "DO",
@@ -4365,10 +5575,44 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Santo_Domingo",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Impuesto sobre Transferencias de Bienes Industrializados y Servicios (ITBIS)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 1600,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "yoghurt and butter, coffee, edible fats, sugars, cocoa and chocolate",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Dirección General de Impuestos Internos (DGII)",
+      "url": "https://dgii.gov.do",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -4388,10 +5632,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "DGII (Dominican Republic): Guía #7 ITBIS — general rate 18%, reduced rate 16%",
+        "url": "https://dgii.gov.do/publicacionesOficiales/bibliotecaVirtual/contribuyentes/itbis/Documents/1-Guia%207%20-%20%28ITBIS%29.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rates primary from the DGII guide (18% general, 16% reduced, unchanged through the coverage window; the standard rate has been 18% since 2013).",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "DZ": {
     "code": "DZ",
@@ -4493,10 +5748,52 @@ const Map<String, Map<String, Object?>> countryData = {
       "America/Guayaquil",
       "Pacific/Galapagos",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Impuesto al Valor Agregado (IVA)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1200,
+          "from": "2022-01-01",
+          "to": "2024-04-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2024-04-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "zero",
+          "basisPoints": 0,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "basic basket goods and other zero-rated supplies",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Servicio de Rentas Internas (SRI)",
+      "url": "https://www.sri.gob.ec",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -4516,10 +5813,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Decreto Ejecutivo No. 198 and SRI guidance: IVA general sube del 12% al 15% desde el 1 de abril de 2024 (Ley Orgánica para enfrentar el conflicto armado interno)",
+        "url": "https://esigef.finanzas.gob.ec/esigef/pub/Gu%C3%ADa%20Informativa%20Incremento%20IVA.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The standard IVA rate rose from 12% to 15% on 1 April 2024 (Executive Decree 198) to fund the internal armed conflict; the underlying law fixes 13% as the permanent rate once the temporary surcharge ends, so the 15% rate carries re-check risk.",
+      "Lower-bound rows - standard (2022-01-01), zero (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "EE": {
     "code": "EE",
@@ -5256,10 +6564,52 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Fiji",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value Added Tax (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 900,
+          "from": "2022-01-01",
+          "to": "2023-08-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2023-08-01",
+          "to": "2025-08-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1250,
+          "from": "2025-08-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 4,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Fiji Revenue and Customs Service (FRCS)",
+      "url": "https://frcs.org.fj",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -5279,10 +6629,26 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "FRCS Standard Interpretation Guideline 2024-15: time of supply — VAT rose from 9% to 15% on 1 August 2023 (2023-24 Budget); 9% had applied since 2016",
+        "url": "https://frcs.org.fj/files/2024/08/SIG-on-Time-of-Supply.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "FRCS public notice: VAT calculation — VAT reduced from 15% to 12.5% effective 1 August 2025 (2025-26 National Budget)",
+        "url": "https://frcs.org.fj/public-notice/value-added-tax-vat-calculation-notice/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Fiji's standard rate moved twice inside the window: 9% to 15% on 1 August 2023 and back down to 12.5% on 1 August 2025. The 9% row is a lower bound from the start of the window (9% had applied since 2016).",
+    ],
   },
   "FK": {
     "code": "FK",
@@ -5294,10 +6660,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Atlantic/Stanley",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Falkland Islands Government",
+      "url": "https://www.falklands.gov.fk",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -5317,10 +6700,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Falkland Islands Government: taxation (no VAT or sales tax; revenue from corporation tax, import duties and licence fees)",
+        "url": "https://www.falklands.gov.fk",
+        "grade": "inferred",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The Falkland Islands levy no VAT or sales tax (grade I — consistent across the territory's published tax structure but not confirmed on a rate page this session); revenue comes from corporation tax, import duties and licence fees.",
+    ],
   },
   "FM": {
     "code": "FM",
@@ -5334,10 +6727,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "Pacific/Chuuk",
       "Pacific/Kosrae",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Department of Finance and Administration (Federated States of Micronesia)",
+      "url": "https://www.fsmgov.org",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -5357,10 +6767,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Micronesia has no federal VAT or sales tax (grade S); the states levy their own sales taxes and gross revenue taxes, which the country-level schema cannot express.",
+    ],
   },
   "FO": {
     "code": "FO",
@@ -5777,10 +7197,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Grenada",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value Added Tax (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Division, Government of Grenada",
+      "url": "https://www.gov.gd",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -5800,10 +7246,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "GE": {
     "code": "GE",
@@ -5902,10 +7359,52 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Cayenne",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA (régime d'outre-mer) + octroi de mer",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 850,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 210,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "basic products",
+          "source": 3,
+        },
+        {
+          "label": "reduced2",
+          "basisPoints": 105,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "newspapers",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction générale des finances publiques (Guyane)",
+      "url": "https://www.impots.gouv.fr",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -5925,10 +7424,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "French Guiana applies French VAT under the overseas derogation with a reduced standard rate (8.5%, 2.1% and 1.05% reduced tiers) plus the octroi de mer import levy at product-specific rates (octroi not modelled).",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), reduced2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "GG": {
     "code": "GG",
@@ -6448,10 +7959,52 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Guadeloupe",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA (régime d'outre-mer) + octroi de mer",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 850,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 210,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "basic products",
+          "source": 3,
+        },
+        {
+          "label": "reduced2",
+          "basisPoints": 105,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "newspapers",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction générale des finances publiques (Guadeloupe)",
+      "url": "https://www.impots.gouv.fr",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6471,10 +8024,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Guadeloupe applies French VAT under the overseas derogation with a reduced standard rate (8.5%, 2.1% and 1.05% reduced tiers) plus the octroi de mer import levy at product-specific rates (octroi not modelled).",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), reduced2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "GQ": {
     "code": "GQ",
@@ -6694,10 +8259,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Atlantic/South_Georgia",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Government of South Georgia and the South Sandwich Islands",
+      "url": "https://www.gov.gs",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6717,10 +8299,19 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "No tax system: South Georgia and the South Sandwich Islands has no permanent population or economy and no taxes of its own",
+        "url": "https://www.iso.org/obp/ui/#iso:code:3166:GS",
+        "grade": "inferred",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear and companyYearEndDefault are calendar defaults for want of any tax system (grade I); the territory has no resident taxpayers.",
+      "indirectTax is none: the territory has no resident population and levies no consumption taxes (grade I).",
+    ],
   },
   "GT": {
     "code": "GT",
@@ -6732,10 +8323,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Guatemala",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Impuesto al Valor Agregado (IVA)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1200,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Superintendencia de Administración Tributaria (SAT)",
+      "url": "https://portal.sat.gob.gt",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6755,10 +8372,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "GU": {
     "code": "GU",
@@ -6770,10 +8398,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Guam",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "Business Privilege Tax (BPT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 500,
+          "from": "2018-10-01",
+          "to": null,
+          "appliesTo": "gross receipts of most businesses (wholesale and manufacturing exemptions apply)",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Department of Revenue and Taxation, Government of Guam",
+      "url": "https://www.revandtaxe.guam.gov",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6793,10 +8447,26 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Guam Code Annotated title 11, chapter 26 (Business Privilege Tax Law) — 5% on gross proceeds of sales and gross income, in force since 1 October 2018 (Public Law 34-116)",
+        "url": "https://law.justia.com/codes/guam/2022/title-11/division-2/chapter-26/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Guam Department of Revenue and Taxation, Director's Announcement 18-05: Business Privilege Tax at 5 percent (extended from 1 October 2018, continuing indefinitely)",
+        "url": "https://www.guamtax.com/notices/DirectorsAnnouncement18-05-BusinessPrivilegeTaxat5percent.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Guam's BPT is a gross receipts tax rather than a sales tax: 5% since 1 October 2018 (8% on poker machines and 12% on boxing events). Some secondary tables record lower wholesale-activity rates; the 5% general rate is statutory.",
+    ],
   },
   "GW": {
     "code": "GW",
@@ -6897,10 +8567,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Guyana",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value Added Tax (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1400,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Guyana Revenue Authority (GRA)",
+      "url": "https://gra.gov.gy",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6920,10 +8616,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "HK": {
     "code": "HK",
@@ -6935,10 +8642,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Hong_Kong",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Department, Hong Kong",
+      "url": "https://www.ird.gov.hk",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6958,10 +8682,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Hong Kong levies no VAT, GST or sales tax (grade S); the Inland Revenue Department collects profits, salaries and stamp duties.",
+    ],
   },
   "HM": {
     "code": "HM",
@@ -6971,10 +8705,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "AUD",
     ],
     "timeZones": [],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Australian Antarctic Division",
+      "url": "https://www.antarctica.gov.au",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -6994,10 +8745,19 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "No tax system: Heard Island and McDonald Islands has no permanent population or economy and no taxes of its own",
+        "url": "https://www.iso.org/obp/ui/#iso:code:3166:HM",
+        "grade": "inferred",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear and companyYearEndDefault are calendar defaults for want of any tax system (grade I); the territory has no resident taxpayers.",
+      "indirectTax is none: the uninhabited Australian external territory has no taxes (grade I).",
+    ],
   },
   "HN": {
     "code": "HN",
@@ -7009,10 +8769,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Tegucigalpa",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Impuesto sobre Ventas (ISV)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Servicio de Administración de Rentas (SAR)",
+      "url": "https://www.sar.gob.hn",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -7032,10 +8818,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "HR": {
     "code": "HR",
@@ -7156,10 +8953,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Port-au-Prince",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Taxe sur le Chiffre d'Affaires (TCA)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction Générale des Impôts (Haïti)",
+      "url": "https://dgi.gouv.ht",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -7179,10 +9002,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "HU": {
     "code": "HU",
@@ -7312,10 +9146,52 @@ const Map<String, Map<String, Object?>> countryData = {
       "Asia/Makassar",
       "Asia/Jayapura",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Pajak Pertambahan Nilai (PPN)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": "2022-04-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1100,
+          "from": "2022-04-01",
+          "to": null,
+          "appliesTo": "effective general rate; nominally 12% from 2025-01-01 charged on an 11/12 base",
+          "source": 3,
+        },
+        {
+          "label": "luxury",
+          "basisPoints": 1200,
+          "from": "2025-01-01",
+          "to": null,
+          "appliesTo": "luxury goods subject to the luxury-goods sales tax (LGST)",
+          "source": 4,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direktorat Jenderal Pajak (DJP)",
+      "url": "https://www.pajak.go.id",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -7335,10 +9211,26 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Direktorat Jenderal Pajak: Multitarif, era baru PPN Indonesia — standard rate 11% from April 2022 under the HPP Law (Law 7/2021), 10% before",
+        "url": "https://pajak.go.id/id/artikel/multitarif-era-baru-ppn-indonesia",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "PMK 131/2024 (JDIH Kementerian Keuangan): 12% VAT from 1 January 2025 — charged on the full base for luxury goods (LGST) and on an 11/12 'other value' base for everything else, keeping the effective rate at 11%",
+        "url": "https://jdih.kemenkeu.go.id/dok/pmk-131-tahun-2024/summary",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "From 1 January 2025 the nominal rate is 12%, but PMK 131/2024 charges it on an 11/12 base for everything except luxury goods, so the effective general rate stays 11%; luxury-goods supplies to end consumers paid the transitional effective 11% during January 2025 and the full 12% from 1 February 2025.",
+    ],
   },
   "IE": {
     "code": "IE",
@@ -7652,10 +9544,68 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Kolkata",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 4,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 3,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "gst",
+      "localName": "Goods and Services Tax (GST)",
+      "rates": [
+        {
+          "label": "merit",
+          "basisPoints": 500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "main rate for goods and services",
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 1200,
+          "from": "2022-01-01",
+          "to": "2025-09-22",
+          "appliesTo": "12% slab (retained only for bricks after 22 September 2025)",
+          "source": 3,
+        },
+        {
+          "label": "demerit",
+          "basisPoints": 2800,
+          "from": "2022-01-01",
+          "to": "2025-09-22",
+          "appliesTo": "28% slab",
+          "source": 3,
+        },
+        {
+          "label": "demerit",
+          "basisPoints": 4000,
+          "from": "2025-09-22",
+          "to": null,
+          "appliesTo": "sin and demerit goods (pan masala, aerated drinks, larger vehicles) and online gaming, betting and casinos",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Central Board of Indirect Taxes and Customs (CBIC)",
+      "url": "https://cbic-gst.gov.in",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -7675,10 +9625,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "GST Council (56th meeting, 3 September 2025): press release — two-slab structure of 5% and 18% with a 40% demerit rate, implemented from 22 September 2025; the 12% and 28% slabs withdrawn",
+        "url": "https://gstcouncil.gov.in/sites/default/files/2025-09/press_release_press_information_bureau_0.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear runs 1 April to 31 March (grade I, from the assessment cycle; the income tax department page was unreachable this session).",
+      "companyYearEndDefault is a 31 March app default for new entities (grade I), the common Indian financial year end.",
+      "Tobacco products remained in the old 28%-plus-cess structure after 22 September 2025 until compensation-cess obligations are discharged; gold and precious metals carry 3% and rough diamonds 0.25% (not modelled).",
+      "Lower-bound rows - merit (2022-01-01), standard (2022-01-01), reduced (2022-01-01), demerit (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "IO": {
     "code": "IO",
@@ -8158,10 +10119,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Jamaica",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "General Consumption Tax (GCT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Tax Administration Jamaica",
+      "url": "https://www.jamaicatax.gov.jm",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -8181,10 +10168,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+      "The 15% GCT rate has applied since 1 April 2020 (cut from 16.5%); a 25% rate applies to telephony services and 10% to hotel and tourism services (grade S, not modelled).",
+    ],
   },
   "JO": {
     "code": "JO",
@@ -8565,10 +10564,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Phnom_Penh",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Impuesto sur la valeur ajoutée / អាករលើតម្លៃបន្ថែម (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "General Department of Taxation (Cambodia)",
+      "url": "https://www.tax.gov.kh",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -8588,10 +10613,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "KI": {
     "code": "KI",
@@ -8605,10 +10641,36 @@ const Map<String, Map<String, Object?>> countryData = {
       "Pacific/Kanton",
       "Pacific/Kiritimati",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "Sales Tax",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1250,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Finance and Economic Development (Kiribati)",
+      "url": "https://www.mfed.gov.ki",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -8628,10 +10690,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Kiribati levies a retail sales tax rather than a VAT; the 12.5% figure is secondary-graded and the rate structure (goods and services components) should be confirmed with the ministry.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "KM": {
     "code": "KM",
@@ -8724,10 +10798,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/St_Kitts",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value Added Tax (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1700,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Department, St Kitts and Nevis",
+      "url": "https://www.sknird.com",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -8747,10 +10847,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+      "A reduced 10% rate applies to hotel accommodation and some supplies (grade S, not modelled).",
+    ],
   },
   "KP": {
     "code": "KP",
@@ -8966,10 +11078,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Cayman",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Cayman Islands Government",
+      "url": "https://www.gov.ky",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -8989,10 +11118,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The Cayman Islands levy no VAT, GST or sales tax; revenue comes from import duties, company fees and stamp duty (grade S).",
+    ],
   },
   "KZ": {
     "code": "KZ",
@@ -9128,10 +11267,44 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Vientiane",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "ພາສີມູນຄ່າເພີ່ມ (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 700,
+          "from": "2022-01-01",
+          "to": "2024-05-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2024-05-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Tax Department, Ministry of Finance (Laos)",
+      "url": "https://lao.customs.gov.la",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -9151,10 +11324,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Lao Trade Portal: Ordinance on Value-Added Tax rate (amendment) No. 003/POL of 19 March 2024 — rate rises from 7% back to 10%; Ministry of Finance Notice 1360 applied 10% from 1 May 2024",
+        "url": "https://www.laotradeportal.gov.la/en-gb/site/display/2800",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Laos cut VAT from 10% to 7% on 1 January 2022 (Presidential Decree 231/P, COVID relief — pre-window) and restored 10% from 1 May 2024 (Ordinance 003/POL plus MOF Notice 1360).",
+    ],
   },
   "LB": {
     "code": "LB",
@@ -9253,10 +11436,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/St_Lucia",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value Added Tax (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1250,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Board, Saint Lucia",
+      "url": "https://ird.gov.lc",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -9276,10 +11485,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+      "A reduced 10% rate applies to hotel accommodation and some tourism supplies (grade S, not modelled).",
+    ],
   },
   "LI": {
     "code": "LI",
@@ -9425,10 +11646,68 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Colombo",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value Added Tax (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 800,
+          "from": "2022-01-01",
+          "to": "2022-06-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1200,
+          "from": "2022-06-01",
+          "to": "2022-09-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-09-01",
+          "to": "2024-01-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2024-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "financial",
+          "basisPoints": 1800,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "supply of financial services by specified institutions",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Department (Sri Lanka)",
+      "url": "https://www.ird.gov.lk",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -9448,10 +11727,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Inland Revenue Department Sri Lanka: Value Added Tax — standard rate 8% to 31 May 2022, 12% from 1 June 2022, 15% from 1 September 2022 and 18% from 1 January 2024; financial services 18% from 1 January 2022",
+        "url": "https://www.ird.gov.lk/en/type%20of%20taxes/sitepages/value%20added%20tax%20(vat).aspx",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "The tax year is the calendar year from 2024 (grade I); the 2023/24 year was the transitional nine months from 1 April to 31 December 2023, which the schema cannot express as a start-month/day pair.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Sri Lanka raised VAT three times during the window (June 2022, September 2022, January 2024) under IMF-programme revenue measures; the 8% row is a lower bound from the start of the window (the 8% rate dated from December 2019).",
+    ],
   },
   "LR": {
     "code": "LR",
@@ -10529,10 +12818,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Marigot",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Service de la fiscalité de Saint-Martin",
+      "url": "https://www.com-saint-martin.fr",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10552,10 +12858,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "French customs (douane.gouv.fr): octroi de mer — the import levy that applies in the French overseas collectivities instead of VAT",
+        "url": "https://www.douane.gouv.fr/fiche/octroi-de-mer",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The French side of Saint-Martin applies no VAT; consumption is taxed through the octroi de mer import levy at product-specific rates (grade S, not modelled). The Dutch side (Sint Maarten) levies its own turnover tax.",
+    ],
   },
   "MG": {
     "code": "MG",
@@ -10642,10 +12958,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "Pacific/Majuro",
       "Pacific/Kwajalein",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Finance (Republic of the Marshall Islands)",
+      "url": "https://www.rmi.gov.mh",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10665,10 +12998,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The Marshall Islands levy no VAT or sales tax (grade S); revenue comes from gross revenue tax, import duties and licence fees.",
+    ],
   },
   "MK": {
     "code": "MK",
@@ -10854,10 +13197,60 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Yangon",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 4,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 3,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "Commercial Tax (CT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 300,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "hotel and tourism services; construction and sale of buildings",
+          "source": 3,
+        },
+        {
+          "label": "higher",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "internet services",
+          "source": 3,
+        },
+        {
+          "label": "reduced2",
+          "basisPoints": 100,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "importation and sale of gold jewellery",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Internal Revenue Department (Myanmar)",
+      "url": "https://ird.gov.mm",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10877,10 +13270,28 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Union Taxation Law 2023 (30 March 2023, English text via the Myanmar Trade Portal) — commercial tax 5% general, 3% hotels/tourism and building sales, 15% internet services, 1% gold jewellery",
+        "url": "https://www.myanmartradeportal.gov.mm/uploads/legals/2024/7/Union%20Taxation%20Law%202023%20Eng.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "VDB Loi Myanmar tax booklet 2023-24 / 2024-25 — financial year runs 1 April to 31 March for all sectors; commercial tax rates summary",
+        "url": "https://www.vdb-loi.com/wp-content/uploads/2024/07/Myanmar-Tax-Booklet_2023-2024_2024-2025-.pdf",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "Myanmar's financial year runs 1 April to 31 March (grade S, VDB Loi booklet); the individual tax year and company default year end follow it. The pre-2018 October-September year is outside the window.",
+      "companyYearEndDefault is a 31 March app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Commercial tax rates are set annually by the Union Taxation Law; the 2023 law's rates (in force through the 2024-25 financial year) are recorded as a lower bound from 1 January 2022, the earliest date a source confirms for the window.",
+      "A MMK 20,000 per-SIM levy and 8% export electricity rate are not modelled. Grade S where read from the VDB Loi or PwC summaries rather than the law text.",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), higher (2022-01-01), reduced2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "MN": {
     "code": "MN",
@@ -10893,10 +13304,36 @@ const Map<String, Map<String, Object?>> countryData = {
       "Asia/Ulaanbaatar",
       "Asia/Hovd",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Нэмүү өртгийн албан татвар (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "General Department of Taxation (Mongolia)",
+      "url": "https://tax.mn",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10916,10 +13353,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "MO": {
     "code": "MO",
@@ -10931,10 +13379,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Macau",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direcção dos Serviços de Finanças (DSF, Macao)",
+      "url": "https://www.dsf.gov.mo",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10954,10 +13419,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Macao levies no VAT, GST or sales tax (grade S); the DSF collects profits, salaries, professional and stamp taxes.",
+    ],
   },
   "MP": {
     "code": "MP",
@@ -10969,10 +13444,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Saipan",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Department of Finance, Commonwealth of the Northern Mariana Islands",
+      "url": "https://www.gov.mp",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -10992,10 +13484,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The Northern Mariana Islands levy no VAT or general sales tax (grade S); a business gross revenue tax and excise taxes apply instead.",
+    ],
   },
   "MQ": {
     "code": "MQ",
@@ -11007,10 +13509,52 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Martinique",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "TVA (régime d'outre-mer) + octroi de mer",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 850,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 210,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "basic products",
+          "source": 3,
+        },
+        {
+          "label": "reduced2",
+          "basisPoints": 105,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "newspapers",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction générale des finances publiques (Martinique)",
+      "url": "https://www.impots.gouv.fr",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11030,10 +13574,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Martinique applies French VAT under the overseas derogation with a reduced standard rate (8.5%, 2.1% and 1.05% reduced tiers) plus the octroi de mer import levy at product-specific rates (octroi not modelled).",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), reduced2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "MR": {
     "code": "MR",
@@ -11119,10 +13675,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Montserrat",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Montserrat Revenue Authority",
+      "url": "https://www.mra.ms",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11142,10 +13715,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Montserrat levies no VAT or sales tax; the Montserrat Revenue Authority collects income tax, property tax, import duties and licence fees (grade S).",
+    ],
   },
   "MT": {
     "code": "MT",
@@ -11373,10 +13956,68 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Indian/Maldives",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "gst",
+      "localName": "Goods and Services Tax (GST)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 600,
+          "from": "2022-01-01",
+          "to": "2023-01-01",
+          "appliesTo": "general sector supplies (tourism sector supplies carry the tourism rate)",
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 800,
+          "from": "2023-01-01",
+          "to": null,
+          "appliesTo": "general sector supplies (tourism sector supplies carry the tourism rate)",
+          "source": 3,
+        },
+        {
+          "label": "tourism",
+          "basisPoints": 1200,
+          "from": "2022-01-01",
+          "to": "2023-01-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "tourism",
+          "basisPoints": 1600,
+          "from": "2023-01-01",
+          "to": "2025-07-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "tourism",
+          "basisPoints": 1700,
+          "from": "2025-07-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Maldives Inland Revenue Authority (MIRA)",
+      "url": "https://www.mira.gov.mv",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11396,10 +14037,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "MIRA: Goods and Services Tax overview — general sector 6% and tourism sector 12% to 31 December 2022; 8% and 16% from 1 January 2023; tourism 17% from 1 July 2025 (7th amendment to the GST Act)",
+        "url": "https://www.mira.gov.mv/Pages/View/gst",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The 6th amendment to the GST Act raised the general rate from 6% to 8% and tourism from 12% to 16% from 1 January 2023; the 7th amendment raised tourism to 17% from 1 July 2025.",
+      "Lower-bound rows - general (2022-01-01), tourism (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "MW": {
     "code": "MW",
@@ -11620,10 +14272,68 @@ const Map<String, Map<String, Object?>> countryData = {
       "Asia/Kuala_Lumpur",
       "Asia/Kuching",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "Sales and Service Tax (SST)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 600,
+          "from": "2022-01-01",
+          "to": "2024-03-01",
+          "appliesTo": "service tax on taxable services",
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 800,
+          "from": "2024-03-01",
+          "to": null,
+          "appliesTo": "service tax on taxable services; food and beverage, telecommunications, parking and logistics services remain at 6%",
+          "source": 3,
+        },
+        {
+          "label": "service",
+          "basisPoints": 600,
+          "from": "2024-03-01",
+          "to": null,
+          "appliesTo": "food and beverage, telecommunications, parking and logistics services (retained 6% rate)",
+          "source": 3,
+        },
+        {
+          "label": "sales",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "sales tax on goods",
+          "source": 3,
+        },
+        {
+          "label": "salesReduced",
+          "basisPoints": 500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "certain goods including basic foodstuffs, construction supplies and telecoms/IT equipment",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Royal Malaysian Customs Department (RMCD)",
+      "url": "https://mysst.customs.gov.my",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11643,10 +14353,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "MySST (Royal Malaysian Customs Department): background — service tax 6% from 1 September 2018 to 29 February 2024 and 8% from 1 March 2024 (F&B, parking, logistics and telecoms stay 6%); scope expanded 1 July 2025",
+        "url": "https://mysst.customs.gov.my/background/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Malaysia's SST is a single-stage tax, not a VAT: the 8% service tax (from 1 March 2024, Budget 2024) and 10%/5% sales tax. New service categories added from 1 July 2025 (financial services 8%; construction, private healthcare, education and rental at 6%) are not modelled.",
+      "Lower-bound rows - service (2022-01-01), sales (2022-01-01), salesReduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "MZ": {
     "code": "MZ",
@@ -11822,10 +14543,60 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Noumea",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Taxe générale sur la consommation (TGC)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1100,
+          "from": "2018-10-01",
+          "to": null,
+          "appliesTo": "taxe normale",
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 300,
+          "from": "2018-10-01",
+          "to": null,
+          "appliesTo": "locally produced or transformed goods, passenger transport and reimbursed medicines",
+          "source": 4,
+        },
+        {
+          "label": "specific",
+          "basisPoints": 600,
+          "from": "2018-10-01",
+          "to": null,
+          "appliesTo": "services generally",
+          "source": 4,
+        },
+        {
+          "label": "higher",
+          "basisPoints": 2200,
+          "from": "2018-10-01",
+          "to": null,
+          "appliesTo": "alcohol, sugary drinks, tobacco, jewellery, vehicles and other listed goods",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction des Services Fiscaux (New Caledonia)",
+      "url": "https://dsf.gouv.nc",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11845,10 +14616,26 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Direction des Services Fiscaux (New Caledonia): la Taxe générale sur la consommation (TGC) — VAT-type tax since 1 October 2018 with four rates (3%, 6%, 11%, 22%)",
+        "url": "https://dsf.gouv.nc/professionnels-impots-et-taxes/la-taxe-generale-sur-la-consommation-tgc",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "CCI Nouvelle-Calédonie: TGC rates — 3% reduced, 6% specific (services), 11% normal, 22% higher, definitive since 1 October 2018",
+        "url": "https://www.cci.nc/entreprises/creer-une-entreprise/connaitre-la-fiscalite-et-les-taux-de-la-tgc",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-02-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "TGC rates have applied since 1 October 2018. A simplification reform under consultation in October-November 2026 would replace the four rates with two (0% and 10%, or 2% and 9%); consultations closed 20 November 2026, so re-check before the rates move.",
+    ],
   },
   "NE": {
     "code": "NE",
@@ -11940,10 +14727,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Norfolk",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Norfolk Island Administration",
+      "url": "https://www.norfolkisland.gov.nf",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -11963,10 +14767,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Australian Taxation Office: Norfolk Island — Australian taxation (income tax and super guarantee) applies from 1 July 2016",
+        "url": "https://www.ato.gov.au/businesses-and-organisations/small-business-benchmarks/in-detail/norfolk-island",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Norfolk Island moved into the Australian income tax system from 1 July 2016 but Australia's GST does not apply there and the island levies no broad consumption tax of its own (grade S/I).",
+    ],
   },
   "NG": {
     "code": "NG",
@@ -12080,10 +14894,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Managua",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Impuesto al Valor Agregado (IVA)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Dirección General de Ingresos, Ministerio de Hacienda y Crédito Público",
+      "url": "https://www.mhcp.gob.ni",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12103,10 +14943,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "NL": {
     "code": "NL",
@@ -12333,10 +15184,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Kathmandu",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 7,
+      "startDay": 17,
+      "calendar": "bikram-sambat",
+    },
+    "companyYearEndDefault": {
+      "month": 7,
+      "day": 16,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "मूल्य अभिवृद्धि कर (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1300,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Department (Nepal)",
+      "url": "https://ird.gov.np",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12356,10 +15233,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear follows the Bikram Sambat fiscal year starting Shrawan 1, which falls on 16 or 17 July; the model pins 17 July (grade I, the recent-year start date).",
+      "companyYearEndDefault approximates the fiscal year end at 16 July (grade I); the true date alternates between 15/16 and 16/17 July.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "NR": {
     "code": "NR",
@@ -12371,10 +15259,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Nauru",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Nauru Revenue Office",
+      "url": "https://www.nauru.gov.nr",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12394,10 +15299,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Nauru levies no VAT or sales tax (grade S); revenue comes from business tax, employment tax and visa and licence fees.",
+    ],
   },
   "NU": {
     "code": "NU",
@@ -12409,10 +15324,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Niue",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 4,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 3,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "Consumption Tax",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1250,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Niue Treasury, Government of Niue",
+      "url": "https://niue.gov.nu",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12432,10 +15373,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear runs 1 April to 31 March (grade I, aligned to New Zealand's tax year which applies to Niue residents).",
+      "companyYearEndDefault is a 31 March app default for new entities (grade I).",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "NZ": {
     "code": "NZ",
@@ -12629,10 +15581,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Panama",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Impuesto de Transferencia de Bienes Muebles y Prestación de Servicios (ITBMS)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 700,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Dirección General de Ingresos, Ministerio de Economía y Finanzas",
+      "url": "https://www.dgi.mef.gob.pa",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12652,10 +15630,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+      "Higher ITBMS rates are not modelled: 10% on hotel accommodation and alcohol, 15% on tobacco (grade S).",
+    ],
   },
   "PE": {
     "code": "PE",
@@ -12667,10 +15657,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Lima",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Impuesto General a las Ventas (IGV, incl. IPM)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "combined IGV and municipal promotion tax (IPM)",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Superintendencia Nacional de Aduanas y de Administración Tributaria (SUNAT)",
+      "url": "https://www.gob.pe/sunat",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12690,10 +15706,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "SUNAT: Impuesto General a las Ventas — 2026 rate 15.5% IGV plus 2.5% IPM, total 18% (Ley 32387 shifts half a point a year from IGV to IPM 2026-2029)",
+        "url": "https://www.gob.pe/institucion/sunat/pages/7910-impuesto-general-a-las-ventas-igv",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The combined rate paid at the till is 18% throughout the window; Ley 32387 (published 16 June 2025) only shifts half a point a year between the IGV and the municipal IPM from 1 January 2026 (IGV 15.5% plus IPM 2.5% in 2026), so no rate row changes. A reduced 10.5% combined rate (2026) applies to qualifying micro/small restaurants and hotels (not modelled).",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "PF": {
     "code": "PF",
@@ -12707,10 +15734,52 @@ const Map<String, Map<String, Object?>> countryData = {
       "Pacific/Marquesas",
       "Pacific/Gambier",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Taxe sur la valeur ajoutée (TVA)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1600,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 1300,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "services",
+          "source": 3,
+        },
+        {
+          "label": "reduced2",
+          "basisPoints": 500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "various services and imports",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Direction des Finances Publiques (French Polynesia)",
+      "url": "https://www.polynesie-francaise.prefecture.gouv.fr",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12730,10 +15799,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "French Polynesia levies its own TVA outside the French VAT system; the 16% standard rate is secondary-graded for this pass.",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), reduced2 (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "PG": {
     "code": "PG",
@@ -12746,10 +15827,36 @@ const Map<String, Map<String, Object?>> countryData = {
       "Pacific/Port_Moresby",
       "Pacific/Bougainville",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "gst",
+      "localName": "Goods and Services Tax (GST)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Internal Revenue Commission (Papua New Guinea)",
+      "url": "https://www.irc.gov.pg",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12769,10 +15876,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+      "The 10% GST rate has applied since 2003 (grade S).",
+    ],
   },
   "PH": {
     "code": "PH",
@@ -12784,10 +15903,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Manila",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value-Added Tax (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1200,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Bureau of Internal Revenue (BIR)",
+      "url": "https://www.bir.gov.ph",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12807,10 +15952,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "A 12% VAT has applied since 2006; legislative proposals to cut it to 10% were still bills, not law, as at the research date.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "PK": {
     "code": "PK",
@@ -12822,10 +15979,44 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Karachi",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 7,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 6,
+      "day": 30,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Sales Tax",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1700,
+          "from": "2022-01-01",
+          "to": "2023-02-15",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1800,
+          "from": "2023-02-15",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Federal Board of Revenue (FBR)",
+      "url": "https://www.fbr.gov.pk",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -12845,10 +16036,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "FBR: S.R.O. 179(I)/2023 of 14 February 2023 — sales tax rate enhanced from 17% to 18% (published 15 February 2023; ratified by the Finance (Supplementary) Act 2023)",
+        "url": "https://download1.fbr.gov.pk/SROs/20232151124337684SRO179-2023.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "EY Global Tax Alert: Pakistan increases Sales Tax and Federal Excise Tax rates (18% effective 14 February 2023; 25% higher rate for a range of goods from 8 March 2023)",
+        "url": "https://taxnews.ey.com/news/2023-0484-pakistan-increases-sales-tax-and-federal-excise-tax-rates",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear runs 1 July to 30 June (grade I, from the assessment cycle; FBR's own page was unreachable this session).",
+      "companyYearEndDefault is a 30 June app default for new entities (grade I), not a statutory requirement.",
+      "The 18% rate is charged from 15 February 2023, the date S.R.O. 179(I)/2023 (dated 14 February) was published; a 25% higher rate applies to listed luxury goods and higher-value mobile phones from 8 March 2023 (not modelled). Provincial sales taxes on services are separate.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "PL": {
     "code": "PL",
@@ -13013,10 +16221,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Pitcairn",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Government of the Pitcairn Islands",
+      "url": "https://www.government.pn",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -13036,10 +16261,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Government of the Pitcairn Islands (no VAT, GST or sales tax; the territory funds itself through stamp duty, landing fees and sales of coins and stamps)",
+        "url": "https://www.government.pn",
+        "grade": "inferred",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Pitcairn levies no VAT, GST or sales tax (grade I — consistent with the territory's published structure, but no rate page was reachable this session).",
+    ],
   },
   "PR": {
     "code": "PR",
@@ -13051,10 +16286,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Puerto_Rico",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "Impuesto sobre Ventas y Uso (SUT, sales and use tax)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1150,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "10.5% commonwealth rate plus 1% municipal rate",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Departamento de Hacienda de Puerto Rico",
+      "url": "https://hacienda.pr.gov",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -13074,10 +16335,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Puerto Rico runs its own sales and use tax (11.5% since July 2015) alongside United States federal taxes; a reduced 4% rate applies to professional services (grade S, not modelled).",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "PS": {
     "code": "PS",
@@ -13291,10 +16564,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Palau",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "gst",
+      "localName": "Palau Goods and Services Tax (PGST)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2023-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Finance, Republic of Palau",
+      "url": "https://www.palaugov.pw",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -13314,10 +16613,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Palau had no general consumption tax before the PGST began on 1 January 2023, so rate coverage starts there. A 4% gross revenue tax continues to apply alongside (grade S, not modelled).",
+    ],
   },
   "PY": {
     "code": "PY",
@@ -13329,10 +16639,44 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Asuncion",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Impuesto al Valor Agregado (IVA)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "basic foodstuffs, some real estate and financial services",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Dirección Nacional de Ingresos Tributarios (DNIT)",
+      "url": "https://www.dnit.gov.py",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -13352,10 +16696,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "COVID-era reduced rates on transport and tourism (5%) lapsed during 2022 and are not modelled.",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "QA": {
     "code": "QA",
@@ -14007,10 +17363,44 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Guadalcanal",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "Sales Tax and Goods Tax",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "sales tax on the scheduled services and goods tax on locally manufactured goods",
+          "source": 3,
+        },
+        {
+          "label": "goodsImport",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "goods tax on imported goods (collected at the port)",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Division, Ministry of Finance and Treasury (Solomon Islands)",
+      "url": "https://www.ird.gov.sb",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -14030,10 +17420,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Solomon Islands Inland Revenue Division: tax legislation index (Goods Tax Act Cap 122 and Sales Tax Act Cap 125 in force; no VAT Act) with the published rate tables",
+        "url": "https://www.ird.gov.sb/tax-legislation/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "IMF Country Report 08/359 (Solomon Islands): goods tax 15% on imports and 10% on locally manufactured goods; sales tax 10% on a closed schedule of services",
+        "url": "https://www.imf.org/-/media/websites/imf/imported-full-text-pdf/external/pubs/ft/scr/2008/_cr08359.pdf",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Solomon Islands has no VAT: the Sales Tax Act charges 10% on a closed schedule of about 22 named services, and the Goods Tax Act charges 15% on imported goods and 10% on prescribed local manufactures at wholesale, unrecoverably. A 15% single-rate VAT Bill was before Parliament's committee as at March 2026 and is not law.",
+      "Lower-bound rows - standard (2022-01-01), goodsImport (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "SC": {
     "code": "SC",
@@ -14317,10 +17724,52 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Singapore",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "gst",
+      "localName": "Goods and Services Tax (GST)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 700,
+          "from": "2022-01-01",
+          "to": "2023-01-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 800,
+          "from": "2023-01-01",
+          "to": "2024-01-01",
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 900,
+          "from": "2024-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Authority of Singapore (IRAS)",
+      "url": "https://www.iras.gov.sg",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -14340,10 +17789,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "IRAS: Current GST rates — 8% from 1 January 2023 and 9% from 1 January 2024 (announced in Budget 2022)",
+        "url": "https://www.iras.gov.sg/taxes/goods-services-tax-(gst)/basics-of-gst/current-gst-rates",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "GST rose 7% to 8% on 1 January 2023 and to 9% on 1 January 2024 (IRAS); the 7% rate had applied since 2007, so its row starts at the window edge as a lower bound.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "SH": {
     "code": "SH",
@@ -15013,10 +18473,60 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Paramaribo",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Belasting over de Toegevoegde Waarde (BTW)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1200,
+          "from": "2022-01-01",
+          "to": "2023-01-01",
+          "appliesTo": "turnover tax (omzetbelasting) — goods and services",
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2023-01-01",
+          "to": null,
+          "appliesTo": "value added tax (BTW)",
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 500,
+          "from": "2023-01-01",
+          "to": null,
+          "appliesTo": "gasoline",
+          "source": 4,
+        },
+        {
+          "label": "higher",
+          "basisPoints": 2500,
+          "from": "2023-01-01",
+          "to": null,
+          "appliesTo": "luxury goods (annex 3)",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Belastingdienst Suriname",
+      "url": "https://belastingdienst.sr",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -15036,10 +18546,26 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Staatsblad 2022 No. 121: Wet Belasting over de Toegevoegde Waarde 2022 — 10% from 1 January 2023, 25% on annex-3 luxury goods, replacing the Wet Omzetbelasting 1997",
+        "url": "https://belastingdienst.sr/wp-content/uploads/2026/01/BTWS.B.-2022-no.-121-WET-BTW-2022.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Communicatiedienst Suriname: BTW in werking per 1 januari 2023 — general rate 10%, 5% on gasoline, 25% on luxury goods; turnover tax was 12%",
+        "url": "http://cds.gov.sr/de-boodschap/suriname-laatste-land-in-regio-met-btw/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Suriname replaced its 12% turnover tax with a 10% VAT on 1 January 2023 (Staatsblad 2022 No. 121); 0% applies to basic necessities, exports, and oil, gas and mining supplies (zero-rate rows not modelled).",
+    ],
   },
   "SS": {
     "code": "SS",
@@ -15200,10 +18726,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/El_Salvador",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Impuesto al Valor Agregado (IVA)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1300,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministerio de Hacienda de El Salvador",
+      "url": "https://www.mh.gob.sv",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -15223,10 +18775,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "SX": {
     "code": "SX",
@@ -15238,10 +18801,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Lower_Princes",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "Turnover Tax (TOT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 600,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Belastingdienst Sint Maarten",
+      "url": "https://www.sintmaartengov.org",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -15261,10 +18850,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Sint Maarten's turnover tax rose from 5% to 6% on 1 January 2022 (grade S); the 5% rate falls outside the coverage window.",
+    ],
   },
   "SY": {
     "code": "SY",
@@ -15428,10 +19028,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Grand_Turk",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Turks and Caicos Islands Government",
+      "url": "https://www.gov.tc",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -15451,10 +19068,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The Turks and Caicos Islands levy no VAT, GST or sales tax; revenue comes from customs duties, accommodation tax and stamp duty (grade S).",
+    ],
   },
   "TD": {
     "code": "TD",
@@ -15563,8 +19190,15 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Indian/Kerguelen",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
     "indirectTax": {
       "kind": "none",
       "localName": null,
@@ -15574,8 +19208,8 @@ const Map<String, Map<String, Object?>> countryData = {
       "subdivisions": [],
     },
     "authority": {
-      "name": "Terres australes et antarctiques françaises (TAAF)",
-      "url": "https://www.taaf.fr",
+      "name": "Administration des Terres australes et antarctiques françaises",
+      "url": "https://taaf.fr",
     },
     "sources": [
       {
@@ -15597,17 +19231,17 @@ const Map<String, Map<String, Object?>> countryData = {
         "retrievedOn": "2026-11-13",
       },
       {
-        "title": "TAAF — Terres australes et antarctiques françaises (official site of the French Southern and Antarctic Lands)",
-        "url": "https://www.taaf.fr",
-        "grade": "secondary",
+        "title": "No tax system: French Southern and Antarctic Lands has no permanent population or economy and no taxes of its own",
+        "url": "https://www.iso.org/obp/ui/#iso:code:3166:TF",
+        "grade": "inferred",
         "retrievedOn": "2026-11-13",
       },
     ],
     "verifiedOn": "2026-11-13",
     "recheckBy": "2027-05-13",
     "caveats": [
-      "The French Southern Territories have no permanent civilian population and no resident tax system (grade I); no VAT, GST or sales tax applies.",
-      "individualTaxYear and companyYearEndDefault are left null: there is no personal or corporate tax year to record (grade I, no primary source reachable this session).",
+      "individualTaxYear and companyYearEndDefault are calendar defaults for want of any tax system (grade I); the territory has no resident taxpayers.",
+      "indirectTax is none: the territory has no permanent resident population and levies no consumption taxes (grade I).",
     ],
   },
   "TG": {
@@ -15700,10 +19334,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Bangkok",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "ภาษีมูลค่าเพิ่ม (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 700,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "6.3% VAT plus 0.7% municipal tax; statutory rate 10% reduced by royal decree",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "The Revenue Department (Thailand)",
+      "url": "https://www.rd.go.th",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -15723,10 +19383,27 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Royal Thai Government press release, 27 July 2026: Cabinet extends the reduced 7% VAT rate (6.3% plus 0.7% local tax) to 30 September 2027 by Royal Decree No. 807",
+        "url": "https://www.thaigov.go.th/th/news/166956",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "KPMG tax news flash: Thailand — reduced 7% VAT rate extended through September 2027 (Royal Decree No. 807 of 20 August 2026)",
+        "url": "https://kpmg.com/us/en/taxnewsflash/news/2026/09/thailand-reduced-7-percent-vat-rate-extended-through-september-2027.html",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-09-15",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The statutory VAT rate is 10%; successive royal decrees have reduced it to 7% (6.3% plus 0.7% municipal tax) continuously since 1999, most recently to 30 September 2027 (Royal Decree No. 807). The medium-term fiscal framework plans a rise from fiscal 2028.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "TJ": {
     "code": "TJ",
@@ -15857,10 +19534,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Fakaofo",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 4,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 3,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Tokelau Administration (Government of New Zealand)",
+      "url": "https://www.tokelau.org.nz",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -15880,10 +19574,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "New Zealand Ministry of Foreign Affairs and Trade: Tokelau (administered by New Zealand; no VAT, GST or income tax)",
+        "url": "https://www.mfat.govt.nz/en/countries-and-regions/pacific/tokelau/",
+        "grade": "inferred",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is modelled as 1 April to 31 March, following New Zealand's tax year (grade I); Tokelau itself levies no income tax.",
+      "companyYearEndDefault is a 31 March app default for new entities (grade I).",
+      "Tokelau levies no VAT, GST or sales tax; services are funded by New Zealand appropriations, fisheries fees and stamps (grade I).",
+    ],
   },
   "TL": {
     "code": "TL",
@@ -15895,10 +19599,44 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Dili",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "Services tax and import duty",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "services tax",
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 250,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "import duty on goods",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Autoridade Tributária de Timor-Leste",
+      "url": "https://www.mof.gov.tl",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -15918,10 +19656,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Timor-Leste has no VAT: consumption is taxed by a 5% services tax and a 2.5% import duty on goods.",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "TM": {
     "code": "TM",
@@ -16113,10 +19863,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Tongatapu",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Consumption Tax",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Department, Ministry of Revenue (Tonga)",
+      "url": "https://www.tonga.gov.to",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -16136,10 +19912,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "TR": {
     "code": "TR",
@@ -16282,10 +20069,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Port_of_Spain",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value Added Tax (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1250,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Division, Ministry of Finance (Trinidad and Tobago)",
+      "url": "https://www.ird.gov.tt",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -16305,10 +20118,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "TV": {
     "code": "TV",
@@ -16320,10 +20144,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Funafuti",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "salesTax",
+      "localName": "Sales Tax",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 700,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "most goods and services; rice, flour, sugar, cooking oils and other essentials exempt",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Finance (Tuvalu)",
+      "url": "https://www.gov.tv",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -16343,10 +20193,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Tuvalu's sales tax is secondary-graded for this pass; the rate has been reported at both 5% and 7% in recent years, so treat 7% as needing confirmation.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "TW": {
     "code": "TW",
@@ -16358,10 +20220,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Taipei",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "加值型營業稅 (Value-added Business Tax)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry of Finance (Taiwan)",
+      "url": "https://www.mof.gov.tw",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -16381,10 +20269,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "The 5% rate has applied since 2011; the Value-added and Non-value-added Business Tax Act page on law.moj.gov.tw renders only via script and could not be read this session (grade S).",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "TZ": {
     "code": "TZ",
@@ -16652,10 +20552,27 @@ const Map<String, Map<String, Object?>> countryData = {
       "Pacific/Midway",
       "Pacific/Wake",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "United States Fish and Wildlife Service",
+      "url": "https://www.fws.gov",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -16675,10 +20592,19 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "No tax system: United States Minor Outlying Islands has no permanent population or economy and no taxes of its own",
+        "url": "https://www.iso.org/obp/ui/#iso:code:3166:UM",
+        "grade": "inferred",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear and companyYearEndDefault are calendar defaults for want of any tax system (grade I); the territory has no resident taxpayers.",
+      "indirectTax is none: the islands have no permanent population and no taxes of their own (grade I).",
+    ],
   },
   "US": {
     "code": "US",
@@ -16711,7 +20637,703 @@ const Map<String, Map<String, Object?>> countryData = {
       "rates": [],
       "registrationThreshold": null,
       "returnFrequency": null,
-      "subdivisions": [],
+      "subdivisions": [
+        {
+          "code": "US-AK",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 0,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-AL",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 400,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-AR",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 650,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-AZ",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 560,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-CA",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 725,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-CO",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 290,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-CT",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 635,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-DC",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 600,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-DE",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 0,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-FL",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 600,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-GA",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 400,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-HI",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 400,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-IA",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 600,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-ID",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 600,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-IL",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 625,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-IN",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 700,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-KS",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 650,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-KY",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 600,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-LA",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 445,
+              "from": "2022-01-01",
+              "to": "2025-01-01",
+              "appliesTo": null,
+              "source": 18,
+            },
+            {
+              "label": "standard",
+              "basisPoints": 500,
+              "from": "2025-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 18,
+            },
+          ],
+        },
+        {
+          "code": "US-MA",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 625,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-MD",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 600,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-ME",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 550,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-MI",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 600,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-MN",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 688,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-MO",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 423,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-MS",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 700,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-MT",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 0,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-NC",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 475,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-ND",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 500,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-NE",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 550,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-NH",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 0,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-NJ",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 663,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-NM",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 513,
+              "from": "2022-01-01",
+              "to": "2022-07-01",
+              "appliesTo": "state GRT including the pre-cut 5.125% rounded to 513bp (schema stores integer hundredths)",
+              "source": 17,
+            },
+            {
+              "label": "standard",
+              "basisPoints": 500,
+              "from": "2022-07-01",
+              "to": "2023-07-01",
+              "appliesTo": null,
+              "source": 17,
+            },
+            {
+              "label": "standard",
+              "basisPoints": 488,
+              "from": "2023-07-01",
+              "to": null,
+              "appliesTo": "state GRT of 4.875% rounded to 488bp (schema stores integer hundredths)",
+              "source": 17,
+            },
+          ],
+        },
+        {
+          "code": "US-NV",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 685,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-NY",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 400,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-OH",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 575,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-OK",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 450,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-OR",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 0,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-PA",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 600,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-RI",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 700,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-SC",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 600,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-SD",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 450,
+              "from": "2022-01-01",
+              "to": "2023-07-01",
+              "appliesTo": null,
+              "source": 16,
+            },
+            {
+              "label": "standard",
+              "basisPoints": 420,
+              "from": "2023-07-01",
+              "to": null,
+              "appliesTo": "reduced by HB 1137; rises back to 4.5% on 1 July 2027 under its sunset clause",
+              "source": 16,
+            },
+          ],
+        },
+        {
+          "code": "US-TN",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 700,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-TX",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 625,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-UT",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 610,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-VA",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 530,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-VT",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 600,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-WA",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 650,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-WI",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 500,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-WV",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 600,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+        {
+          "code": "US-WY",
+          "rates": [
+            {
+              "label": "standard",
+              "basisPoints": 400,
+              "from": "2022-01-01",
+              "to": null,
+              "appliesTo": null,
+              "source": 15,
+            },
+          ],
+        },
+      ],
     },
     "authority": {
       "name": "Internal Revenue Service (IRS)",
@@ -16736,13 +21358,112 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Tax Foundation: State and Local Sales Tax Rates, Midyear 2026 (state-level rates as of 1 July 2026, including mandatory statewide add-ons; cross-checked against the Index 2024 Table 16 rates as of 1 July 2023, which confirm the pre-change value for every state that moved after 2022)",
+        "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "South Dakota Department of Revenue: Department of Revenue Updates Tax System for Decrease in State Tax Rate (HB 1137: 4.5% to 4.2% from 1 July 2023, sunset 30 June 2027)",
+        "url": "https://dor.sd.gov/newsroom/department-of-revenue-updates-tax-system-for-decrease-in-state-tax-rate/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "New Mexico Taxation and Revenue Department: State portion of Gross Receipts Tax drops to 4.875% (two-step cut from 5.125% under 2022 legislation; second step 1 July 2023)",
+        "url": "https://www.tax.newmexico.gov/wp-content/uploads/2023/06/July-1-tax-changes.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Louisiana Department of Revenue, Revenue Information Bulletin 25-007: state sales tax rate 5% from 1 January 2025 (Act 11 of the 2024 Third Extraordinary Session)",
+        "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Tax Foundation: State and Local Sales Tax Rates, Midyear 2026 (state-level rates as of 1 July 2026, including mandatory statewide add-ons; cross-checked against the Index 2024 Table 16 rates as of 1 July 2023, which confirm the pre-change value for every state that moved after 2022)",
+        "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "South Dakota Department of Revenue: Department of Revenue Updates Tax System for Decrease in State Tax Rate (HB 1137: 4.5% to 4.2% from 1 July 2023, sunset 30 June 2027)",
+        "url": "https://dor.sd.gov/newsroom/department-of-revenue-updates-tax-system-for-decrease-in-state-tax-rate/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "New Mexico Taxation and Revenue Department: State portion of Gross Receipts Tax drops to 4.875% (two-step cut from 5.125% under 2022 legislation; second step 1 July 2023)",
+        "url": "https://www.tax.newmexico.gov/wp-content/uploads/2023/06/July-1-tax-changes.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Louisiana Department of Revenue, Revenue Information Bulletin 25-007: state sales tax rate 5% from 1 January 2025 (Act 11 of the 2024 Third Extraordinary Session)",
+        "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Tax Foundation: State and Local Sales Tax Rates, Midyear 2026 (state-level rates as of 1 July 2026, including mandatory statewide add-ons; cross-checked against the Index 2024 Table 16 rates as of 1 July 2023, which confirm the pre-change value for every state that moved after 2022)",
+        "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "South Dakota Department of Revenue: Department of Revenue Updates Tax System for Decrease in State Tax Rate (HB 1137: 4.5% to 4.2% from 1 July 2023, sunset 30 June 2027)",
+        "url": "https://dor.sd.gov/newsroom/department-of-revenue-updates-tax-system-for-decrease-in-state-tax-rate/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "New Mexico Taxation and Revenue Department: State portion of Gross Receipts Tax drops to 4.875% (two-step cut from 5.125% under 2022 legislation; second step 1 July 2023)",
+        "url": "https://www.tax.newmexico.gov/wp-content/uploads/2023/06/July-1-tax-changes.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Louisiana Department of Revenue, Revenue Information Bulletin 25-007: state sales tax rate 5% from 1 January 2025 (Act 11 of the 2024 Third Extraordinary Session)",
+        "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Tax Foundation: State and Local Sales Tax Rates, Midyear 2026 (state-level rates as of 1 July 2026, including mandatory statewide add-ons; cross-checked against the Index 2024 Table 16 rates as of 1 July 2023, which confirm the pre-change value for every state that moved after 2022)",
+        "url": "https://taxfoundation.org/data/all/state/2026-sales-tax-rates-midyear/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "South Dakota Department of Revenue: Department of Revenue Updates Tax System for Decrease in State Tax Rate (HB 1137: 4.5% to 4.2% from 1 July 2023, sunset 30 June 2027)",
+        "url": "https://dor.sd.gov/newsroom/department-of-revenue-updates-tax-system-for-decrease-in-state-tax-rate/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "New Mexico Taxation and Revenue Department: State portion of Gross Receipts Tax drops to 4.875% (two-step cut from 5.125% under 2022 legislation; second step 1 July 2023)",
+        "url": "https://www.tax.newmexico.gov/wp-content/uploads/2023/06/July-1-tax-changes.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Louisiana Department of Revenue, Revenue Information Bulletin 25-007: state sales tax rate 5% from 1 January 2025 (Act 11 of the 2024 Third Extraordinary Session)",
+        "url": "https://dam.ldr.la.gov/lawspolicies/RIB%2025-007%20-%20State%20Sales%20Tax%20Rate.pdf",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
     "verifiedOn": "2026-11-13",
     "recheckBy": "2027-05-13",
     "caveats": [
-      "The United States has no federal VAT or sales tax (grade I); state and local sales-tax base rates are subdivision data and arrive with task U4.",
+      "The United States has no federal VAT or sales tax (grade I); subdivision data records each state's base sales-tax rate only (Tax Foundation convention: mandatory statewide add-ons counted as state rate — California 7.25%, Utah 6.1%, Virginia 5.3%, Nevada 6.85%). Local county and city rates are not recorded; the user enters the combined rate on the receipt.",
       "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
       "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "State base-rate changes inside the window, dated from primary sources: New Mexico 5.125% to 5% on 1 July 2022 and to 4.875% on 1 July 2023; South Dakota 4.5% to 4.2% on 1 July 2023 (sunsets 30 June 2027); Louisiana 4.45% to 5% on 1 January 2025 (Act 11 of 2024; drops to 4.75% on 1 January 2030).",
+      "Non-integer state rates are rounded to whole basis points: Minnesota 6.875% (688), Missouri 4.225% (423), New Jersey 6.625% (663), New Mexico 5.125%/4.875% (513/488).",
+      "Lower-bound rows: unchanged states start at 2022-01-01 — the two Tax Foundation tables (as of 1 July 2023 and 1 July 2026) agree on every other state, so those rates are treated as in force throughout the window. Category-specific rates (grocery reductions in Illinois, Kansas, Oklahoma, Mississippi, Virginia and elsewhere) are not modelled.",
     ],
   },
   "UY": {
@@ -16755,10 +21476,44 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Montevideo",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Impuesto al Valor Agregado (IVA)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 2200,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "basic foodstuffs, tourist-related services, medicines and health",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Dirección General Impositiva (DGI, Uruguay)",
+      "url": "https://www.gub.uy/direccion-general-impositiva",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -16778,10 +21533,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Temporary reduced rates for tourism and hospitality ended in April 2026 and are not modelled (grade S).",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "UZ": {
     "code": "UZ",
@@ -16949,10 +21716,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/St_Vincent",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value Added Tax (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Department, St Vincent and the Grenadines",
+      "url": "https://ird.gov.vc",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -16972,10 +21765,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "VE": {
     "code": "VE",
@@ -16987,10 +21791,44 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Caracas",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Impuesto al Valor Agregado (IVA)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1600,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 800,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "foodstuffs, professional services, domestic air travel, construction",
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Servicio Nacional Integrado de Administración Aduanera y Tributaria (SENIAT)",
+      "url": "https://seniat.gob.ve",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -17010,10 +21848,22 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "Rate secondary (grade S): taken from VATCalc's 2026 global table because the authority's own rate pages were not reachable in this session; confirm against the authority before relying on a filing figure.",
+      "Venezuela's IVA rate has moved frequently by decree; the 16% general rate is confirmed in force across the coverage window by the cited secondary table only (grade S).",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "VG": {
     "code": "VG",
@@ -17025,10 +21875,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/Tortola",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Inland Revenue Department, British Virgin Islands",
+      "url": "https://www.bvi.gov.vg",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -17048,10 +21915,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The British Virgin Islands levy no VAT, GST or sales tax; revenue comes from payroll tax, customs duties and licence fees (grade S).",
+    ],
   },
   "VI": {
     "code": "VI",
@@ -17063,10 +21940,27 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "America/St_Thomas",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "none",
+      "localName": null,
+      "rates": [],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Bureau of Internal Revenue, US Virgin Islands",
+      "url": "https://bir.vi.gov",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -17086,10 +21980,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The US Virgin Islands levy no general sales tax; a gross receipts tax and excise taxes apply instead, and the territory mirrors United States federal income tax under the mirror code (grade S).",
+    ],
   },
   "VN": {
     "code": "VN",
@@ -17101,10 +22005,76 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Asia/Ho_Chi_Minh",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Thuế giá trị gia tăng (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": "2022-02-01",
+          "appliesTo": null,
+          "source": 5,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 800,
+          "from": "2022-02-01",
+          "to": "2023-01-01",
+          "appliesTo": "2-point cut under Resolution 43/2022/QH15 (Decree 15/2022)",
+          "source": 3,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 1000,
+          "from": "2023-01-01",
+          "to": "2023-07-01",
+          "appliesTo": "cut lapsed 1 January 2023 until Resolution 101/2023/QH15",
+          "source": 4,
+        },
+        {
+          "label": "standard",
+          "basisPoints": 800,
+          "from": "2023-07-01",
+          "to": null,
+          "appliesTo": "2-point cut under Resolutions 101/2023, 142/2024, 259/2024 and 204/2025 (Decrees 44, 72, 94, 204 and 174); lapses 31 December 2026 unless extended",
+          "source": 3,
+        },
+        {
+          "label": "reduced",
+          "basisPoints": 500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "essential goods and services (water, medical, education, public transport, and others)",
+          "source": 5,
+        },
+        {
+          "label": "standardExcluded",
+          "basisPoints": 1000,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": "telecommunications, financial activities, banking, securities, insurance, real estate, metal products, most mining, and goods and services subject to special consumption tax — never received the 2-point cut",
+          "source": 5,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "General Department of Taxation (Vietnam)",
+      "url": "https://gdt.gov.vn",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -17124,10 +22094,33 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Hanoi Tax Department (General Department of Taxation): Resolution 204/2025/QH15 — 2-point VAT cut (10% to 8%) from 1 July 2025 to 31 December 2026",
+        "url": "https://hanoi.gdt.gov.vn/wps/wcm/connect/HaNoi/site/news/cucthue/64b285a2-6cd5-4f69-a760-f4e8403ca1b6",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Allen & Gledhill: Vietnam reduces VAT rate to 8% from 1 July 2023 (Resolution 101/2023/QH15 and Decree 44/2023 — window 1 July to 31 December 2023, later extended through 2024)",
+        "url": "https://www.allenandgledhill.com/vn/perspectives/articles/25010/vnkh-vietnam-reduces-vat-rate-to-8-from-1-july-2023",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+        "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-01-15",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The statutory rates are 0%, 5% and 10%; the 8% rows record the temporary 2-point cuts on the 10% track: 1 February 2022 to 31 January 2023 (Res. 43/2022), lapsed 1 January to 30 June 2023, 1 July 2023 to 31 December 2024 (Res. 101/2023, extended by Decree 94/2023 and Res. 142/2024), 1 January to 30 June 2025 (Res. 259/2024) and 1 July 2025 to 31 December 2026 (Res. 204/2025). Extension into 2027 was still under review in November 2026, so the open 8% row may lapse on 31 December 2026.",
+      "Lower-bound rows - standard (2022-01-01), reduced (2022-01-01), standardExcluded (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "VU": {
     "code": "VU",
@@ -17139,10 +22132,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Efate",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value Added Tax (VAT)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2022-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Customs and Inland Revenue (Vanuatu)",
+      "url": "https://customsinlandrevenue.gov.vu",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -17162,10 +22181,21 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Vanuatu Customs and Inland Revenue: Value Added Tax — imposed at 15% on most goods and services (rate increased to 15% in 2018)",
+        "url": "https://customsinlandrevenue.gov.vu/taxes-and-licensing/taxes/value-added-tax-vat/introduction.html",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The 15% rate dates from 2018; the authority page states the year but not the day, so the row starts at the window edge as a lower bound.",
+      "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (in force at the start of the coverage window on 1 January 2022).",
+    ],
   },
   "WF": {
     "code": "WF",
@@ -17177,10 +22207,20 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Wallis",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
     "indirectTax": null,
-    "authority": null,
+    "authority": {
+      "name": "Administration supérieure des îles Wallis-et-Futuna",
+      "url": "https://www.wallis-et-futuna.gouv.fr",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -17200,10 +22240,20 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "No rate source found this session: the Wallis and Futuna administration publishes no consolidated consumption-tax rate table that was reachable",
+        "url": "https://www.wallis-et-futuna.gouv.fr",
+        "grade": "inferred",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "indirectTax left null: Wallis and Futuna levies no VAT; consumption is taxed through customs duties and small territorial levies, and no reliable rate table was reachable this session (grade I). Re-check before serving entities that need a rate.",
+    ],
   },
   "WS": {
     "code": "WS",
@@ -17215,10 +22265,36 @@ const Map<String, Map<String, Object?>> countryData = {
     "timeZones": [
       "Pacific/Apia",
     ],
-    "individualTaxYear": null,
-    "companyYearEndDefault": null,
-    "indirectTax": null,
-    "authority": null,
+    "individualTaxYear": {
+      "startMonth": 1,
+      "startDay": 1,
+      "calendar": "gregorian",
+    },
+    "companyYearEndDefault": {
+      "month": 12,
+      "day": 31,
+    },
+    "indirectTax": {
+      "kind": "vat",
+      "localName": "Value Added Goods and Services Tax (VAGST)",
+      "rates": [
+        {
+          "label": "standard",
+          "basisPoints": 1500,
+          "from": "2016-01-01",
+          "to": null,
+          "appliesTo": null,
+          "source": 3,
+        },
+      ],
+      "registrationThreshold": null,
+      "returnFrequency": null,
+      "subdivisions": [],
+    },
+    "authority": {
+      "name": "Ministry for Revenue (Samoa)",
+      "url": "https://revenue.gov.ws",
+    },
     "sources": [
       {
         "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -17238,10 +22314,26 @@ const Map<String, Map<String, Object?>> countryData = {
         "grade": "secondary",
         "retrievedOn": "2026-11-13",
       },
+      {
+        "title": "Samoa Ministry for Revenue: rates — VAGST of 15% is added to the price of goods and services",
+        "url": "https://revenue.gov.ws/rates/",
+        "grade": "primary",
+        "retrievedOn": "2026-11-13",
+      },
+      {
+        "title": "Value Added Goods and Services Tax Act 2015 (Samoa) s.8(3): VAGST rate 15%, in force since 1 January 2016 (as cited by a secondary tracker of the act)",
+        "url": "https://ausref.dev/ws/vat",
+        "grade": "secondary",
+        "retrievedOn": "2026-11-13",
+      },
     ],
-    "verifiedOn": null,
-    "recheckBy": null,
-    "caveats": [],
+    "verifiedOn": "2026-11-13",
+    "recheckBy": "2027-05-13",
+    "caveats": [
+      "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+      "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+      "The 15% rate is confirmed on the Ministry for Revenue page and dates from 1 January 2016 under the VAGST Act 2015; the start date's act citation is secondary-graded.",
+    ],
   },
   "YE": {
     "code": "YE",
