@@ -8,10 +8,44 @@
   "timeZones": [
     "Africa/Bissau"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "IVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2022-01-01",
+        "to": "2025-01-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1900,
+        "from": "2025-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Ministério das Finanças (Direção Geral das Contribuições e Impostos)",
+    "url": "https://www.mf.gov.gw"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +64,26 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+      "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "CalcBright: VAT and sales tax rates in 177 countries (updated October 2026)",
+      "url": "https://calcbright.com/blog/vat-rates-by-country-2026",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Sources disagree on Guinea-Bissau (both grade S): AfroTools (March 2026) reports a 15% IGV still current, while CalcBright (October 2026, citing Orbitax/Innovate Tax) reports a 19% VAT replacing the sales tax from 1 January 2025. Both rows are recorded with their sources; flag for early re-check.",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window)."
+  ]
 }

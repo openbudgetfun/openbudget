@@ -8,10 +8,41 @@
   "timeZones": [
     "Africa/Lusaka"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 4,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 3,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1600,
+        "from": "2008-04-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 80000000,
+      "currency": "ZMW",
+      "period": "annualTurnover",
+      "source": 3
+    },
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Zambia Revenue Authority (ZRA)",
+    "url": "https://www.zra.org.zm"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +61,20 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Zambia — VAT standard rate (ZRA practice notes 2008) and registration threshold (VAT Act Cap 331, s. 28)",
+      "url": "https://afriref.dev/zm/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear runs 1 April to 31 March (grade S; the Zambian charge year, standard ZRA practice).",
+    "companyYearEndDefault is a 31 March default aligned to the charge year (grade S).",
+    "Lower-bound rows - standard (2008-04-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (16% per the ZRA's own 2008 practice notes, cited by afriref).",
+    "Registration threshold of ZMW 800,000 (grade S; VAT Act Cap 331, s. 28 per afriref)."
+  ]
 }

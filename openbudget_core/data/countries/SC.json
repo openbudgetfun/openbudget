@@ -8,10 +8,36 @@
   "timeZones": [
     "Indian/Mahe"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1500,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Seychelles Revenue Commission (SRC)",
+    "url": "https://src.gov.sc"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +56,19 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "AfroTools: VAT Rates Across Africa 2026 — country-by-country guide (updated March 2026)",
+      "url": "https://afrotools.com/blog/vat-rates-africa-2026",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (15%, introduced 2013, per AfroTools, March 2026). No threshold figure was sourced this pass; left null rather than guessed."
+  ]
 }

@@ -8,10 +8,36 @@
   "timeZones": [
     "Europe/Monaco"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "TVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 2000,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Direction des Services Fiscaux",
+    "url": "https://www.gouv.mc"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +56,27 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "EAS: European VAT rates — standard, reduced and super reduced rates (updated 27 February 2026)",
+      "url": "https://help.easproject.com/hc/en-gb/articles/5025537539487-European-VAT-rates",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "1stopVAT: VAT in Europe — standard rates and registration thresholds (August 2024)",
+      "url": "https://1stopvat.com/vat-in-europe",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Monaco applies French VAT law through the customs union with France (grade S): the French standard 20% (reduced 10%, 5.5% and 2.1% also apply) is collected in Monaco under the 1963 fiscal convention.",
+    "Lower-bound rows - standard (2022-01-01): the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window) (the 20% French rate has applied since 2014; Monaco follows every French rate change).",
+    "Registration thresholds follow the French franchise regime with Monaco-specific amounts (EUR 33,100 per one secondary table, unverified); left null rather than guessed."
+  ]
 }

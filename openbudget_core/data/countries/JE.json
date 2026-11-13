@@ -8,10 +8,41 @@
   "timeZones": [
     "Europe/Jersey"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "gst",
+    "localName": "GST",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 500,
+        "from": "2011-06-06",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 30000000,
+      "currency": "GBP",
+      "period": "rolling12Months",
+      "source": 3
+    },
+    "returnFrequency": "quarterly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Revenue Jersey",
+    "url": "https://www.gov.je/taxesmoney"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +61,21 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Government of Jersey: GST registration thresholds (GBP 300,000) and GST quick guide (5%; quarterly returns; calendar tax year)",
+      "url": "https://www.gov.je/TaxesMoney/GST/Businesses/Registration/Pages/ShouldIBe.aspx",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (grade P, gov.je: 'Jersey's tax year runs from 1 January to 31 December').",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Rates and effective dating (grade P for the current 5% from gov.je's GST pages; grade S for the 2011 date): GST was introduced in 2008 at 3% and rose to 5% on 6 June 2011, unchanged since.",
+    "Registration threshold of GBP 300,000 taxable supplies in any 12 months (grade P, gov.je); overseas retailers register at the same threshold from 1 July 2023.",
+    "Returns are quarterly, due within one month of the quarter end (grade P, gov.je)."
+  ]
 }

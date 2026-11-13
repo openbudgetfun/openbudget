@@ -10,10 +10,36 @@
     "Asia/Gaza",
     "Asia/Hebron"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "VAT",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1600,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Ministry of Finance",
+    "url": "https://www.mof.pna.ps"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -32,9 +58,20 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "PwC Worldwide Tax Summaries: Palestinian territories — corporate other taxes (VAT 16%; last reviewed 12 August 2026)",
+      "url": "https://taxsummaries.pwc.com/Palestinian-territories/Corporate/Other-taxes",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Rates secondary (grade S): VAT is 16% on deals subject to VAT (PwC Palestinian territories, last reviewed 12 August 2026). The rate's history is not published in English sources; the row starts at the coverage window's lower bound.",
+    "The Palestinian VAT rate is set under the Paris Protocol in step with Jordan and Israel; the authority's own pages were not reachable this session."
+  ]
 }

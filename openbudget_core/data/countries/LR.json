@@ -8,10 +8,52 @@
   "timeZones": [
     "Africa/Monrovia"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "salesTax",
+    "localName": "GST",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1000,
+        "from": "2022-01-01",
+        "to": "2025-04-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1200,
+        "from": "2025-04-01",
+        "to": "2026-05-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "basisPoints": 1300,
+        "from": "2026-05-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": "monthly",
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Liberia Revenue Authority (LRA)",
+    "url": "https://revenue.lra.gov.lr"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +72,33 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Liberia Revenue Authority: Revenue Notice of April 2026 — GST rises from 12% to 13% from 1 May 2026 under the Liberia Tax Amendment Act of December 2025",
+      "url": "https://revenue.lra.gov.lr/wp-content/uploads/2026/04/GST-Revenue-Notice.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "PwC Worldwide Tax Summaries: Liberia — corporate other taxes (GST 13%; VAT replaces GST on 1 January 2027 at 15%)",
+      "url": "https://taxsummaries.pwc.com/republic-of-liberia/corporate/other-taxes",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: Liberia — GST increase to 13% from 1 May 2026 and the January 2027 VAT implementation with USD 20,000 threshold",
+      "url": "https://www.vatcalc.com/liberia/liberia-looks-to-implement-vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2026-12-15",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Effective dating (grade P for the current rate from the LRA's own Revenue Notice of April 2026; grade S for the earlier steps): GST on goods and services was 10% (row starts at the coverage window's lower bound), rose to 12% on 1 April 2025 and to 13% on 1 May 2026 under the Liberia Tax Amendment Act of December 2025. Exports stay zero-rated; telecommunications stay at 15%.",
+    "A VAT replaces the GST on 1 January 2027: registration opened 1 July 2026 with a USD 20,000 threshold. The enacted rate is reported as 15% by PwC (the December 2024 amendment cut it from 18%) but other trackers still say 18% - flagged for re-check before go-live.",
+    "Registration threshold left null for the GST period (no figure sourced); the USD 20,000 threshold belongs to the 2027 VAT regime."
+  ]
 }

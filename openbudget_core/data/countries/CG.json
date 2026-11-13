@@ -8,10 +8,49 @@
   "timeZones": [
     "Africa/Brazzaville"
   ],
-  "individualTaxYear": null,
-  "companyYearEndDefault": null,
-  "indirectTax": null,
-  "authority": null,
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "TVA",
+    "rates": [
+      {
+        "label": "standard",
+        "basisPoints": 1800,
+        "from": "1997-05-12",
+        "to": null,
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "centimesAdditionnels",
+        "basisPoints": 90,
+        "from": "2022-01-01",
+        "to": null,
+        "appliesTo": "5% surcharge levied on the VAT itself (not deductible)",
+        "source": 4
+      }
+    ],
+    "registrationThreshold": {
+      "amountMinor": 100000000,
+      "currency": "XAF",
+      "period": "annualTurnover",
+      "source": 3
+    },
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Direction Générale des Impôts (DGI)",
+    "url": "https://www.dgi.gouv.cg"
+  },
   "sources": [
     {
       "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
@@ -30,9 +69,26 @@
       "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
       "grade": "secondary",
       "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "afriref: Republic of the Congo — VAT standard rate (Loi n°12-97) and registration threshold (2026 finance law)",
+      "url": "https://afriref.dev/cg/vat",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "LookupTax: Worldwide tax rates table (VAT/GST with legal citations, checked October 2026)",
+      "url": "https://lookuptax.com/docs/worldwide-tax-rates",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
     }
   ],
-  "verifiedOn": null,
-  "recheckBy": null,
-  "caveats": []
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "The standard TVA is 18% (Loi n°12-97 instituting the TVA, per afriref); a 5% centimes additionnels surcharge levied on the VAT itself brings the combined burden to 18.9% (grade S, LookupTax). The surcharge row's `from` is a lower bound (the `from` date is the earliest a source confirms the rate applied, not necessarily its true start (rate predates the coverage window)).",
+    "Registration threshold of XAF 100,000,000 from 1 January 2026 (grade S; Loi n°42 du 31 décembre 2025, finance law for 2026, per afriref — raised from XAF 60,000,000)."
+  ]
 }
