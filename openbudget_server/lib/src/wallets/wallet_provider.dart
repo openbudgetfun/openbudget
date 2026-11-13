@@ -2,7 +2,6 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/generated/common/confidence.dart';
 import 'package:openbudget_server/src/generated/wallets/price_quality.dart';
 import 'package:openbudget_server/src/generated/wallets/price_source.dart';
-import 'package:openbudget_server/src/generated/wallets/wallet_network.dart';
 
 /// A provider failure that should leave the last committed wallet facts alone.
 final class WalletProviderException implements Exception {
