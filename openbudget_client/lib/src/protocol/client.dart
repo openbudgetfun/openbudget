@@ -130,6 +130,8 @@ import 'package:openbudget_client/src/protocol/transactions/transaction_view.dar
     as _irfj6dpt;
 import 'package:openbudget_client/src/protocol/transactions/transfer_input.dart'
     as _i4fjyt55;
+import 'package:openbudget_client/src/protocol/wallets/spam_verdict.dart'
+    as _i096eook;
 import 'package:openbudget_client/src/protocol/wallets/wallet.dart'
     as _igzh8mor;
 import 'package:openbudget_client/src/protocol/wallets/wallet_holding.dart'
@@ -2142,6 +2144,25 @@ class EndpointTax extends _isc.EndpointRef {
       'startYear': startYear,
     },
   );
+
+  /// Creates a short-lived signed download link for the entity's tax
+  /// summary export for the year starting in [startYear].
+  ///
+  /// When [startYear] is null the year containing the entity's local today
+  /// is used. The link carries only opaque ids, the year and an expiry
+  /// inside its HMAC token — no name, email or entity name — and stops
+  /// working after ten minutes. The app opens it with `url_launcher`.
+  _ida.Future<String> createExportLink(
+    _isc.UuidValue entityId, {
+    int? startYear,
+  }) => caller.callServerEndpoint<String>(
+    'tax',
+    'createExportLink',
+    {
+      'entityId': entityId,
+      'startYear': startYear,
+    },
+  );
 }
 
 /// API surface for transaction rule operations.
@@ -2497,6 +2518,20 @@ class EndpointWallet extends _isc.EndpointRef {
     'wallet',
     'listHoldings',
     {'walletId': walletId},
+  );
+
+  /// Sets a user verdict on one holding: hide it, allow it, or clear the
+  /// override and let the classifier decide.
+  _ida.Future<_izm3e498.WalletHolding> setHoldingVerdict(
+    _isc.UuidValue walletHoldingId,
+    _i096eook.SpamVerdict? verdict,
+  ) => caller.callServerEndpoint<_izm3e498.WalletHolding>(
+    'wallet',
+    'setHoldingVerdict',
+    {
+      'walletHoldingId': walletHoldingId,
+      'verdict': verdict,
+    },
   );
 
   /// Lists the wallet's transactions, newest first.

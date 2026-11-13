@@ -6372,42 +6372,6 @@ abstract class AppLocalizations {
   /// **'Germany'**
   String get taxJurisdictionDe;
 
-  /// No description provided for @taxSalesTaxRegistered.
-  ///
-  /// In en, this message translates to:
-  /// **'Registered for sales tax or VAT'**
-  String get taxSalesTaxRegistered;
-
-  /// No description provided for @taxSalesTaxRegisteredHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Turn this on if you charge and reclaim sales tax on these books.'**
-  String get taxSalesTaxRegisteredHint;
-
-  /// No description provided for @taxGbScottishTaxpayer.
-  ///
-  /// In en, this message translates to:
-  /// **'Scottish taxpayer'**
-  String get taxGbScottishTaxpayer;
-
-  /// No description provided for @taxGbScottishTaxpayerHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Use Scottish income tax rates.'**
-  String get taxGbScottishTaxpayerHint;
-
-  /// No description provided for @taxGbStudentLoanPlan.
-  ///
-  /// In en, this message translates to:
-  /// **'Student loan plan'**
-  String get taxGbStudentLoanPlan;
-
-  /// No description provided for @taxGbStudentLoanNone.
-  ///
-  /// In en, this message translates to:
-  /// **'No student loan'**
-  String get taxGbStudentLoanNone;
-
   /// No description provided for @taxGbStudentLoanPlan1.
   ///
   /// In en, this message translates to:
@@ -6437,60 +6401,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Postgraduate loan'**
   String get taxGbStudentLoanPostgraduate;
-
-  /// No description provided for @taxGbPostgraduateLoanHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Repay 6% of income above £21,000 on top of any undergraduate plan.'**
-  String get taxGbPostgraduateLoanHint;
-
-  /// No description provided for @taxGbAccountingPeriodEnd.
-  ///
-  /// In en, this message translates to:
-  /// **'Accounting period end'**
-  String get taxGbAccountingPeriodEnd;
-
-  /// No description provided for @taxGbAccountingPeriodEndHint.
-  ///
-  /// In en, this message translates to:
-  /// **'The company\'s year end. Corporation Tax runs on these periods, not the tax year.'**
-  String get taxGbAccountingPeriodEndHint;
-
-  /// No description provided for @taxGbAccountingPeriodMonth.
-  ///
-  /// In en, this message translates to:
-  /// **'Month'**
-  String get taxGbAccountingPeriodMonth;
-
-  /// No description provided for @taxGbAccountingPeriodDay.
-  ///
-  /// In en, this message translates to:
-  /// **'Day'**
-  String get taxGbAccountingPeriodDay;
-
-  /// No description provided for @taxGbAssociatedCompanies.
-  ///
-  /// In en, this message translates to:
-  /// **'Associated companies'**
-  String get taxGbAssociatedCompanies;
-
-  /// No description provided for @taxGbAssociatedCompaniesHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Other companies under common control. Each one divides the £50,000 and £250,000 limits.'**
-  String get taxGbAssociatedCompaniesHint;
-
-  /// No description provided for @taxGbAssociatedCompaniesError.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter the number of associated companies as a whole number, such as 0.'**
-  String get taxGbAssociatedCompaniesError;
-
-  /// No description provided for @taxUsFilingStatus.
-  ///
-  /// In en, this message translates to:
-  /// **'Filing status'**
-  String get taxUsFilingStatus;
 
   /// No description provided for @taxUsFilingSingle.
   ///
@@ -6522,84 +6432,6 @@ abstract class AppLocalizations {
   /// **'Qualifying surviving spouse'**
   String get taxUsFilingQualifyingSurvivingSpouse;
 
-  /// No description provided for @taxUsForeignEarnedIncomeExclusion.
-  ///
-  /// In en, this message translates to:
-  /// **'Foreign earned income exclusion'**
-  String get taxUsForeignEarnedIncomeExclusion;
-
-  /// No description provided for @taxUsForeignEarnedIncomeExclusionHint.
-  ///
-  /// In en, this message translates to:
-  /// **'The amount you excluded on Form 2555 this year. It is added back when the investment income and deduction phase-outs check your income.'**
-  String get taxUsForeignEarnedIncomeExclusionHint;
-
-  /// No description provided for @taxUsDependentsUnder17.
-  ///
-  /// In en, this message translates to:
-  /// **'Dependents under 17'**
-  String get taxUsDependentsUnder17;
-
-  /// No description provided for @taxUsDependents17OrOlder.
-  ///
-  /// In en, this message translates to:
-  /// **'Dependents 17 or older'**
-  String get taxUsDependents17OrOlder;
-
-  /// No description provided for @taxUsDependentsCountHint.
-  ///
-  /// In en, this message translates to:
-  /// **'The number of people you claim as dependents.'**
-  String get taxUsDependentsCountHint;
-
-  /// No description provided for @taxUsDependentsSsn.
-  ///
-  /// In en, this message translates to:
-  /// **'All dependents have an SSN'**
-  String get taxUsDependentsSsn;
-
-  /// No description provided for @taxUsDependentsSsnHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Only dependents with an SSN valid for employment earn a credit.'**
-  String get taxUsDependentsSsnHint;
-
-  /// No description provided for @taxUsTaxpayer65OrOlder.
-  ///
-  /// In en, this message translates to:
-  /// **'You are 65 or older'**
-  String get taxUsTaxpayer65OrOlder;
-
-  /// No description provided for @taxUsSpouse65OrOlder.
-  ///
-  /// In en, this message translates to:
-  /// **'Your spouse is 65 or older'**
-  String get taxUsSpouse65OrOlder;
-
-  /// No description provided for @taxUsTaxpayerHasSsn.
-  ///
-  /// In en, this message translates to:
-  /// **'You have an SSN'**
-  String get taxUsTaxpayerHasSsn;
-
-  /// No description provided for @taxUsSpouseHasSsn.
-  ///
-  /// In en, this message translates to:
-  /// **'Your spouse has an SSN'**
-  String get taxUsSpouseHasSsn;
-
-  /// No description provided for @taxUsSsnHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Required for the tips, overtime, and senior deductions.'**
-  String get taxUsSsnHint;
-
-  /// No description provided for @taxUsHomeOfficeMethod.
-  ///
-  /// In en, this message translates to:
-  /// **'Home office method'**
-  String get taxUsHomeOfficeMethod;
-
   /// No description provided for @taxUsHomeOfficeSimplified.
   ///
   /// In en, this message translates to:
@@ -6612,150 +6444,6 @@ abstract class AppLocalizations {
   /// **'Regular (Form 8829)'**
   String get taxUsHomeOfficeRegular;
 
-  /// No description provided for @taxUsSpecifiedServiceTrade.
-  ///
-  /// In en, this message translates to:
-  /// **'Specified service business'**
-  String get taxUsSpecifiedServiceTrade;
-
-  /// No description provided for @taxUsSpecifiedServiceTradeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Consulting, law, health and similar businesses phase out of the qualified business income deduction.'**
-  String get taxUsSpecifiedServiceTradeHint;
-
-  /// No description provided for @taxNgAnnualRent.
-  ///
-  /// In en, this message translates to:
-  /// **'Annual rent paid'**
-  String get taxNgAnnualRent;
-
-  /// No description provided for @taxNgAnnualRentHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Used for rent relief under the Nigeria Tax Act.'**
-  String get taxNgAnnualRentHint;
-
-  /// No description provided for @taxNgAnnualRentError.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter the annual rent as a number, such as 1200000.'**
-  String get taxNgAnnualRentError;
-
-  /// No description provided for @taxNgSmallCompanyCeiling.
-  ///
-  /// In en, this message translates to:
-  /// **'Small company turnover ceiling'**
-  String get taxNgSmallCompanyCeiling;
-
-  /// No description provided for @taxNgSmallCompanyCeilingHint.
-  ///
-  /// In en, this message translates to:
-  /// **'The two Nigerian Acts disagree: the Nigeria Tax Act gazette says N50,000,000 and the Administration Act says N100,000,000. Pick the figure that should decide your company\'s small company status.'**
-  String get taxNgSmallCompanyCeilingHint;
-
-  /// No description provided for @taxNgSmallCompanyCeilingGazette.
-  ///
-  /// In en, this message translates to:
-  /// **'N50,000,000 (Nigeria Tax Act gazette)'**
-  String get taxNgSmallCompanyCeilingGazette;
-
-  /// No description provided for @taxNgSmallCompanyCeilingIntended.
-  ///
-  /// In en, this message translates to:
-  /// **'N100,000,000 (Administration Act)'**
-  String get taxNgSmallCompanyCeilingIntended;
-
-  /// No description provided for @taxNgMneGroupMember.
-  ///
-  /// In en, this message translates to:
-  /// **'Member of a multinational group'**
-  String get taxNgMneGroupMember;
-
-  /// No description provided for @taxNgMneGroupMemberHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Multinational group members may owe the 15% minimum effective tax rate whatever their turnover.'**
-  String get taxNgMneGroupMemberHint;
-
-  /// No description provided for @taxDeJointAssessment.
-  ///
-  /// In en, this message translates to:
-  /// **'Joint assessment'**
-  String get taxDeJointAssessment;
-
-  /// No description provided for @taxDeJointAssessmentHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Spouses assessed together with income splitting.'**
-  String get taxDeJointAssessmentHint;
-
-  /// No description provided for @taxDeSpouseEmployed.
-  ///
-  /// In en, this message translates to:
-  /// **'Spouse also earns wages'**
-  String get taxDeSpouseEmployed;
-
-  /// No description provided for @taxDeSpouseEmployedHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Each employed spouse claims their own worker\'s flat-rate allowance and files their own Anlage N.'**
-  String get taxDeSpouseEmployedHint;
-
-  /// No description provided for @taxDeChurchTax.
-  ///
-  /// In en, this message translates to:
-  /// **'Church tax'**
-  String get taxDeChurchTax;
-
-  /// No description provided for @taxDeChurchTaxHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Kirchensteuer on top of income tax.'**
-  String get taxDeChurchTaxHint;
-
-  /// No description provided for @taxDeChurchState.
-  ///
-  /// In en, this message translates to:
-  /// **'State (Land) of the church tax'**
-  String get taxDeChurchState;
-
-  /// No description provided for @taxDeChurchStateHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Sets the rate: 8% in Bavaria and Baden-Württemberg, 9% elsewhere. Leave it out to assume 9%.'**
-  String get taxDeChurchStateHint;
-
-  /// No description provided for @taxDeChurchStateNone.
-  ///
-  /// In en, this message translates to:
-  /// **'Not specified (assume 9%)'**
-  String get taxDeChurchStateNone;
-
-  /// No description provided for @taxDeChildren.
-  ///
-  /// In en, this message translates to:
-  /// **'Children (Kindergeld)'**
-  String get taxDeChildren;
-
-  /// No description provided for @taxDeChildrenHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Children you receive Kindergeld for; a full twelve months per child is assumed.'**
-  String get taxDeChildrenHint;
-
-  /// No description provided for @taxDeEinkunftsArt.
-  ///
-  /// In en, this message translates to:
-  /// **'Type of self-employment'**
-  String get taxDeEinkunftsArt;
-
-  /// No description provided for @taxDeEinkunftsArtHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Freiberufler owe no trade tax and file Anlage S; Gewerbetreibende owe Gewerbesteuer and file Anlage G.'**
-  String get taxDeEinkunftsArtHint;
-
   /// No description provided for @taxDeEinkunftsArtFreiberuflich.
   ///
   /// In en, this message translates to:
@@ -6767,66 +6455,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gewerbetreibender (trade)'**
   String get taxDeEinkunftsArtGewerblich;
-
-  /// No description provided for @taxDeStatutoryPension.
-  ///
-  /// In en, this message translates to:
-  /// **'Statutory pension contributions'**
-  String get taxDeStatutoryPension;
-
-  /// No description provided for @taxDeStatutoryPensionHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Employee and employer share per year; they reduce the Rürup (Basisrente) deduction.'**
-  String get taxDeStatutoryPensionHint;
-
-  /// No description provided for @taxDePriorTurnover.
-  ///
-  /// In en, this message translates to:
-  /// **'Previous year\'s turnover'**
-  String get taxDePriorTurnover;
-
-  /// No description provided for @taxDePriorTurnoverHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Total turnover of last year; it decides the Kleinunternehmer test (at most €25,000 prior year, €100,000 this year).'**
-  String get taxDePriorTurnoverHint;
-
-  /// No description provided for @taxDeCommuteKm.
-  ///
-  /// In en, this message translates to:
-  /// **'Commute: one-way distance (km)'**
-  String get taxDeCommuteKm;
-
-  /// No description provided for @taxDeCommuteKmHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Full kilometres to your first workplace, shortest route (Anlage N).'**
-  String get taxDeCommuteKmHint;
-
-  /// No description provided for @taxDeCommuteDays.
-  ///
-  /// In en, this message translates to:
-  /// **'Commute: days travelled'**
-  String get taxDeCommuteDays;
-
-  /// No description provided for @taxDeCommuteDaysHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Days you actually visited the workplace; illness, holiday and home-office days do not count.'**
-  String get taxDeCommuteDaysHint;
-
-  /// No description provided for @taxDeNumberError.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a whole number of 0 or more.'**
-  String get taxDeNumberError;
-
-  /// No description provided for @taxDeAmountError.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter the amount as a number, such as 4800.'**
-  String get taxDeAmountError;
 
   /// No description provided for @taxDeBundeslandBw.
   ///
@@ -6924,17 +6552,617 @@ abstract class AppLocalizations {
   /// **'Thuringia'**
   String get taxDeBundeslandTh;
 
-  /// No description provided for @taxDeSmallBusinessExemption.
+  /// No description provided for @taxProfileCountError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number of 0 or more.'**
+  String get taxProfileCountError;
+
+  /// No description provided for @taxProfileAmountError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount as a number, such as 4800.'**
+  String get taxProfileAmountError;
+
+  /// No description provided for @taxQCommonEntityKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Entity kind'**
+  String get taxQCommonEntityKind;
+
+  /// No description provided for @taxQCommonEntityKindIndividual.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual'**
+  String get taxQCommonEntityKindIndividual;
+
+  /// No description provided for @taxQCommonEntityKindSoleTrader.
+  ///
+  /// In en, this message translates to:
+  /// **'Sole trader'**
+  String get taxQCommonEntityKindSoleTrader;
+
+  /// No description provided for @taxQCommonEntityKindCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get taxQCommonEntityKindCompany;
+
+  /// No description provided for @taxQCommonSalesTaxRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered for sales tax or VAT'**
+  String get taxQCommonSalesTaxRegistered;
+
+  /// No description provided for @taxQCommonSalesTaxRegisteredHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn this on if you charge and reclaim sales tax on these books.'**
+  String get taxQCommonSalesTaxRegisteredHelp;
+
+  /// No description provided for @taxQCommonTaxResident.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax resident of this country'**
+  String get taxQCommonTaxResident;
+
+  /// No description provided for @taxQCommonTaxResidentHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Residence decides which rules apply to you. Tax-saving ideas wait until you answer this.'**
+  String get taxQCommonTaxResidentHelp;
+
+  /// No description provided for @taxQCommonUsPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'US person'**
+  String get taxQCommonUsPerson;
+
+  /// No description provided for @taxQCommonUsPersonHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'US citizens, green card holders and people who meet the substantial presence test owe US filings wherever they live.'**
+  String get taxQCommonUsPersonHelp;
+
+  /// No description provided for @taxQGbScottishTaxpayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Scottish taxpayer'**
+  String get taxQGbScottishTaxpayer;
+
+  /// No description provided for @taxQGbScottishTaxpayerHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Scottish income tax rates.'**
+  String get taxQGbScottishTaxpayerHelp;
+
+  /// No description provided for @taxQGbStudentLoanPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Student loan plan'**
+  String get taxQGbStudentLoanPlan;
+
+  /// No description provided for @taxQGbStudentLoanPlanPlan1.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan 1'**
+  String get taxQGbStudentLoanPlanPlan1;
+
+  /// No description provided for @taxQGbStudentLoanPlanPlan2.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan 2'**
+  String get taxQGbStudentLoanPlanPlan2;
+
+  /// No description provided for @taxQGbStudentLoanPlanPlan4.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan 4'**
+  String get taxQGbStudentLoanPlanPlan4;
+
+  /// No description provided for @taxQGbStudentLoanPlanPlan5.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan 5'**
+  String get taxQGbStudentLoanPlanPlan5;
+
+  /// No description provided for @taxQGbStudentLoanPlanNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No student loan'**
+  String get taxQGbStudentLoanPlanNone;
+
+  /// No description provided for @taxQGbPostgraduateLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Postgraduate loan'**
+  String get taxQGbPostgraduateLoan;
+
+  /// No description provided for @taxQGbPostgraduateLoanHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Repay 6% of income above £21,000 on top of any undergraduate plan.'**
+  String get taxQGbPostgraduateLoanHelp;
+
+  /// No description provided for @taxQGbAccountingPeriodEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounting period end'**
+  String get taxQGbAccountingPeriodEnd;
+
+  /// No description provided for @taxQGbAccountingPeriodEndHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The company\'s year end. Corporation Tax runs on these periods, not the tax year.'**
+  String get taxQGbAccountingPeriodEndHelp;
+
+  /// No description provided for @taxQGbAccountingPeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get taxQGbAccountingPeriodMonth;
+
+  /// No description provided for @taxQGbAccountingPeriodDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get taxQGbAccountingPeriodDay;
+
+  /// No description provided for @taxQGbAssociatedCompanies.
+  ///
+  /// In en, this message translates to:
+  /// **'Associated companies'**
+  String get taxQGbAssociatedCompanies;
+
+  /// No description provided for @taxQGbAssociatedCompaniesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Other companies under common control. Each one divides the £50,000 and £250,000 limits.'**
+  String get taxQGbAssociatedCompaniesHelp;
+
+  /// No description provided for @taxQUsFilingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Filing status'**
+  String get taxQUsFilingStatus;
+
+  /// No description provided for @taxQUsFilingStatusSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'Single'**
+  String get taxQUsFilingStatusSingle;
+
+  /// No description provided for @taxQUsFilingStatusMarriedFilingJointly.
+  ///
+  /// In en, this message translates to:
+  /// **'Married filing jointly'**
+  String get taxQUsFilingStatusMarriedFilingJointly;
+
+  /// No description provided for @taxQUsFilingStatusMarriedFilingSeparately.
+  ///
+  /// In en, this message translates to:
+  /// **'Married filing separately'**
+  String get taxQUsFilingStatusMarriedFilingSeparately;
+
+  /// No description provided for @taxQUsFilingStatusHeadOfHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Head of household'**
+  String get taxQUsFilingStatusHeadOfHousehold;
+
+  /// No description provided for @taxQUsFilingStatusQualifyingSurvivingSpouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Qualifying surviving spouse'**
+  String get taxQUsFilingStatusQualifyingSurvivingSpouse;
+
+  /// No description provided for @taxQUsTaxpayerHasSsn.
+  ///
+  /// In en, this message translates to:
+  /// **'You have an SSN'**
+  String get taxQUsTaxpayerHasSsn;
+
+  /// No description provided for @taxQUsTaxpayerHasSsnHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Required for the tips, overtime, and senior deductions.'**
+  String get taxQUsTaxpayerHasSsnHelp;
+
+  /// No description provided for @taxQUsSpouseHasSsn.
+  ///
+  /// In en, this message translates to:
+  /// **'Your spouse has an SSN'**
+  String get taxQUsSpouseHasSsn;
+
+  /// No description provided for @taxQUsSpouseHasSsnHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Required for the tips, overtime, and senior deductions.'**
+  String get taxQUsSpouseHasSsnHelp;
+
+  /// No description provided for @taxQUsTaxpayer65OrOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'You are 65 or older'**
+  String get taxQUsTaxpayer65OrOlder;
+
+  /// No description provided for @taxQUsSpouse65OrOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'Your spouse is 65 or older'**
+  String get taxQUsSpouse65OrOlder;
+
+  /// No description provided for @taxQUsDependentsUnder17.
+  ///
+  /// In en, this message translates to:
+  /// **'Dependents under 17'**
+  String get taxQUsDependentsUnder17;
+
+  /// No description provided for @taxQUsDependentsUnder17Help.
+  ///
+  /// In en, this message translates to:
+  /// **'The number of people you claim as dependents.'**
+  String get taxQUsDependentsUnder17Help;
+
+  /// No description provided for @taxQUsDependents17OrOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'Dependents 17 or older'**
+  String get taxQUsDependents17OrOlder;
+
+  /// No description provided for @taxQUsDependents17OrOlderHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The number of people you claim as dependents.'**
+  String get taxQUsDependents17OrOlderHelp;
+
+  /// No description provided for @taxQUsDependentsHaveSsn.
+  ///
+  /// In en, this message translates to:
+  /// **'All dependents have an SSN'**
+  String get taxQUsDependentsHaveSsn;
+
+  /// No description provided for @taxQUsDependentsHaveSsnHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Only dependents with an SSN valid for employment earn a credit.'**
+  String get taxQUsDependentsHaveSsnHelp;
+
+  /// No description provided for @taxQUsForeignEarnedIncomeExclusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Foreign earned income exclusion'**
+  String get taxQUsForeignEarnedIncomeExclusion;
+
+  /// No description provided for @taxQUsForeignEarnedIncomeExclusionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount you excluded on Form 2555 this year. It is added back when the investment income and deduction phase-outs check your income.'**
+  String get taxQUsForeignEarnedIncomeExclusionHelp;
+
+  /// No description provided for @taxQUsSpecifiedServiceTrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Specified service business'**
+  String get taxQUsSpecifiedServiceTrade;
+
+  /// No description provided for @taxQUsSpecifiedServiceTradeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Consulting, law, health and similar businesses phase out of the qualified business income deduction.'**
+  String get taxQUsSpecifiedServiceTradeHelp;
+
+  /// No description provided for @taxQUsHomeOfficeMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Home office method'**
+  String get taxQUsHomeOfficeMethod;
+
+  /// No description provided for @taxQUsHomeOfficeMethodSimplified.
+  ///
+  /// In en, this message translates to:
+  /// **'Simplified (\$5 per square foot)'**
+  String get taxQUsHomeOfficeMethodSimplified;
+
+  /// No description provided for @taxQUsHomeOfficeMethodRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular (Form 8829)'**
+  String get taxQUsHomeOfficeMethodRegular;
+
+  /// No description provided for @taxQNgAnnualRent.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual rent paid'**
+  String get taxQNgAnnualRent;
+
+  /// No description provided for @taxQNgAnnualRentHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for rent relief under the Nigeria Tax Act.'**
+  String get taxQNgAnnualRentHelp;
+
+  /// No description provided for @taxQNgSmallCompanyCeiling.
+  ///
+  /// In en, this message translates to:
+  /// **'Small company turnover ceiling'**
+  String get taxQNgSmallCompanyCeiling;
+
+  /// No description provided for @taxQNgSmallCompanyCeilingHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The two Nigerian Acts disagree: the Nigeria Tax Act gazette says N50,000,000 and the Administration Act says N100,000,000. Pick the figure that should decide your company\'s small company status.'**
+  String get taxQNgSmallCompanyCeilingHelp;
+
+  /// No description provided for @taxQNgSmallCompanyCeilingGazette.
+  ///
+  /// In en, this message translates to:
+  /// **'N50,000,000 (Nigeria Tax Act gazette)'**
+  String get taxQNgSmallCompanyCeilingGazette;
+
+  /// No description provided for @taxQNgSmallCompanyCeilingIntended.
+  ///
+  /// In en, this message translates to:
+  /// **'N100,000,000 (Administration Act)'**
+  String get taxQNgSmallCompanyCeilingIntended;
+
+  /// No description provided for @taxQNgMneGroupMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member of a multinational group'**
+  String get taxQNgMneGroupMember;
+
+  /// No description provided for @taxQNgMneGroupMemberHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Multinational group members may owe the 15% minimum effective tax rate whatever their turnover.'**
+  String get taxQNgMneGroupMemberHelp;
+
+  /// No description provided for @taxQDeJointAssessment.
+  ///
+  /// In en, this message translates to:
+  /// **'Joint assessment'**
+  String get taxQDeJointAssessment;
+
+  /// No description provided for @taxQDeJointAssessmentHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouses assessed together with income splitting.'**
+  String get taxQDeJointAssessmentHelp;
+
+  /// No description provided for @taxQDeSpouseEmployed.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse also earns wages'**
+  String get taxQDeSpouseEmployed;
+
+  /// No description provided for @taxQDeSpouseEmployedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Each employed spouse claims their own worker\'s flat-rate allowance and files their own Anlage N.'**
+  String get taxQDeSpouseEmployedHelp;
+
+  /// No description provided for @taxQDeChurchTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Church tax'**
+  String get taxQDeChurchTax;
+
+  /// No description provided for @taxQDeChurchTaxHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Kirchensteuer on top of income tax.'**
+  String get taxQDeChurchTaxHelp;
+
+  /// No description provided for @taxQDeChurchState.
+  ///
+  /// In en, this message translates to:
+  /// **'State (Land) of the church tax'**
+  String get taxQDeChurchState;
+
+  /// No description provided for @taxQDeChurchStateHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sets the rate: 8% in Bavaria and Baden-Württemberg, 9% elsewhere. Leave it out to assume 9%.'**
+  String get taxQDeChurchStateHelp;
+
+  /// No description provided for @taxQDeChurchStateBadenWuerttemberg.
+  ///
+  /// In en, this message translates to:
+  /// **'Baden-Württemberg'**
+  String get taxQDeChurchStateBadenWuerttemberg;
+
+  /// No description provided for @taxQDeChurchStateBayern.
+  ///
+  /// In en, this message translates to:
+  /// **'Bavaria'**
+  String get taxQDeChurchStateBayern;
+
+  /// No description provided for @taxQDeChurchStateBerlin.
+  ///
+  /// In en, this message translates to:
+  /// **'Berlin'**
+  String get taxQDeChurchStateBerlin;
+
+  /// No description provided for @taxQDeChurchStateBrandenburg.
+  ///
+  /// In en, this message translates to:
+  /// **'Brandenburg'**
+  String get taxQDeChurchStateBrandenburg;
+
+  /// No description provided for @taxQDeChurchStateBremen.
+  ///
+  /// In en, this message translates to:
+  /// **'Bremen'**
+  String get taxQDeChurchStateBremen;
+
+  /// No description provided for @taxQDeChurchStateHamburg.
+  ///
+  /// In en, this message translates to:
+  /// **'Hamburg'**
+  String get taxQDeChurchStateHamburg;
+
+  /// No description provided for @taxQDeChurchStateHessen.
+  ///
+  /// In en, this message translates to:
+  /// **'Hesse'**
+  String get taxQDeChurchStateHessen;
+
+  /// No description provided for @taxQDeChurchStateMecklenburgVorpommern.
+  ///
+  /// In en, this message translates to:
+  /// **'Mecklenburg-Vorpommern'**
+  String get taxQDeChurchStateMecklenburgVorpommern;
+
+  /// No description provided for @taxQDeChurchStateNiedersachsen.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower Saxony'**
+  String get taxQDeChurchStateNiedersachsen;
+
+  /// No description provided for @taxQDeChurchStateNordrheinWestfalen.
+  ///
+  /// In en, this message translates to:
+  /// **'North Rhine-Westphalia'**
+  String get taxQDeChurchStateNordrheinWestfalen;
+
+  /// No description provided for @taxQDeChurchStateRheinlandPfalz.
+  ///
+  /// In en, this message translates to:
+  /// **'Rhineland-Palatinate'**
+  String get taxQDeChurchStateRheinlandPfalz;
+
+  /// No description provided for @taxQDeChurchStateSaarland.
+  ///
+  /// In en, this message translates to:
+  /// **'Saarland'**
+  String get taxQDeChurchStateSaarland;
+
+  /// No description provided for @taxQDeChurchStateSachsen.
+  ///
+  /// In en, this message translates to:
+  /// **'Saxony'**
+  String get taxQDeChurchStateSachsen;
+
+  /// No description provided for @taxQDeChurchStateSachsenAnhalt.
+  ///
+  /// In en, this message translates to:
+  /// **'Saxony-Anhalt'**
+  String get taxQDeChurchStateSachsenAnhalt;
+
+  /// No description provided for @taxQDeChurchStateSchleswigHolstein.
+  ///
+  /// In en, this message translates to:
+  /// **'Schleswig-Holstein'**
+  String get taxQDeChurchStateSchleswigHolstein;
+
+  /// No description provided for @taxQDeChurchStateThueringen.
+  ///
+  /// In en, this message translates to:
+  /// **'Thuringia'**
+  String get taxQDeChurchStateThueringen;
+
+  /// No description provided for @taxQDeChurchStateNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified (assume 9%)'**
+  String get taxQDeChurchStateNone;
+
+  /// No description provided for @taxQDeChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Children (Kindergeld)'**
+  String get taxQDeChildren;
+
+  /// No description provided for @taxQDeChildrenHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Children you receive Kindergeld for; a full twelve months per child is assumed.'**
+  String get taxQDeChildrenHelp;
+
+  /// No description provided for @taxQDeStatutoryPension.
+  ///
+  /// In en, this message translates to:
+  /// **'Statutory pension contributions'**
+  String get taxQDeStatutoryPension;
+
+  /// No description provided for @taxQDeStatutoryPensionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee and employer share per year; they reduce the Rürup (Basisrente) deduction.'**
+  String get taxQDeStatutoryPensionHelp;
+
+  /// No description provided for @taxQDeCommuteKm.
+  ///
+  /// In en, this message translates to:
+  /// **'Commute: one-way distance (km)'**
+  String get taxQDeCommuteKm;
+
+  /// No description provided for @taxQDeCommuteKmHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Full kilometres to your first workplace, shortest route (Anlage N).'**
+  String get taxQDeCommuteKmHelp;
+
+  /// No description provided for @taxQDeCommuteDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Commute: days travelled'**
+  String get taxQDeCommuteDays;
+
+  /// No description provided for @taxQDeCommuteDaysHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Days you actually visited the workplace; illness, holiday and home-office days do not count.'**
+  String get taxQDeCommuteDaysHelp;
+
+  /// No description provided for @taxQDeSmallBusinessExemption.
   ///
   /// In en, this message translates to:
   /// **'Small business VAT exemption'**
-  String get taxDeSmallBusinessExemption;
+  String get taxQDeSmallBusinessExemption;
 
-  /// No description provided for @taxDeSmallBusinessExemptionHint.
+  /// No description provided for @taxQDeSmallBusinessExemptionHelp.
   ///
   /// In en, this message translates to:
   /// **'Kleinunternehmerregelung: no VAT charged or reclaimed.'**
-  String get taxDeSmallBusinessExemptionHint;
+  String get taxQDeSmallBusinessExemptionHelp;
+
+  /// No description provided for @taxQDeEinkunftsArt.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of self-employment'**
+  String get taxQDeEinkunftsArt;
+
+  /// No description provided for @taxQDeEinkunftsArtHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Freiberufler owe no trade tax and file Anlage S; Gewerbetreibende owe Gewerbesteuer and file Anlage G.'**
+  String get taxQDeEinkunftsArtHelp;
+
+  /// No description provided for @taxQDeEinkunftsArtFreiberuflich.
+  ///
+  /// In en, this message translates to:
+  /// **'Freiberufler (liberal profession)'**
+  String get taxQDeEinkunftsArtFreiberuflich;
+
+  /// No description provided for @taxQDeEinkunftsArtGewerblich.
+  ///
+  /// In en, this message translates to:
+  /// **'Gewerbetreibender (trade)'**
+  String get taxQDeEinkunftsArtGewerblich;
+
+  /// No description provided for @taxQDePriorTurnover.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous year\'s turnover'**
+  String get taxQDePriorTurnover;
+
+  /// No description provided for @taxQDePriorTurnoverHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Total turnover of last year; it decides the Kleinunternehmer test (at most €25,000 prior year, €100,000 this year).'**
+  String get taxQDePriorTurnoverHelp;
 
   /// No description provided for @taxLinkedBudget.
   ///

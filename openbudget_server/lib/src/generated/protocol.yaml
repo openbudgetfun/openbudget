@@ -155,6 +155,7 @@ tax:
   - setLineTax:
   - getReport:
   - getSummary:
+  - createExportLink:
 transactionRule:
   - create:
   - list:
@@ -185,6 +186,7 @@ wallet:
   - getForAccount:
   - sync:
   - listHoldings:
+  - setHoldingVerdict:
   - listTransactions:
   - listTaxYearSummaries:
   - updateTransactionMetadata:
