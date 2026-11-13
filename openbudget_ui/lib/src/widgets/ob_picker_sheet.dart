@@ -289,8 +289,9 @@ class ObPickerSheet<T> extends HookWidget {
     var offset = 0.0;
     for (final entry in entries) {
       if (entry is _Row<T> && entry.option.value == selected) {
-        // Leave one row of context above the selection.
-        return (offset - _rowExtent).clamp(0.0, double.infinity);
+        // A selection near the top leaves the list at the top, so the first
+        // heading shows; further down, keep one row of context above it.
+        return offset <= _rowExtent * 4 ? 0 : offset - _rowExtent;
       }
       offset += entry is _Heading<T> ? _headerExtent : _rowExtent;
     }
