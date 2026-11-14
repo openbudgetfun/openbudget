@@ -21,15 +21,7 @@ Map<String, Object?> searchKnowledgeResult({
   final requestedCountry = (countryArg ?? entity.countryCode).toUpperCase();
   final crossBorder = requestedCountry != entityCountry;
 
-  int year;
-  if (taxYearArg != null) {
-    year = taxYearArg;
-  } else {
-    // The clock seam is the only way to honour a pinned now in search_knowledge.
-    // ignore: invalid_use_of_visible_for_testing_member
-    final now = TaxSummaryService.clock();
-    year = TaxSummaryService.startYearFor(entity, now: now);
-  }
+  final year = taxYearArg ?? TaxSummaryService.currentStartYearFor(entity);
 
   // Cards read by id are not subject to the BM25 filters, so a card listed
   // in the entity brief can always be opened.
@@ -65,10 +57,7 @@ Map<String, Object?> searchKnowledgeResult({
     crossBorder: crossBorder,
   );
 
-  return {
-    'cards': cards,
-    'guidance': block,
-  };
+  return {'cards': cards, 'guidance': block};
 }
 
 Map<String, Object?> _cardJson(KnowledgeCard card, int year) {
