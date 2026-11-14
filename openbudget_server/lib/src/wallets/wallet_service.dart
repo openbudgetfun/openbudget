@@ -155,20 +155,14 @@ abstract final class WalletService {
         if (cleanLabel != null && cleanLabel != current.label) {
           wallet = await Wallet.db.updateRow(
             session,
-            current.copyWith(
-              label: cleanLabel,
-              updatedAt: clock(),
-            ),
+            current.copyWith(label: cleanLabel, updatedAt: clock()),
             transaction: tx,
           );
         }
         if (cleanAccountName != null && cleanAccountName != account.name) {
           await Account.db.updateRow(
             session,
-            account.copyWith(
-              name: cleanAccountName,
-              updatedAt: clock(),
-            ),
+            account.copyWith(name: cleanAccountName, updatedAt: clock()),
             transaction: tx,
           );
         }
@@ -225,10 +219,7 @@ abstract final class WalletService {
   }
 
   /// Lists the wallets of one owned entity, newest first.
-  static Future<List<Wallet>> list(
-    Session session,
-    UuidValue entityId,
-  ) async {
+  static Future<List<Wallet>> list(Session session, UuidValue entityId) async {
     await EntityAccess.requireOwned(session, entityId);
     return Wallet.db.find(
       session,
@@ -337,10 +328,7 @@ abstract final class WalletService {
         wallet = await _ownedWallet(session, walletId);
         startedAt = DateTime.now().toUtc();
       } on _AllNetworksFailed catch (failure, stackTrace) {
-        _log.warning(
-          'Wallet sync failed for $walletId: $failure',
-          stackTrace,
-        );
+        _log.warning('Wallet sync failed for $walletId: $failure', stackTrace);
         await _markFailed(
           session,
           walletId,
@@ -351,10 +339,7 @@ abstract final class WalletService {
         );
         throw WalletProviderException(failure.message);
       } on Object catch (error, stackTrace) {
-        _log.warning(
-          'Wallet sync failed for $walletId: $error',
-          stackTrace,
-        );
+        _log.warning('Wallet sync failed for $walletId: $error', stackTrace);
         await _markFailed(session, walletId, startedAt, error, networks);
         rethrow;
       }
@@ -445,8 +430,14 @@ abstract final class WalletService {
   }
 
   /// Replaces which networks an EVM wallet reads, or clears them back to its
-  /// home network when [networks] is null. The change takes effect on the
-  /// wallet's next read.
+  /// home network when [networks] is null.
+  ///
+  /// When the set of networks changes the wallet is read at once, so a
+  /// network that was added shows its holdings, and one that was removed
+  /// loses its holdings and read state, with the valuation recomputed, before
+  /// this answers. A read that fails on every network is already recorded
+  /// per network by [sync]; it does not undo the change. Setting the same
+  /// networks again reads nothing.
   static Future<Wallet> setScanNetworks(
     Session session,
     UuidValue walletId,
@@ -456,7 +447,7 @@ abstract final class WalletService {
     _requireWritable(await EntityAccess.requireOwned(session, wallet.entityId));
     final cleanNetworks = _requireScanNetworks(wallet.network, networks);
 
-    await session.db.transaction((tx) async {
+    final changed = await session.db.transaction((tx) async {
       await EntityAccess.requireOwned(
         session,
         wallet.entityId,
@@ -470,15 +461,13 @@ abstract final class WalletService {
         lockMode: LockMode.forUpdate,
       );
       if (current == null) throw NotFoundException();
-      await Wallet.db.updateRow(
-        session,
-        current.copyWith(
-          // An explicit null clears the list, it does not keep it.
-          scanNetworks: cleanNetworks,
-          updatedAt: clock(),
-        ),
-        transaction: tx,
+      final next = current.copyWith(
+        // An explicit null clears the list, it does not keep it.
+        scanNetworks: cleanNetworks,
+        updatedAt: clock(),
       );
+      await Wallet.db.updateRow(session, next, transaction: tx);
+      return !_sameNetworks(_readNetworksFor(current), _readNetworksFor(next));
     });
 
     await _publish(
@@ -487,8 +476,22 @@ abstract final class WalletService {
       ChangeScope.accounts,
       accountId: wallet.accountId,
     );
+    if (changed) {
+      try {
+        await sync(session, walletId);
+      } on WalletProviderException {
+        // Every network failed: sync recorded each reason on its state row.
+      }
+    }
     return await Wallet.db.findById(session, walletId) ?? wallet;
   }
+
+  static bool _sameNetworks(
+    List<WalletNetwork> left,
+    List<WalletNetwork> right,
+  ) =>
+      left.toSet().difference(right.toSet()).isEmpty &&
+      right.toSet().difference(left.toSet()).isEmpty;
 
   /// One row per network the wallet reads: when its holdings were last read
   /// and why the last read failed, in display order.
@@ -596,10 +599,7 @@ abstract final class WalletService {
       if (current == null) throw NotFoundException();
       return WalletHolding.db.updateRow(
         session,
-        current.copyWith(
-          spamVerdict: newVerdict,
-          updatedAt: clock(),
-        ),
+        current.copyWith(spamVerdict: newVerdict, updatedAt: clock()),
         transaction: tx,
       );
     });
@@ -992,9 +992,7 @@ LIMIT @limit''',
       // again from the cache where a price is still available.
       for (final entry in existingByFailedNetwork.entries) {
         for (final existing in entry.value) {
-          if (!seenKeys.add(
-            (entry.key, existing.assetId, existing.position),
-          )) {
+          if (!seenKeys.add((entry.key, existing.assetId, existing.position))) {
             continue;
           }
           resolved.add(
@@ -1323,6 +1321,16 @@ LIMIT @limit''',
         );
       }
 
+      // A network that left the scan set takes its read state with its
+      // holdings, so it no longer shows as a section or a stale failure.
+      await WalletNetworkState.db.deleteWhere(
+        session,
+        where: (t) =>
+            t.walletId.equals(wallet.id) &
+            t.network.notInSet(requestNetworks.toSet()),
+        transaction: tx,
+      );
+
       final updatedWallet = await Wallet.db.updateRow(
         session,
         current.copyWith(
@@ -1533,9 +1541,7 @@ LIMIT @limit''',
       if ((unit == null && total == null) ||
           (unit != null && unit.numerator <= BigInt.zero) ||
           (total != null && total.numerator <= BigInt.zero)) {
-        warnings.add(
-          'Ignoring invalid provider price for ${holding.assetId}.',
-        );
+        warnings.add('Ignoring invalid provider price for ${holding.assetId}.');
         continue;
       }
       return _PriceChoice(
@@ -1660,9 +1666,7 @@ LIMIT @limit''',
           transaction: tx,
         );
         for (final network in attemptedNetworks) {
-          final reason = _capMessage(
-            reasonsByNetwork[network] ?? message,
-          );
+          final reason = _capMessage(reasonsByNetwork[network] ?? message);
           await WalletNetworkState.db.upsertRow(
             session,
             WalletNetworkState(
@@ -1891,14 +1895,10 @@ LIMIT @limit''',
     final seen = <WalletNetwork>{};
     for (final candidate in scanNetworks) {
       if (candidate.family != ChainFamily.evm) {
-        throw ValidationException(
-          message: 'A wallet scans EVM networks only.',
-        );
+        throw ValidationException(message: 'A wallet scans EVM networks only.');
       }
       if (!seen.add(candidate)) {
-        throw ValidationException(
-          message: 'A wallet scans each network once.',
-        );
+        throw ValidationException(message: 'A wallet scans each network once.');
       }
     }
     if (!seen.contains(network)) {
@@ -2108,9 +2108,11 @@ LIMIT @limit''',
     final endYear = !DateTime.utc(year, month, day).isAfter(endThisYear)
         ? year
         : year + 1;
-    final start = DateTime.utc(endYear - 1, endMonth, endDay).add(
-      const Duration(days: 1),
-    );
+    final start = DateTime.utc(
+      endYear - 1,
+      endMonth,
+      endDay,
+    ).add(const Duration(days: 1));
     return start.year;
   }
 

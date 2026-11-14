@@ -605,7 +605,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Success!'), findsOneWidget);
-      expect(find.text('Add Another'), findsOneWidget);
+      expect(find.text('Add another'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Done'), findsOneWidget);
 
       await tester.tap(find.widgetWithText(FilledButton, 'Done'));
@@ -707,7 +707,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Success!'), findsOneWidget);
-    expect(find.text('Add Another'), findsOneWidget);
+    expect(find.text('Add another'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Done'), findsOneWidget);
     await _captureAddAccountStepScreenshot(
       tester,
@@ -826,7 +826,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Success!'), findsOneWidget);
-      await tester.tap(find.widgetWithText(OutlinedButton, 'Add Another'));
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Add another'));
       await tester.pumpAndSettle();
 
       expect(find.text('Add Unlinked Account'), findsOneWidget);

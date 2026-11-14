@@ -10,6 +10,7 @@ import 'package:openbudget_app/src/features/accounts/providers/account_detail_pr
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/wallet_provider.dart';
 import 'package:openbudget_app/src/features/accounts/widgets/wallet_holdings_section.dart';
+import 'package:openbudget_app/src/features/accounts/widgets/wallet_settings_sheet.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
@@ -168,6 +169,29 @@ class AccountDetailScreen extends HookConsumerWidget {
                     ),
                   ),
                 ],
+                if (walletId != null) ...[
+                  const SizedBox(height: SpacingTokens.md),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: OutlinedButton.icon(
+                      key: walletSettingsButtonKey,
+                      onPressed: () => showWalletSettingsSheet(
+                        context,
+                        entityId: entityId,
+                        accountId: accountId,
+                      ),
+                      icon: const SkribbleIcon(
+                        data: OpenBudgetIcons.settings,
+                        size: 18,
+                      ),
+                      label: Text(l10n.walletSettingsButton),
+                    ),
+                  ),
+                  WalletHoldingsSection(
+                    walletId: walletId,
+                    fallbackCurrencyCode: currencyCode,
+                  ),
+                ],
                 if (isValuation) ...[
                   const SizedBox(height: SpacingTokens.md),
                   ObSectionHeader(
@@ -197,12 +221,6 @@ class AccountDetailScreen extends HookConsumerWidget {
                     orElse: () => const SizedBox.shrink(),
                   ),
                 ] else ...[
-                  if (walletId != null) ...[
-                    WalletHoldingsSection(
-                      walletId: walletId,
-                      fallbackCurrencyCode: currencyCode,
-                    ),
-                  ],
                   const SizedBox(height: SpacingTokens.md),
                   ObSectionHeader(
                     title: l10n.accountDetailTransactionsTitle,

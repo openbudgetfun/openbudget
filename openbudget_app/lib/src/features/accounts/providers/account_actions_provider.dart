@@ -10,7 +10,11 @@ part 'account_actions_provider.g.dart';
 /// Create, edit, close and delete actions for accounts, plus valuations for
 /// track-by-value accounts. Opening balances and dates become an opening
 /// transaction or a first valuation on the server.
-@riverpod
+///
+/// Kept alive so the invalidations that follow each await still reach the
+/// providers they refresh: an auto-disposed notifier that nothing watches is
+/// unmounted by then, and its `ref.invalidate` throws.
+@Riverpod(keepAlive: true)
 class AccountActions extends _$AccountActions {
   @override
   FutureOr<void> build() {}
@@ -72,7 +76,9 @@ class AccountActions extends _$AccountActions {
       note: note,
       sortOrder: sortOrder,
     );
-    ref.invalidate(accountListProvider(entityId));
+    ref
+      ..invalidate(accountListProvider(entityId))
+      ..invalidate(accountDetailProvider(accountId));
     return account;
   }
 
