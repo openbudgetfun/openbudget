@@ -6,7 +6,7 @@ import 'test_data.dart';
 /// A fake assistant backend for the Patrol flow.
 ///
 /// It knows one pending proposal and streams a short turn so the screen can
-/// show a tool chip, a reply and a proposal without a server.
+/// show a tool chip, a cited reply and a proposal without a server.
 class FakeAssistantApi implements AssistantApi {
   FakeAssistantApi({
     List<AgentEvent>? events,
@@ -20,6 +20,7 @@ class FakeAssistantApi implements AssistantApi {
              provider: AgentProvider.zen,
              allowanceMicroUsd: 5000000,
              usedMicroUsd: 420000,
+             conversationsLeft: TestData.assistantConversationsLeft,
            );
 
   final List<AgentEvent> events;
@@ -27,12 +28,18 @@ class FakeAssistantApi implements AssistantApi {
   final AgentUsageView usage;
   final List<String> applyCalls = [];
 
+  /// Every question asked, in order.
+  final List<String> chatMessages = [];
+
   @override
   Stream<AgentEvent> chat({
     required String entityId,
     required String message,
     String? conversationId,
-  }) => Stream.fromIterable(events);
+  }) {
+    chatMessages.add(message);
+    return Stream.fromIterable(events);
+  }
 
   @override
   Future<List<AgentConversation>> listConversations(String entityId) async =>
@@ -122,7 +129,28 @@ List<AgentEvent> _defaultEvents() {
     AgentEvent(
       kind: AgentEventKind.textDelta,
       conversationId: conversationId,
-      text: TestData.assistantReply,
+      text: TestData.assistantReplyWithCitations,
+      citations: [
+        AgentCitation(
+          key: 'universal-overspending',
+          title: TestData.assistantSourceTitle,
+          url: 'https://www.moneyhelper.org.uk/en/everyday-money/budgeting',
+          authority: 'moneyhelper.org.uk',
+          verifiedOn: DateTime.utc(2026, 11, 2),
+          grade: 'secondary',
+          announced: false,
+        ),
+        AgentCitation(
+          key: 'report-2026',
+          title: TestData.assistantTaxSourceTitle,
+          url: 'https://www.gov.uk/income-tax-rates',
+          authority: 'gov.uk',
+          verifiedOn: DateTime.utc(2026, 11, 2),
+          grade: 'primary',
+          announced: true,
+        ),
+      ],
+      touchesTaxOrInvestment: true,
     ),
     AgentEvent(
       kind: AgentEventKind.done,

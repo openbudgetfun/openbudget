@@ -280,10 +280,16 @@ class _TimelineItemView extends HookWidget {
         text: text,
         isUser: true,
       ),
-      AssistantAssistantMessage(:final text) => AssistantMessageBubble(
-        text: text,
-        isUser: false,
-      ),
+      AssistantAssistantMessage(
+        :final text,
+        :final sources,
+        :final touchesTaxOrInvestment,
+      ) =>
+        AssistantReplyBubble(
+          text: text,
+          sources: sources,
+          touchesTaxOrInvestment: touchesTaxOrInvestment,
+        ),
       AssistantToolCall(:final toolName) => AssistantToolChip(
         label: assistantToolLabel(l10n, toolName),
       ),

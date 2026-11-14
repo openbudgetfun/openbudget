@@ -60,7 +60,7 @@ void main() {
       expect(find.text('Import Transactions'), findsOneWidget);
       expect(find.text('Taxes'), findsOneWidget);
       expect(find.text('Settings'), findsOneWidget);
-      expect(find.text('Assistant'), findsOneWidget);
+      expect(find.text('Money guide'), findsOneWidget);
     });
 
     testWidgets('shows correct icons for each item', (tester) async {

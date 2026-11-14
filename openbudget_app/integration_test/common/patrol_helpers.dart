@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/main.dart';
 import 'package:openbudget_app/src/features/agent_access/screens/agent_access_screen.dart';
 import 'package:openbudget_app/src/features/assistant/screens/assistant_screen.dart';
+import 'package:openbudget_app/src/features/assistant/widgets/assistant_message_bubble.dart';
+import 'package:openbudget_app/src/features/assistant/widgets/assistant_sources_sheet.dart';
 import 'package:openbudget_app/src/features/tax/widgets/tax_question_field.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -397,7 +400,7 @@ class MoreTabPage {
   final WidgetTester tester;
 
   Finder get title => find.text('More').first;
-  Finder get assistantTile => find.text('Assistant');
+  Finder get assistantTile => find.text('Money guide');
   Finder get recurringTile => find.text('Recurring Transactions');
   Finder get payeesTile => find.text('Payees');
   Finder get rulesTile => find.text('Transaction Rules');
@@ -575,29 +578,100 @@ class CategoryDetailPage {
       scrollIntoView(tester, renameCategoryButton);
 }
 
-/// Page object for the financial assistant.
+/// Page object for the Money guide.
 class AssistantPage {
   AssistantPage(this.tester);
 
   final WidgetTester tester;
 
-  Finder get title => find.text('Assistant').first;
-  Finder get emptyTitle => find.text('Ask about this plan');
+  Finder get title => find.text('Money guide').first;
+  Finder get emptyTitle => find.text('Ask the Money guide');
   Finder get suggestionTax => find.text('How much tax will I owe this year?');
   Finder get suggestionCuts => find.text('Where can I cut spending?');
   Finder get suggestionGoals => find.text('Am I on track for my goals?');
   Finder get composerField => find.byKey(AssistantScreen.composerFieldKey);
   Finder get sendButton => find.byKey(AssistantScreen.sendButtonKey);
-  Finder get typingIndicator => find.text('The assistant is thinking…');
+  Finder get typingIndicator => find.text('The Money guide is thinking…');
   Finder get applyButton => find.text('Apply').first;
   Finder get dismissButton => find.text('Dismiss').first;
   Finder get appliedChip => find.text('Applied');
   Finder get dismissedChip => find.text('Dismissed');
   Finder get disclaimer =>
-      find.text('Guidance only, not financial or tax advice.');
+      find.text('Guidance, not regulated financial advice.');
 
   Finder toolChip(String label) => find.text(label);
   Finder proposalSummary(String summary) => find.text(summary);
+
+  /// A reply, by its opening words; citation chips sit inside its text.
+  Finder reply(String text) => find.textContaining(text, findRichText: true);
+
+  /// The reply text that carries the inline mark for citation [number].
+  Finder citationMark(int number) => find.descendant(
+    of: find.byType(AssistantReplyBubble),
+    matching: find.byWidgetPredicate(
+      (widget) => widget is RichText && _hasMark(widget.text, number),
+    ),
+  );
+
+  static bool _hasMark(InlineSpan text, int number) {
+    var found = false;
+    text.visitChildren((span) {
+      found =
+          span is TextSpan &&
+          span.recognizer != null &&
+          span.text == assistantCitationMark('$number');
+      return !found;
+    });
+    return found;
+  }
+
+  /// Taps the first inline mark for citation [number], at its glyphs.
+  Future<void> tapCitationMark(int number) async {
+    final paragraph = tester.renderObject<RenderParagraph>(
+      citationMark(number).first,
+    );
+    final mark = assistantCitationMark('$number');
+    final start = paragraph.text
+        .toPlainText(includeSemanticsLabels: false)
+        .indexOf(mark);
+    final box = paragraph
+        .getBoxesForSelection(
+          TextSelection(baseOffset: start, extentOffset: start + mark.length),
+        )
+        .first
+        .toRect();
+    await tester.tapAt(paragraph.localToGlobal(box.center));
+    await tester.pumpAndSettle();
+  }
+
+  Finder get sourcesButton => find.byKey(AssistantReplyBubble.sourcesButtonKey);
+  Finder get replyDisclaimer => find.byKey(AssistantReplyBubble.disclaimerKey);
+  Finder get sourcesSheet => find.byKey(AssistantSourcesSheet.sheetKey);
+  Finder sourceTitle(String title) =>
+      find.descendant(of: sourcesSheet, matching: find.text(title));
+  Finder get secondaryBadge => find.descendant(
+    of: sourcesSheet,
+    matching: find.text('From a secondary source'),
+  );
+  Finder get announcedBadge => find.descendant(
+    of: sourcesSheet,
+    matching: find.text('Announced, not yet law'),
+  );
+  Finder conversationsLeft(int count) =>
+      find.text('About $count conversations left this month');
+
+  Future<void> ask(String question) async {
+    await tester.enterText(composerField, question);
+    await tester.pump();
+    await tester.tap(sendButton);
+    await tester.pumpAndSettle();
+  }
+
+  /// Closes the sources sheet by tapping the dimmed page above it.
+  Future<void> closeSourcesSheet() async {
+    await tester.tapAt(const Offset(20, 20));
+    await tester.pumpAndSettle();
+  }
 
   Future<void> sendSuggestion(String prompt) async {
     await tester.tap(find.text(prompt));

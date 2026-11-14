@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
@@ -8,6 +9,8 @@ import 'package:openbudget_app/src/features/assistant/providers/assistant_api_pr
 import 'package:openbudget_app/src/features/assistant/providers/assistant_conversations_provider.dart';
 import 'package:openbudget_app/src/features/assistant/providers/assistant_usage_provider.dart';
 import 'package:openbudget_app/src/features/assistant/screens/assistant_screen.dart';
+import 'package:openbudget_app/src/features/assistant/widgets/assistant_message_bubble.dart';
+import 'package:openbudget_app/src/features/assistant/widgets/assistant_sources_sheet.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -56,12 +59,12 @@ void main() {
     );
     await _pumpAssistant(tester, api);
 
-    expect(find.text('Ask about this plan'), findsOneWidget);
+    expect(find.text('Ask the Money guide'), findsOneWidget);
     expect(find.text('How much tax will I owe this year?'), findsOneWidget);
     expect(find.text('Where can I cut spending?'), findsOneWidget);
     expect(find.text('Am I on track for my goals?'), findsOneWidget);
     expect(
-      find.text('Guidance only, not financial or tax advice.'),
+      find.text('Guidance, not regulated financial advice.'),
       findsOneWidget,
     );
 
@@ -86,7 +89,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(WiredLoadingIndicator), findsOneWidget);
-    expect(find.text('The assistant is thinking…'), findsOneWidget);
+    expect(find.text('The Money guide is thinking…'), findsOneWidget);
     expect(
       tester
           .widget<ObTextField>(find.byKey(AssistantScreen.composerFieldKey))
@@ -187,7 +190,7 @@ void main() {
     ),
     (
       failure: const AssistantFailure.providerUnavailable(),
-      title: 'The assistant has no provider right now',
+      title: 'The Money guide has no provider right now',
       text:
           "The built-in provider isn't available. Try again, or connect "
           'your own OpenAI-compatible provider.',
@@ -201,12 +204,12 @@ void main() {
     ),
     (
       failure: const AssistantFailure.network(),
-      title: "Couldn't reach the assistant",
+      title: "Couldn't reach the Money guide",
       text: 'Check your connection and try again.',
     ),
     (
       failure: const AssistantFailure.unknown(),
-      title: "The assistant couldn't finish",
+      title: "The Money guide couldn't finish",
       text: 'Something went wrong while answering. Try again.',
     ),
   ];
@@ -250,5 +253,72 @@ void main() {
 
     expect(find.text('Using your own provider'), findsOneWidget);
     expect(find.text(r'$0.00 of $0.00 used this month'), findsNothing);
+  });
+
+  testWidgets('says about how many conversations are left', (tester) async {
+    await _pumpAssistant(
+      tester,
+      FakeAssistantApi(),
+      usage: testUsage(conversationsLeft: 42),
+    );
+
+    expect(find.text('About 42 conversations left this month'), findsOneWidget);
+  });
+
+  testWidgets('says when one conversation is left', (tester) async {
+    await _pumpAssistant(
+      tester,
+      FakeAssistantApi(),
+      usage: testUsage(conversationsLeft: 1),
+    );
+
+    expect(find.text('About 1 conversation left this month'), findsOneWidget);
+  });
+
+  testWidgets('hides the conversations-left line without an estimate', (
+    tester,
+  ) async {
+    await _pumpAssistant(tester, FakeAssistantApi(), usage: testUsage());
+
+    expect(find.textContaining('left this month'), findsNothing);
+  });
+
+  testWidgets('shows a cited reply with its marks and disclaimer', (
+    tester,
+  ) async {
+    final api = FakeAssistantApi(
+      chatEvents: [
+        agentEvent(
+          AgentEventKind.textDelta,
+          text: 'The allowance is £3,000[^gb-cgt-aea].',
+          citations: [testCitation('gb-cgt-aea', grade: 'secondary')],
+          touchesTaxOrInvestment: true,
+        ),
+        agentEvent(AgentEventKind.done),
+      ],
+    );
+    await _pumpAssistant(tester, api);
+
+    await tester.tap(find.text('How much tax will I owe this year?'));
+    await tester.pumpAndSettle();
+
+    final mark = assistantCitationMark('1');
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is RichText &&
+            widget.text
+                .toPlainText(includeSemanticsLabels: false)
+                .contains(mark),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(AssistantReplyBubble.disclaimerKey), findsOneWidget);
+
+    await tester.tap(find.byKey(AssistantReplyBubble.sourcesButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(AssistantSourcesSheet.sheetKey), findsOneWidget);
+    expect(find.text('From a secondary source'), findsOneWidget);
   });
 }

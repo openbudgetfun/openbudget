@@ -20,90 +20,118 @@ import 'common/patrol_helpers.dart';
 import 'common/test_data.dart';
 
 void main() {
-  patrolWidgetTest('More -> Assistant -> ask -> apply a proposal', ($) async {
-    final tester = $.tester;
-    final api = FakeAssistantApi();
-    const entityId = TestData.assistantEntityId;
+  patrolWidgetTest(
+    'More -> Money guide -> ask -> open sources -> apply a proposal',
+    ($) async {
+      final tester = $.tester;
+      final api = FakeAssistantApi();
+      const entityId = TestData.assistantEntityId;
 
-    final container = ProviderContainer(
-      overrides: [
-        assistantApiProvider.overrideWith((ref) => api),
-        assistantUsageProvider.overrideWith((ref) async => api.usage),
-        entityDetailProvider.overrideWith(
-          (ref, id) async => TestData.gbpEntity(
-            id: entityId,
-          ),
-        ),
-        taxProfileProvider.overrideWith((ref, id) async => null),
-      ],
-    );
-    addTearDown(container.dispose);
-
-    final router = GoRouter(
-      initialLocation: '/budgets/$entityId/more',
-      routes: [
-        GoRoute(
-          name: moreRoute,
-          path: morePath,
-          builder: (context, state) =>
-              MoreScreen(entityId: state.pathParameters['entityId']!),
-        ),
-        GoRoute(
-          name: assistantRoute,
-          path: assistantPath,
-          builder: (context, state) =>
-              AssistantScreen(entityId: state.pathParameters['entityId']!),
-          routes: [
-            GoRoute(
-              name: assistantProposalsRoute,
-              path: 'proposals',
-              builder: (context, state) => AssistantProposalsScreen(
-                entityId: state.pathParameters['entityId']!,
-              ),
+      final container = ProviderContainer(
+        overrides: [
+          assistantApiProvider.overrideWith((ref) => api),
+          assistantUsageProvider.overrideWith((ref) async => api.usage),
+          entityDetailProvider.overrideWith(
+            (ref, id) async => TestData.gbpEntity(
+              id: entityId,
             ),
-          ],
-        ),
-      ],
-    );
+          ),
+          taxProfileProvider.overrideWith((ref, id) async => null),
+        ],
+      );
+      addTearDown(container.dispose);
 
-    await tester.pumpApp(
-      const SizedBox.shrink(),
-      container: container,
-      router: router,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-    );
-    await tester.pumpAndSettle();
+      final router = GoRouter(
+        initialLocation: '/budgets/$entityId/more',
+        routes: [
+          GoRoute(
+            name: moreRoute,
+            path: morePath,
+            builder: (context, state) =>
+                MoreScreen(entityId: state.pathParameters['entityId']!),
+          ),
+          GoRoute(
+            name: assistantRoute,
+            path: assistantPath,
+            builder: (context, state) =>
+                AssistantScreen(entityId: state.pathParameters['entityId']!),
+            routes: [
+              GoRoute(
+                name: assistantProposalsRoute,
+                path: 'proposals',
+                builder: (context, state) => AssistantProposalsScreen(
+                  entityId: state.pathParameters['entityId']!,
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
 
-    final more = MoreTabPage(tester);
-    expect(more.assistantTile, findsOneWidget);
+      await tester.pumpApp(
+        const SizedBox.shrink(),
+        container: container,
+        router: router,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(more.assistantTile);
-    await tester.pumpAndSettle();
+      final more = MoreTabPage(tester);
+      expect(more.assistantTile, findsOneWidget);
 
-    final assistant = AssistantPage(tester);
-    expect(assistant.title, findsOneWidget);
-    expect(assistant.emptyTitle, findsOneWidget);
-    expect(assistant.disclaimer, findsOneWidget);
+      await tester.tap(more.assistantTile);
+      await tester.pumpAndSettle();
 
-    await assistant.sendSuggestion(TestData.assistantSuggestion);
+      final assistant = AssistantPage(tester);
+      expect(assistant.title, findsOneWidget);
+      expect(assistant.emptyTitle, findsOneWidget);
+      expect(assistant.disclaimer, findsOneWidget);
+      expect(
+        assistant.conversationsLeft(TestData.assistantConversationsLeft),
+        findsOneWidget,
+      );
 
-    expect(find.text(TestData.assistantReply), findsOneWidget);
-    expect(assistant.toolChip(TestData.assistantToolLabel), findsOneWidget);
-    expect(
-      assistant.proposalSummary(TestData.assistantProposalSummary),
-      findsOneWidget,
-    );
+      await assistant.ask(TestData.assistantQuestion);
 
-    await assistant.applyFirstProposal();
+      expect(api.chatMessages, [TestData.assistantQuestion]);
+      expect(assistant.reply(TestData.assistantReply), findsOneWidget);
+      expect(assistant.citationMark(1), findsOneWidget);
+      expect(assistant.citationMark(2), findsOneWidget);
+      expect(assistant.replyDisclaimer, findsOneWidget);
+      expect(assistant.toolChip(TestData.assistantToolLabel), findsOneWidget);
+      expect(
+        assistant.proposalSummary(TestData.assistantProposalSummary),
+        findsOneWidget,
+      );
 
-    expect(api.applyCalls, [TestData.assistantProposalId]);
-    expect(assistant.appliedChip, findsOneWidget);
+      await assistant.tapCitationMark(1);
 
-    // Guard: the flow must never build the production Serverpod client.
-    // With the fixtures above missing, MoreScreen's books entry reads the
-    // live budget and tax providers, so this fails instead of leaving a
-    // request to api.openbudget.app in flight at teardown.
-    expect(container.exists(serverpodClientProvider), isFalse);
-  });
+      expect(assistant.sourcesSheet, findsOneWidget);
+      expect(
+        assistant.sourceTitle(TestData.assistantSourceTitle),
+        findsOneWidget,
+      );
+      expect(
+        assistant.sourceTitle(TestData.assistantTaxSourceTitle),
+        findsOneWidget,
+      );
+      expect(assistant.secondaryBadge, findsOneWidget);
+      expect(assistant.announcedBadge, findsOneWidget);
+
+      await assistant.closeSourcesSheet();
+      expect(assistant.sourcesSheet, findsNothing);
+
+      await assistant.applyFirstProposal();
+
+      expect(api.applyCalls, [TestData.assistantProposalId]);
+      expect(assistant.appliedChip, findsOneWidget);
+
+      // Guard: the flow must never build the production Serverpod client.
+      // With the fixtures above missing, MoreScreen's books entry reads the
+      // live budget and tax providers, so this fails instead of leaving a
+      // request to api.openbudget.app in flight at teardown.
+      expect(container.exists(serverpodClientProvider), isFalse);
+    },
+  );
 }

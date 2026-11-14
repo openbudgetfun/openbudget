@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:openbudget_app/src/features/assistant/models/assistant_chat_state.dart';
 import 'package:openbudget_app/src/features/assistant/models/assistant_failure.dart';
+import 'package:openbudget_app/src/features/assistant/models/assistant_source.dart';
 import 'package:openbudget_app/src/features/assistant/models/assistant_timeline_item.dart';
 import 'package:openbudget_app/src/features/assistant/providers/assistant_api_provider.dart';
 import 'package:openbudget_app/src/features/assistant/providers/assistant_conversations_provider.dart';
@@ -59,6 +60,8 @@ class AssistantChat extends _$AssistantChat {
             AssistantTimelineItem.assistant(
               text: message.content,
               createdAt: message.createdAt,
+              sources: assistantSourcesFromJson(message.citationsJson),
+              touchesTaxOrInvestment: message.touchesTaxOrInvestment,
             ),
         for (final proposal in proposals)
           if (proposal.id != null && proposal.conversationId?.toString() == id)
@@ -175,6 +178,11 @@ class AssistantChat extends _$AssistantChat {
           AssistantTimelineItem.assistant(
             text: text,
             createdAt: DateTime.now(),
+            sources: [
+              for (final citation in event.citations ?? const <AgentCitation>[])
+                assistantSourceFrom(citation),
+            ],
+            touchesTaxOrInvestment: event.touchesTaxOrInvestment ?? false,
           ),
         );
       case AgentEventKind.toolCall:

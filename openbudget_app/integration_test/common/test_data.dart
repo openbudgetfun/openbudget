@@ -466,7 +466,18 @@ abstract final class TestData {
   static const assistantConversationId = '00000000-0000-0000-0000-000000000f03';
   static const assistantProposalId = '00000000-0000-0000-0000-000000000f04';
   static const assistantSuggestion = 'Where can I cut spending?';
-  static const assistantReply = r'You could free up $50 by trimming dining.';
+  static const assistantQuestion = 'Can I cover the dining overspend?';
+
+  /// The reply as the server streams it, with its citation markers.
+  static const assistantReplyWithCitations =
+      r'You could free up $50 by trimming dining[^universal-overspending]. '
+      'Your tax estimate does not change[^report-2026].';
+
+  /// The opening words of the reply as drawn, before its first chip.
+  static const assistantReply = r'You could free up $50 by trimming dining';
+  static const assistantSourceTitle = 'Covering an overspent envelope';
+  static const assistantTaxSourceTitle = 'Income Tax rates and allowances';
+  static const assistantConversationsLeft = 37;
   static const assistantProposalSummary =
       r'Move $50 from Dining Out to Groceries.';
   static const assistantToolLabel = 'Looked at your tax report';
