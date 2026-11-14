@@ -94,3 +94,6 @@ local.properties
 # Deep-research notes behind the .claude/skills domain skills (kept local)
 research_notes/
 /reports/
+
+# Money guide live eval reports (cost and pass rate; written by `live_eval`)
+/openbudget_server/test/money_guide/eval_reports/
