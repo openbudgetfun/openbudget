@@ -288,7 +288,7 @@ Cards for GB (id: title): gb-income-tax-bands: Income tax bands; gb-cgt-crypto-m
 Universal cards (id: title): universal-budgeting-sinking-funds: ...
 ```
 
-Nothing in the brief identifies the user: no names, emails or account numbers, just as `AgentPrompt` already promises.
+Nothing in the brief identifies the user: no names, emails or account numbers, just as the old `AgentPrompt` promised.
 
 ### 7.2 Static rules (draft for G8)
 
@@ -599,7 +599,7 @@ M3 runs after C1 and C2 of milestone M2 ([`tax-jurisdictions.md` section 9.4](ta
   - the jurisdiction state per section;
   - the card index;
   - static-first ordering.
-- Files: `openbudget_server/lib/src/agent/agent_prompt.dart` (renamed `money_guide_prompt.dart`), `agent_service.dart`, tests.
+- Files: `openbudget_server/lib/src/money_guide/money_guide_prompt.dart` (was `agent/agent_prompt.dart`), `agent_service.dart`, tests.
 - Acceptance:
   - the brief for GB, US, DE, NG and Kenya matches golden snapshots;
   - the static part is byte-identical across entities;

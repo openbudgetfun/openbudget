@@ -51,3 +51,13 @@ Map<String, Object?> buildGuidanceBlock({
   }
   return block;
 }
+
+/// The rule-set version of [entity]'s pack for [year], or null when no pack
+/// serves the country or the pack has no rules for that year.
+String? rulesVersionFor(Entity entity, int year) {
+  final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+  if (jurisdiction == null) return null;
+  final pack = TaxRules.forJurisdiction(jurisdiction);
+  if (!pack.supportedStartYears.contains(year)) return null;
+  return pack.ruleSet(year).versionFor(jurisdiction);
+}
