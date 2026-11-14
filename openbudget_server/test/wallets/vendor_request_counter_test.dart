@@ -22,7 +22,7 @@ void main() {
 
   test('counts per vendor and logs without urls', () {
     final counter = WalletVendorRequestCounter();
-    expect(counter.increment('esplora'), 1);
+    expect(counter.record('esplora'), 1);
     expect(counter.record('esplora'), 2);
     expect(counter.count('esplora'), 2);
     expect(counter.count('alchemy'), 0);
@@ -37,11 +37,12 @@ void main() {
 
   test('reset clears counts', () {
     final counter = WalletVendorRequestCounter();
-    // Cascade lint is a false positive for this two-step call.
+    // Two-step call is clearer as separate statements; cascade lint is a
+    // false positive here.
     // ignore: cascade_invocations
     counter
-      ..tick('esplora')
-      ..clear();
+      ..record('esplora')
+      ..reset();
     expect(counter.count('esplora'), 0);
   });
 }

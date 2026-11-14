@@ -5,6 +5,7 @@ library;
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/wallets/bitcoin/esplora_client.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
+import 'package:openbudget_server/src/wallets/wallet_vendor_request_counter.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// Esplora-backed Bitcoin provider for single addresses.
@@ -20,8 +21,21 @@ import 'package:serverpod/serverpod.dart';
 /// parser but their addresses are not derived until W4.2, so they are
 /// reported as not yet supported in plain words.
 final class BitcoinWalletProvider implements WalletProvider {
-  BitcoinWalletProvider({EsploraClient? client})
-    : _client = client ?? EsploraClient();
+  BitcoinWalletProvider({
+    EsploraClient? client,
+    WalletVendorRequestCounter? counter,
+    WalletVendorRequestCounter? requestCounter,
+    WalletVendorRequestCounter? vendorRequestCounter,
+    WalletVendorRequestCounter? vendorCounter,
+  }) : _client =
+           client ??
+           EsploraClient(
+             counter:
+                 counter ??
+                 requestCounter ??
+                 vendorRequestCounter ??
+                 vendorCounter,
+           );
 
   /// Builds the provider from the session. Bitcoin reads public Esplora
   /// servers, so no key is needed.
@@ -37,7 +51,7 @@ final class BitcoinWalletProvider implements WalletProvider {
   static const _hdIdentityPrefix = 'hd:';
 
   static const _hdUnsupportedMessage =
-      'Extended Bitcoin keys such as xpub or zpub are not supported yet. '
+      'Extended Bitcoin keys are not supported yet. '
       'Add single addresses for now.';
 
   final EsploraClient _client;

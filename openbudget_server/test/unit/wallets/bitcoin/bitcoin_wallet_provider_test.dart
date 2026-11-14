@@ -119,8 +119,8 @@ void main() {
 
         expect(
           error.message,
-          'Extended Bitcoin keys such as xpub or zpub are not supported '
-          'yet. Add single addresses for now.',
+          'Extended Bitcoin keys are not supported yet. '
+          'Add single addresses for now.',
         );
         expect(error.message.contains(address), isFalse);
         expect(error.message.contains('hd:'), isFalse);

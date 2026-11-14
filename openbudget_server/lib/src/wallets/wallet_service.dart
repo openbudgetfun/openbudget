@@ -13,6 +13,7 @@ import 'package:openbudget_server/src/wallets/wallet_math.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider_registry.dart';
 import 'package:openbudget_server/src/wallets/wallet_spam_classifier.dart';
+import 'package:openbudget_server/src/wallets/wallet_vendor_request_counter.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
 
@@ -89,6 +90,7 @@ abstract final class WalletService {
     _publisher = EntityRealtimeNotifier.notify;
     _previewRateLimiter.reset();
     clock = () => DateTime.now().toUtc();
+    WalletVendorRequestCounter.current = null;
   }
 
   /// Creates the wallet and its fixed crypto account in one transaction, then
@@ -254,95 +256,107 @@ abstract final class WalletService {
     Session session,
     UuidValue walletId,
   ) async {
-    var wallet = await _ownedWallet(session, walletId);
-    _requireWritable(await EntityAccess.requireOwned(session, wallet.entityId));
-    var startedAt = DateTime.now().toUtc();
-    var attempt = 0;
+    WalletVendorRequestCounter.current = WalletVendorRequestCounter();
+    try {
+      var wallet = await _ownedWallet(session, walletId);
+      _requireWritable(
+        await EntityAccess.requireOwned(session, wallet.entityId),
+      );
+      var startedAt = DateTime.now().toUtc();
+      var attempt = 0;
 
-    while (true) {
-      final networks = _readNetworksFor(wallet);
-      try {
-        // Every network call happens before the transaction opens: the
-        // per-network history cursors are read here, outside any
-        // transaction, and the provider is resolved before the commit below
-        // opens one.
-        final states = await WalletNetworkState.db.find(
-          session,
-          where: (t) => t.walletId.equals(wallet.id),
-        );
-        final cursors = {
-          for (final state in states)
-            if (state.historyCursor != null && networks.contains(state.network))
-              state.network: state.historyCursor!,
-        };
-        final provider = _providerFactory(session, wallet.network);
-        final snapshot = await provider.fetchSnapshot(
-          WalletReadRequest(
-            homeNetwork: wallet.network,
-            networks: networks,
-            address: wallet.address,
-            // HD wallets pass the opened descriptor here from W4.2 on.
-            untilSignature: wallet.lastSignature,
-            // Solana keeps its cursor in the wallet row (multichain-wallets.md
-            // 7.3); other families resume from these wallet_network_state
-            // cursors once history sync covers them.
-            historyCursors: cursors,
-          ),
-        );
-        if (snapshot.readNetworks.isEmpty) {
-          // Nothing was readable: the catch below keeps every committed
-          // fact and records each network's own reason.
-          throw _AllNetworksFailed(
-            _combinedFailureMessage(networks, snapshot.failedNetworks),
-            snapshot.failedNetworks,
+      while (true) {
+        final networks = _readNetworksFor(wallet);
+        try {
+          // Every network call happens before the transaction opens: the
+          // per-network history cursors are read here, outside any
+          // transaction, and the provider is resolved before the commit below
+          // opens one.
+          final states = await WalletNetworkState.db.find(
+            session,
+            where: (t) => t.walletId.equals(wallet.id),
           );
-        }
-        final outcome = await _commit(
-          session,
-          wallet,
-          snapshot,
-          requestNetworks: networks,
-          cursorsByNetwork: cursors,
-          startedAt: startedAt,
-        );
-        await _publish(
-          session,
-          wallet.entityId,
-          ChangeScope.accounts,
-          accountId: wallet.accountId,
-        );
-        await _publish(
-          session,
-          wallet.entityId,
-          ChangeScope.transactions,
-          accountId: wallet.accountId,
-        );
-        return outcome;
-      } on _SyncConflict {
-        attempt += 1;
-        if (attempt >= 2) {
-          throw ValidationException(
-            message: 'Wallet changed while syncing; retry the sync.',
+          final cursors = {
+            for (final state in states)
+              if (state.historyCursor != null &&
+                  networks.contains(state.network))
+                state.network: state.historyCursor!,
+          };
+          final provider = _providerFactory(session, wallet.network);
+          final snapshot = await provider.fetchSnapshot(
+            WalletReadRequest(
+              homeNetwork: wallet.network,
+              networks: networks,
+              address: wallet.address,
+              // HD wallets pass the opened descriptor here from W4.2 on.
+              untilSignature: wallet.lastSignature,
+              // Solana keeps its cursor in the wallet row (multichain-wallets.md
+              // 7.3); other families resume from these wallet_network_state
+              // cursors once history sync covers them.
+              historyCursors: cursors,
+            ),
           );
+          if (snapshot.readNetworks.isEmpty) {
+            // Nothing was readable: the catch below keeps every committed
+            // fact and records each network's own reason.
+            throw _AllNetworksFailed(
+              _combinedFailureMessage(networks, snapshot.failedNetworks),
+              snapshot.failedNetworks,
+            );
+          }
+          final outcome = await _commit(
+            session,
+            wallet,
+            snapshot,
+            requestNetworks: networks,
+            cursorsByNetwork: cursors,
+            startedAt: startedAt,
+          );
+          await _publish(
+            session,
+            wallet.entityId,
+            ChangeScope.accounts,
+            accountId: wallet.accountId,
+          );
+          await _publish(
+            session,
+            wallet.entityId,
+            ChangeScope.transactions,
+            accountId: wallet.accountId,
+          );
+          return outcome;
+        } on _SyncConflict {
+          attempt += 1;
+          if (attempt >= 2) {
+            throw ValidationException(
+              message: 'Wallet changed while syncing; retry the sync.',
+            );
+          }
+          wallet = await _ownedWallet(session, walletId);
+          startedAt = DateTime.now().toUtc();
+        } on _AllNetworksFailed catch (failure, stackTrace) {
+          _log.warning(
+            'Wallet sync failed for $walletId: $failure',
+            stackTrace,
+          );
+          await _markFailed(
+            session,
+            walletId,
+            startedAt,
+            WalletProviderException(failure.message),
+            networks,
+            reasonsByNetwork: failure.reasonsByNetwork,
+          );
+          throw WalletProviderException(failure.message);
+        } on Object catch (error, stackTrace) {
+          _log.warning('Wallet sync failed for $walletId: $error', stackTrace);
+          await _markFailed(session, walletId, startedAt, error, networks);
+          rethrow;
         }
-        wallet = await _ownedWallet(session, walletId);
-        startedAt = DateTime.now().toUtc();
-      } on _AllNetworksFailed catch (failure, stackTrace) {
-        _log.warning('Wallet sync failed for $walletId: $failure', stackTrace);
-        await _markFailed(
-          session,
-          walletId,
-          startedAt,
-          WalletProviderException(failure.message),
-          networks,
-          reasonsByNetwork: failure.reasonsByNetwork,
-        );
-        throw WalletProviderException(failure.message);
-      } on Object catch (error, stackTrace) {
-        _log.warning('Wallet sync failed for $walletId: $error', stackTrace);
-        await _markFailed(session, walletId, startedAt, error, networks);
-        rethrow;
       }
+    } finally {
+      WalletVendorRequestCounter.current?.log();
+      WalletVendorRequestCounter.current = null;
     }
   }
 

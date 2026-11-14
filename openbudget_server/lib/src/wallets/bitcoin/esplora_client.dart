@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
+import 'package:openbudget_server/src/wallets/wallet_vendor_request_counter.dart';
 
 /// Reads single Bitcoin addresses from Esplora servers.
 ///
@@ -23,10 +24,16 @@ final class EsploraClient {
     this.maxRetryAfter = defaultMaxRetryAfter,
     DateTime Function()? now,
     Future<void> Function(Duration duration)? delay,
+    WalletVendorRequestCounter? counter,
+    WalletVendorRequestCounter? requestCounter,
+    WalletVendorRequestCounter? vendorRequestCounter,
+    WalletVendorRequestCounter? vendorCounter,
   }) : _baseUrls = _checkedBaseUrls(baseUrls),
        _transport = transport ?? _ioTransport,
        _now = now ?? DateTime.now,
-       _delay = delay ?? _defaultDelay;
+       _delay = delay ?? _defaultDelay,
+       _counter =
+           counter ?? requestCounter ?? vendorRequestCounter ?? vendorCounter;
 
   /// mempool.space first, then Blockstream. Both speak the same Esplora
   /// API, and a self-hosted server later replaces the list with one URL
@@ -56,6 +63,7 @@ final class EsploraClient {
   final EsploraTransport _transport;
   final DateTime Function() _now;
   final Future<void> Function(Duration duration) _delay;
+  final WalletVendorRequestCounter? _counter;
 
   /// The minimum spacing between two requests to one host.
   final Duration minRequestInterval;
@@ -85,6 +93,7 @@ final class EsploraClient {
     var retriedAfter429 = false;
     while (true) {
       await _pace(baseUrl);
+      _recordRequest();
       final EsploraResponse response;
       try {
         response = await _transport(_addressUrl(baseUrl, address));
@@ -116,6 +125,17 @@ final class EsploraClient {
         throw const _EsploraFailure.rateLimited();
       }
       throw _EsploraFailure.http(response.statusCode);
+    }
+  }
+
+  void _recordRequest() {
+    _counter?.record('esplora');
+    final current = WalletVendorRequestCounter.current;
+    if (current != null && !identical(current, _counter)) {
+      current.record('esplora');
+    }
+    if (_counter == null && current == null) {
+      // No counter available: nothing to record.
     }
   }
 

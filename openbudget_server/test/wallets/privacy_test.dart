@@ -5,10 +5,16 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:openbudget_core/openbudget_core.dart';
+import 'package:openbudget_server/src/wallets/bitcoin/bitcoin_wallet_provider.dart';
+import 'package:openbudget_server/src/wallets/bitcoin/esplora_client.dart';
 import 'package:openbudget_server/src/wallets/jupiter_price_client.dart';
 import 'package:openbudget_server/src/wallets/magic_eden_nft_price_client.dart';
+import 'package:openbudget_server/src/wallets/prices/coingecko_price_client.dart';
+import 'package:openbudget_server/src/wallets/prices/defillama_price_client.dart';
 import 'package:openbudget_server/src/wallets/solana_wallet_provider.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
+import 'package:openbudget_server/src/wallets/xrpl/xrpl_client.dart';
+import 'package:openbudget_server/src/wallets/xrpl/xrpl_wallet_provider.dart';
 import 'package:solana_kit_helius/solana_kit_helius.dart';
 import 'package:test/test.dart';
 
@@ -395,5 +401,238 @@ void main() {
         }
       },
     );
+  });
+
+  group('privacy: bitcoin/esplora failure paths', () {
+    test('Esplora client failure paths are clean', () async {
+      for (final status in <int>[400, 429, 500]) {
+        final client = EsploraClient(
+          baseUrls: [Uri.parse('https://mempool.space/api')],
+          transport: (_) async => EsploraResponse(
+            statusCode: status,
+            body: '{"error":"nope"}',
+          ),
+        );
+        try {
+          await client.fetchAddress(_testAddress);
+        } on Object catch (error) {
+          captured.add(error.toString());
+        }
+      }
+
+      final malformed = EsploraClient(
+        baseUrls: [Uri.parse('https://mempool.space/api')],
+        transport: (_) async => const EsploraResponse(
+          statusCode: 200,
+          body: '{not json',
+        ),
+      );
+      try {
+        await malformed.fetchAddress(_testAddress);
+      } on Object catch (error) {
+        captured.add(error.toString());
+      }
+
+      final timingOut = EsploraClient(
+        baseUrls: [Uri.parse('https://mempool.space/api')],
+        transport: (_) async => throw TimeoutException('timed out'),
+      );
+      try {
+        await timingOut.fetchAddress(_testAddress);
+      } on Object catch (error) {
+        captured.add(error.toString());
+      }
+
+      // xpub input must never appear in captured output.
+      final xpubClient = EsploraClient(
+        baseUrls: [Uri.parse('https://mempool.space/api')],
+        transport: (_) async =>
+            const EsploraResponse(statusCode: 500, body: 'err'),
+      );
+      const xpub =
+          'xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8';
+      try {
+        await xpubClient.fetchAddress(xpub);
+      } on Object catch (error) {
+        captured.add(error.toString());
+      }
+
+      assertClean();
+    });
+
+    test('Bitcoin provider refuses xpub without leaking', () async {
+      const xpub =
+          'xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8';
+      final client = EsploraClient(
+        baseUrls: [Uri.parse('https://mempool.space/api')],
+        transport: (_) async =>
+            const EsploraResponse(statusCode: 200, body: '{}'),
+      );
+      try {
+        await BitcoinWalletProvider(client: client).fetchSnapshot(
+          const WalletReadRequest(
+            homeNetwork: WalletNetwork.bitcoinMainnet,
+            networks: <WalletNetwork>[WalletNetwork.bitcoinMainnet],
+            address: xpub,
+          ),
+        );
+      } on Object catch (error) {
+        captured.add(error.toString());
+      }
+      assertClean();
+    });
+  });
+
+  group('privacy: xrpl failure paths', () {
+    test('Xrpl client failure paths are clean', () async {
+      for (final status in <int>[400, 429, 500]) {
+        final client = XrplClient(
+          endpoints: ['https://xrplcluster.com'],
+          transport: (_, [_]) async => XrplResponse(
+            statusCode: status,
+            body: '{"result":{"error":"nope"}}',
+          ),
+        );
+        try {
+          await client.call('account_info', {'account': _testAddress});
+        } on Object catch (error) {
+          captured.add(error.toString());
+        }
+      }
+
+      final malformed = XrplClient(
+        endpoints: ['https://xrplcluster.com'],
+        transport: (_, [_]) async => const XrplResponse(
+          statusCode: 200,
+          body: '{not json',
+        ),
+      );
+      try {
+        await malformed.call('account_info', {'account': _testAddress});
+      } on Object catch (error) {
+        captured.add(error.toString());
+      }
+
+      final timingOut = XrplClient(
+        endpoints: ['https://xrplcluster.com'],
+        transport: (_, [_]) async => throw TimeoutException('timed out'),
+      );
+      try {
+        await timingOut.call('account_info', {'account': _testAddress});
+      } on Object catch (error) {
+        captured.add(error.toString());
+      }
+
+      assertClean();
+    });
+
+    test('Xrpl provider failure paths are clean', () async {
+      final provider = XrplWalletProvider(
+        transport: (_, [_]) async => const XrplResponse(
+          statusCode: 500,
+          body: '{"result":{"error":"nope"}}',
+        ),
+      );
+      try {
+        await provider.fetchSnapshot(
+          const WalletReadRequest(
+            homeNetwork: WalletNetwork.xrplMainnet,
+            networks: <WalletNetwork>[WalletNetwork.xrplMainnet],
+            address: _testAddress,
+          ),
+        );
+      } on Object catch (error) {
+        captured.add(error.toString());
+      }
+      assertClean();
+    });
+  });
+
+  group('privacy: coingecko failure paths', () {
+    test('CoinGecko client failure paths are clean', () async {
+      for (final status in <int>[400, 429, 500]) {
+        final fake = _FakeHttpClient(
+          (uri) => _FakeIoResponse(status, utf8.encode('{"error":"nope"}')),
+        );
+        await CoinGeckoPriceClient.fetchSimplePrices(
+          ids: <String>['bitcoin'],
+          httpClient: fake,
+          passwords: const {'coingeckoProApiKey': _apiKey},
+        );
+      }
+
+      final malformed = _FakeHttpClient(
+        (uri) => _FakeIoResponse(200, utf8.encode('{not json')),
+      );
+      await CoinGeckoPriceClient.fetchSimplePrices(
+        ids: <String>['bitcoin'],
+        httpClient: malformed,
+        passwords: const {'coingeckoProApiKey': _apiKey},
+      );
+
+      final timingOut = _FakeHttpClient((uri) {
+        throw TimeoutException('timed out');
+      });
+      await CoinGeckoPriceClient.fetchSimplePrices(
+        ids: <String>['bitcoin'],
+        httpClient: timingOut,
+        passwords: const {'coingeckoProApiKey': _apiKey},
+      );
+
+      assertClean();
+    });
+  });
+
+  group('privacy: defillama failure paths', () {
+    test('DefiLlama client failure paths are clean', () async {
+      for (final status in <int>[400, 429, 500]) {
+        final fake = _FakeHttpClient(
+          (uri) => _FakeIoResponse(status, utf8.encode('{"error":"nope"}')),
+        );
+        await DefiLlamaPriceClient.fetchPrices(
+          coins: <String>['coingecko:bitcoin'],
+          httpClient: fake,
+        );
+      }
+
+      final malformed = _FakeHttpClient(
+        (uri) => _FakeIoResponse(200, utf8.encode('{not json')),
+      );
+      await DefiLlamaPriceClient.fetchPrices(
+        coins: <String>['coingecko:bitcoin'],
+        httpClient: malformed,
+      );
+
+      final timingOut = _FakeHttpClient((uri) {
+        throw TimeoutException('timed out');
+      });
+      await DefiLlamaPriceClient.fetchPrices(
+        coins: <String>['coingecko:bitcoin'],
+        httpClient: timingOut,
+      );
+
+      assertClean();
+    });
+  });
+
+  group('privacy: HTTP request shape (extra vendors)', () {
+    test('Esplora request carries only the address', () async {
+      final urls = <Uri>[];
+      final client = EsploraClient(
+        baseUrls: [Uri.parse('https://mempool.space/api')],
+        transport: (uri) async {
+          urls.add(uri);
+          return const EsploraResponse(
+            statusCode: 200,
+            body: '{"chain_stats":{"funded_txo_sum":0,"spent_txo_sum":0},"mempool_stats":{"funded_txo_sum":0,"spent_txo_sum":0}}',
+          );
+        },
+      );
+      await client.fetchAddress(_testAddress);
+      expect(urls, isNotEmpty);
+      for (final uri in urls) {
+        expect(uri.toString(), contains(_testAddress));
+      }
+    });
   });
 }

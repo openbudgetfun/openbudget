@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:openbudget_server/src/wallets/wallet_vendor_request_counter.dart';
 
 class CoinGeckoPriceClient {
   static const int chunkSize = 515;
@@ -94,6 +97,10 @@ class CoinGeckoPriceClient {
     Map<String, String> environment = const {},
     HttpClient? httpClient,
     void Function(String warning)? onWarning,
+    WalletVendorRequestCounter? counter,
+    WalletVendorRequestCounter? requestCounter,
+    WalletVendorRequestCounter? vendorRequestCounter,
+    WalletVendorRequestCounter? vendorCounter,
   }) async {
     final cleaned = ids
         .map((e) => e.trim())
@@ -126,6 +133,11 @@ class CoinGeckoPriceClient {
           environment: environment,
           onWarning: onWarning,
           errorPrefix: 'CoinGecko simple/price',
+          counter:
+              counter ??
+              requestCounter ??
+              vendorRequestCounter ??
+              vendorCounter,
         );
         if (decoded is Map<String, dynamic>) {
           prices.addAll(
@@ -146,6 +158,10 @@ class CoinGeckoPriceClient {
     Map<String, String> environment = const {},
     HttpClient? httpClient,
     void Function(String warning)? onWarning,
+    WalletVendorRequestCounter? counter,
+    WalletVendorRequestCounter? requestCounter,
+    WalletVendorRequestCounter? vendorRequestCounter,
+    WalletVendorRequestCounter? vendorCounter,
   }) => fetchSimplePrices(
     ids: ids,
     vsCurrency: vsCurrency,
@@ -153,6 +169,10 @@ class CoinGeckoPriceClient {
     environment: environment,
     httpClient: httpClient,
     onWarning: onWarning,
+    counter: counter,
+    requestCounter: requestCounter,
+    vendorRequestCounter: vendorRequestCounter,
+    vendorCounter: vendorCounter,
   );
 
   static Future<Map<String, double>> fetchTokenPrices({
@@ -163,6 +183,10 @@ class CoinGeckoPriceClient {
     Map<String, String> environment = const {},
     HttpClient? httpClient,
     void Function(String warning)? onWarning,
+    WalletVendorRequestCounter? counter,
+    WalletVendorRequestCounter? requestCounter,
+    WalletVendorRequestCounter? vendorRequestCounter,
+    WalletVendorRequestCounter? vendorCounter,
   }) async {
     final cleaned = contractAddresses
         .map((e) => e.trim())
@@ -195,6 +219,11 @@ class CoinGeckoPriceClient {
           environment: environment,
           onWarning: onWarning,
           errorPrefix: 'CoinGecko simple/token_price',
+          counter:
+              counter ??
+              requestCounter ??
+              vendorRequestCounter ??
+              vendorCounter,
         );
         if (decoded is Map<String, dynamic>) {
           prices.addAll(
@@ -255,7 +284,14 @@ class CoinGeckoPriceClient {
     required Map<String, String> environment,
     required String errorPrefix,
     void Function(String warning)? onWarning,
+    WalletVendorRequestCounter? counter,
   }) async {
+    counter?.record('coingecko');
+    final current = WalletVendorRequestCounter.current;
+    if (current != null && !identical(current, counter)) {
+      current.record('coingecko');
+    }
+
     try {
       final request = await client.getUrl(uri);
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
@@ -275,6 +311,9 @@ class CoinGeckoPriceClient {
       return null;
     } on HttpException {
       onWarning?.call('$errorPrefix request failed due to HTTP error.');
+      return null;
+    } on TimeoutException {
+      onWarning?.call('$errorPrefix request timed out.');
       return null;
     } on FormatException {
       onWarning?.call('$errorPrefix response could not be parsed.');

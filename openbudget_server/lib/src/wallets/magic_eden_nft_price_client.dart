@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:openbudget_server/src/wallets/wallet_vendor_request_counter.dart';
+
 /// Normalized NFT quote returned from marketplace fallback pricing.
 class NftMarketPriceQuote {
   const NftMarketPriceQuote({
@@ -40,6 +42,10 @@ class MagicEdenNftPriceClient {
     int maxMints = 100,
     void Function(String warning)? onWarning,
     HttpClient? httpClient,
+    WalletVendorRequestCounter? counter,
+    WalletVendorRequestCounter? requestCounter,
+    WalletVendorRequestCounter? vendorRequestCounter,
+    WalletVendorRequestCounter? vendorCounter,
   }) async {
     final cleanedMints = mintAddresses
         .map((mint) => mint.trim())
@@ -60,6 +66,12 @@ class MagicEdenNftPriceClient {
     final shouldClose = httpClient == null;
     final quotes = <String, NftMarketPriceQuote>{};
     final collectionFloorCache = <String, double?>{};
+    final resolvedCounter =
+        counter ??
+        requestCounter ??
+        vendorRequestCounter ??
+        vendorCounter ??
+        WalletVendorRequestCounter.current;
 
     try {
       for (final mint in cleanedMints.take(maxMints)) {
@@ -69,6 +81,7 @@ class MagicEdenNftPriceClient {
           solUsdPrice: solUsd,
           onWarning: onWarning,
           collectionFloorCache: collectionFloorCache,
+          counter: resolvedCounter,
         );
         if (quote != null) {
           quotes[mint] = quote;
@@ -89,12 +102,14 @@ class MagicEdenNftPriceClient {
     required double solUsdPrice,
     required Map<String, double?> collectionFloorCache,
     void Function(String warning)? onWarning,
+    WalletVendorRequestCounter? counter,
   }) async {
     final token = await _requestJsonMap(
       client,
       _baseUri.resolve('/v2/tokens/$mint'),
       onWarning: onWarning,
       errorPrefix: 'Magic Eden token endpoint failed',
+      counter: counter,
     );
 
     final collection = token == null ? null : parseCollectionSymbol(token);
@@ -117,6 +132,7 @@ class MagicEdenNftPriceClient {
       ),
       onWarning: onWarning,
       errorPrefix: 'Magic Eden activities endpoint failed',
+      counter: counter,
     );
 
     final recentSaleSol = activities == null
@@ -141,6 +157,7 @@ class MagicEdenNftPriceClient {
             client,
             collection,
             onWarning: onWarning,
+            counter: counter,
           );
       collectionFloorCache[collection] = floorSol;
       if (floorSol != null && floorSol > 0) {
@@ -162,12 +179,14 @@ class MagicEdenNftPriceClient {
     HttpClient client,
     String collectionSymbol, {
     void Function(String warning)? onWarning,
+    WalletVendorRequestCounter? counter,
   }) async {
     final stats = await _requestJsonMap(
       client,
       _baseUri.resolve('/v2/collections/$collectionSymbol/stats'),
       onWarning: onWarning,
       errorPrefix: 'Magic Eden collection stats endpoint failed',
+      counter: counter,
     );
     if (stats == null) return null;
     return parseCollectionFloorPriceSol(stats);
@@ -242,12 +261,14 @@ class MagicEdenNftPriceClient {
     Uri uri, {
     required String errorPrefix,
     void Function(String warning)? onWarning,
+    WalletVendorRequestCounter? counter,
   }) async {
     final payload = await _requestJson(
       client,
       uri,
       errorPrefix: errorPrefix,
       onWarning: onWarning,
+      counter: counter,
     );
     return payload is Map<String, dynamic> ? payload : null;
   }
@@ -257,12 +278,14 @@ class MagicEdenNftPriceClient {
     Uri uri, {
     required String errorPrefix,
     void Function(String warning)? onWarning,
+    WalletVendorRequestCounter? counter,
   }) async {
     final payload = await _requestJson(
       client,
       uri,
       errorPrefix: errorPrefix,
       onWarning: onWarning,
+      counter: counter,
     );
     return payload is List<dynamic> ? payload : null;
   }
@@ -272,7 +295,13 @@ class MagicEdenNftPriceClient {
     Uri uri, {
     required String errorPrefix,
     void Function(String warning)? onWarning,
+    WalletVendorRequestCounter? counter,
   }) async {
+    counter?.record('magiceden');
+    final current = WalletVendorRequestCounter.current;
+    if (current != null && !identical(current, counter)) {
+      current.record('magiceden');
+    }
     try {
       final request = await client.getUrl(uri);
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
