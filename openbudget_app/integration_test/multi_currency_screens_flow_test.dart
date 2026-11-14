@@ -183,8 +183,10 @@ void main() {
           '/budgets/$household/accounts/${MultiCurrencyData.walletAccountId}',
     );
 
-    expect(find.text('Solana'), findsOneWidget);
-    expect(find.text('USD Coin'), findsOneWidget);
+    // Each holding's name and ticker share one rich text ("Solana  SOL"),
+    // and the chain stamp also reads "Solana".
+    expect(find.textContaining('Solana  SOL'), findsOneWidget);
+    expect(find.textContaining('USD Coin  USDC'), findsOneWidget);
     await captureIntegrationScreenshot(tester, 'account-detail-wallet-phone');
   });
 

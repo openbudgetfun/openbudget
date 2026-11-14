@@ -27,6 +27,17 @@ Future<List<WalletHolding>> walletHoldings(Ref ref, String walletId) async {
   return client.wallet.listHoldings(UuidValue.fromString(walletId));
 }
 
+/// How the last read of each of the wallet's networks went: when it
+/// succeeded, and why it failed.
+@riverpod
+Future<List<WalletNetworkState>> walletNetworkStates(
+  Ref ref,
+  String walletId,
+) async {
+  final client = ref.read(serverpodClientProvider);
+  return client.wallet.listNetworkStates(UuidValue.fromString(walletId));
+}
+
 /// The wallet's on-chain transactions, newest first.
 @riverpod
 Future<List<WalletTransaction>> walletTransactions(
@@ -47,7 +58,10 @@ Future<List<WalletTaxYearSummary>> walletTaxYearSummaries(
   return client.wallet.listTaxYearSummaries(UuidValue.fromString(walletId));
 }
 
-@riverpod
+/// Wallet mutations. Kept alive so the invalidations that follow each await
+/// still reach the providers they refresh: an auto-disposed notifier is
+/// unmounted by then and its `ref.invalidate` does nothing.
+@Riverpod(keepAlive: true)
 class WalletActions extends _$WalletActions {
   @override
   FutureOr<void> build() {}
@@ -81,9 +95,31 @@ class WalletActions extends _$WalletActions {
     ref
       ..invalidate(walletListProvider(entityId))
       ..invalidate(walletHoldingsProvider(walletId))
+      ..invalidate(walletNetworkStatesProvider(walletId))
       ..invalidate(walletTransactionsProvider(walletId))
       ..invalidate(walletTaxYearSummariesProvider(walletId));
     return result;
+  }
+
+  /// Hides or shows holdings by setting the user's verdict on each, then
+  /// refreshes the wallet's holdings. [verdict] of
+  /// [SpamVerdict.hiddenByUser] hides; [SpamVerdict.allowedByUser] shows.
+  ///
+  /// The holdings are refreshed even when a call fails part-way, so the
+  /// screen shows what the server now holds.
+  Future<void> setHoldingVerdicts({
+    required String walletId,
+    required List<UuidValue> holdingIds,
+    required SpamVerdict verdict,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    try {
+      for (final holdingId in holdingIds) {
+        await client.wallet.setHoldingVerdict(holdingId, verdict);
+      }
+    } finally {
+      ref.invalidate(walletHoldingsProvider(walletId));
+    }
   }
 
   Future<WalletTransaction> updateTransactionMetadata({

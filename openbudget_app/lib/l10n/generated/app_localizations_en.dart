@@ -6228,6 +6228,205 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountHoldingsUnpriced => 'No price yet';
 
   @override
+  String get accountHoldingsCostUnknown => 'Cost unknown';
+
+  @override
+  String get walletHoldingsNetworkSolana => 'Solana';
+
+  @override
+  String get walletHoldingsNetworkSolanaDevnet => 'Solana Devnet';
+
+  @override
+  String get walletHoldingsNetworkBitcoin => 'Bitcoin';
+
+  @override
+  String get walletHoldingsNetworkEthereum => 'Ethereum';
+
+  @override
+  String get walletHoldingsNetworkBase => 'Base';
+
+  @override
+  String get walletHoldingsNetworkArbitrumOne => 'Arbitrum One';
+
+  @override
+  String get walletHoldingsNetworkOpMainnet => 'OP Mainnet';
+
+  @override
+  String get walletHoldingsNetworkPolygonPos => 'Polygon PoS';
+
+  @override
+  String get walletHoldingsNetworkBnbSmartChain => 'BNB Smart Chain';
+
+  @override
+  String get walletHoldingsNetworkAvalancheCChain => 'Avalanche C-Chain';
+
+  @override
+  String get walletHoldingsNetworkTron => 'Tron';
+
+  @override
+  String get walletHoldingsNetworkXrpl => 'XRP Ledger';
+
+  @override
+  String get walletHoldingsNetworkHyperliquid => 'Hyperliquid';
+
+  @override
+  String get walletHoldingsNetworkDogecoin => 'Dogecoin';
+
+  @override
+  String get walletHoldingsNetworkLitecoin => 'Litecoin';
+
+  @override
+  String get walletHoldingsNetworkCardano => 'Cardano';
+
+  @override
+  String get walletHoldingsNetworkTon => 'TON';
+
+  @override
+  String get walletHoldingsNetworkSui => 'Sui';
+
+  @override
+  String get walletHoldingsNetworkAptos => 'Aptos';
+
+  @override
+  String walletHoldingsAgeMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes ago',
+      one: '1 minute ago',
+      zero: 'less than a minute ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String walletHoldingsAgeHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hours ago',
+      one: '1 hour ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String walletHoldingsAgeDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days ago',
+      one: '1 day ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String walletHoldingsReadAgo(String age) {
+    return 'Read $age';
+  }
+
+  @override
+  String get walletHoldingsNeverRead => 'Not read yet';
+
+  @override
+  String get walletHoldingsNothingCounted => 'Nothing counted';
+
+  @override
+  String walletHoldingsSectionSemantics(
+    String network,
+    String total,
+    String status,
+  ) {
+    return '$network, $total, $status';
+  }
+
+  @override
+  String walletHoldingsReadFailedWithAmounts(String network, String age) {
+    return '$network couldn\'t be read. Showing amounts from $age.';
+  }
+
+  @override
+  String walletHoldingsReadFailedWithoutAmounts(String network) {
+    return '$network couldn\'t be read yet. There are no amounts to show.';
+  }
+
+  @override
+  String get walletHoldingsStaked => 'Staked';
+
+  @override
+  String get walletHoldingsRewards => 'Rewards';
+
+  @override
+  String walletHoldingsOldPrice(String age) {
+    return 'Price from $age';
+  }
+
+  @override
+  String get walletHoldingsOldPriceUndated => 'Old price';
+
+  @override
+  String walletHoldingsHiddenTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hidden',
+      one: '1 hidden',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String walletHoldingsHiddenUnpriced(int count) {
+    return '$count without a price';
+  }
+
+  @override
+  String walletHoldingsHiddenSuspected(int count) {
+    return '$count suspected spam';
+  }
+
+  @override
+  String walletHoldingsHiddenByYou(int count) {
+    return '$count hidden by you';
+  }
+
+  @override
+  String get walletHoldingsReasonUnpriced => 'No price';
+
+  @override
+  String get walletHoldingsReasonSuspected => 'Suspected spam';
+
+  @override
+  String get walletHoldingsReasonHiddenByYou => 'Hidden by you';
+
+  @override
+  String walletHoldingsHiddenDetail(String network, String quantity) {
+    return '$network · Quantity $quantity';
+  }
+
+  @override
+  String get walletHoldingsShow => 'Show';
+
+  @override
+  String get walletHoldingsHide => 'Hide';
+
+  @override
+  String walletHoldingsShowSemantics(String name) {
+    return 'Show $name';
+  }
+
+  @override
+  String walletHoldingsHideSemantics(String name) {
+    return 'Hide $name';
+  }
+
+  @override
+  String walletHoldingsVerdictFailed(String name) {
+    return 'Couldn\'t update $name. Try again.';
+  }
+
+  @override
   String transactionDetailAndDate(String detail, String date) {
     return '$detail · $date';
   }

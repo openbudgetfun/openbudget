@@ -261,6 +261,98 @@ final class WalletHoldingsFamily extends $Family
   String toString() => r'walletHoldingsProvider';
 }
 
+/// How the last read of each of the wallet's networks went: when it
+/// succeeded, and why it failed.
+
+@ProviderFor(walletNetworkStates)
+final walletNetworkStatesProvider = WalletNetworkStatesFamily._();
+
+/// How the last read of each of the wallet's networks went: when it
+/// succeeded, and why it failed.
+
+final class WalletNetworkStatesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<WalletNetworkState>>,
+          List<WalletNetworkState>,
+          FutureOr<List<WalletNetworkState>>
+        >
+    with
+        $FutureModifier<List<WalletNetworkState>>,
+        $FutureProvider<List<WalletNetworkState>> {
+  /// How the last read of each of the wallet's networks went: when it
+  /// succeeded, and why it failed.
+  WalletNetworkStatesProvider._({
+    required WalletNetworkStatesFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'walletNetworkStatesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$walletNetworkStatesHash();
+
+  @override
+  String toString() {
+    return r'walletNetworkStatesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<WalletNetworkState>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<WalletNetworkState>> create(Ref ref) {
+    final argument = this.argument as String;
+    return walletNetworkStates(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WalletNetworkStatesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$walletNetworkStatesHash() =>
+    r'8f555c494e76eaaac879121c76999e4ab6abddd3';
+
+/// How the last read of each of the wallet's networks went: when it
+/// succeeded, and why it failed.
+
+final class WalletNetworkStatesFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<WalletNetworkState>>, String> {
+  WalletNetworkStatesFamily._()
+    : super(
+        retry: null,
+        name: r'walletNetworkStatesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// How the last read of each of the wallet's networks went: when it
+  /// succeeded, and why it failed.
+
+  WalletNetworkStatesProvider call(String walletId) =>
+      WalletNetworkStatesProvider._(argument: walletId, from: this);
+
+  @override
+  String toString() => r'walletNetworkStatesProvider';
+}
+
 /// The wallet's on-chain transactions, newest first.
 
 @ProviderFor(walletTransactions)
@@ -440,18 +532,28 @@ final class WalletTaxYearSummariesFamily extends $Family
   String toString() => r'walletTaxYearSummariesProvider';
 }
 
+/// Wallet mutations. Kept alive so the invalidations that follow each await
+/// still reach the providers they refresh: an auto-disposed notifier is
+/// unmounted by then and its `ref.invalidate` does nothing.
+
 @ProviderFor(WalletActions)
 final walletActionsProvider = WalletActionsProvider._();
 
+/// Wallet mutations. Kept alive so the invalidations that follow each await
+/// still reach the providers they refresh: an auto-disposed notifier is
+/// unmounted by then and its `ref.invalidate` does nothing.
 final class WalletActionsProvider
     extends $AsyncNotifierProvider<WalletActions, void> {
+  /// Wallet mutations. Kept alive so the invalidations that follow each await
+  /// still reach the providers they refresh: an auto-disposed notifier is
+  /// unmounted by then and its `ref.invalidate` does nothing.
   WalletActionsProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'walletActionsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -464,7 +566,11 @@ final class WalletActionsProvider
   WalletActions create() => WalletActions();
 }
 
-String _$walletActionsHash() => r'dcd05fb93ee81cf3c42ae8b0b168cee860347a14';
+String _$walletActionsHash() => r'8ad7acfc325daed002304cd396f228d3a154bf17';
+
+/// Wallet mutations. Kept alive so the invalidations that follow each await
+/// still reach the providers they refresh: an auto-disposed notifier is
+/// unmounted by then and its `ref.invalidate` does nothing.
 
 abstract class _$WalletActions extends $AsyncNotifier<void> {
   FutureOr<void> build();
