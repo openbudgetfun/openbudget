@@ -162,11 +162,11 @@ return proposal(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String text,  DateTime createdAt)?  user,TResult Function( String text,  DateTime createdAt)?  assistant,TResult Function( String toolName,  DateTime createdAt)?  tool,TResult Function( AssistantProposalCard proposal,  DateTime createdAt)?  proposal,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String text,  DateTime createdAt)?  user,TResult Function( String text,  DateTime createdAt,  List<AssistantSource> sources,  bool touchesTaxOrInvestment)?  assistant,TResult Function( String toolName,  DateTime createdAt)?  tool,TResult Function( AssistantProposalCard proposal,  DateTime createdAt)?  proposal,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case AssistantUserMessage() when user != null:
 return user(_that.text,_that.createdAt);case AssistantAssistantMessage() when assistant != null:
-return assistant(_that.text,_that.createdAt);case AssistantToolCall() when tool != null:
+return assistant(_that.text,_that.createdAt,_that.sources,_that.touchesTaxOrInvestment);case AssistantToolCall() when tool != null:
 return tool(_that.toolName,_that.createdAt);case AssistantProposalItem() when proposal != null:
 return proposal(_that.proposal,_that.createdAt);case _:
   return orElse();
@@ -186,11 +186,11 @@ return proposal(_that.proposal,_that.createdAt);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String text,  DateTime createdAt)  user,required TResult Function( String text,  DateTime createdAt)  assistant,required TResult Function( String toolName,  DateTime createdAt)  tool,required TResult Function( AssistantProposalCard proposal,  DateTime createdAt)  proposal,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String text,  DateTime createdAt)  user,required TResult Function( String text,  DateTime createdAt,  List<AssistantSource> sources,  bool touchesTaxOrInvestment)  assistant,required TResult Function( String toolName,  DateTime createdAt)  tool,required TResult Function( AssistantProposalCard proposal,  DateTime createdAt)  proposal,}) {final _that = this;
 switch (_that) {
 case AssistantUserMessage():
 return user(_that.text,_that.createdAt);case AssistantAssistantMessage():
-return assistant(_that.text,_that.createdAt);case AssistantToolCall():
+return assistant(_that.text,_that.createdAt,_that.sources,_that.touchesTaxOrInvestment);case AssistantToolCall():
 return tool(_that.toolName,_that.createdAt);case AssistantProposalItem():
 return proposal(_that.proposal,_that.createdAt);}
 }
@@ -206,11 +206,11 @@ return proposal(_that.proposal,_that.createdAt);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String text,  DateTime createdAt)?  user,TResult? Function( String text,  DateTime createdAt)?  assistant,TResult? Function( String toolName,  DateTime createdAt)?  tool,TResult? Function( AssistantProposalCard proposal,  DateTime createdAt)?  proposal,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String text,  DateTime createdAt)?  user,TResult? Function( String text,  DateTime createdAt,  List<AssistantSource> sources,  bool touchesTaxOrInvestment)?  assistant,TResult? Function( String toolName,  DateTime createdAt)?  tool,TResult? Function( AssistantProposalCard proposal,  DateTime createdAt)?  proposal,}) {final _that = this;
 switch (_that) {
 case AssistantUserMessage() when user != null:
 return user(_that.text,_that.createdAt);case AssistantAssistantMessage() when assistant != null:
-return assistant(_that.text,_that.createdAt);case AssistantToolCall() when tool != null:
+return assistant(_that.text,_that.createdAt,_that.sources,_that.touchesTaxOrInvestment);case AssistantToolCall() when tool != null:
 return tool(_that.toolName,_that.createdAt);case AssistantProposalItem() when proposal != null:
 return proposal(_that.proposal,_that.createdAt);case _:
   return null;
@@ -294,11 +294,23 @@ as DateTime,
 
 
 class AssistantAssistantMessage implements AssistantTimelineItem {
-  const AssistantAssistantMessage({required this.text, required this.createdAt});
+  const AssistantAssistantMessage({required this.text, required this.createdAt,  List<AssistantSource> sources = const [], this.touchesTaxOrInvestment = false}): _sources = sources;
   
 
  final  String text;
 @override final  DateTime createdAt;
+/// The sources the reply's `[^key]` markers resolved to.
+ final  List<AssistantSource> _sources;
+/// The sources the reply's `[^key]` markers resolved to.
+@JsonKey() List<AssistantSource> get sources {
+  if (_sources is EqualUnmodifiableListView) return _sources;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_sources);
+}
+
+/// Whether the reply touches tax or investments, so it carries the
+/// disclaimer.
+@JsonKey() final  bool touchesTaxOrInvestment;
 
 /// Create a copy of AssistantTimelineItem
 /// with the given fields replaced by the non-null parameter values.
@@ -310,18 +322,18 @@ $AssistantAssistantMessageCopyWith<AssistantAssistantMessage> get copyWith => _$
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is AssistantAssistantMessage&&(identical(other.text, text) || other.text == text)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is AssistantAssistantMessage&&(identical(other.text, text) || other.text == text)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&const DeepCollectionEquality().equals(other.sources, _sources)&&(identical(other.touchesTaxOrInvestment, touchesTaxOrInvestment) || other.touchesTaxOrInvestment == touchesTaxOrInvestment));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,text,createdAt);
+    return Object.hash(runtimeType,text,createdAt,const DeepCollectionEquality().hash(_sources),touchesTaxOrInvestment);
 }
 
 @override
 String toString() {
-    return 'AssistantTimelineItem.assistant(text: $text, createdAt: $createdAt)';
+    return 'AssistantTimelineItem.assistant(text: $text, createdAt: $createdAt, sources: $sources, touchesTaxOrInvestment: $touchesTaxOrInvestment)';
 }
 
 
@@ -332,7 +344,7 @@ abstract mixin class $AssistantAssistantMessageCopyWith<$Res> implements $Assist
   factory $AssistantAssistantMessageCopyWith(AssistantAssistantMessage value, $Res Function(AssistantAssistantMessage) _then) = _$AssistantAssistantMessageCopyWithImpl;
 @override @useResult
 $Res call({
- String text, DateTime createdAt
+ String text, DateTime createdAt, List<AssistantSource> sources, bool touchesTaxOrInvestment
 });
 
 
@@ -349,11 +361,13 @@ class _$AssistantAssistantMessageCopyWithImpl<$Res>
 
 /// Create a copy of AssistantTimelineItem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? text = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? text = null,Object? createdAt = null,Object? sources = null,Object? touchesTaxOrInvestment = null,}) {
   return _then(AssistantAssistantMessage(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,sources: null == sources ? _self._sources : sources // ignore: cast_nullable_to_non_nullable
+as List<AssistantSource>,touchesTaxOrInvestment: null == touchesTaxOrInvestment ? _self.touchesTaxOrInvestment : touchesTaxOrInvestment // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

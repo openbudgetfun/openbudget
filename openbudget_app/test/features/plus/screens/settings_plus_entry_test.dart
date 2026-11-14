@@ -77,7 +77,7 @@ void main() {
 
     expect(find.text('OpenBudget Plus'), findsOneWidget);
     expect(
-      find.text('Tax reports, the assistant and more'),
+      find.text('Tax reports, the Money guide and more'),
       findsOneWidget,
     );
 

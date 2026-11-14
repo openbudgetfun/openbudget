@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -10,6 +11,7 @@ import 'package:openbudget_app/src/features/assistant/providers/assistant_propos
 import 'package:openbudget_app/src/features/assistant/providers/assistant_proposals_provider.dart';
 import 'package:openbudget_app/src/features/assistant/providers/assistant_provider_settings_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 
 import '../support/fake_assistant_api.dart';
 
@@ -122,6 +124,79 @@ void main() {
       expect(state.items[0], isA<AssistantUserMessage>());
       expect(state.items[1], isA<AssistantAssistantMessage>());
       expect(state.items[2], isA<AssistantProposalItem>());
+    });
+
+    test(
+      'keeps the streamed citations and disclaimer flag on a reply',
+      () async {
+        final api = FakeAssistantApi(
+          chatEvents: [
+            agentEvent(
+              AgentEventKind.textDelta,
+              text: 'The allowance is £3,000[^gb-cgt-aea].',
+              citations: [
+                testCitation('gb-cgt-aea', grade: 'secondary', announced: true),
+              ],
+              touchesTaxOrInvestment: true,
+            ),
+            agentEvent(AgentEventKind.done),
+          ],
+        );
+        final container = _container(api);
+        final subscription = container.listen(
+          assistantChatProvider(testBudgetId),
+          (_, _) {},
+        );
+        addTearDown(subscription.close);
+
+        container
+            .read(assistantChatProvider(testBudgetId).notifier)
+            .send('What is my CGT allowance?');
+        await pumpEventQueue();
+
+        final reply =
+            container.read(assistantChatProvider(testBudgetId)).items.last
+                as AssistantAssistantMessage;
+        expect(reply.touchesTaxOrInvestment, isTrue);
+        expect(reply.sources, hasLength(1));
+        expect(reply.sources.single.key, 'gb-cgt-aea');
+        expect(reply.sources.single.grade, SourceGrade.secondary);
+        expect(reply.sources.single.announced, isTrue);
+        expect(reply.sources.single.verifiedOn, DateTime.utc(2026, 11, 2));
+      },
+    );
+
+    test('reads stored citations when it opens a conversation', () async {
+      final citation = testCitation('report-2026', grade: 'inferred');
+      final api = FakeAssistantApi(
+        messages: [
+          testMessage(
+            AgentMessageRole.assistant,
+            'Your estimate is £1,200[^report-2026].',
+            createdAt: DateTime(2026, 1, 2),
+            citationsJson: jsonEncode([citation.toJson()]),
+            touchesTaxOrInvestment: true,
+          ),
+        ],
+      );
+      final container = _container(api);
+      final subscription = container.listen(
+        assistantChatProvider(testBudgetId),
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+
+      await container
+          .read(assistantChatProvider(testBudgetId).notifier)
+          .openConversation(testConversation());
+
+      final reply =
+          container.read(assistantChatProvider(testBudgetId)).items.single
+              as AssistantAssistantMessage;
+      expect(reply.touchesTaxOrInvestment, isTrue);
+      expect(reply.sources.single.key, 'report-2026');
+      expect(reply.sources.single.grade, SourceGrade.inferred);
+      expect(reply.sources.single.authority, 'gov.uk');
     });
 
     test('maps a stream failure and retries the last question', () async {

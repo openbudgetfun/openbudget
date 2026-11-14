@@ -5,16 +5,15 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
-import 'package:openbudget_app/src/features/tax/providers/tax_url_launcher_provider.dart';
 import 'package:openbudget_app/src/features/tax/tax_formatting.dart';
 import 'package:openbudget_app/src/features/tax/tax_labels.dart';
+import 'package:openbudget_app/src/features/tax/widgets/source_widgets.dart';
 import 'package:openbudget_app/src/features/tax/widgets/tax_caveat_card.dart';
 import 'package:openbudget_app/src/features/tax/widgets/tax_disclaimer_bar.dart';
 import 'package:openbudget_app/src/features/tax/widgets/tax_export_card.dart';
 import 'package:openbudget_app/src/features/tax/widgets/tax_year_switcher.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
-import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -214,21 +213,6 @@ DateTime _ratesDate(DateTime? lastDayOfYear) {
     return today;
   }
   return lastDayOfYear;
-}
-
-/// Opens [url] outside the app, telling the person in plain words when the
-/// device has nothing to open it with.
-Future<void> _openLink(BuildContext context, WidgetRef ref, Uri url) async {
-  final message = AppLocalizations.of(context).taxLinkOpenFailed;
-  var opened = false;
-  try {
-    opened = await ref.read(taxUrlLauncherProvider).openPage(url);
-  } on Exception {
-    opened = false;
-  }
-  if (!opened && context.mounted) {
-    showAppToast(context, message: message, variant: AppToastVariant.error);
-  }
 }
 
 /// "In plain words": why this panel looks different from a pack country's.
@@ -691,7 +675,7 @@ class _RateCard extends HookConsumerWidget {
                   runSpacing: SpacingTokens.xs,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    if (grade != null) _GradeChip(grade: grade),
+                    if (grade != null) _gradeChip(grade),
                     Text(
                       l10n.taxRateSince(DateFormat.yMMMd().format(rate.from)),
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -713,85 +697,23 @@ class _RateCard extends HookConsumerWidget {
   }
 }
 
-/// The badge that says how firmly a source backs a figure.
-class _GradeChip extends HookWidget {
-  const _GradeChip({required this.grade});
-
-  final SourceGrade grade;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return ObToneChip(
-      key: grade == SourceGrade.secondary
-          ? const Key('tax-secondary-source-badge')
-          : null,
-      label: taxSourceGradeLabel(l10n, grade),
-      tone: switch (grade) {
-        SourceGrade.primary => ObTone.funded,
-        SourceGrade.secondary => ObTone.review,
-        SourceGrade.inferred => ObTone.underfunded,
-        SourceGrade.background => ObTone.neutral,
-      },
-    );
-  }
-}
-
 /// Where a figure comes from, as a short label that opens the source.
 ///
 /// The label is the source's website, not its full research citation; the
 /// citation is the link's spoken label and its tooltip.
-class _SourceLink extends HookConsumerWidget {
+class _SourceLink extends HookWidget {
   const _SourceLink({required this.source});
 
   final SourceInfo source;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final palette = theme.ob;
-    final url = webLink(source.url);
-    final label = l10n.taxRateSource(shortSourceLabel(source));
-
-    if (url == null) {
-      return Tooltip(
-        message: source.title,
-        child: Text(
-          label,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.bodySmall?.copyWith(color: palette.mutedInk),
-        ),
-      );
-    }
-    return Semantics(
-      link: true,
-      label: l10n.taxRateSourceOpen(source.title),
-      excludeSemantics: true,
-      child: Tooltip(
-        message: source.title,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          onTap: () => _openLink(context, ref, url),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: palette.brand,
-                  decoration: TextDecoration.underline,
-                  decorationColor: palette.brand,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+    return SourceLinkText(
+      label: l10n.taxRateSource(shortSourceLabel(source)),
+      semanticLabel: l10n.taxRateSourceOpen(source.title),
+      tooltip: source.title,
+      url: webLink(source.url),
     );
   }
 }
@@ -838,7 +760,7 @@ class _ThresholdCard extends HookWidget {
                 ),
                 if (grade != null) ...[
                   const SizedBox(height: SpacingTokens.xs),
-                  _GradeChip(grade: grade),
+                  _gradeChip(grade),
                 ],
               ],
             ),
@@ -1004,7 +926,7 @@ class _AuthorityCard extends HookConsumerWidget {
                 message: l10n.taxAuthorityOpen(authority.name),
                 child: ObCard(
                   key: const Key('tax-authority-link'),
-                  onTap: () => _openLink(context, ref, url),
+                  onTap: () => openSourceLink(context, ref, url),
                   child: content,
                 ),
               ),
@@ -1145,3 +1067,11 @@ class _ResearchNotes extends HookWidget {
     );
   }
 }
+
+/// The grade badge, keyed for a secondary source so tests can find it.
+Widget _gradeChip(SourceGrade grade) => SourceGradeChip(
+  key: grade == SourceGrade.secondary
+      ? const Key('tax-secondary-source-badge')
+      : null,
+  grade: grade,
+);

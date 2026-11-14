@@ -61,7 +61,7 @@ final class AssistantChatProvider
   }
 }
 
-String _$assistantChatHash() => r'190e62aa3287a29e42b96193befd6d4e266fe93f';
+String _$assistantChatHash() => r'33a74721ef40d71d13ad5efd5cd1fd959e22414b';
 
 /// Runs one assistant conversation in a budget.
 

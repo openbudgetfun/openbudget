@@ -20,6 +20,8 @@ AgentEvent agentEvent(
   String? toolName,
   AgentProposal? proposal,
   int? costMicroUsd,
+  List<AgentCitation>? citations,
+  bool? touchesTaxOrInvestment,
 }) => AgentEvent(
   kind: kind,
   conversationId: testConversationUuid,
@@ -27,16 +29,39 @@ AgentEvent agentEvent(
   toolName: toolName,
   proposal: proposal,
   costMicroUsd: costMicroUsd,
+  citations: citations,
+  touchesTaxOrInvestment: touchesTaxOrInvestment,
+);
+
+/// One source behind a citation key.
+AgentCitation testCitation(
+  String key, {
+  String title = 'Capital gains tax: allowances',
+  String url = 'https://www.gov.uk/capital-gains-tax/allowances',
+  String authority = 'gov.uk',
+  String grade = 'primary',
+  bool announced = false,
+  DateTime? verifiedOn,
+}) => AgentCitation(
+  key: key,
+  title: title,
+  url: url,
+  authority: authority,
+  verifiedOn: verifiedOn ?? DateTime.utc(2026, 11, 2),
+  grade: grade,
+  announced: announced,
 );
 
 AgentUsageView testUsage({
   AgentProvider provider = AgentProvider.zen,
   int allowanceMicroUsd = 5000000,
   int usedMicroUsd = 420000,
+  int? conversationsLeft,
 }) => AgentUsageView(
   provider: provider,
   allowanceMicroUsd: allowanceMicroUsd,
   usedMicroUsd: usedMicroUsd,
+  conversationsLeft: conversationsLeft,
 );
 
 AgentConversation testConversation({
@@ -54,6 +79,8 @@ AgentMessage testMessage(
   AgentMessageRole role,
   String content, {
   DateTime? createdAt,
+  String? citationsJson,
+  bool touchesTaxOrInvestment = false,
 }) => AgentMessage(
   id: UuidValue.fromString(
     role == AgentMessageRole.user
@@ -64,6 +91,8 @@ AgentMessage testMessage(
   role: role,
   content: content,
   createdAt: createdAt,
+  citationsJson: citationsJson,
+  touchesTaxOrInvestment: touchesTaxOrInvestment,
 );
 
 AgentProposal testProposal({

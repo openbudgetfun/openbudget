@@ -2329,6 +2329,18 @@
   "taxTransactionSalesTaxError": "Enter an amount no larger than the transaction.",
   "taxCategoryLoadRetry": "Try again",
   "assistantApply": "Apply",
+  "assistantCitationSemantics": "Source {number}: {title}",
+  "@assistantCitationSemantics": {
+    "description": "Spoken label of an inline citation chip in a Money guide reply.",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "assistantComposerHint": "Ask about this plan…",
   "assistantConversationDelete": "Delete conversation",
   "assistantConversationDeleteError": "Could not delete the conversation.",
@@ -2337,23 +2349,32 @@
   "assistantConversationDeletedToast": "Conversation deleted",
   "assistantConversationListEmpty": "No conversations yet. Your first question starts one.",
   "assistantConversations": "Conversations",
+  "assistantConversationsLeft": "{count, plural, =0{No full conversations left this month} =1{About 1 conversation left this month} other{About {count} conversations left this month}}",
+  "@assistantConversationsLeft": {
+    "description": "Estimate of how many typical Money guide conversations the remaining allowance covers.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "assistantConversationsLoadError": "Could not load conversations.",
-  "assistantDisclaimer": "Guidance only, not financial or tax advice.",
+  "assistantDisclaimer": "Guidance, not regulated financial advice.",
   "assistantDismiss": "Dismiss",
-  "assistantEmptyMessage": "I can read your budget, explain what changed, and suggest moves for you to approve. I never change anything on my own.",
-  "assistantEmptyTitle": "Ask about this plan",
-  "assistantErrorAllowanceMessage": "You've used this month's included assistant usage. It resets with your next billing period, or you can connect your own provider and keep going now.",
+  "assistantEmptyMessage": "Ask about your plan, your taxes or your crypto. I show what the rules say and what your figures show, with sources. You decide what to do, and I never change anything on my own.",
+  "assistantEmptyTitle": "Ask the Money guide",
+  "assistantErrorAllowanceMessage": "You've used this month's included Money guide usage. It resets with your next billing period, or you can connect your own provider and keep going now.",
   "assistantErrorAllowanceTitle": "Included usage is spent",
-  "assistantErrorEntitlementMessage": "The included assistant is part of OpenBudget Plus. Subscribe to keep chatting, or connect your own OpenAI-compatible provider.",
+  "assistantErrorEntitlementMessage": "The Money guide is part of OpenBudget Plus. Subscribe to keep asking, or connect your own OpenAI-compatible provider.",
   "assistantErrorEntitlementTitle": "OpenBudget Plus is needed",
   "assistantErrorGetPlus": "Get OpenBudget Plus",
   "assistantErrorNetworkMessage": "Check your connection and try again.",
-  "assistantErrorNetworkTitle": "Couldn't reach the assistant",
+  "assistantErrorNetworkTitle": "Couldn't reach the Money guide",
   "assistantErrorProviderMessage": "The built-in provider isn't available. Try again, or connect your own OpenAI-compatible provider.",
-  "assistantErrorProviderTitle": "The assistant has no provider right now",
+  "assistantErrorProviderTitle": "The Money guide has no provider right now",
   "assistantErrorTryAgain": "Try again",
   "assistantErrorUnknownMessage": "Something went wrong while answering. Try again.",
-  "assistantErrorUnknownTitle": "The assistant couldn't finish",
+  "assistantErrorUnknownTitle": "The Money guide couldn't finish",
   "assistantErrorUseOwnProvider": "Use your own provider",
   "assistantErrorValidationTitle": "That request wasn't valid",
   "assistantLoadingHistory": "Opening the conversation…",
@@ -2378,19 +2399,19 @@
   "assistantProposalMoveMoney": "Move money",
   "assistantProposalPendingLabel": "Waiting for your call",
   "assistantProposalTransactionTax": "Transaction tax category",
-  "assistantProposalsEmptyMessage": "When the assistant suggests a move, it waits here for you to apply or dismiss it.",
+  "assistantProposalsEmptyMessage": "When the Money guide suggests a move, it waits here for you to apply or dismiss it.",
   "assistantProposalsEmptyTitle": "Nothing waiting",
   "assistantProposalsHistorySection": "Past proposals",
   "assistantProposalsLoadError": "Could not load proposals.",
   "assistantProposalsLoading": "Gathering proposals…",
   "assistantProposalsPendingSection": "Waiting for you",
-  "assistantProposalsTitle": "Assistant proposals",
+  "assistantProposalsTitle": "Money guide suggestions",
   "assistantProviderApiKey": "API key",
   "assistantProviderApiKeyHint": "sk-…",
   "assistantProviderBaseUrl": "Base URL",
   "assistantProviderBaseUrlHint": "https://api.example.com/v1",
   "assistantProviderEnterKeyAgain": "Saved keys are never shown. Enter the key again to save changes.",
-  "assistantProviderIntro": "Connect an OpenAI-compatible provider to talk to the assistant with your own key.",
+  "assistantProviderIntro": "Connect an OpenAI-compatible provider to use the Money guide with your own key.",
   "assistantProviderKeyRequired": "Enter the API key.",
   "assistantProviderKeyStored": "••••{hint}",
   "@assistantProviderKeyStored": {
@@ -2409,7 +2430,7 @@
   "assistantProviderRemove": "Remove provider",
   "assistantProviderRemovedToast": "Provider removed",
   "assistantProviderRemoveError": "Could not remove the provider.",
-  "assistantProviderRemoveMessage": "The assistant will go back to the included provider, which needs OpenBudget Plus.",
+  "assistantProviderRemoveMessage": "The Money guide will go back to the included provider, which needs OpenBudget Plus.",
   "assistantProviderRemoveTitle": "Remove this provider?",
   "assistantProviderReplace": "Use a different provider",
   "assistantProviderSave": "Save provider",
@@ -2417,16 +2438,73 @@
   "assistantProviderSavedToast": "Provider saved",
   "assistantProviderSaveError": "Could not save the provider.",
   "assistantProviderSettingsHint": "Use your own OpenAI-compatible provider",
-  "assistantProviderSettingsRow": "Assistant provider",
-  "assistantProviderTitle": "Assistant provider",
+  "assistantProviderSettingsRow": "Money guide provider",
+  "assistantProviderTitle": "Money guide provider",
   "assistantProviderUrlInvalid": "Use a full HTTPS URL that points at the provider.",
   "assistantProviderUrlRequired": "Enter the provider's HTTPS base URL.",
   "assistantRetry": "Try again",
   "assistantSend": "Send message",
+  "assistantSourceAnnouncedBadge": "Announced, not yet law",
+  "@assistantSourceAnnouncedBadge": {
+    "description": "Badge on a source that describes a rule that is announced but not yet law."
+  },
+  "assistantSourceChecked": "Checked {date}",
+  "@assistantSourceChecked": {
+    "description": "When a cited source was last checked.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantSourceNumber": "Source {number}",
+  "@assistantSourceNumber": {
+    "description": "Spoken label of a source's number in the sources sheet.",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "assistantSourceOpen": "Open {authority}",
+  "@assistantSourceOpen": {
+    "description": "Link that opens a cited source; authority is its website, such as gov.uk.",
+    "placeholders": {
+      "authority": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantSourceOpenSemantics": "Open source: {title}",
+  "@assistantSourceOpenSemantics": {
+    "description": "Spoken label of the link that opens a cited source.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantSourcesButton": "{count, plural, =1{1 source} other{{count} sources}}",
+  "@assistantSourcesButton": {
+    "description": "Button under a Money guide reply that opens its sources.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assistantSourcesIntro": "Where the rules and figures in this answer come from. Open one to read it at the source.",
+  "@assistantSourcesIntro": {
+    "description": "Line under the sources sheet title."
+  },
+  "assistantSourcesTitle": "Sources",
+  "@assistantSourcesTitle": {
+    "description": "Title of the sheet that lists a reply's sources."
+  },
   "assistantSuggestionCuts": "Where can I cut spending?",
   "assistantSuggestionGoals": "Am I on track for my goals?",
   "assistantSuggestionTax": "How much tax will I owe this year?",
-  "assistantTitle": "Assistant",
+  "assistantTitle": "Money guide",
   "assistantToolGetTaxReport": "Looked at your tax report",
   "assistantToolListBudgets": "Looked at your plan",
   "assistantToolListEnvelopes": "Looked at your envelopes",
@@ -2436,7 +2514,7 @@
   "assistantToolProposeTransactionTax": "Drafted a tax category change",
   "assistantToolSearchTransactions": "Searched your transactions",
   "assistantToolUnknown": "Looked something up",
-  "assistantTyping": "The assistant is thinking…",
+  "assistantTyping": "The Money guide is thinking…",
   "assistantUntitledConversation": "Untitled conversation",
   "assistantUsageLoading": "Checking this month's usage…",
   "assistantUsageUnavailable": "Usage isn't available right now.",
@@ -2452,17 +2530,17 @@
     }
   },
   "plusTitle": "OpenBudget Plus",
-  "plusNavSubtitle": "Tax reports, the assistant and more",
+  "plusNavSubtitle": "Tax reports, the Money guide and more",
   "plusHeroHeadline": "Get more from every envelope",
-  "plusHeroBody": "Tax reports, a built-in assistant that knows your budget, and room to bring your own agent.",
+  "plusHeroBody": "Tax reports, a Money guide that knows your budget, and room to bring your own agent.",
   "plusPriceAmount": "$20",
   "plusPricePeriod": "a month",
   "plusPriceNote": "Cancel whenever you like.",
-  "plusIncludedUsage": "$5 of assistant usage included every month",
+  "plusIncludedUsage": "$5 of Money guide usage included every month",
   "plusBenefitsTitle": "What you get",
   "plusBenefitTaxTitle": "Tax reports",
   "plusBenefitTaxBody": "UK, US, Nigeria and Germany, built from your own transactions.",
-  "plusBenefitAssistantTitle": "The assistant",
+  "plusBenefitAssistantTitle": "The Money guide",
   "plusBenefitAssistantBody": "Ask questions about your money, with $5 of usage included each month.",
   "plusBenefitAgentTitle": "Bring your own agent",
   "plusBenefitAgentBody": "Connect an OpenAI-compatible provider and use your own key.",
