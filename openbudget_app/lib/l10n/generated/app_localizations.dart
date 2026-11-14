@@ -4069,7 +4069,7 @@ abstract class AppLocalizations {
   /// No description provided for @addAccountConnectWallet.
   ///
   /// In en, this message translates to:
-  /// **'Connect Solana Wallet'**
+  /// **'Add a crypto wallet'**
   String get addAccountConnectWallet;
 
   /// No description provided for @addAccountUnlinkedTitle.
@@ -4113,12 +4113,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading institutions...'**
   String get addAccountLoadingInstitutions;
-
-  /// No description provided for @addAccountConnectWalletButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Connect Wallet'**
-  String get addAccountConnectWalletButton;
 
   /// No description provided for @dialogNext.
   ///
@@ -4185,36 +4179,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add an Unlinked Account'**
   String get addAccountAddUnlinked;
-
-  /// No description provided for @addAccountWalletConnectionDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Connect a Solana wallet in read-only mode. OpenBudget imports native SPL balances and keeps fiat valuation synced.'**
-  String get addAccountWalletConnectionDescription;
-
-  /// No description provided for @addAccountWalletAddressLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Wallet Address'**
-  String get addAccountWalletAddressLabel;
-
-  /// No description provided for @addAccountWalletAddressHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Paste Solana wallet address'**
-  String get addAccountWalletAddressHint;
-
-  /// No description provided for @addAccountWalletLabelOptional.
-  ///
-  /// In en, this message translates to:
-  /// **'Wallet Label (optional)'**
-  String get addAccountWalletLabelOptional;
-
-  /// No description provided for @addAccountWalletLabelHint.
-  ///
-  /// In en, this message translates to:
-  /// **'My Solana Wallet'**
-  String get addAccountWalletLabelHint;
 
   /// No description provided for @addAccountWalletIncludeInBudgetTotals.
   ///
@@ -11091,6 +11055,341 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Owner capital and drawings'**
   String get universalCategoryOutOfScopeOwnerCapitalAndDrawings;
+
+  /// No description provided for @walletAddIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an address or extended public key. OpenBudget only reads your wallet: it never holds a key and can\'t move anything.'**
+  String get walletAddIntro;
+
+  /// No description provided for @walletAddFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet address'**
+  String get walletAddFieldLabel;
+
+  /// No description provided for @walletAddFieldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an address or extended public key'**
+  String get walletAddFieldHint;
+
+  /// No description provided for @walletAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add wallet'**
+  String get walletAddButton;
+
+  /// No description provided for @walletAddInvalidInput.
+  ///
+  /// In en, this message translates to:
+  /// **'That doesn\'t look like a wallet address.'**
+  String get walletAddInvalidInput;
+
+  /// No description provided for @walletAddInvalidChecksum.
+  ///
+  /// In en, this message translates to:
+  /// **'One character is wrong. Check the address and try again.'**
+  String get walletAddInvalidChecksum;
+
+  /// No description provided for @walletAddInvalidKey.
+  ///
+  /// In en, this message translates to:
+  /// **'That extended key isn\'t one OpenBudget recognises.'**
+  String get walletAddInvalidKey;
+
+  /// No description provided for @walletAddRefusedPrivateKeyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s a private key'**
+  String get walletAddRefusedPrivateKeyTitle;
+
+  /// No description provided for @walletAddRefusedPrivateKeyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget never needs it. We cleared the field. Don\'t share it with anyone.'**
+  String get walletAddRefusedPrivateKeyMessage;
+
+  /// No description provided for @walletAddRefusedEvmKeyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'That looks like a private key'**
+  String get walletAddRefusedEvmKeyTitle;
+
+  /// No description provided for @walletAddRefusedEvmKeyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'That looks like a private key, not an address. OpenBudget never needs it. We cleared the field.'**
+  String get walletAddRefusedEvmKeyMessage;
+
+  /// No description provided for @walletAddRefusedTestnetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mainnet only'**
+  String get walletAddRefusedTestnetTitle;
+
+  /// No description provided for @walletAddRefusedTestnetMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget only supports mainnet addresses.'**
+  String get walletAddRefusedTestnetMessage;
+
+  /// No description provided for @walletAddRefusedMultisigTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Multisig keys aren\'t supported yet'**
+  String get walletAddRefusedMultisigTitle;
+
+  /// No description provided for @walletAddRefusedMultisigMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A multisig wallet needs every co-signer\'s key. That\'s coming later.'**
+  String get walletAddRefusedMultisigMessage;
+
+  /// No description provided for @walletAddRefusedExchangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s an exchange account'**
+  String get walletAddRefusedExchangeTitle;
+
+  /// No description provided for @walletAddRefusedExchangeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'That X-address points at an exchange account. Use the address for your own account.'**
+  String get walletAddRefusedExchangeMessage;
+
+  /// No description provided for @walletAddDetectedAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'A {chain} address.'**
+  String walletAddDetectedAddress(String chain);
+
+  /// No description provided for @walletAddDetectedKey.
+  ///
+  /// In en, this message translates to:
+  /// **'A {chain} extended public key. OpenBudget finds every address it makes, and never needs a private key.'**
+  String walletAddDetectedKey(String chain);
+
+  /// No description provided for @walletAddDetectedEvm.
+  ///
+  /// In en, this message translates to:
+  /// **'One address that can hold assets on {count} networks.'**
+  String walletAddDetectedEvm(int count);
+
+  /// The second line of a chain stamp for an address that works on several networks, such as "+ 6" under Ethereum.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {count}'**
+  String walletAddStampMore(int count);
+
+  /// No description provided for @walletAddScriptTypeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll check which kind of address this key makes.'**
+  String get walletAddScriptTypeUnknown;
+
+  /// No description provided for @walletAddWhichChain.
+  ///
+  /// In en, this message translates to:
+  /// **'Which chain is this address on?'**
+  String get walletAddWhichChain;
+
+  /// No description provided for @walletAddUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{chain} isn\'t available yet'**
+  String walletAddUnavailableTitle(String chain);
+
+  /// No description provided for @walletAddUnavailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget can\'t read that chain right now. Try again later.'**
+  String get walletAddUnavailableMessage;
+
+  /// No description provided for @walletAddPreviewLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for assets on {networks}…'**
+  String walletAddPreviewLoading(String networks);
+
+  /// No description provided for @walletAddPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where should OpenBudget look?'**
+  String get walletAddPickerTitle;
+
+  /// No description provided for @walletAddPickerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a chain to include it or leave it out. Ethereum is always read, because that\'s where your address lives.'**
+  String get walletAddPickerHint;
+
+  /// No description provided for @walletAddNetworkNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing'**
+  String get walletAddNetworkNothing;
+
+  /// No description provided for @walletAddNetworkNoPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'No price'**
+  String get walletAddNetworkNoPrice;
+
+  /// No description provided for @walletAddNetworkUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t read'**
+  String get walletAddNetworkUnreadable;
+
+  /// No description provided for @walletAddPreviewFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t look ahead'**
+  String get walletAddPreviewFailedTitle;
+
+  /// No description provided for @walletAddPreviewFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t check which chains hold assets. You can still add the wallet. It will read Ethereum.'**
+  String get walletAddPreviewFailedMessage;
+
+  /// No description provided for @walletAddPreviewRateLimitedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve looked up a lot of wallets. Try again in a little while, or add this one now and it will read Ethereum.'**
+  String get walletAddPreviewRateLimitedMessage;
+
+  /// No description provided for @walletAddPreviewRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get walletAddPreviewRetry;
+
+  /// No description provided for @walletAddNamesTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'{first} and {second}'**
+  String walletAddNamesTwo(String first, String second);
+
+  /// No description provided for @walletAddNamesThree.
+  ///
+  /// In en, this message translates to:
+  /// **'{first}, {second} and {third}'**
+  String walletAddNamesThree(String first, String second, String third);
+
+  /// No description provided for @walletAddNamesMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{first}, {second}, {third} and {count} more'**
+  String walletAddNamesMore(
+    String first,
+    String second,
+    String third,
+    int count,
+  );
+
+  /// Shown while a new wallet is read for the first time. {networks} is a list such as "Ethereum, Base and Arbitrum One".
+  ///
+  /// In en, this message translates to:
+  /// **'Reading {networks}…'**
+  String walletAddReading(String networks);
+
+  /// No description provided for @walletAddReadingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The first read takes a few seconds.'**
+  String get walletAddReadingHint;
+
+  /// No description provided for @walletAddUnreadableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read your wallet'**
+  String get walletAddUnreadableTitle;
+
+  /// No description provided for @walletAddUnreadableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach {networks}. The wallet is in your accounts, and OpenBudget will keep trying.'**
+  String walletAddUnreadableMessage(String networks);
+
+  /// No description provided for @walletAddRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get walletAddRetry;
+
+  /// No description provided for @walletAddFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t add the wallet'**
+  String get walletAddFailedTitle;
+
+  /// No description provided for @walletAddFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Check your connection and try again.'**
+  String get walletAddFailedMessage;
+
+  /// No description provided for @walletAddedPostmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get walletAddedPostmark;
+
+  /// No description provided for @walletAddedPostmarkChains.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} chains'**
+  String walletAddedPostmarkChains(int count);
+
+  /// No description provided for @walletAddedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet added'**
+  String get walletAddedTitle;
+
+  /// No description provided for @walletAddedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{accountName} is in your accounts. Its holdings show in the account\'s details.'**
+  String walletAddedMessage(String accountName);
+
+  /// The name given to a new wallet's account, such as "Ethereum wallet (0xAb…12cD)".
+  ///
+  /// In en, this message translates to:
+  /// **'{chain} wallet ({address})'**
+  String walletAddAccountNameAddress(String chain, String address);
+
+  /// The name given to a Bitcoin HD wallet's account, such as "Bitcoin wallet, zpub".
+  ///
+  /// In en, this message translates to:
+  /// **'{chain} wallet, {keyType}'**
+  String walletAddAccountNameKey(String chain, String keyType);
+
+  /// No description provided for @walletAddStampDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'detected'**
+  String get walletAddStampDetected;
+
+  /// No description provided for @walletAddStampIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'included'**
+  String get walletAddStampIncluded;
+
+  /// No description provided for @walletAddStampLeftOut.
+  ///
+  /// In en, this message translates to:
+  /// **'left out'**
+  String get walletAddStampLeftOut;
+
+  /// No description provided for @walletAddPickerSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 network selected} other{{count} networks selected}}'**
+  String walletAddPickerSelectedCount(int count);
 }
 
 class _AppLocalizationsDelegate
