@@ -448,6 +448,7 @@ abstract final class MultiCurrencyData {
       quantityRaw: BigInt.parse('12500000000'),
       priceCurrencyCode: 'USD',
       valueMinor: 175000,
+      priceQuality: PriceQuality.live,
       costBasisMinor: 140000,
     ),
     WalletHolding(
@@ -460,6 +461,7 @@ abstract final class MultiCurrencyData {
       quantityRaw: BigInt.parse('90500000'),
       priceCurrencyCode: 'USD',
       valueMinor: 9050,
+      priceQuality: PriceQuality.live,
       costBasisMinor: 9050,
     ),
   ];
