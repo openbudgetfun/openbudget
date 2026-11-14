@@ -1,0 +1,20 @@
+# A recorded turn that meets every gate of universal-01.
+id: universal-01-pass
+question: universal-01
+expect:
+  verdict: pass
+steps:
+  - tool: search_knowledge
+    arguments:
+      entityId: "{{entityId}}"
+      ids: [universal-budgeting-sinking-funds]
+    prompt: 6100
+    cached: 0
+    completion: 40
+  - say: >-
+      Divide the £480 by the eight months left: £60 a month goes into a
+      sinking-fund envelope, and anything already saved lowers that figure
+      [^universal-budgeting-sinking-funds]. This assumes the bill is £480 and due in eight months.
+    prompt: 6900
+    cached: 6100
+    completion: 70

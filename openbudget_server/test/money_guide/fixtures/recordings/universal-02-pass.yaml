@@ -1,0 +1,16 @@
+# A recorded turn that meets every gate of universal-02.
+id: universal-02-pass
+question: universal-02
+expect:
+  verdict: pass
+steps:
+  - tool: search_knowledge
+    arguments:
+      entityId: "{{entityId}}"
+      ids: [universal-budgeting-zero-based-envelopes]
+  - say: >-
+      Zero-based budgeting means income minus assigned expenses equals zero at
+      the start of the month. List the month's income, fill envelopes for
+      rent, utilities and food first, then irregular costs, then goals, and
+      check that the envelopes together hold exactly the income
+      [^universal-budgeting-zero-based-envelopes].

@@ -474,7 +474,7 @@ Grading is deterministic, so a run is cheap and repeatable. There is no LLM judg
 - **Live, through Monosecret, by the author of any PR that changes cards, the prompt, tools or golden files:**
 
   ```bash
-  cd openbudget_server && msr --reason "Money guide eval" dart test -t live_eval test/money_guide/eval_test.dart
+  cd openbudget_server && msr --reason "Money guide eval" dart test --run-skipped -t live_eval test/money_guide/live_eval_test.dart
   ```
 
   The PR body includes the report (pass rate per country and cost per question). A full run of 21 countries costs about $6.
