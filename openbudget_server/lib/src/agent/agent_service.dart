@@ -9,6 +9,7 @@ import 'package:openbudget_server/src/agent/agent_usage_service.dart';
 import 'package:openbudget_server/src/agent/chat_completions_client.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/money_guide/citation_resolver.dart';
+import 'package:openbudget_server/src/money_guide/context_budget.dart';
 import 'package:openbudget_server/src/money_guide/money_guide_prompt.dart';
 import 'package:openbudget_server/src/tax/tax_service.dart';
 import 'package:openbudget_server/src/tax/tax_summary_service.dart';
@@ -52,6 +53,9 @@ abstract final class AgentService {
     if (trimmed.isEmpty) {
       throw ValidationException(message: 'Message must not be empty.');
     }
+    if (estimateTokens(trimmed) > ContextBudget.maxMessageTokens) {
+      throw ValidationException(message: 'Message is too long.');
+    }
 
     // Resolve before writing anything, so a missing plan or key leaves no
     // half-started conversation behind.
@@ -93,19 +97,46 @@ abstract final class AgentService {
     final systemMessages = MoneyGuidePrompt.systemMessages(
       await _entityBrief(session, entity),
     );
+    // What every call carries besides the conversation, so the history can
+    // be kept under the ceiling.
+    final fixedTokens =
+        estimateTokens(jsonEncode(systemMessages)) +
+        estimateTokens(jsonEncode(tools));
+    int? turnStart;
+    var loggedCompactions = 0;
 
     for (var call = 0; call < maxModelCalls; call++) {
       // Recheck on every pass: an earlier call in this turn may have used up
       // the remaining allowance.
       final provider = await AgentProviderResolver.resolve(session, userId);
+      final window = ContextBudget.window(
+        await _storedMessages(session, id),
+        fixedTokens: fixedTokens,
+      );
+      if (!window.fits) {
+        throw ValidationException(
+          message:
+              'This conversation is too long to continue. '
+              'Start a new one.',
+        );
+      }
+      // The new user message is the last one stored before the first call.
+      final firstPosition = turnStart ??= window.messages.length - 1;
+      final compactionsThisTurn = window.compactionPositions
+          .where((position) => position >= firstPosition)
+          .length;
+      if (compactionsThisTurn > loggedCompactions) {
+        loggedCompactions = compactionsThisTurn;
+        _log.info(
+          'Compacted history conversation=$id '
+          'elided=${window.elidedResults} tokens=${window.historyTokens}',
+        );
+      }
       final result = await _client.complete(
         endpoint: provider.endpoint,
         apiKey: provider.apiKey,
         model: provider.model,
-        messages: [
-          ...systemMessages,
-          ...await _history(session, id),
-        ],
+        messages: [...systemMessages, ...window.messages],
         tools: tools,
       );
 
@@ -389,56 +420,16 @@ abstract final class AgentService {
     );
   }
 
-  static Future<List<Map<String, Object?>>> _history(
+  /// Every stored message of the conversation, oldest first. Compaction runs
+  /// over these rows and never rewrites them.
+  static Future<List<AgentMessage>> _storedMessages(
     Session session,
     UuidValue conversationId,
-  ) async {
-    final messages = await AgentMessage.db.find(
-      session,
-      where: (t) => t.conversationId.equals(conversationId),
-      orderBy: (t) => t.createdAt,
-    );
-
-    final history = <Map<String, Object?>>[];
-    for (final message in messages) {
-      switch (message.role) {
-        case AgentMessageRole.user:
-          history.add({'role': 'user', 'content': message.content});
-        case AgentMessageRole.assistant:
-          history.add(_assistantMessage(message));
-        case AgentMessageRole.tool:
-          final toolCallId = message.toolCallId;
-          if (toolCallId != null) {
-            history.add({
-              'role': 'tool',
-              'tool_call_id': toolCallId,
-              'content': message.content,
-            });
-          }
-      }
-    }
-    return history;
-  }
-
-  static Map<String, Object?> _assistantMessage(AgentMessage message) {
-    final toolCalls = _decodeToolCalls(message.toolCallsJson);
-    return {
-      'role': 'assistant',
-      'content': message.content.isEmpty ? null : message.content,
-      'tool_calls': ?toolCalls,
-    };
-  }
-
-  static List<Object?>? _decodeToolCalls(String? json) {
-    if (json == null || json.isEmpty) return null;
-    final Object? decoded;
-    try {
-      decoded = jsonDecode(json);
-    } on FormatException {
-      return null;
-    }
-    return decoded is List ? decoded : null;
-  }
+  ) => AgentMessage.db.find(
+    session,
+    where: (t) => t.conversationId.equals(conversationId),
+    orderByList: (t) => [t.createdAt, t.id],
+  );
 
   static Future<String> _runTool(
     AgentToolRegistry registry,

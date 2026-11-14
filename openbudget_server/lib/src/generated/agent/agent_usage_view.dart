@@ -22,6 +22,7 @@ abstract class AgentUsageView
     required this.allowanceMicroUsd,
     required this.usedMicroUsd,
     this.periodEnd,
+    this.conversationsLeft,
   });
 
   factory AgentUsageView({
@@ -29,6 +30,7 @@ abstract class AgentUsageView
     required int allowanceMicroUsd,
     required int usedMicroUsd,
     DateTime? periodEnd,
+    int? conversationsLeft,
   }) = _AgentUsageViewImpl;
 
   factory AgentUsageView.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -41,6 +43,7 @@ abstract class AgentUsageView
       periodEnd: jsonSerialization['periodEnd'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['periodEnd']),
+      conversationsLeft: jsonSerialization['conversationsLeft'] as int?,
     );
   }
 
@@ -55,6 +58,11 @@ abstract class AgentUsageView
   /// When the allowance next resets, when the user is subscribed.
   DateTime? periodEnd;
 
+  /// About how many typical conversations the remaining allowance covers,
+  /// from the user's own median cost per conversation. Null until the user
+  /// has had three conversations, and for bring-your-own providers.
+  int? conversationsLeft;
+
   /// Returns a shallow copy of this [AgentUsageView]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
@@ -63,6 +71,7 @@ abstract class AgentUsageView
     int? allowanceMicroUsd,
     int? usedMicroUsd,
     DateTime? periodEnd = const _is.$UndefinedDateTime(),
+    int? conversationsLeft,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -72,6 +81,7 @@ abstract class AgentUsageView
       'allowanceMicroUsd': allowanceMicroUsd,
       'usedMicroUsd': usedMicroUsd,
       if (periodEnd != null) 'periodEnd': periodEnd?.toJson(),
+      if (conversationsLeft != null) 'conversationsLeft': conversationsLeft,
     };
   }
 
@@ -83,6 +93,7 @@ abstract class AgentUsageView
       'allowanceMicroUsd': allowanceMicroUsd,
       'usedMicroUsd': usedMicroUsd,
       if (periodEnd != null) 'periodEnd': periodEnd?.toJson(),
+      if (conversationsLeft != null) 'conversationsLeft': conversationsLeft,
     };
   }
 
@@ -92,17 +103,21 @@ abstract class AgentUsageView
   }
 }
 
+class _Undefined {}
+
 class _AgentUsageViewImpl extends AgentUsageView {
   _AgentUsageViewImpl({
     required _ice504k4.AgentProvider provider,
     required int allowanceMicroUsd,
     required int usedMicroUsd,
     DateTime? periodEnd,
+    int? conversationsLeft,
   }) : super._(
          provider: provider,
          allowanceMicroUsd: allowanceMicroUsd,
          usedMicroUsd: usedMicroUsd,
          periodEnd: periodEnd,
+         conversationsLeft: conversationsLeft,
        );
 
   /// Returns a shallow copy of this [AgentUsageView]
@@ -114,6 +129,7 @@ class _AgentUsageViewImpl extends AgentUsageView {
     int? allowanceMicroUsd,
     int? usedMicroUsd,
     DateTime? periodEnd = const _is.$UndefinedDateTime(),
+    Object? conversationsLeft = _Undefined,
   }) {
     return AgentUsageView(
       provider: provider ?? this.provider,
@@ -122,6 +138,9 @@ class _AgentUsageViewImpl extends AgentUsageView {
       periodEnd: periodEnd is _is.UndefinedSentinel
           ? this.periodEnd
           : periodEnd,
+      conversationsLeft: conversationsLeft is int?
+          ? conversationsLeft
+          : this.conversationsLeft,
     );
   }
 }
