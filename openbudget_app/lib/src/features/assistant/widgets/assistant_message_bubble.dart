@@ -9,6 +9,8 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/assistant/models/assistant_cited_reply.dart';
 import 'package:openbudget_app/src/features/assistant/models/assistant_source.dart';
 import 'package:openbudget_app/src/features/assistant/widgets/assistant_sources_sheet.dart';
+import 'package:openbudget_app/src/features/assistant/widgets/assistant_text.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// The smallest side of the area that opens an inline citation mark.
@@ -63,7 +65,8 @@ class AssistantMessageBubble extends HookWidget {
 }
 
 /// A Money guide reply: its text with numbered citation chips, a button that
-/// opens its sources, and the disclaimer when it touches tax or investments.
+/// opens its sources, and its country's disclaimer when it touches tax or
+/// investments.
 ///
 /// Each citation is a number on a spot-ink wash, set as text so it wraps with
 /// the word it follows and never changes the line height. A tap on a mark
@@ -74,6 +77,7 @@ class AssistantReplyBubble extends HookWidget {
     required this.text,
     this.sources = const [],
     this.touchesTaxOrInvestment = false,
+    this.jurisdiction,
     super.key,
   });
 
@@ -88,6 +92,10 @@ class AssistantReplyBubble extends HookWidget {
 
   /// Whether the reply carries the disclaimer.
   final bool touchesTaxOrInvestment;
+
+  /// The tax jurisdiction of the entity being discussed, which picks the
+  /// disclaimer's wording. Null for a country with no rule pack.
+  final TaxJurisdiction? jurisdiction;
 
   @override
   Widget build(BuildContext context) {
@@ -235,7 +243,7 @@ class AssistantReplyBubble extends HookWidget {
                           vertical: SpacingTokens.xs,
                         ),
                         child: Text(
-                          l10n.assistantDisclaimer,
+                          assistantReplyDisclaimer(l10n, jurisdiction),
                           key: disclaimerKey,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: palette.mutedInk,

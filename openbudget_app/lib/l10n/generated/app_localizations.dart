@@ -7737,7 +7737,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantComposerHint.
   ///
   /// In en, this message translates to:
-  /// **'Ask about this plan…'**
+  /// **'Ask about money, tax or crypto…'**
   String get assistantComposerHint;
 
   /// No description provided for @assistantConversationDelete.
@@ -8208,6 +8208,36 @@ abstract class AppLocalizations {
   /// **'Enter the provider\'s HTTPS base URL.'**
   String get assistantProviderUrlRequired;
 
+  /// Under a Money guide reply about tax or investments for a German entity. A literal English rendering of the German addition in guidanceDisclaimers (openbudget_core); have a German speaker review before launch.
+  ///
+  /// In en, this message translates to:
+  /// **'General information, not tax advice for your individual case. Rules change. For your situation, ask a Steuerberater or a Lohnsteuerhilfeverein.'**
+  String get assistantReplyDisclaimerDe;
+
+  /// No description provided for @assistantReplyDisclaimerGb.
+  ///
+  /// In en, this message translates to:
+  /// **'Information only, not tax, legal or investment advice, and it doesn\'t recommend any investment, pension or ISA product. Rules change, so check with a qualified professional.'**
+  String get assistantReplyDisclaimerGb;
+
+  /// Under a Money guide reply about tax or investments for an entity whose country has no tax rule pack. Deliberately not the same text as the fixed footer (assistantDisclaimer).
+  ///
+  /// In en, this message translates to:
+  /// **'Information only, not tax, legal or investment advice. Rules change, so check with a qualified professional before you act on it.'**
+  String get assistantReplyDisclaimerGeneric;
+
+  /// No description provided for @assistantReplyDisclaimerNg.
+  ///
+  /// In en, this message translates to:
+  /// **'Information only, not tax, legal or investment advice. Rules change, so confirm with a registered tax practitioner and the tax authority before relying on this.'**
+  String get assistantReplyDisclaimerNg;
+
+  /// No description provided for @assistantReplyDisclaimerUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Information only, not tax, legal or investment advice. A general educational calculation, not a written federal tax opinion. Rules change, so check with a qualified professional.'**
+  String get assistantReplyDisclaimerUs;
+
   /// No description provided for @assistantRetry.
   ///
   /// In en, this message translates to:
@@ -8292,17 +8322,47 @@ abstract class AppLocalizations {
   /// **'Money guide'**
   String get assistantTitle;
 
+  /// No description provided for @assistantToolGetNetWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Looked at your net worth'**
+  String get assistantToolGetNetWorth;
+
+  /// No description provided for @assistantToolGetSpendingSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Looked at your spending'**
+  String get assistantToolGetSpendingSummary;
+
+  /// No description provided for @assistantToolGetTaxCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked your tax deadlines'**
+  String get assistantToolGetTaxCalendar;
+
   /// No description provided for @assistantToolGetTaxReport.
   ///
   /// In en, this message translates to:
   /// **'Looked at your tax report'**
   String get assistantToolGetTaxReport;
 
+  /// No description provided for @assistantToolGetTaxSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Looked at your tax summary'**
+  String get assistantToolGetTaxSummary;
+
   /// No description provided for @assistantToolListBudgets.
   ///
   /// In en, this message translates to:
   /// **'Looked at your plan'**
   String get assistantToolListBudgets;
+
+  /// No description provided for @assistantToolListEntities.
+  ///
+  /// In en, this message translates to:
+  /// **'Looked at your budgets'**
+  String get assistantToolListEntities;
 
   /// No description provided for @assistantToolListEnvelopes.
   ///
@@ -8333,6 +8393,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Drafted a tax category change'**
   String get assistantToolProposeTransactionTax;
+
+  /// No description provided for @assistantToolSearchKnowledge.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked the sourced rules'**
+  String get assistantToolSearchKnowledge;
 
   /// No description provided for @assistantToolSearchTransactions.
   ///

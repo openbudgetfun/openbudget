@@ -11,10 +11,12 @@ import 'package:openbudget_app/src/features/assistant/providers/assistant_usage_
 import 'package:openbudget_app/src/features/assistant/screens/assistant_screen.dart';
 import 'package:openbudget_app/src/features/assistant/widgets/assistant_message_bubble.dart';
 import 'package:openbudget_app/src/features/assistant/widgets/assistant_sources_sheet.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+import '../../tax/tax_test_data.dart' show testEntity;
 import '../support/fake_assistant_api.dart';
 
 Future<ProviderContainer> _pumpAssistant(
@@ -22,9 +24,14 @@ Future<ProviderContainer> _pumpAssistant(
   FakeAssistantApi api, {
   AgentUsageView? usage,
   List<AgentConversation> conversations = const [],
+  String countryCode = 'GB',
 }) async {
   final container = ProviderContainer(
     overrides: [
+      entityDetailProvider.overrideWith(
+        (ref, id) async =>
+            testEntity(id: testBudgetId, countryCode: countryCode),
+      ),
       assistantApiProvider.overrideWith((ref) => api),
       assistantUsageProvider.overrideWith((ref) async => usage ?? testUsage()),
       assistantConversationsProvider.overrideWith(
@@ -60,6 +67,8 @@ void main() {
     await _pumpAssistant(tester, api);
 
     expect(find.text('Ask the Money guide'), findsOneWidget);
+    expect(find.text('Ask about money, tax or crypto…'), findsOneWidget);
+    expect(find.text('Ask about this plan…'), findsNothing);
     expect(find.text('How much tax will I owe this year?'), findsOneWidget);
     expect(find.text('Where can I cut spending?'), findsOneWidget);
     expect(find.text('Am I on track for my goals?'), findsOneWidget);
@@ -320,5 +329,109 @@ void main() {
 
     expect(find.byKey(AssistantSourcesSheet.sheetKey), findsOneWidget);
     expect(find.text('From a secondary source'), findsOneWidget);
+  });
+  group('reply disclaimer', () {
+    const footer = 'Guidance, not regulated financial advice.';
+
+    Future<void> askTaxQuestion(WidgetTester tester, String countryCode) async {
+      final api = FakeAssistantApi(
+        chatEvents: [
+          agentEvent(
+            AgentEventKind.textDelta,
+            text: 'The allowance is £3,000.',
+            touchesTaxOrInvestment: true,
+          ),
+          agentEvent(AgentEventKind.done),
+        ],
+      );
+      await _pumpAssistant(tester, api, countryCode: countryCode);
+      await tester.tap(find.text('How much tax will I owe this year?'));
+      await tester.pumpAndSettle();
+    }
+
+    String disclaimerText(WidgetTester tester) => tester
+        .widget<Text>(find.byKey(AssistantReplyBubble.disclaimerKey))
+        .data!;
+
+    testWidgets('shows the GB disclaimer, not the footer twice', (
+      tester,
+    ) async {
+      await askTaxQuestion(tester, 'GB');
+
+      expect(disclaimerText(tester), contains('ISA product'));
+      expect(find.text(footer), findsOneWidget);
+    });
+
+    const wording = {
+      'US': 'not a written federal tax opinion',
+      'DE': 'Lohnsteuerhilfeverein',
+      'NG': 'registered tax practitioner',
+    };
+    for (final MapEntry(key: country, value: phrase) in wording.entries) {
+      testWidgets('shows its own wording for $country', (tester) async {
+        await askTaxQuestion(tester, country);
+
+        expect(disclaimerText(tester), contains(phrase));
+        expect(find.text(footer), findsOneWidget);
+      });
+    }
+
+    testWidgets('falls back to the generic text for an unserved country', (
+      tester,
+    ) async {
+      await askTaxQuestion(tester, 'KE');
+
+      expect(
+        disclaimerText(tester),
+        'Information only, not tax, legal or investment advice. Rules change, '
+        'so check with a qualified professional before you act on it.',
+      );
+      expect(disclaimerText(tester), isNot(footer));
+      expect(find.text(footer), findsOneWidget);
+    });
+
+    testWidgets('shows no disclaimer under a reply that is not about tax', (
+      tester,
+    ) async {
+      final api = FakeAssistantApi(
+        chatEvents: [
+          agentEvent(AgentEventKind.textDelta, text: r'Trim dining by $50.'),
+          agentEvent(AgentEventKind.done),
+        ],
+      );
+      await _pumpAssistant(tester, api);
+      await tester.tap(find.text('Where can I cut spending?'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(AssistantReplyBubble.disclaimerKey), findsNothing);
+    });
+  });
+
+  testWidgets('labels every server tool with its own words', (tester) async {
+    const labels = {
+      'list_entities': 'Looked at your budgets',
+      'search_knowledge': 'Checked the sourced rules',
+      'get_spending_summary': 'Looked at your spending',
+      'get_tax_calendar': 'Checked your tax deadlines',
+      'get_tax_summary': 'Looked at your tax summary',
+      'get_net_worth': 'Looked at your net worth',
+    };
+    final api = FakeAssistantApi(
+      chatEvents: [
+        for (final tool in labels.keys)
+          agentEvent(AgentEventKind.toolCall, toolName: tool),
+        agentEvent(AgentEventKind.textDelta, text: 'All checked.'),
+        agentEvent(AgentEventKind.done),
+      ],
+    );
+    await _pumpAssistant(tester, api);
+
+    await tester.tap(find.text('How much tax will I owe this year?'));
+    await tester.pumpAndSettle();
+
+    for (final label in labels.values) {
+      expect(find.text(label), findsOneWidget, reason: label);
+    }
+    expect(find.text('Looked something up'), findsNothing);
   });
 }

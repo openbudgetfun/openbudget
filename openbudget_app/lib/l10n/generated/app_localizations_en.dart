@@ -4578,7 +4578,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get assistantComposerHint => 'Ask about this plan…';
+  String get assistantComposerHint => 'Ask about money, tax or crypto…';
 
   @override
   String get assistantConversationDelete => 'Delete conversation';
@@ -4855,6 +4855,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter the provider\'s HTTPS base URL.';
 
   @override
+  String get assistantReplyDisclaimerDe =>
+      'General information, not tax advice for your individual case. Rules change. For your situation, ask a Steuerberater or a Lohnsteuerhilfeverein.';
+
+  @override
+  String get assistantReplyDisclaimerGb =>
+      'Information only, not tax, legal or investment advice, and it doesn\'t recommend any investment, pension or ISA product. Rules change, so check with a qualified professional.';
+
+  @override
+  String get assistantReplyDisclaimerGeneric =>
+      'Information only, not tax, legal or investment advice. Rules change, so check with a qualified professional before you act on it.';
+
+  @override
+  String get assistantReplyDisclaimerNg =>
+      'Information only, not tax, legal or investment advice. Rules change, so confirm with a registered tax practitioner and the tax authority before relying on this.';
+
+  @override
+  String get assistantReplyDisclaimerUs =>
+      'Information only, not tax, legal or investment advice. A general educational calculation, not a written federal tax opinion. Rules change, so check with a qualified professional.';
+
+  @override
   String get assistantRetry => 'Try again';
 
   @override
@@ -4914,10 +4934,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assistantTitle => 'Money guide';
 
   @override
+  String get assistantToolGetNetWorth => 'Looked at your net worth';
+
+  @override
+  String get assistantToolGetSpendingSummary => 'Looked at your spending';
+
+  @override
+  String get assistantToolGetTaxCalendar => 'Checked your tax deadlines';
+
+  @override
   String get assistantToolGetTaxReport => 'Looked at your tax report';
 
   @override
+  String get assistantToolGetTaxSummary => 'Looked at your tax summary';
+
+  @override
   String get assistantToolListBudgets => 'Looked at your plan';
+
+  @override
+  String get assistantToolListEntities => 'Looked at your budgets';
 
   @override
   String get assistantToolListEnvelopes => 'Looked at your envelopes';
@@ -4935,6 +4970,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get assistantToolProposeTransactionTax =>
       'Drafted a tax category change';
+
+  @override
+  String get assistantToolSearchKnowledge => 'Checked the sourced rules';
 
   @override
   String get assistantToolSearchTransactions => 'Searched your transactions';

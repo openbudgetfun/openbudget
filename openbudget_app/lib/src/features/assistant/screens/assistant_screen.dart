@@ -13,7 +13,9 @@ import 'package:openbudget_app/src/features/assistant/widgets/assistant_message_
 import 'package:openbudget_app/src/features/assistant/widgets/assistant_proposal_card_view.dart';
 import 'package:openbudget_app/src/features/assistant/widgets/assistant_text.dart';
 import 'package:openbudget_app/src/features/assistant/widgets/assistant_usage_meter.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// The financial assistant: a conversation about one budget, the changes it
@@ -36,6 +38,16 @@ class AssistantScreen extends HookConsumerWidget {
     final chat = ref.watch(assistantChatProvider(entityId));
     final usage = ref.watch(assistantUsageProvider);
     final proposals = ref.watch(assistantProposalsProvider(entityId));
+    // The entity's country picks each reply's disclaimer; until it loads, or
+    // for a country with no rule pack, replies carry the generic one.
+    final jurisdiction = ref.watch(
+      entityDetailProvider(entityId).select(
+        (entity) => switch (entity.value?.countryCode) {
+          final code? => TaxJurisdiction.fromCountryCode(code),
+          null => null,
+        },
+      ),
+    );
     final controller = useTextEditingController();
     final scrollController = useScrollController();
     final hasText = useState(false);
@@ -149,6 +161,7 @@ class AssistantScreen extends HookConsumerWidget {
                             child: _TimelineItemView(
                               entityId: entityId,
                               item: item,
+                              jurisdiction: jurisdiction,
                             ),
                           ),
                       if (chat.isStreaming)
@@ -266,10 +279,15 @@ class _EmptyConversation extends HookWidget {
 }
 
 class _TimelineItemView extends HookWidget {
-  const _TimelineItemView({required this.entityId, required this.item});
+  const _TimelineItemView({
+    required this.entityId,
+    required this.item,
+    required this.jurisdiction,
+  });
 
   final String entityId;
   final AssistantTimelineItem item;
+  final TaxJurisdiction? jurisdiction;
 
   @override
   Widget build(BuildContext context) {
@@ -289,6 +307,7 @@ class _TimelineItemView extends HookWidget {
           text: text,
           sources: sources,
           touchesTaxOrInvestment: touchesTaxOrInvestment,
+          jurisdiction: jurisdiction,
         ),
       AssistantToolCall(:final toolName) => AssistantToolChip(
         label: assistantToolLabel(l10n, toolName),

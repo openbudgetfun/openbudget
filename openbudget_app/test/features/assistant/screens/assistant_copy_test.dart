@@ -10,9 +10,11 @@ import 'package:openbudget_app/src/features/assistant/screens/assistant_proposal
 import 'package:openbudget_app/src/features/assistant/screens/assistant_provider_screen.dart';
 import 'package:openbudget_app/src/features/assistant/screens/assistant_screen.dart';
 import 'package:openbudget_app/src/features/assistant/widgets/assistant_message_bubble.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 
+import '../../tax/tax_test_data.dart' show testEntity;
 import '../support/fake_assistant_api.dart';
 
 // The feature is the Money guide (docs/money-guide.md, section 3). The code and
@@ -51,6 +53,9 @@ Future<void> _pump(
 ) async {
   final container = ProviderContainer(
     overrides: [
+      entityDetailProvider.overrideWith(
+        (ref, id) async => testEntity(id: testBudgetId),
+      ),
       assistantApiProvider.overrideWith((ref) => api),
       assistantUsageProvider.overrideWith((ref) async => api.usage),
       assistantConversationsProvider.overrideWith(
