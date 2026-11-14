@@ -1,0 +1,930 @@
+{
+  "title": "[1.0.0](https://github.com/openbudgetfun/openbudget/releases/tag/v1.0.0) (2026-11-14)",
+  "summary": [
+    "Grouped release for `openbudget`."
+  ],
+  "sections": [
+    {
+      "title": "New",
+      "collapsed": false,
+      "entries": [
+        {
+          "summary": "Set up your books in any country",
+          "details_markdown": "Choose from more than 240 countries when you create your books, and search by name, code or what people call it (\"UK\", \"Ivory Coast\"). Your currency, time zone and tax year fill in for you, and you can still pick any currency in the world.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "minor"
+            }
+          ],
+          "change_type": "user_feat",
+          "bump": "minor",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/any-country-entity-user.md",
+            "changeset_path": ".changeset/any-country-entity-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #288",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/288"
+            },
+            "introduced_commit": {
+              "label": "fb2c586",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/fb2c586f99e69cbbcf7226c8501d99900f9c3063"
+            }
+          }
+        },
+        {
+          "summary": "Welcome to OpenBudget",
+          "details_markdown": "Give every unit of money a job, see where it went, keep every account in one place, and know what you owe in tax, with an assistant that works through it with you.\n\n- **Plan month by month.** Assign money to envelopes, jump between months, copy last month's plan, start from a template, or let quick budget and auto-assign fill envelopes for you. Search, reorder, and add notes to envelopes.\n- **Know what needs attention.** Envelopes show spending progress, carryover, and clear overspent and underfunded labels. Set goals, move money in a couple of taps, and track the age of your money.\n- **All your accounts.** Add, edit, transfer between, reconcile, and close accounts, pay off credit cards, link accounts from banks in your region, and see Solana wallet balances alongside your budget.\n- **Transactions that stay tidy.** Split, edit, delete and undo, search, filter, sort, bulk edit, catch duplicates, import from CSV, and export your data.\n- **Recurring bills on autopilot.** See them on a calendar, skip one, and have due transactions posted for you.\n- **Every currency, honestly.** Choose a display currency with up-to-date exchange rates. Amounts in a currency the app does not support show their own code instead of pretending to be dollars.\n- **Know what you owe.** Set up a tax profile for the UK, the US, Nigeria or Germany, as an individual, sole trader or company, and tag envelopes and transactions with tax categories. Your report shows the balance due or refund, the bands behind each tax, and the legal savings your own figures point to, with the sources and assumptions behind every number.\n- **Talk to your budget.** Ask the assistant how much tax you may owe, where you could cut spending, or whether you are on track. It shows what it looked at, and every change it suggests waits for you to apply or dismiss it. Guidance only, not financial or tax advice.\n- **Bring your own agent.** Connect your own OpenAI-compatible provider, or create an access token in Settings so Claude Code, Codex or any MCP client can work with your finances.\n- **OpenBudget Plus.** $20 a month for tax reports and the built-in assistant with $5 of usage included every month. Subscribe from the App Store or Google Play, by card in a browser, or with USDC from a Solana wallet.\n- **A hand-drawn look.** Every screen has a fresh sketched style in light and dark, and after each update a short note shows what changed. You can open it again from Settings.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "minor"
+            }
+          ],
+          "change_type": "user_feat",
+          "bump": "minor",
+          "stream": "user",
+          "style": "expanded",
+          "provenance": {
+            "source_path": ".changeset/first-release-user-notes.md",
+            "changeset_path": ".changeset/first-release-user-notes.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #220",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/220"
+            },
+            "introduced_commit": {
+              "label": "40aa012",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/40aa012849cde26d9ddf5277b853b1c7d32cb556"
+            },
+            "last_updated_commit": {
+              "label": "1ad58d7",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/1ad58d71d80ea6349f3eb4a56b6fa77c945a031b"
+            }
+          }
+        },
+        {
+          "summary": "Sign in with Google and Sign in with Apple on iPhone",
+          "details_markdown": "You can now create and access your OpenBudget account with the Google or Apple account already on your iPhone. Both buttons appear on the sign-in screen, and once you sign in the app keeps you signed in between launches.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "minor"
+            }
+          ],
+          "change_type": "user_feat",
+          "bump": "minor",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/ios-social-sign-in-user.md",
+            "changeset_path": ".changeset/ios-social-sign-in-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #254",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/254"
+            },
+            "introduced_commit": {
+              "label": "ab1ba20",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/ab1ba2071952f4bafa8b106296edd72d38cea690"
+            }
+          }
+        },
+        {
+          "summary": "Keep the books for your business",
+          "details_markdown": "Budgets set up as a sole trader or limited company can now turn on double-entry books. Open More, tap \"Enable double-entry books\" — OpenBudget sets up your chart of accounts once (this can't be undone) — and your Books are ready. Record money in and money out as journals that always balance, see everything you owe and own grouped in your chart of accounts, and check the trial balance for any date you like; OpenBudget tells you at a glance whether your books balance. Posted entries are locked for your records, so mistakes are corrected with a reversal instead of an edit, and you can set a lock date to freeze the periods you've already closed.\n\nJournals now show their lines, so you can see exactly what went in and out of each account. Drafts can be reopened and finished later: OpenBudget fills the entry back in and saves over the same draft instead of making a second one. Your books' lock date is remembered, and the Books screen shows it at a glance.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "minor"
+            }
+          ],
+          "change_type": "user_feat",
+          "bump": "minor",
+          "stream": "user",
+          "style": "expanded",
+          "provenance": {
+            "source_path": ".changeset/ledger-app-user.md",
+            "changeset_path": ".changeset/ledger-app-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #250",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/250"
+            },
+            "introduced_commit": {
+              "label": "cd977fc",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/cd977fce4c4d98ef9c6590c1448626d01a751bde"
+            }
+          }
+        },
+        {
+          "summary": "Meet the Money guide",
+          "details_markdown": "The assistant is now the Money guide. Its answers carry small numbered marks: tap one to see where a rule or figure comes from, when it was last checked, and whether it comes from a secondary source or describes a rule that is announced but not yet law, then open the source itself. Answers about tax or investments say plainly that they are guidance, not regulated financial advice, and the usage header shows about how many conversations you have left this month.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "minor"
+            }
+          ],
+          "change_type": "user_feat",
+          "bump": "minor",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/money-guide-app-user.md",
+            "changeset_path": ".changeset/money-guide-app-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #321",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/321"
+            },
+            "introduced_commit": {
+              "label": "1725c95",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/1725c957993bccfb5c7d7d0411a68bbd7ca393d7"
+            }
+          }
+        },
+        {
+          "summary": "See your crypto by chain or by asset in net worth",
+          "details_markdown": "Net worth now has a Crypto section whenever you've connected a wallet. One\nprinted bar shows how your crypto splits across chains, with each chain's value\nand share beneath it, and a switch regroups it by asset, so all your USDC is one\nline wherever it sits. Tokens that look like scams and tokens without a price\nare left out, and everything is shown in your reporting currency.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "minor"
+            }
+          ],
+          "change_type": "user_feat",
+          "bump": "minor",
+          "stream": "user",
+          "style": "expanded",
+          "provenance": {
+            "source_path": ".changeset/net-worth-crypto-breakdown-user.md",
+            "changeset_path": ".changeset/net-worth-crypto-breakdown-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #306",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/306"
+            },
+            "introduced_commit": {
+              "label": "8b184bb",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/8b184bb9cacf8f01253e19245e29a529e4db3190"
+            }
+          }
+        },
+        {
+          "summary": "Your money across currencies, people and businesses",
+          "details_markdown": "Keep separate books for yourself, a household, a sole trade or a company, each in its own currency, and see them together in one net worth.\n\n- **Net worth across currencies.** Pick the currency you want to see everything in. Each converted figure shows the rate and date it used. When a rate is old it is marked stale, and when one is missing the screen says which accounts were left out instead of guessing.\n- **Accounts in any currency.** Add bank accounts, cards, loans, property and wallets in the currency they really use. Track an account by its transactions or by its value.\n- **Spend in a foreign currency.** When an account's currency differs from your books, the form shows what the amount is worth in your currency and the rate it used, and you can set your own rate.\n- **Transfers between currencies and entities.** Enter what was sent and what arrived; the app shows the rate that implies.\n- **Split a purchase exactly.** Break one payment across several envelopes; it only saves when the parts add up to the total.\n- **Reports add up.** Spending with no category now has its own row, and age of money is back on the plan.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "minor"
+            }
+          ],
+          "change_type": "user_feat",
+          "bump": "minor",
+          "stream": "user",
+          "style": "expanded",
+          "provenance": {
+            "source_path": ".changeset/schema-reset-app-user.md",
+            "changeset_path": ".changeset/schema-reset-app-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #267",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/267"
+            },
+            "introduced_commit": {
+              "label": "76b34b7",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/76b34b7980cde1c85c01a58c7002cf59204afa38"
+            }
+          }
+        },
+        {
+          "summary": "See your next tax dates",
+          "details_markdown": "The tax screen now has an Upcoming list with the next filing and payment dates for your books: what each one is for, the period it covers, how many days are left and the tax authority's page it comes from. When a weekend or holiday moves a date, the list shows the day it was moved from.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "minor"
+            }
+          ],
+          "change_type": "user_feat",
+          "bump": "minor",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/tax-filing-calendar-user.md",
+            "changeset_path": ".changeset/tax-filing-calendar-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #307",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/307"
+            },
+            "introduced_commit": {
+              "label": "e9f0597",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/e9f0597202c10c733f2cc9fa5a493a3e4249501d"
+            }
+          }
+        },
+        {
+          "summary": "See your tax year and VAT or sales tax rates in any country",
+          "details_markdown": "Wherever you live, the Taxes screen now shows your tax year, the VAT, GST or sales tax rates with where each one comes from, a link to your tax authority, and a running summary of your income, expenses and tax already paid. Tap \"Export tax summary\" to download it for your accountant. UK, US, Nigerian and German books keep their full tax report and gain the same download button.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "minor"
+            }
+          ],
+          "change_type": "user_feat",
+          "bump": "minor",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/universal-tax-panel-user.md",
+            "changeset_path": ".changeset/universal-tax-panel-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #301",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/301"
+            },
+            "introduced_commit": {
+              "label": "46c9cef",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/46c9cef1028211f3f046c8b9fc3e043b0d1d1828"
+            }
+          }
+        },
+        {
+          "summary": "Add a wallet from any major chain",
+          "details_markdown": "Adding a crypto wallet is now one step: paste an address or an extended public key and OpenBudget works out the chain, from Bitcoin and Ethereum to Solana, Tron and the XRP Ledger. For an Ethereum-style address it checks which networks hold something and picks them for you, so you can add or drop a chain with a tap. While your wallet is read for the first time you see which chains are being read, and a successful add lands with an ADDED stamp. If you paste a private key or a recovery phrase, OpenBudget empties the field straight away, tells you never to share it, and sends nothing anywhere.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "minor"
+            }
+          ],
+          "change_type": "user_feat",
+          "bump": "minor",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/wallet-add-flow-user.md",
+            "changeset_path": ".changeset/wallet-add-flow-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #309",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/309"
+            },
+            "introduced_commit": {
+              "label": "b70e2d8",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/b70e2d8b85abdbca37959568d0b4dd2919509354"
+            }
+          }
+        },
+        {
+          "summary": "See your wallet's holdings chain by chain",
+          "details_markdown": "A wallet on several chains now lists its holdings in one section per chain, each with a stamp, its own total and when it was last read. Staked tokens and unclaimed rewards sit under their coin, a price that is a few days old says so, and a chain that couldn't be read tells you why while still showing its last amounts. Tokens without a price, suspected scams and anything you hide fold into one Hidden group at the bottom, where you can show or hide each one.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "minor"
+            }
+          ],
+          "change_type": "user_feat",
+          "bump": "minor",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/wallet-holdings-by-chain-user.md",
+            "changeset_path": ".changeset/wallet-holdings-by-chain-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #305",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/305"
+            },
+            "introduced_commit": {
+              "label": "0cbb275",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/0cbb2750e2c037c38d4e26b7e1d3693f3f9375ca"
+            }
+          }
+        },
+        {
+          "summary": "Choose which chains your wallet reads",
+          "details_markdown": "Open a crypto wallet and tap Wallet settings to rename it, pick the chains it looks at, or disconnect it. Not sure where your assets are? Tap \"Look for assets on other chains\" and OpenBudget checks and offers anything it finds. If you stop reading a chain that holds money, you're told what will leave your net worth before anything changes.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "minor"
+            }
+          ],
+          "change_type": "user_feat",
+          "bump": "minor",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/wallet-settings-user.md",
+            "changeset_path": ".changeset/wallet-settings-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #310",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/310"
+            },
+            "introduced_commit": {
+              "label": "3268703",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/32687038ac0234f7613ce2dfc7dccf6fd4ab8cd2"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Improved",
+      "collapsed": false,
+      "entries": [
+        {
+          "summary": "Your tax profile asks where you are tax resident and whether you are a US person",
+          "details_markdown": "The tax profile now asks, in every country, whether you are a tax resident there and whether you are a US person, and keeps your answers when you save. Tax-saving ideas wait until you have answered. A count or amount that is not a number is now flagged right under its field, and the form stays in a comfortable column on wide screens.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_improve",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/generic-tax-profile-form-user.md",
+            "changeset_path": ".changeset/generic-tax-profile-form-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #303",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/303"
+            },
+            "introduced_commit": {
+              "label": "f27f649",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/f27f649ab0ca7a2bfde3e8a439145db578e343db"
+            }
+          }
+        },
+        {
+          "summary": "Tax tips described neutrally and marked when based on unconfirmed figures",
+          "details_markdown": "Tax tips now read as descriptions of what the rules allow and what your\nfigures show, rather than instructions, and tips that rest on unconfirmed\nfigures are marked accordingly and show no estimated saving.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_improve",
+          "bump": "patch",
+          "stream": "user",
+          "style": "expanded",
+          "provenance": {
+            "source_path": ".changeset/guardrail-data-app-g1.md",
+            "changeset_path": ".changeset/guardrail-data-app-g1.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #297",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/297"
+            },
+            "introduced_commit": {
+              "label": "6aa16aa",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/6aa16aa8cfadfdbe7818e3df53a8348dd6acf924"
+            }
+          }
+        },
+        {
+          "summary": "The Money guide speaks plainly about where it looks and what it is",
+          "details_markdown": "A Money guide reply about tax or investments now carries the disclaimer for your country, so it says what applies where you live instead of repeating the note under the screen. The small notes about what the guide looked at now say so in plain words, such as \"Looked at your tax summary\" or \"Checked your tax deadlines\". The message box now invites questions about money, tax or crypto.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_improve",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/money-guide-country-disclaimer-and-labels.md",
+            "changeset_path": ".changeset/money-guide-country-disclaimer-and-labels.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #322",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/322"
+            },
+            "introduced_commit": {
+              "label": "564f360",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/564f360db4765be8e18fb53562b1eb46b114cc4f"
+            }
+          }
+        },
+        {
+          "summary": "Clearer money screens across currencies",
+          "details_markdown": "Net worth now leads with one big figure, says how old its exchange rates are, and points out any currency it can't convert yet instead of quietly leaving it out. Account pages show the balance, what's cleared and what the bank says at a glance, the reconcile sheet tells you plainly when you match your statement, and dates read like \"Nov 8, 2026\" everywhere. Foreign-currency accounts show what they're worth in your own currency right under the balance, the account-type list shows real names like Personal Loan and Solana Wallet, and the screens no longer cramp on small phones or stretch across wide windows.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_improve",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/multi-currency-screen-polish-user.md",
+            "changeset_path": ".changeset/multi-currency-screen-polish-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #271",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/271"
+            },
+            "introduced_commit": {
+              "label": "41c85d0",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/41c85d0c5d894c0a03623f6b7a7cd06ca5ecaf0e"
+            }
+          }
+        },
+        {
+          "summary": "Every screen in the new hand-drawn look",
+          "details_markdown": "Every screen now wears OpenBudget's new look: hand-drawn outlines, underlined section titles, sticker-style cards and a bright pink Add button. Highlighted figures, like the money ready to assign, are easier to read in dark mode, transaction labels such as \"Unassigned\" no longer get cut off on smaller phones, and the icons inside text fields, like the envelope beside Email, now sit neatly inside the box instead of on its corner.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_improve",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/skribble-app-user.md",
+            "changeset_path": ".changeset/skribble-app-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #262",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/262"
+            },
+            "introduced_commit": {
+              "label": "fa62401",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/fa62401d598f37efa3032468295224d45649c15a"
+            }
+          }
+        },
+        {
+          "summary": "A brighter, hand-drawn OpenBudget",
+          "details_markdown": "OpenBudget has a new look. The icon is now a hot-pink envelope with a gold coin dropping in, and the whole app is brighter: a sunny cream page, bold pink, teal and sunflower accents, and a deep violet ink that stays easy to read in light and dark mode. Outlines, lettering and underlines look drawn by hand. Full envelopes are sealed with wax, the money ready to assign is marked with a highlighter, and new pages slide in behind a stroke of ink. If you have Reduce Motion turned on, everything appears without the animation.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_improve",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/skribble-identity-user.md",
+            "changeset_path": ".changeset/skribble-identity-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #261",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/261"
+            },
+            "introduced_commit": {
+              "label": "1f31da8",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/1f31da89cbb6f78019d518ca3cf734b0e7b8e029"
+            }
+          }
+        },
+        {
+          "summary": "Tax figures say when they are still in preview",
+          "details_markdown": "The tax overview now tells you when a country's tax figures have not yet been checked by a tax professional, so you know to treat them as a guide.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_improve",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/tax-pack-manifest-app-user.md",
+            "changeset_path": ".changeset/tax-pack-manifest-app-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #277",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/277"
+            },
+            "introduced_commit": {
+              "label": "ef451e8",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/ef451e819728e4b41b289e3ad6939651978575ac"
+            }
+          }
+        },
+        {
+          "summary": "See what we could not verify",
+          "details_markdown": "Your tax report now ends with a \"What we could not verify\" list: the honest gaps in our research for your country, each saying what needs a second look and none of it hidden in fine print. Figures that come from secondary sources rather than the tax authority itself carry a \"From a secondary source\" badge on their line, and changes a government has only announced — not yet made law — are labelled as exactly that.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_improve",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/tax-unverified-section.md",
+            "changeset_path": ".changeset/tax-unverified-section.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #293",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/293"
+            },
+            "introduced_commit": {
+              "label": "f7a69dd",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/f7a69dd11b519af0c4c537a160a6356effdd7e99"
+            }
+          }
+        },
+        {
+          "summary": "Clearer country tax facts",
+          "details_markdown": "On a country without full tax rules, the Taxes screen now explains in plain words which figures come from secondary sources and which dates we assumed, shows the VAT or sales tax registration threshold, and labels each source by its website. The researchers' own notes stay one tap away under \"Research notes\".",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_improve",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/universal-tax-panel-review-user.md",
+            "changeset_path": ".changeset/universal-tax-panel-review-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #301",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/301"
+            },
+            "introduced_commit": {
+              "label": "46c9cef",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/46c9cef1028211f3f046c8b9fc3e043b0d1d1828"
+            }
+          }
+        },
+        {
+          "summary": "Net worth now leaves out suspected scam tokens and stale prices",
+          "details_markdown": "Wallets no longer count tokens that look like spam or scams, or prices older\nthan a week, toward net worth. You can still hide or allow any token yourself,\nand your choice sticks across syncs.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "minor"
+            }
+          ],
+          "change_type": "user_improve",
+          "bump": "minor",
+          "stream": "user",
+          "style": "expanded",
+          "provenance": {
+            "source_path": ".changeset/wallet-spam-classifier-app.md",
+            "changeset_path": ".changeset/wallet-spam-classifier-app.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #302",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/302"
+            },
+            "introduced_commit": {
+              "label": "58e6bb4",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/58e6bb4f126593f4caa45acc033e7dfd7d171a68"
+            }
+          }
+        },
+        {
+          "summary": "Wallets stay fresh on their own",
+          "details_markdown": "Connected wallets now refresh automatically in the background, so balances and values stay up to date without pulling to refresh.",
+          "packages": [
+            {
+              "name": "openbudget_server",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_improve",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/wallet-refresh-hourly-user.md",
+            "changeset_path": ".changeset/wallet-refresh-hourly-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #314",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/314"
+            },
+            "introduced_commit": {
+              "label": "8df7d4d",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/8df7d4df78bcfe571b93e477eae4608259828517"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Fixed",
+      "collapsed": false,
+      "entries": [
+        {
+          "summary": "German tax reports now show the right numbers",
+          "details_markdown": "Your German tax reports got a set of corrections: filing deadlines no longer land on weekends, church tax follows your federal state (8% in Bavaria and Baden-Württemberg, 9% everywhere else), couples each get their own worker's allowance, children are credited with whichever is better for you — child benefit or the child allowance — freelancers are no longer charged trade tax, and the commuter and home-office allowances follow the 2025 and 2026 rules. The tax profile asks a few new questions, like your federal state, your children and your commute, so the numbers fit your situation.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_fix",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/de-tax-pack-fixes-user.md",
+            "changeset_path": ".changeset/de-tax-pack-fixes-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #246",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/246"
+            },
+            "introduced_commit": {
+              "label": "8c9b2f0",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/8c9b2f03f7814c7bd7cfb948b9b74068f8919c1a"
+            }
+          }
+        },
+        {
+          "summary": "UK tax figures are more accurate",
+          "details_markdown": "Your UK tax estimates now follow HMRC's rules more closely. Your personal allowance no longer shrinks when pension contributions or Gift Aid bring your income down, student loan repayments match the amounts HMRC collects (and you can tell us about a postgraduate loan on top of your plan), and the 31 January bill shows the real two instalments towards next year instead of a guess. Limited companies pick their actual year end and say how many companies they're connected to, so Corporation Tax lands on the right rates, and big equipment purchases stop above the annual investment allowance until the spending can be claimed. Company owners comparing salary with dividends now see the year's real thresholds, including whether the Employment Allowance applies. The UK tax profile screen asks the new questions under Company and Student loan settings.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_fix",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/gb-tax-pack-fixes-user.md",
+            "changeset_path": ".changeset/gb-tax-pack-fixes-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #245",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/245"
+            },
+            "introduced_commit": {
+              "label": "e2577e1",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/e2577e14ca034ef6f333df7ab28ccb6be738c789"
+            }
+          }
+        },
+        {
+          "summary": "Amounts you type are saved exactly",
+          "details_markdown": "When you type an amount like 12.34, it is now saved as exactly 12.34 instead of passing through a floating-point conversion. If you type more decimal places than the currency uses, the field tells you and asks for a correct amount rather than quietly rounding it. The same applies to accounts, transfers, recurring transactions, split expenses, reconciliation and imported transactions.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_fix",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/integer-money-entry-user.md",
+            "changeset_path": ".changeset/integer-money-entry-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #252",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/252"
+            },
+            "introduced_commit": {
+              "label": "2b517cc",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/2b517ccf9b4d27f58fba39f6054f66550e78df16"
+            }
+          }
+        },
+        {
+          "summary": "Record transactions in Uganda and more countries",
+          "details_markdown": "People whose time zone has another official name, such as Uganda's (Kampala), can now record transactions. Before, adding one failed.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_fix",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/link-time-zones-user.md",
+            "changeset_path": ".changeset/link-time-zones-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #312",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/312"
+            },
+            "introduced_commit": {
+              "label": "9c458cb",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/9c458cbd44855e8ee766becae15ba5bf84f57499"
+            }
+          }
+        },
+        {
+          "summary": "Nigeria tax figures corrected, and 2025 returns added",
+          "details_markdown": "- Nigerian tax profiles can now prepare 2025 returns under the rules that applied that year, alongside the 2026 rules.\n- The small-company turnover limit now lets you choose between the two conflicting official figures (N50,000,000 as gazetted and N100,000,000 as intended), and the report clearly warns you whenever your turnover falls between the two.\n- Medical services are no longer wrongly described as VAT-exempt — they are zero-rated, so their input VAT stays recoverable. Land and buildings are exempt.\n- Extra VAT you have paid can now be shown as refundable on request, not only carried forward.\n- Foreign dividends, interest, rent and royalties you bring home through approved channels are treated as exempt from Nigerian income tax.\n- Companies in a multinational group are now asked, so the report can flag the 15% minimum effective tax rate that applies to them.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_fix",
+          "bump": "patch",
+          "stream": "user",
+          "style": "expanded",
+          "provenance": {
+            "source_path": ".changeset/ng-tax-pack-fixes-user.md",
+            "changeset_path": ".changeset/ng-tax-pack-fixes-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #244",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/244"
+            },
+            "introduced_commit": {
+              "label": "3e2cb7a",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/3e2cb7a1af9e464520f9474c81e322d0407f78cf"
+            }
+          }
+        },
+        {
+          "summary": "Tax profile answers are saved in full",
+          "details_markdown": "Some tax profile answers were lost when you saved: a UK company's year end and associated companies, a postgraduate loan, a Nigerian company's turnover-limit choice and multinational-group answer, and the new German questions (church-tax state, type of self-employment, children, pension, last year's turnover and commute). They are now kept, so your tax estimates use them. A profile with an impossible value, such as a 31 September year end, is now refused with a message instead of being stored.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_fix",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/tax-profile-fields-user.md",
+            "changeset_path": ".changeset/tax-profile-fields-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #249",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/249"
+            },
+            "introduced_commit": {
+              "label": "c391b1a",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/c391b1a2364bf3ce7403469fe43dc6dffcb634a4"
+            }
+          }
+        },
+        {
+          "summary": "US tax reports now match your filed return",
+          "details_markdown": "Your US federal tax report has been corrected to match what the IRS\nactually computes:\n\n- For taxable income under $100,000, the report now uses the same IRS tax\n  table the paper return uses, so the numbers line up with what you file.\n- Investment income tax and the state-and-local-tax deduction now use the\n  right income measure, so they stop triggering when they shouldn't.\n- The business income deduction now phases down gradually at higher\n  incomes instead of disappearing, and pays attention to your business's\n  payroll and equipment.\n- State and local taxes are correctly capped, and the new 2025 deductions\n  for tips, overtime, car loan interest, and seniors are included.\n- The child tax credit is applied when you add your dependents, and\n  qualifying surviving spouse is now a filing status choice.\n- The US tax profile asks a few more questions (dependents, age, Social\n  Security numbers, home office method), so the report can use them.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_fix",
+          "bump": "patch",
+          "stream": "user",
+          "style": "expanded",
+          "provenance": {
+            "source_path": ".changeset/us-tax-pack-fixes-user.md",
+            "changeset_path": ".changeset/us-tax-pack-fixes-user.md",
+            "change_owner": {
+              "label": "@ifiokjr",
+              "url": "https://github.com/ifiokjr"
+            },
+            "review_request": {
+              "label": "PR #247",
+              "url": "https://github.com/openbudgetfun/openbudget/pull/247"
+            },
+            "introduced_commit": {
+              "label": "4250f09",
+              "url": "https://github.com/openbudgetfun/openbudget/commit/4250f0983b1eecffaf539af278e25791cd7fe326"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
