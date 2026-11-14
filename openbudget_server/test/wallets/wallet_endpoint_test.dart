@@ -749,6 +749,27 @@ void main() {
     });
   });
 
+  group('Given WalletEndpoint sync throttle', () {
+    test(
+      'when syncing twice within 5 minutes then makes one provider call',
+      () async {
+        WalletService.manualSyncThrottle = const Duration(minutes: 5);
+        final provider = _ScriptedProvider((_) async => _snapshot());
+        final wallet = await connect(provider: provider);
+
+        WalletService.clock = () =>
+            DateTime.utc(2026).add(const Duration(minutes: 6));
+        await endpoint.sync(book.session, wallet.id!);
+        final readCalls = provider.untils.length;
+
+        WalletService.clock = () =>
+            DateTime.utc(2026).add(const Duration(minutes: 7));
+        await endpoint.sync(book.session, wallet.id!);
+        expect(provider.untils.length, readCalls);
+      },
+    );
+  });
+
   group('Given WalletEndpoint transactions', () {
     test(
       'when syncing twice then upserts by signature without duplicates',
