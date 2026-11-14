@@ -81,9 +81,14 @@ final class SolanaWalletProvider implements WalletProvider {
       GetAssetsByOwnerRequest(ownerAddress: address, limit: 1000),
     );
 
-    final history = await historyFuture;
-    final balances = await balancesFuture;
-    final assets = await assetsFuture;
+    final results = await Future.wait<Object?>([
+      historyFuture,
+      balancesFuture,
+      assetsFuture,
+    ]);
+    final history = results[0]! as List<WalletProviderTransaction>;
+    final balances = results[1]! as WalletBalances;
+    final assets = results[2]! as AssetList;
     final assetsById = {for (final asset in assets.items) asset.id: asset};
 
     if (assets.total > assets.items.length) {
@@ -287,13 +292,13 @@ final class SolanaWalletProvider implements WalletProvider {
 
     for (final token in balances.tokens) {
       if (token.amount < 0) {
-        throw WalletProviderException(
-          'Provider returned a negative balance for ${token.mint}.',
+        throw const WalletProviderException(
+          'Provider returned a negative balance for a token.',
         );
       }
       if (token.decimals < 0 || token.decimals > 36) {
-        throw WalletProviderException(
-          'Provider returned invalid decimals for ${token.mint}.',
+        throw const WalletProviderException(
+          'Provider returned invalid decimals for a token.',
         );
       }
       if (token.amount == 0) continue;
@@ -333,8 +338,8 @@ final class SolanaWalletProvider implements WalletProvider {
       if (!seen.add(asset.id)) continue;
       final decimals = asset.tokenInfo?.decimals ?? 0;
       if (decimals < 0 || decimals > 36) {
-        throw WalletProviderException(
-          'Provider returned invalid decimals for ${asset.id}.',
+        throw const WalletProviderException(
+          'Provider returned invalid decimals for an asset.',
         );
       }
       holdings.add(
@@ -381,7 +386,7 @@ final class SolanaWalletProvider implements WalletProvider {
       final currency = (info.currency ?? _priceCurrency).trim().toUpperCase();
       if (currency != _priceCurrency) {
         warnings.add(
-          'Ignoring $currency price for $assetId; wallets value in '
+          'Ignoring $currency price for an asset; wallets value in '
           '$_priceCurrency only.',
         );
       } else {
@@ -474,7 +479,7 @@ final class SolanaWalletProvider implements WalletProvider {
     if (price == null) return null;
     final exact = ExactDecimal.fromDouble(price);
     if (exact == null) {
-      warnings.add('Ignoring invalid provider price for $assetId.');
+      warnings.add('Ignoring invalid provider price for an asset.');
     }
     return exact;
   }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -58,6 +59,8 @@ class JupiterPriceClient {
       onWarning?.call('Jupiter price API request failed due to HTTP error.');
     } on FormatException {
       onWarning?.call('Jupiter price API response could not be parsed.');
+    } on TimeoutException {
+      onWarning?.call('Jupiter price API request timed out.');
     } finally {
       if (shouldClose) {
         client.close();

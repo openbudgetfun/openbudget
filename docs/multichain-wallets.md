@@ -158,6 +158,33 @@ Wallet addresses are pseudonymous, but in OpenBudget's database they sit next to
 - **Previews are rate limited.** The preview endpoint reads any address, so a signed-in user gets 20 previews an hour. That keeps OpenBudget from becoming a free portfolio API.
 - **The privacy notice lists every vendor** that receives addresses (W7.2). Deleting a wallet deletes our rows, but vendors keep their own request logs under their retention rules.
 
+### 4.4.1 Vendors we send data to
+
+OpenBudget sends a wallet's address, the network it is on and, where a vendor
+requires one, our API key. Nothing else: no user id, entity id, email, wallet
+label or account name. Price services receive asset ids and contracts only,
+never addresses. This list matches [section 4.2](#42-provider-per-chain-family).
+
+| Vendor                                                   | Chains                                                                                                                       | What is sent                                   | Docs                                                      |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | --------------------------------------------------------- |
+| Helius                                                   | Solana                                                                                                                       | address, network, `heliusApiKey`               | https://docs.helius.dev/                                  |
+| Alchemy                                                  | Ethereum, Base, Arbitrum One, OP Mainnet, Polygon PoS, BNB Smart Chain, Avalanche C-Chain (and Sui, Bitcoin Cash if enabled) | address, network, `alchemyApiKey`              | https://docs.alchemy.com/                                 |
+| mempool.space (Esplora)                                  | Bitcoin                                                                                                                      | address, network                               | https://mempool.space/docs/api                            |
+| Blockstream (Esplora)                                    | Bitcoin (fallback)                                                                                                           | address, network                               | https://github.com/Blockstream/esplora/blob/master/API.md |
+| TronGrid                                                 | Tron                                                                                                                         | address, network, `trongridApiKey`             | https://developers.tron.network/docs/trongrid             |
+| Tronscan (fallback)                                      | Tron                                                                                                                         | address, network                               | https://tronscan.org/                                     |
+| xrplcluster.com                                          | XRP Ledger                                                                                                                   | address, network                               | https://xrplcluster.com/                                  |
+| Ripple public servers (`s1.ripple.com`, `s2.ripple.com`) | XRP Ledger (fallback)                                                                                                        | address, network                               | https://xrpl.org/                                         |
+| Hyperliquid                                              | Hyperliquid                                                                                                                  | address, network                               | https://hyperliquid.gitbook.io/hyperliquid-docs           |
+| Blockfrost                                               | Cardano                                                                                                                      | address, network, `blockfrostProjectId`        | https://docs.blockfrost.io/                               |
+| Koios (fallback)                                         | Cardano                                                                                                                      | address, network                               | https://koios.rest/                                       |
+| Toncenter                                                | TON                                                                                                                          | address, network, `toncenterApiKey`            | https://toncenter.com/api/v3/                             |
+| TonAPI (fallback)                                        | TON                                                                                                                          | address, network                               | https://tonapi.io/                                        |
+| Sui GraphQL (`graphql.mainnet.sui.io`)                   | Sui                                                                                                                          | address, network                               | https://docs.sui.io/                                      |
+| Aptos Labs indexer                                       | Aptos                                                                                                                        | address, network, `aptosApiKey`                | https://aptos.dev/                                        |
+| CoinGecko                                                | all chains (prices only)                                                                                                     | asset ids and token contracts, never addresses | https://docs.coingecko.com/                               |
+| DefiLlama                                                | all chains (prices only)                                                                                                     | asset ids and token contracts, never addresses | https://defillama.com/docs/api                            |
+
 ### 4.5 Lock-in and the exit plan
 
 The holdings model, asset identity and prices are ours. A vendor change replaces one provider class.
