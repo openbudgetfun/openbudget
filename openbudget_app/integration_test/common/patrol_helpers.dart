@@ -1067,3 +1067,60 @@ class ExpenseFxPage {
     await tester.pumpAndSettle();
   }
 }
+
+/// Page object for the add-a-wallet step of the add account flow.
+class AddWalletPage {
+  AddWalletPage(this.tester);
+
+  final WidgetTester tester;
+
+  /// The bank search step's "Add a crypto wallet" button.
+  Finder get entryButton =>
+      find.widgetWithText(FilledButton, 'Add a crypto wallet');
+  Finder get addressField => find.byKey(const Key('add-wallet-address-field'));
+  Finder get addButton => find.byKey(const Key('add-wallet-submit'));
+  Finder get detectedStamp =>
+      find.byKey(const Key('add-wallet-detected-stamp'));
+  Finder get doneButton => find.byKey(const Key('add-wallet-done'));
+  Finder get addAnotherButton =>
+      find.byKey(const Key('add-wallet-add-another'));
+
+  /// The postmark that lands when the wallet is in.
+  Finder get postmark => find.byType(ObPostmark);
+
+  /// The stamp for [network] (a `WalletNetwork` name, such as `baseMainnet`)
+  /// in the EVM picker.
+  Finder networkStamp(String network) =>
+      find.byKey(ValueKey('add-wallet-network-$network'));
+
+  Finder get pickerTitle => find.text('Where should OpenBudget look?');
+  Finder get refusalTitle => find.text("That's a private key");
+  Finder get unreadableTitle => find.text("Couldn't read your wallet");
+
+  /// Opens the wallet step from the bank search step.
+  Future<void> open() => scrollAndTap(tester, entryButton);
+
+  /// Pastes [text] into the field, as a person pasting from their wallet.
+  Future<void> paste(String text) async {
+    await tester.enterText(addressField, text);
+    await tester.pumpAndSettle();
+  }
+
+  /// What the field holds right now.
+  String get fieldText =>
+      tester.widget<TextField>(addressField).controller?.text ?? '';
+
+  /// Whether the Add wallet button can be tapped.
+  bool get canAdd => tester.widget<FilledButton>(addButton).onPressed != null;
+
+  Future<void> toggleNetwork(String network) async {
+    await tester.ensureVisible(networkStamp(network));
+    await tester.tap(networkStamp(network));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> tapAdd() async {
+    await tester.tap(addButton);
+    await tester.pump();
+  }
+}

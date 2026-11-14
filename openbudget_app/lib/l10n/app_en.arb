@@ -994,7 +994,7 @@
   "transactionCategoryLabel": "Category",
   "transactionAccountLabel": "Account",
   "transactionDateLabel": "Date",
-  "addAccountConnectWallet": "Connect Solana Wallet",
+  "addAccountConnectWallet": "Add a crypto wallet",
   "addAccountUnlinkedTitle": "Add Unlinked Account",
   "addAccountSelectAccountType": "Select Account Type",
   "addAccountSuccessTitle": "Account Added",
@@ -1002,7 +1002,6 @@
   "addAccountSuccessAddAnother": "Add Another",
   "addAccountSelectTypePlaceholder": "Select account type...",
   "addAccountLoadingInstitutions": "Loading institutions...",
-  "addAccountConnectWalletButton": "Connect Wallet",
   "dialogNext": "Next",
   "loadingTitle": "Loading...",
   "loadingHint": "This might take a few seconds.",
@@ -1014,11 +1013,6 @@
   "addAccountNoInstitutionsFound": "No institutions found. Try another name or add an unlinked account.",
   "orText": "or",
   "addAccountAddUnlinked": "Add an Unlinked Account",
-  "addAccountWalletConnectionDescription": "Connect a Solana wallet in read-only mode. OpenBudget imports native SPL balances and keeps fiat valuation synced.",
-  "addAccountWalletAddressLabel": "Wallet Address",
-  "addAccountWalletAddressHint": "Paste Solana wallet address",
-  "addAccountWalletLabelOptional": "Wallet Label (optional)",
-  "addAccountWalletLabelHint": "My Solana Wallet",
   "addAccountWalletIncludeInBudgetTotals": "Include in budget totals",
   "addAccountWalletIntro": "Add your Solana wallet to track transfers, swaps, and holdings in one place.",
   "addAccountUnlinkedIntro": "Bank connections are currently unavailable in this build, so let's set up an unlinked account.",
@@ -3561,5 +3555,200 @@
   "universalCategoryOutOfScopeTransfers": "Transfers",
   "universalCategoryOutOfScopeLoans": "Loans",
   "universalCategoryOutOfScopeGiftsReceived": "Gifts received",
-  "universalCategoryOutOfScopeOwnerCapitalAndDrawings": "Owner capital and drawings"
+  "universalCategoryOutOfScopeOwnerCapitalAndDrawings": "Owner capital and drawings",
+  "walletAddIntro": "Paste an address or extended public key. OpenBudget only reads your wallet: it never holds a key and can't move anything.",
+  "walletAddFieldLabel": "Wallet address",
+  "walletAddFieldHint": "Paste an address or extended public key",
+  "walletAddButton": "Add wallet",
+  "walletAddInvalidInput": "That doesn't look like a wallet address.",
+  "walletAddInvalidChecksum": "One character is wrong. Check the address and try again.",
+  "walletAddInvalidKey": "That extended key isn't one OpenBudget recognises.",
+  "walletAddRefusedPrivateKeyTitle": "That's a private key",
+  "walletAddRefusedPrivateKeyMessage": "OpenBudget never needs it. We cleared the field. Don't share it with anyone.",
+  "walletAddRefusedEvmKeyTitle": "That looks like a private key",
+  "walletAddRefusedEvmKeyMessage": "That looks like a private key, not an address. OpenBudget never needs it. We cleared the field.",
+  "walletAddRefusedTestnetTitle": "Mainnet only",
+  "walletAddRefusedTestnetMessage": "OpenBudget only supports mainnet addresses.",
+  "walletAddRefusedMultisigTitle": "Multisig keys aren't supported yet",
+  "walletAddRefusedMultisigMessage": "A multisig wallet needs every co-signer's key. That's coming later.",
+  "walletAddRefusedExchangeTitle": "That's an exchange account",
+  "walletAddRefusedExchangeMessage": "That X-address points at an exchange account. Use the address for your own account.",
+  "walletAddDetectedAddress": "A {chain} address.",
+  "@walletAddDetectedAddress": {
+    "placeholders": {
+      "chain": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddDetectedKey": "A {chain} extended public key. OpenBudget finds every address it makes, and never needs a private key.",
+  "@walletAddDetectedKey": {
+    "placeholders": {
+      "chain": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddDetectedEvm": "One address that can hold assets on {count} networks.",
+  "@walletAddDetectedEvm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletAddStampMore": "+ {count}",
+  "@walletAddStampMore": {
+    "description": "The second line of a chain stamp for an address that works on several networks, such as \"+ 6\" under Ethereum.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletAddScriptTypeUnknown": "We'll check which kind of address this key makes.",
+  "walletAddWhichChain": "Which chain is this address on?",
+  "walletAddUnavailableTitle": "{chain} isn't available yet",
+  "@walletAddUnavailableTitle": {
+    "placeholders": {
+      "chain": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddUnavailableMessage": "OpenBudget can't read that chain right now. Try again later.",
+  "walletAddPreviewLoading": "Looking for assets on {networks}…",
+  "@walletAddPreviewLoading": {
+    "placeholders": {
+      "networks": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddPickerTitle": "Where should OpenBudget look?",
+  "walletAddPickerHint": "Tap a chain to include it or leave it out. Ethereum is always read, because that's where your address lives.",
+  "walletAddNetworkNothing": "Nothing",
+  "walletAddNetworkNoPrice": "No price",
+  "walletAddNetworkUnreadable": "Can't read",
+  "walletAddPreviewFailedTitle": "Couldn't look ahead",
+  "walletAddPreviewFailedMessage": "We couldn't check which chains hold assets. You can still add the wallet. It will read Ethereum.",
+  "walletAddPreviewRateLimitedMessage": "You've looked up a lot of wallets. Try again in a little while, or add this one now and it will read Ethereum.",
+  "walletAddPreviewRetry": "Try again",
+  "walletAddNamesTwo": "{first} and {second}",
+  "@walletAddNamesTwo": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddNamesThree": "{first}, {second} and {third}",
+  "@walletAddNamesThree": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      },
+      "third": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddNamesMore": "{first}, {second}, {third} and {count} more",
+  "@walletAddNamesMore": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      },
+      "third": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletAddReading": "Reading {networks}…",
+  "@walletAddReading": {
+    "description": "Shown while a new wallet is read for the first time. {networks} is a list such as \"Ethereum, Base and Arbitrum One\".",
+    "placeholders": {
+      "networks": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddReadingHint": "The first read takes a few seconds.",
+  "walletAddUnreadableTitle": "Couldn't read your wallet",
+  "walletAddUnreadableMessage": "Couldn't reach {networks}. The wallet is in your accounts, and OpenBudget will keep trying.",
+  "@walletAddUnreadableMessage": {
+    "placeholders": {
+      "networks": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddRetry": "Try again",
+  "walletAddFailedTitle": "Couldn't add the wallet",
+  "walletAddFailedMessage": "Something went wrong. Check your connection and try again.",
+  "walletAddedPostmark": "Added",
+  "walletAddedPostmarkChains": "{count} chains",
+  "@walletAddedPostmarkChains": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletAddedTitle": "Wallet added",
+  "walletAddedMessage": "{accountName} is in your accounts. Its holdings show in the account's details.",
+  "@walletAddedMessage": {
+    "placeholders": {
+      "accountName": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddAccountNameAddress": "{chain} wallet ({address})",
+  "@walletAddAccountNameAddress": {
+    "description": "The name given to a new wallet's account, such as \"Ethereum wallet (0xAb…12cD)\".",
+    "placeholders": {
+      "chain": {
+        "type": "String"
+      },
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddAccountNameKey": "{chain} wallet, {keyType}",
+  "@walletAddAccountNameKey": {
+    "description": "The name given to a Bitcoin HD wallet's account, such as \"Bitcoin wallet, zpub\".",
+    "placeholders": {
+      "chain": {
+        "type": "String"
+      },
+      "keyType": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddStampDetected": "detected",
+  "walletAddStampIncluded": "included",
+  "walletAddStampLeftOut": "left out",
+  "walletAddPickerSelectedCount": "{count, plural, =1{1 network selected} other{{count} networks selected}}",
+  "@walletAddPickerSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
