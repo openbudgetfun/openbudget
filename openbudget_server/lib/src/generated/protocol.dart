@@ -63,6 +63,8 @@ import 'package:openbudget_server/src/generated/reports/spending_row.dart'
     as _ijvd4zl8;
 import 'package:openbudget_server/src/generated/tax/tax_category_view.dart'
     as _i687t6y5;
+import 'package:openbudget_server/src/generated/tax/tax_deadline_view.dart'
+    as _i5r4fio6;
 import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
     as _i4wqhpw2;
 import 'package:openbudget_server/src/generated/transactions/import_row.dart'
@@ -179,6 +181,7 @@ import 'reports/spending_row.dart' as _ikppksh7;
 import 'settings/user_settings.dart' as _i99f9doz;
 import 'tax/tax_band_slice_view.dart' as _ic4zfx3b;
 import 'tax/tax_category_view.dart' as _iv5oayw3;
+import 'tax/tax_deadline_view.dart' as _i63eatye;
 import 'tax/tax_figure_view.dart' as _ixm9q9lk;
 import 'tax/tax_liability_view.dart' as _ivss6b81;
 import 'tax/tax_opportunity_view.dart' as _iuft4v7q;
@@ -313,6 +316,7 @@ export 'reports/spending_row.dart';
 export 'settings/user_settings.dart';
 export 'tax/tax_band_slice_view.dart';
 export 'tax/tax_category_view.dart';
+export 'tax/tax_deadline_view.dart';
 export 'tax/tax_figure_view.dart';
 export 'tax/tax_liability_view.dart';
 export 'tax/tax_opportunity_view.dart';
@@ -462,6 +466,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i99f9doz.UserSettings>,
           _is.getType<_ic4zfx3b.TaxBandSliceView>,
           _is.getType<_iv5oayw3.TaxCategoryView>,
+          _is.getType<_i63eatye.TaxDeadlineView>,
           _is.getType<_ixm9q9lk.TaxFigureView>,
           _is.getType<_ivss6b81.TaxLiabilityView>,
           _is.getType<_iuft4v7q.TaxOpportunityView>,
@@ -597,6 +602,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i99f9doz.UserSettings?>,
           _is.getType<_ic4zfx3b.TaxBandSliceView?>,
           _is.getType<_iv5oayw3.TaxCategoryView?>,
+          _is.getType<_i63eatye.TaxDeadlineView?>,
           _is.getType<_ixm9q9lk.TaxFigureView?>,
           _is.getType<_ivss6b81.TaxLiabilityView?>,
           _is.getType<_iuft4v7q.TaxOpportunityView?>,
@@ -697,6 +703,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_ijvd4zl8.SpendingRow>>,
           _is.getType<List<_ipz3w5am.BudgetMonthSummary>>,
           _is.getType<List<_i687t6y5.TaxCategoryView>>,
+          _is.getType<List<_i5r4fio6.TaxDeadlineView>>,
           _is.getType<List<_i4wqhpw2.TransactionRule>>,
           _is.getType<List<_iw07wj0h.TransactionView>>,
           _is.getType<List<_iyod81ld.ImportRow>>,
@@ -809,6 +816,7 @@ class Protocol extends _is.DatabaseSerializationManager
           'UserSettings',
           'TaxBandSliceView',
           'TaxCategoryView',
+          'TaxDeadlineView',
           'TaxFigureView',
           'TaxLiabilityView',
           'TaxOpportunityView',
@@ -5933,6 +5941,9 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _iv5oayw3.TaxCategoryView) {
       return _iv5oayw3.TaxCategoryView.fromJson(data) as T;
     }
+    if (t == _i63eatye.TaxDeadlineView) {
+      return _i63eatye.TaxDeadlineView.fromJson(data) as T;
+    }
     if (t == _ixm9q9lk.TaxFigureView) {
       return _ixm9q9lk.TaxFigureView.fromJson(data) as T;
     }
@@ -6459,6 +6470,10 @@ class Protocol extends _is.DatabaseSerializationManager
       return (data != null ? _iv5oayw3.TaxCategoryView.fromJson(data) : null)
           as T;
     }
+    if (t == _is.getType<_i63eatye.TaxDeadlineView?>()) {
+      return (data != null ? _i63eatye.TaxDeadlineView.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_ixm9q9lk.TaxFigureView?>()) {
       return (data != null ? _ixm9q9lk.TaxFigureView.fromJson(data) : null)
           as T;
@@ -6978,6 +6993,12 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
+    if (t == List<_i5r4fio6.TaxDeadlineView>) {
+      return (data as List)
+              .map((e) => deserialize<_i5r4fio6.TaxDeadlineView>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_i4wqhpw2.TransactionRule>) {
       return (data as List)
               .map((e) => deserialize<_i4wqhpw2.TransactionRule>(e))
@@ -7162,6 +7183,7 @@ class Protocol extends _is.DatabaseSerializationManager
       _i99f9doz.UserSettings => 'UserSettings',
       _ic4zfx3b.TaxBandSliceView => 'TaxBandSliceView',
       _iv5oayw3.TaxCategoryView => 'TaxCategoryView',
+      _i63eatye.TaxDeadlineView => 'TaxDeadlineView',
       _ixm9q9lk.TaxFigureView => 'TaxFigureView',
       _ivss6b81.TaxLiabilityView => 'TaxLiabilityView',
       _iuft4v7q.TaxOpportunityView => 'TaxOpportunityView',
@@ -7404,6 +7426,8 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'TaxBandSliceView';
       case _iv5oayw3.TaxCategoryView():
         return 'TaxCategoryView';
+      case _i63eatye.TaxDeadlineView():
+        return 'TaxDeadlineView';
       case _ixm9q9lk.TaxFigureView():
         return 'TaxFigureView';
       case _ivss6b81.TaxLiabilityView():
@@ -7807,6 +7831,9 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (dataClassName == 'TaxCategoryView') {
       return deserialize<_iv5oayw3.TaxCategoryView>(data['data']);
+    }
+    if (dataClassName == 'TaxDeadlineView') {
+      return deserialize<_i63eatye.TaxDeadlineView>(data['data']);
     }
     if (dataClassName == 'TaxFigureView') {
       return deserialize<_ixm9q9lk.TaxFigureView>(data['data']);

@@ -34,6 +34,10 @@ abstract interface class TaxRepository {
 
   Future<TaxReportView> getReport(String entityId, int startYear);
 
+  /// The entity's upcoming filing and payment dates, soonest first. Empty
+  /// for a country with no rule pack.
+  Future<List<TaxDeadlineView>> listDeadlines(String entityId);
+
   /// The tax-ready summary for any entity, pack country or not.
   ///
   /// A null [startYear] lets the server pick the year containing the
@@ -99,6 +103,10 @@ class ServerpodTaxRepository implements TaxRepository {
         UuidValue.fromString(entityId),
         startYear: startYear,
       );
+
+  @override
+  Future<List<TaxDeadlineView>> listDeadlines(String entityId) =>
+      _client.tax.listDeadlines(UuidValue.fromString(entityId));
 
   @override
   Future<TaxSummaryView> getSummary(String entityId, {int? startYear}) =>

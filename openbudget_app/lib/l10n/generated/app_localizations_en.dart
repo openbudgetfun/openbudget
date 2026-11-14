@@ -3714,6 +3714,68 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your download is ready, but this device wouldn\'t open it. Try again in a moment.';
 
   @override
+  String get taxUpcomingTitle => 'Upcoming';
+
+  @override
+  String get taxUpcomingKindFiling => 'Filing';
+
+  @override
+  String get taxUpcomingKindPayment => 'Payment';
+
+  @override
+  String get taxUpcomingKindFilingAndPayment => 'Filing and payment';
+
+  @override
+  String taxUpcomingDaysLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'In $count days',
+      one: 'Due tomorrow',
+      zero: 'Due today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String taxUpcomingPeriod(String period) {
+    return 'For $period';
+  }
+
+  @override
+  String get taxUpcomingDependsOnProfile => 'Based on your tax profile';
+
+  @override
+  String taxUpcomingMoved(String date) {
+    return 'Moved from $date, a weekend or holiday';
+  }
+
+  @override
+  String get taxUpcomingInferredBadge => 'Date not confirmed by the authority';
+
+  @override
+  String taxUpcomingSource(String citation) {
+    return 'Source: $citation';
+  }
+
+  @override
+  String get taxUpcomingSourceHint => 'Opens the authority\'s page';
+
+  @override
+  String taxUpcomingShowAll(int count) {
+    return 'Show all $count dates';
+  }
+
+  @override
+  String get taxUpcomingShowFewer => 'Show fewer dates';
+
+  @override
+  String get taxUpcomingEmpty => 'No filing or payment dates in the next year.';
+
+  @override
+  String get taxUpcomingLoadError => 'We couldn\'t load your upcoming dates.';
+
+  @override
   String taxUniversalIntroTitle(String country) {
     return 'No full tax rules for $country yet';
   }

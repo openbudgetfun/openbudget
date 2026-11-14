@@ -6264,6 +6264,96 @@ abstract class AppLocalizations {
   /// **'Your download is ready, but this device wouldn\'t open it. Try again in a moment.'**
   String get taxExportOpenFailed;
 
+  /// Section header for the next filing and payment dates on the tax overview.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get taxUpcomingTitle;
+
+  /// Chip on an upcoming date that is for sending a return.
+  ///
+  /// In en, this message translates to:
+  /// **'Filing'**
+  String get taxUpcomingKindFiling;
+
+  /// Chip on an upcoming date that is for paying tax.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get taxUpcomingKindPayment;
+
+  /// Chip on an upcoming date when the return and the payment fall due together.
+  ///
+  /// In en, this message translates to:
+  /// **'Filing and payment'**
+  String get taxUpcomingKindFilingAndPayment;
+
+  /// How far away an upcoming filing or payment date is.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Due today} =1{Due tomorrow} other{In {count} days}}'**
+  String taxUpcomingDaysLeft(int count);
+
+  /// The period an upcoming date covers, such as 2025/26.
+  ///
+  /// In en, this message translates to:
+  /// **'For {period}'**
+  String taxUpcomingPeriod(String period);
+
+  /// Chip on an upcoming date whose day or relevance comes from the person's tax profile answers.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on your tax profile'**
+  String get taxUpcomingDependsOnProfile;
+
+  /// Note on a date the tax authority's rules moved to the next working day.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved from {date}, a weekend or holiday'**
+  String taxUpcomingMoved(String date);
+
+  /// Badge on an upcoming date that was worked out from guidance rather than read from the authority's own page.
+  ///
+  /// In en, this message translates to:
+  /// **'Date not confirmed by the authority'**
+  String get taxUpcomingInferredBadge;
+
+  /// Link that opens the authority page behind an upcoming date.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {citation}'**
+  String taxUpcomingSource(String citation);
+
+  /// No description provided for @taxUpcomingSourceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens the authority\'s page'**
+  String get taxUpcomingSourceHint;
+
+  /// No description provided for @taxUpcomingShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all {count} dates'**
+  String taxUpcomingShowAll(int count);
+
+  /// No description provided for @taxUpcomingShowFewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Show fewer dates'**
+  String get taxUpcomingShowFewer;
+
+  /// No description provided for @taxUpcomingEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No filing or payment dates in the next year.'**
+  String get taxUpcomingEmpty;
+
+  /// No description provided for @taxUpcomingLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your upcoming dates.'**
+  String get taxUpcomingLoadError;
+
   /// Heading of the panel shown for a country without a tax rule pack.
   ///
   /// In en, this message translates to:

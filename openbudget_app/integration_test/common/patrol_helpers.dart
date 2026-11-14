@@ -934,6 +934,25 @@ class TaxOverviewPage {
   );
   Finder get exportButton => find.byKey(const Key('tax-export-button'));
   Finder get exportError => find.byKey(const Key('tax-export-error'));
+  Finder get upcoming => find.byKey(const Key('tax-upcoming'));
+  Finder get upcomingToggle => find.byKey(const Key('tax-upcoming-toggle'));
+  Finder get upcomingSourceLinks =>
+      find.byKey(const Key('tax-deadline-source'));
+
+  /// One upcoming date's card, by rule id and due day (`yyyymmdd`).
+  Finder deadline(String id, String day) =>
+      find.byKey(Key('tax-deadline-$id-$day'));
+
+  /// Every upcoming date's card.
+  Finder get deadlines => find.byWidgetPredicate(
+    (widget) =>
+        widget.key is ValueKey<String> &&
+        (widget.key! as ValueKey<String>).value.startsWith('tax-deadline-') &&
+        RegExp(r'-\d{8}$').hasMatch((widget.key! as ValueKey<String>).value),
+  );
+
+  /// Scrolls the Upcoming list into view.
+  Future<void> showUpcoming() => scrollIntoView(tester, upcoming);
 
   /// Makes the export link and opens it, scrolling to the button first.
   Future<void> export() async {
