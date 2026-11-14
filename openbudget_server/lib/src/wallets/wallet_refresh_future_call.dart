@@ -3,6 +3,7 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/billing/entitlement_service.dart';
 import 'package:openbudget_server/src/entities/entity_access.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/wallets/prices/price_service.dart';
 import 'package:openbudget_server/src/wallets/wallet_service.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -19,16 +20,7 @@ class WalletRefreshReport {
   final int revaluations;
   final int processed;
   final int skipped;
-
-  int get readCount => reads;
-  int get revaluationCount => revaluations;
-  int get walletsRead => reads;
-  int get walletsRevalued => revaluations;
 }
-
-/// Backwards-compatible alias.
-typedef WalletRefreshResult = WalletRefreshReport;
-typedef WalletRefreshSummary = WalletRefreshReport;
 
 /// Hourly refresh of wallet holdings: due reads by plan, then a revaluation
 /// of every wallet that was not read this run.
@@ -51,40 +43,49 @@ class WalletRefreshFutureCall extends FutureCall {
   @visibleForTesting
   static int readCap = 500;
 
-  /// The report from the most recent [refresh] run.
-  static WalletRefreshReport? lastReport;
-
   /// Runs one refresh pass over every wallet.
   Future<void> refresh(Session session) async {
-    lastReport = await _run(session);
+    await run(session);
   }
 
   /// Internal implementation returning the report.
-  static Future<WalletRefreshReport> _run(Session session) async {
+  @visibleForTesting
+  static Future<WalletRefreshReport> run(Session session) async {
     final now = WalletService.clock();
 
     final wallets = await Wallet.db.find(
       session,
       orderBy: (t) => t.lastSyncedAt,
     );
-    wallets.sort((a, b) {
-      final aTime = a.lastSyncedAt;
-      final bTime = b.lastSyncedAt;
-      if (aTime == null && bTime == null) return 0;
-      if (aTime == null) return -1;
-      if (bTime == null) return 1;
-      return aTime.compareTo(bTime);
-    });
+
+    // Load the entities for all wallets in one query.
+    final entityIds = wallets.map((w) => w.entityId).toSet();
+    final entities = entityIds.isEmpty
+        ? const <Entity>[]
+        : await Entity.db.find(
+            session,
+            where: (t) => t.id.inSet(entityIds),
+          );
+    final entityById = <UuidValue, Entity>{
+      for (final entity in entities) entity.id!: entity,
+    };
+
+    // Resolve entitlements per distinct owner once.
+    final ownerIds = entities.map((e) => e.ownerId).toSet();
+    final entitlementByOwner = <UuidValue, Entitlement?>{};
+    for (final ownerId in ownerIds) {
+      entitlementByOwner[ownerId] = await EntitlementService.activeFor(
+        session,
+        ownerId,
+        now: now,
+      );
+    }
 
     final due = <Wallet>[];
     for (final wallet in wallets) {
-      final entity = await Entity.db.findById(session, wallet.entityId);
+      final entity = entityById[wallet.entityId];
       if (entity == null || entity.archivedAt != null) continue;
-      final entitlement = await EntitlementService.activeFor(
-        session,
-        entity.ownerId,
-        now: now,
-      );
+      final entitlement = entitlementByOwner[entity.ownerId];
       final readInterval = entitlement == null
           ? freeReadInterval
           : plusReadInterval;
@@ -95,13 +96,32 @@ class WalletRefreshFutureCall extends FutureCall {
 
     final toRead = due.take(readCap).map((w) => w.id).toSet();
 
+    // Price sweep: distinct (network, assetId) keys of priced holdings across
+    // the wallets being revalued. Resolved once for the whole run.
+    final revaluedWalletIds = wallets
+        .where((w) => !toRead.contains(w.id))
+        .map((w) => w.id!)
+        .toSet();
+    final sweepHoldings = revaluedWalletIds.isEmpty
+        ? const <WalletHolding>[]
+        : await WalletHolding.db.find(
+            session,
+            where: (t) => t.walletId.inSet(revaluedWalletIds),
+          );
+    final sweepKeys = <(WalletNetwork, String)>{
+      for (final holding in sweepHoldings) (holding.network, holding.assetId),
+    };
+    final prices = sweepKeys.isEmpty
+        ? const <(WalletNetwork, String), AssetPrice?>{}
+        : await PriceService.resolve(session, sweepKeys, now: now);
+
     var reads = 0;
     var revaluations = 0;
     var processed = 0;
     var skipped = 0;
 
     for (final wallet in wallets) {
-      final entity = await Entity.db.findById(session, wallet.entityId);
+      final entity = entityById[wallet.entityId];
       if (entity == null || entity.archivedAt != null) {
         skipped++;
         continue;
@@ -109,10 +129,11 @@ class WalletRefreshFutureCall extends FutureCall {
 
       SystemEntityOwner owner;
       try {
-        owner = await EntityAccess.systemOwnerFor(session, entity.id!);
+        owner = EntityAccess.systemOwnerFromEntity(entity);
       } on Object catch (error, stackTrace) {
         _log.warning(
-          'Wallet refresh could not resolve owner for ${wallet.id}: $error',
+          'Wallet refresh could not resolve owner for ${wallet.id}: '
+          '${error.runtimeType}',
           stackTrace,
         );
         skipped++;
@@ -133,13 +154,14 @@ class WalletRefreshFutureCall extends FutureCall {
             session,
             wallet.id!,
             systemOwner: owner,
+            prices: prices,
           );
           revaluations++;
         }
         processed++;
       } on Object catch (error, stackTrace) {
         _log.warning(
-          'Wallet refresh failed for ${wallet.id}: $error',
+          'Wallet refresh failed for ${wallet.id}: ${error.runtimeType}',
           stackTrace,
         );
         skipped++;

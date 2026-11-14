@@ -77,9 +77,8 @@ class WalletEndpoint extends Endpoint {
   /// Fetches the chain and commits holdings, transactions and the valuation.
   Future<WalletSyncResult> sync(
     Session session,
-    UuidValue walletId, {
-    bool force = false,
-  }) => WalletService.sync(session, walletId, force: force);
+    UuidValue walletId,
+  ) => WalletService.sync(session, walletId);
 
   /// Lists the wallet's persisted holdings.
   Future<List<WalletHolding>> listHoldings(

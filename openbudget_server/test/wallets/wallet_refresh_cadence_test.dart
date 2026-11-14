@@ -69,7 +69,6 @@ void main() {
     WalletService.clock = () => DateTime.utc(2026);
     WalletService.debugProviderFactory = (_, _) => _FakeProvider();
     WalletRefreshFutureCall.readCap = 500;
-    WalletRefreshFutureCall.lastReport = null;
   });
 
   tearDown(WalletService.resetForTests);
@@ -128,8 +127,7 @@ void main() {
       var revaluations = 0;
       for (var i = 0; i < 25; i++) {
         WalletService.clock = () => base.add(Duration(hours: i));
-        await WalletRefreshFutureCall().refresh(book.session);
-        final report = WalletRefreshFutureCall.lastReport!;
+        final report = await WalletRefreshFutureCall.run(book.session);
         reads += report.reads;
         revaluations += report.revaluations;
       }
@@ -152,8 +150,7 @@ void main() {
     var revaluations = 0;
     for (var i = 0; i < 25; i++) {
       WalletService.clock = () => base.add(Duration(hours: i));
-      await WalletRefreshFutureCall().refresh(book.session);
-      final report = WalletRefreshFutureCall.lastReport!;
+      final report = await WalletRefreshFutureCall.run(book.session);
       reads += report.reads;
       revaluations += report.revaluations;
     }
@@ -187,7 +184,7 @@ void main() {
       WalletService.debugProviderFactory = (_, _) => provider;
 
       await Future.wait([
-        WalletRefreshFutureCall().refresh(book.session),
+        WalletRefreshFutureCall.run(book.session),
         WalletService.sync(book.session, walletId),
       ]);
 
@@ -266,8 +263,7 @@ void main() {
     WalletService.debugProviderFactory = (_, _) => provider;
 
     WalletService.clock = () => base;
-    await WalletRefreshFutureCall().refresh(book.session);
-    final report = WalletRefreshFutureCall.lastReport!;
+    final report = await WalletRefreshFutureCall.run(book.session);
     expect(report.reads, 2);
 
     final oldWallet = await Wallet.db.findById(book.session, idOld);

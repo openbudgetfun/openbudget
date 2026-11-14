@@ -45,6 +45,7 @@ void main() {
     events = EventLog()..install();
     WalletService.debugPublisher = events.record;
     WalletService.clock = () => DateTime.utc(2026);
+    WalletService.manualSyncThrottle = Duration.zero;
     book = await BudgetTestBook.create(server.anonymousSession());
     await book.session.caches.clear();
     await book.session.db.unsafeExecute('DELETE FROM asset_price');
@@ -152,11 +153,11 @@ void main() {
       });
       registerEvmProvider(provider);
       final wallet = await connectEvm(provider);
-      final first = await endpoint.sync(book.session, wallet.id!, force: true);
+      final first = await endpoint.sync(book.session, wallet.id!);
       expect(first.readNetworks, twoNetworks);
       expect(first.failedNetworks, isEmpty);
 
-      final second = await endpoint.sync(book.session, wallet.id!, force: true);
+      final second = await endpoint.sync(book.session, wallet.id!);
       expect(second.readNetworks, [WalletNetwork.ethereumMainnet]);
       expect(second.failedNetworks, [WalletNetwork.baseMainnet]);
 
@@ -225,7 +226,7 @@ void main() {
       });
       registerEvmProvider(provider);
       final wallet = await connectEvm(provider);
-      await endpoint.sync(book.session, wallet.id!, force: true);
+      await endpoint.sync(book.session, wallet.id!);
       final valuationBefore = await todayValuation(wallet.accountId);
       final holdingsBefore = await holdings(wallet);
       final ethStateBefore = await networkState(
@@ -239,7 +240,7 @@ void main() {
       events.events.clear();
 
       await expectLater(
-        endpoint.sync(book.session, wallet.id!, force: true),
+        endpoint.sync(book.session, wallet.id!),
         throwsA(
           isA<WalletProviderException>().having(
             (error) => error.message,
@@ -706,7 +707,7 @@ void main() {
         twoNetworks,
       );
       expect(updated.scanNetworks, twoNetworks);
-      await endpoint.sync(book.session, wallet.id!, force: true);
+      await endpoint.sync(book.session, wallet.id!);
       expect(provider.requests.last.networks, twoNetworks);
 
       for (final invalid in [
@@ -766,8 +767,8 @@ void main() {
       });
       registerEvmProvider(provider);
       final wallet = await connectEvm(provider);
-      await endpoint.sync(book.session, wallet.id!, force: true);
-      await endpoint.sync(book.session, wallet.id!, force: true);
+      await endpoint.sync(book.session, wallet.id!);
+      await endpoint.sync(book.session, wallet.id!);
 
       final states = await endpoint.listNetworkStates(book.session, wallet.id!);
       expect(states.map((state) => state.network), twoNetworks);
@@ -813,7 +814,7 @@ void main() {
       expect(wallet.syncStatus, SyncStatus.synced);
       expect(wallet.scanNetworks, isNull);
       expect(wallet.network, WalletNetwork.solanaMainnet);
-      final result = await endpoint.sync(book.session, wallet.id!, force: true);
+      final result = await endpoint.sync(book.session, wallet.id!);
       expect(result.totalValueMinor, 15000);
       expect(result.readNetworks, [WalletNetwork.solanaMainnet]);
       expect(result.failedNetworks, isEmpty);

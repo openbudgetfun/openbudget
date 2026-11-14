@@ -41,6 +41,7 @@ void main() {
     WalletService.debugPublisher = events.record;
     AccountService.debugPublisher = events.record;
     WalletService.clock = () => DateTime.utc(2026);
+    WalletService.manualSyncThrottle = Duration.zero;
     book = await BudgetTestBook.create(server.anonymousSession());
     await book.session.caches.clear();
     addTearDown(book.expectBalancesConsistent);

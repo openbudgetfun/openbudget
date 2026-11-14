@@ -9,6 +9,7 @@ import 'package:openbudget_server/src/entities/entity_access.dart';
 import 'package:openbudget_server/src/entities/entity_clock.dart';
 import 'package:openbudget_server/src/entities/entity_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/wallets/prices/price_service.dart';
 import 'package:openbudget_server/src/wallets/wallet_math.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider_registry.dart';
@@ -46,6 +47,9 @@ abstract final class WalletService {
   /// The server clock used for sync cadence and throttling. Tests inject a
   /// fake clock here; production defaults to UTC now.
   static DateTime Function() clock = () => DateTime.now().toUtc();
+
+  /// Manual sync throttle window. Defaults to 5 minutes; tests may shorten it.
+  static Duration manualSyncThrottle = const Duration(minutes: 5);
 
   static WalletChangePublisher _publisher = EntityRealtimeNotifier.notify;
   static final _previewRateLimiter = _PreviewRateLimiter(
@@ -278,7 +282,7 @@ abstract final class WalletService {
     if (!force) {
       final now = clock();
       if (wallet.lastSyncedAt != null &&
-          now.difference(wallet.lastSyncedAt!) < const Duration(minutes: 5)) {
+          now.difference(wallet.lastSyncedAt!) < manualSyncThrottle) {
         return _throttledSyncResult(session, wallet);
       }
     }
@@ -360,7 +364,10 @@ abstract final class WalletService {
         );
         startedAt = clock();
       } on _AllNetworksFailed catch (failure, stackTrace) {
-        _log.warning('Wallet sync failed for $walletId: $failure', stackTrace);
+        _log.warning(
+          'Wallet sync failed for $walletId: ${failure.runtimeType}',
+          stackTrace,
+        );
         await _markFailed(
           session,
           walletId,
@@ -371,7 +378,10 @@ abstract final class WalletService {
         );
         throw WalletProviderException(failure.message);
       } on Object catch (error, stackTrace) {
-        _log.warning('Wallet sync failed for $walletId: $error', stackTrace);
+        _log.warning(
+          'Wallet sync failed for $walletId: ${error.runtimeType}',
+          stackTrace,
+        );
         await _markFailed(session, walletId, startedAt, error, networks);
         rethrow;
       }
@@ -384,6 +394,7 @@ abstract final class WalletService {
     Session session,
     UuidValue walletId, {
     SystemEntityOwner? systemOwner,
+    Map<(WalletNetwork, String), AssetPrice?>? prices,
   }) async {
     final wallet = await _ownedWallet(
       session,
@@ -425,10 +436,66 @@ abstract final class WalletService {
         where: (t) => t.walletId.equals(wallet.id),
         transaction: tx,
       );
+
+      // Resolve swept prices when the caller did not pass them (the hourly
+      // job resolves them once for the whole run).
+      final priceKeys = <(WalletNetwork, String)>{
+        for (final holding in holdings) (holding.network, holding.assetId),
+      };
+      final resolvedPrices =
+          prices ??
+          await PriceService.resolve(
+            session,
+            priceKeys,
+            now: clock(),
+          );
+
       var total = BigInt.zero;
+      final now = clock();
       for (final holding in holdings) {
-        if (holding.valueMinor != null) {
-          total += BigInt.from(holding.valueMinor!);
+        final price = resolvedPrices[(holding.network, holding.assetId)];
+        var newValue = holding.valueMinor;
+        var newUnitPrice = holding.unitPrice;
+        var newSource = holding.priceSource;
+        var newCurrency = holding.priceCurrencyCode;
+        var newAsOf = holding.priceAsOf;
+        var newQuality = holding.priceQuality;
+        final newConfidence = holding.priceConfidence;
+        if (price != null) {
+          final unit = ExactDecimal.tryParse(price.unitPrice);
+          if (unit != null) {
+            newValue = WalletMath.valueMinor(
+              quantityRaw: holding.quantityRaw,
+              decimals: holding.decimals,
+              unitPrice: unit,
+              currencyCode: price.currencyCode,
+            );
+            newUnitPrice = price.unitPrice;
+            newSource = price.source;
+            newCurrency = price.currencyCode;
+            newAsOf = price.fetchedAt;
+            newQuality = PriceQuality.live;
+          }
+        }
+        await WalletHolding.db.updateRow(
+          session,
+          holding.copyWith(
+            priceCurrencyCode: newCurrency,
+            unitPrice: newUnitPrice,
+            valueMinor: newValue,
+            priceSource: newSource,
+            priceQuality: newQuality,
+            priceConfidence: newConfidence,
+            priceAsOf: newAsOf,
+            updatedAt: now,
+          ),
+          transaction: tx,
+        );
+        final verdict = holding.spamVerdict;
+        if (newValue != null &&
+            (verdict == SpamVerdict.clean ||
+                verdict == SpamVerdict.allowedByUser)) {
+          total += BigInt.from(newValue);
         }
       }
       final valuationDate = EntityClock.today(entity, now: clock());
@@ -442,7 +509,6 @@ abstract final class WalletService {
         note: 'Wallet revaluation',
       );
 
-      final now = clock();
       await Wallet.db.updateRow(
         session,
         current.copyWith(updatedAt: now),
