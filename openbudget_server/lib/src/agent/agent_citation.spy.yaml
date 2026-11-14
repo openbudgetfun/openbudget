@@ -1,0 +1,21 @@
+### One source behind a citation key in an assistant reply
+### (docs/money-guide.md, section 6).
+###
+### A key can resolve to several sources: a knowledge card lists each of its
+### sources, and a tax report lists the authority pages it used.
+class: AgentCitation
+fields:
+  ### The key the model wrote as `[^key]`: a card id or a tool `citeAs`.
+  key: String
+  ### What the source is called.
+  title: String
+  ### Where the source lives.
+  url: String
+  ### The authority that publishes it: the source's host without `www.`.
+  authority: String
+  ### When the source was last checked, as a date-only UTC value.
+  verifiedOn: DateTime?
+  ### `primary`, `secondary` or `inferred`.
+  grade: String
+  ### True when the source describes a rule that is not yet law.
+  announced: bool

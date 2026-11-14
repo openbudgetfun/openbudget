@@ -11,6 +11,12 @@ fields:
   toolCallsJson: String?
   ### The tool call this message answers, for role tool.
   toolCallId: String?
+  ### JSON list of the sources the assistant's citations resolved to, when
+  ### the reply cited any. Each item is an `AgentCitation`.
+  citationsJson: String?
+  ### True when the reply cites a tax card, a tax tool result or an
+  ### opportunity, so the app shows the country's disclaimer under it.
+  touchesTaxOrInvestment: bool, default=false
   createdAt: DateTime, default=now
 indexes:
   agent_message_conversation_idx:
