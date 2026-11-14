@@ -310,14 +310,17 @@ class TaxSummaryService {
   static int currentStartYearFor(Entity entity) =>
       startYearFor(entity, now: clock());
 
-  /// The exclusive end date of the tax year [entity] is in today, on the
+  /// The inclusive last day of the tax year [entity] is in today, on the
   /// server clock in the entity's own time zone.
-  static DateTime currentYearEndFor(Entity entity) {
+  ///
+  /// [period.end] is the half-open range's exclusive end, so the last
+  /// calendar day is one day before it.
+  static DateTime currentYearLastDayFor(Entity entity) {
     final now = clock();
     final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
     final pack = jurisdiction == null ? null : packFor(jurisdiction);
     final period = _resolvePeriod(entity, pack, null, now);
-    return period.end;
+    return period.end.subtract(const Duration(days: 1));
   }
 
   /// Pure helper: the start year a summary for [entity] covers at [now],

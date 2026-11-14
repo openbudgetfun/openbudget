@@ -707,14 +707,15 @@ class AgentToolRegistry {
           'averageIncomeMinor': entry.inflowMinor ~/ months,
           'averageSpendingMinor': entry.outflowMinor ~/ months,
         },
-      {
-        'id': null,
-        'name': 'Other',
-        'totalIncomeMinor': otherInflow,
-        'totalSpendingMinor': otherOutflow,
-        'averageIncomeMinor': otherInflow ~/ months,
-        'averageSpendingMinor': otherOutflow ~/ months,
-      },
+      if (otherEnvelopes.isNotEmpty)
+        {
+          'id': null,
+          'name': 'Other',
+          'totalIncomeMinor': otherInflow,
+          'totalSpendingMinor': otherOutflow,
+          'averageIncomeMinor': otherInflow ~/ months,
+          'averageSpendingMinor': otherOutflow ~/ months,
+        },
     ];
 
     // Aggregate per category group.
@@ -818,7 +819,7 @@ class AgentToolRegistry {
 
     final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
     if (jurisdiction == null) {
-      final taxYearEnd = TaxSummaryService.currentYearEndFor(entity);
+      final taxYearEnd = TaxSummaryService.currentYearLastDayFor(entity);
       return _json({
         'jurisdictionState': 'universal',
         'deadlines': <Object?>[],
@@ -861,7 +862,6 @@ class AgentToolRegistry {
       rulesVersion: view.rulesVersion,
     );
     final json = view.toJson();
-    json['citeAs'] = 'summary-${view.startYear}';
     json['guidance'] = block;
     return _json(json);
   }
