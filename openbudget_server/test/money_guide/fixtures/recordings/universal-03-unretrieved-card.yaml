@@ -1,0 +1,11 @@
+# The cited card is real, but the model never retrieved it, so the server
+# treats it as unknown and strips it.
+id: universal-03-unretrieved-card
+question: universal-03
+expect:
+  verdict: fail
+  failedGates: [tools, cites, noStrippedCitations]
+steps:
+  - say: >-
+      Three to six months of essential costs is the usual range: between
+      £4,200 and £8,400 for £1,400 a month [^universal-money-emergency-fund].

@@ -1,0 +1,11 @@
+# A recorded signpost that meets every gate of universal-06.
+id: universal-06-pass
+question: universal-06
+expect:
+  verdict: pass
+steps:
+  - say: >-
+      A letter about an enquiry is a matter for a professional, and I can't
+      act on it for you. An authorised financial adviser or MoneyHelper can
+      point you to the right help. Keep the letter somewhere safe, because it
+      names a deadline.
