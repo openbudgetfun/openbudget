@@ -1,4 +1,6 @@
+import 'package:openbudget_app/src/features/accounts/providers/account_detail_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -157,9 +159,42 @@ class WalletActions extends _$WalletActions {
     return updated;
   }
 
+  /// Replaces the networks an EVM wallet reads. The server reads the wallet
+  /// before it answers when the set changed: an added network shows its
+  /// holdings, a removed one loses them, and the account's valuation moves,
+  /// so everything that shows the wallet or its value is refreshed.
+  Future<Wallet> setScanNetworks({
+    required String walletId,
+    required String entityId,
+    required String accountId,
+    required List<WalletNetwork> networks,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    try {
+      return await client.wallet.setScanNetworks(
+        UuidValue.fromString(walletId),
+        networks,
+      );
+    } finally {
+      ref
+        ..invalidate(walletListProvider(entityId))
+        ..invalidate(walletForAccountProvider(accountId))
+        ..invalidate(walletHoldingsProvider(walletId))
+        ..invalidate(walletNetworkStatesProvider(walletId))
+        ..invalidate(accountDetailProvider(accountId))
+        ..invalidate(accountBalancesProvider(accountId))
+        ..invalidate(accountValuationsProvider(accountId))
+        ..invalidate(accountListProvider(entityId))
+        ..invalidate(netWorthForEntitiesProvider({entityId}));
+    }
+  }
+
+  /// Disconnects the wallet. The crypto account and its history stay unless
+  /// [deleteAccount] is set.
   Future<void> disconnect({
     required String walletId,
     required String entityId,
+    String? accountId,
     bool deleteAccount = false,
   }) async {
     final client = ref.read(serverpodClientProvider);
@@ -167,6 +202,9 @@ class WalletActions extends _$WalletActions {
       UuidValue.fromString(walletId),
       deleteAccount: deleteAccount,
     );
-    ref.invalidate(walletListProvider(entityId));
+    ref
+      ..invalidate(walletListProvider(entityId))
+      ..invalidate(accountListProvider(entityId));
+    if (accountId != null) ref.invalidate(walletForAccountProvider(accountId));
   }
 }

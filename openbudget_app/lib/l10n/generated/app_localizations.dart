@@ -4099,7 +4099,7 @@ abstract class AppLocalizations {
   /// No description provided for @addAccountSuccessAddAnother.
   ///
   /// In en, this message translates to:
-  /// **'Add Another'**
+  /// **'Add another'**
   String get addAccountSuccessAddAnother;
 
   /// No description provided for @addAccountSelectTypePlaceholder.
@@ -11390,6 +11390,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 network selected} other{{count} networks selected}}'**
   String walletAddPickerSelectedCount(int count);
+
+  /// No description provided for @walletSettingsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet settings'**
+  String get walletSettingsButton;
+
+  /// No description provided for @walletSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet settings'**
+  String get walletSettingsTitle;
+
+  /// No description provided for @walletSettingsNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet name'**
+  String get walletSettingsNameLabel;
+
+  /// No description provided for @walletSettingsNameSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save name'**
+  String get walletSettingsNameSave;
+
+  /// No description provided for @walletSettingsNameSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet renamed'**
+  String get walletSettingsNameSaved;
+
+  /// No description provided for @walletSettingsNameFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t rename the wallet. Try again.'**
+  String get walletSettingsNameFailed;
+
+  /// No description provided for @walletSettingsNetworksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chains OpenBudget reads'**
+  String get walletSettingsNetworksTitle;
+
+  /// No description provided for @walletSettingsNotRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Not read'**
+  String get walletSettingsNotRead;
+
+  /// No description provided for @walletSettingsNetworksSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save chains'**
+  String get walletSettingsNetworksSave;
+
+  /// No description provided for @walletSettingsNetworksSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Chains updated'**
+  String get walletSettingsNetworksSaved;
+
+  /// No description provided for @walletSettingsNetworksFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update the chains. Try again.'**
+  String get walletSettingsNetworksFailed;
+
+  /// No description provided for @walletSettingsNetworksReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved, but {networks} couldn\'t be read yet. OpenBudget will keep trying.'**
+  String walletSettingsNetworksReadFailed(String networks);
+
+  /// No description provided for @walletSettingsSingleChain.
+  ///
+  /// In en, this message translates to:
+  /// **'{chain} wallets are read on one chain, so there\'s nothing to choose.'**
+  String walletSettingsSingleChain(String chain);
+
+  /// No description provided for @walletSettingsLookAhead.
+  ///
+  /// In en, this message translates to:
+  /// **'Look for assets on other chains'**
+  String get walletSettingsLookAhead;
+
+  /// No description provided for @walletSettingsFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Found assets on {networks}'**
+  String walletSettingsFoundTitle(String networks);
+
+  /// No description provided for @walletSettingsFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'They\'re picked above. Save the chains to start reading them.'**
+  String get walletSettingsFoundMessage;
+
+  /// No description provided for @walletSettingsNothingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing new found'**
+  String get walletSettingsNothingTitle;
+
+  /// No description provided for @walletSettingsNothingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{OpenBudget looked at 1 other chain and found no assets there.} other{OpenBudget looked at {count} other chains and found no assets there.}}'**
+  String walletSettingsNothingMessage(int count);
+
+  /// No description provided for @walletSettingsLookAheadFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t check the other chains. Try again in a moment.'**
+  String get walletSettingsLookAheadFailedMessage;
+
+  /// No description provided for @walletSettingsLookAheadRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve looked up a lot of wallets. Try again in a little while.'**
+  String get walletSettingsLookAheadRateLimited;
+
+  /// No description provided for @walletSettingsRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop reading {networks}?'**
+  String walletSettingsRemoveTitle(String networks);
+
+  /// No description provided for @walletSettingsRemoveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} on {networks} will drop out of your net worth. Your assets stay where they are, and you can add the chain back any time.'**
+  String walletSettingsRemoveMessage(String amount, String networks);
+
+  /// No description provided for @walletSettingsRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop reading'**
+  String get walletSettingsRemoveConfirm;
+
+  /// No description provided for @walletSettingsRemoveCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep reading'**
+  String get walletSettingsRemoveCancel;
+
+  /// No description provided for @walletSettingsDisconnectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get walletSettingsDisconnectTitle;
+
+  /// No description provided for @walletSettingsDisconnectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget stops reading this wallet. The account and its history stay in your accounts.'**
+  String get walletSettingsDisconnectHint;
+
+  /// No description provided for @walletSettingsDisconnectButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect wallet'**
+  String get walletSettingsDisconnectButton;
+
+  /// No description provided for @walletSettingsDisconnectConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect {name}?'**
+  String walletSettingsDisconnectConfirmTitle(String name);
+
+  /// No description provided for @walletSettingsDisconnectConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget stops reading this wallet and its value stops updating. The account and its history stay, and you can add the wallet again later.'**
+  String get walletSettingsDisconnectConfirmMessage;
+
+  /// No description provided for @walletSettingsDisconnectConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get walletSettingsDisconnectConfirm;
+
+  /// No description provided for @walletSettingsDisconnectCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep wallet'**
+  String get walletSettingsDisconnectCancel;
+
+  /// No description provided for @walletSettingsDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet disconnected'**
+  String get walletSettingsDisconnected;
+
+  /// No description provided for @walletSettingsDisconnectFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t disconnect the wallet. Try again.'**
+  String get walletSettingsDisconnectFailed;
+
+  /// No description provided for @walletSettingsAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget already reads every chain this address can use.'**
+  String get walletSettingsAllRead;
 }
 
 class _AppLocalizationsDelegate

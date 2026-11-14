@@ -1018,3 +1018,105 @@ abstract final class WalletFlowData {
     valueCurrencyCode: valueMinor == null ? null : 'USD',
   );
 }
+
+/// What the wallet settings flow shows and the faked server answers with.
+///
+/// One EVM wallet on Ethereum ($2,000) and Base ($310), with $50 waiting on
+/// Arbitrum One for the look-ahead to find.
+abstract final class WalletSettingsFlowData {
+  static const String entityId = TestData.gbpEntityId;
+  static const String accountId = '00000000-0000-0000-0000-000000000901';
+  static const String walletId = '00000000-0000-0000-0000-000000000902';
+
+  /// The EIP-55 example address, valid on every EVM network.
+  static const String evmAddress = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';
+  static const String accountName = 'Ethereum wallet (0x5a…eAed)';
+  static const String renamedAccount = 'Cold storage';
+
+  static const int ethereumMinor = 200000;
+  static const int baseMinor = 31000;
+  static const int arbitrumMinor = 5000;
+
+  static Account account({required String name, required int balanceMinor}) =>
+      Account(
+        id: UuidValue.fromString(accountId),
+        entityId: UuidValue.fromString(entityId),
+        name: name,
+        kind: AccountKind.crypto,
+        currencyCode: 'USD',
+        balanceSource: AccountBalanceSource.valuations,
+        balanceMinor: balanceMinor,
+        onBudget: false,
+      );
+
+  static Wallet wallet(List<WalletNetwork> scan) => Wallet(
+    id: UuidValue.fromString(walletId),
+    entityId: UuidValue.fromString(entityId),
+    accountId: UuidValue.fromString(accountId),
+    network: WalletNetwork.ethereumMainnet,
+    address: evmAddress,
+    scanNetworks: [...scan],
+    syncStatus: SyncStatus.synced,
+    createdAt: DateTime.utc(2026, 11, 14),
+    updatedAt: DateTime.utc(2026, 11, 14),
+  );
+
+  /// One ETH holding per read chain that holds something.
+  static List<WalletHolding> holdings(
+    List<WalletNetwork> scan,
+    Map<WalletNetwork, int> valueByNetwork,
+  ) => [
+    for (final (index, chain) in scan.indexed)
+      if ((valueByNetwork[chain] ?? 0) > 0)
+        WalletHolding(
+          id: UuidValue.fromString(
+            '00000000-0000-0000-0000-00000000091${index.toRadixString(16)}',
+          ),
+          walletId: UuidValue.fromString(walletId),
+          network: chain,
+          assetId: 'native',
+          symbol: 'ETH',
+          name: 'Ether',
+          decimals: 18,
+          quantityRaw: BigInt.from(10).pow(18),
+          priceCurrencyCode: 'USD',
+          valueMinor: valueByNetwork[chain],
+          priceQuality: PriceQuality.live,
+        ),
+  ];
+
+  static List<WalletNetworkState> states(List<WalletNetwork> scan) => [
+    for (final chain in scan)
+      WalletNetworkState(
+        walletId: UuidValue.fromString(walletId),
+        network: chain,
+        lastReadAt: DateTime.now().toUtc(),
+      ),
+  ];
+
+  /// What a fresh look at the address finds on each EVM chain.
+  static WalletPreview preview(Map<WalletNetwork, int> valueByNetwork) =>
+      WalletPreview(
+        network: WalletNetwork.ethereumMainnet,
+        address: evmAddress.toLowerCase(),
+        networks: [
+          for (final chain in [
+            WalletNetwork.ethereumMainnet,
+            WalletNetwork.baseMainnet,
+            WalletNetwork.arbitrumOne,
+          ])
+            WalletPreviewNetwork(
+              network: chain,
+              holdingCount: (valueByNetwork[chain] ?? 0) > 0 ? 1 : 0,
+              pricedHoldingCount: (valueByNetwork[chain] ?? 0) > 0 ? 1 : 0,
+              valueMinor: (valueByNetwork[chain] ?? 0) > 0
+                  ? valueByNetwork[chain]
+                  : null,
+              valueCurrencyCode: (valueByNetwork[chain] ?? 0) > 0
+                  ? 'USD'
+                  : null,
+            ),
+        ],
+        warnings: const [],
+      );
+}

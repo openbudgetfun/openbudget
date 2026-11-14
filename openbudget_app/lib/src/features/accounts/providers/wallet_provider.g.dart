@@ -616,7 +616,7 @@ final class WalletActionsProvider
   WalletActions create() => WalletActions();
 }
 
-String _$walletActionsHash() => r'8d4a056c0ff7dfb681d90d14289a36b6295e2fb4';
+String _$walletActionsHash() => r'039fef1bebf4e257b9d011f362db3f9e92b5ef4b';
 
 /// Wallet mutations. Kept alive so the invalidations that follow each await
 /// still reach the providers they refresh: an auto-disposed notifier is
