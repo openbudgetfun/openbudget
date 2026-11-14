@@ -240,12 +240,12 @@ void main() {
   });
 
   group('sources button', () {
-    testWidgets('counts distinct citations and opens the sheet', (
+    testWidgets('counts every listed source and opens the sheet', (
       tester,
     ) async {
       await _pumpReply(tester);
 
-      expect(find.text('2 sources'), findsOneWidget);
+      expect(find.text('3 sources'), findsOneWidget);
       expect(
         tester
             .getSize(find.byKey(AssistantReplyBubble.sourcesButtonKey))

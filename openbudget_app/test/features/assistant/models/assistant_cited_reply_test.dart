@@ -47,7 +47,7 @@ void main() {
         [for (final entry in reply.sources) (entry.number, entry.source.key)],
         [(1, 'b'), (2, 'a')],
       );
-      expect(reply.citationCount, 2);
+      expect(reply.sourceCount, 2);
     });
 
     test('reuses the number when a key is cited again', () {
@@ -67,7 +67,7 @@ void main() {
       ]);
 
       expect(reply.sources.map((entry) => entry.number), [1, 1]);
-      expect(reply.citationCount, 1);
+      expect(reply.sourceCount, 2);
     });
 
     test('drops a marker whose key has no source', () {

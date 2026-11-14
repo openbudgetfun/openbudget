@@ -225,7 +225,7 @@ class AssistantReplyBubble extends HookWidget {
                       _SourcesButton(
                         key: sourcesButtonKey,
                         label: l10n.assistantSourcesButton(
-                          reply.citationCount,
+                          reply.sourceCount,
                         ),
                         onTap: openSources,
                       ),

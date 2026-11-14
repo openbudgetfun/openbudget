@@ -20,9 +20,9 @@ abstract class AssistantCitedReply with _$AssistantCitedReply {
   /// Whether the reply cites anything.
   bool get hasSources => sources.isNotEmpty;
 
-  /// How many distinct citation numbers the reply uses.
-  int get citationCount =>
-      sources.map((source) => source.number).toSet().length;
+  /// How many sources the sources sheet lists. One citation number can
+  /// cover several sources, so this can exceed the numbers in the text.
+  int get sourceCount => sources.length;
 }
 
 /// One run of a reply: plain text, or a citation drawn as a numbered chip.
