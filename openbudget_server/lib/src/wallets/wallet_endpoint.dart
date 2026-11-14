@@ -49,8 +49,10 @@ class WalletEndpoint extends Endpoint {
   Future<List<WalletNetwork>> supportedNetworks(Session session) async =>
       WalletService.supportedNetworks(session);
 
-  /// Replaces the networks an EVM wallet reads on its next sync; null reads
-  /// its home network only.
+  /// Replaces the networks an EVM wallet reads; null reads its home network
+  /// only. A changed set is read at once: an added network shows its
+  /// holdings, a removed one loses its holdings and read state, and the
+  /// valuation follows, before this answers.
   Future<Wallet> setScanNetworks(
     Session session,
     UuidValue walletId,
@@ -84,6 +86,18 @@ class WalletEndpoint extends Endpoint {
     Session session,
     UuidValue walletId,
   ) => WalletService.listHoldings(session, walletId);
+
+  /// Sets a user verdict on one holding: hide it, allow it, or clear the
+  /// override and let the classifier decide.
+  Future<WalletHolding> setHoldingVerdict(
+    Session session,
+    UuidValue walletHoldingId,
+    SpamVerdict? verdict,
+  ) => WalletService.setHoldingVerdict(
+    session,
+    walletHoldingId,
+    verdict,
+  );
 
   /// Lists the wallet's transactions, newest first.
   Future<List<WalletTransaction>> listTransactions(

@@ -1,0 +1,24 @@
+### What an entity's wallets are worth, split by chain or by asset, in one
+### reporting currency. Only counted holdings are summed: priced ones whose
+### spam verdict is clean or allowedByUser, converted with the same daily FX
+### the net worth report uses.
+class: CryptoBreakdownView
+fields:
+  ### ISO 4217 reporting currency every value is in.
+  currencyCode: String
+  ### Calendar date the rates are for: today in the entity's time zone.
+  asOf: DateTime
+  grouping: CryptoBreakdownGrouping
+  ### The sum of every row's valueMinor.
+  totalMinor: int
+  ### How many wallets the entity has, counted or not. Zero means the app
+  ### hides the section.
+  walletCount: int
+  ### False when some holding's currency had no rate; those holdings are left
+  ### out of every figure and their codes are in missingCurrencyCodes.
+  isComplete: bool
+  missingCurrencyCodes: List<String>
+  ### True when any rate used is stale.
+  hasStaleRates: bool
+  ### Largest first; empty when nothing is counted.
+  rows: List<CryptoBreakdownRow>

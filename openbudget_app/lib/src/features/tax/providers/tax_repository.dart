@@ -33,6 +33,19 @@ abstract interface class TaxRepository {
   });
 
   Future<TaxReportView> getReport(String entityId, int startYear);
+
+  /// The entity's upcoming filing and payment dates, soonest first. Empty
+  /// for a country with no rule pack.
+  Future<List<TaxDeadlineView>> listDeadlines(String entityId);
+
+  /// The tax-ready summary for any entity, pack country or not.
+  ///
+  /// A null [startYear] lets the server pick the year containing the
+  /// entity's local today.
+  Future<TaxSummaryView> getSummary(String entityId, {int? startYear});
+
+  /// A signed link to the summary ZIP; it stops working after ten minutes.
+  Future<String> createExportLink(String entityId, {int? startYear});
 }
 
 /// The production [TaxRepository], backed by the Serverpod client.
@@ -87,6 +100,24 @@ class ServerpodTaxRepository implements TaxRepository {
   @override
   Future<TaxReportView> getReport(String entityId, int startYear) =>
       _client.tax.getReport(
+        UuidValue.fromString(entityId),
+        startYear: startYear,
+      );
+
+  @override
+  Future<List<TaxDeadlineView>> listDeadlines(String entityId) =>
+      _client.tax.listDeadlines(UuidValue.fromString(entityId));
+
+  @override
+  Future<TaxSummaryView> getSummary(String entityId, {int? startYear}) =>
+      _client.tax.getSummary(
+        UuidValue.fromString(entityId),
+        startYear: startYear,
+      );
+
+  @override
+  Future<String> createExportLink(String entityId, {int? startYear}) =>
+      _client.tax.createExportLink(
         UuidValue.fromString(entityId),
         startYear: startYear,
       );

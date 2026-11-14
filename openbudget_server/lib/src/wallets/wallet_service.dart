@@ -12,6 +12,7 @@ import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:openbudget_server/src/wallets/wallet_math.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider_registry.dart';
+import 'package:openbudget_server/src/wallets/wallet_spam_classifier.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
 
@@ -157,20 +158,14 @@ abstract final class WalletService {
         if (cleanLabel != null && cleanLabel != current.label) {
           wallet = await Wallet.db.updateRow(
             session,
-            current.copyWith(
-              label: cleanLabel,
-              updatedAt: clock(),
-            ),
+            current.copyWith(label: cleanLabel, updatedAt: clock()),
             transaction: tx,
           );
         }
         if (cleanAccountName != null && cleanAccountName != account.name) {
           await Account.db.updateRow(
             session,
-            account.copyWith(
-              name: cleanAccountName,
-              updatedAt: clock(),
-            ),
+            account.copyWith(name: cleanAccountName, updatedAt: clock()),
             transaction: tx,
           );
         }
@@ -227,10 +222,7 @@ abstract final class WalletService {
   }
 
   /// Lists the wallets of one owned entity, newest first.
-  static Future<List<Wallet>> list(
-    Session session,
-    UuidValue entityId,
-  ) async {
+  static Future<List<Wallet>> list(Session session, UuidValue entityId) async {
     await EntityAccess.requireOwned(session, entityId);
     return Wallet.db.find(
       session,
@@ -368,10 +360,7 @@ abstract final class WalletService {
         );
         startedAt = clock();
       } on _AllNetworksFailed catch (failure, stackTrace) {
-        _log.warning(
-          'Wallet sync failed for $walletId: $failure',
-          stackTrace,
-        );
+        _log.warning('Wallet sync failed for $walletId: $failure', stackTrace);
         await _markFailed(
           session,
           walletId,
@@ -382,10 +371,7 @@ abstract final class WalletService {
         );
         throw WalletProviderException(failure.message);
       } on Object catch (error, stackTrace) {
-        _log.warning(
-          'Wallet sync failed for $walletId: $error',
-          stackTrace,
-        );
+        _log.warning('Wallet sync failed for $walletId: $error', stackTrace);
         await _markFailed(session, walletId, startedAt, error, networks);
         rethrow;
       }
@@ -584,8 +570,14 @@ abstract final class WalletService {
   }
 
   /// Replaces which networks an EVM wallet reads, or clears them back to its
-  /// home network when [networks] is null. The change takes effect on the
-  /// wallet's next read.
+  /// home network when [networks] is null.
+  ///
+  /// When the set of networks changes the wallet is read at once, so a
+  /// network that was added shows its holdings, and one that was removed
+  /// loses its holdings and read state, with the valuation recomputed, before
+  /// this answers. A read that fails on every network is already recorded
+  /// per network by [sync]; it does not undo the change. Setting the same
+  /// networks again reads nothing.
   static Future<Wallet> setScanNetworks(
     Session session,
     UuidValue walletId,
@@ -595,7 +587,7 @@ abstract final class WalletService {
     _requireWritable(await EntityAccess.requireOwned(session, wallet.entityId));
     final cleanNetworks = _requireScanNetworks(wallet.network, networks);
 
-    await session.db.transaction((tx) async {
+    final changed = await session.db.transaction((tx) async {
       await EntityAccess.requireOwned(
         session,
         wallet.entityId,
@@ -609,15 +601,13 @@ abstract final class WalletService {
         lockMode: LockMode.forUpdate,
       );
       if (current == null) throw NotFoundException();
-      await Wallet.db.updateRow(
-        session,
-        current.copyWith(
-          // An explicit null clears the list, it does not keep it.
-          scanNetworks: cleanNetworks,
-          updatedAt: clock(),
-        ),
-        transaction: tx,
+      final next = current.copyWith(
+        // An explicit null clears the list, it does not keep it.
+        scanNetworks: cleanNetworks,
+        updatedAt: clock(),
       );
+      await Wallet.db.updateRow(session, next, transaction: tx);
+      return !_sameNetworks(_readNetworksFor(current), _readNetworksFor(next));
     });
 
     await _publish(
@@ -626,8 +616,22 @@ abstract final class WalletService {
       ChangeScope.accounts,
       accountId: wallet.accountId,
     );
+    if (changed) {
+      try {
+        await sync(session, walletId);
+      } on WalletProviderException {
+        // Every network failed: sync recorded each reason on its state row.
+      }
+    }
     return await Wallet.db.findById(session, walletId) ?? wallet;
   }
+
+  static bool _sameNetworks(
+    List<WalletNetwork> left,
+    List<WalletNetwork> right,
+  ) =>
+      left.toSet().difference(right.toSet()).isEmpty &&
+      right.toSet().difference(left.toSet()).isEmpty;
 
   /// One row per network the wallet reads: when its holdings were last read
   /// and why the last read failed, in display order.
@@ -671,6 +675,82 @@ abstract final class WalletService {
       }
       return left.assetId.compareTo(right.assetId);
     });
+  }
+
+  /// Sets a user verdict on one holding.
+  ///
+  /// [verdict] of [SpamVerdict.hiddenByUser] or [SpamVerdict.allowedByUser]
+  /// overrides the classifier; [SpamVerdict.clean] (or null) clears the
+  /// override and re-runs the classifier on the holding. [SpamVerdict.suspected]
+  /// is stored as given.
+  static Future<WalletHolding> setHoldingVerdict(
+    Session session,
+    UuidValue walletHoldingId,
+    SpamVerdict? verdict,
+  ) async {
+    final discovered = await WalletHolding.db.findById(
+      session,
+      walletHoldingId,
+    );
+    if (discovered == null) throw NotFoundException();
+    final wallet = await Wallet.db.findById(session, discovered.walletId);
+    if (wallet == null) throw NotFoundException();
+    final entity = await EntityAccess.requireOwned(session, wallet.entityId);
+    _requireWritable(entity);
+
+    SpamVerdict newVerdict;
+    if (verdict == null || verdict == SpamVerdict.clean) {
+      final siblings = await WalletHolding.db.find(
+        session,
+        where: (t) => t.walletId.equals(wallet.id),
+      );
+      final total = siblings.fold<int>(
+        0,
+        (sum, holding) =>
+            holding.valueMinor == null ? sum : sum + holding.valueMinor!,
+      );
+      newVerdict = WalletSpamClassifier.classify(
+        holding: discovered,
+        walletTotalValueMinor: total,
+      );
+    } else {
+      newVerdict = verdict;
+    }
+
+    final updated = await session.db.transaction((tx) async {
+      await EntityAccess.requireOwned(
+        session,
+        wallet.entityId,
+        transaction: tx,
+        lockMode: LockMode.forNoKeyUpdate,
+      );
+      await Wallet.db.findById(
+        session,
+        wallet.id!,
+        transaction: tx,
+        lockMode: LockMode.forUpdate,
+      );
+      final current = await WalletHolding.db.findById(
+        session,
+        walletHoldingId,
+        transaction: tx,
+        lockMode: LockMode.forUpdate,
+      );
+      if (current == null) throw NotFoundException();
+      return WalletHolding.db.updateRow(
+        session,
+        current.copyWith(spamVerdict: newVerdict, updatedAt: clock()),
+        transaction: tx,
+      );
+    });
+
+    await _publish(
+      session,
+      wallet.entityId,
+      ChangeScope.accounts,
+      accountId: wallet.accountId,
+    );
+    return updated;
   }
 
   /// Lists one wallet's transactions newest first.
@@ -1054,9 +1134,7 @@ LIMIT @limit''',
       // again from the cache where a price is still available.
       for (final entry in existingByFailedNetwork.entries) {
         for (final existing in entry.value) {
-          if (!seenKeys.add(
-            (entry.key, existing.assetId, existing.position),
-          )) {
+          if (!seenKeys.add((entry.key, existing.assetId, existing.position))) {
             continue;
           }
           resolved.add(
@@ -1070,9 +1148,43 @@ LIMIT @limit''',
         }
       }
 
+      // Classify every resolved holding. User choices survive; the
+      // classifier only moves holdings between clean and suspected.
+      final pricedTotalMinor = resolved.fold<BigInt>(
+        BigInt.zero,
+        (sum, holding) => holding.valueMinor == null
+            ? sum
+            : sum + BigInt.from(holding.valueMinor!),
+      );
+      final verdicts =
+          <(WalletNetwork, String, HoldingPosition), SpamVerdict>{};
+      for (final holding in resolved) {
+        final key = (holding.network, holding.assetId, holding.position);
+        final existingVerdict = existingByKey[key]?.spamVerdict;
+        if (existingVerdict == SpamVerdict.hiddenByUser ||
+            existingVerdict == SpamVerdict.allowedByUser) {
+          verdicts[key] = existingVerdict!;
+        } else {
+          verdicts[key] = WalletSpamClassifier.classify(
+            network: holding.network,
+            assetId: holding.assetId,
+            symbol: holding.symbol,
+            name: holding.name,
+            priceSource: holding.source,
+            priceQuality: holding.quality,
+            valueMinor: holding.valueMinor,
+            walletTotalValueMinor: pricedTotalMinor.toInt(),
+          );
+        }
+      }
+
       var total = BigInt.zero;
       for (final holding in resolved) {
-        if (holding.valueMinor != null) {
+        final key = (holding.network, holding.assetId, holding.position);
+        final verdict = verdicts[key]!;
+        if (holding.valueMinor != null &&
+            (verdict == SpamVerdict.clean ||
+                verdict == SpamVerdict.allowedByUser)) {
           total += BigInt.from(holding.valueMinor!);
         }
       }
@@ -1164,6 +1276,7 @@ LIMIT @limit''',
               decimals: holding.decimals,
               quantityRaw: holding.quantityRaw,
               isNft: holding.isNft,
+              spamVerdict: verdicts[key],
               priceCurrencyCode: holding.currencyCode,
               unitPrice: holding.unitPrice,
               valueMinor: holding.valueMinor,
@@ -1189,6 +1302,7 @@ LIMIT @limit''',
               decimals: holding.decimals,
               quantityRaw: holding.quantityRaw,
               isNft: holding.isNft,
+              spamVerdict: verdicts[key],
               priceCurrencyCode: holding.currencyCode,
               unitPrice: holding.unitPrice,
               valueMinor: holding.valueMinor,
@@ -1348,6 +1462,16 @@ LIMIT @limit''',
           transaction: tx,
         );
       }
+
+      // A network that left the scan set takes its read state with its
+      // holdings, so it no longer shows as a section or a stale failure.
+      await WalletNetworkState.db.deleteWhere(
+        session,
+        where: (t) =>
+            t.walletId.equals(wallet.id) &
+            t.network.notInSet(requestNetworks.toSet()),
+        transaction: tx,
+      );
 
       final updatedWallet = await Wallet.db.updateRow(
         session,
@@ -1559,9 +1683,7 @@ LIMIT @limit''',
       if ((unit == null && total == null) ||
           (unit != null && unit.numerator <= BigInt.zero) ||
           (total != null && total.numerator <= BigInt.zero)) {
-        warnings.add(
-          'Ignoring invalid provider price for ${holding.assetId}.',
-        );
+        warnings.add('Ignoring invalid provider price for ${holding.assetId}.');
         continue;
       }
       return _PriceChoice(
@@ -1580,6 +1702,12 @@ LIMIT @limit''',
         WalletMath.parseUnitPrice(existing?.unitPrice) ??
         WalletMath.parseUnitPrice(cached?.unitPrice);
     if (cachedPrice == null) return null;
+    final asOf = existing?.priceAsOf ?? cached?.fetchedAt;
+    // A cached price counts for 7 days; older than that the holding is
+    // unpriced until a source quotes it again.
+    if (asOf == null || clock().difference(asOf) > const Duration(days: 7)) {
+      return null;
+    }
     warnings.add('Using cached price for asset ${holding.assetId}');
     return _PriceChoice(
       unitPrice: cachedPrice.toString(),
@@ -1588,7 +1716,7 @@ LIMIT @limit''',
       source: existing?.priceSource ?? cached?.source,
       quality: PriceQuality.cached,
       confidence: Confidence.low,
-      asOf: existing?.priceAsOf ?? cached?.fetchedAt,
+      asOf: asOf,
     );
   }
 
@@ -1680,9 +1808,7 @@ LIMIT @limit''',
           transaction: tx,
         );
         for (final network in attemptedNetworks) {
-          final reason = _capMessage(
-            reasonsByNetwork[network] ?? message,
-          );
+          final reason = _capMessage(reasonsByNetwork[network] ?? message);
           await WalletNetworkState.db.upsertRow(
             session,
             WalletNetworkState(
@@ -1916,14 +2042,10 @@ LIMIT @limit''',
     final seen = <WalletNetwork>{};
     for (final candidate in scanNetworks) {
       if (candidate.family != ChainFamily.evm) {
-        throw ValidationException(
-          message: 'A wallet scans EVM networks only.',
-        );
+        throw ValidationException(message: 'A wallet scans EVM networks only.');
       }
       if (!seen.add(candidate)) {
-        throw ValidationException(
-          message: 'A wallet scans each network once.',
-        );
+        throw ValidationException(message: 'A wallet scans each network once.');
       }
     }
     if (!seen.contains(network)) {
@@ -2133,9 +2255,11 @@ LIMIT @limit''',
     final endYear = !DateTime.utc(year, month, day).isAfter(endThisYear)
         ? year
         : year + 1;
-    final start = DateTime.utc(endYear - 1, endMonth, endDay).add(
-      const Duration(days: 1),
-    );
+    final start = DateTime.utc(
+      endYear - 1,
+      endMonth,
+      endDay,
+    ).add(const Duration(days: 1));
     return start.year;
   }
 

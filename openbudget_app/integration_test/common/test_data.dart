@@ -223,6 +223,126 @@ abstract final class TestData {
     ],
   );
 
+  // Crypto breakdown (net worth with two connected wallets, in GBP)
+  static const cryptoTotalMinor = 20000;
+
+  static CryptoBreakdownRow _cryptoRow(
+    String key,
+    int valueMinor,
+    int shareBasisPoints, {
+    required List<WalletNetwork> networks,
+    String? symbol,
+    String? name,
+    bool isOther = false,
+    int holdingCount = 1,
+  }) => CryptoBreakdownRow(
+    key: key,
+    networks: networks,
+    symbol: symbol,
+    name: name,
+    isOther: isOther,
+    holdingCount: holdingCount,
+    valueMinor: valueMinor,
+    shareBasisPoints: shareBasisPoints,
+  );
+
+  /// The server's crypto breakdown for [gbpEntityId]: £200.00 across
+  /// Ethereum, Solana and Base, or the same money by asset, where USDC on
+  /// three networks is one row.
+  static CryptoBreakdownView gbpCryptoBreakdown(
+    CryptoBreakdownGrouping grouping,
+  ) {
+    final rows = switch (grouping) {
+      CryptoBreakdownGrouping.byChain => [
+        _cryptoRow(
+          'ethereumMainnet',
+          10000,
+          5000,
+          networks: [WalletNetwork.ethereumMainnet],
+          holdingCount: 4,
+        ),
+        _cryptoRow(
+          'solanaMainnet',
+          7000,
+          3500,
+          networks: [WalletNetwork.solanaMainnet],
+          holdingCount: 2,
+        ),
+        _cryptoRow(
+          'baseMainnet',
+          3000,
+          1500,
+          networks: [WalletNetwork.baseMainnet],
+        ),
+      ],
+      CryptoBreakdownGrouping.byAsset => [
+        _cryptoRow(
+          'asset:USDC',
+          8000,
+          4000,
+          networks: [
+            WalletNetwork.ethereumMainnet,
+            WalletNetwork.baseMainnet,
+            WalletNetwork.solanaMainnet,
+          ],
+          symbol: 'USDC',
+          name: 'USD Coin',
+          holdingCount: 3,
+        ),
+        _cryptoRow(
+          'asset:ETH',
+          6000,
+          3000,
+          networks: [WalletNetwork.ethereumMainnet, WalletNetwork.baseMainnet],
+          symbol: 'ETH',
+          holdingCount: 2,
+        ),
+        _cryptoRow(
+          'asset:SOL',
+          4000,
+          2000,
+          networks: [WalletNetwork.solanaMainnet],
+          symbol: 'SOL',
+        ),
+        _cryptoRow(
+          'other',
+          2000,
+          1000,
+          networks: [WalletNetwork.baseMainnet],
+          isOther: true,
+          holdingCount: 3,
+        ),
+      ],
+    };
+    return CryptoBreakdownView(
+      currencyCode: 'GBP',
+      asOf: DateTime.utc(2026, 11, 8),
+      grouping: grouping,
+      totalMinor: cryptoTotalMinor,
+      walletCount: 2,
+      isComplete: true,
+      missingCurrencyCodes: const [],
+      hasStaleRates: false,
+      rows: rows,
+    );
+  }
+
+  /// The server's answer for an entity without wallets: the Crypto section
+  /// stays hidden.
+  static CryptoBreakdownView noWalletsCryptoBreakdown(
+    CryptoBreakdownGrouping grouping,
+  ) => CryptoBreakdownView(
+    currencyCode: 'GBP',
+    asOf: DateTime.utc(2026, 11, 8),
+    grouping: grouping,
+    totalMinor: 0,
+    walletCount: 0,
+    isComplete: true,
+    missingCurrencyCodes: const [],
+    hasStaleRates: false,
+    rows: const [],
+  );
+
   // Transfer (flow 2: GBP -> USD cross-currency)
   static const transferSentMinor = 10000;
   static const transferReceivedMinor = 7900;
@@ -235,6 +355,93 @@ abstract final class TestData {
       'Guidance only, not tax advice. Check figures with a qualified adviser '
       'before filing.';
   static const taxYearLabel = 'Tax year 2026';
+
+  // Tax: the Upcoming list
+  static const taxUpcomingTitle = 'Upcoming';
+  static const taxUpcomingFirstTitle =
+      'Self Assessment online return for tax-code collection';
+  static const taxUpcomingFirstDate = 'Dec 30, 2026';
+  static const taxUpcomingFirstDaysLeft = 'In 49 days';
+  static const taxUpcomingReturnTitle = 'Self Assessment online return';
+  static const taxUpcomingReturnDate = 'Jan 31, 2027';
+  static const taxUpcomingReturnSource =
+      'Source: GOV.UK Self Assessment deadlines';
+  static const taxUpcomingFifthTitle = 'Second payment on account';
+  static const taxUpcomingShowAll = 'Show all 5 dates';
+
+  /// The fixed dates the fake tax server lists, soonest first.
+  static List<TaxDeadlineView> taxDeadlines() {
+    TaxDeadlineView deadline({
+      required String id,
+      required String title,
+      required String kind,
+      required DateTime dueDate,
+      required int daysLeft,
+      required String periodLabel,
+      String citation = 'GOV.UK Self Assessment deadlines',
+      String? note,
+    }) => TaxDeadlineView(
+      id: id,
+      title: title,
+      kind: kind,
+      dueDate: dueDate,
+      daysLeft: daysLeft,
+      periodStart: DateTime.utc(2025, 4, 6),
+      periodEnd: DateTime.utc(2026, 4, 6),
+      periodLabel: periodLabel,
+      source: 'https://www.gov.uk/self-assessment-tax-returns/deadlines',
+      citation: citation,
+      grade: 'primary',
+      dependsOnProfile: false,
+      note: note,
+    );
+
+    return [
+      deadline(
+        id: 'gb.sa.coding-out',
+        title: taxUpcomingFirstTitle,
+        kind: 'filing',
+        dueDate: DateTime.utc(2026, 12, 30),
+        daysLeft: 49,
+        periodLabel: '2025/26',
+        note:
+            'Filing online by this day lets a balance under £3,000 be '
+            'collected through the tax code.',
+      ),
+      deadline(
+        id: 'gb.sa.online-return',
+        title: taxUpcomingReturnTitle,
+        kind: 'filing',
+        dueDate: DateTime.utc(2027, 1, 31),
+        daysLeft: 81,
+        periodLabel: '2025/26',
+      ),
+      deadline(
+        id: 'gb.sa.balancing-payment',
+        title: 'Self Assessment balancing payment',
+        kind: 'payment',
+        dueDate: DateTime.utc(2027, 1, 31),
+        daysLeft: 81,
+        periodLabel: '2025/26',
+      ),
+      deadline(
+        id: 'gb.sa.payment-on-account-1',
+        title: 'First payment on account',
+        kind: 'payment',
+        dueDate: DateTime.utc(2027, 1, 31),
+        daysLeft: 81,
+        periodLabel: '2026/27',
+      ),
+      deadline(
+        id: 'gb.sa.payment-on-account-2',
+        title: taxUpcomingFifthTitle,
+        kind: 'payment',
+        dueDate: DateTime.utc(2027, 7, 31),
+        daysLeft: 262,
+        periodLabel: '2026/27',
+      ),
+    ];
+  }
 
   // Books (double-entry ledger)
   static const booksEnableTitle = 'Enable double-entry books';
@@ -448,6 +655,7 @@ abstract final class MultiCurrencyData {
       quantityRaw: BigInt.parse('12500000000'),
       priceCurrencyCode: 'USD',
       valueMinor: 175000,
+      priceQuality: PriceQuality.live,
       costBasisMinor: 140000,
     ),
     WalletHolding(
@@ -460,6 +668,7 @@ abstract final class MultiCurrencyData {
       quantityRaw: BigInt.parse('90500000'),
       priceCurrencyCode: 'USD',
       valueMinor: 9050,
+      priceQuality: PriceQuality.live,
       costBasisMinor: 9050,
     ),
   ];
@@ -720,4 +929,194 @@ abstract final class AnyCountryData {
 
   /// The entity id the fake creator hands back.
   static const String createdEntityId = TestData.gbpEntityId;
+}
+
+/// What the tax export flow shows and opens: a Kenyan individual, a country
+/// with no tax pack, whose summary is the universal panel's.
+abstract final class TaxExportData {
+  static const kenyaIntroTitle = 'No full tax rules for Kenya yet';
+  static const vatRatesTitle = 'VAT rates';
+  static const kenyaStandardRate = '16%';
+  static const kenyaAuthorityUrl = 'https://www.kra.go.ke';
+  static const exportButtonLabel = 'Export tax summary';
+
+  /// The signed link the fake server hands out.
+  static const exportLink =
+      'https://api.openbudget.test/tax/export?token=signed-token-for-flow';
+
+  /// The tax year the fake summary reports.
+  static const taxYear = 2026;
+  static const taxYearLabel = 'Tax year 2026';
+}
+
+/// What the add-a-wallet flow pastes and the faked server answers with.
+///
+/// The addresses are published test vectors (EIP-55 and BIP 84), not
+/// anyone's wallet. The recovery phrase is the BIP 39 test mnemonic.
+abstract final class WalletFlowData {
+  static const String entityId = TestData.gbpEntityId;
+
+  /// The EIP-55 example address, valid on every EVM network.
+  static const String evmAddress = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';
+
+  /// The account name the app gives the new EVM wallet.
+  static const String evmAccountName = 'Ethereum wallet (0x5a…eAed)';
+
+  /// The BIP 84 test vector's account key: a native SegWit HD wallet.
+  static const String zpub =
+      'zpub6rFR7y4Q2AijBEqTUquhVz398htDFrtymD9xYYfG1m4wAcvPhXNfE3EfH1r1ADqtfSdVCToUG868RvUUkgDKf31mGDtKsAYz2oz2AGutZYs';
+  static const String zpubAccountName = 'Bitcoin wallet, zpub';
+
+  /// Twelve words that must never leave the device.
+  static const String recoveryPhrase =
+      'abandon abandon abandon abandon abandon abandon abandon abandon '
+      'abandon abandon abandon about';
+
+  static const String accountId = '00000000-0000-0000-0000-000000000801';
+  static const String walletId = '00000000-0000-0000-0000-000000000802';
+
+  /// Ethereum $1,240, Base $310 and Arbitrum One with nothing on it.
+  static WalletPreview evmPreview() => WalletPreview(
+    network: WalletNetwork.ethereumMainnet,
+    address: evmAddress.toLowerCase(),
+    networks: [
+      _previewRow(WalletNetwork.ethereumMainnet, valueMinor: 124000),
+      _previewRow(WalletNetwork.baseMainnet, valueMinor: 31000),
+      _previewRow(WalletNetwork.arbitrumOne),
+    ],
+    warnings: const [],
+  );
+
+  /// The wallet the server returns after its first read.
+  static Wallet connected({
+    WalletNetwork network = WalletNetwork.ethereumMainnet,
+    String address = evmAddress,
+    SyncStatus syncStatus = SyncStatus.synced,
+    String? lastSyncError,
+    List<WalletNetwork>? scanNetworks,
+  }) => Wallet(
+    id: UuidValue.fromString(walletId),
+    entityId: UuidValue.fromString(entityId),
+    accountId: UuidValue.fromString(accountId),
+    network: network,
+    address: address,
+    scanNetworks: scanNetworks,
+    syncStatus: syncStatus,
+    lastSyncError: lastSyncError,
+    createdAt: DateTime.utc(2026, 11, 14),
+    updatedAt: DateTime.utc(2026, 11, 14),
+  );
+
+  static WalletPreviewNetwork _previewRow(
+    WalletNetwork network, {
+    int? valueMinor,
+  }) => WalletPreviewNetwork(
+    network: network,
+    holdingCount: valueMinor == null ? 0 : 1,
+    pricedHoldingCount: valueMinor == null ? 0 : 1,
+    valueMinor: valueMinor,
+    valueCurrencyCode: valueMinor == null ? null : 'USD',
+  );
+}
+
+/// What the wallet settings flow shows and the faked server answers with.
+///
+/// One EVM wallet on Ethereum ($2,000) and Base ($310), with $50 waiting on
+/// Arbitrum One for the look-ahead to find.
+abstract final class WalletSettingsFlowData {
+  static const String entityId = TestData.gbpEntityId;
+  static const String accountId = '00000000-0000-0000-0000-000000000901';
+  static const String walletId = '00000000-0000-0000-0000-000000000902';
+
+  /// The EIP-55 example address, valid on every EVM network.
+  static const String evmAddress = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';
+  static const String accountName = 'Ethereum wallet (0x5a…eAed)';
+  static const String renamedAccount = 'Cold storage';
+
+  static const int ethereumMinor = 200000;
+  static const int baseMinor = 31000;
+  static const int arbitrumMinor = 5000;
+
+  static Account account({required String name, required int balanceMinor}) =>
+      Account(
+        id: UuidValue.fromString(accountId),
+        entityId: UuidValue.fromString(entityId),
+        name: name,
+        kind: AccountKind.crypto,
+        currencyCode: 'USD',
+        balanceSource: AccountBalanceSource.valuations,
+        balanceMinor: balanceMinor,
+        onBudget: false,
+      );
+
+  static Wallet wallet(List<WalletNetwork> scan) => Wallet(
+    id: UuidValue.fromString(walletId),
+    entityId: UuidValue.fromString(entityId),
+    accountId: UuidValue.fromString(accountId),
+    network: WalletNetwork.ethereumMainnet,
+    address: evmAddress,
+    scanNetworks: [...scan],
+    syncStatus: SyncStatus.synced,
+    createdAt: DateTime.utc(2026, 11, 14),
+    updatedAt: DateTime.utc(2026, 11, 14),
+  );
+
+  /// One ETH holding per read chain that holds something.
+  static List<WalletHolding> holdings(
+    List<WalletNetwork> scan,
+    Map<WalletNetwork, int> valueByNetwork,
+  ) => [
+    for (final (index, chain) in scan.indexed)
+      if ((valueByNetwork[chain] ?? 0) > 0)
+        WalletHolding(
+          id: UuidValue.fromString(
+            '00000000-0000-0000-0000-00000000091${index.toRadixString(16)}',
+          ),
+          walletId: UuidValue.fromString(walletId),
+          network: chain,
+          assetId: 'native',
+          symbol: 'ETH',
+          name: 'Ether',
+          decimals: 18,
+          quantityRaw: BigInt.from(10).pow(18),
+          priceCurrencyCode: 'USD',
+          valueMinor: valueByNetwork[chain],
+          priceQuality: PriceQuality.live,
+        ),
+  ];
+
+  static List<WalletNetworkState> states(List<WalletNetwork> scan) => [
+    for (final chain in scan)
+      WalletNetworkState(
+        walletId: UuidValue.fromString(walletId),
+        network: chain,
+        lastReadAt: DateTime.now().toUtc(),
+      ),
+  ];
+
+  /// What a fresh look at the address finds on each EVM chain.
+  static WalletPreview preview(Map<WalletNetwork, int> valueByNetwork) =>
+      WalletPreview(
+        network: WalletNetwork.ethereumMainnet,
+        address: evmAddress.toLowerCase(),
+        networks: [
+          for (final chain in [
+            WalletNetwork.ethereumMainnet,
+            WalletNetwork.baseMainnet,
+            WalletNetwork.arbitrumOne,
+          ])
+            WalletPreviewNetwork(
+              network: chain,
+              holdingCount: (valueByNetwork[chain] ?? 0) > 0 ? 1 : 0,
+              pricedHoldingCount: (valueByNetwork[chain] ?? 0) > 0 ? 1 : 0,
+              valueMinor: (valueByNetwork[chain] ?? 0) > 0
+                  ? valueByNetwork[chain]
+                  : null,
+              valueCurrencyCode: (valueByNetwork[chain] ?? 0) > 0
+                  ? 'USD'
+                  : null,
+            ),
+        ],
+        warnings: const [],
+      );
 }

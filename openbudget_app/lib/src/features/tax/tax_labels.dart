@@ -95,3 +95,32 @@ String taxDeEinkunftsArtLabel(AppLocalizations l10n, DeEinkunftsArt art) =>
       DeEinkunftsArt.freiberuflich => l10n.taxDeEinkunftsArtFreiberuflich,
       DeEinkunftsArt.gewerblich => l10n.taxDeEinkunftsArtGewerblich,
     };
+
+/// The name of an indirect tax in a sentence, such as "VAT".
+String taxIndirectKindLabel(AppLocalizations l10n, IndirectTaxKind kind) =>
+    switch (kind) {
+      IndirectTaxKind.vat => l10n.taxIndirectKindVat,
+      IndirectTaxKind.gst => l10n.taxIndirectKindGst,
+      IndirectTaxKind.salesTax => l10n.taxIndirectKindSalesTax,
+      IndirectTaxKind.consumptionTax => l10n.taxIndirectKindConsumptionTax,
+      IndirectTaxKind.none => l10n.taxIndirectKindNone,
+    };
+
+/// The badge that says how firmly a source backs a figure.
+String taxSourceGradeLabel(AppLocalizations l10n, SourceGrade grade) =>
+    switch (grade) {
+      SourceGrade.primary => l10n.taxGradePrimaryBadge,
+      SourceGrade.secondary => l10n.taxSecondarySourceBadge,
+      SourceGrade.inferred => l10n.taxGradeInferredBadge,
+      SourceGrade.background => l10n.taxGradeBackgroundBadge,
+    };
+
+/// The disclaimer the server asked the summary to show, by its ARB key.
+///
+/// An unknown key falls back to the general tax disclaimer, so a newer
+/// server never leaves the summary without one.
+String taxSummaryDisclaimerText(AppLocalizations l10n, String disclaimerKey) =>
+    switch (disclaimerKey) {
+      'taxSummaryDisclaimer' => l10n.taxSummaryDisclaimer,
+      _ => l10n.taxDisclaimer,
+    };

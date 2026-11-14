@@ -349,6 +349,18 @@ class FakeCompanyTaxRepository implements TaxRepository {
   @override
   Future<TaxReportView> getReport(String entityId, int startYear) =>
       throw UnimplementedError();
+
+  @override
+  Future<List<TaxDeadlineView>> listDeadlines(String entityId) =>
+      throw UnimplementedError();
+
+  @override
+  Future<TaxSummaryView> getSummary(String entityId, {int? startYear}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<String> createExportLink(String entityId, {int? startYear}) =>
+      throw UnimplementedError();
 }
 
 Widget _buildApp(FakeBooksRepository books) {

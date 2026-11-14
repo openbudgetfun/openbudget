@@ -1250,7 +1250,10 @@ void main() {
           .firstWhere(
             (opportunity) => opportunity.id == 'us.standard_vs_itemized',
           );
-      expect(election.title, 'Itemize deductions');
+      expect(
+        election.title,
+        'Itemized deductions above the standard deduction',
+      );
       expect(election.estimatedSavingMinor, greaterThan(0));
     });
 

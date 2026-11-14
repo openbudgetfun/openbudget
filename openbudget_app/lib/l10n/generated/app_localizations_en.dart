@@ -2374,7 +2374,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionDateLabel => 'Date';
 
   @override
-  String get addAccountConnectWallet => 'Connect Solana Wallet';
+  String get addAccountConnectWallet => 'Add a crypto wallet';
 
   @override
   String get addAccountUnlinkedTitle => 'Add Unlinked Account';
@@ -2389,16 +2389,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addAccountSuccessHeadline => 'Success!';
 
   @override
-  String get addAccountSuccessAddAnother => 'Add Another';
+  String get addAccountSuccessAddAnother => 'Add another';
 
   @override
   String get addAccountSelectTypePlaceholder => 'Select account type...';
 
   @override
   String get addAccountLoadingInstitutions => 'Loading institutions...';
-
-  @override
-  String get addAccountConnectWalletButton => 'Connect Wallet';
 
   @override
   String get dialogNext => 'Next';
@@ -2434,22 +2431,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addAccountAddUnlinked => 'Add an Unlinked Account';
-
-  @override
-  String get addAccountWalletConnectionDescription =>
-      'Connect a Solana wallet in read-only mode. OpenBudget imports native SPL balances and keeps fiat valuation synced.';
-
-  @override
-  String get addAccountWalletAddressLabel => 'Wallet Address';
-
-  @override
-  String get addAccountWalletAddressHint => 'Paste Solana wallet address';
-
-  @override
-  String get addAccountWalletLabelOptional => 'Wallet Label (optional)';
-
-  @override
-  String get addAccountWalletLabelHint => 'My Solana Wallet';
 
   @override
   String get addAccountWalletIncludeInBudgetTotals =>
@@ -3693,6 +3674,283 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taxOpportunitySource => 'Guidance';
 
   @override
+  String get taxExportTitle => 'Take it to your accountant';
+
+  @override
+  String get taxExportMessage =>
+      'A ZIP with this tax year\'s summary and every line behind it. The download link works for 10 minutes.';
+
+  @override
+  String get taxExportButton => 'Export tax summary';
+
+  @override
+  String get taxExportPreparing => 'Preparing your download';
+
+  @override
+  String get taxExportFailed =>
+      'We couldn\'t prepare your download. Check your connection and try again.';
+
+  @override
+  String get taxExportOpenFailed =>
+      'Your download is ready, but this device wouldn\'t open it. Try again in a moment.';
+
+  @override
+  String get taxUpcomingTitle => 'Upcoming';
+
+  @override
+  String get taxUpcomingKindFiling => 'Filing';
+
+  @override
+  String get taxUpcomingKindPayment => 'Payment';
+
+  @override
+  String get taxUpcomingKindFilingAndPayment => 'Filing and payment';
+
+  @override
+  String taxUpcomingDaysLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'In $count days',
+      one: 'Due tomorrow',
+      zero: 'Due today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String taxUpcomingPeriod(String period) {
+    return 'For $period';
+  }
+
+  @override
+  String get taxUpcomingDependsOnProfile => 'Based on your tax profile';
+
+  @override
+  String taxUpcomingMoved(String date) {
+    return 'Moved from $date, a weekend or holiday';
+  }
+
+  @override
+  String get taxUpcomingInferredBadge => 'Date not confirmed by the authority';
+
+  @override
+  String taxUpcomingSource(String citation) {
+    return 'Source: $citation';
+  }
+
+  @override
+  String get taxUpcomingSourceHint => 'Opens the authority\'s page';
+
+  @override
+  String taxUpcomingShowAll(int count) {
+    return 'Show all $count dates';
+  }
+
+  @override
+  String get taxUpcomingShowFewer => 'Show fewer dates';
+
+  @override
+  String get taxUpcomingEmpty => 'No filing or payment dates in the next year.';
+
+  @override
+  String get taxUpcomingLoadError => 'We couldn\'t load your upcoming dates.';
+
+  @override
+  String taxUniversalIntroTitle(String country) {
+    return 'No full tax rules for $country yet';
+  }
+
+  @override
+  String get taxUniversalIntroMessage =>
+      'OpenBudget can\'t work out what you owe here yet. It can show your tax year, the rates we know about, and a summary of your records to hand to an accountant.';
+
+  @override
+  String taxUniversalYearLabel(String label) {
+    return 'Tax year $label';
+  }
+
+  @override
+  String taxUniversalYearPeriod(String start, String end) {
+    return '$start to $end';
+  }
+
+  @override
+  String get taxUniversalYearLoading => 'Finding your tax year';
+
+  @override
+  String get taxSummaryTitle => 'Your year so far';
+
+  @override
+  String get taxSummaryIncome => 'Income this tax year';
+
+  @override
+  String get taxSummaryExpenses => 'Expenses';
+
+  @override
+  String get taxSummaryReliefs => 'Reliefs';
+
+  @override
+  String get taxSummaryTaxPaid => 'Tax already paid';
+
+  @override
+  String taxSummarySalesTaxCollected(String tax) {
+    return '$tax collected';
+  }
+
+  @override
+  String taxSummarySalesTaxPaid(String tax) {
+    return '$tax paid';
+  }
+
+  @override
+  String get taxSummaryLoadError => 'We couldn\'t load your summary.';
+
+  @override
+  String get taxSummaryDisclaimer =>
+      'This summarises what you\'ve recorded in OpenBudget. It is not a tax return. Guidance only, not tax advice. Check figures with a qualified adviser before filing.';
+
+  @override
+  String taxIndirectTitle(String tax) {
+    return '$tax rates';
+  }
+
+  @override
+  String get taxIndirectKindVat => 'VAT';
+
+  @override
+  String get taxIndirectKindGst => 'GST';
+
+  @override
+  String get taxIndirectKindSalesTax => 'Sales tax';
+
+  @override
+  String get taxIndirectKindConsumptionTax => 'Consumption tax';
+
+  @override
+  String get taxIndirectKindNone => 'VAT or sales tax';
+
+  @override
+  String taxIndirectLocalName(String name) {
+    return 'Known locally as $name';
+  }
+
+  @override
+  String taxIndirectNone(String country) {
+    return '$country doesn\'t charge VAT or sales tax.';
+  }
+
+  @override
+  String get taxIndirectUnknown =>
+      'We haven\'t looked up the VAT or sales tax rates for this country yet.';
+
+  @override
+  String get taxIndirectNoRateForYear =>
+      'We don\'t have a rate for this tax year.';
+
+  @override
+  String taxRatePercent(String rate) {
+    return '$rate%';
+  }
+
+  @override
+  String taxRateAppliesTo(String scope) {
+    return 'Applies to $scope';
+  }
+
+  @override
+  String taxRateSince(String date) {
+    return 'In force since $date';
+  }
+
+  @override
+  String taxRateSource(String name) {
+    return 'Source: $name';
+  }
+
+  @override
+  String taxRateSourceOpen(String title) {
+    return 'Open source: $title';
+  }
+
+  @override
+  String get taxRegistrationThresholdTitle => 'Registration threshold';
+
+  @override
+  String taxRegistrationThresholdPeriod(String period) {
+    String _temp0 = intl.Intl.selectLogic(
+      period,
+      {
+        'annualTurnover': 'a year in turnover',
+        'rolling12Months': 'in turnover over any 12 months',
+        'calendarYear': 'in turnover in a calendar year',
+        'fourConsecutiveQuarters': 'in turnover over four quarters in a row',
+        'annualTurnoverGoodsOnly': 'a year in turnover from goods',
+        'annualTurnoverSmallBusinessExclusion':
+            'a year in turnover, with a small-business exclusion',
+        'other': 'in turnover',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get taxGradePrimaryBadge => 'From the tax authority';
+
+  @override
+  String get taxGradeInferredBadge => 'Our best estimate';
+
+  @override
+  String get taxGradeBackgroundBadge => 'Background information';
+
+  @override
+  String get taxRegionalRatesTitle => 'Rates by region';
+
+  @override
+  String get taxRegionalRatesHint => 'Some regions add their own tax on top.';
+
+  @override
+  String get taxAuthorityTitle => 'Tax authority';
+
+  @override
+  String taxAuthorityOpen(String name) {
+    return 'Open the $name website';
+  }
+
+  @override
+  String get taxLinkOpenFailed =>
+      'We couldn\'t open that page. Try again in a moment.';
+
+  @override
+  String taxUniversalCaveatSecondary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count of the figures above come from secondary sources, not the tax authority\'s own pages.',
+      one: 'One of the figures above comes from a secondary source, not the tax authority\'s own pages.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String taxUniversalCaveatAssumed(String country) {
+    return 'The tax year and, for companies, the year-end date are defaults OpenBudget assumed for $country. Check them with the tax authority before you file.';
+  }
+
+  @override
+  String get taxResearchNotesTitle => 'Research notes';
+
+  @override
+  String get taxResearchNotesHint =>
+      'The notes behind these figures, as our researchers wrote them.';
+
+  @override
+  String taxUniversalVerifiedOn(String date) {
+    return 'Country facts checked on $date';
+  }
+
+  @override
   String get taxHowWorkedOutTitle => 'How this was worked out';
 
   @override
@@ -3771,25 +4029,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taxJurisdictionDe => 'Germany';
 
   @override
-  String get taxSalesTaxRegistered => 'Registered for sales tax or VAT';
-
-  @override
-  String get taxSalesTaxRegisteredHint =>
-      'Turn this on if you charge and reclaim sales tax on these books.';
-
-  @override
-  String get taxGbScottishTaxpayer => 'Scottish taxpayer';
-
-  @override
-  String get taxGbScottishTaxpayerHint => 'Use Scottish income tax rates.';
-
-  @override
-  String get taxGbStudentLoanPlan => 'Student loan plan';
-
-  @override
-  String get taxGbStudentLoanNone => 'No student loan';
-
-  @override
   String get taxGbStudentLoanPlan1 => 'Plan 1';
 
   @override
@@ -3803,37 +4042,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taxGbStudentLoanPostgraduate => 'Postgraduate loan';
-
-  @override
-  String get taxGbPostgraduateLoanHint =>
-      'Repay 6% of income above £21,000 on top of any undergraduate plan.';
-
-  @override
-  String get taxGbAccountingPeriodEnd => 'Accounting period end';
-
-  @override
-  String get taxGbAccountingPeriodEndHint =>
-      'The company\'s year end. Corporation Tax runs on these periods, not the tax year.';
-
-  @override
-  String get taxGbAccountingPeriodMonth => 'Month';
-
-  @override
-  String get taxGbAccountingPeriodDay => 'Day';
-
-  @override
-  String get taxGbAssociatedCompanies => 'Associated companies';
-
-  @override
-  String get taxGbAssociatedCompaniesHint =>
-      'Other companies under common control. Each one divides the £50,000 and £250,000 limits.';
-
-  @override
-  String get taxGbAssociatedCompaniesError =>
-      'Enter the number of associated companies as a whole number, such as 0.';
-
-  @override
-  String get taxUsFilingStatus => 'Filing status';
 
   @override
   String get taxUsFilingSingle => 'Single';
@@ -3852,138 +4060,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Qualifying surviving spouse';
 
   @override
-  String get taxUsForeignEarnedIncomeExclusion =>
-      'Foreign earned income exclusion';
-
-  @override
-  String get taxUsForeignEarnedIncomeExclusionHint =>
-      'The amount you excluded on Form 2555 this year. It is added back when the investment income and deduction phase-outs check your income.';
-
-  @override
-  String get taxUsDependentsUnder17 => 'Dependents under 17';
-
-  @override
-  String get taxUsDependents17OrOlder => 'Dependents 17 or older';
-
-  @override
-  String get taxUsDependentsCountHint =>
-      'The number of people you claim as dependents.';
-
-  @override
-  String get taxUsDependentsSsn => 'All dependents have an SSN';
-
-  @override
-  String get taxUsDependentsSsnHint =>
-      'Only dependents with an SSN valid for employment earn a credit.';
-
-  @override
-  String get taxUsTaxpayer65OrOlder => 'You are 65 or older';
-
-  @override
-  String get taxUsSpouse65OrOlder => 'Your spouse is 65 or older';
-
-  @override
-  String get taxUsTaxpayerHasSsn => 'You have an SSN';
-
-  @override
-  String get taxUsSpouseHasSsn => 'Your spouse has an SSN';
-
-  @override
-  String get taxUsSsnHint =>
-      'Required for the tips, overtime, and senior deductions.';
-
-  @override
-  String get taxUsHomeOfficeMethod => 'Home office method';
-
-  @override
   String get taxUsHomeOfficeSimplified => 'Simplified (\$5 per square foot)';
 
   @override
   String get taxUsHomeOfficeRegular => 'Regular (Form 8829)';
-
-  @override
-  String get taxUsSpecifiedServiceTrade => 'Specified service business';
-
-  @override
-  String get taxUsSpecifiedServiceTradeHint =>
-      'Consulting, law, health and similar businesses phase out of the qualified business income deduction.';
-
-  @override
-  String get taxNgAnnualRent => 'Annual rent paid';
-
-  @override
-  String get taxNgAnnualRentHint =>
-      'Used for rent relief under the Nigeria Tax Act.';
-
-  @override
-  String get taxNgAnnualRentError =>
-      'Enter the annual rent as a number, such as 1200000.';
-
-  @override
-  String get taxNgSmallCompanyCeiling => 'Small company turnover ceiling';
-
-  @override
-  String get taxNgSmallCompanyCeilingHint =>
-      'The two Nigerian Acts disagree: the Nigeria Tax Act gazette says N50,000,000 and the Administration Act says N100,000,000. Pick the figure that should decide your company\'s small company status.';
-
-  @override
-  String get taxNgSmallCompanyCeilingGazette =>
-      'N50,000,000 (Nigeria Tax Act gazette)';
-
-  @override
-  String get taxNgSmallCompanyCeilingIntended =>
-      'N100,000,000 (Administration Act)';
-
-  @override
-  String get taxNgMneGroupMember => 'Member of a multinational group';
-
-  @override
-  String get taxNgMneGroupMemberHint =>
-      'Multinational group members may owe the 15% minimum effective tax rate whatever their turnover.';
-
-  @override
-  String get taxDeJointAssessment => 'Joint assessment';
-
-  @override
-  String get taxDeJointAssessmentHint =>
-      'Spouses assessed together with income splitting.';
-
-  @override
-  String get taxDeSpouseEmployed => 'Spouse also earns wages';
-
-  @override
-  String get taxDeSpouseEmployedHint =>
-      'Each employed spouse claims their own worker\'s flat-rate allowance and files their own Anlage N.';
-
-  @override
-  String get taxDeChurchTax => 'Church tax';
-
-  @override
-  String get taxDeChurchTaxHint => 'Kirchensteuer on top of income tax.';
-
-  @override
-  String get taxDeChurchState => 'State (Land) of the church tax';
-
-  @override
-  String get taxDeChurchStateHint =>
-      'Sets the rate: 8% in Bavaria and Baden-Württemberg, 9% elsewhere. Leave it out to assume 9%.';
-
-  @override
-  String get taxDeChurchStateNone => 'Not specified (assume 9%)';
-
-  @override
-  String get taxDeChildren => 'Children (Kindergeld)';
-
-  @override
-  String get taxDeChildrenHint =>
-      'Children you receive Kindergeld for; a full twelve months per child is assumed.';
-
-  @override
-  String get taxDeEinkunftsArt => 'Type of self-employment';
-
-  @override
-  String get taxDeEinkunftsArtHint =>
-      'Freiberufler owe no trade tax and file Anlage S; Gewerbetreibende owe Gewerbesteuer and file Anlage G.';
 
   @override
   String get taxDeEinkunftsArtFreiberuflich =>
@@ -3991,40 +4071,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taxDeEinkunftsArtGewerblich => 'Gewerbetreibender (trade)';
-
-  @override
-  String get taxDeStatutoryPension => 'Statutory pension contributions';
-
-  @override
-  String get taxDeStatutoryPensionHint =>
-      'Employee and employer share per year; they reduce the Rürup (Basisrente) deduction.';
-
-  @override
-  String get taxDePriorTurnover => 'Previous year\'s turnover';
-
-  @override
-  String get taxDePriorTurnoverHint =>
-      'Total turnover of last year; it decides the Kleinunternehmer test (at most €25,000 prior year, €100,000 this year).';
-
-  @override
-  String get taxDeCommuteKm => 'Commute: one-way distance (km)';
-
-  @override
-  String get taxDeCommuteKmHint =>
-      'Full kilometres to your first workplace, shortest route (Anlage N).';
-
-  @override
-  String get taxDeCommuteDays => 'Commute: days travelled';
-
-  @override
-  String get taxDeCommuteDaysHint =>
-      'Days you actually visited the workplace; illness, holiday and home-office days do not count.';
-
-  @override
-  String get taxDeNumberError => 'Enter a whole number of 0 or more.';
-
-  @override
-  String get taxDeAmountError => 'Enter the amount as a number, such as 4800.';
 
   @override
   String get taxDeBundeslandBw => 'Baden-Württemberg';
@@ -4075,11 +4121,344 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taxDeBundeslandTh => 'Thuringia';
 
   @override
-  String get taxDeSmallBusinessExemption => 'Small business VAT exemption';
+  String get taxProfileCountError => 'Enter a whole number of 0 or more.';
 
   @override
-  String get taxDeSmallBusinessExemptionHint =>
+  String get taxProfileAmountError =>
+      'Enter the amount as a number, such as 4800.';
+
+  @override
+  String get taxQCommonEntityKind => 'Entity kind';
+
+  @override
+  String get taxQCommonEntityKindIndividual => 'Individual';
+
+  @override
+  String get taxQCommonEntityKindSoleTrader => 'Sole trader';
+
+  @override
+  String get taxQCommonEntityKindCompany => 'Company';
+
+  @override
+  String get taxQCommonSalesTaxRegistered => 'Registered for sales tax or VAT';
+
+  @override
+  String get taxQCommonSalesTaxRegisteredHelp =>
+      'Turn this on if you charge and reclaim sales tax on these books.';
+
+  @override
+  String get taxQCommonTaxResident => 'Tax resident of this country';
+
+  @override
+  String get taxQCommonTaxResidentHelp =>
+      'Residence decides which rules apply to you. Tax-saving ideas wait until you answer this.';
+
+  @override
+  String get taxQCommonUsPerson => 'US person';
+
+  @override
+  String get taxQCommonUsPersonHelp =>
+      'US citizens, green card holders and people who meet the substantial presence test owe US filings wherever they live.';
+
+  @override
+  String get taxQGbScottishTaxpayer => 'Scottish taxpayer';
+
+  @override
+  String get taxQGbScottishTaxpayerHelp => 'Use Scottish income tax rates.';
+
+  @override
+  String get taxQGbStudentLoanPlan => 'Student loan plan';
+
+  @override
+  String get taxQGbStudentLoanPlanPlan1 => 'Plan 1';
+
+  @override
+  String get taxQGbStudentLoanPlanPlan2 => 'Plan 2';
+
+  @override
+  String get taxQGbStudentLoanPlanPlan4 => 'Plan 4';
+
+  @override
+  String get taxQGbStudentLoanPlanPlan5 => 'Plan 5';
+
+  @override
+  String get taxQGbStudentLoanPlanNone => 'No student loan';
+
+  @override
+  String get taxQGbPostgraduateLoan => 'Postgraduate loan';
+
+  @override
+  String get taxQGbPostgraduateLoanHelp =>
+      'Repay 6% of income above £21,000 on top of any undergraduate plan.';
+
+  @override
+  String get taxQGbAccountingPeriodEnd => 'Accounting period end';
+
+  @override
+  String get taxQGbAccountingPeriodEndHelp =>
+      'The company\'s year end. Corporation Tax runs on these periods, not the tax year.';
+
+  @override
+  String get taxQGbAccountingPeriodMonth => 'Month';
+
+  @override
+  String get taxQGbAccountingPeriodDay => 'Day';
+
+  @override
+  String get taxQGbAssociatedCompanies => 'Associated companies';
+
+  @override
+  String get taxQGbAssociatedCompaniesHelp =>
+      'Other companies under common control. Each one divides the £50,000 and £250,000 limits.';
+
+  @override
+  String get taxQUsFilingStatus => 'Filing status';
+
+  @override
+  String get taxQUsFilingStatusSingle => 'Single';
+
+  @override
+  String get taxQUsFilingStatusMarriedFilingJointly => 'Married filing jointly';
+
+  @override
+  String get taxQUsFilingStatusMarriedFilingSeparately =>
+      'Married filing separately';
+
+  @override
+  String get taxQUsFilingStatusHeadOfHousehold => 'Head of household';
+
+  @override
+  String get taxQUsFilingStatusQualifyingSurvivingSpouse =>
+      'Qualifying surviving spouse';
+
+  @override
+  String get taxQUsTaxpayerHasSsn => 'You have an SSN';
+
+  @override
+  String get taxQUsTaxpayerHasSsnHelp =>
+      'Required for the tips, overtime, and senior deductions.';
+
+  @override
+  String get taxQUsSpouseHasSsn => 'Your spouse has an SSN';
+
+  @override
+  String get taxQUsSpouseHasSsnHelp =>
+      'Required for the tips, overtime, and senior deductions.';
+
+  @override
+  String get taxQUsTaxpayer65OrOlder => 'You are 65 or older';
+
+  @override
+  String get taxQUsSpouse65OrOlder => 'Your spouse is 65 or older';
+
+  @override
+  String get taxQUsDependentsUnder17 => 'Dependents under 17';
+
+  @override
+  String get taxQUsDependentsUnder17Help =>
+      'The number of people you claim as dependents.';
+
+  @override
+  String get taxQUsDependents17OrOlder => 'Dependents 17 or older';
+
+  @override
+  String get taxQUsDependents17OrOlderHelp =>
+      'The number of people you claim as dependents.';
+
+  @override
+  String get taxQUsDependentsHaveSsn => 'All dependents have an SSN';
+
+  @override
+  String get taxQUsDependentsHaveSsnHelp =>
+      'Only dependents with an SSN valid for employment earn a credit.';
+
+  @override
+  String get taxQUsForeignEarnedIncomeExclusion =>
+      'Foreign earned income exclusion';
+
+  @override
+  String get taxQUsForeignEarnedIncomeExclusionHelp =>
+      'The amount you excluded on Form 2555 this year. It is added back when the investment income and deduction phase-outs check your income.';
+
+  @override
+  String get taxQUsSpecifiedServiceTrade => 'Specified service business';
+
+  @override
+  String get taxQUsSpecifiedServiceTradeHelp =>
+      'Consulting, law, health and similar businesses phase out of the qualified business income deduction.';
+
+  @override
+  String get taxQUsHomeOfficeMethod => 'Home office method';
+
+  @override
+  String get taxQUsHomeOfficeMethodSimplified =>
+      'Simplified (\$5 per square foot)';
+
+  @override
+  String get taxQUsHomeOfficeMethodRegular => 'Regular (Form 8829)';
+
+  @override
+  String get taxQNgAnnualRent => 'Annual rent paid';
+
+  @override
+  String get taxQNgAnnualRentHelp =>
+      'Used for rent relief under the Nigeria Tax Act.';
+
+  @override
+  String get taxQNgSmallCompanyCeiling => 'Small company turnover ceiling';
+
+  @override
+  String get taxQNgSmallCompanyCeilingHelp =>
+      'The two Nigerian Acts disagree: the Nigeria Tax Act gazette says N50,000,000 and the Administration Act says N100,000,000. Pick the figure that should decide your company\'s small company status.';
+
+  @override
+  String get taxQNgSmallCompanyCeilingGazette =>
+      'N50,000,000 (Nigeria Tax Act gazette)';
+
+  @override
+  String get taxQNgSmallCompanyCeilingIntended =>
+      'N100,000,000 (Administration Act)';
+
+  @override
+  String get taxQNgMneGroupMember => 'Member of a multinational group';
+
+  @override
+  String get taxQNgMneGroupMemberHelp =>
+      'Multinational group members may owe the 15% minimum effective tax rate whatever their turnover.';
+
+  @override
+  String get taxQDeJointAssessment => 'Joint assessment';
+
+  @override
+  String get taxQDeJointAssessmentHelp =>
+      'Spouses assessed together with income splitting.';
+
+  @override
+  String get taxQDeSpouseEmployed => 'Spouse also earns wages';
+
+  @override
+  String get taxQDeSpouseEmployedHelp =>
+      'Each employed spouse claims their own worker\'s flat-rate allowance and files their own Anlage N.';
+
+  @override
+  String get taxQDeChurchTax => 'Church tax';
+
+  @override
+  String get taxQDeChurchTaxHelp => 'Kirchensteuer on top of income tax.';
+
+  @override
+  String get taxQDeChurchState => 'State (Land) of the church tax';
+
+  @override
+  String get taxQDeChurchStateHelp =>
+      'Sets the rate: 8% in Bavaria and Baden-Württemberg, 9% elsewhere. Leave it out to assume 9%.';
+
+  @override
+  String get taxQDeChurchStateBadenWuerttemberg => 'Baden-Württemberg';
+
+  @override
+  String get taxQDeChurchStateBayern => 'Bavaria';
+
+  @override
+  String get taxQDeChurchStateBerlin => 'Berlin';
+
+  @override
+  String get taxQDeChurchStateBrandenburg => 'Brandenburg';
+
+  @override
+  String get taxQDeChurchStateBremen => 'Bremen';
+
+  @override
+  String get taxQDeChurchStateHamburg => 'Hamburg';
+
+  @override
+  String get taxQDeChurchStateHessen => 'Hesse';
+
+  @override
+  String get taxQDeChurchStateMecklenburgVorpommern => 'Mecklenburg-Vorpommern';
+
+  @override
+  String get taxQDeChurchStateNiedersachsen => 'Lower Saxony';
+
+  @override
+  String get taxQDeChurchStateNordrheinWestfalen => 'North Rhine-Westphalia';
+
+  @override
+  String get taxQDeChurchStateRheinlandPfalz => 'Rhineland-Palatinate';
+
+  @override
+  String get taxQDeChurchStateSaarland => 'Saarland';
+
+  @override
+  String get taxQDeChurchStateSachsen => 'Saxony';
+
+  @override
+  String get taxQDeChurchStateSachsenAnhalt => 'Saxony-Anhalt';
+
+  @override
+  String get taxQDeChurchStateSchleswigHolstein => 'Schleswig-Holstein';
+
+  @override
+  String get taxQDeChurchStateThueringen => 'Thuringia';
+
+  @override
+  String get taxQDeChurchStateNone => 'Not specified (assume 9%)';
+
+  @override
+  String get taxQDeChildren => 'Children (Kindergeld)';
+
+  @override
+  String get taxQDeChildrenHelp =>
+      'Children you receive Kindergeld for; a full twelve months per child is assumed.';
+
+  @override
+  String get taxQDeStatutoryPension => 'Statutory pension contributions';
+
+  @override
+  String get taxQDeStatutoryPensionHelp =>
+      'Employee and employer share per year; they reduce the Rürup (Basisrente) deduction.';
+
+  @override
+  String get taxQDeCommuteKm => 'Commute: one-way distance (km)';
+
+  @override
+  String get taxQDeCommuteKmHelp =>
+      'Full kilometres to your first workplace, shortest route (Anlage N).';
+
+  @override
+  String get taxQDeCommuteDays => 'Commute: days travelled';
+
+  @override
+  String get taxQDeCommuteDaysHelp =>
+      'Days you actually visited the workplace; illness, holiday and home-office days do not count.';
+
+  @override
+  String get taxQDeSmallBusinessExemption => 'Small business VAT exemption';
+
+  @override
+  String get taxQDeSmallBusinessExemptionHelp =>
       'Kleinunternehmerregelung: no VAT charged or reclaimed.';
+
+  @override
+  String get taxQDeEinkunftsArt => 'Type of self-employment';
+
+  @override
+  String get taxQDeEinkunftsArtHelp =>
+      'Freiberufler owe no trade tax and file Anlage S; Gewerbetreibende owe Gewerbesteuer and file Anlage G.';
+
+  @override
+  String get taxQDeEinkunftsArtFreiberuflich =>
+      'Freiberufler (liberal profession)';
+
+  @override
+  String get taxQDeEinkunftsArtGewerblich => 'Gewerbetreibender (trade)';
+
+  @override
+  String get taxQDePriorTurnover => 'Previous year\'s turnover';
+
+  @override
+  String get taxQDePriorTurnoverHelp =>
+      'Total turnover of last year; it decides the Kleinunternehmer test (at most €25,000 prior year, €100,000 this year).';
 
   @override
   String get taxLinkedBudget => 'Linked personal budget';
@@ -5323,6 +5702,85 @@ class AppLocalizationsEn extends AppLocalizations {
   String get netWorthTabByAccount => 'By account';
 
   @override
+  String get cryptoBreakdownTitle => 'Crypto';
+
+  @override
+  String get cryptoBreakdownByChain => 'By chain';
+
+  @override
+  String get cryptoBreakdownByAsset => 'By asset';
+
+  @override
+  String cryptoBreakdownWallets(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Across $count wallets',
+      one: 'Across 1 wallet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cryptoBreakdownBarLabel(String grouping, String shares) {
+    return '$grouping: $shares';
+  }
+
+  @override
+  String cryptoBreakdownBarShare(String name, String share) {
+    return '$name $share';
+  }
+
+  @override
+  String get cryptoBreakdownShareUnderOne => '<1%';
+
+  @override
+  String get cryptoBreakdownOther => 'Other';
+
+  @override
+  String cryptoBreakdownOtherHoldings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count smaller holdings',
+      one: '1 smaller holding',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cryptoBreakdownChainHoldings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count holdings',
+      one: '1 holding',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cryptoBreakdownNetworksMore(String names, int count) {
+    return '$names +$count';
+  }
+
+  @override
+  String get cryptoBreakdownEmpty =>
+      'Nothing is counted yet. Tokens without a price are left out until one is found.';
+
+  @override
+  String get cryptoBreakdownFootnote =>
+      'Tokens that look like scams and tokens without a price are left out.';
+
+  @override
+  String cryptoBreakdownMissingRates(String currencies) {
+    return 'No exchange rate for $currencies, so those holdings are left out of this figure.';
+  }
+
+  @override
+  String get cryptoBreakdownLoadError => 'Couldn\'t load your crypto breakdown';
+
+  @override
   String netWorthValuedOn(String date) {
     return 'Valued $date';
   }
@@ -5751,6 +6209,205 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountHoldingsUnpriced => 'No price yet';
 
   @override
+  String get accountHoldingsCostUnknown => 'Cost unknown';
+
+  @override
+  String get walletHoldingsNetworkSolana => 'Solana';
+
+  @override
+  String get walletHoldingsNetworkSolanaDevnet => 'Solana Devnet';
+
+  @override
+  String get walletHoldingsNetworkBitcoin => 'Bitcoin';
+
+  @override
+  String get walletHoldingsNetworkEthereum => 'Ethereum';
+
+  @override
+  String get walletHoldingsNetworkBase => 'Base';
+
+  @override
+  String get walletHoldingsNetworkArbitrumOne => 'Arbitrum One';
+
+  @override
+  String get walletHoldingsNetworkOpMainnet => 'OP Mainnet';
+
+  @override
+  String get walletHoldingsNetworkPolygonPos => 'Polygon PoS';
+
+  @override
+  String get walletHoldingsNetworkBnbSmartChain => 'BNB Smart Chain';
+
+  @override
+  String get walletHoldingsNetworkAvalancheCChain => 'Avalanche C-Chain';
+
+  @override
+  String get walletHoldingsNetworkTron => 'Tron';
+
+  @override
+  String get walletHoldingsNetworkXrpl => 'XRP Ledger';
+
+  @override
+  String get walletHoldingsNetworkHyperliquid => 'Hyperliquid';
+
+  @override
+  String get walletHoldingsNetworkDogecoin => 'Dogecoin';
+
+  @override
+  String get walletHoldingsNetworkLitecoin => 'Litecoin';
+
+  @override
+  String get walletHoldingsNetworkCardano => 'Cardano';
+
+  @override
+  String get walletHoldingsNetworkTon => 'TON';
+
+  @override
+  String get walletHoldingsNetworkSui => 'Sui';
+
+  @override
+  String get walletHoldingsNetworkAptos => 'Aptos';
+
+  @override
+  String walletHoldingsAgeMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes ago',
+      one: '1 minute ago',
+      zero: 'less than a minute ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String walletHoldingsAgeHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hours ago',
+      one: '1 hour ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String walletHoldingsAgeDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days ago',
+      one: '1 day ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String walletHoldingsReadAgo(String age) {
+    return 'Read $age';
+  }
+
+  @override
+  String get walletHoldingsNeverRead => 'Not read yet';
+
+  @override
+  String get walletHoldingsNothingCounted => 'Nothing counted';
+
+  @override
+  String walletHoldingsSectionSemantics(
+    String network,
+    String total,
+    String status,
+  ) {
+    return '$network, $total, $status';
+  }
+
+  @override
+  String walletHoldingsReadFailedWithAmounts(String network, String age) {
+    return '$network couldn\'t be read. Showing amounts from $age.';
+  }
+
+  @override
+  String walletHoldingsReadFailedWithoutAmounts(String network) {
+    return '$network couldn\'t be read yet. There are no amounts to show.';
+  }
+
+  @override
+  String get walletHoldingsStaked => 'Staked';
+
+  @override
+  String get walletHoldingsRewards => 'Rewards';
+
+  @override
+  String walletHoldingsOldPrice(String age) {
+    return 'Price from $age';
+  }
+
+  @override
+  String get walletHoldingsOldPriceUndated => 'Old price';
+
+  @override
+  String walletHoldingsHiddenTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hidden',
+      one: '1 hidden',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String walletHoldingsHiddenUnpriced(int count) {
+    return '$count without a price';
+  }
+
+  @override
+  String walletHoldingsHiddenSuspected(int count) {
+    return '$count suspected spam';
+  }
+
+  @override
+  String walletHoldingsHiddenByYou(int count) {
+    return '$count hidden by you';
+  }
+
+  @override
+  String get walletHoldingsReasonUnpriced => 'No price';
+
+  @override
+  String get walletHoldingsReasonSuspected => 'Suspected spam';
+
+  @override
+  String get walletHoldingsReasonHiddenByYou => 'Hidden by you';
+
+  @override
+  String walletHoldingsHiddenDetail(String network, String quantity) {
+    return '$network · Quantity $quantity';
+  }
+
+  @override
+  String get walletHoldingsShow => 'Show';
+
+  @override
+  String get walletHoldingsHide => 'Hide';
+
+  @override
+  String walletHoldingsShowSemantics(String name) {
+    return 'Show $name';
+  }
+
+  @override
+  String walletHoldingsHideSemantics(String name) {
+    return 'Hide $name';
+  }
+
+  @override
+  String walletHoldingsVerdictFailed(String name) {
+    return 'Couldn\'t update $name. Try again.';
+  }
+
+  @override
   String transactionDetailAndDate(String detail, String date) {
     return '$detail · $date';
   }
@@ -5904,4 +6561,360 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get universalCategoryOutOfScopeOwnerCapitalAndDrawings =>
       'Owner capital and drawings';
+
+  @override
+  String get walletAddIntro =>
+      'Paste an address or extended public key. OpenBudget only reads your wallet: it never holds a key and can\'t move anything.';
+
+  @override
+  String get walletAddFieldLabel => 'Wallet address';
+
+  @override
+  String get walletAddFieldHint => 'Paste an address or extended public key';
+
+  @override
+  String get walletAddButton => 'Add wallet';
+
+  @override
+  String get walletAddInvalidInput =>
+      'That doesn\'t look like a wallet address.';
+
+  @override
+  String get walletAddInvalidChecksum =>
+      'One character is wrong. Check the address and try again.';
+
+  @override
+  String get walletAddInvalidKey =>
+      'That extended key isn\'t one OpenBudget recognises.';
+
+  @override
+  String get walletAddRefusedPrivateKeyTitle => 'That\'s a private key';
+
+  @override
+  String get walletAddRefusedPrivateKeyMessage =>
+      'OpenBudget never needs it. We cleared the field. Don\'t share it with anyone.';
+
+  @override
+  String get walletAddRefusedEvmKeyTitle => 'That looks like a private key';
+
+  @override
+  String get walletAddRefusedEvmKeyMessage =>
+      'That looks like a private key, not an address. OpenBudget never needs it. We cleared the field.';
+
+  @override
+  String get walletAddRefusedTestnetTitle => 'Mainnet only';
+
+  @override
+  String get walletAddRefusedTestnetMessage =>
+      'OpenBudget only supports mainnet addresses.';
+
+  @override
+  String get walletAddRefusedMultisigTitle =>
+      'Multisig keys aren\'t supported yet';
+
+  @override
+  String get walletAddRefusedMultisigMessage =>
+      'A multisig wallet needs every co-signer\'s key. That\'s coming later.';
+
+  @override
+  String get walletAddRefusedExchangeTitle => 'That\'s an exchange account';
+
+  @override
+  String get walletAddRefusedExchangeMessage =>
+      'That X-address points at an exchange account. Use the address for your own account.';
+
+  @override
+  String walletAddDetectedAddress(String chain) {
+    return 'A $chain address.';
+  }
+
+  @override
+  String walletAddDetectedKey(String chain) {
+    return 'A $chain extended public key. OpenBudget finds every address it makes, and never needs a private key.';
+  }
+
+  @override
+  String walletAddDetectedEvm(int count) {
+    return 'One address that can hold assets on $count networks.';
+  }
+
+  @override
+  String walletAddStampMore(int count) {
+    return '+ $count';
+  }
+
+  @override
+  String get walletAddScriptTypeUnknown =>
+      'We\'ll check which kind of address this key makes.';
+
+  @override
+  String get walletAddWhichChain => 'Which chain is this address on?';
+
+  @override
+  String walletAddUnavailableTitle(String chain) {
+    return '$chain isn\'t available yet';
+  }
+
+  @override
+  String get walletAddUnavailableMessage =>
+      'OpenBudget can\'t read that chain right now. Try again later.';
+
+  @override
+  String walletAddPreviewLoading(String networks) {
+    return 'Looking for assets on $networks…';
+  }
+
+  @override
+  String get walletAddPickerTitle => 'Where should OpenBudget look?';
+
+  @override
+  String get walletAddPickerHint =>
+      'Tap a chain to include it or leave it out. Ethereum is always read, because that\'s where your address lives.';
+
+  @override
+  String get walletAddNetworkNothing => 'Nothing';
+
+  @override
+  String get walletAddNetworkNoPrice => 'No price';
+
+  @override
+  String get walletAddNetworkUnreadable => 'Can\'t read';
+
+  @override
+  String get walletAddPreviewFailedTitle => 'Couldn\'t look ahead';
+
+  @override
+  String get walletAddPreviewFailedMessage =>
+      'We couldn\'t check which chains hold assets. You can still add the wallet. It will read Ethereum.';
+
+  @override
+  String get walletAddPreviewRateLimitedMessage =>
+      'You\'ve looked up a lot of wallets. Try again in a little while, or add this one now and it will read Ethereum.';
+
+  @override
+  String get walletAddPreviewRetry => 'Try again';
+
+  @override
+  String walletAddNamesTwo(String first, String second) {
+    return '$first and $second';
+  }
+
+  @override
+  String walletAddNamesThree(String first, String second, String third) {
+    return '$first, $second and $third';
+  }
+
+  @override
+  String walletAddNamesMore(
+    String first,
+    String second,
+    String third,
+    int count,
+  ) {
+    return '$first, $second, $third and $count more';
+  }
+
+  @override
+  String walletAddReading(String networks) {
+    return 'Reading $networks…';
+  }
+
+  @override
+  String get walletAddReadingHint => 'The first read takes a few seconds.';
+
+  @override
+  String get walletAddUnreadableTitle => 'Couldn\'t read your wallet';
+
+  @override
+  String walletAddUnreadableMessage(String networks) {
+    return 'Couldn\'t reach $networks. The wallet is in your accounts, and OpenBudget will keep trying.';
+  }
+
+  @override
+  String get walletAddRetry => 'Try again';
+
+  @override
+  String get walletAddFailedTitle => 'Couldn\'t add the wallet';
+
+  @override
+  String get walletAddFailedMessage =>
+      'Something went wrong. Check your connection and try again.';
+
+  @override
+  String get walletAddedPostmark => 'Added';
+
+  @override
+  String walletAddedPostmarkChains(int count) {
+    return '$count chains';
+  }
+
+  @override
+  String get walletAddedTitle => 'Wallet added';
+
+  @override
+  String walletAddedMessage(String accountName) {
+    return '$accountName is in your accounts. Its holdings show in the account\'s details.';
+  }
+
+  @override
+  String walletAddAccountNameAddress(String chain, String address) {
+    return '$chain wallet ($address)';
+  }
+
+  @override
+  String walletAddAccountNameKey(String chain, String keyType) {
+    return '$chain wallet, $keyType';
+  }
+
+  @override
+  String get walletAddStampDetected => 'detected';
+
+  @override
+  String get walletAddStampIncluded => 'included';
+
+  @override
+  String get walletAddStampLeftOut => 'left out';
+
+  @override
+  String walletAddPickerSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count networks selected',
+      one: '1 network selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get walletSettingsButton => 'Wallet settings';
+
+  @override
+  String get walletSettingsTitle => 'Wallet settings';
+
+  @override
+  String get walletSettingsNameLabel => 'Wallet name';
+
+  @override
+  String get walletSettingsNameSave => 'Save name';
+
+  @override
+  String get walletSettingsNameSaved => 'Wallet renamed';
+
+  @override
+  String get walletSettingsNameFailed =>
+      'Couldn\'t rename the wallet. Try again.';
+
+  @override
+  String get walletSettingsNetworksTitle => 'Chains OpenBudget reads';
+
+  @override
+  String get walletSettingsNotRead => 'Not read';
+
+  @override
+  String get walletSettingsNetworksSave => 'Save chains';
+
+  @override
+  String get walletSettingsNetworksSaved => 'Chains updated';
+
+  @override
+  String get walletSettingsNetworksFailed =>
+      'Couldn\'t update the chains. Try again.';
+
+  @override
+  String walletSettingsNetworksReadFailed(String networks) {
+    return 'Saved, but $networks couldn\'t be read yet. OpenBudget will keep trying.';
+  }
+
+  @override
+  String walletSettingsSingleChain(String chain) {
+    return '$chain wallets are read on one chain, so there\'s nothing to choose.';
+  }
+
+  @override
+  String get walletSettingsLookAhead => 'Look for assets on other chains';
+
+  @override
+  String walletSettingsFoundTitle(String networks) {
+    return 'Found assets on $networks';
+  }
+
+  @override
+  String get walletSettingsFoundMessage =>
+      'They\'re picked above. Save the chains to start reading them.';
+
+  @override
+  String get walletSettingsNothingTitle => 'Nothing new found';
+
+  @override
+  String walletSettingsNothingMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'OpenBudget looked at $count other chains and found no assets there.',
+      one: 'OpenBudget looked at 1 other chain and found no assets there.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get walletSettingsLookAheadFailedMessage =>
+      'We couldn\'t check the other chains. Try again in a moment.';
+
+  @override
+  String get walletSettingsLookAheadRateLimited =>
+      'You\'ve looked up a lot of wallets. Try again in a little while.';
+
+  @override
+  String walletSettingsRemoveTitle(String networks) {
+    return 'Stop reading $networks?';
+  }
+
+  @override
+  String walletSettingsRemoveMessage(String amount, String networks) {
+    return '$amount on $networks will drop out of your net worth. Your assets stay where they are, and you can add the chain back any time.';
+  }
+
+  @override
+  String get walletSettingsRemoveConfirm => 'Stop reading';
+
+  @override
+  String get walletSettingsRemoveCancel => 'Keep reading';
+
+  @override
+  String get walletSettingsDisconnectTitle => 'Disconnect';
+
+  @override
+  String get walletSettingsDisconnectHint =>
+      'OpenBudget stops reading this wallet. The account and its history stay in your accounts.';
+
+  @override
+  String get walletSettingsDisconnectButton => 'Disconnect wallet';
+
+  @override
+  String walletSettingsDisconnectConfirmTitle(String name) {
+    return 'Disconnect $name?';
+  }
+
+  @override
+  String get walletSettingsDisconnectConfirmMessage =>
+      'OpenBudget stops reading this wallet and its value stops updating. The account and its history stay, and you can add the wallet again later.';
+
+  @override
+  String get walletSettingsDisconnectConfirm => 'Disconnect';
+
+  @override
+  String get walletSettingsDisconnectCancel => 'Keep wallet';
+
+  @override
+  String get walletSettingsDisconnected => 'Wallet disconnected';
+
+  @override
+  String get walletSettingsDisconnectFailed =>
+      'Couldn\'t disconnect the wallet. Try again.';
+
+  @override
+  String get walletSettingsAllRead =>
+      'OpenBudget already reads every chain this address can use.';
 }

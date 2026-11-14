@@ -6,6 +6,7 @@ import 'package:openbudget_server/src/entities/entity_clock.dart';
 import 'package:openbudget_server/src/fx_rates/fx_quote_selection.dart';
 import 'package:openbudget_server/src/fx_rates/fx_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/reports/crypto_breakdown.dart';
 import 'package:openbudget_server/src/reports/net_worth_periods.dart';
 import 'package:openbudget_server/src/settings/user_settings_service.dart';
 import 'package:serverpod/serverpod.dart';
@@ -219,6 +220,160 @@ abstract final class NetWorthService {
       result.missingDates.where((date) => !date.isAfter(result.today)),
     );
     return result.view;
+  }
+
+  /// What one owned entity's wallets are worth today, split by chain or by
+  /// asset, in the reporting currency.
+  ///
+  /// Only counted holdings are summed: a holding with a stored value, a price
+  /// quality other than unpriced, and a spam verdict of clean or allowedByUser
+  /// (multichain-wallets.md 6.3). Suspected, hidden and unpriced holdings are
+  /// left out. Each holding's value is in the currency its price was quoted in;
+  /// it is converted with the daily FX [current] uses, as of today in the
+  /// entity's time zone. A currency with no rate is never guessed: its
+  /// holdings are left out of every figure and `isComplete` is false.
+  ///
+  /// Like the other report calls, a missing entity is `NotFound` and one owned
+  /// by someone else is `Forbidden`. A null [currencyCode] uses the caller's
+  /// reporting currency.
+  static Future<CryptoBreakdownView> cryptoBreakdown(
+    Session session, {
+    required UuidValue entityId,
+    required CryptoBreakdownGrouping grouping,
+    String? currencyCode,
+  }) async {
+    final result = await session.db.transaction(
+      (transaction) async {
+        _countStatement('scope');
+        final entity = await EntityAccess.requireOwned(
+          session,
+          entityId,
+          transaction: transaction,
+        );
+        final reporting = await _reportingCurrency(
+          session,
+          transaction,
+          currencyCode,
+        );
+        final today = _todayFor([entity]);
+
+        _countStatement('wallets');
+        final wallets = await Wallet.db.find(
+          session,
+          where: (table) => table.entityId.equals(entityId),
+          transaction: transaction,
+        );
+        final holdings = wallets.isEmpty
+            ? const <WalletHolding>[]
+            : await _loadCountedHoldings(
+                session,
+                transaction,
+                {for (final wallet in wallets) wallet.id!},
+              );
+        final counted = [
+          for (final holding in holdings)
+            // A priced holding always carries its quote currency; one that
+            // does not cannot be converted and is left out.
+            if (holding.priceCurrencyCode case final code?)
+              CountedHolding(
+                walletId: holding.walletId,
+                network: holding.network,
+                assetId: holding.assetId,
+                symbol: holding.symbol,
+                name: holding.name,
+                currencyCode: code,
+                valueMinor: holding.valueMinor!,
+              ),
+        ];
+
+        final currencies = {
+          for (final holding in counted) holding.currencyCode,
+        }..forEach(_exponentFor);
+        final fxRates = await _loadFxRates(
+          session,
+          transaction,
+          fromDate: today,
+          toDate: today,
+          reportingCurrencyCode: reporting.code,
+          accountCurrencies: currencies,
+        );
+        final now = FxService.utcNow();
+        final quotes = {
+          for (final code in currencies)
+            code: FxQuoteSelection.select(
+              fromCurrencyCode: code,
+              toCurrencyCode: reporting.code,
+              date: today,
+              rates: fxRates,
+              now: now,
+            ),
+        };
+
+        final breakdown = CryptoBreakdownBuilder.build(
+          holdings: counted,
+          grouping: grouping,
+          convert: (code, amountMinor) {
+            final quote = quotes[code];
+            if (quote == null) return null;
+            return _convertMinor(
+              amountMinor,
+              quote,
+              fromExponent: _exponentFor(code),
+              toExponent: reporting.exponent,
+              context: '$code crypto value',
+            );
+          },
+        );
+        final used = {
+          for (final code in currencies)
+            if (!breakdown.missingCurrencyCodes.contains(code)) code,
+        };
+
+        return _CryptoResult(
+          view: CryptoBreakdownView(
+            currencyCode: reporting.code,
+            asOf: today,
+            grouping: grouping,
+            totalMinor: breakdown.totalMinor,
+            walletCount: wallets.length,
+            isComplete: breakdown.missingCurrencyCodes.isEmpty,
+            missingCurrencyCodes: breakdown.missingCurrencyCodes,
+            hasStaleRates: used.any((code) => quotes[code]?.isStale ?? false),
+            rows: breakdown.rows,
+          ),
+          missingToday: breakdown.missingCurrencyCodes.isNotEmpty,
+        );
+      },
+      settings: const TransactionSettings(
+        isolationLevel: IsolationLevel.repeatableRead,
+      ),
+    );
+
+    if (result.missingToday) {
+      await FxService.requestBackfill(session, result.view.asOf);
+    }
+    return result.view;
+  }
+
+  static Future<List<WalletHolding>> _loadCountedHoldings(
+    Session session,
+    Transaction transaction,
+    Set<UuidValue> walletIds,
+  ) {
+    _countStatement('holdings');
+    return WalletHolding.db.find(
+      session,
+      where: (table) =>
+          table.walletId.inSet(walletIds) &
+          table.valueMinor.notEquals(null) &
+          table.priceQuality.notEquals(PriceQuality.unpriced) &
+          table.spamVerdict.inSet({
+            SpamVerdict.clean,
+            SpamVerdict.allowedByUser,
+          }),
+      orderByList: (table) => [table.network, table.assetId, table.id],
+      transaction: transaction,
+    );
   }
 
   /// Transaction movements: one opening total before the range and one total
@@ -808,25 +963,39 @@ ORDER BY "accountId", "valuationDate" DESC''';
     _Atom atom,
     FxQuoteSelection quote,
     int reportingExponent,
-  ) {
-    // Security: convertMinorUnits is the single checked conversion boundary
-    // and reports an out-of-range result as RangeError. Surface it as a
-    // validation failure instead of letting a raw Error escape the endpoint.
+  ) => _convertMinor(
+    atom.balanceMinor,
+    quote,
+    fromExponent: _exponentFor(atom.account.currencyCode),
+    toExponent: reportingExponent,
+    context: 'Converted balance for account ${atom.account.id}',
+  );
+
+  /// The one checked conversion boundary for current and crypto figures.
+  ///
+  /// Security: convertMinorUnits reports an out-of-range result as
+  /// RangeError. Surface it as a validation failure instead of letting a raw
+  /// Error escape the endpoint.
+  static int _convertMinor(
+    int amountMinor,
+    FxQuoteSelection quote, {
+    required int fromExponent,
+    required int toExponent,
+    required String context,
+  }) {
     try {
       return convertMinorUnits(
-        amountMinor: atom.balanceMinor,
+        amountMinor: amountMinor,
         exchangeRate: quote.rate,
-        transactionExponent: _exponentFor(atom.account.currencyCode),
-        functionalExponent: reportingExponent,
+        transactionExponent: fromExponent,
+        functionalExponent: toExponent,
       );
       // The conversion boundary checks the range and throws RangeError; this
       // boundary is the one place that turns it into a validation failure.
       // ignore: avoid_catching_errors
     } on RangeError {
       throw ValidationException(
-        message:
-            'Converted balance for account ${atom.account.id} exceeds the '
-            'safe minor-unit range',
+        message: '$context exceeds the safe minor-unit range',
       );
     }
   }
@@ -1154,6 +1323,13 @@ class _HistoryComputation {
 
   final List<_PointComputation> points;
   final Set<DateTime> missingDates;
+}
+
+class _CryptoResult {
+  const _CryptoResult({required this.view, required this.missingToday});
+
+  final CryptoBreakdownView view;
+  final bool missingToday;
 }
 
 class _CurrentResult {

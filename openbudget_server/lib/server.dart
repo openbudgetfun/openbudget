@@ -10,6 +10,7 @@ import 'package:openbudget_server/src/generated/serverpod.dart';
 import 'package:openbudget_server/src/institutions/institution_service.dart';
 import 'package:openbudget_server/src/logging/server_logging.dart';
 import 'package:openbudget_server/src/recurring_transactions/recurring_post_future_call.dart';
+import 'package:openbudget_server/src/tax/export/tax_export_route.dart';
 import 'package:openbudget_server/src/wallets/wallet_refresh_future_call.dart';
 import 'package:openbudget_server/src/web/routes/app_config_route.dart';
 import 'package:openbudget_server/src/web/routes/billing_webhook_routes.dart';
@@ -118,6 +119,9 @@ Future<void> run(List<String> args) async {
 
   // MCP server for external agents, authorised by personal access tokens.
   pod.webServer.addRoute(AgentMcpRoute(), '/mcp');
+
+  // Tax summary export downloads, authorised by a signed short-lived token.
+  pod.webServer.addRoute(TaxExportRoute(), '/tax/export/:token');
 
   if (appleIdpEnabled) {
     pod.webServer.addRoute(

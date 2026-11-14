@@ -1,3 +1,6 @@
+import 'package:openbudget_app/src/features/accounts/providers/account_detail_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -13,6 +16,14 @@ Future<List<Wallet>> walletList(Ref ref, String entityId) async {
   return client.wallet.list(UuidValue.fromString(entityId));
 }
 
+/// The networks the server can read now: each one's chain family has a
+/// provider and its secret is set. A chain missing from the list is off.
+@riverpod
+Future<List<WalletNetwork>> supportedWalletNetworks(Ref ref) async {
+  final client = ref.read(serverpodClientProvider);
+  return client.wallet.supportedNetworks();
+}
+
 /// The wallet that values one account, if any.
 @riverpod
 Future<Wallet?> walletForAccount(Ref ref, String accountId) async {
@@ -25,6 +36,17 @@ Future<Wallet?> walletForAccount(Ref ref, String accountId) async {
 Future<List<WalletHolding>> walletHoldings(Ref ref, String walletId) async {
   final client = ref.read(serverpodClientProvider);
   return client.wallet.listHoldings(UuidValue.fromString(walletId));
+}
+
+/// How the last read of each of the wallet's networks went: when it
+/// succeeded, and why it failed.
+@riverpod
+Future<List<WalletNetworkState>> walletNetworkStates(
+  Ref ref,
+  String walletId,
+) async {
+  final client = ref.read(serverpodClientProvider);
+  return client.wallet.listNetworkStates(UuidValue.fromString(walletId));
 }
 
 /// The wallet's on-chain transactions, newest first.
@@ -47,18 +69,26 @@ Future<List<WalletTaxYearSummary>> walletTaxYearSummaries(
   return client.wallet.listTaxYearSummaries(UuidValue.fromString(walletId));
 }
 
-@riverpod
+/// Wallet mutations. Kept alive so the invalidations that follow each await
+/// still reach the providers they refresh: an auto-disposed notifier is
+/// unmounted by then and its `ref.invalidate` does nothing.
+@Riverpod(keepAlive: true)
 class WalletActions extends _$WalletActions {
   @override
   FutureOr<void> build() {}
 
-  /// Connects a wallet; the server creates its crypto account and syncs.
+  /// Connects a wallet; the server creates its crypto account and reads the
+  /// wallet for the first time before it answers.
+  ///
+  /// [scanNetworks] is the networks an EVM wallet reads (always including its
+  /// home network); every other chain reads its one network.
   Future<Wallet> connect({
     required String entityId,
     required WalletNetwork network,
     required String address,
     String? label,
     String? accountName,
+    List<WalletNetwork>? scanNetworks,
   }) async {
     final client = ref.read(serverpodClientProvider);
     final wallet = await client.wallet.connect(
@@ -67,8 +97,11 @@ class WalletActions extends _$WalletActions {
       address,
       label: label,
       accountName: accountName,
+      scanNetworks: scanNetworks,
     );
-    ref.invalidate(walletListProvider(entityId));
+    ref
+      ..invalidate(walletListProvider(entityId))
+      ..invalidate(accountListProvider(entityId));
     return wallet;
   }
 
@@ -81,9 +114,31 @@ class WalletActions extends _$WalletActions {
     ref
       ..invalidate(walletListProvider(entityId))
       ..invalidate(walletHoldingsProvider(walletId))
+      ..invalidate(walletNetworkStatesProvider(walletId))
       ..invalidate(walletTransactionsProvider(walletId))
       ..invalidate(walletTaxYearSummariesProvider(walletId));
     return result;
+  }
+
+  /// Hides or shows holdings by setting the user's verdict on each, then
+  /// refreshes the wallet's holdings. [verdict] of
+  /// [SpamVerdict.hiddenByUser] hides; [SpamVerdict.allowedByUser] shows.
+  ///
+  /// The holdings are refreshed even when a call fails part-way, so the
+  /// screen shows what the server now holds.
+  Future<void> setHoldingVerdicts({
+    required String walletId,
+    required List<UuidValue> holdingIds,
+    required SpamVerdict verdict,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    try {
+      for (final holdingId in holdingIds) {
+        await client.wallet.setHoldingVerdict(holdingId, verdict);
+      }
+    } finally {
+      ref.invalidate(walletHoldingsProvider(walletId));
+    }
   }
 
   Future<WalletTransaction> updateTransactionMetadata({
@@ -104,9 +159,42 @@ class WalletActions extends _$WalletActions {
     return updated;
   }
 
+  /// Replaces the networks an EVM wallet reads. The server reads the wallet
+  /// before it answers when the set changed: an added network shows its
+  /// holdings, a removed one loses them, and the account's valuation moves,
+  /// so everything that shows the wallet or its value is refreshed.
+  Future<Wallet> setScanNetworks({
+    required String walletId,
+    required String entityId,
+    required String accountId,
+    required List<WalletNetwork> networks,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    try {
+      return await client.wallet.setScanNetworks(
+        UuidValue.fromString(walletId),
+        networks,
+      );
+    } finally {
+      ref
+        ..invalidate(walletListProvider(entityId))
+        ..invalidate(walletForAccountProvider(accountId))
+        ..invalidate(walletHoldingsProvider(walletId))
+        ..invalidate(walletNetworkStatesProvider(walletId))
+        ..invalidate(accountDetailProvider(accountId))
+        ..invalidate(accountBalancesProvider(accountId))
+        ..invalidate(accountValuationsProvider(accountId))
+        ..invalidate(accountListProvider(entityId))
+        ..invalidate(netWorthForEntitiesProvider({entityId}));
+    }
+  }
+
+  /// Disconnects the wallet. The crypto account and its history stay unless
+  /// [deleteAccount] is set.
   Future<void> disconnect({
     required String walletId,
     required String entityId,
+    String? accountId,
     bool deleteAccount = false,
   }) async {
     final client = ref.read(serverpodClientProvider);
@@ -114,6 +202,9 @@ class WalletActions extends _$WalletActions {
       UuidValue.fromString(walletId),
       deleteAccount: deleteAccount,
     );
-    ref.invalidate(walletListProvider(entityId));
+    ref
+      ..invalidate(walletListProvider(entityId))
+      ..invalidate(accountListProvider(entityId));
+    if (accountId != null) ref.invalidate(walletForAccountProvider(accountId));
   }
 }

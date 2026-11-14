@@ -44,6 +44,7 @@ void main() {
   setUp(() async {
     events = EventLog()..install();
     WalletService.debugPublisher = events.record;
+    WalletService.clock = () => DateTime.utc(2026);
     book = await BudgetTestBook.create(server.anonymousSession());
     await book.session.caches.clear();
     await book.session.db.unsafeExecute('DELETE FROM asset_price');
@@ -204,10 +205,7 @@ void main() {
       final bothRead = _evmSnapshot(
         readNetworks: twoNetworks,
         holdings: [
-          _evmHolding(
-            network: WalletNetwork.ethereumMainnet,
-            price: '2000',
-          ),
+          _evmHolding(network: WalletNetwork.ethereumMainnet, price: '2000'),
           _evmHolding(
             network: WalletNetwork.baseMainnet,
             quantity: '2000000000000000000',
@@ -268,10 +266,7 @@ void main() {
         row.updatedAt,
       );
       final rowsAfter = await holdings(wallet);
-      expect(
-        rowsAfter.map(factsOf),
-        holdingsBefore.map(factsOf),
-      );
+      expect(rowsAfter.map(factsOf), holdingsBefore.map(factsOf));
       final valuationAfter = await todayValuation(wallet.accountId);
       expect(valuationAfter!.valueMinor, valuationBefore!.valueMinor);
       expect(valuationAfter.valuationDate, valuationBefore.valuationDate);
@@ -295,8 +290,8 @@ void main() {
       expect(baseState.lastReadAt, baseStateBefore!.lastReadAt);
     });
 
-    test('when a network leaves scanNetworks then its holdings are removed at '
-        'the next read', () async {
+    test('when a network leaves scanNetworks then its holdings and read '
+        'state are removed and the valuation drops', () async {
       final provider = recordingProvider((request, call) async {
         if (call == 1) {
           return _evmSnapshot(
@@ -315,12 +310,9 @@ void main() {
           );
         }
         return _evmSnapshot(
-          readNetworks: [WalletNetwork.ethereumMainnet],
+          readNetworks: request.networks,
           holdings: [
-            _evmHolding(
-              network: WalletNetwork.ethereumMainnet,
-              price: '2000',
-            ),
+            _evmHolding(network: WalletNetwork.ethereumMainnet, price: '2000'),
           ],
         );
       });
@@ -330,20 +322,135 @@ void main() {
         (await holdings(wallet)).map((row) => row.network),
         unorderedEquals(twoNetworks),
       );
+      expect((await todayValuation(wallet.accountId))!.valueMinor, 220000);
+      expect(
+        await networkState(wallet.id!, WalletNetwork.baseMainnet),
+        isNotNull,
+      );
+
+      final updated = await endpoint.setScanNetworks(book.session, wallet.id!, [
+        WalletNetwork.ethereumMainnet,
+      ]);
+
+      expect(updated.scanNetworks, [WalletNetwork.ethereumMainnet]);
+      expect(provider.requests.last.networks, [
+        WalletNetwork.ethereumMainnet,
+      ], reason: 'the change is read at once, without a separate sync');
+      final rows = await holdings(wallet);
+      expect(rows, hasLength(1));
+      expect(rows.single.network, WalletNetwork.ethereumMainnet);
+      expect((await todayValuation(wallet.accountId))!.valueMinor, 200000);
+      expect(
+        await networkState(wallet.id!, WalletNetwork.baseMainnet),
+        isNull,
+        reason: 'a network that left the scan set loses its read state',
+      );
+      expect(
+        (await endpoint.listNetworkStates(
+          book.session,
+          wallet.id!,
+        )).map((state) => state.network),
+        [WalletNetwork.ethereumMainnet],
+      );
+    });
+
+    test('when a network joins scanNetworks then it is read at once and '
+        'raises the valuation', () async {
+      final provider = recordingProvider((request, call) async {
+        final base = request.networks.contains(WalletNetwork.baseMainnet);
+        return _evmSnapshot(
+          readNetworks: request.networks,
+          holdings: [
+            _evmHolding(network: WalletNetwork.ethereumMainnet, price: '2000'),
+            if (base)
+              _evmHolding(
+                network: WalletNetwork.baseMainnet,
+                quantity: '2000000000000000000',
+                price: '100',
+              ),
+          ],
+        );
+      });
+      registerEvmProvider(provider);
+      final wallet = await connectEvm(
+        provider,
+        scanNetworks: [WalletNetwork.ethereumMainnet],
+      );
+      expect(provider.requests, hasLength(1));
+      expect((await holdings(wallet)).map((row) => row.network), [
+        WalletNetwork.ethereumMainnet,
+      ]);
+      expect((await todayValuation(wallet.accountId))!.valueMinor, 200000);
+      expect(await networkState(wallet.id!, WalletNetwork.baseMainnet), isNull);
+
+      final updated = await endpoint.setScanNetworks(
+        book.session,
+        wallet.id!,
+        twoNetworks,
+      );
+
+      expect(updated.scanNetworks, twoNetworks);
+      expect(provider.requests, hasLength(2));
+      expect(provider.requests.last.networks, twoNetworks);
+      expect(
+        (await holdings(wallet)).map((row) => row.network),
+        unorderedEquals(twoNetworks),
+      );
+      expect((await todayValuation(wallet.accountId))!.valueMinor, 220000);
+      final baseState = await networkState(
+        wallet.id!,
+        WalletNetwork.baseMainnet,
+      );
+      expect(baseState!.lastReadAt, isNotNull);
+      expect(baseState.lastError, isNull);
+    });
+
+    test('when the same networks are set again then nothing is read, and '
+        'when the read fails the change still stands', () async {
+      final provider = recordingProvider((request, call) async {
+        if (call >= 2) {
+          return _evmSnapshot(
+            readNetworks: const [],
+            failedNetworks: {
+              WalletNetwork.ethereumMainnet: ethFailure,
+              WalletNetwork.baseMainnet: baseFailure,
+            },
+          );
+        }
+        return _evmSnapshot(
+          readNetworks: [WalletNetwork.ethereumMainnet],
+          holdings: [
+            _evmHolding(network: WalletNetwork.ethereumMainnet, price: '2000'),
+          ],
+        );
+      });
+      registerEvmProvider(provider);
+      final wallet = await connectEvm(
+        provider,
+        scanNetworks: [WalletNetwork.ethereumMainnet],
+      );
 
       await endpoint.setScanNetworks(book.session, wallet.id!, [
         WalletNetwork.ethereumMainnet,
       ]);
-      final result = await endpoint.sync(book.session, wallet.id!, force: true);
+      expect(provider.requests, hasLength(1), reason: 'no change, no read');
 
-      expect(provider.requests.last.networks, [
+      final updated = await endpoint.setScanNetworks(
+        book.session,
+        wallet.id!,
+        twoNetworks,
+      );
+      expect(updated.scanNetworks, twoNetworks);
+      expect(provider.requests, hasLength(2));
+      expect(
+        (await networkState(wallet.id!, WalletNetwork.baseMainnet))!.lastError,
+        baseFailure,
+      );
+      expect(
+        (await holdings(wallet)).single.network,
         WalletNetwork.ethereumMainnet,
-      ]);
-      final rows = await holdings(wallet);
-      expect(rows, hasLength(1));
-      expect(rows.single.network, WalletNetwork.ethereumMainnet);
-      expect(result.totalValueMinor, 200000);
-      expect((await todayValuation(wallet.accountId))!.valueMinor, 200000);
+        reason: 'a failed read keeps what was already read',
+      );
     });
   });
 
@@ -485,10 +592,7 @@ void main() {
           (request, _) async => _evmSnapshot(
             readNetworks: [WalletNetwork.ethereumMainnet],
             holdings: [
-              _evmHolding(
-                network: WalletNetwork.ethereumMainnet,
-                price: '1',
-              ),
+              _evmHolding(network: WalletNetwork.ethereumMainnet, price: '1'),
             ],
           ),
         );
@@ -568,11 +672,9 @@ void main() {
           ),
         },
       );
-      expect(
-        await endpoint.supportedNetworks(book.session),
-        [WalletNetwork.solanaMainnet],
-        reason: 'the test network is never offered',
-      );
+      expect(await endpoint.supportedNetworks(book.session), [
+        WalletNetwork.solanaMainnet,
+      ], reason: 'the test network is never offered');
     });
 
     test('when setScanNetworks replaces the list then the next read covers '
@@ -658,10 +760,7 @@ void main() {
           readNetworks: [WalletNetwork.ethereumMainnet],
           failedNetworks: {WalletNetwork.baseMainnet: baseFailure},
           holdings: [
-            _evmHolding(
-              network: WalletNetwork.ethereumMainnet,
-              price: '2000',
-            ),
+            _evmHolding(network: WalletNetwork.ethereumMainnet, price: '2000'),
           ],
         );
       });
@@ -670,10 +769,7 @@ void main() {
       await endpoint.sync(book.session, wallet.id!, force: true);
       await endpoint.sync(book.session, wallet.id!, force: true);
 
-      final states = await endpoint.listNetworkStates(
-        book.session,
-        wallet.id!,
-      );
+      final states = await endpoint.listNetworkStates(book.session, wallet.id!);
       expect(states.map((state) => state.network), twoNetworks);
       expect(states.first.lastReadAt, isNotNull);
       expect(states.first.lastError, isNull);

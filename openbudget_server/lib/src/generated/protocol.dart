@@ -63,6 +63,8 @@ import 'package:openbudget_server/src/generated/reports/spending_row.dart'
     as _ijvd4zl8;
 import 'package:openbudget_server/src/generated/tax/tax_category_view.dart'
     as _i687t6y5;
+import 'package:openbudget_server/src/generated/tax/tax_deadline_view.dart'
+    as _i5r4fio6;
 import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
     as _i4wqhpw2;
 import 'package:openbudget_server/src/generated/transactions/import_row.dart'
@@ -164,6 +166,9 @@ import 'monthly_allocations/monthly_allocation.dart' as _igdgld5u;
 import 'payees/payee.dart' as _ignezpci;
 import 'plaid/plaid_connection.dart' as _i1vmvtrm;
 import 'recurring_transactions/recurring_transaction.dart' as _i9is7zb8;
+import 'reports/crypto_breakdown_grouping.dart' as _i9t71w04;
+import 'reports/crypto_breakdown_row.dart' as _id3mj5jh;
+import 'reports/crypto_breakdown_view.dart' as _ivz6et46;
 import 'reports/net_worth_account_row.dart' as _ieg4kkwo;
 import 'reports/net_worth_currency_row.dart' as _if6ke1e2;
 import 'reports/net_worth_entity_row.dart' as _i2p47r1m;
@@ -176,6 +181,7 @@ import 'reports/spending_row.dart' as _ikppksh7;
 import 'settings/user_settings.dart' as _i99f9doz;
 import 'tax/tax_band_slice_view.dart' as _ic4zfx3b;
 import 'tax/tax_category_view.dart' as _iv5oayw3;
+import 'tax/tax_deadline_view.dart' as _i63eatye;
 import 'tax/tax_figure_view.dart' as _ixm9q9lk;
 import 'tax/tax_liability_view.dart' as _ivss6b81;
 import 'tax/tax_opportunity_view.dart' as _iuft4v7q;
@@ -295,6 +301,9 @@ export 'monthly_allocations/monthly_allocation.dart';
 export 'payees/payee.dart';
 export 'plaid/plaid_connection.dart';
 export 'recurring_transactions/recurring_transaction.dart';
+export 'reports/crypto_breakdown_grouping.dart';
+export 'reports/crypto_breakdown_row.dart';
+export 'reports/crypto_breakdown_view.dart';
 export 'reports/net_worth_account_row.dart';
 export 'reports/net_worth_currency_row.dart';
 export 'reports/net_worth_entity_row.dart';
@@ -307,6 +316,7 @@ export 'reports/spending_row.dart';
 export 'settings/user_settings.dart';
 export 'tax/tax_band_slice_view.dart';
 export 'tax/tax_category_view.dart';
+export 'tax/tax_deadline_view.dart';
 export 'tax/tax_figure_view.dart';
 export 'tax/tax_liability_view.dart';
 export 'tax/tax_opportunity_view.dart';
@@ -441,6 +451,9 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_ignezpci.Payee>,
           _is.getType<_i1vmvtrm.PlaidConnection>,
           _is.getType<_i9is7zb8.RecurringTransaction>,
+          _is.getType<_i9t71w04.CryptoBreakdownGrouping>,
+          _is.getType<_id3mj5jh.CryptoBreakdownRow>,
+          _is.getType<_ivz6et46.CryptoBreakdownView>,
           _is.getType<_ieg4kkwo.NetWorthAccountRow>,
           _is.getType<_if6ke1e2.NetWorthCurrencyRow>,
           _is.getType<_i2p47r1m.NetWorthEntityRow>,
@@ -453,6 +466,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i99f9doz.UserSettings>,
           _is.getType<_ic4zfx3b.TaxBandSliceView>,
           _is.getType<_iv5oayw3.TaxCategoryView>,
+          _is.getType<_i63eatye.TaxDeadlineView>,
           _is.getType<_ixm9q9lk.TaxFigureView>,
           _is.getType<_ivss6b81.TaxLiabilityView>,
           _is.getType<_iuft4v7q.TaxOpportunityView>,
@@ -573,6 +587,9 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_ignezpci.Payee?>,
           _is.getType<_i1vmvtrm.PlaidConnection?>,
           _is.getType<_i9is7zb8.RecurringTransaction?>,
+          _is.getType<_i9t71w04.CryptoBreakdownGrouping?>,
+          _is.getType<_id3mj5jh.CryptoBreakdownRow?>,
+          _is.getType<_ivz6et46.CryptoBreakdownView?>,
           _is.getType<_ieg4kkwo.NetWorthAccountRow?>,
           _is.getType<_if6ke1e2.NetWorthCurrencyRow?>,
           _is.getType<_i2p47r1m.NetWorthEntityRow?>,
@@ -585,6 +602,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i99f9doz.UserSettings?>,
           _is.getType<_ic4zfx3b.TaxBandSliceView?>,
           _is.getType<_iv5oayw3.TaxCategoryView?>,
+          _is.getType<_i63eatye.TaxDeadlineView?>,
           _is.getType<_ixm9q9lk.TaxFigureView?>,
           _is.getType<_ivss6b81.TaxLiabilityView?>,
           _is.getType<_iuft4v7q.TaxOpportunityView?>,
@@ -632,8 +650,10 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_ii8h2sft.EnvelopeMonthView>>,
           _is.getType<List<_i15udi7x.FxRateQuote>>,
           _is.getType<List<_i5gsx3ds.TrialBalanceRowView>>,
-          _is.getType<List<_ihwosu5p.NetWorthPoint>>,
+          _is.getType<List<_ifz8weqz.WalletNetwork>>,
           _is.getType<List<String>>,
+          _is.getType<List<_id3mj5jh.CryptoBreakdownRow>>,
+          _is.getType<List<_ihwosu5p.NetWorthPoint>>,
           _is.getType<List<_if6ke1e2.NetWorthCurrencyRow>>,
           _is.getType<List<_i2p47r1m.NetWorthEntityRow>>,
           _is.getType<List<_ieg4kkwo.NetWorthAccountRow>>,
@@ -652,7 +672,6 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_imsv7m6w.TransactionLineInput>>,
           _is.getType<List<_ilixdhed.TransactionView>>,
           _is.getType<List<_ipio7ws3.TransactionLine>>,
-          _is.getType<List<_ifz8weqz.WalletNetwork>>,
           _is.getType<List<_ifz8weqz.WalletNetwork>?>,
           _is.getType<List<_icbqx9y3.WalletPreviewNetwork>>,
           _is.getType<List<String>?>,
@@ -684,6 +703,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_ijvd4zl8.SpendingRow>>,
           _is.getType<List<_ipz3w5am.BudgetMonthSummary>>,
           _is.getType<List<_i687t6y5.TaxCategoryView>>,
+          _is.getType<List<_i5r4fio6.TaxDeadlineView>>,
           _is.getType<List<_i4wqhpw2.TransactionRule>>,
           _is.getType<List<_iw07wj0h.TransactionView>>,
           _is.getType<List<_iyod81ld.ImportRow>>,
@@ -781,6 +801,9 @@ class Protocol extends _is.DatabaseSerializationManager
           'Payee',
           'PlaidConnection',
           'RecurringTransaction',
+          'CryptoBreakdownGrouping',
+          'CryptoBreakdownRow',
+          'CryptoBreakdownView',
           'NetWorthAccountRow',
           'NetWorthCurrencyRow',
           'NetWorthEntityRow',
@@ -793,6 +816,7 @@ class Protocol extends _is.DatabaseSerializationManager
           'UserSettings',
           'TaxBandSliceView',
           'TaxCategoryView',
+          'TaxDeadlineView',
           'TaxFigureView',
           'TaxLiabilityView',
           'TaxOpportunityView',
@@ -5872,6 +5896,15 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _i9is7zb8.RecurringTransaction) {
       return _i9is7zb8.RecurringTransaction.fromJson(data) as T;
     }
+    if (t == _i9t71w04.CryptoBreakdownGrouping) {
+      return _i9t71w04.CryptoBreakdownGrouping.fromJson(data) as T;
+    }
+    if (t == _id3mj5jh.CryptoBreakdownRow) {
+      return _id3mj5jh.CryptoBreakdownRow.fromJson(data) as T;
+    }
+    if (t == _ivz6et46.CryptoBreakdownView) {
+      return _ivz6et46.CryptoBreakdownView.fromJson(data) as T;
+    }
     if (t == _ieg4kkwo.NetWorthAccountRow) {
       return _ieg4kkwo.NetWorthAccountRow.fromJson(data) as T;
     }
@@ -5907,6 +5940,9 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (t == _iv5oayw3.TaxCategoryView) {
       return _iv5oayw3.TaxCategoryView.fromJson(data) as T;
+    }
+    if (t == _i63eatye.TaxDeadlineView) {
+      return _i63eatye.TaxDeadlineView.fromJson(data) as T;
     }
     if (t == _ixm9q9lk.TaxFigureView) {
       return _ixm9q9lk.TaxFigureView.fromJson(data) as T;
@@ -6367,6 +6403,22 @@ class Protocol extends _is.DatabaseSerializationManager
               : null)
           as T;
     }
+    if (t == _is.getType<_i9t71w04.CryptoBreakdownGrouping?>()) {
+      return (data != null
+              ? _i9t71w04.CryptoBreakdownGrouping.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_id3mj5jh.CryptoBreakdownRow?>()) {
+      return (data != null ? _id3mj5jh.CryptoBreakdownRow.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ivz6et46.CryptoBreakdownView?>()) {
+      return (data != null
+              ? _ivz6et46.CryptoBreakdownView.fromJson(data)
+              : null)
+          as T;
+    }
     if (t == _is.getType<_ieg4kkwo.NetWorthAccountRow?>()) {
       return (data != null ? _ieg4kkwo.NetWorthAccountRow.fromJson(data) : null)
           as T;
@@ -6416,6 +6468,10 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (t == _is.getType<_iv5oayw3.TaxCategoryView?>()) {
       return (data != null ? _iv5oayw3.TaxCategoryView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i63eatye.TaxDeadlineView?>()) {
+      return (data != null ? _i63eatye.TaxDeadlineView.fromJson(data) : null)
           as T;
     }
     if (t == _is.getType<_ixm9q9lk.TaxFigureView?>()) {
@@ -6621,14 +6677,26 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
-    if (t == List<_ihwosu5p.NetWorthPoint>) {
+    if (t == List<_ifz8weqz.WalletNetwork>) {
       return (data as List)
-              .map((e) => deserialize<_ihwosu5p.NetWorthPoint>(e))
+              .map((e) => deserialize<_ifz8weqz.WalletNetwork>(e))
               .toList()
           as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == List<_id3mj5jh.CryptoBreakdownRow>) {
+      return (data as List)
+              .map((e) => deserialize<_id3mj5jh.CryptoBreakdownRow>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ihwosu5p.NetWorthPoint>) {
+      return (data as List)
+              .map((e) => deserialize<_ihwosu5p.NetWorthPoint>(e))
+              .toList()
+          as T;
     }
     if (t == List<_if6ke1e2.NetWorthCurrencyRow>) {
       return (data as List)
@@ -6736,12 +6804,6 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == List<_ipio7ws3.TransactionLine>) {
       return (data as List)
               .map((e) => deserialize<_ipio7ws3.TransactionLine>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_ifz8weqz.WalletNetwork>) {
-      return (data as List)
-              .map((e) => deserialize<_ifz8weqz.WalletNetwork>(e))
               .toList()
           as T;
     }
@@ -6931,6 +6993,12 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
+    if (t == List<_i5r4fio6.TaxDeadlineView>) {
+      return (data as List)
+              .map((e) => deserialize<_i5r4fio6.TaxDeadlineView>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_i4wqhpw2.TransactionRule>) {
       return (data as List)
               .map((e) => deserialize<_i4wqhpw2.TransactionRule>(e))
@@ -7100,6 +7168,9 @@ class Protocol extends _is.DatabaseSerializationManager
       _ignezpci.Payee => 'Payee',
       _i1vmvtrm.PlaidConnection => 'PlaidConnection',
       _i9is7zb8.RecurringTransaction => 'RecurringTransaction',
+      _i9t71w04.CryptoBreakdownGrouping => 'CryptoBreakdownGrouping',
+      _id3mj5jh.CryptoBreakdownRow => 'CryptoBreakdownRow',
+      _ivz6et46.CryptoBreakdownView => 'CryptoBreakdownView',
       _ieg4kkwo.NetWorthAccountRow => 'NetWorthAccountRow',
       _if6ke1e2.NetWorthCurrencyRow => 'NetWorthCurrencyRow',
       _i2p47r1m.NetWorthEntityRow => 'NetWorthEntityRow',
@@ -7112,6 +7183,7 @@ class Protocol extends _is.DatabaseSerializationManager
       _i99f9doz.UserSettings => 'UserSettings',
       _ic4zfx3b.TaxBandSliceView => 'TaxBandSliceView',
       _iv5oayw3.TaxCategoryView => 'TaxCategoryView',
+      _i63eatye.TaxDeadlineView => 'TaxDeadlineView',
       _ixm9q9lk.TaxFigureView => 'TaxFigureView',
       _ivss6b81.TaxLiabilityView => 'TaxLiabilityView',
       _iuft4v7q.TaxOpportunityView => 'TaxOpportunityView',
@@ -7324,6 +7396,12 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'PlaidConnection';
       case _i9is7zb8.RecurringTransaction():
         return 'RecurringTransaction';
+      case _i9t71w04.CryptoBreakdownGrouping():
+        return 'CryptoBreakdownGrouping';
+      case _id3mj5jh.CryptoBreakdownRow():
+        return 'CryptoBreakdownRow';
+      case _ivz6et46.CryptoBreakdownView():
+        return 'CryptoBreakdownView';
       case _ieg4kkwo.NetWorthAccountRow():
         return 'NetWorthAccountRow';
       case _if6ke1e2.NetWorthCurrencyRow():
@@ -7348,6 +7426,8 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'TaxBandSliceView';
       case _iv5oayw3.TaxCategoryView():
         return 'TaxCategoryView';
+      case _i63eatye.TaxDeadlineView():
+        return 'TaxDeadlineView';
       case _ixm9q9lk.TaxFigureView():
         return 'TaxFigureView';
       case _ivss6b81.TaxLiabilityView():
@@ -7707,6 +7787,15 @@ class Protocol extends _is.DatabaseSerializationManager
     if (dataClassName == 'RecurringTransaction') {
       return deserialize<_i9is7zb8.RecurringTransaction>(data['data']);
     }
+    if (dataClassName == 'CryptoBreakdownGrouping') {
+      return deserialize<_i9t71w04.CryptoBreakdownGrouping>(data['data']);
+    }
+    if (dataClassName == 'CryptoBreakdownRow') {
+      return deserialize<_id3mj5jh.CryptoBreakdownRow>(data['data']);
+    }
+    if (dataClassName == 'CryptoBreakdownView') {
+      return deserialize<_ivz6et46.CryptoBreakdownView>(data['data']);
+    }
     if (dataClassName == 'NetWorthAccountRow') {
       return deserialize<_ieg4kkwo.NetWorthAccountRow>(data['data']);
     }
@@ -7742,6 +7831,9 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (dataClassName == 'TaxCategoryView') {
       return deserialize<_iv5oayw3.TaxCategoryView>(data['data']);
+    }
+    if (dataClassName == 'TaxDeadlineView') {
+      return deserialize<_i63eatye.TaxDeadlineView>(data['data']);
     }
     if (dataClassName == 'TaxFigureView') {
       return deserialize<_ixm9q9lk.TaxFigureView>(data['data']);

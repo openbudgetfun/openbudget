@@ -18,6 +18,8 @@ import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal_kin
 import 'package:openbudget_server/src/generated/future_calls.dart' as _iwv90kfd;
 import 'package:openbudget_server/src/generated/ledger/journal_line_input.dart'
     as _in0sxdux;
+import 'package:openbudget_server/src/generated/reports/crypto_breakdown_grouping.dart'
+    as _iy82xdzz;
 import 'package:openbudget_server/src/generated/reports/net_worth_granularity.dart'
     as _iwv93n42;
 import 'package:openbudget_server/src/generated/reports/report_grouping.dart'
@@ -34,6 +36,8 @@ import 'package:openbudget_server/src/generated/transactions/transaction_status.
     as _i54b59qp;
 import 'package:openbudget_server/src/generated/transactions/transfer_input.dart'
     as _i7e3qnpf;
+import 'package:openbudget_server/src/generated/wallets/spam_verdict.dart'
+    as _i2db4e6h;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
@@ -3453,6 +3457,37 @@ class Endpoints extends _is.EndpointDispatch {
                     currencyCode: params['currencyCode'],
                   ),
         ),
+        'cryptoBreakdown': _is.MethodConnector(
+          name: 'cryptoBreakdown',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'grouping': _is.ParameterDescription(
+              name: 'grouping',
+              type: _is.getType<_iy82xdzz.CryptoBreakdownGrouping>(),
+              nullable: false,
+            ),
+            'currencyCode': _is.ParameterDescription(
+              name: 'currencyCode',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['report'] as _iqte9uvc.ReportEndpoint)
+                  .cryptoBreakdown(
+                    session,
+                    params['entityId'],
+                    params['grouping'],
+                    currencyCode: params['currencyCode'],
+                  ),
+        ),
         'spending': _is.MethodConnector(
           name: 'spending',
           params: {
@@ -3752,6 +3787,25 @@ class Endpoints extends _is.EndpointDispatch {
                 startYear: params['startYear'],
               ),
         ),
+        'listDeadlines': _is.MethodConnector(
+          name: 'listDeadlines',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['tax'] as _i34kr7gr.TaxEndpoint).listDeadlines(
+                    session,
+                    params['entityId'],
+                  ),
+        ),
         'getSummary': _is.MethodConnector(
           name: 'getSummary',
           params: {
@@ -3775,6 +3829,31 @@ class Endpoints extends _is.EndpointDispatch {
                 params['entityId'],
                 startYear: params['startYear'],
               ),
+        ),
+        'createExportLink': _is.MethodConnector(
+          name: 'createExportLink',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'startYear': _is.ParameterDescription(
+              name: 'startYear',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['tax'] as _i34kr7gr.TaxEndpoint).createExportLink(
+                    session,
+                    params['entityId'],
+                    startYear: params['startYear'],
+                  ),
         ),
       },
     );
@@ -4450,6 +4529,31 @@ class Endpoints extends _is.EndpointDispatch {
                   .listHoldings(
                     session,
                     params['walletId'],
+                  ),
+        ),
+        'setHoldingVerdict': _is.MethodConnector(
+          name: 'setHoldingVerdict',
+          params: {
+            'walletHoldingId': _is.ParameterDescription(
+              name: 'walletHoldingId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'verdict': _is.ParameterDescription(
+              name: 'verdict',
+              type: _is.getType<_i2db4e6h.SpamVerdict?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['wallet'] as _i1ub0otr.WalletEndpoint)
+                  .setHoldingVerdict(
+                    session,
+                    params['walletHoldingId'],
+                    params['verdict'],
                   ),
         ),
         'listTransactions': _is.MethodConnector(

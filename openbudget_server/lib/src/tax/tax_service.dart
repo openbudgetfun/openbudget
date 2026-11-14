@@ -342,6 +342,51 @@ class TaxService {
     });
   }
 
+  /// The days ahead [listDeadlines] looks: a year, so the next filing and
+  /// the next round of instalments are both in view.
+  static const _deadlineHorizonDays = 366;
+
+  /// Lists the entity's upcoming filing and payment deadlines, soonest
+  /// first.
+  ///
+  /// The list holds every deadline due from the entity's local today to a
+  /// year ahead, drawn from each tax year the pack knows. An entity whose
+  /// country has no rule pack gets an empty list rather than an error: the
+  /// calendar is a pack feature, and the tax overview only asks for it where
+  /// a pack exists. An entity with no saved profile gets the dates for a
+  /// default profile, which each deadline marks when the profile decides it.
+  static Future<List<TaxDeadlineView>> listDeadlines(
+    Session session, {
+    required UuidValue entityId,
+  }) async {
+    final entity = await EntityAccess.requireOwned(session, entityId);
+    final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+    if (jurisdiction == null) return const [];
+
+    final pack = _requirePack(jurisdiction);
+    final stored = await _loadProfile(session, entity);
+    final profile = stored?.profile ?? _parseCanonicalProfile(entity, '{}');
+    final now = clock();
+    final today = EntityClock.today(entity, now: now);
+    final todayDate = DateTime.utc(today.year, today.month, today.day);
+    final horizon = todayDate.add(const Duration(days: _deadlineHorizonDays));
+
+    final upcoming = [
+      for (final startYear in pack.supportedStartYears)
+        for (final deadline in pack.deadlines(
+          pack.taxYear(startYear),
+          profile,
+        ))
+          if (!deadline.dueDate.isBefore(todayDate) &&
+              !deadline.dueDate.isAfter(horizon))
+            deadline,
+    ];
+    return [
+      for (final deadline in sortTaxDeadlines(upcoming))
+        _toDeadlineView(deadline, todayDate),
+    ];
+  }
+
   /// Computes the entity's tax report for the year that starts in [startYear].
   ///
   /// When [startYear] is null the tax year containing the entity's local today
@@ -688,6 +733,8 @@ class TaxService {
           taxCategoryCode: row[8] as String?,
           envelopeTaxCategoryCode: row[9] as String?,
           isTransfer: row[10] as bool,
+          envelopeName: row[11] as String?,
+          payeeName: row[12] as String?,
         ),
       );
     }
@@ -939,6 +986,26 @@ class TaxService {
         'counted as uncategorised.';
   }
 
+  static TaxDeadlineView _toDeadlineView(
+    TaxDeadline deadline,
+    DateTime today,
+  ) => TaxDeadlineView(
+    id: deadline.id,
+    title: deadline.title,
+    kind: deadline.kind.name,
+    dueDate: deadline.dueDate,
+    daysLeft: deadline.daysLeft(today),
+    periodStart: deadline.periodStart,
+    periodEnd: deadline.periodEnd,
+    periodLabel: deadline.periodLabel,
+    source: deadline.source.toString(),
+    citation: deadline.citation,
+    grade: deadline.grade.name,
+    dependsOnProfile: deadline.dependsOnProfile,
+    note: deadline.note,
+    rolledFrom: deadline.rolledFrom,
+  );
+
   static TaxReportView _toView(
     TaxReport report,
     List<TaxOpportunity> opportunities, {
@@ -1045,6 +1112,14 @@ class TaxService {
             estimatedSavingMinor: opportunity.estimatedSavingMinor,
             deadline: opportunity.deadline,
             source: opportunity.source.toString(),
+            ruleYear: opportunity.ruleYear,
+            grade: opportunity.grade.name,
+            announced: opportunity.announced,
+            signpostOnly: opportunity.signpostOnly,
+            needsEvidence: opportunity.needsEvidence,
+            assumptions: [
+              for (final assumption in opportunity.assumptions) assumption,
+            ],
           ),
       ],
     );
@@ -1066,11 +1141,14 @@ SELECT
   l."businessUsePercent",
   l."taxCategoryCode",
   e."taxCategoryCode",
-  tr.id IS NOT NULL
+  tr.id IS NOT NULL,
+  e.name,
+  p.name
 FROM transaction_line l
 JOIN "transaction" t ON t.id = l."transactionId"
 JOIN account a ON a.id = t."accountId"
 LEFT JOIN envelope e ON e.id = l."envelopeId"
+LEFT JOIN payee p ON p.id = t."payeeId"
 LEFT JOIN transfer tr
   ON tr."fromTransactionId" = t.id OR tr."toTransactionId" = t.id
 WHERE t."entityId" = ANY(@entityIds::uuid[])

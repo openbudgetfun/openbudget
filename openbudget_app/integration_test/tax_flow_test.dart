@@ -141,6 +141,18 @@ class _FakeTaxRepository implements TaxRepository {
   @override
   Future<TaxReportView> getReport(String entityId, int startYear) async =>
       _makeReport(startYear);
+
+  @override
+  Future<List<TaxDeadlineView>> listDeadlines(String entityId) async =>
+      TestData.taxDeadlines();
+
+  @override
+  Future<TaxSummaryView> getSummary(String entityId, {int? startYear}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<String> createExportLink(String entityId, {int? startYear}) =>
+      throw UnimplementedError();
 }
 
 Widget _buildApp(_FakeTaxRepository repository) {
@@ -213,8 +225,8 @@ void main() {
       expect(find.text('United Kingdom'), findsWidgets);
       expect(find.text('Individual'), findsOneWidget);
 
-      await tester.tap(profile.scottishTaxpayerToggle);
-      await tester.pumpAndSettle();
+      await profile.tapQuestion(profile.scottishTaxpayerToggle);
+      await profile.tapQuestion(profile.taxResidentToggle);
       await profile.save();
 
       expect(repository.savedProfiles, hasLength(1));
@@ -225,12 +237,40 @@ void main() {
         repository.savedProfiles.single.profileJson,
         contains('"scottishTaxpayer":true'),
       );
+      // The residence guardrail question is asked in every country.
+      expect(
+        repository.savedProfiles.single.profileJson,
+        contains('"taxResident":true'),
+      );
 
       expect(overview.yearLabel, findsOneWidget);
       expect(find.text(TestData.taxYearLabel), findsOneWidget);
       expect(find.text(TestData.taxBalanceDue), findsOneWidget);
       expect(find.text('Income tax'), findsOneWidget);
       expect(find.text(TestData.taxDisclaimer), findsOneWidget);
+
+      // The Upcoming list shows the next dates, four at first.
+      await overview.showUpcoming();
+      expect(find.text(TestData.taxUpcomingTitle), findsOneWidget);
+      await scrollIntoView(tester, overview.upcomingToggle);
+      expect(overview.deadlines, findsNWidgets(4));
+      expect(find.text(TestData.taxUpcomingFirstTitle), findsOneWidget);
+      expect(find.text(TestData.taxUpcomingFirstDate), findsOneWidget);
+      expect(find.text(TestData.taxUpcomingFirstDaysLeft), findsOneWidget);
+      expect(
+        overview.deadline('gb.sa.online-return', '20270131'),
+        findsOneWidget,
+      );
+      expect(find.text(TestData.taxUpcomingReturnTitle), findsOneWidget);
+      expect(find.text(TestData.taxUpcomingReturnSource), findsWidgets);
+      expect(find.text(TestData.taxUpcomingShowAll), findsOneWidget);
+      expect(find.text(TestData.taxUpcomingFifthTitle), findsNothing);
+
+      await tester.tap(overview.upcomingToggle);
+      await tester.pumpAndSettle();
+      await scrollIntoView(tester, find.text(TestData.taxUpcomingFifthTitle));
+      expect(find.text(TestData.taxUpcomingFifthTitle), findsOneWidget);
+      expect(find.text('Show fewer dates'), findsOneWidget);
 
       // The unverified list shows the caveat the fake report carries.
       await tester.scrollUntilVisible(
