@@ -97,6 +97,56 @@ final class WalletListFamily extends $Family
   String toString() => r'walletListProvider';
 }
 
+/// The networks the server can read now: each one's chain family has a
+/// provider and its secret is set. A chain missing from the list is off.
+
+@ProviderFor(supportedWalletNetworks)
+final supportedWalletNetworksProvider = SupportedWalletNetworksProvider._();
+
+/// The networks the server can read now: each one's chain family has a
+/// provider and its secret is set. A chain missing from the list is off.
+
+final class SupportedWalletNetworksProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<WalletNetwork>>,
+          List<WalletNetwork>,
+          FutureOr<List<WalletNetwork>>
+        >
+    with
+        $FutureModifier<List<WalletNetwork>>,
+        $FutureProvider<List<WalletNetwork>> {
+  /// The networks the server can read now: each one's chain family has a
+  /// provider and its secret is set. A chain missing from the list is off.
+  SupportedWalletNetworksProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'supportedWalletNetworksProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$supportedWalletNetworksHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<WalletNetwork>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<WalletNetwork>> create(Ref ref) {
+    return supportedWalletNetworks(ref);
+  }
+}
+
+String _$supportedWalletNetworksHash() =>
+    r'1678684379e77edfe5205cb2ff907294bec861c6';
+
 /// The wallet that values one account, if any.
 
 @ProviderFor(walletForAccount)
@@ -566,7 +616,7 @@ final class WalletActionsProvider
   WalletActions create() => WalletActions();
 }
 
-String _$walletActionsHash() => r'8ad7acfc325daed002304cd396f228d3a154bf17';
+String _$walletActionsHash() => r'8d4a056c0ff7dfb681d90d14289a36b6295e2fb4';
 
 /// Wallet mutations. Kept alive so the invalidations that follow each await
 /// still reach the providers they refresh: an auto-disposed notifier is

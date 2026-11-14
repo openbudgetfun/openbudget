@@ -2374,7 +2374,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionDateLabel => 'Date';
 
   @override
-  String get addAccountConnectWallet => 'Connect Solana Wallet';
+  String get addAccountConnectWallet => 'Add a crypto wallet';
 
   @override
   String get addAccountUnlinkedTitle => 'Add Unlinked Account';
@@ -2396,9 +2396,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addAccountLoadingInstitutions => 'Loading institutions...';
-
-  @override
-  String get addAccountConnectWalletButton => 'Connect Wallet';
 
   @override
   String get dialogNext => 'Next';
@@ -2434,22 +2431,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addAccountAddUnlinked => 'Add an Unlinked Account';
-
-  @override
-  String get addAccountWalletConnectionDescription =>
-      'Connect a Solana wallet in read-only mode. OpenBudget imports native SPL balances and keeps fiat valuation synced.';
-
-  @override
-  String get addAccountWalletAddressLabel => 'Wallet Address';
-
-  @override
-  String get addAccountWalletAddressHint => 'Paste Solana wallet address';
-
-  @override
-  String get addAccountWalletLabelOptional => 'Wallet Label (optional)';
-
-  @override
-  String get addAccountWalletLabelHint => 'My Solana Wallet';
 
   @override
   String get addAccountWalletIncludeInBudgetTotals =>
@@ -6580,4 +6561,228 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get universalCategoryOutOfScopeOwnerCapitalAndDrawings =>
       'Owner capital and drawings';
+
+  @override
+  String get walletAddIntro =>
+      'Paste an address or extended public key. OpenBudget only reads your wallet: it never holds a key and can\'t move anything.';
+
+  @override
+  String get walletAddFieldLabel => 'Wallet address';
+
+  @override
+  String get walletAddFieldHint => 'Paste an address or extended public key';
+
+  @override
+  String get walletAddButton => 'Add wallet';
+
+  @override
+  String get walletAddInvalidInput =>
+      'That doesn\'t look like a wallet address.';
+
+  @override
+  String get walletAddInvalidChecksum =>
+      'One character is wrong. Check the address and try again.';
+
+  @override
+  String get walletAddInvalidKey =>
+      'That extended key isn\'t one OpenBudget recognises.';
+
+  @override
+  String get walletAddRefusedPrivateKeyTitle => 'That\'s a private key';
+
+  @override
+  String get walletAddRefusedPrivateKeyMessage =>
+      'OpenBudget never needs it. We cleared the field. Don\'t share it with anyone.';
+
+  @override
+  String get walletAddRefusedEvmKeyTitle => 'That looks like a private key';
+
+  @override
+  String get walletAddRefusedEvmKeyMessage =>
+      'That looks like a private key, not an address. OpenBudget never needs it. We cleared the field.';
+
+  @override
+  String get walletAddRefusedTestnetTitle => 'Mainnet only';
+
+  @override
+  String get walletAddRefusedTestnetMessage =>
+      'OpenBudget only supports mainnet addresses.';
+
+  @override
+  String get walletAddRefusedMultisigTitle =>
+      'Multisig keys aren\'t supported yet';
+
+  @override
+  String get walletAddRefusedMultisigMessage =>
+      'A multisig wallet needs every co-signer\'s key. That\'s coming later.';
+
+  @override
+  String get walletAddRefusedExchangeTitle => 'That\'s an exchange account';
+
+  @override
+  String get walletAddRefusedExchangeMessage =>
+      'That X-address points at an exchange account. Use the address for your own account.';
+
+  @override
+  String walletAddDetectedAddress(String chain) {
+    return 'A $chain address.';
+  }
+
+  @override
+  String walletAddDetectedKey(String chain) {
+    return 'A $chain extended public key. OpenBudget finds every address it makes, and never needs a private key.';
+  }
+
+  @override
+  String walletAddDetectedEvm(int count) {
+    return 'One address that can hold assets on $count networks.';
+  }
+
+  @override
+  String walletAddStampMore(int count) {
+    return '+ $count';
+  }
+
+  @override
+  String get walletAddScriptTypeUnknown =>
+      'We\'ll check which kind of address this key makes.';
+
+  @override
+  String get walletAddWhichChain => 'Which chain is this address on?';
+
+  @override
+  String walletAddUnavailableTitle(String chain) {
+    return '$chain isn\'t available yet';
+  }
+
+  @override
+  String get walletAddUnavailableMessage =>
+      'OpenBudget can\'t read that chain right now. Try again later.';
+
+  @override
+  String walletAddPreviewLoading(String networks) {
+    return 'Looking for assets on $networks…';
+  }
+
+  @override
+  String get walletAddPickerTitle => 'Where should OpenBudget look?';
+
+  @override
+  String get walletAddPickerHint =>
+      'Tap a chain to include it or leave it out. Ethereum is always read, because that\'s where your address lives.';
+
+  @override
+  String get walletAddNetworkNothing => 'Nothing';
+
+  @override
+  String get walletAddNetworkNoPrice => 'No price';
+
+  @override
+  String get walletAddNetworkUnreadable => 'Can\'t read';
+
+  @override
+  String get walletAddPreviewFailedTitle => 'Couldn\'t look ahead';
+
+  @override
+  String get walletAddPreviewFailedMessage =>
+      'We couldn\'t check which chains hold assets. You can still add the wallet. It will read Ethereum.';
+
+  @override
+  String get walletAddPreviewRateLimitedMessage =>
+      'You\'ve looked up a lot of wallets. Try again in a little while, or add this one now and it will read Ethereum.';
+
+  @override
+  String get walletAddPreviewRetry => 'Try again';
+
+  @override
+  String walletAddNamesTwo(String first, String second) {
+    return '$first and $second';
+  }
+
+  @override
+  String walletAddNamesThree(String first, String second, String third) {
+    return '$first, $second and $third';
+  }
+
+  @override
+  String walletAddNamesMore(
+    String first,
+    String second,
+    String third,
+    int count,
+  ) {
+    return '$first, $second, $third and $count more';
+  }
+
+  @override
+  String walletAddReading(String networks) {
+    return 'Reading $networks…';
+  }
+
+  @override
+  String get walletAddReadingHint => 'The first read takes a few seconds.';
+
+  @override
+  String get walletAddUnreadableTitle => 'Couldn\'t read your wallet';
+
+  @override
+  String walletAddUnreadableMessage(String networks) {
+    return 'Couldn\'t reach $networks. The wallet is in your accounts, and OpenBudget will keep trying.';
+  }
+
+  @override
+  String get walletAddRetry => 'Try again';
+
+  @override
+  String get walletAddFailedTitle => 'Couldn\'t add the wallet';
+
+  @override
+  String get walletAddFailedMessage =>
+      'Something went wrong. Check your connection and try again.';
+
+  @override
+  String get walletAddedPostmark => 'Added';
+
+  @override
+  String walletAddedPostmarkChains(int count) {
+    return '$count chains';
+  }
+
+  @override
+  String get walletAddedTitle => 'Wallet added';
+
+  @override
+  String walletAddedMessage(String accountName) {
+    return '$accountName is in your accounts. Its holdings show in the account\'s details.';
+  }
+
+  @override
+  String walletAddAccountNameAddress(String chain, String address) {
+    return '$chain wallet ($address)';
+  }
+
+  @override
+  String walletAddAccountNameKey(String chain, String keyType) {
+    return '$chain wallet, $keyType';
+  }
+
+  @override
+  String get walletAddStampDetected => 'detected';
+
+  @override
+  String get walletAddStampIncluded => 'included';
+
+  @override
+  String get walletAddStampLeftOut => 'left out';
+
+  @override
+  String walletAddPickerSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count networks selected',
+      one: '1 network selected',
+    );
+    return '$_temp0';
+  }
 }

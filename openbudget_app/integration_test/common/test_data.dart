@@ -948,3 +948,73 @@ abstract final class TaxExportData {
   static const taxYear = 2026;
   static const taxYearLabel = 'Tax year 2026';
 }
+
+/// What the add-a-wallet flow pastes and the faked server answers with.
+///
+/// The addresses are published test vectors (EIP-55 and BIP 84), not
+/// anyone's wallet. The recovery phrase is the BIP 39 test mnemonic.
+abstract final class WalletFlowData {
+  static const String entityId = TestData.gbpEntityId;
+
+  /// The EIP-55 example address, valid on every EVM network.
+  static const String evmAddress = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';
+
+  /// The account name the app gives the new EVM wallet.
+  static const String evmAccountName = 'Ethereum wallet (0x5a…eAed)';
+
+  /// The BIP 84 test vector's account key: a native SegWit HD wallet.
+  static const String zpub =
+      'zpub6rFR7y4Q2AijBEqTUquhVz398htDFrtymD9xYYfG1m4wAcvPhXNfE3EfH1r1ADqtfSdVCToUG868RvUUkgDKf31mGDtKsAYz2oz2AGutZYs';
+  static const String zpubAccountName = 'Bitcoin wallet, zpub';
+
+  /// Twelve words that must never leave the device.
+  static const String recoveryPhrase =
+      'abandon abandon abandon abandon abandon abandon abandon abandon '
+      'abandon abandon abandon about';
+
+  static const String accountId = '00000000-0000-0000-0000-000000000801';
+  static const String walletId = '00000000-0000-0000-0000-000000000802';
+
+  /// Ethereum $1,240, Base $310 and Arbitrum One with nothing on it.
+  static WalletPreview evmPreview() => WalletPreview(
+    network: WalletNetwork.ethereumMainnet,
+    address: evmAddress.toLowerCase(),
+    networks: [
+      _previewRow(WalletNetwork.ethereumMainnet, valueMinor: 124000),
+      _previewRow(WalletNetwork.baseMainnet, valueMinor: 31000),
+      _previewRow(WalletNetwork.arbitrumOne),
+    ],
+    warnings: const [],
+  );
+
+  /// The wallet the server returns after its first read.
+  static Wallet connected({
+    WalletNetwork network = WalletNetwork.ethereumMainnet,
+    String address = evmAddress,
+    SyncStatus syncStatus = SyncStatus.synced,
+    String? lastSyncError,
+    List<WalletNetwork>? scanNetworks,
+  }) => Wallet(
+    id: UuidValue.fromString(walletId),
+    entityId: UuidValue.fromString(entityId),
+    accountId: UuidValue.fromString(accountId),
+    network: network,
+    address: address,
+    scanNetworks: scanNetworks,
+    syncStatus: syncStatus,
+    lastSyncError: lastSyncError,
+    createdAt: DateTime.utc(2026, 11, 14),
+    updatedAt: DateTime.utc(2026, 11, 14),
+  );
+
+  static WalletPreviewNetwork _previewRow(
+    WalletNetwork network, {
+    int? valueMinor,
+  }) => WalletPreviewNetwork(
+    network: network,
+    holdingCount: valueMinor == null ? 0 : 1,
+    pricedHoldingCount: valueMinor == null ? 0 : 1,
+    valueMinor: valueMinor,
+    valueCurrencyCode: valueMinor == null ? null : 'USD',
+  );
+}
