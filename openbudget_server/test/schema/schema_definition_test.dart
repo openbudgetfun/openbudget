@@ -12,6 +12,9 @@ void main() {
   final multichain = migrations.singleWhere(
     (m) => m.path.endsWith('multichain-wallet-schema'),
   );
+  final journalOrder = migrations.singleWhere(
+    (m) => m.path.endsWith('journal-line-order'),
+  );
   final tables = RegExp(r'CREATE TABLE "([^\"]+)" \(([\s\S]*?)\n\);')
       .allMatches(sql)
       .where((m) => !m[1]!.startsWith('serverpod_'))
@@ -19,12 +22,14 @@ void main() {
   String tableSql(String name) => tables.singleWhere((m) => m[1] == name)[2]!;
 
   test(
-    'the schema reset, multichain and journal order migrations, in order',
+    'the schema reset, multichain, journal order and citations migrations, '
+    'in order',
     () {
-      expect(migrations, hasLength(3));
-      expect(migrations.first.path, endsWith('schema-reset'));
+      expect(migrations, hasLength(4));
+      expect(migrations[0].path, endsWith('schema-reset'));
       expect(migrations[1].path, endsWith('multichain-wallet-schema'));
-      expect(migrations.last.path, endsWith('journal-line-order'));
+      expect(migrations[2].path, endsWith('journal-line-order'));
+      expect(migrations[3].path, endsWith('money-guide-citations'));
     },
   );
 
@@ -153,7 +158,7 @@ void main() {
 
   test('the journal order migration backfills line numbers', () {
     final migrationSql = File(
-      '${migrations.last.path}/migration.sql',
+      '${journalOrder.path}/migration.sql',
     ).readAsStringSync();
     expect(
       migrationSql,

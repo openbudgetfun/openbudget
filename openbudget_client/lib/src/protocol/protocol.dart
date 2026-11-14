@@ -91,6 +91,7 @@ import 'accounts/account.dart' as _iz2jf14v;
 import 'accounts/account_balances_view.dart' as _i53yl4yp;
 import 'accounts/account_valuation.dart' as _i87oqvv1;
 import 'accounts/valuation_source.dart' as _ig9cy6ku;
+import 'agent/agent_citation.dart' as _i8g2gx4m;
 import 'agent/agent_conversation.dart' as _isfmgqgu;
 import 'agent/agent_event.dart' as _i769eo9u;
 import 'agent/agent_event_kind.dart' as _iyhb15ax;
@@ -220,6 +221,7 @@ export 'accounts/account.dart';
 export 'accounts/account_balances_view.dart';
 export 'accounts/account_valuation.dart';
 export 'accounts/valuation_source.dart';
+export 'agent/agent_citation.dart';
 export 'agent/agent_conversation.dart';
 export 'agent/agent_event.dart';
 export 'agent/agent_event_kind.dart';
@@ -364,6 +366,7 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i53yl4yp.AccountBalancesView>,
           _isc.getType<_i87oqvv1.AccountValuation>,
           _isc.getType<_ig9cy6ku.ValuationSource>,
+          _isc.getType<_i8g2gx4m.AgentCitation>,
           _isc.getType<_isfmgqgu.AgentConversation>,
           _isc.getType<_i769eo9u.AgentEvent>,
           _isc.getType<_iyhb15ax.AgentEventKind>,
@@ -493,6 +496,7 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i53yl4yp.AccountBalancesView?>,
           _isc.getType<_i87oqvv1.AccountValuation?>,
           _isc.getType<_ig9cy6ku.ValuationSource?>,
+          _isc.getType<_i8g2gx4m.AgentCitation?>,
           _isc.getType<_isfmgqgu.AgentConversation?>,
           _isc.getType<_i769eo9u.AgentEvent?>,
           _isc.getType<_iyhb15ax.AgentEventKind?>,
@@ -618,6 +622,8 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_ipdq2p58.WalletSyncResult?>,
           _isc.getType<_ivsmsmw6.WalletTaxYearSummary?>,
           _isc.getType<_i6m1jx15.WalletTransaction?>,
+          _isc.getType<List<_i8g2gx4m.AgentCitation>>,
+          _isc.getType<List<_i8g2gx4m.AgentCitation>?>,
           _isc.getType<List<_iwxpkdmg.Category>>,
           _isc.getType<List<_ii8h2sft.EnvelopeMonthView>>,
           _isc.getType<List<_i15udi7x.FxRateQuote>>,
@@ -699,6 +705,7 @@ class Protocol extends _isc.SerializationManager
           'AccountBalancesView',
           'AccountValuation',
           'ValuationSource',
+          'AgentCitation',
           'AgentConversation',
           'AgentEvent',
           'AgentEventKind',
@@ -862,6 +869,9 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _ig9cy6ku.ValuationSource) {
       return _ig9cy6ku.ValuationSource.fromJson(data) as T;
+    }
+    if (t == _i8g2gx4m.AgentCitation) {
+      return _i8g2gx4m.AgentCitation.fromJson(data) as T;
     }
     if (t == _isfmgqgu.AgentConversation) {
       return _isfmgqgu.AgentConversation.fromJson(data) as T;
@@ -1253,6 +1263,10 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _isc.getType<_ig9cy6ku.ValuationSource?>()) {
       return (data != null ? _ig9cy6ku.ValuationSource.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i8g2gx4m.AgentCitation?>()) {
+      return (data != null ? _i8g2gx4m.AgentCitation.fromJson(data) : null)
           as T;
     }
     if (t == _isc.getType<_isfmgqgu.AgentConversation?>()) {
@@ -1786,6 +1800,20 @@ class Protocol extends _isc.SerializationManager
       return (data != null ? _i6m1jx15.WalletTransaction.fromJson(data) : null)
           as T;
     }
+    if (t == List<_i8g2gx4m.AgentCitation>) {
+      return (data as List)
+              .map((e) => deserialize<_i8g2gx4m.AgentCitation>(e))
+              .toList()
+          as T;
+    }
+    if (t == _isc.getType<List<_i8g2gx4m.AgentCitation>?>()) {
+      return (data != null
+              ? (data as List)
+                    .map((e) => deserialize<_i8g2gx4m.AgentCitation>(e))
+                    .toList()
+              : null)
+          as T;
+    }
     if (t == List<_iwxpkdmg.Category>) {
       return (data as List)
               .map((e) => deserialize<_iwxpkdmg.Category>(e))
@@ -2222,6 +2250,7 @@ class Protocol extends _isc.SerializationManager
       _i53yl4yp.AccountBalancesView => 'AccountBalancesView',
       _i87oqvv1.AccountValuation => 'AccountValuation',
       _ig9cy6ku.ValuationSource => 'ValuationSource',
+      _i8g2gx4m.AgentCitation => 'AgentCitation',
       _isfmgqgu.AgentConversation => 'AgentConversation',
       _i769eo9u.AgentEvent => 'AgentEvent',
       _iyhb15ax.AgentEventKind => 'AgentEventKind',
@@ -2375,6 +2404,8 @@ class Protocol extends _isc.SerializationManager
         return 'AccountValuation';
       case _ig9cy6ku.ValuationSource():
         return 'ValuationSource';
+      case _i8g2gx4m.AgentCitation():
+        return 'AgentCitation';
       case _isfmgqgu.AgentConversation():
         return 'AgentConversation';
       case _i769eo9u.AgentEvent():
@@ -2662,6 +2693,9 @@ class Protocol extends _isc.SerializationManager
     }
     if (dataClassName == 'ValuationSource') {
       return deserialize<_ig9cy6ku.ValuationSource>(data['data']);
+    }
+    if (dataClassName == 'AgentCitation') {
+      return deserialize<_i8g2gx4m.AgentCitation>(data['data']);
     }
     if (dataClassName == 'AgentConversation') {
       return deserialize<_isfmgqgu.AgentConversation>(data['data']);
