@@ -40,4 +40,56 @@ void main() {
       expect(TaxSummaryService.startYearFor(entity, now: now), 2026);
     });
   });
+
+  group('TaxSummaryService.currentYearLastDayFor', () {
+    test('KE entity pinned to 2026-07-01 gives 2026-12-31', () {
+      final previous = TaxSummaryService.clock;
+      TaxSummaryService.clock = () => DateTime.utc(2026, 7);
+      try {
+        final entity = Entity(
+          ownerId: UuidValue.fromString(
+            '00000000-0000-0000-0000-000000000001',
+          ),
+          name: 'Test',
+          kind: EntityKind.individual,
+          countryCode: 'KE',
+          baseCurrencyCode: 'KES',
+          timeZone: 'Africa/Nairobi',
+          fiscalYearEndMonth: 12,
+          fiscalYearEndDay: 30,
+        );
+        expect(
+          TaxSummaryService.currentYearLastDayFor(entity),
+          DateTime.utc(2026, 12, 31),
+        );
+      } finally {
+        TaxSummaryService.clock = previous;
+      }
+    });
+
+    test('GB individual pinned to 2026-07-01 gives 2027-04-05', () {
+      final previous = TaxSummaryService.clock;
+      TaxSummaryService.clock = () => DateTime.utc(2026, 7);
+      try {
+        final entity = Entity(
+          ownerId: UuidValue.fromString(
+            '00000000-0000-0000-0000-000000000001',
+          ),
+          name: 'Test',
+          kind: EntityKind.individual,
+          countryCode: 'GB',
+          baseCurrencyCode: 'GBP',
+          timeZone: 'Europe/London',
+          fiscalYearEndMonth: 4,
+          fiscalYearEndDay: 5,
+        );
+        expect(
+          TaxSummaryService.currentYearLastDayFor(entity),
+          DateTime.utc(2027, 4, 5),
+        );
+      } finally {
+        TaxSummaryService.clock = previous;
+      }
+    });
+  });
 }

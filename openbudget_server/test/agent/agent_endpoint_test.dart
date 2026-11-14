@@ -855,6 +855,9 @@ void main() {
           ('get_tax_report', {'entityId': entity.id.toString()}),
           ('list_tax_categories', {'entityId': entity.id.toString()}),
           ('get_net_worth', {'entityId': entity.id.toString()}),
+          ('get_spending_summary', {'entityId': entity.id.toString()}),
+          ('get_tax_calendar', {'entityId': entity.id.toString()}),
+          ('get_tax_summary', {'entityId': entity.id.toString()}),
           (
             'propose_move_money',
             {
