@@ -295,19 +295,28 @@ class TaxSummaryService {
   ///
   /// The export link needs a year pinned into its token, so it resolves
   /// the default through this instead of guessing the rule twice.
-  static Future<int> defaultStartYear(
-    Session session,
-    UuidValue entityId,
-  ) => session.db.transaction((tx) async {
-    final entity = await EntityAccess.requireOwned(
-      session,
-      entityId,
-      transaction: tx,
-    );
+  static Future<int> defaultStartYear(Session session, UuidValue entityId) =>
+      session.db.transaction((tx) async {
+        final entity = await EntityAccess.requireOwned(
+          session,
+          entityId,
+          transaction: tx,
+        );
+        return currentStartYearFor(entity);
+      });
+
+  /// The start year a summary for [entity] covers today, on the server
+  /// clock in the entity's own time zone.
+  static int currentStartYearFor(Entity entity) =>
+      startYearFor(entity, now: clock());
+
+  /// Pure helper: the start year a summary for [entity] covers at [now],
+  /// wrapping [_resolvePeriod] (docs/money-guide.md, section 5.3 clock).
+  static int startYearFor(Entity entity, {required DateTime now}) {
     final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
     final pack = jurisdiction == null ? null : packFor(jurisdiction);
-    return _resolvePeriod(entity, pack, null, clock()).startYear;
-  });
+    return _resolvePeriod(entity, pack, null, now).startYear;
+  }
 
   /// The summary period for [entity].
   ///
@@ -365,21 +374,29 @@ class TaxSummaryService {
     final endMonth = entity.fiscalYearEndMonth;
     final endDay = entity.fiscalYearEndDay;
     final resolved = startYear ?? _fiscalYearContaining(now, endMonth, endDay);
-    var start = civilDate(resolved - 1, endMonth, endDay).add(
-      const Duration(days: 1),
-    );
-    var end = civilDate(resolved, endMonth, endDay).add(
-      const Duration(days: 1),
-    );
+    var start = civilDate(
+      resolved - 1,
+      endMonth,
+      endDay,
+    ).add(const Duration(days: 1));
+    var end = civilDate(
+      resolved,
+      endMonth,
+      endDay,
+    ).add(const Duration(days: 1));
     if (start.isBefore(civilDate(resolved, 1, 1))) {
       // That year ends in the calendar year before [resolved]; the year
       // starting in [resolved] ends in the one after instead.
-      start = civilDate(resolved, endMonth, endDay).add(
-        const Duration(days: 1),
-      );
-      end = civilDate(resolved + 1, endMonth, endDay).add(
-        const Duration(days: 1),
-      );
+      start = civilDate(
+        resolved,
+        endMonth,
+        endDay,
+      ).add(const Duration(days: 1));
+      end = civilDate(
+        resolved + 1,
+        endMonth,
+        endDay,
+      ).add(const Duration(days: 1));
     }
     return _SummaryPeriod(
       startYear: resolved,
@@ -405,11 +422,7 @@ class TaxSummaryService {
   static int _fiscalYearContaining(DateTime now, int endMonth, int endDay) {
     final endThisYear = civilDate(now.year, endMonth, endDay);
     final endYear =
-        !DateTime.utc(
-          now.year,
-          now.month,
-          now.day,
-        ).isAfter(endThisYear)
+        !DateTime.utc(now.year, now.month, now.day).isAfter(endThisYear)
         ? now.year
         : now.year + 1;
     return endYear - 1;
@@ -449,15 +462,12 @@ class TaxSummaryService {
         // a rate the summary never used.
         throw StateError('A checked exchange rate vanished while grouping');
       }
-      groups.putIfAbsent(
-          (
-            request.fromCurrencyCode,
-            quote.rateText,
-            quote.rateDate,
-            quote.source,
-          ),
-          () => _FxGroup(request.fromCurrencyCode, quote),
-        )
+      groups.putIfAbsent((
+          request.fromCurrencyCode,
+          quote.rateText,
+          quote.rateDate,
+          quote.source,
+        ), () => _FxGroup(request.fromCurrencyCode, quote))
         ..lineCount += 1
         ..convertedMinor += entries[index].amountMinor;
     }
@@ -505,20 +515,18 @@ class TaxSummaryService {
         mapped.add((index, entry));
         continue;
       }
-      mapped.add(
-        (
-          index,
-          TaxEntry(
-            date: entry.date,
-            amountMinor: entry.amountMinor,
-            categoryCode: packCode,
-            businessUsePercent: entry.businessUsePercent,
-            salesTaxMinor: entry.salesTaxMinor,
-            sourceId: entry.sourceId,
-            note: entry.note,
-          ),
+      mapped.add((
+        index,
+        TaxEntry(
+          date: entry.date,
+          amountMinor: entry.amountMinor,
+          categoryCode: packCode,
+          businessUsePercent: entry.businessUsePercent,
+          salesTaxMinor: entry.salesTaxMinor,
+          sourceId: entry.sourceId,
+          note: entry.note,
         ),
-      );
+      ));
     }
     return mapped;
   }

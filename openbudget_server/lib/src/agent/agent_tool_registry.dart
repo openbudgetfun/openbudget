@@ -6,6 +6,8 @@ import 'package:openbudget_server/src/agent/agent_access.dart';
 import 'package:openbudget_server/src/budget/budget_month_service.dart';
 import 'package:openbudget_server/src/entities/entity_clock.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/money_guide/guidance_block.dart';
+import 'package:openbudget_server/src/money_guide/search_knowledge.dart';
 import 'package:openbudget_server/src/reports/net_worth_service.dart';
 import 'package:openbudget_server/src/tax/tax_service.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
@@ -129,6 +131,34 @@ class AgentToolRegistry {
           'labels and where they land on the return.',
       properties: {
         'entityId': _uuidSchema('The entity whose categories to list.'),
+      },
+      required: ['entityId'],
+    ),
+    _tool(
+      name: 'search_knowledge',
+      description:
+          "Find OpenBudget's sourced knowledge cards on tax law, crypto tax "
+          'and regulation, budgeting and money basics. Call it before stating '
+          'any rule, rate, threshold, allowance or deadline. Write the query '
+          'in English and add the official local term when you know it. Pass '
+          'ids to read cards listed in the brief.',
+      properties: {
+        'entityId': _uuidSchema('The entity the question is about.'),
+        'query': _stringSchema('The search query, in English.'),
+        'ids': {
+          'type': 'array',
+          'items': {'type': 'string'},
+          'maxItems': 4,
+          'description': 'Card ids to read directly, at most 4.',
+        },
+        'country': _stringSchema(
+          "ISO country code. Omit for the entity's country.",
+        ),
+        'taxYear': {
+          'type': 'integer',
+          'description':
+              'Start year of the tax year. Omit for the current one.',
+        },
       },
       required: ['entityId'],
     ),
@@ -260,6 +290,7 @@ class AgentToolRegistry {
       'list_envelopes' => _listEnvelopes(context, args),
       'search_transactions' => _searchTransactions(context, args),
       'get_tax_report' => _getTaxReport(context, args),
+      'search_knowledge' => _searchKnowledge(context, args),
       'list_tax_categories' => _listTaxCategories(context, args),
       'get_net_worth' => _getNetWorth(context, args),
       'propose_move_money' => _proposeMoveMoney(context, args),
@@ -460,18 +491,51 @@ class AgentToolRegistry {
     Map<String, Object?> args,
   ) async {
     final entityId = _requireUuid(args, 'entityId');
-    await requireOwnedEntity(
+    final entity = await requireOwnedEntity(
       context.session,
       userId: context.userId,
       entityId: entityId,
     );
+    // Entities in a country without a pack get the universal hint instead of
+    // an error, so the model can recover with get_tax_summary
+    // (docs/money-guide.md, section 7.6).
+    final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+    if (jurisdiction == null) {
+      final block = buildGuidanceBlock(entity: entity);
+      return _json({
+        'jurisdictionState': 'universal',
+        'use': 'get_tax_summary',
+        'guidance': block,
+      });
+    }
     final startYear = _optionalInt(args, 'startYear');
     final report = await TaxService.report(
       context.session,
       entityId: entityId,
       startYear: startYear,
     );
-    return _json(report.toJson());
+    final block = buildGuidanceBlock(
+      entity: entity,
+      rulesVersion: report.rulesVersion,
+      maturity: report.maturity,
+    );
+    final json = report.toJson();
+    json['guidance'] = block;
+    return _json(json);
+  }
+
+  Future<String> _searchKnowledge(
+    AgentToolContext context,
+    Map<String, Object?> args,
+  ) async {
+    final entityId = _requireUuid(args, 'entityId');
+    final entity = await requireOwnedEntity(
+      context.session,
+      userId: context.userId,
+      entityId: entityId,
+    );
+    final result = searchKnowledgeResult(entity: entity, args: args);
+    return _json(result);
   }
 
   Future<String> _listTaxCategories(
