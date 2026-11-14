@@ -23,12 +23,7 @@ final class SolanaWalletProvider implements WalletProvider {
     required this.helius,
     this.httpClient,
     this.clock = DateTime.now,
-    WalletVendorRequestCounter? counter,
-    WalletVendorRequestCounter? requestCounter,
-    WalletVendorRequestCounter? vendorRequestCounter,
-    WalletVendorRequestCounter? vendorCounter,
-  }) : _counter =
-           counter ?? requestCounter ?? vendorRequestCounter ?? vendorCounter;
+  });
 
   /// Builds a provider from the server's configured Helius key.
   factory SolanaWalletProvider.fromSession(
@@ -65,7 +60,6 @@ final class SolanaWalletProvider implements WalletProvider {
   final HeliusClient helius;
   final HttpClient? httpClient;
   final DateTime Function() clock;
-  final WalletVendorRequestCounter? _counter;
 
   @override
   Future<WalletProviderSnapshot> fetchSnapshot(
@@ -77,20 +71,21 @@ final class SolanaWalletProvider implements WalletProvider {
     final address = request.address;
     final untilSignature = request.untilSignature;
     final warnings = <String>[];
-    _recordRequest('helius');
     final historyFuture = _fetchHistory(
       address: address,
       untilSignature: untilSignature,
     );
-    _recordRequest('helius');
+    WalletVendorRequestCounter.current?.record('helius');
     final balancesFuture = helius.wallet.getBalances(
       GetBalancesRequest(address: address),
     );
-    _recordRequest('helius');
+    WalletVendorRequestCounter.current?.record('helius');
     final assetsFuture = helius.das.getAssetsByOwner(
       GetAssetsByOwnerRequest(ownerAddress: address, limit: 1000),
     );
 
+    // Await all three together: a failure in one must not leave the others
+    // as unhandled errors.
     final results = await Future.wait<Object?>([
       historyFuture,
       balancesFuture,
@@ -115,7 +110,6 @@ final class SolanaWalletProvider implements WalletProvider {
       },
       onWarning: warnings.add,
       httpClient: httpClient,
-      counter: _counter ?? WalletVendorRequestCounter.current,
     );
 
     final nftMints = assets.items
@@ -128,7 +122,6 @@ final class SolanaWalletProvider implements WalletProvider {
       onWarning: warnings.add,
       maxMints: 150,
       httpClient: httpClient,
-      counter: _counter ?? WalletVendorRequestCounter.current,
     );
 
     final holdings = _buildHoldings(
@@ -150,14 +143,6 @@ final class SolanaWalletProvider implements WalletProvider {
     );
   }
 
-  void _recordRequest(String vendor) {
-    _counter?.record(vendor);
-    final current = WalletVendorRequestCounter.current;
-    if (current != null && !identical(current, _counter)) {
-      current.record(vendor);
-    }
-  }
-
   Future<List<WalletProviderTransaction>> _fetchHistory({
     required String address,
     String? untilSignature,
@@ -167,7 +152,7 @@ final class SolanaWalletProvider implements WalletProvider {
     var pages = 0;
 
     while (true) {
-      _recordRequest('helius');
+      WalletVendorRequestCounter.current?.record('helius');
       final page = await helius.wallet.getHistory(
         GetHistoryRequest(
           address: address,
@@ -186,7 +171,7 @@ final class SolanaWalletProvider implements WalletProvider {
       if (page.length < _historyPageSize) break;
       pages += 1;
       if (pages >= _maxHistoryPages) {
-        _recordRequest('helius');
+        WalletVendorRequestCounter.current?.record('helius');
         final probe = await helius.wallet.getHistory(
           GetHistoryRequest(
             address: address,

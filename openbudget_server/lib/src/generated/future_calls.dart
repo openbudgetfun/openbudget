@@ -21,6 +21,7 @@ import '../billing/solana_billing_collector_future_call.dart' as _i6oeyfz6;
 import '../fx_rates/fx_backfill_future_call.dart' as _idsel8od;
 import '../fx_rates/fx_refresh_future_call.dart' as _i1ol5dhc;
 import '../recurring_transactions/recurring_post_future_call.dart' as _ibpoas7h;
+import '../wallets/wallet_refresh_future_call.dart' as _i5v17gy5;
 import 'future_calls_generated_models/fx_backfill_future_call_fetch_model.dart'
     as _iuflqeka;
 
@@ -74,6 +75,7 @@ class FutureCalls extends _is.FutureCallDispatch<_FutureCallRef> {
       'FxBackfillFetchFutureCall': FxBackfillFetchFutureCall(),
       'FxRefreshRefreshFutureCall': FxRefreshRefreshFutureCall(),
       'RecurringPostPostDueFutureCall': RecurringPostPostDueFutureCall(),
+      'WalletRefreshRefreshFutureCall': WalletRefreshRefreshFutureCall(),
     };
     _futureCallManager = futureCallManager;
     _serverId = serverId;
@@ -208,6 +210,10 @@ class _FutureCallRef {
   late final recurringPost = _RecurringPostFutureCallDispatcher(
     _invokeFutureCall,
   );
+
+  late final walletRefresh = _WalletRefreshFutureCallDispatcher(
+    _invokeFutureCall,
+  );
 }
 
 class _BalanceVerifyFutureCallDispatcher {
@@ -271,6 +277,19 @@ class _RecurringPostFutureCallDispatcher {
   Future<void> postDue() {
     return _invokeFutureCall(
       'RecurringPostPostDueFutureCall',
+      null,
+    );
+  }
+}
+
+class _WalletRefreshFutureCallDispatcher {
+  _WalletRefreshFutureCallDispatcher(this._invokeFutureCall);
+
+  final _InvokeFutureCall _invokeFutureCall;
+
+  Future<void> refresh() {
+    return _invokeFutureCall(
+      'WalletRefreshRefreshFutureCall',
       null,
     );
   }
@@ -342,5 +361,17 @@ class RecurringPostPostDueFutureCall extends _is.FutureCall
     _is.SerializableModel? object,
   ) async {
     await _ibpoas7h.RecurringPostFutureCall().postDue(session);
+  }
+}
+
+/// Runs one refresh pass over every wallet.
+class WalletRefreshRefreshFutureCall extends _is.FutureCall
+    implements _is.InvokableFutureCall {
+  @override
+  _ida.Future<void> invoke(
+    _is.Session session,
+    _is.SerializableModel? object,
+  ) async {
+    await _i5v17gy5.WalletRefreshFutureCall().refresh(session);
   }
 }

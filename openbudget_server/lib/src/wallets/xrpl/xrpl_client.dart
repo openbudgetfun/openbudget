@@ -25,17 +25,11 @@ final class XrplClient {
     http.Client? httpClient,
     http.Client? client,
     this.userAgent = 'OpenBudgetServer',
-    WalletVendorRequestCounter? counter,
-    WalletVendorRequestCounter? requestCounter,
-    WalletVendorRequestCounter? vendorRequestCounter,
-    WalletVendorRequestCounter? vendorCounter,
   }) : _endpoints = _parseEndpoints(endpoints ?? baseUrls ?? urls),
        // Keeping the public parameter named `transport`.
        // ignore: prefer_initializing_formals
        _transport = transport,
-       _httpClient = httpClient ?? client,
-       _counter =
-           counter ?? requestCounter ?? vendorRequestCounter ?? vendorCounter {
+       _httpClient = httpClient ?? client {
     if (_endpoints.isEmpty) {
       throw ArgumentError('At least one XRP Ledger endpoint is required.');
     }
@@ -56,7 +50,6 @@ final class XrplClient {
   final Object? _transport;
   final http.Client? _httpClient;
   final String userAgent;
-  final WalletVendorRequestCounter? _counter;
 
   /// The hosts this client reads, in failover order.
   List<Uri> get endpoints => List.unmodifiable(_endpoints);
@@ -103,7 +96,7 @@ final class XrplClient {
   }
 
   Future<_XrplResponse> _post(Uri endpoint, String body) async {
-    _recordRequest();
+    WalletVendorRequestCounter.current?.record('xrpl');
     // Transport injection: support both two-argument (url, body) and
     // one-argument (url) callables so tests can script responses either
     // way.
@@ -149,14 +142,6 @@ final class XrplClient {
       );
     }
     throw const FormatException('unexpected transport result');
-  }
-
-  void _recordRequest() {
-    _counter?.record('xrpl');
-    final current = WalletVendorRequestCounter.current;
-    if (current != null && !identical(current, _counter)) {
-      current.record('xrpl');
-    }
   }
 
   static List<Uri> _parseEndpoints(Object? input) {

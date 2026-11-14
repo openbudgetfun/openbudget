@@ -29,6 +29,7 @@ void main() {
 
   setUp(() async {
     WalletService.clock = () => DateTime.utc(2026);
+    WalletService.manualSyncThrottle = Duration.zero;
     book = await BudgetTestBook.create(server.anonymousSession());
     await book.session.caches.clear();
     await book.session.db.unsafeExecute('DELETE FROM asset_price');

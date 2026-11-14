@@ -16,10 +16,6 @@ class JupiterPriceClient {
     required Iterable<String> mintAddresses,
     void Function(String warning)? onWarning,
     HttpClient? httpClient,
-    WalletVendorRequestCounter? counter,
-    WalletVendorRequestCounter? requestCounter,
-    WalletVendorRequestCounter? vendorRequestCounter,
-    WalletVendorRequestCounter? vendorCounter,
   }) async {
     final cleanedMints = mintAddresses
         .map((mint) => mint.trim())
@@ -31,12 +27,6 @@ class JupiterPriceClient {
     final client = httpClient ?? HttpClient();
     final shouldClose = httpClient == null;
     final prices = <String, double>{};
-    final resolvedCounter =
-        counter ??
-        requestCounter ??
-        vendorRequestCounter ??
-        vendorCounter ??
-        WalletVendorRequestCounter.current;
 
     try {
       for (var index = 0; index < cleanedMints.length; index += _batchSize) {
@@ -46,11 +36,7 @@ class JupiterPriceClient {
           next > cleanedMints.length ? cleanedMints.length : next,
         );
         final uri = _baseUri.replace(queryParameters: {'ids': batch.join(',')});
-        if (resolvedCounter != null) resolvedCounter.record('jupiter');
-        final current = WalletVendorRequestCounter.current;
-        if (current != null && !identical(current, resolvedCounter)) {
-          current.record('jupiter');
-        }
+        WalletVendorRequestCounter.current?.record('jupiter');
         final request = await client.getUrl(uri);
         request.headers.set(HttpHeaders.acceptHeader, 'application/json');
 

@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
-import 'package:openbudget_server/src/wallets/wallet_vendor_request_counter.dart';
 import 'package:openbudget_server/src/wallets/xrpl/xrpl_amount.dart';
 import 'package:openbudget_server/src/wallets/xrpl/xrpl_client.dart';
 import 'package:openbudget_server/src/wallets/xrpl/xrpl_currency.dart';
@@ -29,10 +28,6 @@ final class XrplWalletProvider implements WalletProvider {
     Object? urls,
     Object? transport,
     dynamic httpClient,
-    WalletVendorRequestCounter? counter,
-    WalletVendorRequestCounter? requestCounter,
-    WalletVendorRequestCounter? vendorRequestCounter,
-    WalletVendorRequestCounter? vendorCounter,
   }) : _client =
            client ??
            rpcClient ??
@@ -42,11 +37,6 @@ final class XrplWalletProvider implements WalletProvider {
              urls: urls,
              transport: transport,
              httpClient: httpClient is http.Client ? httpClient : null,
-             counter:
-                 counter ??
-                 requestCounter ??
-                 vendorRequestCounter ??
-                 vendorCounter,
            );
 
   factory XrplWalletProvider.fromSession(

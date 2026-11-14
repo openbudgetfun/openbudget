@@ -36,10 +36,6 @@ class DefiLlamaPriceClient {
     required Iterable<String> coins,
     HttpClient? httpClient,
     void Function(String warning)? onWarning,
-    WalletVendorRequestCounter? counter,
-    WalletVendorRequestCounter? requestCounter,
-    WalletVendorRequestCounter? vendorRequestCounter,
-    WalletVendorRequestCounter? vendorCounter,
   }) async {
     final cleaned = coins
         .map((e) => e.trim())
@@ -54,14 +50,7 @@ class DefiLlamaPriceClient {
     try {
       // DefiLlama accepts comma-separated keys in the path.
       final uri = Uri.parse('$baseUrl/${cleaned.join(',')}');
-      final resolvedCounter =
-          counter ?? requestCounter ?? vendorRequestCounter ?? vendorCounter;
-      final decoded = await _requestJson(
-        client,
-        uri,
-        onWarning: onWarning,
-        counter: resolvedCounter,
-      );
+      final decoded = await _requestJson(client, uri, onWarning: onWarning);
       if (decoded is Map<String, dynamic>) {
         prices.addAll(parsePricesResponse(decoded));
       }
@@ -115,13 +104,8 @@ class DefiLlamaPriceClient {
     HttpClient client,
     Uri uri, {
     void Function(String warning)? onWarning,
-    WalletVendorRequestCounter? counter,
   }) async {
-    counter?.record('defillama');
-    final current = WalletVendorRequestCounter.current;
-    if (current != null && !identical(current, counter)) {
-      current.record('defillama');
-    }
+    WalletVendorRequestCounter.current?.record('defillama');
     try {
       final request = await client.getUrl(uri);
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');

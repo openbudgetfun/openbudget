@@ -21,6 +21,9 @@ import 'package:test/test.dart';
 const _testAddress = '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin';
 const _apiKey = 'super-secret-api-key';
 
+/// An extended public key: a `[xyz]pub` prefix followed by its base58 body.
+final _extendedKey = RegExp('[xyz]pub[1-9A-HJ-NP-Za-km-z]{20,}');
+
 class _FakeIoResponse implements HttpClientResponse {
   _FakeIoResponse(this._status, this._body);
 
@@ -159,8 +162,7 @@ void main() {
     final lower = output.toLowerCase();
     if (lower.contains(_testAddress.toLowerCase())) return true;
     if (lower.contains(_apiKey.toLowerCase())) return true;
-    if (lower.contains('xpub')) return true;
-    if (lower.contains('zpub')) return true;
+    if (_extendedKey.hasMatch(output)) return true;
     if (lower.contains('descriptor')) return true;
     if (lower.contains('http://')) return true;
     if (lower.contains('https://')) return true;
@@ -408,10 +410,8 @@ void main() {
       for (final status in <int>[400, 429, 500]) {
         final client = EsploraClient(
           baseUrls: [Uri.parse('https://mempool.space/api')],
-          transport: (_) async => EsploraResponse(
-            statusCode: status,
-            body: '{"error":"nope"}',
-          ),
+          transport: (_) async =>
+              EsploraResponse(statusCode: status, body: '{"error":"nope"}'),
         );
         try {
           await client.fetchAddress(_testAddress);
@@ -422,10 +422,8 @@ void main() {
 
       final malformed = EsploraClient(
         baseUrls: [Uri.parse('https://mempool.space/api')],
-        transport: (_) async => const EsploraResponse(
-          statusCode: 200,
-          body: '{not json',
-        ),
+        transport: (_) async =>
+            const EsploraResponse(statusCode: 200, body: '{not json'),
       );
       try {
         await malformed.fetchAddress(_testAddress);
@@ -502,10 +500,8 @@ void main() {
 
       final malformed = XrplClient(
         endpoints: ['https://xrplcluster.com'],
-        transport: (_, [_]) async => const XrplResponse(
-          statusCode: 200,
-          body: '{not json',
-        ),
+        transport: (_, [_]) async =>
+            const XrplResponse(statusCode: 200, body: '{not json'),
       );
       try {
         await malformed.call('account_info', {'account': _testAddress});

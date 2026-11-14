@@ -9,6 +9,7 @@ import 'package:openbudget_server/src/entities/entity_access.dart';
 import 'package:openbudget_server/src/entities/entity_clock.dart';
 import 'package:openbudget_server/src/entities/entity_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/wallets/prices/price_service.dart';
 import 'package:openbudget_server/src/wallets/wallet_math.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider_registry.dart';
@@ -43,12 +44,18 @@ abstract final class WalletService {
   static WalletProviderFactory _providerFactory = _registryProvider;
   static WalletProviderRegistry _registry =
       WalletProviderRegistry.defaultRegistry;
-  static WalletChangePublisher _publisher = EntityRealtimeNotifier.notify;
-  static final _previewRateLimiter = _PreviewRateLimiter();
 
-  /// The server clock used for the 7-day price rule and related stamps.
-  @visibleForTesting
+  /// The server clock used for sync cadence and throttling. Tests inject a
+  /// fake clock here; production defaults to UTC now.
   static DateTime Function() clock = () => DateTime.now().toUtc();
+
+  /// Manual sync throttle window. Defaults to 5 minutes; tests may shorten it.
+  static Duration manualSyncThrottle = const Duration(minutes: 5);
+
+  static WalletChangePublisher _publisher = EntityRealtimeNotifier.notify;
+  static final _previewRateLimiter = _PreviewRateLimiter(
+    clock: () => clock(),
+  );
 
   /// The chain provider used by [connect], [sync] and [preview].
   @visibleForTesting
@@ -90,7 +97,6 @@ abstract final class WalletService {
     _publisher = EntityRealtimeNotifier.notify;
     _previewRateLimiter.reset();
     clock = () => DateTime.now().toUtc();
-    WalletVendorRequestCounter.current = null;
   }
 
   /// Creates the wallet and its fixed crypto account in one transaction, then
@@ -254,110 +260,306 @@ abstract final class WalletService {
   /// the wallet is marked failed.
   static Future<WalletSyncResult> sync(
     Session session,
-    UuidValue walletId,
-  ) async {
-    WalletVendorRequestCounter.current = WalletVendorRequestCounter();
-    try {
-      var wallet = await _ownedWallet(session, walletId);
-      _requireWritable(
-        await EntityAccess.requireOwned(session, wallet.entityId),
-      );
-      var startedAt = DateTime.now().toUtc();
-      var attempt = 0;
+    UuidValue walletId, {
+    bool force = false,
+    SystemEntityOwner? systemOwner,
+  }) => WalletVendorRequestCounter.track(
+    () => _sync(session, walletId, force: force, systemOwner: systemOwner),
+  );
 
-      while (true) {
-        final networks = _readNetworksFor(wallet);
-        try {
-          // Every network call happens before the transaction opens: the
-          // per-network history cursors are read here, outside any
-          // transaction, and the provider is resolved before the commit below
-          // opens one.
-          final states = await WalletNetworkState.db.find(
+  static Future<WalletSyncResult> _sync(
+    Session session,
+    UuidValue walletId, {
+    required bool force,
+    SystemEntityOwner? systemOwner,
+  }) async {
+    var wallet = await _ownedWallet(
+      session,
+      walletId,
+      systemOwner: systemOwner,
+    );
+    _requireWritable(
+      await EntityAccess.requireOwned(
+        session,
+        wallet.entityId,
+        systemOwner: systemOwner,
+      ),
+    );
+
+    // Manual throttle: a sync within 5 minutes of the last one makes no
+    // provider call. The timestamp lives on the wallet row, so it is
+    // consistent across server instances.
+    if (!force) {
+      final now = clock();
+      if (wallet.lastSyncedAt != null &&
+          now.difference(wallet.lastSyncedAt!) < manualSyncThrottle) {
+        return _throttledSyncResult(session, wallet);
+      }
+    }
+
+    var startedAt = clock();
+    var attempt = 0;
+
+    while (true) {
+      final networks = _readNetworksFor(wallet);
+      try {
+        // Every network call happens before the transaction opens: the
+        // per-network history cursors are read here, outside any
+        // transaction, and the provider is resolved before the commit below
+        // opens one.
+        final states = await WalletNetworkState.db.find(
+          session,
+          where: (t) => t.walletId.equals(wallet.id),
+        );
+        final cursors = {
+          for (final state in states)
+            if (state.historyCursor != null && networks.contains(state.network))
+              state.network: state.historyCursor!,
+        };
+        final provider = _providerFactory(session, wallet.network);
+        final snapshot = await provider.fetchSnapshot(
+          WalletReadRequest(
+            homeNetwork: wallet.network,
+            networks: networks,
+            address: wallet.address,
+            // HD wallets pass the opened descriptor here from W4.2 on.
+            untilSignature: wallet.lastSignature,
+            // Solana keeps its cursor in the wallet row (multichain-wallets.md
+            // 7.3); other families resume from these wallet_network_state
+            // cursors once history sync covers them.
+            historyCursors: cursors,
+          ),
+        );
+        if (snapshot.readNetworks.isEmpty) {
+          // Nothing was readable: the catch below keeps every committed
+          // fact and records each network's own reason.
+          throw _AllNetworksFailed(
+            _combinedFailureMessage(networks, snapshot.failedNetworks),
+            snapshot.failedNetworks,
+          );
+        }
+        final outcome = await _commit(
+          session,
+          wallet,
+          snapshot,
+          requestNetworks: networks,
+          cursorsByNetwork: cursors,
+          startedAt: startedAt,
+          systemOwner: systemOwner,
+        );
+        await _publish(
+          session,
+          wallet.entityId,
+          ChangeScope.accounts,
+          accountId: wallet.accountId,
+        );
+        await _publish(
+          session,
+          wallet.entityId,
+          ChangeScope.transactions,
+          accountId: wallet.accountId,
+        );
+        return outcome;
+      } on _SyncConflict {
+        attempt += 1;
+        if (attempt >= 2) {
+          throw ValidationException(
+            message: 'Wallet changed while syncing; retry the sync.',
+          );
+        }
+        wallet = await _ownedWallet(
+          session,
+          walletId,
+          systemOwner: systemOwner,
+        );
+        startedAt = clock();
+      } on _AllNetworksFailed catch (failure, stackTrace) {
+        _log.warning(
+          'Wallet sync failed for $walletId: ${failure.runtimeType}',
+          stackTrace,
+        );
+        await _markFailed(
+          session,
+          walletId,
+          startedAt,
+          WalletProviderException(failure.message),
+          networks,
+          reasonsByNetwork: failure.reasonsByNetwork,
+        );
+        throw WalletProviderException(failure.message);
+      } on Object catch (error, stackTrace) {
+        _log.warning(
+          'Wallet sync failed for $walletId: ${error.runtimeType}',
+          stackTrace,
+        );
+        await _markFailed(session, walletId, startedAt, error, networks);
+        rethrow;
+      }
+    }
+  }
+
+  /// Revalues a wallet from its stored quantities and cached prices without
+  /// any provider read. Updates today's account valuation only.
+  static Future<void> revalue(
+    Session session,
+    UuidValue walletId, {
+    SystemEntityOwner? systemOwner,
+    Map<(WalletNetwork, String), AssetPrice?>? prices,
+  }) async {
+    final wallet = await _ownedWallet(
+      session,
+      walletId,
+      systemOwner: systemOwner,
+    );
+    _requireWritable(
+      await EntityAccess.requireOwned(
+        session,
+        wallet.entityId,
+        systemOwner: systemOwner,
+      ),
+    );
+
+    await session.db.transaction((tx) async {
+      final entity = await EntityAccess.requireOwned(
+        session,
+        wallet.entityId,
+        transaction: tx,
+        lockMode: LockMode.forNoKeyUpdate,
+        systemOwner: systemOwner,
+      );
+      _requireWritable(entity);
+
+      final account = await _lockWalletAccount(session, wallet.accountId, tx);
+      final current = await Wallet.db.findById(
+        session,
+        wallet.id!,
+        transaction: tx,
+        lockMode: LockMode.forUpdate,
+      );
+      if (current == null) throw NotFoundException();
+      if (current.accountId != account.id) {
+        throw StateError('Wallet ${current.id} changed its crypto account.');
+      }
+
+      final holdings = await WalletHolding.db.find(
+        session,
+        where: (t) => t.walletId.equals(wallet.id),
+        transaction: tx,
+      );
+
+      // Resolve swept prices when the caller did not pass them (the hourly
+      // job resolves them once for the whole run).
+      final priceKeys = <(WalletNetwork, String)>{
+        for (final holding in holdings) (holding.network, holding.assetId),
+      };
+      final resolvedPrices =
+          prices ??
+          await PriceService.resolve(
             session,
-            where: (t) => t.walletId.equals(wallet.id),
+            priceKeys,
+            now: clock(),
           );
-          final cursors = {
-            for (final state in states)
-              if (state.historyCursor != null &&
-                  networks.contains(state.network))
-                state.network: state.historyCursor!,
-          };
-          final provider = _providerFactory(session, wallet.network);
-          final snapshot = await provider.fetchSnapshot(
-            WalletReadRequest(
-              homeNetwork: wallet.network,
-              networks: networks,
-              address: wallet.address,
-              // HD wallets pass the opened descriptor here from W4.2 on.
-              untilSignature: wallet.lastSignature,
-              // Solana keeps its cursor in the wallet row (multichain-wallets.md
-              // 7.3); other families resume from these wallet_network_state
-              // cursors once history sync covers them.
-              historyCursors: cursors,
-            ),
-          );
-          if (snapshot.readNetworks.isEmpty) {
-            // Nothing was readable: the catch below keeps every committed
-            // fact and records each network's own reason.
-            throw _AllNetworksFailed(
-              _combinedFailureMessage(networks, snapshot.failedNetworks),
-              snapshot.failedNetworks,
+
+      var total = BigInt.zero;
+      final now = clock();
+      for (final holding in holdings) {
+        final price = resolvedPrices[(holding.network, holding.assetId)];
+        var newValue = holding.valueMinor;
+        var newUnitPrice = holding.unitPrice;
+        var newSource = holding.priceSource;
+        var newCurrency = holding.priceCurrencyCode;
+        var newAsOf = holding.priceAsOf;
+        var newQuality = holding.priceQuality;
+        final newConfidence = holding.priceConfidence;
+        if (price != null) {
+          final unit = ExactDecimal.tryParse(price.unitPrice);
+          if (unit != null) {
+            newValue = WalletMath.valueMinor(
+              quantityRaw: holding.quantityRaw,
+              decimals: holding.decimals,
+              unitPrice: unit,
+              currencyCode: price.currencyCode,
             );
+            newUnitPrice = price.unitPrice;
+            newSource = price.source;
+            newCurrency = price.currencyCode;
+            newAsOf = price.fetchedAt;
+            newQuality = PriceQuality.live;
           }
-          final outcome = await _commit(
-            session,
-            wallet,
-            snapshot,
-            requestNetworks: networks,
-            cursorsByNetwork: cursors,
-            startedAt: startedAt,
-          );
-          await _publish(
-            session,
-            wallet.entityId,
-            ChangeScope.accounts,
-            accountId: wallet.accountId,
-          );
-          await _publish(
-            session,
-            wallet.entityId,
-            ChangeScope.transactions,
-            accountId: wallet.accountId,
-          );
-          return outcome;
-        } on _SyncConflict {
-          attempt += 1;
-          if (attempt >= 2) {
-            throw ValidationException(
-              message: 'Wallet changed while syncing; retry the sync.',
-            );
-          }
-          wallet = await _ownedWallet(session, walletId);
-          startedAt = DateTime.now().toUtc();
-        } on _AllNetworksFailed catch (failure, stackTrace) {
-          _log.warning(
-            'Wallet sync failed for $walletId: $failure',
-            stackTrace,
-          );
-          await _markFailed(
-            session,
-            walletId,
-            startedAt,
-            WalletProviderException(failure.message),
-            networks,
-            reasonsByNetwork: failure.reasonsByNetwork,
-          );
-          throw WalletProviderException(failure.message);
-        } on Object catch (error, stackTrace) {
-          _log.warning('Wallet sync failed for $walletId: $error', stackTrace);
-          await _markFailed(session, walletId, startedAt, error, networks);
-          rethrow;
+        }
+        await WalletHolding.db.updateRow(
+          session,
+          holding.copyWith(
+            priceCurrencyCode: newCurrency,
+            unitPrice: newUnitPrice,
+            valueMinor: newValue,
+            priceSource: newSource,
+            priceQuality: newQuality,
+            priceConfidence: newConfidence,
+            priceAsOf: newAsOf,
+            updatedAt: now,
+          ),
+          transaction: tx,
+        );
+        final verdict = holding.spamVerdict;
+        if (newValue != null &&
+            (verdict == SpamVerdict.clean ||
+                verdict == SpamVerdict.allowedByUser)) {
+          total += BigInt.from(newValue);
         }
       }
-    } finally {
-      WalletVendorRequestCounter.current?.log();
-      WalletVendorRequestCounter.current = null;
-    }
+      final valuationDate = EntityClock.today(entity, now: clock());
+      await AccountValuationService.setInTransaction(
+        session,
+        tx,
+        wallet.accountId,
+        valuationDate,
+        _safeMinor(total, 'wallet total value'),
+        source: ValuationSource.wallet,
+        note: 'Wallet revaluation',
+      );
+
+      await Wallet.db.updateRow(
+        session,
+        current.copyWith(updatedAt: now),
+        transaction: tx,
+      );
+    });
+  }
+
+  /// Returns the last stored sync result when a manual sync is throttled.
+  static Future<WalletSyncResult> _throttledSyncResult(
+    Session session,
+    Wallet wallet,
+  ) async {
+    final holdings = await WalletHolding.db.find(
+      session,
+      where: (t) => t.walletId.equals(wallet.id),
+    );
+    final valuation = await AccountValuation.db.findFirstRow(
+      session,
+      where: (t) => t.accountId.equals(wallet.accountId),
+      orderBy: (t) => t.valuationDate.desc(),
+    );
+    return WalletSyncResult(
+      walletId: wallet.id!,
+      insertedTransactions: 0,
+      updatedTransactions: 0,
+      holdingCount: holdings.length,
+      pricedHoldingCount: 0,
+      cachedHoldingCount: 0,
+      unpricedHoldingCount: 0,
+      nftHoldingCount: holdings.where((h) => h.isNft).length,
+      pricedNftHoldingCount: 0,
+      cachedNftHoldingCount: 0,
+      unpricedNftHoldingCount: 0,
+      totalValueMinor: valuation?.valueMinor,
+      valuationCurrencyCode: _valuationCurrency,
+      readNetworks: const [],
+      failedNetworks: const [],
+      syncedAt: wallet.lastSyncedAt ?? clock(),
+      warnings: const ['Sync throttled; returned the last result.'],
+    );
   }
 
   /// Reads what one address holds across its family's supported networks,
@@ -853,6 +1055,7 @@ LIMIT @limit''',
     required List<WalletNetwork> requestNetworks,
     required Map<WalletNetwork, String> cursorsByNetwork,
     required DateTime startedAt,
+    SystemEntityOwner? systemOwner,
   }) async {
     final outcome = await session.db.transaction((tx) async {
       final entity = await EntityAccess.requireOwned(
@@ -860,6 +1063,7 @@ LIMIT @limit''',
         wallet.entityId,
         transaction: tx,
         lockMode: LockMode.forNoKeyUpdate,
+        systemOwner: systemOwner,
       );
       _requireWritable(entity);
 
@@ -1296,7 +1500,7 @@ LIMIT @limit''',
       // One state row per network: a read refreshes lastReadAt and clears
       // the error, a failure records the reason and keeps the facts
       // (multichain-wallets.md 8.1).
-      final syncedAt = DateTime.now().toUtc();
+      final syncedAt = clock();
       for (final network in readNetworks) {
         await WalletNetworkState.db.upsertRow(
           session,
@@ -1724,11 +1928,16 @@ LIMIT @limit''',
 
   static Future<Wallet> _ownedWallet(
     Session session,
-    UuidValue walletId,
-  ) async {
+    UuidValue walletId, {
+    SystemEntityOwner? systemOwner,
+  }) async {
     final wallet = await Wallet.db.findById(session, walletId);
     if (wallet == null) throw NotFoundException();
-    await EntityAccess.requireOwned(session, wallet.entityId);
+    await EntityAccess.requireOwned(
+      session,
+      wallet.entityId,
+      systemOwner: systemOwner,
+    );
     return wallet;
   }
 
