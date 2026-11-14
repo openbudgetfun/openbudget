@@ -7728,6 +7728,12 @@ abstract class AppLocalizations {
   /// **'Apply'**
   String get assistantApply;
 
+  /// Spoken label of an inline citation chip in a Money guide reply.
+  ///
+  /// In en, this message translates to:
+  /// **'Source {number}: {title}'**
+  String assistantCitationSemantics(int number, String title);
+
   /// No description provided for @assistantComposerHint.
   ///
   /// In en, this message translates to:
@@ -7776,6 +7782,12 @@ abstract class AppLocalizations {
   /// **'Conversations'**
   String get assistantConversations;
 
+  /// Estimate of how many typical Money guide conversations the remaining allowance covers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No full conversations left this month} =1{About 1 conversation left this month} other{About {count} conversations left this month}}'**
+  String assistantConversationsLeft(int count);
+
   /// No description provided for @assistantConversationsLoadError.
   ///
   /// In en, this message translates to:
@@ -7785,7 +7797,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantDisclaimer.
   ///
   /// In en, this message translates to:
-  /// **'Guidance only, not financial or tax advice.'**
+  /// **'Guidance, not regulated financial advice.'**
   String get assistantDisclaimer;
 
   /// No description provided for @assistantDismiss.
@@ -7797,19 +7809,19 @@ abstract class AppLocalizations {
   /// No description provided for @assistantEmptyMessage.
   ///
   /// In en, this message translates to:
-  /// **'I can read your budget, explain what changed, and suggest moves for you to approve. I never change anything on my own.'**
+  /// **'Ask about your plan, your taxes or your crypto. I show what the rules say and what your figures show, with sources. You decide what to do, and I never change anything on my own.'**
   String get assistantEmptyMessage;
 
   /// No description provided for @assistantEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'Ask about this plan'**
+  /// **'Ask the Money guide'**
   String get assistantEmptyTitle;
 
   /// No description provided for @assistantErrorAllowanceMessage.
   ///
   /// In en, this message translates to:
-  /// **'You\'ve used this month\'s included assistant usage. It resets with your next billing period, or you can connect your own provider and keep going now.'**
+  /// **'You\'ve used this month\'s included Money guide usage. It resets with your next billing period, or you can connect your own provider and keep going now.'**
   String get assistantErrorAllowanceMessage;
 
   /// No description provided for @assistantErrorAllowanceTitle.
@@ -7821,7 +7833,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantErrorEntitlementMessage.
   ///
   /// In en, this message translates to:
-  /// **'The included assistant is part of OpenBudget Plus. Subscribe to keep chatting, or connect your own OpenAI-compatible provider.'**
+  /// **'The Money guide is part of OpenBudget Plus. Subscribe to keep asking, or connect your own OpenAI-compatible provider.'**
   String get assistantErrorEntitlementMessage;
 
   /// No description provided for @assistantErrorEntitlementTitle.
@@ -7845,7 +7857,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantErrorNetworkTitle.
   ///
   /// In en, this message translates to:
-  /// **'Couldn\'t reach the assistant'**
+  /// **'Couldn\'t reach the Money guide'**
   String get assistantErrorNetworkTitle;
 
   /// No description provided for @assistantErrorProviderMessage.
@@ -7857,7 +7869,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantErrorProviderTitle.
   ///
   /// In en, this message translates to:
-  /// **'The assistant has no provider right now'**
+  /// **'The Money guide has no provider right now'**
   String get assistantErrorProviderTitle;
 
   /// No description provided for @assistantErrorTryAgain.
@@ -7875,7 +7887,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantErrorUnknownTitle.
   ///
   /// In en, this message translates to:
-  /// **'The assistant couldn\'t finish'**
+  /// **'The Money guide couldn\'t finish'**
   String get assistantErrorUnknownTitle;
 
   /// No description provided for @assistantErrorUseOwnProvider.
@@ -7983,7 +7995,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantProposalsEmptyMessage.
   ///
   /// In en, this message translates to:
-  /// **'When the assistant suggests a move, it waits here for you to apply or dismiss it.'**
+  /// **'When the Money guide suggests a move, it waits here for you to apply or dismiss it.'**
   String get assistantProposalsEmptyMessage;
 
   /// No description provided for @assistantProposalsEmptyTitle.
@@ -8019,7 +8031,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantProposalsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Assistant proposals'**
+  /// **'Money guide suggestions'**
   String get assistantProposalsTitle;
 
   /// No description provided for @assistantProviderApiKey.
@@ -8055,7 +8067,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantProviderIntro.
   ///
   /// In en, this message translates to:
-  /// **'Connect an OpenAI-compatible provider to talk to the assistant with your own key.'**
+  /// **'Connect an OpenAI-compatible provider to use the Money guide with your own key.'**
   String get assistantProviderIntro;
 
   /// No description provided for @assistantProviderKeyRequired.
@@ -8127,7 +8139,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantProviderRemoveMessage.
   ///
   /// In en, this message translates to:
-  /// **'The assistant will go back to the included provider, which needs OpenBudget Plus.'**
+  /// **'The Money guide will go back to the included provider, which needs OpenBudget Plus.'**
   String get assistantProviderRemoveMessage;
 
   /// No description provided for @assistantProviderRemoveTitle.
@@ -8175,13 +8187,13 @@ abstract class AppLocalizations {
   /// No description provided for @assistantProviderSettingsRow.
   ///
   /// In en, this message translates to:
-  /// **'Assistant provider'**
+  /// **'Money guide provider'**
   String get assistantProviderSettingsRow;
 
   /// No description provided for @assistantProviderTitle.
   ///
   /// In en, this message translates to:
-  /// **'Assistant provider'**
+  /// **'Money guide provider'**
   String get assistantProviderTitle;
 
   /// No description provided for @assistantProviderUrlInvalid.
@@ -8208,6 +8220,54 @@ abstract class AppLocalizations {
   /// **'Send message'**
   String get assistantSend;
 
+  /// Badge on a source that describes a rule that is announced but not yet law.
+  ///
+  /// In en, this message translates to:
+  /// **'Announced, not yet law'**
+  String get assistantSourceAnnouncedBadge;
+
+  /// When a cited source was last checked.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked {date}'**
+  String assistantSourceChecked(String date);
+
+  /// Spoken label of a source's number in the sources sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Source {number}'**
+  String assistantSourceNumber(int number);
+
+  /// Link that opens a cited source; authority is its website, such as gov.uk.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {authority}'**
+  String assistantSourceOpen(String authority);
+
+  /// Spoken label of the link that opens a cited source.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source: {title}'**
+  String assistantSourceOpenSemantics(String title);
+
+  /// Button under a Money guide reply that opens its sources.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 source} other{{count} sources}}'**
+  String assistantSourcesButton(int count);
+
+  /// Line under the sources sheet title.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the rules and figures in this answer come from. Open one to read it at the source.'**
+  String get assistantSourcesIntro;
+
+  /// Title of the sheet that lists a reply's sources.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources'**
+  String get assistantSourcesTitle;
+
   /// No description provided for @assistantSuggestionCuts.
   ///
   /// In en, this message translates to:
@@ -8229,7 +8289,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantTitle.
   ///
   /// In en, this message translates to:
-  /// **'Assistant'**
+  /// **'Money guide'**
   String get assistantTitle;
 
   /// No description provided for @assistantToolGetTaxReport.
@@ -8289,7 +8349,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantTyping.
   ///
   /// In en, this message translates to:
-  /// **'The assistant is thinking…'**
+  /// **'The Money guide is thinking…'**
   String get assistantTyping;
 
   /// No description provided for @assistantUntitledConversation.
@@ -8325,7 +8385,7 @@ abstract class AppLocalizations {
   /// No description provided for @plusNavSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Tax reports, the assistant and more'**
+  /// **'Tax reports, the Money guide and more'**
   String get plusNavSubtitle;
 
   /// No description provided for @plusHeroHeadline.
@@ -8337,7 +8397,7 @@ abstract class AppLocalizations {
   /// No description provided for @plusHeroBody.
   ///
   /// In en, this message translates to:
-  /// **'Tax reports, a built-in assistant that knows your budget, and room to bring your own agent.'**
+  /// **'Tax reports, a Money guide that knows your budget, and room to bring your own agent.'**
   String get plusHeroBody;
 
   /// No description provided for @plusPriceAmount.
@@ -8361,7 +8421,7 @@ abstract class AppLocalizations {
   /// No description provided for @plusIncludedUsage.
   ///
   /// In en, this message translates to:
-  /// **'\$5 of assistant usage included every month'**
+  /// **'\$5 of Money guide usage included every month'**
   String get plusIncludedUsage;
 
   /// No description provided for @plusBenefitsTitle.
@@ -8385,7 +8445,7 @@ abstract class AppLocalizations {
   /// No description provided for @plusBenefitAssistantTitle.
   ///
   /// In en, this message translates to:
-  /// **'The assistant'**
+  /// **'The Money guide'**
   String get plusBenefitAssistantTitle;
 
   /// No description provided for @plusBenefitAssistantBody.

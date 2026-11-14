@@ -4573,6 +4573,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assistantApply => 'Apply';
 
   @override
+  String assistantCitationSemantics(int number, String title) {
+    return 'Source $number: $title';
+  }
+
+  @override
   String get assistantComposerHint => 'Ask about this plan…';
 
   @override
@@ -4600,32 +4605,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assistantConversations => 'Conversations';
 
   @override
+  String assistantConversationsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'About $count conversations left this month',
+      one: 'About 1 conversation left this month',
+      zero: 'No full conversations left this month',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get assistantConversationsLoadError => 'Could not load conversations.';
 
   @override
-  String get assistantDisclaimer =>
-      'Guidance only, not financial or tax advice.';
+  String get assistantDisclaimer => 'Guidance, not regulated financial advice.';
 
   @override
   String get assistantDismiss => 'Dismiss';
 
   @override
   String get assistantEmptyMessage =>
-      'I can read your budget, explain what changed, and suggest moves for you to approve. I never change anything on my own.';
+      'Ask about your plan, your taxes or your crypto. I show what the rules say and what your figures show, with sources. You decide what to do, and I never change anything on my own.';
 
   @override
-  String get assistantEmptyTitle => 'Ask about this plan';
+  String get assistantEmptyTitle => 'Ask the Money guide';
 
   @override
   String get assistantErrorAllowanceMessage =>
-      'You\'ve used this month\'s included assistant usage. It resets with your next billing period, or you can connect your own provider and keep going now.';
+      'You\'ve used this month\'s included Money guide usage. It resets with your next billing period, or you can connect your own provider and keep going now.';
 
   @override
   String get assistantErrorAllowanceTitle => 'Included usage is spent';
 
   @override
   String get assistantErrorEntitlementMessage =>
-      'The included assistant is part of OpenBudget Plus. Subscribe to keep chatting, or connect your own OpenAI-compatible provider.';
+      'The Money guide is part of OpenBudget Plus. Subscribe to keep asking, or connect your own OpenAI-compatible provider.';
 
   @override
   String get assistantErrorEntitlementTitle => 'OpenBudget Plus is needed';
@@ -4638,7 +4654,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Check your connection and try again.';
 
   @override
-  String get assistantErrorNetworkTitle => 'Couldn\'t reach the assistant';
+  String get assistantErrorNetworkTitle => 'Couldn\'t reach the Money guide';
 
   @override
   String get assistantErrorProviderMessage =>
@@ -4646,7 +4662,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assistantErrorProviderTitle =>
-      'The assistant has no provider right now';
+      'The Money guide has no provider right now';
 
   @override
   String get assistantErrorTryAgain => 'Try again';
@@ -4656,7 +4672,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Something went wrong while answering. Try again.';
 
   @override
-  String get assistantErrorUnknownTitle => 'The assistant couldn\'t finish';
+  String get assistantErrorUnknownTitle => 'The Money guide couldn\'t finish';
 
   @override
   String get assistantErrorUseOwnProvider => 'Use your own provider';
@@ -4721,7 +4737,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assistantProposalsEmptyMessage =>
-      'When the assistant suggests a move, it waits here for you to apply or dismiss it.';
+      'When the Money guide suggests a move, it waits here for you to apply or dismiss it.';
 
   @override
   String get assistantProposalsEmptyTitle => 'Nothing waiting';
@@ -4739,7 +4755,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assistantProposalsPendingSection => 'Waiting for you';
 
   @override
-  String get assistantProposalsTitle => 'Assistant proposals';
+  String get assistantProposalsTitle => 'Money guide suggestions';
 
   @override
   String get assistantProviderApiKey => 'API key';
@@ -4759,7 +4775,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assistantProviderIntro =>
-      'Connect an OpenAI-compatible provider to talk to the assistant with your own key.';
+      'Connect an OpenAI-compatible provider to use the Money guide with your own key.';
 
   @override
   String get assistantProviderKeyRequired => 'Enter the API key.';
@@ -4800,7 +4816,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assistantProviderRemoveMessage =>
-      'The assistant will go back to the included provider, which needs OpenBudget Plus.';
+      'The Money guide will go back to the included provider, which needs OpenBudget Plus.';
 
   @override
   String get assistantProviderRemoveTitle => 'Remove this provider?';
@@ -4825,10 +4841,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Use your own OpenAI-compatible provider';
 
   @override
-  String get assistantProviderSettingsRow => 'Assistant provider';
+  String get assistantProviderSettingsRow => 'Money guide provider';
 
   @override
-  String get assistantProviderTitle => 'Assistant provider';
+  String get assistantProviderTitle => 'Money guide provider';
 
   @override
   String get assistantProviderUrlInvalid =>
@@ -4845,6 +4861,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assistantSend => 'Send message';
 
   @override
+  String get assistantSourceAnnouncedBadge => 'Announced, not yet law';
+
+  @override
+  String assistantSourceChecked(String date) {
+    return 'Checked $date';
+  }
+
+  @override
+  String assistantSourceNumber(int number) {
+    return 'Source $number';
+  }
+
+  @override
+  String assistantSourceOpen(String authority) {
+    return 'Open $authority';
+  }
+
+  @override
+  String assistantSourceOpenSemantics(String title) {
+    return 'Open source: $title';
+  }
+
+  @override
+  String assistantSourcesButton(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sources',
+      one: '1 source',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get assistantSourcesIntro =>
+      'Where the rules and figures in this answer come from. Open one to read it at the source.';
+
+  @override
+  String get assistantSourcesTitle => 'Sources';
+
+  @override
   String get assistantSuggestionCuts => 'Where can I cut spending?';
 
   @override
@@ -4854,7 +4911,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assistantSuggestionTax => 'How much tax will I owe this year?';
 
   @override
-  String get assistantTitle => 'Assistant';
+  String get assistantTitle => 'Money guide';
 
   @override
   String get assistantToolGetTaxReport => 'Looked at your tax report';
@@ -4886,7 +4943,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assistantToolUnknown => 'Looked something up';
 
   @override
-  String get assistantTyping => 'The assistant is thinking…';
+  String get assistantTyping => 'The Money guide is thinking…';
 
   @override
   String get assistantUntitledConversation => 'Untitled conversation';
@@ -4906,14 +4963,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get plusTitle => 'OpenBudget Plus';
 
   @override
-  String get plusNavSubtitle => 'Tax reports, the assistant and more';
+  String get plusNavSubtitle => 'Tax reports, the Money guide and more';
 
   @override
   String get plusHeroHeadline => 'Get more from every envelope';
 
   @override
   String get plusHeroBody =>
-      'Tax reports, a built-in assistant that knows your budget, and room to bring your own agent.';
+      'Tax reports, a Money guide that knows your budget, and room to bring your own agent.';
 
   @override
   String get plusPriceAmount => '\$20';
@@ -4925,7 +4982,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get plusPriceNote => 'Cancel whenever you like.';
 
   @override
-  String get plusIncludedUsage => '\$5 of assistant usage included every month';
+  String get plusIncludedUsage =>
+      '\$5 of Money guide usage included every month';
 
   @override
   String get plusBenefitsTitle => 'What you get';
@@ -4938,7 +4996,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'UK, US, Nigeria and Germany, built from your own transactions.';
 
   @override
-  String get plusBenefitAssistantTitle => 'The assistant';
+  String get plusBenefitAssistantTitle => 'The Money guide';
 
   @override
   String get plusBenefitAssistantBody =>
