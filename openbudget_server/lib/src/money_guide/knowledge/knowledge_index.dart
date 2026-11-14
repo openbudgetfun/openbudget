@@ -116,6 +116,21 @@ final class KnowledgeIndex {
     return hits.take(math.max(0, limit)).toList();
   }
 
+  /// Every card matching [country], [taxYear] and [entityKind], with the
+  /// same filters as [search], in id order.
+  ///
+  /// The entity brief lists these so the model can read a card by id
+  /// (docs/money-guide.md, section 5.1).
+  List<KnowledgeCard> cardsFor({
+    String? country,
+    int? taxYear,
+    EntityKind? entityKind,
+  }) => [
+    for (final document in _documents)
+      if (_matchesFilters(document.card, country, taxYear, entityKind))
+        document.card,
+  ]..sort((a, b) => a.id.compareTo(b.id));
+
   double _inverseDocumentFrequency(String term) {
     final df = _documentFrequency[term] ?? 0;
     return math.log(1 + (_documents.length - df + 0.5) / (df + 0.5));

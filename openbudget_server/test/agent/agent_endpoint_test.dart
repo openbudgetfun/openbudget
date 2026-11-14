@@ -14,6 +14,8 @@ import 'package:openbudget_server/src/billing/entitlement_service.dart';
 import 'package:openbudget_server/src/common/secret_box.dart';
 import 'package:openbudget_server/src/entities/entity_clock.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/money_guide/money_guide_prompt.dart';
+import 'package:openbudget_server/src/tax/tax_summary_service.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
 import 'package:test/test.dart';
 
@@ -275,6 +277,38 @@ void main() {
         ];
         expect(names, contains('list_entities'));
         expect(names, contains('propose_move_money'));
+      });
+
+      test('then the request opens with the static rules and the entity '
+          'brief', () async {
+        await subscribe(rawSession, userId);
+        final entity = await createEntity('Zebediah Quillfeather');
+        useMock([_textResponse('Fine.')]);
+        final previousClock = TaxSummaryService.clock;
+        TaxSummaryService.clock = () => DateTime.utc(2026, 11, 14);
+        addTearDown(() => TaxSummaryService.clock = previousClock);
+
+        await endpoints.agent
+            .chat(authedSession, entity.id!, null, 'Hi')
+            .toList();
+
+        final body = jsonDecode(requests.single.body) as Map<String, Object?>;
+        final messages = (body['messages']! as List<Object?>)
+            .cast<Map<String, Object?>>();
+        expect(messages[0]['role'], 'system');
+        expect(messages[0]['content'], MoneyGuidePrompt.staticRules);
+        expect(messages[1]['role'], 'system');
+        final brief = messages[1]['content']! as String;
+        expect(
+          brief,
+          startsWith('Entity: individual in GB, base currency GBP'),
+        );
+        expect(brief, contains('Tax year now: 2026/27, 2026-04-06'));
+        expect(brief, contains('Jurisdiction: preview'));
+        expect(brief, contains('Profile: tax resident of GB not recorded'));
+        expect(brief, isNot(contains('Zebediah')));
+        expect(brief, isNot(contains(entity.id!.uuid)));
+        expect(messages[2]['role'], 'user');
       });
 
       test(

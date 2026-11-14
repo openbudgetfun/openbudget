@@ -75,7 +75,7 @@ Wording: "This is a point where a qualified adviser can look at your whole situa
 
 ## 6. Prompt and tool-result checklist
 
-System prompt (`AgentPrompt.system`) must say, in this order of importance:
+System prompt (`MoneyGuidePrompt.staticRules` plus the generated entity brief) must say, in this order of importance:
 
 1. Scope: guidance only; no regulated tax, legal or investment advice; no product, security or allocation choices.
 2. Perimeter rules per the user's jurisdiction (injected from the tax profile, not hard-coded to one country).
@@ -92,7 +92,7 @@ Opportunity rows carry: `grade`, `announced`, `signpostOnly`, `assumptions`, `ne
 
 ## 7. State of the code on 5 November 2026 (dated; re-audit before relying)
 
-- `AgentPrompt.system` states scope, tool grounding, no-change-claims, and a one-line "guidance, not regulated advice" instruction. It lacks perimeter rules per country, the never-suggest list, wording rules, signpost triggers, residence prompts, and anything about grade or `announced` status. It frames the assistant as helping "building wealth".
+- `AgentPrompt.system` (since replaced by `MoneyGuidePrompt`, which carries these rules) stated scope, tool grounding, no-change-claims, and a one-line "guidance, not regulated advice" instruction. It lacks perimeter rules per country, the never-suggest list, wording rules, signpost triggers, residence prompts, and anything about grade or `announced` status. It frames the assistant as helping "building wealth".
 - `AgentMcpHandler.instructions` has a one-sentence disclaimer only. Tool results carry no disclaimer, grade or perimeter fields.
 - `TaxOpportunity` has `id`, `title`, `explanation`, `source`, `estimatedSavingMinor`, `deadline`. No grade, `announced`, `signpostOnly`, evidence, or rule-year field.
 - Several opportunity titles are imperatives ("Use your pension annual allowance", "Shelter savings and dividends in an ISA", "Harvest capital losses", "Itemize deductions", "Claim rent relief", "Pay quarterly estimated tax", "Basisrente bis zum Höchstbetrag einzahlen", "Homeoffice-Pauschale ausschöpfen").
