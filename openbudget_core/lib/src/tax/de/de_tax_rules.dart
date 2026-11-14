@@ -1,8 +1,11 @@
+import 'package:openbudget_core/src/tax/de/de_calendar.dart';
 import 'package:openbudget_core/src/tax/de/de_categories.dart';
 import 'package:openbudget_core/src/tax/de/de_opportunities.dart';
+import 'package:openbudget_core/src/tax/de/de_profile.dart';
 import 'package:openbudget_core/src/tax/de/de_reports.dart';
 import 'package:openbudget_core/src/tax/de/de_tables.dart';
 import 'package:openbudget_core/src/tax/tax_model.dart';
+import 'package:openbudget_core/src/tax/tax_profile.dart';
 import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 
 /// Germany's tax rules for the Veranlagungszeiträume in [deTaxTables].
@@ -28,6 +31,12 @@ final class DeTaxRules implements TaxRulePack {
   TaxJurisdiction get jurisdiction => TaxJurisdiction.de;
 
   @override
+  List<TaxDeadline> deadlines(TaxYear period, TaxProfile profile) {
+    requireTaxDeadlineInput(this, period, profile);
+    return deDeadlines(period, profile as DeTaxProfile);
+  }
+
+  @override
   TaxPackManifest get manifest => deTaxManifest;
 
   @override
@@ -35,6 +44,17 @@ final class DeTaxRules implements TaxRulePack {
 
   @override
   TaxRuleSet ruleSet(int startYear) => deRuleSetFor(startYear);
+
+  @override
+  TaxProfile profileFromJson(Map<String, Object?> json) =>
+      deProfileFromJson(json);
+
+  @override
+  List<TaxProfileQuestion> profileQuestions(EntityKind kind) =>
+      taxProfileQuestionsFor(kind, [
+        ...commonTaxProfileQuestions,
+        ...deTaxProfileQuestions,
+      ]);
 
   @override
   TaxYear taxYearFor(DateTime date) => taxYear(date.year);

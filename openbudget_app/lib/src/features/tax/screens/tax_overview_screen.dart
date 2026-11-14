@@ -8,6 +8,12 @@ import 'package:openbudget_app/src/features/home/providers/entity_detail_provide
 import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
 import 'package:openbudget_app/src/features/tax/tax_formatting.dart';
 import 'package:openbudget_app/src/features/tax/tax_labels.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_caveat_card.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_disclaimer_bar.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_export_card.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_upcoming_section.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_year_switcher.dart';
+import 'package:openbudget_app/src/features/tax/widgets/universal_tax_panel.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -23,8 +29,25 @@ class TaxOverviewScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final palette = theme.ob;
+    final entityAsync = ref.watch(entityDetailProvider(entityId));
+    final entity = entityAsync.value;
+
+    // A country with no tax rule pack has no profile to set up and no report
+    // to compute, so it gets the universal panel instead.
+    if (entity != null &&
+        TaxJurisdiction.fromCountryCode(entity.countryCode) == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.taxOverviewTitle)),
+        body: UniversalTaxPanel(entityId: entityId, entity: entity),
+      );
+    }
+    if (entity == null && entityAsync.isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.taxOverviewTitle)),
+        body: Center(child: ObLoadingPanel(label: l10n.taxOverviewLoading)),
+      );
+    }
+
     final profileAsync = ref.watch(taxProfileProvider(entityId));
     final hasProfile = profileAsync.hasValue && profileAsync.value != null;
 
@@ -87,30 +110,7 @@ class TaxOverviewScreen extends HookConsumerWidget {
               ),
       ),
       bottomNavigationBar: hasProfile
-          ? DecoratedBox(
-              decoration: BoxDecoration(
-                color: palette.surface,
-                border: Border(top: BorderSide(color: palette.line)),
-              ),
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    SpacingTokens.md,
-                    SpacingTokens.sm,
-                    SpacingTokens.md,
-                    SpacingTokens.sm,
-                  ),
-                  child: Text(
-                    l10n.taxDisclaimer,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: palette.mutedInk,
-                    ),
-                  ),
-                ),
-              ),
-            )
+          ? TaxDisclaimerBar(text: l10n.taxDisclaimer)
           : null,
     );
   }
@@ -154,7 +154,7 @@ class _TaxReportBody extends HookConsumerWidget {
 
     return Column(
       children: [
-        _YearSwitcher(
+        TaxYearSwitcher(
           label: l10n.taxYearLabel(report?.startYear ?? startYear),
           onPrevious: () => selectedYear.value = startYear - 1,
           onNext: () => selectedYear.value = startYear + 1,
@@ -283,6 +283,7 @@ class _TaxReportBody extends HookConsumerWidget {
                         liability: liability,
                         currency: report.currencyCode,
                       ),
+                  TaxUpcomingSection(entityId: entityId),
                   ObSectionHeader(
                     title: l10n.taxReportLinesTitle,
                     padding: const EdgeInsets.fromLTRB(
@@ -320,9 +321,18 @@ class _TaxReportBody extends HookConsumerWidget {
                       ),
                     ),
                     for (final caveat in report.caveats)
-                      _CaveatCard(caveat: caveat),
+                      TaxCaveatCard(
+                        key: Key('tax-caveat-${caveat.id}'),
+                        text: caveat.text,
+                        announced: caveat.announced,
+                      ),
                   ],
                   const SizedBox(height: SpacingTokens.md),
+                  TaxExportCard(
+                    entityId: entityId,
+                    startYear: report.startYear,
+                  ),
+                  const SizedBox(height: SpacingTokens.xs),
                   _HowWorkedOutCard(report: report),
                 ],
               ),
@@ -330,51 +340,6 @@ class _TaxReportBody extends HookConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _YearSwitcher extends HookWidget {
-  const _YearSwitcher({
-    required this.label,
-    required this.onPrevious,
-    required this.onNext,
-  });
-
-  final String label;
-  final VoidCallback onPrevious;
-  final VoidCallback onNext;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.md),
-      child: Row(
-        children: [
-          IconButton(
-            key: const Key('tax-year-previous'),
-            tooltip: l10n.taxPreviousYear,
-            onPressed: onPrevious,
-            icon: const SkribbleIcon(data: OpenBudgetIcons.chevronLeft),
-          ),
-          Expanded(
-            child: Text(
-              label,
-              key: const Key('tax-year-label'),
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium,
-            ),
-          ),
-          IconButton(
-            key: const Key('tax-year-next'),
-            tooltip: l10n.taxNextYear,
-            onPressed: onNext,
-            icon: const SkribbleIcon(data: OpenBudgetIcons.chevronRight),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -841,58 +806,6 @@ class _OpportunityCard extends HookWidget {
           SelectableText(
             opportunity.source,
             style: theme.textTheme.bodySmall?.copyWith(color: palette.brand),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// One "what we could not verify" entry, from the rule pack's caveat data.
-class _CaveatCard extends HookWidget {
-  const _CaveatCard({required this.caveat});
-
-  final TaxRuleCaveatView caveat;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final palette = theme.ob;
-
-    return ObCard(
-      key: Key('tax-caveat-${caveat.id}'),
-      margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
-      padding: const EdgeInsets.all(SpacingTokens.md),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SkribbleIcon(
-            data: OpenBudgetIcons.warning,
-            size: 20,
-            color: palette.mutedInk,
-          ),
-          const SizedBox(width: SpacingTokens.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  caveat.text,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: palette.ink,
-                  ),
-                ),
-                if (caveat.announced) ...[
-                  const SizedBox(height: SpacingTokens.xs),
-                  ObToneChip(
-                    key: const Key('tax-announced-badge'),
-                    label: l10n.taxAnnouncedBadge,
-                    tone: ObTone.review,
-                  ),
-                ],
-              ],
-            ),
           ),
         ],
       ),

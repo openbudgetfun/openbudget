@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 import 'package:openbudget_core/src/tax/de/de_tariff.dart';
+import 'package:openbudget_core/src/tax/tax_calendar.dart';
 import 'package:openbudget_core/src/tax/tax_model.dart';
 import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 
@@ -673,18 +674,11 @@ final Map<int, DateTime> _advisedTransitionDeadlines = {
 /// and the like) are not modelled, so in a Land with such a holiday the
 /// shown deadline can be a day earlier than the law allows, never later.
 /// That errs towards filing on time.
-DateTime deRollForward(DateTime deadline) {
-  var day = DateTime.utc(deadline.year, deadline.month, deadline.day);
-  while (_isRestDay(day)) {
-    day = DateTime.utc(day.year, day.month, day.day + 1);
-  }
-  return day;
-}
+DateTime deRollForward(DateTime deadline) =>
+    rollForwardTaxDate(deadline, _isRestDay);
 
 bool _isRestDay(DateTime day) =>
-    day.weekday == DateTime.saturday ||
-    day.weekday == DateTime.sunday ||
-    _nationwideHolidays(day.year).contains(day);
+    isWeekend(day) || _nationwideHolidays(day.year).contains(day);
 
 /// The Feiertage every Land observes (§ 2 Abs. 1 Feiertagsgesetz der Länder
 /// in derselben Fassung): Neujahr, Karfreitag, Ostermontag, Tag der Arbeit,

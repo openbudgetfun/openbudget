@@ -7,5 +7,6 @@ export 'gb_categories.dart';
 export 'gb_corporation_tax.dart';
 export 'gb_income_tax.dart';
 export 'gb_payments_on_account.dart';
+export 'gb_profile.dart';
 export 'gb_rates.dart';
 export 'gb_tax_rules.dart';

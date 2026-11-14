@@ -1,10 +1,11 @@
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/tax/export/tax_export_service.dart';
 import 'package:openbudget_server/src/tax/tax_service.dart';
 import 'package:openbudget_server/src/tax/tax_summary_service.dart';
 import 'package:serverpod/serverpod.dart';
 
-/// API surface for tax profiles, line coding, envelope defaults, reports
-/// and tax-ready summaries.
+/// API surface for tax profiles, line coding, envelope defaults, reports,
+/// the filing calendar and tax-ready summaries.
 ///
 /// Every method requires authentication and delegates to [TaxService], which
 /// owns the entity boundary and the write rules.
@@ -93,6 +94,16 @@ class TaxEndpoint extends Endpoint {
     startYear: startYear,
   );
 
+  /// Lists the entity's upcoming filing and payment deadlines, soonest
+  /// first.
+  ///
+  /// Covers the entity's local today to a year ahead. An entity whose
+  /// country has no rule pack gets an empty list.
+  Future<List<TaxDeadlineView>> listDeadlines(
+    Session session,
+    UuidValue entityId,
+  ) => TaxService.listDeadlines(session, entityId: entityId);
+
   /// Builds the entity's tax-ready summary for the year starting in
   /// [startYear].
   ///
@@ -105,6 +116,23 @@ class TaxEndpoint extends Endpoint {
     UuidValue entityId, {
     int? startYear,
   }) => TaxSummaryService.build(
+    session,
+    entityId: entityId,
+    startYear: startYear,
+  );
+
+  /// Creates a short-lived signed download link for the entity's tax
+  /// summary export for the year starting in [startYear].
+  ///
+  /// When [startYear] is null the year containing the entity's local today
+  /// is used. The link carries only opaque ids, the year and an expiry
+  /// inside its HMAC token — no name, email or entity name — and stops
+  /// working after ten minutes. The app opens it with `url_launcher`.
+  Future<String> createExportLink(
+    Session session,
+    UuidValue entityId, {
+    int? startYear,
+  }) => TaxExportService.createExportLink(
     session,
     entityId: entityId,
     startYear: startYear,

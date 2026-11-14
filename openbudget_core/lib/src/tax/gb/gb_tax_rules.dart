@@ -1,11 +1,13 @@
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:openbudget_core/src/tax/gb/gb_calendar.dart';
 import 'package:openbudget_core/src/tax/gb/gb_capital_allowances.dart';
 import 'package:openbudget_core/src/tax/gb/gb_categories.dart';
 import 'package:openbudget_core/src/tax/gb/gb_corporation_tax.dart';
 import 'package:openbudget_core/src/tax/gb/gb_income_tax.dart';
 import 'package:openbudget_core/src/tax/gb/gb_payments_on_account.dart';
+import 'package:openbudget_core/src/tax/gb/gb_profile.dart';
 import 'package:openbudget_core/src/tax/gb/gb_rates.dart';
 import 'package:openbudget_core/src/tax/tax_model.dart';
 import 'package:openbudget_core/src/tax/tax_profile.dart';
@@ -53,6 +55,12 @@ final class GbTaxRules implements TaxRulePack {
   TaxJurisdiction get jurisdiction => TaxJurisdiction.gb;
 
   @override
+  List<TaxDeadline> deadlines(TaxYear period, TaxProfile profile) {
+    requireTaxDeadlineInput(this, period, profile);
+    return gbDeadlines(period, profile as GbTaxProfile);
+  }
+
+  @override
   TaxPackManifest get manifest => gbTaxManifest;
 
   @override
@@ -66,6 +74,17 @@ final class GbTaxRules implements TaxRulePack {
     }
     return ruleSet;
   }
+
+  @override
+  TaxProfile profileFromJson(Map<String, Object?> json) =>
+      gbProfileFromJson(json);
+
+  @override
+  List<TaxProfileQuestion> profileQuestions(EntityKind kind) =>
+      taxProfileQuestionsFor(kind, [
+        ...commonTaxProfileQuestions,
+        ...gbTaxProfileQuestions,
+      ]);
 
   @override
   TaxYear taxYearFor(DateTime date) {
@@ -1016,10 +1035,11 @@ final class GbTaxRules implements TaxRulePack {
   ) {
     final figures = _individualFigures(profile, input, rates);
     final yearEnd = DateTime.utc(input.year.startYear + 1, 4, 5);
+    final ruleYear = input.year.label;
     final opportunities = <TaxOpportunity>[
       TaxOpportunity(
         id: 'gb.pension_annual_allowance',
-        title: 'Use your pension annual allowance',
+        title: 'Pension annual allowance',
         explanation:
             'You can pay up to ${_money(rates.pensionAnnualAllowanceMinor)} '
             'into private pensions this year and get tax relief at your '
@@ -1029,7 +1049,13 @@ final class GbTaxRules implements TaxRulePack {
         source: Uri.parse(
           'https://www.gov.uk/tax-on-your-private-pension/annual-allowance',
         ),
+        ruleYear: ruleYear,
         deadline: yearEnd,
+        assumptions: const [
+          'Relief is capped at 100% of UK relevant earnings in the year.',
+          'The £60,000 annual allowance assumes no unused allowance carried forward and no taper from adjusted net income above £260,000.',
+          'The tax-free cash and the state pension are outside these figures.',
+        ],
       ),
     ];
 
@@ -1055,7 +1081,7 @@ final class GbTaxRules implements TaxRulePack {
       opportunities.add(
         TaxOpportunity(
           id: 'gb.pension_taper',
-          title: 'Restore your personal allowance',
+          title: 'Personal allowance taper and pension contributions',
           explanation:
               'Your adjusted net income of ${_money(adjustedNetIncome)} has '
               'reduced your personal allowance to '
@@ -1067,7 +1093,13 @@ final class GbTaxRules implements TaxRulePack {
               '${_money(saving)}.',
           estimatedSavingMinor: saving,
           source: Uri.parse('https://www.gov.uk/income-tax-rates'),
+          ruleYear: ruleYear,
           deadline: yearEnd,
+          assumptions: const [
+            'The contribution is a gross personal pension contribution paid before the tax year ends.',
+            'The estimate uses your marginal rate on your top slice of income; Scottish rate taxpayers use Scottish rates.',
+            'Income recorded outside OpenBudget would change the taper.',
+          ],
         ),
       );
     }
@@ -1088,7 +1120,7 @@ final class GbTaxRules implements TaxRulePack {
       opportunities.add(
         TaxOpportunity(
           id: 'gb.isa_allowance',
-          title: 'Shelter savings and dividends in an ISA',
+          title: 'ISA allowance for savings and dividends',
           explanation:
               'You can put ${_money(rates.isaAllowanceMinor)} into ISAs each '
               'year, and interest and dividends inside them are tax free. '
@@ -1097,7 +1129,13 @@ final class GbTaxRules implements TaxRulePack {
               '${saving > 0 ? 'save ${_money(saving)}' : 'save nothing at your current rates, but it protects future growth'}.',
           estimatedSavingMinor: saving > 0 ? saving : null,
           source: Uri.parse('https://www.gov.uk/individual-savings-accounts'),
+          ruleYear: ruleYear,
           deadline: yearEnd,
+          assumptions: const [
+            'The estimate compares today\u2019s tax with the same income sheltered in an ISA; it does not predict future interest or dividend rates.',
+            'The ISA subscription limit is per tax year and cannot be carried forward.',
+            'Which ISA product to use is a choice this guidance does not make.',
+          ],
         ),
       );
     }
@@ -1128,7 +1166,7 @@ final class GbTaxRules implements TaxRulePack {
         opportunities.add(
           TaxOpportunity(
             id: 'gb.trading_allowance',
-            title: 'Trading allowance beats your expenses',
+            title: 'Trading allowance compared with recorded expenses',
             explanation:
                 'The ${_money(rates.tradingAllowanceMinor)} trading allowance '
                 'replaces actual expenses for a trade. Your recorded expenses '
@@ -1140,7 +1178,12 @@ final class GbTaxRules implements TaxRulePack {
               'https://www.gov.uk/guidance/tax-free-allowances-on-property-'
               'and-trading-income',
             ),
+            ruleYear: ruleYear,
             deadline: yearEnd,
+            assumptions: const [
+              'The trade\u2019s allowable expenses are the ones recorded in OpenBudget; unrecorded costs would change the comparison.',
+              'The allowance cannot be claimed in a year the trade claims capital allowances.',
+            ],
           ),
         );
       }
@@ -1159,7 +1202,7 @@ final class GbTaxRules implements TaxRulePack {
       opportunities.add(
         TaxOpportunity(
           id: 'gb.capital_gains_annual_exempt_amount',
-          title: 'Use your Capital Gains Tax annual exempt amount',
+          title: 'Capital Gains Tax annual exempt amount',
           explanation:
               'You have ${_money(unused)} of the '
               '${_money(rates.capitalGainsAnnualExemptAmountMinor)} annual '
@@ -1169,7 +1212,13 @@ final class GbTaxRules implements TaxRulePack {
           source: Uri.parse(
             'https://www.gov.uk/guidance/capital-gains-tax-rates-and-allowances',
           ),
+          ruleYear: ruleYear,
           deadline: yearEnd,
+          assumptions: const [
+            'The estimate values unused exempt amount at the rate your gains would otherwise bear this year.',
+            'Unused exempt amount cannot be carried to a later year.',
+            'Disposals and costs are limited to the entries recorded in OpenBudget.',
+          ],
         ),
       );
     }
@@ -1211,12 +1260,17 @@ final class GbTaxRules implements TaxRulePack {
     opportunities.add(
       TaxOpportunity(
         id: 'gb.self_assessment_deadline',
-        title: 'Budget for the 31 January deadline',
+        title: 'Self Assessment payment deadline',
         explanation: deadlineMessage,
         source: Uri.parse(
           'https://www.gov.uk/understand-self-assessment-bill/payments-on-account',
         ),
+        ruleYear: ruleYear,
         deadline: DateTime.utc(input.year.startYear + 1, 1, 31),
+        assumptions: const [
+          'The balance and instalments follow the entries recorded in OpenBudget only.',
+          'Payments on account already made for this year cannot be separated from tax recorded as paid.',
+        ],
       ),
     );
 
@@ -1244,15 +1298,20 @@ final class GbTaxRules implements TaxRulePack {
     return <TaxOpportunity>[
       TaxOpportunity(
         id: 'gb.vat_registration_threshold',
-        title: 'Watch the VAT registration threshold',
+        title: 'VAT registration threshold',
         explanation:
-            'Your turnover is ${_money(turnover)}. You must register for VAT '
-            'when taxable turnover for any rolling 12 months goes over '
-            '${_money(rates.vatRegistrationThresholdMinor)}, or you expect it '
+            'Your turnover is ${_money(turnover)}. VAT registration becomes '
+            'due when taxable turnover for any rolling 12 months goes over '
+            '${_money(rates.vatRegistrationThresholdMinor)}, or is expected '
             'to in the next 30 days. You have ${_money(headroom)} of headroom.',
         source: Uri.parse(
           'https://www.gov.uk/vat-registration/when-to-register',
         ),
+        ruleYear: input.year.label,
+        assumptions: const [
+          'Turnover is the year\u2019s taxable turnover recorded in OpenBudget, not a rolling 12-month total.',
+          'Registration may be due earlier under the 30-day expectation rule.',
+        ],
       ),
     ];
   }
@@ -1328,24 +1387,30 @@ final class GbTaxRules implements TaxRulePack {
       }
       return TaxOpportunity(
         id: 'gb.director_salary_vs_dividend',
-        title: 'Compare a director’s salary with dividends',
+        title: 'Director salary compared with dividends',
         explanation:
-            'Your company’s profit before directors’ pay and Corporation Tax '
+            'Your company\u2019s profit before directors\u2019 pay and Corporation Tax '
             'is ${_money(profit)}. As guidance only, taking '
             '${_money(bestSalary)} as salary and the rest as dividends is '
             'estimated to cost ${_money(bestCost)} in Corporation Tax, '
             'employer and employee National Insurance and income tax, against '
             '${_money(dividendOnly)} for dividends only: a saving of '
-            '${_money(saving)}. The salaries compared are the year’s '
+            '${_money(saving)}. The salaries compared are the year\u2019s '
             'National Insurance thresholds. Employment Allowance is treated '
-            'as ${employmentAllowanceAvailable ? 'available, because the books show wages above the secondary threshold beyond the director’s pay' : 'unavailable, because a company whose sole director is the only employee paid above the secondary threshold cannot claim it'}. '
+            'as ${employmentAllowanceAvailable ? 'available, because the books show wages above the secondary threshold beyond the director\u2019s pay' : 'unavailable, because a company whose sole director is the only employee paid above the secondary threshold cannot claim it'}. '
             'Assumes the profit is before any pay or dividend to the director '
             'and that all profit is distributed; if the books already include '
-            'the director’s pay, treat this as illustrative. This is a '
+            'the director\u2019s pay, treat this as illustrative. This is a '
             'comparison to check, not a recommendation.',
         estimatedSavingMinor: saving,
         source: Uri.parse('https://www.gov.uk/tax-on-dividends'),
+        ruleYear: input.year.label,
         deadline: DateTime.utc(input.year.startYear + 1, 4, 5),
+        assumptions: const [
+          'The company\u2019s profit is before any director\u2019s pay or dividend, and all profit is distributed.',
+          'The salaries compared are the year\u2019s Class 1 National Insurance thresholds from rule data, not a recommended figure.',
+          'Dividend legality, the director\u2019s other income and shareholdings are outside this comparison; an accountant can check the whole position.',
+        ],
       );
     }
     return null;

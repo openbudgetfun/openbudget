@@ -63,6 +63,14 @@ class FakeTaxPack implements TaxRulePack {
   TaxPackManifest get manifest => fakeManifest;
 
   @override
+  TaxProfile profileFromJson(Map<String, Object?> json) =>
+      TaxRules.forJurisdiction(TaxJurisdiction.gb).profileFromJson(json);
+
+  @override
+  List<TaxProfileQuestion> profileQuestions(EntityKind kind) =>
+      TaxRules.forJurisdiction(TaxJurisdiction.gb).profileQuestions(kind);
+
+  @override
   final Set<int> supportedStartYears;
 
   @override
@@ -118,6 +126,47 @@ class FakeTaxPack implements TaxRulePack {
         _ => null,
       };
 
+  /// Three fixed dates per year, so tests can assert which years and days the
+  /// service draws on: an instalment inside the year, the return the January
+  /// after it and an amendment limit a year later.
+  @override
+  List<TaxDeadline> deadlines(TaxYear period, TaxProfile profile) {
+    requireTaxDeadlineInput(this, period, profile);
+    final year = period.startYear;
+    TaxDeadline deadline(
+      String id,
+      DateTime dueDate,
+      TaxDeadlineKind kind, {
+      bool dependsOnProfile = false,
+    }) => TaxDeadline(
+      id: 'gb.test.$id',
+      title: 'Test $id',
+      kind: kind,
+      dueDate: dueDate,
+      periodStart: period.start,
+      periodEnd: period.end,
+      periodLabel: period.label,
+      source: Uri.parse('https://example.test/fake-deadline'),
+      citation: 'Test rule',
+      grade: TaxEvidenceGrade.primary,
+      dependsOnProfile: dependsOnProfile,
+    );
+    return sortTaxDeadlines([
+      deadline(
+        'instalment',
+        DateTime.utc(year, 6, 30),
+        TaxDeadlineKind.payment,
+      ),
+      deadline(
+        'return',
+        DateTime.utc(year + 1, 1, 31),
+        TaxDeadlineKind.filing,
+        dependsOnProfile: true,
+      ),
+      deadline('amend', DateTime.utc(year + 2, 1, 31), TaxDeadlineKind.filing),
+    ]);
+  }
+
   @override
   TaxReport report(TaxInput input) => TaxReport(
     year: input.year,
@@ -161,6 +210,8 @@ class FakeTaxPack implements TaxRulePack {
       estimatedSavingMinor: 1234,
       deadline: input.year.end,
       source: Uri.parse('https://example.test/fake-tax/opportunity'),
+      ruleYear: input.year.label,
+      assumptions: const ['A test-only assumption.'],
     ),
   ];
 }

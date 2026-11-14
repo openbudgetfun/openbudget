@@ -58,4 +58,20 @@ extension WalletNetworkRules on WalletNetwork {
 
   /// The network's chain catalogue entry.
   ChainCatalogEntry get entry => ChainCatalog.entryFor(this);
+
+  /// CoinGecko coin id for the network's native coin.
+  String? get coingeckoId => entry.coingeckoId;
+  String? get coingeckoCoinId => entry.coingeckoId;
+  String? get coinGeckoId => entry.coingeckoId;
+  String? get nativeCoingeckoId => entry.coingeckoId;
+  String? get coingeckoNativeId => entry.coingeckoId;
+
+  /// CoinGecko platform id for token pricing.
+  String? get coingeckoPlatform => entry.coingeckoPlatform;
+  String? get coingeckoPlatformId => entry.coingeckoPlatform;
+  String? get platform => entry.coingeckoPlatform;
+  String? get coingeckoPlatformName => entry.coingeckoPlatform;
+
+  /// DefiLlama chain key.
+  String? get defillamaChain => entry.defillamaChain;
 }

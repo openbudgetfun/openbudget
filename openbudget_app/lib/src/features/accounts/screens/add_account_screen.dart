@@ -9,7 +9,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/plaid_account_link_provider.dart';
-import 'package:openbudget_app/src/features/accounts/providers/wallet_provider.dart';
+import 'package:openbudget_app/src/features/accounts/widgets/add_wallet_step.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/money_input.dart';
@@ -42,10 +42,6 @@ const _addAccountUnlinkedTypeTileKey = Key('add-account-unlinked-type-tile');
 const _addAccountUnlinkedBalanceFieldKey = Key(
   'add-account-unlinked-balance-field',
 );
-const _addAccountWalletAddressFieldKey = Key(
-  'add-account-wallet-address-field',
-);
-const _addAccountWalletLabelFieldKey = Key('add-account-wallet-label-field');
 const _addAccountUnlinkedWalletAddressFieldKey = Key(
   'add-account-unlinked-wallet-address-field',
 );
@@ -73,7 +69,6 @@ class AddAccountScreen extends HookConsumerWidget {
     final balanceController = useTextEditingController();
     final walletAddressController = useTextEditingController();
     final searchController = useTextEditingController();
-    final walletLabelController = useTextEditingController();
     final isSubmitting = useState(false);
     final selectedTypeKey = useState<String?>(null);
     final selectedCurrency = useState<CurrencyCode?>(null);
@@ -126,7 +121,6 @@ class AddAccountScreen extends HookConsumerWidget {
     useListenable(balanceController);
     useListenable(walletAddressController);
     useListenable(searchController);
-    useListenable(walletLabelController);
 
     useEffect(() {
       if (step.value != _AddAccountStep.loading) return null;
@@ -193,7 +187,6 @@ class AddAccountScreen extends HookConsumerWidget {
         (isWalletType
             ? walletAddressController.text.trim().isNotEmpty
             : balanceValue != null);
-    final canSubmitWallet = walletAddressController.text.trim().isNotEmpty;
     final institutionCatalog =
         institutionCatalogAsync.asData?.value ?? const <Institution>[];
 
@@ -286,35 +279,6 @@ class AddAccountScreen extends HookConsumerWidget {
         );
       } finally {
         showSearchingOverlay.value = false;
-      }
-    }
-
-    Future<void> submitSolanaWallet() async {
-      if (!canSubmitWallet || isSubmitting.value) return;
-      isSubmitting.value = true;
-      try {
-        await ref
-            .read(walletActionsProvider.notifier)
-            .connect(
-              entityId: entityId,
-              network: WalletNetwork.solanaMainnet,
-              address: walletAddressController.text.trim(),
-              label: walletLabelController.text.trim().isEmpty
-                  ? null
-                  : walletLabelController.text.trim(),
-            );
-        if (!context.mounted) return;
-        successAccountLabel.value = l10n.accountTypeCryptoWallet;
-        step.value = _AddAccountStep.success;
-      } on Exception catch (_) {
-        if (!context.mounted) return;
-        showAppToast(
-          context,
-          message: l10n.accountCreateError,
-          variant: AppToastVariant.error,
-        );
-      } finally {
-        isSubmitting.value = false;
       }
     }
 
@@ -433,7 +397,7 @@ class AddAccountScreen extends HookConsumerWidget {
                   institutions: institutionCatalog,
                   isLoadingInstitutions: institutionCatalogAsync.isLoading,
                   onInstitutionTap: startLinkedBankFlow,
-                  onConnectSolana: () =>
+                  onAddWallet: () =>
                       step.value = _AddAccountStep.walletConnection,
                   onAddUnlinked: () {
                     selectedInstitution.value = null;
@@ -443,9 +407,12 @@ class AddAccountScreen extends HookConsumerWidget {
               ),
               _AddAccountStep.walletConnection => _StepFrame(
                 maxWidth: 720,
-                child: _WalletConnectStep(
-                  walletAddressController: walletAddressController,
-                  walletLabelController: walletLabelController,
+                child: AddWalletStep(
+                  entityId: entityId,
+                  onDone: () => context.goNamed(
+                    accountListRoute,
+                    pathParameters: {'entityId': entityId},
+                  ),
                 ),
               ),
               _AddAccountStep.unlinkedAccount => _StepFrame(
@@ -500,7 +467,6 @@ class AddAccountScreen extends HookConsumerWidget {
                   nameController.clear();
                   balanceController.clear();
                   walletAddressController.clear();
-                  walletLabelController.clear();
                   selectedInstitution.value = null;
                   step.value = _AddAccountStep.unlinkedAccount;
                 },
@@ -537,31 +503,6 @@ class AddAccountScreen extends HookConsumerWidget {
         bottomNavigationBar: switch (step.value) {
           _AddAccountStep.loading => null,
           _AddAccountStep.loadingInstitutions => null,
-          _AddAccountStep.walletConnection => SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                SpacingTokens.md,
-                SpacingTokens.sm,
-                SpacingTokens.md,
-                SpacingTokens.md,
-              ),
-              child: _StepFrame(
-                maxWidth: 720,
-                child: FilledButton(
-                  onPressed: canSubmitWallet && !isSubmitting.value
-                      ? submitSolanaWallet
-                      : null,
-                  child: isSubmitting.value
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(l10n.addAccountConnectWalletButton),
-                ),
-              ),
-            ),
-          ),
           _AddAccountStep.unlinkedAccount => SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -588,7 +529,9 @@ class AddAccountScreen extends HookConsumerWidget {
             ),
           ),
           _AddAccountStep.success => null,
-          _AddAccountStep.searchBank || _AddAccountStep.accountType => null,
+          _AddAccountStep.walletConnection ||
+          _AddAccountStep.searchBank ||
+          _AddAccountStep.accountType => null,
         },
       ),
     );
@@ -752,7 +695,7 @@ class _BankSearchStep extends HookWidget {
     required this.institutions,
     required this.isLoadingInstitutions,
     required this.onInstitutionTap,
-    required this.onConnectSolana,
+    required this.onAddWallet,
     required this.onAddUnlinked,
   });
 
@@ -762,7 +705,7 @@ class _BankSearchStep extends HookWidget {
   final List<Institution> institutions;
   final bool isLoadingInstitutions;
   final Future<void> Function(Institution institution) onInstitutionTap;
-  final VoidCallback onConnectSolana;
+  final VoidCallback onAddWallet;
   final VoidCallback onAddUnlinked;
 
   @override
@@ -882,8 +825,8 @@ class _BankSearchStep extends HookWidget {
         ),
         const SizedBox(height: SpacingTokens.sm),
         FilledButton.icon(
-          onPressed: onConnectSolana,
-          icon: const SkribbleIcon(data: OpenBudgetIcons.solana),
+          onPressed: onAddWallet,
+          icon: const SkribbleIcon(data: OpenBudgetIcons.wallet),
           label: Text(l10n.addAccountConnectWallet),
         ),
       ],
@@ -917,73 +860,6 @@ class _InstitutionTile extends HookWidget {
       ),
     ),
   );
-}
-
-class _WalletConnectStep extends HookWidget {
-  const _WalletConnectStep({
-    required this.walletAddressController,
-    required this.walletLabelController,
-  });
-
-  final TextEditingController walletAddressController;
-  final TextEditingController walletLabelController;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(
-        SpacingTokens.md,
-        SpacingTokens.md,
-        SpacingTokens.md,
-        SpacingTokens.xl,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            l10n.addAccountWalletConnectionDescription,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.ob.mutedInk,
-            ),
-          ),
-          const SizedBox(height: SpacingTokens.md),
-          Text(
-            l10n.addAccountWalletAddressLabel,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: SpacingTokens.xs),
-          TextField(
-            key: _addAccountWalletAddressFieldKey,
-            controller: walletAddressController,
-            textInputAction: TextInputAction.next,
-            decoration: InputDecoration(
-              hintText: l10n.addAccountWalletAddressHint,
-            ),
-          ),
-          const SizedBox(height: SpacingTokens.md),
-          Text(
-            l10n.addAccountWalletLabelOptional,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: SpacingTokens.xs),
-          TextField(
-            key: _addAccountWalletLabelFieldKey,
-            controller: walletLabelController,
-            textInputAction: TextInputAction.done,
-            decoration: InputDecoration(
-              hintText: l10n.addAccountWalletLabelHint,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _UnlinkedAccountStep extends HookWidget {

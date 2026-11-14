@@ -7,6 +7,7 @@ import 'package:openbudget_app/src/features/accounts/providers/account_detail_pr
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/wallet_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
+import 'package:openbudget_app/src/features/accounts/widgets/wallet_settings_sheet.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_pages_provider.dart';
@@ -135,6 +136,7 @@ WalletHolding _holding({
   quantityRaw: quantityRaw ?? BigInt.from(1500000000),
   priceCurrencyCode: priceCurrencyCode,
   valueMinor: valueMinor,
+  priceQuality: PriceQuality.live,
   costBasisMinor: costBasisMinor,
   realizedPnlMinor: realizedPnlMinor,
 );
@@ -456,6 +458,51 @@ void main() {
       expect(find.textContaining('Valued'), findsWidgets);
     });
 
+    testWidgets('a wallet account offers wallet settings and its holdings, '
+        'though the server values it', (tester) async {
+      await tester.pumpWidget(
+        _buildSubject(
+          // The server makes every wallet account track by value, because
+          // the wallet's valuation sets it.
+          account: _account(
+            name: 'Main Wallet',
+            kind: AccountKind.crypto,
+            balanceMinor: 28000,
+            onBudget: false,
+            balanceSource: AccountBalanceSource.valuations,
+          ),
+          wallet: _wallet(),
+          holdings: [_holding()],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(walletSettingsButtonKey), findsOneWidget);
+      expect(find.text('Holdings'), findsOneWidget);
+      expect(find.text('SOL'), findsOneWidget);
+      await tester.tap(find.byKey(walletSettingsButtonKey));
+      await tester.pumpAndSettle();
+      // The sheet opens on the wallet's own name and single chain.
+      expect(find.byKey(walletSettingsNameFieldKey), findsOneWidget);
+      expect(
+        tester
+            .widget<TextField>(find.byKey(walletSettingsNameFieldKey))
+            .controller!
+            .text,
+        'Main Wallet',
+      );
+      expect(find.text('Disconnect wallet'), findsOneWidget);
+    });
+
+    testWidgets('an account without a wallet has no wallet settings', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(walletSettingsButtonKey), findsNothing);
+    });
+
     testWidgets('wallet accounts show holdings with value and P&L', (
       tester,
     ) async {
@@ -497,7 +544,8 @@ void main() {
       expect(find.text('SOL'), findsOneWidget);
       // 9 decimals: 1500000000 raw = 1.5 SOL.
       expect(find.text('Quantity 1.5'), findsOneWidget);
-      expect(find.text(r'$280.00'), findsOneWidget);
+      // The network's subtotal and the row both show the value.
+      expect(find.text(r'$280.00'), findsNWidgets(2));
       expect(
         find.bySemanticsLabel(
           RegExp(r'^Value \$280\.00$', multiLine: true),

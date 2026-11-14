@@ -994,15 +994,14 @@
   "transactionCategoryLabel": "Category",
   "transactionAccountLabel": "Account",
   "transactionDateLabel": "Date",
-  "addAccountConnectWallet": "Connect Solana Wallet",
+  "addAccountConnectWallet": "Add a crypto wallet",
   "addAccountUnlinkedTitle": "Add Unlinked Account",
   "addAccountSelectAccountType": "Select Account Type",
   "addAccountSuccessTitle": "Account Added",
   "addAccountSuccessHeadline": "Success!",
-  "addAccountSuccessAddAnother": "Add Another",
+  "addAccountSuccessAddAnother": "Add another",
   "addAccountSelectTypePlaceholder": "Select account type...",
   "addAccountLoadingInstitutions": "Loading institutions...",
-  "addAccountConnectWalletButton": "Connect Wallet",
   "dialogNext": "Next",
   "loadingTitle": "Loading...",
   "loadingHint": "This might take a few seconds.",
@@ -1014,11 +1013,6 @@
   "addAccountNoInstitutionsFound": "No institutions found. Try another name or add an unlinked account.",
   "orText": "or",
   "addAccountAddUnlinked": "Add an Unlinked Account",
-  "addAccountWalletConnectionDescription": "Connect a Solana wallet in read-only mode. OpenBudget imports native SPL balances and keeps fiat valuation synced.",
-  "addAccountWalletAddressLabel": "Wallet Address",
-  "addAccountWalletAddressHint": "Paste Solana wallet address",
-  "addAccountWalletLabelOptional": "Wallet Label (optional)",
-  "addAccountWalletLabelHint": "My Solana Wallet",
   "addAccountWalletIncludeInBudgetTotals": "Include in budget totals",
   "addAccountWalletIntro": "Add your Solana wallet to track transfers, swaps, and holdings in one place.",
   "addAccountUnlinkedIntro": "Bank connections are currently unavailable in this build, so let's set up an unlinked account.",
@@ -1817,6 +1811,290 @@
     }
   },
   "taxOpportunitySource": "Guidance",
+  "taxExportTitle": "Take it to your accountant",
+  "@taxExportTitle": {
+    "description": "Heading of the card that offers the tax summary download."
+  },
+  "taxExportMessage": "A ZIP with this tax year's summary and every line behind it. The download link works for 10 minutes.",
+  "taxExportButton": "Export tax summary",
+  "@taxExportButton": {
+    "description": "Button that makes a signed download link for the tax summary and opens it."
+  },
+  "taxExportPreparing": "Preparing your download",
+  "@taxExportPreparing": {
+    "description": "Spoken while the export button is busy."
+  },
+  "taxExportFailed": "We couldn't prepare your download. Check your connection and try again.",
+  "taxExportOpenFailed": "Your download is ready, but this device wouldn't open it. Try again in a moment.",
+  "taxUpcomingTitle": "Upcoming",
+  "@taxUpcomingTitle": {
+    "description": "Section header for the next filing and payment dates on the tax overview."
+  },
+  "taxUpcomingKindFiling": "Filing",
+  "@taxUpcomingKindFiling": {
+    "description": "Chip on an upcoming date that is for sending a return."
+  },
+  "taxUpcomingKindPayment": "Payment",
+  "@taxUpcomingKindPayment": {
+    "description": "Chip on an upcoming date that is for paying tax."
+  },
+  "taxUpcomingKindFilingAndPayment": "Filing and payment",
+  "@taxUpcomingKindFilingAndPayment": {
+    "description": "Chip on an upcoming date when the return and the payment fall due together."
+  },
+  "taxUpcomingDaysLeft": "{count, plural, =0{Due today} =1{Due tomorrow} other{In {count} days}}",
+  "@taxUpcomingDaysLeft": {
+    "description": "How far away an upcoming filing or payment date is.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taxUpcomingPeriod": "For {period}",
+  "@taxUpcomingPeriod": {
+    "description": "The period an upcoming date covers, such as 2025/26.",
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "taxUpcomingDependsOnProfile": "Based on your tax profile",
+  "@taxUpcomingDependsOnProfile": {
+    "description": "Chip on an upcoming date whose day or relevance comes from the person's tax profile answers."
+  },
+  "taxUpcomingMoved": "Moved from {date}, a weekend or holiday",
+  "@taxUpcomingMoved": {
+    "description": "Note on a date the tax authority's rules moved to the next working day.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "taxUpcomingInferredBadge": "Date not confirmed by the authority",
+  "@taxUpcomingInferredBadge": {
+    "description": "Badge on an upcoming date that was worked out from guidance rather than read from the authority's own page."
+  },
+  "taxUpcomingSource": "Source: {citation}",
+  "@taxUpcomingSource": {
+    "description": "Link that opens the authority page behind an upcoming date.",
+    "placeholders": {
+      "citation": {
+        "type": "String"
+      }
+    }
+  },
+  "taxUpcomingSourceHint": "Opens the authority's page",
+  "taxUpcomingShowAll": "Show all {count} dates",
+  "@taxUpcomingShowAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taxUpcomingShowFewer": "Show fewer dates",
+  "taxUpcomingEmpty": "No filing or payment dates in the next year.",
+  "taxUpcomingLoadError": "We couldn't load your upcoming dates.",
+  "taxUniversalIntroTitle": "No full tax rules for {country} yet",
+  "@taxUniversalIntroTitle": {
+    "description": "Heading of the panel shown for a country without a tax rule pack.",
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "taxUniversalIntroMessage": "OpenBudget can't work out what you owe here yet. It can show your tax year, the rates we know about, and a summary of your records to hand to an accountant.",
+  "taxUniversalYearLabel": "Tax year {label}",
+  "@taxUniversalYearLabel": {
+    "description": "The tax year, written as the country writes it, such as 2026 or 2026/27.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "taxUniversalYearPeriod": "{start} to {end}",
+  "@taxUniversalYearPeriod": {
+    "description": "The first and last day of the tax year.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "taxUniversalYearLoading": "Finding your tax year",
+  "taxSummaryTitle": "Your year so far",
+  "taxSummaryIncome": "Income this tax year",
+  "taxSummaryExpenses": "Expenses",
+  "taxSummaryReliefs": "Reliefs",
+  "taxSummaryTaxPaid": "Tax already paid",
+  "taxSummarySalesTaxCollected": "{tax} collected",
+  "@taxSummarySalesTaxCollected": {
+    "description": "A tile in the summary; the placeholder is the country's indirect tax, such as VAT.",
+    "placeholders": {
+      "tax": {
+        "type": "String"
+      }
+    }
+  },
+  "taxSummarySalesTaxPaid": "{tax} paid",
+  "@taxSummarySalesTaxPaid": {
+    "description": "A tile in the summary; the placeholder is the country's indirect tax, such as VAT.",
+    "placeholders": {
+      "tax": {
+        "type": "String"
+      }
+    }
+  },
+  "taxSummaryLoadError": "We couldn't load your summary.",
+  "taxSummaryDisclaimer": "This summarises what you've recorded in OpenBudget. It is not a tax return. Guidance only, not tax advice. Check figures with a qualified adviser before filing.",
+  "taxIndirectTitle": "{tax} rates",
+  "@taxIndirectTitle": {
+    "description": "Heading over a country's indirect-tax rates.",
+    "placeholders": {
+      "tax": {
+        "type": "String"
+      }
+    }
+  },
+  "taxIndirectKindVat": "VAT",
+  "taxIndirectKindGst": "GST",
+  "taxIndirectKindSalesTax": "Sales tax",
+  "taxIndirectKindConsumptionTax": "Consumption tax",
+  "taxIndirectKindNone": "VAT or sales tax",
+  "taxIndirectLocalName": "Known locally as {name}",
+  "@taxIndirectLocalName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taxIndirectNone": "{country} doesn't charge VAT or sales tax.",
+  "@taxIndirectNone": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "taxIndirectUnknown": "We haven't looked up the VAT or sales tax rates for this country yet.",
+  "taxIndirectNoRateForYear": "We don't have a rate for this tax year.",
+  "taxRatePercent": "{rate}%",
+  "@taxRatePercent": {
+    "description": "A rate with its percent sign; the placeholder is already written in the reader's decimal style.",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "taxRateAppliesTo": "Applies to {scope}",
+  "@taxRateAppliesTo": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "taxRateSince": "In force since {date}",
+  "@taxRateSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "taxRateSource": "Source: {name}",
+  "@taxRateSource": {
+    "description": "Short link text for a figure's source: the source's website, such as afriref.dev.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taxRateSourceOpen": "Open source: {title}",
+  "@taxRateSourceOpen": {
+    "description": "Spoken label of the link that opens a rate's source.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "taxRegistrationThresholdTitle": "Registration threshold",
+  "@taxRegistrationThresholdTitle": {
+    "description": "Heading of the card with the turnover above which a business must register for VAT or sales tax."
+  },
+  "taxRegistrationThresholdPeriod": "{period, select, annualTurnover{a year in turnover} rolling12Months{in turnover over any 12 months} calendarYear{in turnover in a calendar year} fourConsecutiveQuarters{in turnover over four quarters in a row} annualTurnoverGoodsOnly{a year in turnover from goods} annualTurnoverSmallBusinessExclusion{a year in turnover, with a small-business exclusion} other{in turnover}}",
+  "@taxRegistrationThresholdPeriod": {
+    "description": "What a registration threshold is counted over, said after the amount.",
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "taxGradePrimaryBadge": "From the tax authority",
+  "@taxGradePrimaryBadge": {
+    "description": "Badge on a figure taken from the authority's own publication."
+  },
+  "taxGradeInferredBadge": "Our best estimate",
+  "@taxGradeInferredBadge": {
+    "description": "Badge on a figure worked out from other facts, not published as stated."
+  },
+  "taxGradeBackgroundBadge": "Background information",
+  "@taxGradeBackgroundBadge": {
+    "description": "Badge on a figure from general reference material."
+  },
+  "taxRegionalRatesTitle": "Rates by region",
+  "taxRegionalRatesHint": "Some regions add their own tax on top.",
+  "taxAuthorityTitle": "Tax authority",
+  "taxAuthorityOpen": "Open the {name} website",
+  "@taxAuthorityOpen": {
+    "description": "Spoken label and tooltip of the link to a tax authority's website.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taxLinkOpenFailed": "We couldn't open that page. Try again in a moment.",
+  "taxUniversalCaveatSecondary": "{count, plural, =1{One of the figures above comes from a secondary source, not the tax authority's own pages.} other{{count} of the figures above come from secondary sources, not the tax authority's own pages.}}",
+  "@taxUniversalCaveatSecondary": {
+    "description": "First line of the summary card under What we could not verify: how many of the shown figures are not from the tax authority itself.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taxUniversalCaveatAssumed": "The tax year and, for companies, the year-end date are defaults OpenBudget assumed for {country}. Check them with the tax authority before you file.",
+  "@taxUniversalCaveatAssumed": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "taxResearchNotesTitle": "Research notes",
+  "taxResearchNotesHint": "The notes behind these figures, as our researchers wrote them.",
+  "taxUniversalVerifiedOn": "Country facts checked on {date}",
+  "@taxUniversalVerifiedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "taxHowWorkedOutTitle": "How this was worked out",
   "taxRulesVerifiedOn": "Rates checked on {date}",
   "@taxRulesVerifiedOn": {
@@ -1870,82 +2148,20 @@
   "taxJurisdictionUs": "United States",
   "taxJurisdictionNg": "Nigeria",
   "taxJurisdictionDe": "Germany",
-  "taxSalesTaxRegistered": "Registered for sales tax or VAT",
-  "taxSalesTaxRegisteredHint": "Turn this on if you charge and reclaim sales tax on these books.",
-  "taxGbScottishTaxpayer": "Scottish taxpayer",
-  "taxGbScottishTaxpayerHint": "Use Scottish income tax rates.",
-  "taxGbStudentLoanPlan": "Student loan plan",
-  "taxGbStudentLoanNone": "No student loan",
   "taxGbStudentLoanPlan1": "Plan 1",
   "taxGbStudentLoanPlan2": "Plan 2",
   "taxGbStudentLoanPlan4": "Plan 4",
   "taxGbStudentLoanPlan5": "Plan 5",
   "taxGbStudentLoanPostgraduate": "Postgraduate loan",
-  "taxGbPostgraduateLoanHint": "Repay 6% of income above £21,000 on top of any undergraduate plan.",
-  "taxGbAccountingPeriodEnd": "Accounting period end",
-  "taxGbAccountingPeriodEndHint": "The company's year end. Corporation Tax runs on these periods, not the tax year.",
-  "taxGbAccountingPeriodMonth": "Month",
-  "taxGbAccountingPeriodDay": "Day",
-  "taxGbAssociatedCompanies": "Associated companies",
-  "taxGbAssociatedCompaniesHint": "Other companies under common control. Each one divides the £50,000 and £250,000 limits.",
-  "taxGbAssociatedCompaniesError": "Enter the number of associated companies as a whole number, such as 0.",
-  "taxUsFilingStatus": "Filing status",
   "taxUsFilingSingle": "Single",
   "taxUsFilingMarriedJointly": "Married filing jointly",
   "taxUsFilingMarriedSeparately": "Married filing separately",
   "taxUsFilingHeadOfHousehold": "Head of household",
   "taxUsFilingQualifyingSurvivingSpouse": "Qualifying surviving spouse",
-  "taxUsForeignEarnedIncomeExclusion": "Foreign earned income exclusion",
-  "taxUsForeignEarnedIncomeExclusionHint": "The amount you excluded on Form 2555 this year. It is added back when the investment income and deduction phase-outs check your income.",
-  "taxUsDependentsUnder17": "Dependents under 17",
-  "taxUsDependents17OrOlder": "Dependents 17 or older",
-  "taxUsDependentsCountHint": "The number of people you claim as dependents.",
-  "taxUsDependentsSsn": "All dependents have an SSN",
-  "taxUsDependentsSsnHint": "Only dependents with an SSN valid for employment earn a credit.",
-  "taxUsTaxpayer65OrOlder": "You are 65 or older",
-  "taxUsSpouse65OrOlder": "Your spouse is 65 or older",
-  "taxUsTaxpayerHasSsn": "You have an SSN",
-  "taxUsSpouseHasSsn": "Your spouse has an SSN",
-  "taxUsSsnHint": "Required for the tips, overtime, and senior deductions.",
-  "taxUsHomeOfficeMethod": "Home office method",
   "taxUsHomeOfficeSimplified": "Simplified ($5 per square foot)",
   "taxUsHomeOfficeRegular": "Regular (Form 8829)",
-  "taxUsSpecifiedServiceTrade": "Specified service business",
-  "taxUsSpecifiedServiceTradeHint": "Consulting, law, health and similar businesses phase out of the qualified business income deduction.",
-  "taxNgAnnualRent": "Annual rent paid",
-  "taxNgAnnualRentHint": "Used for rent relief under the Nigeria Tax Act.",
-  "taxNgAnnualRentError": "Enter the annual rent as a number, such as 1200000.",
-  "taxNgSmallCompanyCeiling": "Small company turnover ceiling",
-  "taxNgSmallCompanyCeilingHint": "The two Nigerian Acts disagree: the Nigeria Tax Act gazette says N50,000,000 and the Administration Act says N100,000,000. Pick the figure that should decide your company's small company status.",
-  "taxNgSmallCompanyCeilingGazette": "N50,000,000 (Nigeria Tax Act gazette)",
-  "taxNgSmallCompanyCeilingIntended": "N100,000,000 (Administration Act)",
-  "taxNgMneGroupMember": "Member of a multinational group",
-  "taxNgMneGroupMemberHint": "Multinational group members may owe the 15% minimum effective tax rate whatever their turnover.",
-  "taxDeJointAssessment": "Joint assessment",
-  "taxDeJointAssessmentHint": "Spouses assessed together with income splitting.",
-  "taxDeSpouseEmployed": "Spouse also earns wages",
-  "taxDeSpouseEmployedHint": "Each employed spouse claims their own worker's flat-rate allowance and files their own Anlage N.",
-  "taxDeChurchTax": "Church tax",
-  "taxDeChurchTaxHint": "Kirchensteuer on top of income tax.",
-  "taxDeChurchState": "State (Land) of the church tax",
-  "taxDeChurchStateHint": "Sets the rate: 8% in Bavaria and Baden-Württemberg, 9% elsewhere. Leave it out to assume 9%.",
-  "taxDeChurchStateNone": "Not specified (assume 9%)",
-  "taxDeChildren": "Children (Kindergeld)",
-  "taxDeChildrenHint": "Children you receive Kindergeld for; a full twelve months per child is assumed.",
-  "taxDeEinkunftsArt": "Type of self-employment",
-  "taxDeEinkunftsArtHint": "Freiberufler owe no trade tax and file Anlage S; Gewerbetreibende owe Gewerbesteuer and file Anlage G.",
   "taxDeEinkunftsArtFreiberuflich": "Freiberufler (liberal profession)",
   "taxDeEinkunftsArtGewerblich": "Gewerbetreibender (trade)",
-  "taxDeStatutoryPension": "Statutory pension contributions",
-  "taxDeStatutoryPensionHint": "Employee and employer share per year; they reduce the Rürup (Basisrente) deduction.",
-  "taxDePriorTurnover": "Previous year's turnover",
-  "taxDePriorTurnoverHint": "Total turnover of last year; it decides the Kleinunternehmer test (at most €25,000 prior year, €100,000 this year).",
-  "taxDeCommuteKm": "Commute: one-way distance (km)",
-  "taxDeCommuteKmHint": "Full kilometres to your first workplace, shortest route (Anlage N).",
-  "taxDeCommuteDays": "Commute: days travelled",
-  "taxDeCommuteDaysHint": "Days you actually visited the workplace; illness, holiday and home-office days do not count.",
-  "taxDeNumberError": "Enter a whole number of 0 or more.",
-  "taxDeAmountError": "Enter the amount as a number, such as 4800.",
   "taxDeBundeslandBw": "Baden-Württemberg",
   "taxDeBundeslandBy": "Bavaria",
   "taxDeBundeslandBe": "Berlin",
@@ -1962,8 +2178,108 @@
   "taxDeBundeslandSt": "Saxony-Anhalt",
   "taxDeBundeslandSh": "Schleswig-Holstein",
   "taxDeBundeslandTh": "Thuringia",
-  "taxDeSmallBusinessExemption": "Small business VAT exemption",
-  "taxDeSmallBusinessExemptionHint": "Kleinunternehmerregelung: no VAT charged or reclaimed.",
+  "taxProfileCountError": "Enter a whole number of 0 or more.",
+  "taxProfileAmountError": "Enter the amount as a number, such as 4800.",
+  "taxQCommonEntityKind": "Entity kind",
+  "taxQCommonEntityKindIndividual": "Individual",
+  "taxQCommonEntityKindSoleTrader": "Sole trader",
+  "taxQCommonEntityKindCompany": "Company",
+  "taxQCommonSalesTaxRegistered": "Registered for sales tax or VAT",
+  "taxQCommonSalesTaxRegisteredHelp": "Turn this on if you charge and reclaim sales tax on these books.",
+  "taxQCommonTaxResident": "Tax resident of this country",
+  "taxQCommonTaxResidentHelp": "Residence decides which rules apply to you. Tax-saving ideas wait until you answer this.",
+  "taxQCommonUsPerson": "US person",
+  "taxQCommonUsPersonHelp": "US citizens, green card holders and people who meet the substantial presence test owe US filings wherever they live.",
+  "taxQGbScottishTaxpayer": "Scottish taxpayer",
+  "taxQGbScottishTaxpayerHelp": "Use Scottish income tax rates.",
+  "taxQGbStudentLoanPlan": "Student loan plan",
+  "taxQGbStudentLoanPlanPlan1": "Plan 1",
+  "taxQGbStudentLoanPlanPlan2": "Plan 2",
+  "taxQGbStudentLoanPlanPlan4": "Plan 4",
+  "taxQGbStudentLoanPlanPlan5": "Plan 5",
+  "taxQGbStudentLoanPlanNone": "No student loan",
+  "taxQGbPostgraduateLoan": "Postgraduate loan",
+  "taxQGbPostgraduateLoanHelp": "Repay 6% of income above £21,000 on top of any undergraduate plan.",
+  "taxQGbAccountingPeriodEnd": "Accounting period end",
+  "taxQGbAccountingPeriodEndHelp": "The company's year end. Corporation Tax runs on these periods, not the tax year.",
+  "taxQGbAccountingPeriodMonth": "Month",
+  "taxQGbAccountingPeriodDay": "Day",
+  "taxQGbAssociatedCompanies": "Associated companies",
+  "taxQGbAssociatedCompaniesHelp": "Other companies under common control. Each one divides the £50,000 and £250,000 limits.",
+  "taxQUsFilingStatus": "Filing status",
+  "taxQUsFilingStatusSingle": "Single",
+  "taxQUsFilingStatusMarriedFilingJointly": "Married filing jointly",
+  "taxQUsFilingStatusMarriedFilingSeparately": "Married filing separately",
+  "taxQUsFilingStatusHeadOfHousehold": "Head of household",
+  "taxQUsFilingStatusQualifyingSurvivingSpouse": "Qualifying surviving spouse",
+  "taxQUsTaxpayerHasSsn": "You have an SSN",
+  "taxQUsTaxpayerHasSsnHelp": "Required for the tips, overtime, and senior deductions.",
+  "taxQUsSpouseHasSsn": "Your spouse has an SSN",
+  "taxQUsSpouseHasSsnHelp": "Required for the tips, overtime, and senior deductions.",
+  "taxQUsTaxpayer65OrOlder": "You are 65 or older",
+  "taxQUsSpouse65OrOlder": "Your spouse is 65 or older",
+  "taxQUsDependentsUnder17": "Dependents under 17",
+  "taxQUsDependentsUnder17Help": "The number of people you claim as dependents.",
+  "taxQUsDependents17OrOlder": "Dependents 17 or older",
+  "taxQUsDependents17OrOlderHelp": "The number of people you claim as dependents.",
+  "taxQUsDependentsHaveSsn": "All dependents have an SSN",
+  "taxQUsDependentsHaveSsnHelp": "Only dependents with an SSN valid for employment earn a credit.",
+  "taxQUsForeignEarnedIncomeExclusion": "Foreign earned income exclusion",
+  "taxQUsForeignEarnedIncomeExclusionHelp": "The amount you excluded on Form 2555 this year. It is added back when the investment income and deduction phase-outs check your income.",
+  "taxQUsSpecifiedServiceTrade": "Specified service business",
+  "taxQUsSpecifiedServiceTradeHelp": "Consulting, law, health and similar businesses phase out of the qualified business income deduction.",
+  "taxQUsHomeOfficeMethod": "Home office method",
+  "taxQUsHomeOfficeMethodSimplified": "Simplified ($5 per square foot)",
+  "taxQUsHomeOfficeMethodRegular": "Regular (Form 8829)",
+  "taxQNgAnnualRent": "Annual rent paid",
+  "taxQNgAnnualRentHelp": "Used for rent relief under the Nigeria Tax Act.",
+  "taxQNgSmallCompanyCeiling": "Small company turnover ceiling",
+  "taxQNgSmallCompanyCeilingHelp": "The two Nigerian Acts disagree: the Nigeria Tax Act gazette says N50,000,000 and the Administration Act says N100,000,000. Pick the figure that should decide your company's small company status.",
+  "taxQNgSmallCompanyCeilingGazette": "N50,000,000 (Nigeria Tax Act gazette)",
+  "taxQNgSmallCompanyCeilingIntended": "N100,000,000 (Administration Act)",
+  "taxQNgMneGroupMember": "Member of a multinational group",
+  "taxQNgMneGroupMemberHelp": "Multinational group members may owe the 15% minimum effective tax rate whatever their turnover.",
+  "taxQDeJointAssessment": "Joint assessment",
+  "taxQDeJointAssessmentHelp": "Spouses assessed together with income splitting.",
+  "taxQDeSpouseEmployed": "Spouse also earns wages",
+  "taxQDeSpouseEmployedHelp": "Each employed spouse claims their own worker's flat-rate allowance and files their own Anlage N.",
+  "taxQDeChurchTax": "Church tax",
+  "taxQDeChurchTaxHelp": "Kirchensteuer on top of income tax.",
+  "taxQDeChurchState": "State (Land) of the church tax",
+  "taxQDeChurchStateHelp": "Sets the rate: 8% in Bavaria and Baden-Württemberg, 9% elsewhere. Leave it out to assume 9%.",
+  "taxQDeChurchStateBadenWuerttemberg": "Baden-Württemberg",
+  "taxQDeChurchStateBayern": "Bavaria",
+  "taxQDeChurchStateBerlin": "Berlin",
+  "taxQDeChurchStateBrandenburg": "Brandenburg",
+  "taxQDeChurchStateBremen": "Bremen",
+  "taxQDeChurchStateHamburg": "Hamburg",
+  "taxQDeChurchStateHessen": "Hesse",
+  "taxQDeChurchStateMecklenburgVorpommern": "Mecklenburg-Vorpommern",
+  "taxQDeChurchStateNiedersachsen": "Lower Saxony",
+  "taxQDeChurchStateNordrheinWestfalen": "North Rhine-Westphalia",
+  "taxQDeChurchStateRheinlandPfalz": "Rhineland-Palatinate",
+  "taxQDeChurchStateSaarland": "Saarland",
+  "taxQDeChurchStateSachsen": "Saxony",
+  "taxQDeChurchStateSachsenAnhalt": "Saxony-Anhalt",
+  "taxQDeChurchStateSchleswigHolstein": "Schleswig-Holstein",
+  "taxQDeChurchStateThueringen": "Thuringia",
+  "taxQDeChurchStateNone": "Not specified (assume 9%)",
+  "taxQDeChildren": "Children (Kindergeld)",
+  "taxQDeChildrenHelp": "Children you receive Kindergeld for; a full twelve months per child is assumed.",
+  "taxQDeStatutoryPension": "Statutory pension contributions",
+  "taxQDeStatutoryPensionHelp": "Employee and employer share per year; they reduce the Rürup (Basisrente) deduction.",
+  "taxQDeCommuteKm": "Commute: one-way distance (km)",
+  "taxQDeCommuteKmHelp": "Full kilometres to your first workplace, shortest route (Anlage N).",
+  "taxQDeCommuteDays": "Commute: days travelled",
+  "taxQDeCommuteDaysHelp": "Days you actually visited the workplace; illness, holiday and home-office days do not count.",
+  "taxQDeSmallBusinessExemption": "Small business VAT exemption",
+  "taxQDeSmallBusinessExemptionHelp": "Kleinunternehmerregelung: no VAT charged or reclaimed.",
+  "taxQDeEinkunftsArt": "Type of self-employment",
+  "taxQDeEinkunftsArtHelp": "Freiberufler owe no trade tax and file Anlage S; Gewerbetreibende owe Gewerbesteuer and file Anlage G.",
+  "taxQDeEinkunftsArtFreiberuflich": "Freiberufler (liberal profession)",
+  "taxQDeEinkunftsArtGewerblich": "Gewerbetreibender (trade)",
+  "taxQDePriorTurnover": "Previous year's turnover",
+  "taxQDePriorTurnoverHelp": "Total turnover of last year; it decides the Kleinunternehmer test (at most €25,000 prior year, €100,000 this year).",
   "taxLinkedBudget": "Linked personal budget",
   "taxLinkedBudgetHint": "The personal budget this business feeds.",
   "taxLinkedBudgetNone": "None",
@@ -2572,6 +2888,80 @@
   "netWorthTabByEntity": "By entity",
   "netWorthTabByCurrency": "By currency",
   "netWorthTabByAccount": "By account",
+  "cryptoBreakdownTitle": "Crypto",
+  "cryptoBreakdownByChain": "By chain",
+  "cryptoBreakdownByAsset": "By asset",
+  "cryptoBreakdownWallets": "{count, plural, =1{Across 1 wallet} other{Across {count} wallets}}",
+  "@cryptoBreakdownWallets": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cryptoBreakdownBarLabel": "{grouping}: {shares}",
+  "@cryptoBreakdownBarLabel": {
+    "description": "Text alternative for the crypto overprint bar. grouping is the selected toggle label; shares lists each row and its share.",
+    "placeholders": {
+      "grouping": {
+        "type": "String"
+      },
+      "shares": {
+        "type": "String"
+      }
+    }
+  },
+  "cryptoBreakdownBarShare": "{name} {share}",
+  "@cryptoBreakdownBarShare": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "share": {
+        "type": "String"
+      }
+    }
+  },
+  "cryptoBreakdownShareUnderOne": "<1%",
+  "cryptoBreakdownOther": "Other",
+  "cryptoBreakdownOtherHoldings": "{count, plural, =1{1 smaller holding} other{{count} smaller holdings}}",
+  "@cryptoBreakdownOtherHoldings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cryptoBreakdownChainHoldings": "{count, plural, =1{1 holding} other{{count} holdings}}",
+  "@cryptoBreakdownChainHoldings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cryptoBreakdownNetworksMore": "{names} +{count}",
+  "@cryptoBreakdownNetworksMore": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cryptoBreakdownEmpty": "Nothing is counted yet. Tokens without a price are left out until one is found.",
+  "cryptoBreakdownFootnote": "Tokens that look like scams and tokens without a price are left out.",
+  "cryptoBreakdownMissingRates": "No exchange rate for {currencies}, so those holdings are left out of this figure.",
+  "@cryptoBreakdownMissingRates": {
+    "placeholders": {
+      "currencies": {
+        "type": "String"
+      }
+    }
+  },
+  "cryptoBreakdownLoadError": "Couldn't load your crypto breakdown",
   "netWorthValuedOn": "Valued {date}",
   "@netWorthValuedOn": {
     "placeholders": {
@@ -2917,6 +3307,180 @@
     }
   },
   "accountHoldingsUnpriced": "No price yet",
+  "accountHoldingsCostUnknown": "Cost unknown",
+  "walletHoldingsNetworkSolana": "Solana",
+  "walletHoldingsNetworkSolanaDevnet": "Solana Devnet",
+  "walletHoldingsNetworkBitcoin": "Bitcoin",
+  "walletHoldingsNetworkEthereum": "Ethereum",
+  "walletHoldingsNetworkBase": "Base",
+  "walletHoldingsNetworkArbitrumOne": "Arbitrum One",
+  "walletHoldingsNetworkOpMainnet": "OP Mainnet",
+  "walletHoldingsNetworkPolygonPos": "Polygon PoS",
+  "walletHoldingsNetworkBnbSmartChain": "BNB Smart Chain",
+  "walletHoldingsNetworkAvalancheCChain": "Avalanche C-Chain",
+  "walletHoldingsNetworkTron": "Tron",
+  "walletHoldingsNetworkXrpl": "XRP Ledger",
+  "walletHoldingsNetworkHyperliquid": "Hyperliquid",
+  "walletHoldingsNetworkDogecoin": "Dogecoin",
+  "walletHoldingsNetworkLitecoin": "Litecoin",
+  "walletHoldingsNetworkCardano": "Cardano",
+  "walletHoldingsNetworkTon": "TON",
+  "walletHoldingsNetworkSui": "Sui",
+  "walletHoldingsNetworkAptos": "Aptos",
+  "walletHoldingsAgeMinutes": "{count, plural, =0{less than a minute ago} =1{1 minute ago} other{{count} minutes ago}}",
+  "@walletHoldingsAgeMinutes": {
+    "description": "How long ago a wallet read or a price was, under an hour. Read after \"Read\", \"from\" or \"Showing amounts from\".",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletHoldingsAgeHours": "{count, plural, =1{1 hour ago} other{{count} hours ago}}",
+  "@walletHoldingsAgeHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletHoldingsAgeDays": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+  "@walletHoldingsAgeDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletHoldingsReadAgo": "Read {age}",
+  "@walletHoldingsReadAgo": {
+    "description": "A network section's second line: when its holdings were last read. {age} is a phrase such as \"2 hours ago\".",
+    "placeholders": {
+      "age": {
+        "type": "String"
+      }
+    }
+  },
+  "walletHoldingsNeverRead": "Not read yet",
+  "walletHoldingsNothingCounted": "Nothing counted",
+  "walletHoldingsSectionSemantics": "{network}, {total}, {status}",
+  "@walletHoldingsSectionSemantics": {
+    "description": "What a screen reader says for a network section's header: the network, its subtotal and its read status.",
+    "placeholders": {
+      "network": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "walletHoldingsReadFailedWithAmounts": "{network} couldn't be read. Showing amounts from {age}.",
+  "@walletHoldingsReadFailedWithAmounts": {
+    "placeholders": {
+      "network": {
+        "type": "String"
+      },
+      "age": {
+        "type": "String"
+      }
+    }
+  },
+  "walletHoldingsReadFailedWithoutAmounts": "{network} couldn't be read yet. There are no amounts to show.",
+  "@walletHoldingsReadFailedWithoutAmounts": {
+    "placeholders": {
+      "network": {
+        "type": "String"
+      }
+    }
+  },
+  "walletHoldingsStaked": "Staked",
+  "walletHoldingsRewards": "Rewards",
+  "walletHoldingsOldPrice": "Price from {age}",
+  "@walletHoldingsOldPrice": {
+    "description": "A chip on a holding whose price is a cached one. {age} is a phrase such as \"3 days ago\".",
+    "placeholders": {
+      "age": {
+        "type": "String"
+      }
+    }
+  },
+  "walletHoldingsOldPriceUndated": "Old price",
+  "walletHoldingsHiddenTitle": "{count, plural, =1{1 hidden} other{{count} hidden}}",
+  "@walletHoldingsHiddenTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletHoldingsHiddenUnpriced": "{count} without a price",
+  "@walletHoldingsHiddenUnpriced": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletHoldingsHiddenSuspected": "{count} suspected spam",
+  "@walletHoldingsHiddenSuspected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletHoldingsHiddenByYou": "{count} hidden by you",
+  "@walletHoldingsHiddenByYou": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletHoldingsReasonUnpriced": "No price",
+  "walletHoldingsReasonSuspected": "Suspected spam",
+  "walletHoldingsReasonHiddenByYou": "Hidden by you",
+  "walletHoldingsHiddenDetail": "{network} · Quantity {quantity}",
+  "@walletHoldingsHiddenDetail": {
+    "placeholders": {
+      "network": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
+  "walletHoldingsShow": "Show",
+  "walletHoldingsHide": "Hide",
+  "walletHoldingsShowSemantics": "Show {name}",
+  "@walletHoldingsShowSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "walletHoldingsHideSemantics": "Hide {name}",
+  "@walletHoldingsHideSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "walletHoldingsVerdictFailed": "Couldn't update {name}. Try again.",
+  "@walletHoldingsVerdictFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "transactionDetailAndDate": "{detail} · {date}",
   "@transactionDetailAndDate": {
     "description": "A transaction row's second line: the payee or other detail, then the date.",
@@ -2991,5 +3555,286 @@
   "universalCategoryOutOfScopeTransfers": "Transfers",
   "universalCategoryOutOfScopeLoans": "Loans",
   "universalCategoryOutOfScopeGiftsReceived": "Gifts received",
-  "universalCategoryOutOfScopeOwnerCapitalAndDrawings": "Owner capital and drawings"
+  "universalCategoryOutOfScopeOwnerCapitalAndDrawings": "Owner capital and drawings",
+  "walletAddIntro": "Paste an address or extended public key. OpenBudget only reads your wallet: it never holds a key and can't move anything.",
+  "walletAddFieldLabel": "Wallet address",
+  "walletAddFieldHint": "Paste an address or extended public key",
+  "walletAddButton": "Add wallet",
+  "walletAddInvalidInput": "That doesn't look like a wallet address.",
+  "walletAddInvalidChecksum": "One character is wrong. Check the address and try again.",
+  "walletAddInvalidKey": "That extended key isn't one OpenBudget recognises.",
+  "walletAddRefusedPrivateKeyTitle": "That's a private key",
+  "walletAddRefusedPrivateKeyMessage": "OpenBudget never needs it. We cleared the field. Don't share it with anyone.",
+  "walletAddRefusedEvmKeyTitle": "That looks like a private key",
+  "walletAddRefusedEvmKeyMessage": "That looks like a private key, not an address. OpenBudget never needs it. We cleared the field.",
+  "walletAddRefusedTestnetTitle": "Mainnet only",
+  "walletAddRefusedTestnetMessage": "OpenBudget only supports mainnet addresses.",
+  "walletAddRefusedMultisigTitle": "Multisig keys aren't supported yet",
+  "walletAddRefusedMultisigMessage": "A multisig wallet needs every co-signer's key. That's coming later.",
+  "walletAddRefusedExchangeTitle": "That's an exchange account",
+  "walletAddRefusedExchangeMessage": "That X-address points at an exchange account. Use the address for your own account.",
+  "walletAddDetectedAddress": "A {chain} address.",
+  "@walletAddDetectedAddress": {
+    "placeholders": {
+      "chain": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddDetectedKey": "A {chain} extended public key. OpenBudget finds every address it makes, and never needs a private key.",
+  "@walletAddDetectedKey": {
+    "placeholders": {
+      "chain": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddDetectedEvm": "One address that can hold assets on {count} networks.",
+  "@walletAddDetectedEvm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletAddStampMore": "+ {count}",
+  "@walletAddStampMore": {
+    "description": "The second line of a chain stamp for an address that works on several networks, such as \"+ 6\" under Ethereum.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletAddScriptTypeUnknown": "We'll check which kind of address this key makes.",
+  "walletAddWhichChain": "Which chain is this address on?",
+  "walletAddUnavailableTitle": "{chain} isn't available yet",
+  "@walletAddUnavailableTitle": {
+    "placeholders": {
+      "chain": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddUnavailableMessage": "OpenBudget can't read that chain right now. Try again later.",
+  "walletAddPreviewLoading": "Looking for assets on {networks}…",
+  "@walletAddPreviewLoading": {
+    "placeholders": {
+      "networks": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddPickerTitle": "Where should OpenBudget look?",
+  "walletAddPickerHint": "Tap a chain to include it or leave it out. Ethereum is always read, because that's where your address lives.",
+  "walletAddNetworkNothing": "Nothing",
+  "walletAddNetworkNoPrice": "No price",
+  "walletAddNetworkUnreadable": "Can't read",
+  "walletAddPreviewFailedTitle": "Couldn't look ahead",
+  "walletAddPreviewFailedMessage": "We couldn't check which chains hold assets. You can still add the wallet. It will read Ethereum.",
+  "walletAddPreviewRateLimitedMessage": "You've looked up a lot of wallets. Try again in a little while, or add this one now and it will read Ethereum.",
+  "walletAddPreviewRetry": "Try again",
+  "walletAddNamesTwo": "{first} and {second}",
+  "@walletAddNamesTwo": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddNamesThree": "{first}, {second} and {third}",
+  "@walletAddNamesThree": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      },
+      "third": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddNamesMore": "{first}, {second}, {third} and {count} more",
+  "@walletAddNamesMore": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      },
+      "third": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletAddReading": "Reading {networks}…",
+  "@walletAddReading": {
+    "description": "Shown while a new wallet is read for the first time. {networks} is a list such as \"Ethereum, Base and Arbitrum One\".",
+    "placeholders": {
+      "networks": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddReadingHint": "The first read takes a few seconds.",
+  "walletAddUnreadableTitle": "Couldn't read your wallet",
+  "walletAddUnreadableMessage": "Couldn't reach {networks}. The wallet is in your accounts, and OpenBudget will keep trying.",
+  "@walletAddUnreadableMessage": {
+    "placeholders": {
+      "networks": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddRetry": "Try again",
+  "walletAddFailedTitle": "Couldn't add the wallet",
+  "walletAddFailedMessage": "Something went wrong. Check your connection and try again.",
+  "walletAddedPostmark": "Added",
+  "walletAddedPostmarkChains": "{count} chains",
+  "@walletAddedPostmarkChains": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletAddedTitle": "Wallet added",
+  "walletAddedMessage": "{accountName} is in your accounts. Its holdings show in the account's details.",
+  "@walletAddedMessage": {
+    "placeholders": {
+      "accountName": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddAccountNameAddress": "{chain} wallet ({address})",
+  "@walletAddAccountNameAddress": {
+    "description": "The name given to a new wallet's account, such as \"Ethereum wallet (0xAb…12cD)\".",
+    "placeholders": {
+      "chain": {
+        "type": "String"
+      },
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddAccountNameKey": "{chain} wallet, {keyType}",
+  "@walletAddAccountNameKey": {
+    "description": "The name given to a Bitcoin HD wallet's account, such as \"Bitcoin wallet, zpub\".",
+    "placeholders": {
+      "chain": {
+        "type": "String"
+      },
+      "keyType": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAddStampDetected": "detected",
+  "walletAddStampIncluded": "included",
+  "walletAddStampLeftOut": "left out",
+  "walletAddPickerSelectedCount": "{count, plural, =1{1 network selected} other{{count} networks selected}}",
+  "@walletAddPickerSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletSettingsButton": "Wallet settings",
+  "walletSettingsTitle": "Wallet settings",
+  "walletSettingsNameLabel": "Wallet name",
+  "walletSettingsNameSave": "Save name",
+  "walletSettingsNameSaved": "Wallet renamed",
+  "walletSettingsNameFailed": "Couldn't rename the wallet. Try again.",
+  "walletSettingsNetworksTitle": "Chains OpenBudget reads",
+  "walletSettingsNotRead": "Not read",
+  "walletSettingsNetworksSave": "Save chains",
+  "walletSettingsNetworksSaved": "Chains updated",
+  "walletSettingsNetworksFailed": "Couldn't update the chains. Try again.",
+  "walletSettingsNetworksReadFailed": "Saved, but {networks} couldn't be read yet. OpenBudget will keep trying.",
+  "@walletSettingsNetworksReadFailed": {
+    "placeholders": {
+      "networks": {
+        "type": "String"
+      }
+    }
+  },
+  "walletSettingsSingleChain": "{chain} wallets are read on one chain, so there's nothing to choose.",
+  "@walletSettingsSingleChain": {
+    "placeholders": {
+      "chain": {
+        "type": "String"
+      }
+    }
+  },
+  "walletSettingsLookAhead": "Look for assets on other chains",
+  "walletSettingsFoundTitle": "Found assets on {networks}",
+  "@walletSettingsFoundTitle": {
+    "placeholders": {
+      "networks": {
+        "type": "String"
+      }
+    }
+  },
+  "walletSettingsFoundMessage": "They're picked above. Save the chains to start reading them.",
+  "walletSettingsNothingTitle": "Nothing new found",
+  "walletSettingsNothingMessage": "{count, plural, =1{OpenBudget looked at 1 other chain and found no assets there.} other{OpenBudget looked at {count} other chains and found no assets there.}}",
+  "@walletSettingsNothingMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletSettingsLookAheadFailedMessage": "We couldn't check the other chains. Try again in a moment.",
+  "walletSettingsLookAheadRateLimited": "You've looked up a lot of wallets. Try again in a little while.",
+  "walletSettingsRemoveTitle": "Stop reading {networks}?",
+  "@walletSettingsRemoveTitle": {
+    "placeholders": {
+      "networks": {
+        "type": "String"
+      }
+    }
+  },
+  "walletSettingsRemoveMessage": "{amount} on {networks} will drop out of your net worth. Your assets stay where they are, and you can add the chain back any time.",
+  "@walletSettingsRemoveMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "networks": {
+        "type": "String"
+      }
+    }
+  },
+  "walletSettingsRemoveConfirm": "Stop reading",
+  "walletSettingsRemoveCancel": "Keep reading",
+  "walletSettingsDisconnectTitle": "Disconnect",
+  "walletSettingsDisconnectHint": "OpenBudget stops reading this wallet. The account and its history stay in your accounts.",
+  "walletSettingsDisconnectButton": "Disconnect wallet",
+  "walletSettingsDisconnectConfirmTitle": "Disconnect {name}?",
+  "@walletSettingsDisconnectConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "walletSettingsDisconnectConfirmMessage": "OpenBudget stops reading this wallet and its value stops updating. The account and its history stay, and you can add the wallet again later.",
+  "walletSettingsDisconnectConfirm": "Disconnect",
+  "walletSettingsDisconnectCancel": "Keep wallet",
+  "walletSettingsDisconnected": "Wallet disconnected",
+  "walletSettingsDisconnectFailed": "Couldn't disconnect the wallet. Try again.",
+  "walletSettingsAllRead": "OpenBudget already reads every chain this address can use."
 }

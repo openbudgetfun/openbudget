@@ -1,0 +1,27 @@
+### One slice of an entity's crypto value, in the reporting currency.
+class: CryptoBreakdownRow
+fields:
+  ### Stable id of the slice within one view: the network name for `byChain`,
+  ### `asset:<symbol>` for a merged canonical asset, `<network>:<assetId>` for
+  ### any other token, and `other` for the remainder.
+  key: String
+  ### The networks that contribute to the slice: one for a chain row and for
+  ### an unmerged token, several for a merged asset, and every network behind
+  ### an "Other" row.
+  networks: List<WalletNetwork>
+  ### The asset's ticker. Null for chain rows and the "Other" row.
+  symbol: String?
+  ### The asset's name. Null for chain rows and the "Other" row.
+  name: String?
+  ### The token's id on its network, for an unmerged token only, so two
+  ### tokens that share a ticker stay apart.
+  assetId: String?
+  ### True for the remainder row after the top eight assets.
+  isOther: bool
+  ### How many holdings fed the slice.
+  holdingCount: int
+  ### The slice's value in the reporting currency's minor units.
+  valueMinor: int
+  ### The slice's share of the view's total, in basis points (1/100 of a
+  ### percent). The shares of one view add up to exactly 10000.
+  shareBasisPoints: int

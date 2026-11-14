@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/main.dart';
 import 'package:openbudget_app/src/features/agent_access/screens/agent_access_screen.dart';
 import 'package:openbudget_app/src/features/assistant/screens/assistant_screen.dart';
-import 'package:openbudget_core/openbudget_core.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_question_field.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 import 'test_data.dart';
@@ -841,6 +841,28 @@ class NetWorthPage {
   Future<void> showByCurrency() => scrollAndTap(tester, tabByCurrency);
 
   Future<void> showByAccount() => scrollAndTap(tester, tabByAccount);
+
+  // The Crypto section: the overprint bar, its rows and the chain / asset
+  // toggle.
+  Finder get cryptoSection => find.byKey(const Key('crypto-breakdown-section'));
+  Finder get cryptoTotal => find.byKey(const Key('crypto-breakdown-total'));
+  Finder get cryptoToggleByChain =>
+      find.byKey(const Key('crypto-breakdown-toggle-by-chain'));
+  Finder get cryptoToggleByAsset =>
+      find.byKey(const Key('crypto-breakdown-toggle-by-asset'));
+
+  /// The overprint bar for `byChain` or `byAsset`.
+  Finder cryptoBar(String grouping) =>
+      find.byKey(ValueKey('crypto-breakdown-bar-$grouping'));
+
+  /// One row, by the key the server gave its slice (`ethereumMainnet`,
+  /// `asset:USDC`, `other`).
+  Finder cryptoRow(String key) =>
+      find.byKey(ValueKey('crypto-breakdown-row-$key'));
+
+  Future<void> showCryptoByChain() => scrollAndTap(tester, cryptoToggleByChain);
+
+  Future<void> showCryptoByAsset() => scrollAndTap(tester, cryptoToggleByAsset);
 }
 
 /// Page object for the cross-currency transfer form.
@@ -910,6 +932,66 @@ class TaxOverviewPage {
     'Guidance only, not tax advice. Check figures with a qualified adviser '
     'before filing.',
   );
+  Finder get exportButton => find.byKey(const Key('tax-export-button'));
+  Finder get exportError => find.byKey(const Key('tax-export-error'));
+  Finder get upcoming => find.byKey(const Key('tax-upcoming'));
+  Finder get upcomingToggle => find.byKey(const Key('tax-upcoming-toggle'));
+  Finder get upcomingSourceLinks =>
+      find.byKey(const Key('tax-deadline-source'));
+
+  /// One upcoming date's card, by rule id and due day (`yyyymmdd`).
+  Finder deadline(String id, String day) =>
+      find.byKey(Key('tax-deadline-$id-$day'));
+
+  /// Every upcoming date's card.
+  Finder get deadlines => find.byWidgetPredicate(
+    (widget) =>
+        widget.key is ValueKey<String> &&
+        (widget.key! as ValueKey<String>).value.startsWith('tax-deadline-') &&
+        RegExp(r'-\d{8}$').hasMatch((widget.key! as ValueKey<String>).value),
+  );
+
+  /// Scrolls the Upcoming list into view.
+  Future<void> showUpcoming() => scrollIntoView(tester, upcoming);
+
+  /// Makes the export link and opens it, scrolling to the button first.
+  Future<void> export() async {
+    await scrollIntoView(tester, exportButton);
+    await tester.tap(exportButton);
+    await tester.pumpAndSettle();
+  }
+}
+
+/// Page object for the tax overview of a country with no tax pack.
+class UniversalTaxPage {
+  UniversalTaxPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get introTitle => find.text(TaxExportData.kenyaIntroTitle);
+  Finder get yearLabel => find.byKey(const Key('tax-year-label'));
+  Finder get summaryHero => find.byKey(const Key('tax-summary-hero'));
+  Finder get ratesTitle => find.text(TaxExportData.vatRatesTitle);
+  Finder get standardRate => find.text(TaxExportData.kenyaStandardRate);
+  Finder get secondaryBadge =>
+      find.byKey(const Key('tax-secondary-source-badge'));
+  Finder get authorityLink => find.byKey(const Key('tax-authority-link'));
+  Finder get exportButton => find.byKey(const Key('tax-export-button'));
+  Finder get exportError => find.byKey(const Key('tax-export-error'));
+
+  /// Makes the export link and opens it, scrolling to the button first.
+  Future<void> export() async {
+    await scrollIntoView(tester, exportButton);
+    await tester.tap(exportButton);
+    await tester.pumpAndSettle();
+  }
+
+  /// Opens the tax authority's website, scrolling to the link first.
+  Future<void> openAuthority() async {
+    await scrollIntoView(tester, authorityLink);
+    await tester.tap(authorityLink);
+    await tester.pumpAndSettle();
+  }
 }
 
 /// Page object for the tax profile form.
@@ -920,13 +1002,30 @@ class TaxProfilePage {
 
   Finder get title => find.text('Tax profile').first;
 
+  /// A question's field is found by the question's key, not its wording,
+  /// so the same page object serves every country's questions.
+  Finder question(String key) => find.byKey(taxQuestionFieldKey(key));
+
   /// The jurisdiction comes from the entity now; the kind dropdown is the
   /// only entity-level control left on the form.
-  Finder get entityField => find.byType(DropdownButtonFormField<EntityKind>);
-  Finder get scottishTaxpayerToggle => find.text('Scottish taxpayer');
-  Finder get studentLoanField => find.byType(DropdownButtonFormField<String>);
-  Finder get annualRentField => find.byType(TextField).first;
+  Finder get entityField => question('entityKind');
+  Finder get scottishTaxpayerToggle => question('scottishTaxpayer');
+  Finder get taxResidentToggle => question('taxResident');
+  Finder get studentLoanField => question('studentLoanPlan');
+  Finder get annualRentField => question('annualRentMinor');
   Finder get saveButton => find.text('Save profile');
+
+  /// Scrolls [field] into view and taps it, for a switch or a dropdown.
+  Future<void> tapQuestion(Finder field) async {
+    await tester.scrollUntilVisible(
+      field,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(field);
+    await tester.pumpAndSettle();
+  }
 
   Future<void> save() async {
     await tester.scrollUntilVisible(
@@ -967,4 +1066,114 @@ class ExpenseFxPage {
     await tester.tap(manualRateUseButton);
     await tester.pumpAndSettle();
   }
+}
+
+/// Page object for the add-a-wallet step of the add account flow.
+class AddWalletPage {
+  AddWalletPage(this.tester);
+
+  final WidgetTester tester;
+
+  /// The bank search step's "Add a crypto wallet" button.
+  Finder get entryButton =>
+      find.widgetWithText(FilledButton, 'Add a crypto wallet');
+  Finder get addressField => find.byKey(const Key('add-wallet-address-field'));
+  Finder get addButton => find.byKey(const Key('add-wallet-submit'));
+  Finder get detectedStamp =>
+      find.byKey(const Key('add-wallet-detected-stamp'));
+  Finder get doneButton => find.byKey(const Key('add-wallet-done'));
+  Finder get addAnotherButton =>
+      find.byKey(const Key('add-wallet-add-another'));
+
+  /// The postmark that lands when the wallet is in.
+  Finder get postmark => find.byType(ObPostmark);
+
+  /// The stamp for [network] (a `WalletNetwork` name, such as `baseMainnet`)
+  /// in the EVM picker.
+  Finder networkStamp(String network) =>
+      find.byKey(ValueKey('add-wallet-network-$network'));
+
+  Finder get pickerTitle => find.text('Where should OpenBudget look?');
+  Finder get refusalTitle => find.text("That's a private key");
+  Finder get unreadableTitle => find.text("Couldn't read your wallet");
+
+  /// Opens the wallet step from the bank search step.
+  Future<void> open() => scrollAndTap(tester, entryButton);
+
+  /// Pastes [text] into the field, as a person pasting from their wallet.
+  Future<void> paste(String text) async {
+    await tester.enterText(addressField, text);
+    await tester.pumpAndSettle();
+  }
+
+  /// What the field holds right now.
+  String get fieldText =>
+      tester.widget<TextField>(addressField).controller?.text ?? '';
+
+  /// Whether the Add wallet button can be tapped.
+  bool get canAdd => tester.widget<FilledButton>(addButton).onPressed != null;
+
+  Future<void> toggleNetwork(String network) async {
+    await tester.ensureVisible(networkStamp(network));
+    await tester.tap(networkStamp(network));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> tapAdd() async {
+    await tester.tap(addButton);
+    await tester.pump();
+  }
+}
+
+/// Page object for a wallet account's settings sheet on account detail.
+class WalletSettingsPage {
+  WalletSettingsPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get openButton => find.byKey(const Key('wallet-settings-button'));
+  Finder get nameField => find.byKey(const Key('wallet-settings-name-field'));
+  Finder get saveNameButton =>
+      find.byKey(const Key('wallet-settings-name-save'));
+  Finder get saveChainsButton =>
+      find.byKey(const Key('wallet-settings-save-networks'));
+  Finder get lookAheadButton =>
+      find.byKey(const Key('wallet-settings-look-ahead'));
+  Finder get removeConfirmButton =>
+      find.byKey(const Key('wallet-settings-remove-confirm'));
+  Finder get removeCancelButton =>
+      find.byKey(const Key('wallet-settings-remove-cancel'));
+  Finder get disconnectButton =>
+      find.byKey(const Key('wallet-settings-disconnect'));
+
+  /// The stamp for [network] (a `WalletNetwork` name, such as `baseMainnet`)
+  /// in the chain editor.
+  Finder networkStamp(String network) =>
+      find.byKey(ValueKey('wallet-settings-network-$network'));
+
+  Future<void> open() => scrollAndTap(tester, openButton);
+
+  /// Closes the sheet, as the system back gesture does.
+  Future<void> close() async {
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+  }
+
+  /// Scrolls account detail to the holdings, one section per chain.
+  Future<void> showHoldings() => scrollIntoView(tester, find.text('Holdings'));
+
+  Future<void> rename(String name) async {
+    await tester.enterText(nameField, name);
+    await tester.pumpAndSettle();
+    await scrollAndTap(tester, saveNameButton);
+  }
+
+  Future<void> toggleNetwork(String network) =>
+      scrollAndTap(tester, networkStamp(network));
+
+  Future<void> saveChains() => scrollAndTap(tester, saveChainsButton);
+
+  Future<void> confirmRemoval() => scrollAndTap(tester, removeConfirmButton);
+
+  Future<void> lookForOtherChains() => scrollAndTap(tester, lookAheadButton);
 }

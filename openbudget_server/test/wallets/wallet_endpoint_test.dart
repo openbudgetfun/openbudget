@@ -36,6 +36,7 @@ void main() {
   setUp(() async {
     events = EventLog()..install();
     WalletService.debugPublisher = events.record;
+    WalletService.clock = () => DateTime.utc(2026);
     book = await BudgetTestBook.create(server.anonymousSession());
     await book.session.caches.clear();
     await book.session.db.unsafeExecute('DELETE FROM asset_price');
@@ -294,6 +295,8 @@ void main() {
           transaction.id!,
           memo: 'mine now',
         ),
+        () => endpoint.listNetworkStates(book.session, foreignWallet.id!),
+        () => endpoint.setScanNetworks(book.session, foreignWallet.id!, null),
         () => endpoint.disconnect(book.session, foreignWallet.id!),
       ]) {
         await expectLater(call(), throwsA(isA<ForbiddenException>()));
