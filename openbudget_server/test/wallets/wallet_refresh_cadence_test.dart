@@ -221,6 +221,48 @@ void main() {
     },
   );
 
+  test('a revaluation re-prices holdings from the swept price', () async {
+    final base = DateTime.utc(2026);
+    WalletService.clock = () => base;
+    final walletId = await seedWallet();
+    final provider = _FakeProvider();
+    WalletService.debugProviderFactory = (_, _) => provider;
+
+    // The first run reads the wallet: 1 SOL at $100 is 10,000 cents.
+    await WalletRefreshFutureCall.run(book.session);
+    expect(provider.calls, 1);
+
+    // An hour later the price cache holds $150. The wallet is not due a
+    // read, so the run revalues it from the swept price.
+    final later = base.add(const Duration(hours: 1));
+    WalletService.clock = () => later;
+    await book.session.db.unsafeExecute('DELETE FROM asset_price');
+    await AssetPrice.db.insertRow(
+      book.session,
+      AssetPrice(
+        network: WalletNetwork.solanaMainnet,
+        assetId: 'SOL',
+        currencyCode: 'USD',
+        unitPrice: '150',
+        source: PriceSource.jupiter,
+        fetchedAt: later,
+        expiresAt: later.add(const Duration(hours: 1)),
+      ),
+    );
+
+    final report = await WalletRefreshFutureCall.run(book.session);
+    expect(report.reads, 0);
+    expect(report.revaluations, 1);
+    expect(provider.calls, 1);
+
+    final holdings = await WalletHolding.db.find(
+      book.session,
+      where: (t) => t.walletId.equals(walletId),
+    );
+    expect(holdings.single.valueMinor, 15000);
+    expect(holdings.single.unitPrice, '150');
+  });
+
   test('the per-run cap is honoured, oldest first', () async {
     final base = DateTime.utc(2026);
     WalletService.clock = () => base.add(const Duration(hours: 30));
