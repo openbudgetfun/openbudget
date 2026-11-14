@@ -232,12 +232,13 @@ void main() {
           for (final tool in tools)
             (tool! as Map<String, Object?>)['name']! as String,
         ];
-        expect(names, hasLength(6));
+        expect(names, hasLength(7));
         expect(names, contains('list_entities'));
         expect(names, contains('list_envelopes'));
         expect(names, contains('search_transactions'));
         expect(names, contains('get_tax_report'));
         expect(names, contains('list_tax_categories'));
+        expect(names, contains('search_knowledge'));
         expect(names, contains('get_net_worth'));
         expect(names, isNot(contains('propose_move_money')));
         expect(names, isNot(contains('propose_transaction_tax_category')));
@@ -257,7 +258,7 @@ void main() {
           for (final tool in tools)
             (tool! as Map<String, Object?>)['name']! as String,
         ];
-        expect(names, hasLength(9));
+        expect(names, hasLength(10));
         expect(names, contains('propose_move_money'));
         expect(names, contains('propose_transaction_tax_category'));
         expect(names, contains('propose_envelope_tax_category'));

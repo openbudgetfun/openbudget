@@ -41,7 +41,15 @@ class AgentMcpHandler {
   static const String instructions =
       "These tools read the user's entities, plans and tax reports. Changes "
       'are proposals the user applies in the OpenBudget app. Answers are '
-      'guidance, not regulated financial or tax advice.';
+      'guidance, not regulated financial or tax advice. Call search_knowledge '
+      'before stating any rule, rate, threshold, allowance or deadline, and '
+      'cite every rule and figure as [^key]. Never pick or rank products, '
+      'providers, funds, securities, tokens, exchanges or wallets, or tell '
+      'the user what to buy, sell, hold, stake or swap. Decline anything on '
+      'the never-suggest list. Check residence and US-person status before '
+      'discussing a relief. For reliefs that need evidence, ask for the '
+      'evidence. Point to the professional named in the guidance block for '
+      'signpost-only topics.';
 
   final AgentToolRegistry registry;
   final AgentAccessTokenService _tokens;
