@@ -173,6 +173,7 @@ void main() {
         });
         expect(result['instructions'], contains('guidance'));
         expect(result['instructions'], contains('proposals'));
+        expect(result['instructions'], contains('search_knowledge'));
       });
 
       test('then an unknown version falls back to the newest', () async {
@@ -232,12 +233,13 @@ void main() {
           for (final tool in tools)
             (tool! as Map<String, Object?>)['name']! as String,
         ];
-        expect(names, hasLength(6));
+        expect(names, hasLength(7));
         expect(names, contains('list_entities'));
         expect(names, contains('list_envelopes'));
         expect(names, contains('search_transactions'));
         expect(names, contains('get_tax_report'));
         expect(names, contains('list_tax_categories'));
+        expect(names, contains('search_knowledge'));
         expect(names, contains('get_net_worth'));
         expect(names, isNot(contains('propose_move_money')));
         expect(names, isNot(contains('propose_transaction_tax_category')));
@@ -257,7 +259,7 @@ void main() {
           for (final tool in tools)
             (tool! as Map<String, Object?>)['name']! as String,
         ];
-        expect(names, hasLength(9));
+        expect(names, hasLength(10));
         expect(names, contains('propose_move_money'));
         expect(names, contains('propose_transaction_tax_category'));
         expect(names, contains('propose_envelope_tax_category'));
@@ -325,6 +327,41 @@ void main() {
           containsPair('error', contains('must be a UUID')),
         );
       });
+
+      test(
+        'then search_knowledge returns cards with citeAs and guidance',
+        () async {
+          final entity = await createEntity('Household');
+
+          final response = await send(
+            _request(
+              'tools/call',
+              params: {
+                'name': 'search_knowledge',
+                'arguments': {
+                  'entityId': entity.id.toString(),
+                  'query': 'emergency fund',
+                },
+              },
+            ),
+          );
+
+          expect(response.statusCode, 200);
+          final result = _result(response);
+          expect(result['isError'], isFalse);
+          final content = result['content']! as List<Object?>;
+          final text =
+              (content.single! as Map<String, Object?>)['text']! as String;
+          final decoded = jsonDecode(text) as Map<String, Object?>;
+          final cards = decoded['cards']! as List<Object?>;
+          expect(cards, isNotEmpty);
+          final card = cards.first! as Map<String, Object?>;
+          expect(card, contains('citeAs'));
+          expect(decoded, contains('guidance'));
+          final guidance = decoded['guidance']! as Map<String, Object?>;
+          expect(guidance, contains('jurisdictionState'));
+        },
+      );
     });
 
     group('when calling a propose tool', () {
