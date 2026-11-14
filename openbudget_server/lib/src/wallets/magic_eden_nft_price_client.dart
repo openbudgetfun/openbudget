@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:openbudget_server/src/wallets/wallet_vendor_request_counter.dart';
 
 /// Normalized NFT quote returned from marketplace fallback pricing.
 class NftMarketPriceQuote {
@@ -93,7 +96,7 @@ class MagicEdenNftPriceClient {
       client,
       _baseUri.resolve('/v2/tokens/$mint'),
       onWarning: onWarning,
-      errorPrefix: 'Magic Eden token endpoint failed for $mint',
+      errorPrefix: 'Magic Eden token endpoint failed',
     );
 
     final collection = token == null ? null : parseCollectionSymbol(token);
@@ -115,7 +118,7 @@ class MagicEdenNftPriceClient {
         '/v2/tokens/$mint/activities?offset=0&limit=$_defaultActivitiesLimit',
       ),
       onWarning: onWarning,
-      errorPrefix: 'Magic Eden activities endpoint failed for $mint',
+      errorPrefix: 'Magic Eden activities endpoint failed',
     );
 
     final recentSaleSol = activities == null
@@ -166,8 +169,7 @@ class MagicEdenNftPriceClient {
       client,
       _baseUri.resolve('/v2/collections/$collectionSymbol/stats'),
       onWarning: onWarning,
-      errorPrefix:
-          'Magic Eden collection stats endpoint failed for $collectionSymbol',
+      errorPrefix: 'Magic Eden collection stats endpoint failed',
     );
     if (stats == null) return null;
     return parseCollectionFloorPriceSol(stats);
@@ -273,6 +275,7 @@ class MagicEdenNftPriceClient {
     required String errorPrefix,
     void Function(String warning)? onWarning,
   }) async {
+    WalletVendorRequestCounter.current?.record('magiceden');
     try {
       final request = await client.getUrl(uri);
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
@@ -294,6 +297,9 @@ class MagicEdenNftPriceClient {
       return null;
     } on FormatException {
       onWarning?.call('$errorPrefix (invalid JSON).');
+      return null;
+    } on TimeoutException {
+      onWarning?.call('$errorPrefix (timeout).');
       return null;
     }
   }

@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:openbudget_server/src/wallets/wallet_vendor_request_counter.dart';
 
 class CoinGeckoPriceClient {
   static const int chunkSize = 515;
@@ -256,6 +259,7 @@ class CoinGeckoPriceClient {
     required String errorPrefix,
     void Function(String warning)? onWarning,
   }) async {
+    WalletVendorRequestCounter.current?.record('coingecko');
     try {
       final request = await client.getUrl(uri);
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
@@ -275,6 +279,9 @@ class CoinGeckoPriceClient {
       return null;
     } on HttpException {
       onWarning?.call('$errorPrefix request failed due to HTTP error.');
+      return null;
+    } on TimeoutException {
+      onWarning?.call('$errorPrefix request timed out.');
       return null;
     } on FormatException {
       onWarning?.call('$errorPrefix response could not be parsed.');

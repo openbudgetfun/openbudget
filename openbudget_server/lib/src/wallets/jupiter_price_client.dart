@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:openbudget_server/src/wallets/wallet_vendor_request_counter.dart';
 
 /// Lightweight Jupiter price API client used as a fallback for missing DAS
 /// token prices.
@@ -33,6 +36,7 @@ class JupiterPriceClient {
           next > cleanedMints.length ? cleanedMints.length : next,
         );
         final uri = _baseUri.replace(queryParameters: {'ids': batch.join(',')});
+        WalletVendorRequestCounter.current?.record('jupiter');
         final request = await client.getUrl(uri);
         request.headers.set(HttpHeaders.acceptHeader, 'application/json');
 
@@ -58,6 +62,8 @@ class JupiterPriceClient {
       onWarning?.call('Jupiter price API request failed due to HTTP error.');
     } on FormatException {
       onWarning?.call('Jupiter price API response could not be parsed.');
+    } on TimeoutException {
+      onWarning?.call('Jupiter price API request timed out.');
     } finally {
       if (shouldClose) {
         client.close();

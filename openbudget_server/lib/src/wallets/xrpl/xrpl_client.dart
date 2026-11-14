@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
+import 'package:openbudget_server/src/wallets/wallet_vendor_request_counter.dart';
 
 /// Reads XRP Ledger accounts from public JSON-RPC servers.
 ///
@@ -95,6 +96,7 @@ final class XrplClient {
   }
 
   Future<_XrplResponse> _post(Uri endpoint, String body) async {
+    WalletVendorRequestCounter.current?.record('xrpl');
     // Transport injection: support both two-argument (url, body) and
     // one-argument (url) callables so tests can script responses either
     // way.

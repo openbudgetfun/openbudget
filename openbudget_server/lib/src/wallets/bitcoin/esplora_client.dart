@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
+import 'package:openbudget_server/src/wallets/wallet_vendor_request_counter.dart';
 
 /// Reads single Bitcoin addresses from Esplora servers.
 ///
@@ -85,6 +86,7 @@ final class EsploraClient {
     var retriedAfter429 = false;
     while (true) {
       await _pace(baseUrl);
+      WalletVendorRequestCounter.current?.record('esplora');
       final EsploraResponse response;
       try {
         response = await _transport(_addressUrl(baseUrl, address));

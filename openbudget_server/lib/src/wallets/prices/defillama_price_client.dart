@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:openbudget_server/src/wallets/wallet_vendor_request_counter.dart';
 
 /// One DefiLlama price result.
 class DefiLlamaPrice {
@@ -102,6 +105,7 @@ class DefiLlamaPriceClient {
     Uri uri, {
     void Function(String warning)? onWarning,
   }) async {
+    WalletVendorRequestCounter.current?.record('defillama');
     try {
       final request = await client.getUrl(uri);
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
@@ -124,6 +128,9 @@ class DefiLlamaPriceClient {
       onWarning?.call(
         'DefiLlama prices/current request failed due to HTTP error.',
       );
+      return null;
+    } on TimeoutException {
+      onWarning?.call('DefiLlama prices/current request timed out.');
       return null;
     } on FormatException {
       onWarning?.call('DefiLlama prices/current response could not be parsed.');

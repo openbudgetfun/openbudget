@@ -14,6 +14,7 @@ import 'package:openbudget_server/src/wallets/wallet_math.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider.dart';
 import 'package:openbudget_server/src/wallets/wallet_provider_registry.dart';
 import 'package:openbudget_server/src/wallets/wallet_spam_classifier.dart';
+import 'package:openbudget_server/src/wallets/wallet_vendor_request_counter.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
 
@@ -261,6 +262,15 @@ abstract final class WalletService {
     Session session,
     UuidValue walletId, {
     bool force = false,
+    SystemEntityOwner? systemOwner,
+  }) => WalletVendorRequestCounter.track(
+    () => _sync(session, walletId, force: force, systemOwner: systemOwner),
+  );
+
+  static Future<WalletSyncResult> _sync(
+    Session session,
+    UuidValue walletId, {
+    required bool force,
     SystemEntityOwner? systemOwner,
   }) async {
     var wallet = await _ownedWallet(

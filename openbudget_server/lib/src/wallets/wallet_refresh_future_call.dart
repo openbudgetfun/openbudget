@@ -5,6 +5,7 @@ import 'package:openbudget_server/src/entities/entity_access.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:openbudget_server/src/wallets/prices/price_service.dart';
 import 'package:openbudget_server/src/wallets/wallet_service.dart';
+import 'package:openbudget_server/src/wallets/wallet_vendor_request_counter.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// A summary of one hourly wallet refresh run.
@@ -50,7 +51,10 @@ class WalletRefreshFutureCall extends FutureCall {
 
   /// Internal implementation returning the report.
   @visibleForTesting
-  static Future<WalletRefreshReport> run(Session session) async {
+  static Future<WalletRefreshReport> run(Session session) =>
+      WalletVendorRequestCounter.track(() => _run(session));
+
+  static Future<WalletRefreshReport> _run(Session session) async {
     final now = WalletService.clock();
 
     final wallets = await Wallet.db.find(
