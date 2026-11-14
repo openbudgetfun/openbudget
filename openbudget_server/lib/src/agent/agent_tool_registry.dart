@@ -9,7 +9,9 @@ import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/money_guide/guidance_block.dart';
 import 'package:openbudget_server/src/money_guide/search_knowledge.dart';
 import 'package:openbudget_server/src/reports/net_worth_service.dart';
+import 'package:openbudget_server/src/reports/report_service.dart';
 import 'package:openbudget_server/src/tax/tax_service.dart';
+import 'package:openbudget_server/src/tax/tax_summary_service.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
 
 /// Everything a tool may read or write for one turn.
@@ -178,6 +180,51 @@ class AgentToolRegistry {
         ),
       },
     ),
+    _tool(
+      name: 'get_spending_summary',
+      description:
+          'Summarise up to 12 months of income and spending per envelope and '
+          'category group: totals, monthly averages and a trend.',
+      properties: {
+        'entityId': _uuidSchema('The entity to summarise.'),
+        'months': {
+          'type': 'integer',
+          'minimum': 1,
+          'maximum': 12,
+          'description':
+              'How many whole months to include, 1 to 12. Defaults to 12.',
+        },
+      },
+      required: ['entityId'],
+    ),
+    _tool(
+      name: 'get_tax_calendar',
+      description:
+          "List the entity's upcoming tax deadlines from the pack, or the "
+          'tax-year end for a country without a pack.',
+      properties: {
+        'entityId': _uuidSchema('The entity whose calendar to read.'),
+      },
+      required: ['entityId'],
+    ),
+    _tool(
+      name: 'get_tax_summary',
+      description:
+          'Read the tax-ready summary totals (U8) for any country, with '
+          'citeAs for each sourced figure.',
+      properties: {
+        'entityId': _uuidSchema('The entity whose summary to read.'),
+        'startYear': {
+          'type': 'integer',
+          'minimum': 1900,
+          'maximum': 2200,
+          'description':
+              'The calendar year the tax year starts in. Omit for the '
+              'current tax year.',
+        },
+      },
+      required: ['entityId'],
+    ),
     if (canPropose) ...[
       _tool(
         name: 'propose_move_money',
@@ -293,6 +340,9 @@ class AgentToolRegistry {
       'search_knowledge' => _searchKnowledge(context, args),
       'list_tax_categories' => _listTaxCategories(context, args),
       'get_net_worth' => _getNetWorth(context, args),
+      'get_spending_summary' => _getSpendingSummary(context, args),
+      'get_tax_calendar' => _getTaxCalendar(context, args),
+      'get_tax_summary' => _getTaxSummary(context, args),
       'propose_move_money' => _proposeMoveMoney(context, args),
       'propose_transaction_tax_category' => _proposeTransactionTaxCategory(
         context,
@@ -555,6 +605,265 @@ class AgentToolRegistry {
     return _json({
       'categories': [for (final category in categories) category.toJson()],
     });
+  }
+
+  Future<String> _getSpendingSummary(
+    AgentToolContext context,
+    Map<String, Object?> args,
+  ) async {
+    final entityId = _requireUuid(args, 'entityId');
+    final entity = await requireOwnedEntity(
+      context.session,
+      userId: context.userId,
+      entityId: entityId,
+    );
+    final months = _optionalInt(args, 'months') ?? 12;
+    if (months < 1 || months > 12) {
+      throw ValidationException(message: 'months must be between 1 and 12.');
+    }
+
+    final monthKeys = _lastMonths(entity, months);
+    final fromMonth = monthKeys.first;
+    final toMonth = monthKeys.last;
+
+    final summaries = await BudgetMonthService.summaries(
+      context.session,
+      entityId: entityId,
+      fromMonth: fromMonth,
+      toMonth: toMonth,
+    );
+    final incomeByMonth = <int, int>{
+      for (final summary in summaries) summary.month: summary.incomeMinor,
+    };
+
+    final envelopeRows = await ReportService.spending(
+      context.session,
+      entityId,
+      fromMonth,
+      toMonth,
+      ReportGrouping.envelope,
+      true,
+    );
+    final categoryRows = await ReportService.spending(
+      context.session,
+      entityId,
+      fromMonth,
+      toMonth,
+      ReportGrouping.category,
+      true,
+    );
+
+    final monthlyOutflow = <int, int>{for (final month in monthKeys) month: 0};
+    for (final row in envelopeRows) {
+      final month = row.month;
+      if (month != null) {
+        monthlyOutflow[month] = (monthlyOutflow[month] ?? 0) + row.outflowMinor;
+      }
+    }
+
+    // Aggregate per envelope.
+    final envelopeTotals = <String, _EnvelopeTotals>{};
+    for (final row in envelopeRows) {
+      final key = row.groupId?.toString() ?? '';
+      final existing = envelopeTotals[key];
+      if (existing == null) {
+        envelopeTotals[key] = _EnvelopeTotals(
+          id: row.groupId,
+          name: row.name,
+          inflowMinor: row.inflowMinor,
+          outflowMinor: row.outflowMinor,
+        );
+      } else {
+        existing
+          ..inflowMinor += row.inflowMinor
+          ..outflowMinor += row.outflowMinor;
+      }
+    }
+
+    final sortedEnvelopes = envelopeTotals.values.toList()
+      ..sort((first, second) {
+        final byOutflow = first.outflowMinor.compareTo(second.outflowMinor);
+        if (byOutflow != 0) return byOutflow;
+        return first.name.compareTo(second.name);
+      });
+
+    final topEnvelopes = sortedEnvelopes.take(20).toList();
+    final otherEnvelopes = sortedEnvelopes.skip(20).toList();
+
+    var otherInflow = 0;
+    var otherOutflow = 0;
+    for (final entry in otherEnvelopes) {
+      otherInflow += entry.inflowMinor;
+      otherOutflow += entry.outflowMinor;
+    }
+
+    final envelopeJson = <Map<String, Object?>>[
+      for (final entry in topEnvelopes)
+        {
+          'id': entry.id?.toString(),
+          'name': entry.name,
+          'totalIncomeMinor': entry.inflowMinor,
+          'totalSpendingMinor': entry.outflowMinor,
+          'averageIncomeMinor': entry.inflowMinor ~/ months,
+          'averageSpendingMinor': entry.outflowMinor ~/ months,
+        },
+      if (otherEnvelopes.isNotEmpty)
+        {
+          'id': null,
+          'name': 'Other',
+          'totalIncomeMinor': otherInflow,
+          'totalSpendingMinor': otherOutflow,
+          'averageIncomeMinor': otherInflow ~/ months,
+          'averageSpendingMinor': otherOutflow ~/ months,
+        },
+    ];
+
+    // Aggregate per category group.
+    final categoryTotals = <String, _EnvelopeTotals>{};
+    for (final row in categoryRows) {
+      final key = row.groupId?.toString() ?? '';
+      final existing = categoryTotals[key];
+      if (existing == null) {
+        categoryTotals[key] = _EnvelopeTotals(
+          id: row.groupId,
+          name: row.name,
+          inflowMinor: row.inflowMinor,
+          outflowMinor: row.outflowMinor,
+        );
+      } else {
+        existing
+          ..inflowMinor += row.inflowMinor
+          ..outflowMinor += row.outflowMinor;
+      }
+    }
+    final sortedCategories = categoryTotals.values.toList()
+      ..sort((first, second) {
+        final byOutflow = first.outflowMinor.compareTo(second.outflowMinor);
+        if (byOutflow != 0) return byOutflow;
+        return first.name.compareTo(second.name);
+      });
+
+    final categoryJson = <Map<String, Object?>>[
+      for (final entry in sortedCategories)
+        {
+          'id': entry.id?.toString(),
+          'name': entry.name,
+          'totalIncomeMinor': entry.inflowMinor,
+          'totalSpendingMinor': entry.outflowMinor,
+          'averageIncomeMinor': entry.inflowMinor ~/ months,
+          'averageSpendingMinor': entry.outflowMinor ~/ months,
+        },
+    ];
+
+    var totalIncome = 0;
+    for (final month in monthKeys) {
+      totalIncome += incomeByMonth[month] ?? 0;
+    }
+    var totalSpending = 0;
+    for (final month in monthKeys) {
+      totalSpending += monthlyOutflow[month] ?? 0;
+    }
+
+    int? trend;
+    if (months >= 6) {
+      final lastMonths = monthKeys.sublist(monthKeys.length - 3);
+      final prevMonths = monthKeys.sublist(
+        monthKeys.length - 6,
+        monthKeys.length - 3,
+      );
+      var lastSum = 0;
+      var prevSum = 0;
+      for (final month in lastMonths) {
+        lastSum += monthlyOutflow[month] ?? 0;
+      }
+      for (final month in prevMonths) {
+        prevSum += monthlyOutflow[month] ?? 0;
+      }
+      if (prevSum != 0) {
+        trend = ((lastSum - prevSum) * 1000000) ~/ prevSum;
+      }
+    }
+
+    final block = buildGuidanceBlock(entity: entity);
+
+    return _json({
+      'entityId': entityId.toString(),
+      'currencyCode': entity.baseCurrencyCode,
+      'months': months,
+      'fromMonth': fromMonth,
+      'toMonth': toMonth,
+      'totalIncomeMinor': totalIncome,
+      'totalSpendingMinor': totalSpending,
+      'averageIncomeMinor': totalIncome ~/ months,
+      'averageSpendingMinor': totalSpending ~/ months,
+      'trendRatePerMillion': trend,
+      'envelopes': envelopeJson,
+      'categoryGroups': categoryJson,
+      'guidance': block,
+    });
+  }
+
+  Future<String> _getTaxCalendar(
+    AgentToolContext context,
+    Map<String, Object?> args,
+  ) async {
+    final entityId = _requireUuid(args, 'entityId');
+    final entity = await requireOwnedEntity(
+      context.session,
+      userId: context.userId,
+      entityId: entityId,
+    );
+
+    final block = buildGuidanceBlock(entity: entity);
+    final jurisdictionState = block['jurisdictionState'];
+
+    final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+    if (jurisdiction == null) {
+      final taxYearEnd = TaxSummaryService.currentYearLastDayFor(entity);
+      return _json({
+        'jurisdictionState': 'universal',
+        'deadlines': <Object?>[],
+        'taxYearEnd': taxYearEnd.toIso8601String().split('T').first,
+        'guidance': block,
+      });
+    }
+
+    final deadlines = await TaxService.listDeadlines(
+      context.session,
+      entityId: entityId,
+    );
+    return _json({
+      'jurisdictionState': jurisdictionState,
+      'deadlines': [
+        for (final deadline in deadlines.take(10)) deadline.toJson(),
+      ],
+      'guidance': block,
+    });
+  }
+
+  Future<String> _getTaxSummary(
+    AgentToolContext context,
+    Map<String, Object?> args,
+  ) async {
+    final entityId = _requireUuid(args, 'entityId');
+    final entity = await requireOwnedEntity(
+      context.session,
+      userId: context.userId,
+      entityId: entityId,
+    );
+    final startYear = _optionalInt(args, 'startYear');
+    final view = await TaxSummaryService.build(
+      context.session,
+      entityId: entityId,
+      startYear: startYear,
+    );
+    final block = buildGuidanceBlock(
+      entity: entity,
+      rulesVersion: view.rulesVersion,
+    );
+    final json = view.toJson();
+    json['guidance'] = block;
+    return _json(json);
   }
 
   Future<String> _getNetWorth(
@@ -839,6 +1148,22 @@ class AgentToolRegistry {
   static int _currentMonth(Entity entity) =>
       MonthKey.fromDate(EntityClock.today(entity));
 
+  static List<int> _lastMonths(Entity entity, int months) {
+    final today = EntityClock.today(entity);
+    final result = <int>[];
+    var year = today.year;
+    var month = today.month;
+    for (var index = 0; index < months; index++) {
+      result.add(year * 100 + month);
+      month -= 1;
+      if (month == 0) {
+        month = 12;
+        year -= 1;
+      }
+    }
+    return result.reversed.toList();
+  }
+
   static String _formatAmount(int minor, String currencyCode) {
     final currency = CurrencyCode.tryParse(currencyCode);
     final decimals = currency?.decimals ?? 2;
@@ -976,4 +1301,18 @@ class AgentToolRegistry {
     }
     return value;
   }
+}
+
+class _EnvelopeTotals {
+  _EnvelopeTotals({
+    required this.id,
+    required this.name,
+    required this.inflowMinor,
+    required this.outflowMinor,
+  });
+
+  final UuidValue? id;
+  final String name;
+  int inflowMinor;
+  int outflowMinor;
 }
