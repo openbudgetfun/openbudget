@@ -2341,7 +2341,7 @@
       }
     }
   },
-  "assistantComposerHint": "Ask about this plan…",
+  "assistantComposerHint": "Ask about money, tax or crypto…",
   "assistantConversationDelete": "Delete conversation",
   "assistantConversationDeleteError": "Could not delete the conversation.",
   "assistantConversationDeleteMessage": "The chat and its messages are removed. Proposals it made stay in your plan.",
@@ -2442,6 +2442,17 @@
   "assistantProviderTitle": "Money guide provider",
   "assistantProviderUrlInvalid": "Use a full HTTPS URL that points at the provider.",
   "assistantProviderUrlRequired": "Enter the provider's HTTPS base URL.",
+  "assistantReplyDisclaimerDe": "General information, not tax advice for your individual case. Rules change. For your situation, ask a Steuerberater or a Lohnsteuerhilfeverein.",
+  "@assistantReplyDisclaimerDe": {
+    "description": "Under a Money guide reply about tax or investments for a German entity. A literal English rendering of the German addition in guidanceDisclaimers (openbudget_core); have a German speaker review before launch."
+  },
+  "assistantReplyDisclaimerGb": "Information only, not tax, legal or investment advice, and it doesn't recommend any investment, pension or ISA product. Rules change, so check with a qualified professional.",
+  "assistantReplyDisclaimerGeneric": "Information only, not tax, legal or investment advice. Rules change, so check with a qualified professional before you act on it.",
+  "@assistantReplyDisclaimerGeneric": {
+    "description": "Under a Money guide reply about tax or investments for an entity whose country has no tax rule pack. Deliberately not the same text as the fixed footer (assistantDisclaimer)."
+  },
+  "assistantReplyDisclaimerNg": "Information only, not tax, legal or investment advice. Rules change, so confirm with a registered tax practitioner and the tax authority before relying on this.",
+  "assistantReplyDisclaimerUs": "Information only, not tax, legal or investment advice. A general educational calculation, not a written federal tax opinion. Rules change, so check with a qualified professional.",
   "assistantRetry": "Try again",
   "assistantSend": "Send message",
   "assistantSourceAnnouncedBadge": "Announced, not yet law",
@@ -2505,13 +2516,19 @@
   "assistantSuggestionGoals": "Am I on track for my goals?",
   "assistantSuggestionTax": "How much tax will I owe this year?",
   "assistantTitle": "Money guide",
+  "assistantToolGetNetWorth": "Looked at your net worth",
+  "assistantToolGetSpendingSummary": "Looked at your spending",
+  "assistantToolGetTaxCalendar": "Checked your tax deadlines",
   "assistantToolGetTaxReport": "Looked at your tax report",
+  "assistantToolGetTaxSummary": "Looked at your tax summary",
   "assistantToolListBudgets": "Looked at your plan",
+  "assistantToolListEntities": "Looked at your budgets",
   "assistantToolListEnvelopes": "Looked at your envelopes",
   "assistantToolListTaxCategories": "Looked at tax categories",
   "assistantToolProposeEnvelopeTax": "Drafted an envelope tax change",
   "assistantToolProposeMoveMoney": "Drafted a money move",
   "assistantToolProposeTransactionTax": "Drafted a tax category change",
+  "assistantToolSearchKnowledge": "Checked the sourced rules",
   "assistantToolSearchTransactions": "Searched your transactions",
   "assistantToolUnknown": "Looked something up",
   "assistantTyping": "The Money guide is thinking…",

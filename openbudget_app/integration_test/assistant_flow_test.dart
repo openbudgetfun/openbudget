@@ -87,6 +87,7 @@ void main() {
       expect(assistant.title, findsOneWidget);
       expect(assistant.emptyTitle, findsOneWidget);
       expect(assistant.disclaimer, findsOneWidget);
+      expect(assistant.composerHint, findsOneWidget);
       expect(
         assistant.conversationsLeft(TestData.assistantConversationsLeft),
         findsOneWidget,
@@ -99,6 +100,9 @@ void main() {
       expect(assistant.citationMark(1), findsOneWidget);
       expect(assistant.citationMark(2), findsOneWidget);
       expect(assistant.replyDisclaimer, findsOneWidget);
+      expect(assistant.gbReplyDisclaimer, findsOneWidget);
+      // The footer stays, and the reply's own wording is a different text.
+      expect(assistant.disclaimer, findsOneWidget);
       expect(assistant.toolChip(TestData.assistantToolLabel), findsOneWidget);
       expect(
         assistant.proposalSummary(TestData.assistantProposalSummary),

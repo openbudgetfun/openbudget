@@ -646,6 +646,14 @@ class AssistantPage {
 
   Finder get sourcesButton => find.byKey(AssistantReplyBubble.sourcesButtonKey);
   Finder get replyDisclaimer => find.byKey(AssistantReplyBubble.disclaimerKey);
+
+  /// The disclaimer under a reply for a UK entity, which is its own wording
+  /// and never the footer's.
+  Finder get gbReplyDisclaimer => find.descendant(
+    of: replyDisclaimer,
+    matching: find.textContaining('ISA product', findRichText: true),
+  );
+  Finder get composerHint => find.text('Ask about money, tax or crypto…');
   Finder get sourcesSheet => find.byKey(AssistantSourcesSheet.sheetKey);
   Finder sourceTitle(String title) =>
       find.descendant(of: sourcesSheet, matching: find.text(title));

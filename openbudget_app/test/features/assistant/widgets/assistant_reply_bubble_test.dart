@@ -9,6 +9,7 @@ import 'package:openbudget_app/src/features/assistant/widgets/assistant_source_n
 import 'package:openbudget_app/src/features/assistant/widgets/assistant_sources_sheet.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_url_launcher_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 import '../../tax/tax_test_data.dart';
@@ -45,6 +46,7 @@ Future<FakeTaxUrlLauncher> _pumpReply(
   String text = _reply,
   List<AgentCitation>? citations,
   bool touchesTaxOrInvestment = true,
+  TaxJurisdiction? jurisdiction,
   ThemeData? theme,
   double textScale = 1,
   Size size = _phone,
@@ -79,6 +81,7 @@ Future<FakeTaxUrlLauncher> _pumpReply(
                     assistantSourceFrom(citation),
                 ],
                 touchesTaxOrInvestment: touchesTaxOrInvestment,
+                jurisdiction: jurisdiction,
               ),
               ?reference,
             ],
@@ -335,16 +338,34 @@ void main() {
   });
 
   group('disclaimer', () {
-    testWidgets('shows under a reply that touches tax or investments', (
+    const footer = 'Guidance, not regulated financial advice.';
+
+    String shown(WidgetTester tester) => tester
+        .widget<Text>(find.byKey(AssistantReplyBubble.disclaimerKey))
+        .data!;
+
+    testWidgets('shows the country wording under a reply about tax', (
+      tester,
+    ) async {
+      await _pumpReply(tester, jurisdiction: TaxJurisdiction.gb);
+
+      expect(find.byKey(AssistantReplyBubble.disclaimerKey), findsOneWidget);
+      expect(
+        shown(tester),
+        "Information only, not tax, legal or investment advice, and it doesn't "
+        'recommend any investment, pension or ISA product. Rules change, so '
+        'check with a qualified professional.',
+      );
+      expect(find.text(footer), findsNothing);
+    });
+
+    testWidgets('falls back to the generic wording without a jurisdiction', (
       tester,
     ) async {
       await _pumpReply(tester);
 
-      expect(find.byKey(AssistantReplyBubble.disclaimerKey), findsOneWidget);
-      expect(
-        find.text('Guidance, not regulated financial advice.'),
-        findsOneWidget,
-      );
+      expect(shown(tester), contains('before you act on it'));
+      expect(shown(tester), isNot(footer));
     });
 
     testWidgets('is absent from a reply without the flag', (tester) async {
