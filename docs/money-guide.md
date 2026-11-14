@@ -508,9 +508,13 @@ The limit is a turn, not a conversation: `AgentService.maxModelCalls` is 6 and c
 ### 9.3 Controls (G10)
 
 - **Order for caching:** static rules and tool definitions first, the entity brief second, the conversation last.
-- **Compaction with hysteresis.** When the history part of a call would pass 32,000 tokens, replace the bodies of tool results older than the last two turns with `{"elided": true, "tool": "...", "citeAs": "..."}`, once. Do nothing more until it passes 32,000 again. The cache breaks once, not on every turn. Citations still resolve, because resolution reads the stored rows, not the compacted prompt.
+- **Compaction with hysteresis.** When the history part of a call would pass 32,000 tokens (the high-water mark), replace the bodies of tool results older than the last two turns with `{"elided": true, "tool": "...", "citeAs": "..."}`, once. Do nothing more until it passes 32,000 again. The cache breaks once per crossing, not on every turn. Citations still resolve, because resolution reads the stored rows, not the compacted prompt. The implementation stores nothing: the stored rows are never rewritten, and the compaction is replayed from them on every call, which gives the same boundaries each time. The doc sets no separate low-water mark: the history simply measures whatever is left after the elision.
+- **The ceiling.** A call never carries more than 40,000 estimated tokens, counting the rules, the brief, the tool definitions and the history. Three measures keep it so:
+  1. A user message may carry at most 4,000 estimated tokens, and a longer one is refused before any call.
+  2. If a call is still over the ceiling after compaction, for example because one turn fetched very large results, tool results are elided oldest first for that call only, until it fits.
+  3. If it cannot fit even then, the turn stops with "This conversation is too long to continue" and no call is made. The user starts a new conversation.
 - **Small results:** cards are at most 300 words; at most four cards per search; tool results stay compact JSON. Token budgets use a characters-divided-by-four estimate, with no tokenizer dependency.
-- **Allowance UI:** once the user has had three conversations, the usage view shows "about N conversations left this month" from their own median cost per conversation.
+- **Allowance UI:** once the user has had three metered conversations, the usage view carries `conversationsLeft`, the remaining allowance divided by the median cost of their newest 20 conversations, rounded down. With an even count the median is the mean of the two middle costs. The app shows it as "about N conversations left this month" (G11).
 
 ## 10. Build plan: milestone M3
 
