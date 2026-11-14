@@ -262,6 +262,9 @@ class _Scroll extends HookWidget {
 }
 
 /// A refused input, in the overspent tone.
+///
+/// A secret (a private key or a recovery phrase) gets a lock, because the
+/// field was cleared to keep it safe; the other refusals get a warning.
 class _RefusalPanel extends HookWidget {
   const _RefusalPanel({required this.refusal});
 
@@ -269,10 +272,49 @@ class _RefusalPanel extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = theme.ob;
     final copy = walletRefusalCopy(AppLocalizations.of(context), refusal);
     return Semantics(
       liveRegion: true,
-      child: ObStatePanel.problem(title: copy.title, message: copy.message),
+      container: true,
+      child: ObCard(
+        tone: ObTone.overspent,
+        padding: const EdgeInsets.all(SpacingTokens.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SkribbleIcon(
+              data: isSecretRefusal(refusal)
+                  ? OpenBudgetIcons.lock
+                  : OpenBudgetIcons.warning,
+              size: 24,
+              color: palette.hue(ObTone.overspent),
+            ),
+            const SizedBox(width: SpacingTokens.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    copy.title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: palette.ink,
+                    ),
+                  ),
+                  const SizedBox(height: SpacingTokens.xs),
+                  Text(
+                    copy.message,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: palette.mutedInk,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

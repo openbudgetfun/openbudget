@@ -999,7 +999,7 @@
   "addAccountSelectAccountType": "Select Account Type",
   "addAccountSuccessTitle": "Account Added",
   "addAccountSuccessHeadline": "Success!",
-  "addAccountSuccessAddAnother": "Add Another",
+  "addAccountSuccessAddAnother": "Add another",
   "addAccountSelectTypePlaceholder": "Select account type...",
   "addAccountLoadingInstitutions": "Loading institutions...",
   "dialogNext": "Next",
@@ -3750,5 +3750,91 @@
         "type": "int"
       }
     }
-  }
+  },
+  "walletSettingsButton": "Wallet settings",
+  "walletSettingsTitle": "Wallet settings",
+  "walletSettingsNameLabel": "Wallet name",
+  "walletSettingsNameSave": "Save name",
+  "walletSettingsNameSaved": "Wallet renamed",
+  "walletSettingsNameFailed": "Couldn't rename the wallet. Try again.",
+  "walletSettingsNetworksTitle": "Chains OpenBudget reads",
+  "walletSettingsNotRead": "Not read",
+  "walletSettingsNetworksSave": "Save chains",
+  "walletSettingsNetworksSaved": "Chains updated",
+  "walletSettingsNetworksFailed": "Couldn't update the chains. Try again.",
+  "walletSettingsNetworksReadFailed": "Saved, but {networks} couldn't be read yet. OpenBudget will keep trying.",
+  "@walletSettingsNetworksReadFailed": {
+    "placeholders": {
+      "networks": {
+        "type": "String"
+      }
+    }
+  },
+  "walletSettingsSingleChain": "{chain} wallets are read on one chain, so there's nothing to choose.",
+  "@walletSettingsSingleChain": {
+    "placeholders": {
+      "chain": {
+        "type": "String"
+      }
+    }
+  },
+  "walletSettingsLookAhead": "Look for assets on other chains",
+  "walletSettingsFoundTitle": "Found assets on {networks}",
+  "@walletSettingsFoundTitle": {
+    "placeholders": {
+      "networks": {
+        "type": "String"
+      }
+    }
+  },
+  "walletSettingsFoundMessage": "They're picked above. Save the chains to start reading them.",
+  "walletSettingsNothingTitle": "Nothing new found",
+  "walletSettingsNothingMessage": "{count, plural, =1{OpenBudget looked at 1 other chain and found no assets there.} other{OpenBudget looked at {count} other chains and found no assets there.}}",
+  "@walletSettingsNothingMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletSettingsLookAheadFailedMessage": "We couldn't check the other chains. Try again in a moment.",
+  "walletSettingsLookAheadRateLimited": "You've looked up a lot of wallets. Try again in a little while.",
+  "walletSettingsRemoveTitle": "Stop reading {networks}?",
+  "@walletSettingsRemoveTitle": {
+    "placeholders": {
+      "networks": {
+        "type": "String"
+      }
+    }
+  },
+  "walletSettingsRemoveMessage": "{amount} on {networks} will drop out of your net worth. Your assets stay where they are, and you can add the chain back any time.",
+  "@walletSettingsRemoveMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "networks": {
+        "type": "String"
+      }
+    }
+  },
+  "walletSettingsRemoveConfirm": "Stop reading",
+  "walletSettingsRemoveCancel": "Keep reading",
+  "walletSettingsDisconnectTitle": "Disconnect",
+  "walletSettingsDisconnectHint": "OpenBudget stops reading this wallet. The account and its history stay in your accounts.",
+  "walletSettingsDisconnectButton": "Disconnect wallet",
+  "walletSettingsDisconnectConfirmTitle": "Disconnect {name}?",
+  "@walletSettingsDisconnectConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "walletSettingsDisconnectConfirmMessage": "OpenBudget stops reading this wallet and its value stops updating. The account and its history stay, and you can add the wallet again later.",
+  "walletSettingsDisconnectConfirm": "Disconnect",
+  "walletSettingsDisconnectCancel": "Keep wallet",
+  "walletSettingsDisconnected": "Wallet disconnected",
+  "walletSettingsDisconnectFailed": "Couldn't disconnect the wallet. Try again.",
+  "walletSettingsAllRead": "OpenBudget already reads every chain this address can use."
 }

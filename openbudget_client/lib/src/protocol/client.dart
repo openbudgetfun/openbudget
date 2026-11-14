@@ -2498,8 +2498,10 @@ class EndpointWallet extends _isc.EndpointRef {
         {},
       );
 
-  /// Replaces the networks an EVM wallet reads on its next sync; null reads
-  /// its home network only.
+  /// Replaces the networks an EVM wallet reads; null reads its home network
+  /// only. A changed set is read at once: an added network shows its
+  /// holdings, a removed one loses its holdings and read state, and the
+  /// valuation follows, before this answers.
   _ida.Future<_igzh8mor.Wallet> setScanNetworks(
     _isc.UuidValue walletId,
     List<_ifz8weqz.WalletNetwork>? networks,

@@ -1124,3 +1124,56 @@ class AddWalletPage {
     await tester.pump();
   }
 }
+
+/// Page object for a wallet account's settings sheet on account detail.
+class WalletSettingsPage {
+  WalletSettingsPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get openButton => find.byKey(const Key('wallet-settings-button'));
+  Finder get nameField => find.byKey(const Key('wallet-settings-name-field'));
+  Finder get saveNameButton =>
+      find.byKey(const Key('wallet-settings-name-save'));
+  Finder get saveChainsButton =>
+      find.byKey(const Key('wallet-settings-save-networks'));
+  Finder get lookAheadButton =>
+      find.byKey(const Key('wallet-settings-look-ahead'));
+  Finder get removeConfirmButton =>
+      find.byKey(const Key('wallet-settings-remove-confirm'));
+  Finder get removeCancelButton =>
+      find.byKey(const Key('wallet-settings-remove-cancel'));
+  Finder get disconnectButton =>
+      find.byKey(const Key('wallet-settings-disconnect'));
+
+  /// The stamp for [network] (a `WalletNetwork` name, such as `baseMainnet`)
+  /// in the chain editor.
+  Finder networkStamp(String network) =>
+      find.byKey(ValueKey('wallet-settings-network-$network'));
+
+  Future<void> open() => scrollAndTap(tester, openButton);
+
+  /// Closes the sheet, as the system back gesture does.
+  Future<void> close() async {
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+  }
+
+  /// Scrolls account detail to the holdings, one section per chain.
+  Future<void> showHoldings() => scrollIntoView(tester, find.text('Holdings'));
+
+  Future<void> rename(String name) async {
+    await tester.enterText(nameField, name);
+    await tester.pumpAndSettle();
+    await scrollAndTap(tester, saveNameButton);
+  }
+
+  Future<void> toggleNetwork(String network) =>
+      scrollAndTap(tester, networkStamp(network));
+
+  Future<void> saveChains() => scrollAndTap(tester, saveChainsButton);
+
+  Future<void> confirmRemoval() => scrollAndTap(tester, removeConfirmButton);
+
+  Future<void> lookForOtherChains() => scrollAndTap(tester, lookAheadButton);
+}

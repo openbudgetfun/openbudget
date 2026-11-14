@@ -1,5 +1,7 @@
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/utils/wallet_holdings_labels.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -119,3 +121,15 @@ ObChainStampWords walletStampWords(AppLocalizations l10n, {String? inked}) =>
       unselected: l10n.walletAddStampLeftOut,
       outline: l10n.walletAddStampLeftOut,
     );
+
+/// What a preview found on one network, in a few words: its priced value,
+/// "No price", "Nothing" or "Can't read". Lettered on the network's stamp.
+String walletPreviewRowLabel(AppLocalizations l10n, WalletPreviewNetwork row) {
+  final value = row.valueMinor;
+  if (row.readError != null) return l10n.walletAddNetworkUnreadable;
+  if (row.pricedHoldingCount > 0 && value != null) {
+    return formatMinorForCode(value, row.valueCurrencyCode ?? 'USD');
+  }
+  if (row.holdingCount > 0) return l10n.walletAddNetworkNoPrice;
+  return l10n.walletAddNetworkNothing;
+}
