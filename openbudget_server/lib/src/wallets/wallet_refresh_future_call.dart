@@ -25,14 +25,25 @@ class WalletRefreshReport {
 
 /// Hourly refresh of wallet holdings: due reads by plan, then a revaluation
 /// of every wallet that was not read this run.
+///
+/// Serverpod treats every public method here as a future call, and each must
+/// return `Future<void>`, so the work lives in [WalletRefreshRunner].
 class WalletRefreshFutureCall extends FutureCall {
-  static final _log = ObLogger('WalletRefreshFutureCall');
-
   /// Stable identifier for the recurring schedule.
   static const identifier = 'wallet-refresh-hourly';
 
   /// The sweep interval.
   static const interval = Duration(hours: 1);
+
+  /// Runs one refresh pass over every wallet.
+  Future<void> refresh(Session session) async {
+    await WalletRefreshRunner.run(session);
+  }
+}
+
+/// One refresh pass: due reads by plan, then revaluation of the rest.
+abstract final class WalletRefreshRunner {
+  static final _log = ObLogger('WalletRefreshFutureCall');
 
   /// Read cadence for a free plan.
   static const freeReadInterval = Duration(hours: 24);
@@ -44,12 +55,7 @@ class WalletRefreshFutureCall extends FutureCall {
   @visibleForTesting
   static int readCap = 500;
 
-  /// Runs one refresh pass over every wallet.
-  Future<void> refresh(Session session) async {
-    await run(session);
-  }
-
-  /// Internal implementation returning the report.
+  /// Runs one refresh pass and returns its report.
   @visibleForTesting
   static Future<WalletRefreshReport> run(Session session) =>
       WalletVendorRequestCounter.track(() => _run(session));

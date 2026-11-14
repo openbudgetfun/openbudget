@@ -68,7 +68,7 @@ void main() {
     await book.session.db.unsafeExecute('DELETE FROM asset_price');
     WalletService.clock = () => DateTime.utc(2026);
     WalletService.debugProviderFactory = (_, _) => _FakeProvider();
-    WalletRefreshFutureCall.readCap = 500;
+    WalletRefreshRunner.readCap = 500;
   });
 
   tearDown(WalletService.resetForTests);
@@ -127,7 +127,7 @@ void main() {
       var revaluations = 0;
       for (var i = 0; i < 25; i++) {
         WalletService.clock = () => base.add(Duration(hours: i));
-        final report = await WalletRefreshFutureCall.run(book.session);
+        final report = await WalletRefreshRunner.run(book.session);
         reads += report.reads;
         revaluations += report.revaluations;
       }
@@ -150,7 +150,7 @@ void main() {
     var revaluations = 0;
     for (var i = 0; i < 25; i++) {
       WalletService.clock = () => base.add(Duration(hours: i));
-      final report = await WalletRefreshFutureCall.run(book.session);
+      final report = await WalletRefreshRunner.run(book.session);
       reads += report.reads;
       revaluations += report.revaluations;
     }
@@ -184,7 +184,7 @@ void main() {
       WalletService.debugProviderFactory = (_, _) => provider;
 
       await Future.wait([
-        WalletRefreshFutureCall.run(book.session),
+        WalletRefreshRunner.run(book.session),
         WalletService.sync(book.session, walletId),
       ]);
 
@@ -229,7 +229,7 @@ void main() {
     WalletService.debugProviderFactory = (_, _) => provider;
 
     // The first run reads the wallet: 1 SOL at $100 is 10,000 cents.
-    await WalletRefreshFutureCall.run(book.session);
+    await WalletRefreshRunner.run(book.session);
     expect(provider.calls, 1);
 
     // An hour later the price cache holds $150. The wallet is not due a
@@ -250,7 +250,7 @@ void main() {
       ),
     );
 
-    final report = await WalletRefreshFutureCall.run(book.session);
+    final report = await WalletRefreshRunner.run(book.session);
     expect(report.reads, 0);
     expect(report.revaluations, 1);
     expect(provider.calls, 1);
@@ -266,7 +266,7 @@ void main() {
   test('the per-run cap is honoured, oldest first', () async {
     final base = DateTime.utc(2026);
     WalletService.clock = () => base.add(const Duration(hours: 30));
-    WalletRefreshFutureCall.readCap = 2;
+    WalletRefreshRunner.readCap = 2;
 
     final idNew = await seedWallet(
       lastSyncedAt: base.add(const Duration(hours: 20)),
@@ -305,7 +305,7 @@ void main() {
     WalletService.debugProviderFactory = (_, _) => provider;
 
     WalletService.clock = () => base;
-    final report = await WalletRefreshFutureCall.run(book.session);
+    final report = await WalletRefreshRunner.run(book.session);
     expect(report.reads, 2);
 
     final oldWallet = await Wallet.db.findById(book.session, idOld);
