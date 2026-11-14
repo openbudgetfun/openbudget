@@ -310,6 +310,16 @@ class TaxSummaryService {
   static int currentStartYearFor(Entity entity) =>
       startYearFor(entity, now: clock());
 
+  /// The exclusive end date of the tax year [entity] is in today, on the
+  /// server clock in the entity's own time zone.
+  static DateTime currentYearEndFor(Entity entity) {
+    final now = clock();
+    final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+    final pack = jurisdiction == null ? null : packFor(jurisdiction);
+    final period = _resolvePeriod(entity, pack, null, now);
+    return period.end;
+  }
+
   /// Pure helper: the start year a summary for [entity] covers at [now],
   /// wrapping [_resolvePeriod] (docs/money-guide.md, section 5.3 clock).
   static int startYearFor(Entity entity, {required DateTime now}) {
