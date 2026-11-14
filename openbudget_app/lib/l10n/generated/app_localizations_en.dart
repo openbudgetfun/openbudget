@@ -2389,7 +2389,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addAccountSuccessHeadline => 'Success!';
 
   @override
-  String get addAccountSuccessAddAnother => 'Add Another';
+  String get addAccountSuccessAddAnother => 'Add another';
 
   @override
   String get addAccountSelectTypePlaceholder => 'Select account type...';
@@ -6785,4 +6785,136 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get walletSettingsButton => 'Wallet settings';
+
+  @override
+  String get walletSettingsTitle => 'Wallet settings';
+
+  @override
+  String get walletSettingsNameLabel => 'Wallet name';
+
+  @override
+  String get walletSettingsNameSave => 'Save name';
+
+  @override
+  String get walletSettingsNameSaved => 'Wallet renamed';
+
+  @override
+  String get walletSettingsNameFailed =>
+      'Couldn\'t rename the wallet. Try again.';
+
+  @override
+  String get walletSettingsNetworksTitle => 'Chains OpenBudget reads';
+
+  @override
+  String get walletSettingsNotRead => 'Not read';
+
+  @override
+  String get walletSettingsNetworksSave => 'Save chains';
+
+  @override
+  String get walletSettingsNetworksSaved => 'Chains updated';
+
+  @override
+  String get walletSettingsNetworksFailed =>
+      'Couldn\'t update the chains. Try again.';
+
+  @override
+  String walletSettingsNetworksReadFailed(String networks) {
+    return 'Saved, but $networks couldn\'t be read yet. OpenBudget will keep trying.';
+  }
+
+  @override
+  String walletSettingsSingleChain(String chain) {
+    return '$chain wallets are read on one chain, so there\'s nothing to choose.';
+  }
+
+  @override
+  String get walletSettingsLookAhead => 'Look for assets on other chains';
+
+  @override
+  String walletSettingsFoundTitle(String networks) {
+    return 'Found assets on $networks';
+  }
+
+  @override
+  String get walletSettingsFoundMessage =>
+      'They\'re picked above. Save the chains to start reading them.';
+
+  @override
+  String get walletSettingsNothingTitle => 'Nothing new found';
+
+  @override
+  String walletSettingsNothingMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'OpenBudget looked at $count other chains and found no assets there.',
+      one: 'OpenBudget looked at 1 other chain and found no assets there.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get walletSettingsLookAheadFailedMessage =>
+      'We couldn\'t check the other chains. Try again in a moment.';
+
+  @override
+  String get walletSettingsLookAheadRateLimited =>
+      'You\'ve looked up a lot of wallets. Try again in a little while.';
+
+  @override
+  String walletSettingsRemoveTitle(String networks) {
+    return 'Stop reading $networks?';
+  }
+
+  @override
+  String walletSettingsRemoveMessage(String amount, String networks) {
+    return '$amount on $networks will drop out of your net worth. Your assets stay where they are, and you can add the chain back any time.';
+  }
+
+  @override
+  String get walletSettingsRemoveConfirm => 'Stop reading';
+
+  @override
+  String get walletSettingsRemoveCancel => 'Keep reading';
+
+  @override
+  String get walletSettingsDisconnectTitle => 'Disconnect';
+
+  @override
+  String get walletSettingsDisconnectHint =>
+      'OpenBudget stops reading this wallet. The account and its history stay in your accounts.';
+
+  @override
+  String get walletSettingsDisconnectButton => 'Disconnect wallet';
+
+  @override
+  String walletSettingsDisconnectConfirmTitle(String name) {
+    return 'Disconnect $name?';
+  }
+
+  @override
+  String get walletSettingsDisconnectConfirmMessage =>
+      'OpenBudget stops reading this wallet and its value stops updating. The account and its history stay, and you can add the wallet again later.';
+
+  @override
+  String get walletSettingsDisconnectConfirm => 'Disconnect';
+
+  @override
+  String get walletSettingsDisconnectCancel => 'Keep wallet';
+
+  @override
+  String get walletSettingsDisconnected => 'Wallet disconnected';
+
+  @override
+  String get walletSettingsDisconnectFailed =>
+      'Couldn\'t disconnect the wallet. Try again.';
+
+  @override
+  String get walletSettingsAllRead =>
+      'OpenBudget already reads every chain this address can use.';
 }

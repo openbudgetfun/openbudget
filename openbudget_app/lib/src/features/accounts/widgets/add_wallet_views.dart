@@ -3,7 +3,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/utils/add_wallet_labels.dart';
 import 'package:openbudget_app/src/features/accounts/utils/wallet_holdings_labels.dart';
-import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -59,7 +58,7 @@ class WalletNetworkPicker extends HookWidget {
                   key: walletNetworkStampKey(row.network),
                   family: row.network.family,
                   label: walletNetworkLabel(l10n, row.network),
-                  value: _foundLabel(l10n, row),
+                  value: walletPreviewRowLabel(l10n, row),
                   words: walletStampWords(
                     l10n,
                     inked: l10n.walletAddStampIncluded,
@@ -70,7 +69,7 @@ class WalletNetworkPicker extends HookWidget {
                   key: walletNetworkStampKey(row.network),
                   family: row.network.family,
                   label: walletNetworkLabel(l10n, row.network),
-                  value: _foundLabel(l10n, row),
+                  value: walletPreviewRowLabel(l10n, row),
                   selected: selected.contains(row.network),
                   words: words,
                   onChanged: (on) => onToggle(row.network, selected: on),
@@ -97,19 +96,6 @@ class WalletNetworkPicker extends HookWidget {
         ),
       ],
     );
-  }
-
-  static String _foundLabel(
-    AppLocalizations l10n,
-    WalletPreviewNetwork row,
-  ) {
-    final value = row.valueMinor;
-    if (row.readError != null) return l10n.walletAddNetworkUnreadable;
-    if (row.pricedHoldingCount > 0 && value != null) {
-      return formatMinorForCode(value, row.valueCurrencyCode ?? 'USD');
-    }
-    if (row.holdingCount > 0) return l10n.walletAddNetworkNoPrice;
-    return l10n.walletAddNetworkNothing;
   }
 }
 

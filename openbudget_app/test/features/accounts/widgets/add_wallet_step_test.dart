@@ -319,6 +319,14 @@ void main() {
       // The field cleared itself and the refusal explains why.
       expect(_fieldText(tester), isEmpty);
       expect(find.text(title), findsOneWidget);
+      // A secret wears a lock, not the cloud of a failed request.
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.lock,
+        ),
+        findsOneWidget,
+      );
       expect(_addEnabled(tester), isFalse);
       // No wallet request of any kind was sent.
       expect(server.workCalls, isEmpty);

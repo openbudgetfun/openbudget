@@ -295,6 +295,8 @@ void main() {
           transaction.id!,
           memo: 'mine now',
         ),
+        () => endpoint.listNetworkStates(book.session, foreignWallet.id!),
+        () => endpoint.setScanNetworks(book.session, foreignWallet.id!, null),
         () => endpoint.disconnect(book.session, foreignWallet.id!),
       ]) {
         await expectLater(call(), throwsA(isA<ForbiddenException>()));

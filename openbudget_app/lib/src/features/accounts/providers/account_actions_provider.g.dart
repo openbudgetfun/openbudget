@@ -11,6 +11,10 @@ part of 'account_actions_provider.dart';
 /// Create, edit, close and delete actions for accounts, plus valuations for
 /// track-by-value accounts. Opening balances and dates become an opening
 /// transaction or a first valuation on the server.
+///
+/// Kept alive so the invalidations that follow each await still reach the
+/// providers they refresh: an auto-disposed notifier that nothing watches is
+/// unmounted by then, and its `ref.invalidate` throws.
 
 @ProviderFor(AccountActions)
 final accountActionsProvider = AccountActionsProvider._();
@@ -18,18 +22,26 @@ final accountActionsProvider = AccountActionsProvider._();
 /// Create, edit, close and delete actions for accounts, plus valuations for
 /// track-by-value accounts. Opening balances and dates become an opening
 /// transaction or a first valuation on the server.
+///
+/// Kept alive so the invalidations that follow each await still reach the
+/// providers they refresh: an auto-disposed notifier that nothing watches is
+/// unmounted by then, and its `ref.invalidate` throws.
 final class AccountActionsProvider
     extends $AsyncNotifierProvider<AccountActions, void> {
   /// Create, edit, close and delete actions for accounts, plus valuations for
   /// track-by-value accounts. Opening balances and dates become an opening
   /// transaction or a first valuation on the server.
+  ///
+  /// Kept alive so the invalidations that follow each await still reach the
+  /// providers they refresh: an auto-disposed notifier that nothing watches is
+  /// unmounted by then, and its `ref.invalidate` throws.
   AccountActionsProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'accountActionsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -42,11 +54,15 @@ final class AccountActionsProvider
   AccountActions create() => AccountActions();
 }
 
-String _$accountActionsHash() => r'68c2fd282ad921862189755ca08b058399820244';
+String _$accountActionsHash() => r'ed73c1a133e18bcdb318aa50295b66390548d62c';
 
 /// Create, edit, close and delete actions for accounts, plus valuations for
 /// track-by-value accounts. Opening balances and dates become an opening
 /// transaction or a first valuation on the server.
+///
+/// Kept alive so the invalidations that follow each await still reach the
+/// providers they refresh: an auto-disposed notifier that nothing watches is
+/// unmounted by then, and its `ref.invalidate` throws.
 
 abstract class _$AccountActions extends $AsyncNotifier<void> {
   FutureOr<void> build();
