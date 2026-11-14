@@ -34,6 +34,14 @@ abstract final class EntityAccess {
   /// This is the narrow seam between an unauthenticated [FutureCallSession]
   /// and [requireOwned]. It reads the row instead of accepting an owner id from
   /// a caller, so an endpoint cannot choose another user's authority.
+  /// Builds a [SystemEntityOwner] from an already-loaded entity, without
+  /// querying it again.
+  static SystemEntityOwner systemOwnerFromEntity(Entity entity) =>
+      SystemEntityOwner._(
+        entityId: entity.id!,
+        ownerId: entity.ownerId,
+      );
+
   static Future<SystemEntityOwner> systemOwnerFor(
     Session session,
     UuidValue entityId, {

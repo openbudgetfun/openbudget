@@ -37,6 +37,7 @@ void main() {
     events = EventLog()..install();
     WalletService.debugPublisher = events.record;
     WalletService.clock = () => DateTime.utc(2026);
+    WalletService.manualSyncThrottle = Duration.zero;
     book = await BudgetTestBook.create(server.anonymousSession());
     await book.session.caches.clear();
     await book.session.db.unsafeExecute('DELETE FROM asset_price');
@@ -669,6 +670,8 @@ void main() {
         WalletService.debugProviderFactory = (_, _) => provider;
         final first = endpoint.sync(book.session, wallet.id!);
         await firstStarted.future;
+        WalletService.clock = () =>
+            DateTime.utc(2026).add(const Duration(minutes: 1));
         final secondSession = server.authenticatedSession(book.userId);
         addTearDown(secondSession.close);
         final second = await endpoint.sync(secondSession, wallet.id!);
@@ -744,6 +747,27 @@ void main() {
       expect((await reloadAccount(wallet.accountId)).balanceMinor, 100);
       expect(events.events, isEmpty);
     });
+  });
+
+  group('Given WalletEndpoint sync throttle', () {
+    test(
+      'when syncing twice within 5 minutes then makes one provider call',
+      () async {
+        WalletService.manualSyncThrottle = const Duration(minutes: 5);
+        final provider = _ScriptedProvider((_) async => _snapshot());
+        final wallet = await connect(provider: provider);
+
+        WalletService.clock = () =>
+            DateTime.utc(2026).add(const Duration(minutes: 6));
+        await endpoint.sync(book.session, wallet.id!);
+        final readCalls = provider.untils.length;
+
+        WalletService.clock = () =>
+            DateTime.utc(2026).add(const Duration(minutes: 7));
+        await endpoint.sync(book.session, wallet.id!);
+        expect(provider.untils.length, readCalls);
+      },
+    );
   });
 
   group('Given WalletEndpoint transactions', () {

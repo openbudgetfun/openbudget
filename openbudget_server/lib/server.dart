@@ -11,6 +11,7 @@ import 'package:openbudget_server/src/institutions/institution_service.dart';
 import 'package:openbudget_server/src/logging/server_logging.dart';
 import 'package:openbudget_server/src/recurring_transactions/recurring_post_future_call.dart';
 import 'package:openbudget_server/src/tax/export/tax_export_route.dart';
+import 'package:openbudget_server/src/wallets/wallet_refresh_future_call.dart';
 import 'package:openbudget_server/src/web/routes/app_config_route.dart';
 import 'package:openbudget_server/src/web/routes/billing_webhook_routes.dart';
 import 'package:openbudget_server/src/web/routes/root.dart';
@@ -202,6 +203,15 @@ Future<void> run(List<String> args) async {
       .every(RecurringPostFutureCall.interval)
       .recurringPost
       .postDue();
+
+  // Refresh wallets hourly: due reads by plan, then revalue the rest.
+  const walletRefreshIdentifier = 'wallet-refresh-hourly';
+  await pod.futureCalls.cancel(walletRefreshIdentifier);
+  await pod.futureCalls
+      .callRecurring(identifier: walletRefreshIdentifier)
+      .every(WalletRefreshFutureCall.interval)
+      .walletRefresh
+      .refresh();
 }
 
 String? _readPassword(Serverpod pod, String key) {
