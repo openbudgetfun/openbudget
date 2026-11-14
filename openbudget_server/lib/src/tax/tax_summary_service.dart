@@ -313,7 +313,7 @@ class TaxSummaryService {
   /// The inclusive last day of the tax year [entity] is in today, on the
   /// server clock in the entity's own time zone.
   ///
-  /// [period.end] is the half-open range's exclusive end, so the last
+  /// `period.end` is the half-open range's exclusive end, so the last
   /// calendar day is one day before it.
   static DateTime currentYearLastDayFor(Entity entity) {
     final now = clock();

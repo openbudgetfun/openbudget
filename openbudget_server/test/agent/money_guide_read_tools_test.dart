@@ -185,10 +185,9 @@ void main() {
       expect(decoded['averageIncomeMinor'], 10000);
       expect(decoded['averageSpendingMinor'], -3000);
       final envelopes = decoded['envelopes']! as List<Object?>;
-      final groceryRow = envelopes.firstWhere((row) {
-        final map = row! as Map<String, Object?>;
-        return map['name'] == 'Groceries';
-      }) as Map<String, Object?>;
+      final groceryRow = envelopes.cast<Map<String, Object?>>().firstWhere(
+        (row) => row['name'] == 'Groceries',
+      );
       expect(groceryRow['totalIncomeMinor'], 0);
       expect(groceryRow['totalSpendingMinor'], -18000);
       expect(groceryRow['averageIncomeMinor'], 0);
@@ -385,7 +384,7 @@ void main() {
     });
 
     test('get_tax_calendar GB deadlines equal first 10 of TaxService.listDeadlines', () async {
-      TaxService.clock = () => DateTime.utc(2026, 7, 1);
+      TaxService.clock = () => DateTime.utc(2026, 7);
       final entity = await createEntity(
         'Household',
         'GB',
@@ -413,7 +412,7 @@ void main() {
     });
 
     test('get_tax_calendar KE returns universal tax-year end', () async {
-      TaxSummaryService.clock = () => DateTime.utc(2026, 7, 1);
+      TaxSummaryService.clock = () => DateTime.utc(2026, 7);
       final entity = await createEntity(
         'Nairobi books',
         'KE',

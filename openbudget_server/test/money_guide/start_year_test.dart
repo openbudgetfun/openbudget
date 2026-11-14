@@ -44,7 +44,7 @@ void main() {
   group('TaxSummaryService.currentYearLastDayFor', () {
     test('KE entity pinned to 2026-07-01 gives 2026-12-31', () {
       final previous = TaxSummaryService.clock;
-      TaxSummaryService.clock = () => DateTime.utc(2026, 7, 1);
+      TaxSummaryService.clock = () => DateTime.utc(2026, 7);
       try {
         final entity = Entity(
           ownerId: UuidValue.fromString(
@@ -69,7 +69,7 @@ void main() {
 
     test('GB individual pinned to 2026-07-01 gives 2027-04-05', () {
       final previous = TaxSummaryService.clock;
-      TaxSummaryService.clock = () => DateTime.utc(2026, 7, 1);
+      TaxSummaryService.clock = () => DateTime.utc(2026, 7);
       try {
         final entity = Entity(
           ownerId: UuidValue.fromString(
