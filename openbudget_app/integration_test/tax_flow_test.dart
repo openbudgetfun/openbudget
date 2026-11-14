@@ -143,6 +143,10 @@ class _FakeTaxRepository implements TaxRepository {
       _makeReport(startYear);
 
   @override
+  Future<List<TaxDeadlineView>> listDeadlines(String entityId) async =>
+      TestData.taxDeadlines();
+
+  @override
   Future<TaxSummaryView> getSummary(String entityId, {int? startYear}) =>
       throw UnimplementedError();
 
@@ -244,6 +248,29 @@ void main() {
       expect(find.text(TestData.taxBalanceDue), findsOneWidget);
       expect(find.text('Income tax'), findsOneWidget);
       expect(find.text(TestData.taxDisclaimer), findsOneWidget);
+
+      // The Upcoming list shows the next dates, four at first.
+      await overview.showUpcoming();
+      expect(find.text(TestData.taxUpcomingTitle), findsOneWidget);
+      await scrollIntoView(tester, overview.upcomingToggle);
+      expect(overview.deadlines, findsNWidgets(4));
+      expect(find.text(TestData.taxUpcomingFirstTitle), findsOneWidget);
+      expect(find.text(TestData.taxUpcomingFirstDate), findsOneWidget);
+      expect(find.text(TestData.taxUpcomingFirstDaysLeft), findsOneWidget);
+      expect(
+        overview.deadline('gb.sa.online-return', '20270131'),
+        findsOneWidget,
+      );
+      expect(find.text(TestData.taxUpcomingReturnTitle), findsOneWidget);
+      expect(find.text(TestData.taxUpcomingReturnSource), findsWidgets);
+      expect(find.text(TestData.taxUpcomingShowAll), findsOneWidget);
+      expect(find.text(TestData.taxUpcomingFifthTitle), findsNothing);
+
+      await tester.tap(overview.upcomingToggle);
+      await tester.pumpAndSettle();
+      await scrollIntoView(tester, find.text(TestData.taxUpcomingFifthTitle));
+      expect(find.text(TestData.taxUpcomingFifthTitle), findsOneWidget);
+      expect(find.text('Show fewer dates'), findsOneWidget);
 
       // The unverified list shows the caveat the fake report carries.
       await tester.scrollUntilVisible(

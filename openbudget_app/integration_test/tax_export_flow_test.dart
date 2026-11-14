@@ -96,6 +96,10 @@ class _FakeTaxRepository implements TaxRepository {
   Future<TaxReportView> getReport(String entityId, int startYear) =>
       throw UnimplementedError();
 
+  /// A country with no rule pack has no calendar.
+  @override
+  Future<List<TaxDeadlineView>> listDeadlines(String entityId) async => [];
+
   @override
   Future<TaxSummaryView> getSummary(String entityId, {int? startYear}) async =>
       _summary();

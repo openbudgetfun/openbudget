@@ -18,6 +18,8 @@ import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal_kin
 import 'package:openbudget_server/src/generated/future_calls.dart' as _iwv90kfd;
 import 'package:openbudget_server/src/generated/ledger/journal_line_input.dart'
     as _in0sxdux;
+import 'package:openbudget_server/src/generated/reports/crypto_breakdown_grouping.dart'
+    as _iy82xdzz;
 import 'package:openbudget_server/src/generated/reports/net_worth_granularity.dart'
     as _iwv93n42;
 import 'package:openbudget_server/src/generated/reports/report_grouping.dart'
@@ -3455,6 +3457,37 @@ class Endpoints extends _is.EndpointDispatch {
                     currencyCode: params['currencyCode'],
                   ),
         ),
+        'cryptoBreakdown': _is.MethodConnector(
+          name: 'cryptoBreakdown',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'grouping': _is.ParameterDescription(
+              name: 'grouping',
+              type: _is.getType<_iy82xdzz.CryptoBreakdownGrouping>(),
+              nullable: false,
+            ),
+            'currencyCode': _is.ParameterDescription(
+              name: 'currencyCode',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['report'] as _iqte9uvc.ReportEndpoint)
+                  .cryptoBreakdown(
+                    session,
+                    params['entityId'],
+                    params['grouping'],
+                    currencyCode: params['currencyCode'],
+                  ),
+        ),
         'spending': _is.MethodConnector(
           name: 'spending',
           params: {
@@ -3753,6 +3786,25 @@ class Endpoints extends _is.EndpointDispatch {
                 params['entityId'],
                 startYear: params['startYear'],
               ),
+        ),
+        'listDeadlines': _is.MethodConnector(
+          name: 'listDeadlines',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['tax'] as _i34kr7gr.TaxEndpoint).listDeadlines(
+                    session,
+                    params['entityId'],
+                  ),
         ),
         'getSummary': _is.MethodConnector(
           name: 'getSummary',

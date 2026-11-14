@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_list_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/crypto_breakdown_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dart';
 import 'package:openbudget_app/src/features/settings/providers/reporting_currency_provider.dart';
@@ -103,6 +104,9 @@ void main() {
             () => _RecordingReportingCurrency(
               onSaved: (code) => reportingCurrency = code,
             ),
+          ),
+          cryptoBreakdownProvider.overrideWith(
+            (ref, arg) async => TestData.noWalletsCryptoBreakdown(arg.$2),
           ),
           netWorthProvider.overrideWith(
             (ref) async => reportingCurrency == 'GBP'

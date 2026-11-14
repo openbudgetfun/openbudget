@@ -13,6 +13,7 @@ import 'package:openbudget_app/src/features/home/providers/entity_actions_provid
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_list_provider.dart';
 import 'package:openbudget_app/src/features/home/screens/create_entity_screen.dart';
+import 'package:openbudget_app/src/features/reports/providers/crypto_breakdown_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dart';
 import 'package:openbudget_app/src/features/settings/providers/reporting_currency_provider.dart';
@@ -59,6 +60,11 @@ void main() {
             () => _RecordingAccountActions(createdAccounts),
           ),
           reportingCurrencyProvider.overrideWith((ref) async => 'GBP'),
+          // The entity also has two connected wallets, so its net worth
+          // screen carries the Crypto section.
+          cryptoBreakdownProvider.overrideWith(
+            (ref, arg) async => TestData.gbpCryptoBreakdown(arg.$2),
+          ),
           netWorthProvider.overrideWith(
             (ref) async => _netWorthFor(createdAccounts),
           ),
@@ -182,9 +188,69 @@ void main() {
       // The row's rate line carries its own date; the trust line and the
       // chart's end label also say "Nov 8", so match the whole line.
       expect(find.text('1 USD = 0.79 GBP · Nov 8'), findsOneWidget);
-      expect(netWorth.trustLine, findsOneWidget);
       expect(find.text(r'$100.00'), findsOneWidget);
       expect(find.text('£79.00'), findsWidgets);
+      // The Crypto section makes the page tall enough that the headline is
+      // no longer built down here, so scroll back up to it.
+      await scrollIntoView(tester, netWorth.trustLine);
+      expect(netWorth.trustLine, findsOneWidget);
+
+      // 4. The Crypto section: one overprint bar with the chains stacked,
+      //    a row per chain with its value and share, and a toggle that
+      //    regroups the same £200.00 by asset, where USDC held on three
+      //    networks is one row.
+      await scrollIntoView(tester, netWorth.cryptoSection);
+      expect(netWorth.cryptoSection, findsOneWidget);
+      expect(netWorth.cryptoBar('byChain'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: netWorth.cryptoTotal,
+          matching: find.text('£200.00'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Across 2 wallets'), findsOneWidget);
+      expect(netWorth.cryptoRow('ethereumMainnet'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: netWorth.cryptoRow('ethereumMainnet'),
+          matching: find.text('£100.00'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: netWorth.cryptoRow('solanaMainnet'),
+          matching: find.text('35%'),
+        ),
+        findsOneWidget,
+      );
+      expect(netWorth.cryptoRow('asset:USDC'), findsNothing);
+
+      await netWorth.showCryptoByAsset();
+      await tester.pumpAndSettle();
+
+      expect(netWorth.cryptoBar('byAsset'), findsOneWidget);
+      expect(netWorth.cryptoRow('asset:USDC'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: netWorth.cryptoRow('asset:USDC'),
+          matching: find.text('£80.00'),
+        ),
+        findsOneWidget,
+      );
+      expect(netWorth.cryptoRow('ethereumMainnet'), findsNothing);
+      expect(
+        find.descendant(
+          of: netWorth.cryptoTotal,
+          matching: find.text('£200.00'),
+        ),
+        findsOneWidget,
+      );
+
+      await netWorth.showCryptoByChain();
+      await tester.pumpAndSettle();
+      expect(netWorth.cryptoRow('ethereumMainnet'), findsOneWidget);
     },
   );
 }

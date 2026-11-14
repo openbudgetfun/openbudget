@@ -141,6 +141,7 @@ recurringTransaction:
 report:
   - netWorth:
   - netWorthHistory:
+  - cryptoBreakdown:
   - spending:
   - monthSummaries:
   - ageOfMoney:
@@ -154,6 +155,7 @@ tax:
   - setEnvelopeTaxCategory:
   - setLineTax:
   - getReport:
+  - listDeadlines:
   - getSummary:
   - createExportLink:
 transactionRule:

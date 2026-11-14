@@ -93,6 +93,10 @@ import 'package:openbudget_server/src/generated/plaid/plaid_connection.dart'
     as _iyqk0wcc;
 import 'package:openbudget_server/src/generated/recurring_transactions/recurring_transaction.dart'
     as _i6lbncsb;
+import 'package:openbudget_server/src/generated/reports/crypto_breakdown_grouping.dart'
+    as _iy82xdzz;
+import 'package:openbudget_server/src/generated/reports/crypto_breakdown_view.dart'
+    as _ivq7d1tb;
 import 'package:openbudget_server/src/generated/reports/net_worth_granularity.dart'
     as _iwv93n42;
 import 'package:openbudget_server/src/generated/reports/net_worth_history_view.dart'
@@ -107,6 +111,8 @@ import 'package:openbudget_server/src/generated/settings/user_settings.dart'
     as _ijkobaqo;
 import 'package:openbudget_server/src/generated/tax/tax_category_view.dart'
     as _i687t6y5;
+import 'package:openbudget_server/src/generated/tax/tax_deadline_view.dart'
+    as _i5r4fio6;
 import 'package:openbudget_server/src/generated/tax/tax_profile.dart'
     as _iqcxgux6;
 import 'package:openbudget_server/src/generated/tax/tax_report_view.dart'
@@ -4635,6 +4641,41 @@ class _ReportEndpoint {
     });
   }
 
+  _ida.Future<_ivq7d1tb.CryptoBreakdownView> cryptoBreakdown(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue entityId,
+    _iy82xdzz.CryptoBreakdownGrouping grouping, {
+    String? currencyCode,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'report',
+            method: 'cryptoBreakdown',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'report',
+          methodName: 'cryptoBreakdown',
+          parameters: _ist.testObjectToJson({
+            'entityId': entityId,
+            'grouping': grouping,
+            'currencyCode': currencyCode,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_ivq7d1tb.CryptoBreakdownView>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _ida.Future<List<_ijvd4zl8.SpendingRow>> spending(
     _ist.TestSessionBuilder sessionBuilder,
     _is.UuidValue entityId,
@@ -5010,6 +5051,35 @@ class _TaxEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _ida.Future<_ik01tkfb.TaxReportView>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_i5r4fio6.TaxDeadlineView>> listDeadlines(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue entityId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'tax',
+            method: 'listDeadlines',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'tax',
+          methodName: 'listDeadlines',
+          parameters: _ist.testObjectToJson({'entityId': entityId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<List<_i5r4fio6.TaxDeadlineView>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

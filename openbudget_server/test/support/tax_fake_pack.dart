@@ -126,6 +126,47 @@ class FakeTaxPack implements TaxRulePack {
         _ => null,
       };
 
+  /// Three fixed dates per year, so tests can assert which years and days the
+  /// service draws on: an instalment inside the year, the return the January
+  /// after it and an amendment limit a year later.
+  @override
+  List<TaxDeadline> deadlines(TaxYear period, TaxProfile profile) {
+    requireTaxDeadlineInput(this, period, profile);
+    final year = period.startYear;
+    TaxDeadline deadline(
+      String id,
+      DateTime dueDate,
+      TaxDeadlineKind kind, {
+      bool dependsOnProfile = false,
+    }) => TaxDeadline(
+      id: 'gb.test.$id',
+      title: 'Test $id',
+      kind: kind,
+      dueDate: dueDate,
+      periodStart: period.start,
+      periodEnd: period.end,
+      periodLabel: period.label,
+      source: Uri.parse('https://example.test/fake-deadline'),
+      citation: 'Test rule',
+      grade: TaxEvidenceGrade.primary,
+      dependsOnProfile: dependsOnProfile,
+    );
+    return sortTaxDeadlines([
+      deadline(
+        'instalment',
+        DateTime.utc(year, 6, 30),
+        TaxDeadlineKind.payment,
+      ),
+      deadline(
+        'return',
+        DateTime.utc(year + 1, 1, 31),
+        TaxDeadlineKind.filing,
+        dependsOnProfile: true,
+      ),
+      deadline('amend', DateTime.utc(year + 2, 1, 31), TaxDeadlineKind.filing),
+    ]);
+  }
+
   @override
   TaxReport report(TaxInput input) => TaxReport(
     year: input.year,

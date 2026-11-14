@@ -88,6 +88,10 @@ import 'package:openbudget_client/src/protocol/plaid/plaid_connection.dart'
     as _itydqisw;
 import 'package:openbudget_client/src/protocol/recurring_transactions/recurring_transaction.dart'
     as _i41tn6nr;
+import 'package:openbudget_client/src/protocol/reports/crypto_breakdown_grouping.dart'
+    as _if8evbml;
+import 'package:openbudget_client/src/protocol/reports/crypto_breakdown_view.dart'
+    as _ir10t9fr;
 import 'package:openbudget_client/src/protocol/reports/net_worth_granularity.dart'
     as _idze6lni;
 import 'package:openbudget_client/src/protocol/reports/net_worth_history_view.dart'
@@ -102,6 +106,8 @@ import 'package:openbudget_client/src/protocol/settings/user_settings.dart'
     as _ivxpuwvx;
 import 'package:openbudget_client/src/protocol/tax/tax_category_view.dart'
     as _ic177lol;
+import 'package:openbudget_client/src/protocol/tax/tax_deadline_view.dart'
+    as _i735p57b;
 import 'package:openbudget_client/src/protocol/tax/tax_profile.dart'
     as _ibyrfq34;
 import 'package:openbudget_client/src/protocol/tax/tax_report_view.dart'
@@ -1906,8 +1912,8 @@ class EndpointRecurringTransaction extends _isc.EndpointRef {
       );
 }
 
-/// Read-only reporting surface for net worth, spending, month summaries and
-/// age of money. Every method requires a signed-in caller and delegates the
+/// Read-only reporting surface for net worth, the crypto breakdown, spending,
+/// month summaries and age of money. Every method requires a signed-in caller and delegates the
 /// ownership boundary to its service.
 /// {@category Endpoint}
 class EndpointReport extends _isc.EndpointRef {
@@ -1946,6 +1952,22 @@ class EndpointReport extends _isc.EndpointRef {
       'toDate': toDate,
       'granularity': granularity,
       'entityIds': entityIds,
+      'currencyCode': currencyCode,
+    },
+  );
+
+  /// What one owned entity's wallets are worth today, split by chain or by
+  /// asset, in the reporting currency. Only counted holdings are summed.
+  _ida.Future<_ir10t9fr.CryptoBreakdownView> cryptoBreakdown(
+    _isc.UuidValue entityId,
+    _if8evbml.CryptoBreakdownGrouping grouping, {
+    String? currencyCode,
+  }) => caller.callServerEndpoint<_ir10t9fr.CryptoBreakdownView>(
+    'report',
+    'cryptoBreakdown',
+    {
+      'entityId': entityId,
+      'grouping': grouping,
       'currencyCode': currencyCode,
     },
   );
@@ -2019,8 +2041,8 @@ class EndpointSettings extends _isc.EndpointRef {
   );
 }
 
-/// API surface for tax profiles, line coding, envelope defaults, reports
-/// and tax-ready summaries.
+/// API surface for tax profiles, line coding, envelope defaults, reports,
+/// the filing calendar and tax-ready summaries.
 ///
 /// Every method requires authentication and delegates to [TaxService], which
 /// owns the entity boundary and the write rules.
@@ -2124,6 +2146,19 @@ class EndpointTax extends _isc.EndpointRef {
       'entityId': entityId,
       'startYear': startYear,
     },
+  );
+
+  /// Lists the entity's upcoming filing and payment deadlines, soonest
+  /// first.
+  ///
+  /// Covers the entity's local today to a year ahead. An entity whose
+  /// country has no rule pack gets an empty list.
+  _ida.Future<List<_i735p57b.TaxDeadlineView>> listDeadlines(
+    _isc.UuidValue entityId,
+  ) => caller.callServerEndpoint<List<_i735p57b.TaxDeadlineView>>(
+    'tax',
+    'listDeadlines',
+    {'entityId': entityId},
   );
 
   /// Builds the entity's tax-ready summary for the year starting in

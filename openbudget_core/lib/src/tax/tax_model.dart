@@ -576,6 +576,101 @@ class TaxOpportunity {
   final List<String> assumptions;
 }
 
+/// What a [TaxDeadline] asks the taxpayer to do.
+enum TaxDeadlineKind {
+  /// Send a return, declaration or information return.
+  filing,
+
+  /// Pay tax, an instalment or a contribution, with nothing to send.
+  payment,
+
+  /// The return and the payment fall due on the same day.
+  filingAndPayment,
+}
+
+/// One filing or payment date a rule pack derives for a tax year and a
+/// profile (docs/tax-jurisdictions.md, task C5).
+///
+/// A deadline is data: a neutral title, the date, the period it covers and
+/// the authority page it came from. It never tells anyone what to do, so
+/// the title is a noun phrase and the wording lint of
+/// `openbudget_core/lib/src/guidance/wording.dart` applies to it.
+@immutable
+final class TaxDeadline {
+  const TaxDeadline({
+    required this.id,
+    required this.title,
+    required this.kind,
+    required this.dueDate,
+    required this.periodStart,
+    required this.periodEnd,
+    required this.periodLabel,
+    required this.source,
+    required this.citation,
+    required this.grade,
+    this.dependsOnProfile = false,
+    this.note,
+    this.rolledFrom,
+  });
+
+  /// Stable identifier of the rule that produced the deadline, prefixed by
+  /// country: `gb.sa.online-return`. Every instance of a recurring rule
+  /// shares it, and the period tells the instances apart.
+  final String id;
+
+  /// A neutral noun phrase in the authority's own language, such as
+  /// `Self Assessment online return`.
+  final String title;
+
+  /// Whether the date is for sending, paying or both.
+  final TaxDeadlineKind kind;
+
+  /// The day the deadline falls, as a date-only UTC value, after any
+  /// weekend or holiday roll-forward the pack's skill specifies.
+  final DateTime dueDate;
+
+  /// First day of the period the deadline covers, as a date-only UTC value.
+  final DateTime periodStart;
+
+  /// First day after the period the deadline covers, so the period is the
+  /// half-open range `[periodStart, periodEnd)` as in [TaxYear].
+  final DateTime periodEnd;
+
+  /// How the authority names the period: `2025/26`, `Q3 2026` or
+  /// `year to 31 March 2027`.
+  final String periodLabel;
+
+  /// The authority page the rule came from.
+  final Uri source;
+
+  /// The provision or page section behind the date: `§ 149 Abs. 2 AO`.
+  final String citation;
+
+  /// How well sourced the date is.
+  final TaxEvidenceGrade grade;
+
+  /// True when the profile's answers decide whether the deadline applies
+  /// or when it falls: VAT registration, a company's year end, the foreign
+  /// earned income exclusion. A deadline that only the kind of books
+  /// decides is not profile-dependent.
+  final bool dependsOnProfile;
+
+  /// One plain sentence saying when the deadline applies or what the date
+  /// assumes, when that is not obvious.
+  final String? note;
+
+  /// The date before a weekend or holiday moved it, or null when nothing
+  /// moved it.
+  final DateTime? rolledFrom;
+
+  /// The whole days from [today] to [dueDate]; negative once it has
+  /// passed.
+  int daysLeft(DateTime today) {
+    final day = DateTime.utc(today.year, today.month, today.day);
+    return dueDate.difference(day).inDays;
+  }
+}
+
 /// The computed position for one entity and tax year.
 @immutable
 class TaxReport {

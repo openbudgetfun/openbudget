@@ -3,8 +3,8 @@ import 'package:openbudget_server/src/reports/net_worth_service.dart';
 import 'package:openbudget_server/src/reports/report_service.dart';
 import 'package:serverpod/serverpod.dart';
 
-/// Read-only reporting surface for net worth, spending, month summaries and
-/// age of money. Every method requires a signed-in caller and delegates the
+/// Read-only reporting surface for net worth, the crypto breakdown, spending,
+/// month summaries and age of money. Every method requires a signed-in caller and delegates the
 /// ownership boundary to its service.
 class ReportEndpoint extends Endpoint {
   @override
@@ -37,6 +37,20 @@ class ReportEndpoint extends Endpoint {
     toDate: toDate,
     granularity: granularity,
     entityIds: entityIds,
+    currencyCode: currencyCode,
+  );
+
+  /// What one owned entity's wallets are worth today, split by chain or by
+  /// asset, in the reporting currency. Only counted holdings are summed.
+  Future<CryptoBreakdownView> cryptoBreakdown(
+    Session session,
+    UuidValue entityId,
+    CryptoBreakdownGrouping grouping, {
+    String? currencyCode,
+  }) => NetWorthService.cryptoBreakdown(
+    session,
+    entityId: entityId,
+    grouping: grouping,
     currencyCode: currencyCode,
   );
 
