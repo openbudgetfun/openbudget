@@ -1,6 +1,7 @@
 import 'package:openbudget_core/src/tax/tax_model.dart';
 import 'package:openbudget_core/src/tax/tax_profile.dart';
 import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
+import 'package:openbudget_core/src/tax/us/us_calendar.dart';
 import 'package:openbudget_core/src/tax/us/us_profile.dart';
 import 'package:openbudget_core/src/tax/us/us_tax_categories.dart';
 import 'package:openbudget_core/src/tax/us/us_tax_tables.dart';
@@ -23,7 +24,7 @@ const TaxPackManifest usTaxManifest = TaxPackManifest(
     TaxSection.indirectTax: TaxSectionCoverage.notApplicable,
     TaxSection.capitalGains: TaxSectionCoverage.partial,
     TaxSection.digitalAssets: TaxSectionCoverage.notBuilt,
-    TaxSection.filingCalendar: TaxSectionCoverage.notBuilt,
+    TaxSection.filingCalendar: TaxSectionCoverage.partial,
     TaxSection.payroll: TaxSectionCoverage.notBuilt,
   },
 );
@@ -44,6 +45,12 @@ final class UsTaxRules implements TaxRulePack {
 
   @override
   TaxJurisdiction get jurisdiction => TaxJurisdiction.us;
+
+  @override
+  List<TaxDeadline> deadlines(TaxYear period, TaxProfile profile) {
+    requireTaxDeadlineInput(this, period, profile);
+    return usDeadlines(period, profile as UsTaxProfile);
+  }
 
   @override
   TaxPackManifest get manifest => usTaxManifest;

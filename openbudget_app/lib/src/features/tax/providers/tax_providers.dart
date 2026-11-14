@@ -14,6 +14,11 @@ Future<TaxProfileRecord?> taxProfile(Ref ref, String entityId) =>
 Future<TaxReportView> taxReport(Ref ref, String entityId, int startYear) =>
     ref.watch(taxRepositoryProvider).getReport(entityId, startYear);
 
+/// The budget's upcoming filing and payment dates, soonest first.
+@riverpod
+Future<List<TaxDeadlineView>> taxDeadlines(Ref ref, String entityId) =>
+    ref.watch(taxRepositoryProvider).listDeadlines(entityId);
+
 /// The tax-ready summary for the year starting in [startYear], or for the
 /// year containing the entity's today when [startYear] is null.
 @riverpod

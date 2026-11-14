@@ -30,6 +30,7 @@ export 'src/tax/fiscal_year.dart';
 export 'src/tax/gb/gb.dart';
 export 'src/tax/ng/ng_profile.dart';
 export 'src/tax/ng/ng_tax_rules.dart';
+export 'src/tax/tax_calendar.dart' show sortTaxDeadlines;
 export 'src/tax/tax_model.dart';
 export 'src/tax/tax_profile.dart';
 export 'src/tax/tax_rule_pack.dart';

@@ -155,6 +155,7 @@ tax:
   - setEnvelopeTaxCategory:
   - setLineTax:
   - getReport:
+  - listDeadlines:
   - getSummary:
   - createExportLink:
 transactionRule:

@@ -152,6 +152,77 @@ TaxOpportunityView taxOpportunity({
   assumptions: assumptions,
 );
 
+TaxDeadlineView taxDeadline({
+  String id = 'gb.sa.online-return',
+  String title = 'Self Assessment online return',
+  String kind = 'filing',
+  DateTime? dueDate,
+  int daysLeft = 81,
+  String periodLabel = '2025/26',
+  String source = 'https://www.gov.uk/self-assessment-tax-returns/deadlines',
+  String citation = 'GOV.UK Self Assessment deadlines',
+  String grade = 'primary',
+  bool dependsOnProfile = false,
+  String? note,
+  DateTime? rolledFrom,
+}) {
+  final due = dueDate ?? DateTime.utc(2027, 1, 31);
+  return TaxDeadlineView(
+    id: id,
+    title: title,
+    kind: kind,
+    dueDate: due,
+    daysLeft: daysLeft,
+    periodStart: DateTime.utc(2025, 4, 6),
+    periodEnd: DateTime.utc(2026, 4, 6),
+    periodLabel: periodLabel,
+    source: source,
+    citation: citation,
+    grade: grade,
+    dependsOnProfile: dependsOnProfile,
+    note: note,
+    rolledFrom: rolledFrom,
+  );
+}
+
+/// A realistic few dates for a UK individual, soonest first.
+List<TaxDeadlineView> testDeadlines() => [
+  taxDeadline(
+    id: 'gb.sa.coding-out',
+    title: 'Self Assessment online return for tax-code collection',
+    dueDate: DateTime.utc(2026, 12, 30),
+    daysLeft: 49,
+    note:
+        'Filing online by this day lets a balance under £3,000 be collected '
+        'through the tax code.',
+  ),
+  taxDeadline(),
+  taxDeadline(
+    id: 'gb.sa.balancing-payment',
+    title: 'Self Assessment balancing payment',
+    kind: 'payment',
+  ),
+  taxDeadline(
+    id: 'gb.sa.payment-on-account-1',
+    title: 'First payment on account',
+    kind: 'payment',
+    periodLabel: '2026/27',
+    note:
+        'Each instalment is half of the previous year’s Income Tax and '
+        'Class 4 bill.',
+    source: 'https://www.gov.uk/understand-self-assessment-bill/payments-on-account',
+    citation: 'GOV.UK payments on account',
+  ),
+  taxDeadline(
+    id: 'gb.sa.payment-on-account-2',
+    title: 'Second payment on account',
+    kind: 'payment',
+    dueDate: DateTime.utc(2027, 7, 31),
+    daysLeft: 262,
+    periodLabel: '2026/27',
+  ),
+];
+
 TaxReportView taxReportView({
   String jurisdiction = 'GB',
   int startYear = 2026,
@@ -354,6 +425,8 @@ class FakeTaxRepository implements TaxRepository {
     this.categories,
     Map<int, TaxReportView>? reports,
     this.defaultReport,
+    this.deadlines = const [],
+    this.deadlinesError,
     this.profileError,
     this.categoriesError,
     this.reportError,
@@ -370,6 +443,8 @@ class FakeTaxRepository implements TaxRepository {
   List<TaxCategoryView>? categories;
   final Map<int, TaxReportView> reports;
   TaxReportView? defaultReport;
+  List<TaxDeadlineView> deadlines;
+  Exception? deadlinesError;
   Exception? profileError;
   Exception? categoriesError;
   Exception? reportError;
@@ -382,6 +457,7 @@ class FakeTaxRepository implements TaxRepository {
   Exception? exportError;
 
   final List<({String entityId, int startYear})> reportCalls = [];
+  final List<String> deadlineCalls = [];
   final List<({String entityId, int? startYear})> summaryCalls = [];
   final List<({String entityId, int? startYear})> exportCalls = [];
   final List<
@@ -488,6 +564,13 @@ class FakeTaxRepository implements TaxRepository {
     return reports[startYear] ??
         defaultReport ??
         taxReportView(startYear: startYear);
+  }
+
+  @override
+  Future<List<TaxDeadlineView>> listDeadlines(String entityId) async {
+    deadlineCalls.add(entityId);
+    if (deadlinesError != null) throw deadlinesError!;
+    return deadlines;
   }
 
   @override

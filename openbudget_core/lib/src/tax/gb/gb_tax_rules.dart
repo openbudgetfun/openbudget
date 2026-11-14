@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:openbudget_core/src/tax/gb/gb_calendar.dart';
 import 'package:openbudget_core/src/tax/gb/gb_capital_allowances.dart';
 import 'package:openbudget_core/src/tax/gb/gb_categories.dart';
 import 'package:openbudget_core/src/tax/gb/gb_corporation_tax.dart';
@@ -52,6 +53,12 @@ final class GbTaxRules implements TaxRulePack {
 
   @override
   TaxJurisdiction get jurisdiction => TaxJurisdiction.gb;
+
+  @override
+  List<TaxDeadline> deadlines(TaxYear period, TaxProfile profile) {
+    requireTaxDeadlineInput(this, period, profile);
+    return gbDeadlines(period, profile as GbTaxProfile);
+  }
 
   @override
   TaxPackManifest get manifest => gbTaxManifest;

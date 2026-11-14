@@ -174,6 +174,17 @@ void main() {
       expect(find.textContaining('not a tax return'), findsOneWidget);
     });
 
+    testWidgets('shows no Upcoming list and never asks for a calendar', (
+      tester,
+    ) async {
+      final repository = FakeTaxRepository(deadlines: testDeadlines());
+      await _pump(tester, repository);
+
+      expect(find.text('Upcoming'), findsNothing);
+      expect(find.byKey(const Key('tax-upcoming')), findsNothing);
+      expect(repository.deadlineCalls, isEmpty);
+    });
+
     testWidgets('shows only the rates in force, not superseded ones', (
       tester,
     ) async {

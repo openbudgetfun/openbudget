@@ -3787,6 +3787,25 @@ class Endpoints extends _is.EndpointDispatch {
                 startYear: params['startYear'],
               ),
         ),
+        'listDeadlines': _is.MethodConnector(
+          name: 'listDeadlines',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['tax'] as _i34kr7gr.TaxEndpoint).listDeadlines(
+                    session,
+                    params['entityId'],
+                  ),
+        ),
         'getSummary': _is.MethodConnector(
           name: 'getSummary',
           params: {

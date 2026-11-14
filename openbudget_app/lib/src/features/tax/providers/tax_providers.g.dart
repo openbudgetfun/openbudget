@@ -178,6 +178,92 @@ final class TaxReportFamily extends $Family
   String toString() => r'taxReportProvider';
 }
 
+/// The budget's upcoming filing and payment dates, soonest first.
+
+@ProviderFor(taxDeadlines)
+final taxDeadlinesProvider = TaxDeadlinesFamily._();
+
+/// The budget's upcoming filing and payment dates, soonest first.
+
+final class TaxDeadlinesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<TaxDeadlineView>>,
+          List<TaxDeadlineView>,
+          FutureOr<List<TaxDeadlineView>>
+        >
+    with
+        $FutureModifier<List<TaxDeadlineView>>,
+        $FutureProvider<List<TaxDeadlineView>> {
+  /// The budget's upcoming filing and payment dates, soonest first.
+  TaxDeadlinesProvider._({
+    required TaxDeadlinesFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'taxDeadlinesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$taxDeadlinesHash();
+
+  @override
+  String toString() {
+    return r'taxDeadlinesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<TaxDeadlineView>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<TaxDeadlineView>> create(Ref ref) {
+    final argument = this.argument as String;
+    return taxDeadlines(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TaxDeadlinesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$taxDeadlinesHash() => r'22460cf602830efbf55416a7f879bd83d4c1c81b';
+
+/// The budget's upcoming filing and payment dates, soonest first.
+
+final class TaxDeadlinesFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<TaxDeadlineView>>, String> {
+  TaxDeadlinesFamily._()
+    : super(
+        retry: null,
+        name: r'taxDeadlinesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The budget's upcoming filing and payment dates, soonest first.
+
+  TaxDeadlinesProvider call(String entityId) =>
+      TaxDeadlinesProvider._(argument: entityId, from: this);
+
+  @override
+  String toString() => r'taxDeadlinesProvider';
+}
+
 /// The tax-ready summary for the year starting in [startYear], or for the
 /// year containing the entity's today when [startYear] is null.
 

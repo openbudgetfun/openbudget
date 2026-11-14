@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:openbudget_core/src/tax/ng/ng_calendar.dart';
 import 'package:openbudget_core/src/tax/ng/ng_profile.dart';
 import 'package:openbudget_core/src/tax/tax_model.dart';
 import 'package:openbudget_core/src/tax/tax_profile.dart';
@@ -29,7 +30,7 @@ const TaxPackManifest ngTaxManifest = TaxPackManifest(
     TaxSection.indirectTax: TaxSectionCoverage.partial,
     TaxSection.capitalGains: TaxSectionCoverage.notBuilt,
     TaxSection.digitalAssets: TaxSectionCoverage.notBuilt,
-    TaxSection.filingCalendar: TaxSectionCoverage.notBuilt,
+    TaxSection.filingCalendar: TaxSectionCoverage.partial,
     TaxSection.payroll: TaxSectionCoverage.notBuilt,
   },
 );
@@ -75,6 +76,12 @@ final class NgTaxRules implements TaxRulePack {
 
   @override
   TaxJurisdiction get jurisdiction => TaxJurisdiction.ng;
+
+  @override
+  List<TaxDeadline> deadlines(TaxYear period, TaxProfile profile) {
+    requireTaxDeadlineInput(this, period, profile);
+    return ngDeadlines(period, profile as NgTaxProfile);
+  }
 
   @override
   TaxPackManifest get manifest => ngTaxManifest;

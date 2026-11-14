@@ -11,6 +11,7 @@ import 'package:openbudget_app/src/features/tax/tax_labels.dart';
 import 'package:openbudget_app/src/features/tax/widgets/tax_caveat_card.dart';
 import 'package:openbudget_app/src/features/tax/widgets/tax_disclaimer_bar.dart';
 import 'package:openbudget_app/src/features/tax/widgets/tax_export_card.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_upcoming_section.dart';
 import 'package:openbudget_app/src/features/tax/widgets/tax_year_switcher.dart';
 import 'package:openbudget_app/src/features/tax/widgets/universal_tax_panel.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
@@ -282,6 +283,7 @@ class _TaxReportBody extends HookConsumerWidget {
                         liability: liability,
                         currency: report.currencyCode,
                       ),
+                  TaxUpcomingSection(entityId: entityId),
                   ObSectionHeader(
                     title: l10n.taxReportLinesTitle,
                     padding: const EdgeInsets.fromLTRB(
