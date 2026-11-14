@@ -571,6 +571,9 @@ class AgentToolRegistry {
     );
     final json = report.toJson();
     json['guidance'] = block;
+    if (report.sources.isNotEmpty) {
+      json['citeAs'] = 'report-${report.startYear}';
+    }
     return _json(json);
   }
 
@@ -863,7 +866,26 @@ class AgentToolRegistry {
     );
     final json = view.toJson();
     json['guidance'] = block;
+    // Only a pack country has authority pages to cite; a universal-layer
+    // summary carries no citeAs.
+    final sources = _summarySources(entity, view);
+    if (sources.isNotEmpty) {
+      json['citeAs'] = 'summary-${view.startYear}';
+      json['sources'] = sources;
+    }
     return _json(json);
+  }
+
+  /// The authority pages behind a summary's figures: the pack rule set's
+  /// sources for a pack country, none for the universal layer.
+  static List<String> _summarySources(Entity entity, TaxSummaryView view) {
+    if (view.rulesVersion == null) return const [];
+    final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+    if (jurisdiction == null) return const [];
+    final ruleSet = TaxRules.forJurisdiction(
+      jurisdiction,
+    ).ruleSet(view.startYear);
+    return [for (final source in ruleSet.sources) source.toString()];
   }
 
   Future<String> _getNetWorth(
