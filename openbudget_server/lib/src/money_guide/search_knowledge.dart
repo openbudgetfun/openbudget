@@ -1,4 +1,3 @@
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:openbudget_server/src/money_guide/guidance_block.dart';
 import 'package:openbudget_server/src/money_guide/knowledge/knowledge_card.dart';
@@ -53,7 +52,7 @@ Map<String, Object?> searchKnowledgeResult({
 
   final block = buildGuidanceBlock(
     entity: entity,
-    rulesVersion: _rulesVersionFor(entity, year),
+    rulesVersion: rulesVersionFor(entity, year),
     crossBorder: crossBorder,
   );
 
@@ -81,14 +80,6 @@ Map<String, Object?> _cardJson(KnowledgeCard card, int year) {
         },
     ],
   };
-}
-
-String? _rulesVersionFor(Entity entity, int year) {
-  final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
-  if (jurisdiction == null) return null;
-  final pack = TaxRules.forJurisdiction(jurisdiction);
-  if (!pack.supportedStartYears.contains(year)) return null;
-  return pack.ruleSet(year).versionFor(jurisdiction);
 }
 
 String? _optionalString(Map<String, Object?> args, String key) {

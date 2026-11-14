@@ -1,0 +1,13 @@
+Entity: company in DE, base currency EUR, time zone Europe/Berlin.
+Tax year now: 2026, 2026-01-01 to 2026-12-31.
+Jurisdiction: preview, rules de-2026-r1.
+Sections: personal income tax preview; self-employment preview; company tax preview; VAT or sales tax preview; capital gains preview; digital assets universal; filing calendar preview; payroll universal.
+Profile: tax resident of DE not recorded; US person not recorded.
+Perimeter: tax illustration. Reserved, so explain in general and signpost: Einzelfallbezogene Steuerberatung; GmbH, Holding und Gehalt-versus-Ausschüttung.
+Signpost to: ein Steuerberater oder ein Lohnsteuerhilfeverein.
+Disclaimer key: de.
+Cards for DE: none.
+Universal cards (id: title):
+- universal-budgeting-zero-based-envelopes: Zero-based envelopes give every unit of income a job
+- universal-crypto-crypto-tax-reporting: Tax offices exchange crypto-asset reports automatically from 2027
+- universal-money-what-aer-means: AER is the yearly savings rate with compounding included

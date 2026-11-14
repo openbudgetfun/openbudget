@@ -422,8 +422,13 @@ void main() {
         // The model sees the stripped text of the first reply, never the
         // unresolved key.
         expect(requests, hasLength(3));
-        expect(requests.last.body, isNot(contains(_zeroBased)));
-        expect(requests.last.body, contains('Spread it out'));
+        // The brief lists every card id, so check the replayed assistant
+        // message rather than the whole request.
+        expect(
+          requests.last.body,
+          contains('"content":"Spread it out [^$_sinkingFunds] and."'),
+        );
+        expect(requests.last.body, isNot(contains('[^$_zeroBased]')));
       });
     });
 

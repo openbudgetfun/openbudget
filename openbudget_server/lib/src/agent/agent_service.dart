@@ -3,13 +3,15 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/agent/agent_access.dart';
-import 'package:openbudget_server/src/agent/agent_prompt.dart';
 import 'package:openbudget_server/src/agent/agent_provider_resolver.dart';
 import 'package:openbudget_server/src/agent/agent_tool_registry.dart';
 import 'package:openbudget_server/src/agent/agent_usage_service.dart';
 import 'package:openbudget_server/src/agent/chat_completions_client.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/money_guide/citation_resolver.dart';
+import 'package:openbudget_server/src/money_guide/money_guide_prompt.dart';
+import 'package:openbudget_server/src/tax/tax_service.dart';
+import 'package:openbudget_server/src/tax/tax_summary_service.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// Runs agent conversations: history, tools, metering and persistence.
@@ -54,7 +56,11 @@ abstract final class AgentService {
     // Resolve before writing anything, so a missing plan or key leaves no
     // half-started conversation behind.
     await AgentProviderResolver.resolve(session, userId);
-    await requireOwnedEntity(session, userId: userId, entityId: entityId);
+    final entity = await requireOwnedEntity(
+      session,
+      userId: userId,
+      entityId: entityId,
+    );
 
     final conversation = conversationId == null
         ? await _createConversation(
@@ -82,6 +88,11 @@ abstract final class AgentService {
     const registry = AgentToolRegistry();
     final tools = registry.definitions(canPropose: true);
     final citations = await _citationCatalogue(session, id);
+    // One brief per turn: the static rules and the brief stay identical
+    // across the turn's model calls, so the provider can cache them.
+    final systemMessages = MoneyGuidePrompt.systemMessages(
+      await _entityBrief(session, entity),
+    );
 
     for (var call = 0; call < maxModelCalls; call++) {
       // Recheck on every pass: an earlier call in this turn may have used up
@@ -92,7 +103,7 @@ abstract final class AgentService {
         apiKey: provider.apiKey,
         model: provider.model,
         messages: [
-          {'role': 'system', 'content': AgentPrompt.system},
+          ...systemMessages,
           ...await _history(session, id),
         ],
         tools: tools,
@@ -194,6 +205,23 @@ abstract final class AgentService {
 
     _log.info('Agent turn finished conversation=$id');
     yield AgentEvent(kind: AgentEventKind.done, conversationId: id);
+  }
+
+  /// The Money guide's entity brief, with the guardrail answers recorded on
+  /// the entity's tax profile.
+  static Future<String> _entityBrief(Session session, Entity entity) async {
+    final record = TaxJurisdiction.fromCountryCode(entity.countryCode) == null
+        ? null
+        : await TaxService.getProfile(session, entityId: entity.id!);
+    final answers = record == null
+        ? const <String, Object?>{}
+        : jsonDecode(record.profileJson) as Map<String, Object?>;
+    return MoneyGuidePrompt.brief(
+      entity: entity,
+      now: TaxSummaryService.now(),
+      taxResident: answers['taxResident'] == true,
+      usPerson: answers['usPerson'] == true,
+    );
   }
 
   /// Lists the user's conversations for one entity, newest first.

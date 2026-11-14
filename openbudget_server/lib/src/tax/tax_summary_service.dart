@@ -147,6 +147,9 @@ class TaxSummaryService {
   @visibleForTesting
   static DateTime Function() clock = () => DateTime.now().toUtc();
 
+  /// The server clock's current instant, in UTC.
+  static DateTime now() => clock();
+
   /// Builds the entity's summary for the year that starts in [startYear].
   ///
   /// When [startYear] is null the year containing the entity's local today
@@ -309,6 +312,23 @@ class TaxSummaryService {
   /// clock in the entity's own time zone.
   static int currentStartYearFor(Entity entity) =>
       startYearFor(entity, now: clock());
+
+  /// The tax year [entity] is in at [now] (the server clock when null), in
+  /// the entity's own time zone: its start year, its label such as `2026/27`,
+  /// its first day and its inclusive last day.
+  static ({int startYear, String label, DateTime start, DateTime lastDay})
+  currentPeriodFor(Entity entity, {DateTime? now}) {
+    final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+    final pack = jurisdiction == null ? null : packFor(jurisdiction);
+    final period = _resolvePeriod(entity, pack, null, now ?? clock());
+    return (
+      startYear: period.startYear,
+      label: period.label,
+      start: period.start,
+      // `period.end` is the half-open range's exclusive end.
+      lastDay: period.end.subtract(const Duration(days: 1)),
+    );
+  }
 
   /// The inclusive last day of the tax year [entity] is in today, on the
   /// server clock in the entity's own time zone.
