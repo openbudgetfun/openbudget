@@ -26,8 +26,11 @@ abstract class AgentMessage
     required this.content,
     this.toolCallsJson,
     this.toolCallId,
+    this.citationsJson,
+    bool? touchesTaxOrInvestment,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+  }) : touchesTaxOrInvestment = touchesTaxOrInvestment ?? false,
+       createdAt = createdAt ?? DateTime.now();
 
   factory AgentMessage({
     _is.UuidValue? id,
@@ -36,6 +39,8 @@ abstract class AgentMessage
     required String content,
     String? toolCallsJson,
     String? toolCallId,
+    String? citationsJson,
+    bool? touchesTaxOrInvestment,
     DateTime? createdAt,
   }) = _AgentMessageImpl;
 
@@ -53,6 +58,13 @@ abstract class AgentMessage
       content: jsonSerialization['content'] as String,
       toolCallsJson: jsonSerialization['toolCallsJson'] as String?,
       toolCallId: jsonSerialization['toolCallId'] as String?,
+      citationsJson: jsonSerialization['citationsJson'] as String?,
+      touchesTaxOrInvestment:
+          jsonSerialization['touchesTaxOrInvestment'] == null
+          ? null
+          : _is.BoolJsonExtension.fromJson(
+              jsonSerialization['touchesTaxOrInvestment'],
+            ),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -79,6 +91,14 @@ abstract class AgentMessage
   /// The tool call this message answers, for role tool.
   String? toolCallId;
 
+  /// JSON list of the sources the assistant's citations resolved to, when
+  /// the reply cited any. Each item is an `AgentCitation`.
+  String? citationsJson;
+
+  /// True when the reply cites a tax card, a tax tool result or an
+  /// opportunity, so the app shows the country's disclaimer under it.
+  bool touchesTaxOrInvestment;
+
   DateTime createdAt;
 
   @override
@@ -94,6 +114,8 @@ abstract class AgentMessage
     String? content,
     String? toolCallsJson,
     String? toolCallId,
+    String? citationsJson,
+    bool? touchesTaxOrInvestment,
     DateTime? createdAt,
   });
   @override
@@ -106,6 +128,8 @@ abstract class AgentMessage
       'content': content,
       if (toolCallsJson != null) 'toolCallsJson': toolCallsJson,
       if (toolCallId != null) 'toolCallId': toolCallId,
+      if (citationsJson != null) 'citationsJson': citationsJson,
+      'touchesTaxOrInvestment': touchesTaxOrInvestment,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -120,6 +144,8 @@ abstract class AgentMessage
       'content': content,
       if (toolCallsJson != null) 'toolCallsJson': toolCallsJson,
       if (toolCallId != null) 'toolCallId': toolCallId,
+      if (citationsJson != null) 'citationsJson': citationsJson,
+      'touchesTaxOrInvestment': touchesTaxOrInvestment,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -162,6 +188,8 @@ class _AgentMessageImpl extends AgentMessage {
     required String content,
     String? toolCallsJson,
     String? toolCallId,
+    String? citationsJson,
+    bool? touchesTaxOrInvestment,
     DateTime? createdAt,
   }) : super._(
          id: id,
@@ -170,6 +198,8 @@ class _AgentMessageImpl extends AgentMessage {
          content: content,
          toolCallsJson: toolCallsJson,
          toolCallId: toolCallId,
+         citationsJson: citationsJson,
+         touchesTaxOrInvestment: touchesTaxOrInvestment,
          createdAt: createdAt,
        );
 
@@ -184,6 +214,8 @@ class _AgentMessageImpl extends AgentMessage {
     String? content,
     Object? toolCallsJson = _Undefined,
     Object? toolCallId = _Undefined,
+    Object? citationsJson = _Undefined,
+    bool? touchesTaxOrInvestment,
     DateTime? createdAt,
   }) {
     return AgentMessage(
@@ -195,6 +227,11 @@ class _AgentMessageImpl extends AgentMessage {
           ? toolCallsJson
           : this.toolCallsJson,
       toolCallId: toolCallId is String? ? toolCallId : this.toolCallId,
+      citationsJson: citationsJson is String?
+          ? citationsJson
+          : this.citationsJson,
+      touchesTaxOrInvestment:
+          touchesTaxOrInvestment ?? this.touchesTaxOrInvestment,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -233,6 +270,18 @@ class AgentMessageUpdateTable extends _is.UpdateTable<AgentMessageTable> {
     value,
   );
 
+  _is.ColumnValue<String, String> citationsJson(String? value) =>
+      _is.ColumnValue(
+        table.citationsJson,
+        value,
+      );
+
+  _is.ColumnValue<bool, bool> touchesTaxOrInvestment(bool value) =>
+      _is.ColumnValue(
+        table.touchesTaxOrInvestment,
+        value,
+      );
+
   _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _is.ColumnValue(
         table.createdAt,
@@ -264,6 +313,15 @@ class AgentMessageTable extends _is.Table<_is.UuidValue?> {
       'toolCallId',
       this,
     );
+    citationsJson = _is.ColumnString(
+      'citationsJson',
+      this,
+    );
+    touchesTaxOrInvestment = _is.ColumnBool(
+      'touchesTaxOrInvestment',
+      this,
+      hasDefault: true,
+    );
     createdAt = _is.ColumnDateTime(
       'createdAt',
       this,
@@ -286,6 +344,14 @@ class AgentMessageTable extends _is.Table<_is.UuidValue?> {
   /// The tool call this message answers, for role tool.
   late final _is.ColumnString toolCallId;
 
+  /// JSON list of the sources the assistant's citations resolved to, when
+  /// the reply cited any. Each item is an `AgentCitation`.
+  late final _is.ColumnString citationsJson;
+
+  /// True when the reply cites a tax card, a tax tool result or an
+  /// opportunity, so the app shows the country's disclaimer under it.
+  late final _is.ColumnBool touchesTaxOrInvestment;
+
   late final _is.ColumnDateTime createdAt;
 
   @override
@@ -296,6 +362,8 @@ class AgentMessageTable extends _is.Table<_is.UuidValue?> {
     content,
     toolCallsJson,
     toolCallId,
+    citationsJson,
+    touchesTaxOrInvestment,
     createdAt,
   ];
 }
