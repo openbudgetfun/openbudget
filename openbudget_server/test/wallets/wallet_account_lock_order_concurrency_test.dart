@@ -122,7 +122,7 @@ void main() {
         addTearDown(gate.release);
 
         final syncRun = _runCatching(
-          () => WalletService.sync(sessionOf(), fixture.walletId),
+          () => WalletService.sync(sessionOf(), fixture.walletId, force: true),
         );
         await _waitForRowLock(server, 'wallet', fixture.walletId);
 
@@ -198,7 +198,7 @@ void main() {
         addTearDown(gate.release);
 
         final syncRun = _runCatching(
-          () => WalletService.sync(sessionOf(), fixture.walletId),
+          () => WalletService.sync(sessionOf(), fixture.walletId, force: true),
         );
         await _waitForRowLock(server, 'wallet', fixture.walletId);
 

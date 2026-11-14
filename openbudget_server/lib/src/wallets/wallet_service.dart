@@ -41,8 +41,15 @@ abstract final class WalletService {
   static WalletProviderFactory _providerFactory = _registryProvider;
   static WalletProviderRegistry _registry =
       WalletProviderRegistry.defaultRegistry;
+
+  /// The server clock used for sync cadence and throttling. Tests inject a
+  /// fake clock here; production defaults to UTC now.
+  static DateTime Function() clock = () => DateTime.now().toUtc();
+
   static WalletChangePublisher _publisher = EntityRealtimeNotifier.notify;
-  static final _previewRateLimiter = _PreviewRateLimiter();
+  static final _previewRateLimiter = _PreviewRateLimiter(
+    clock: () => clock(),
+  );
 
   /// The chain provider used by [connect], [sync] and [preview].
   @visibleForTesting
@@ -83,6 +90,7 @@ abstract final class WalletService {
     _registry = WalletProviderRegistry.defaultRegistry;
     _publisher = EntityRealtimeNotifier.notify;
     _previewRateLimiter.reset();
+    clock = () => DateTime.now().toUtc();
   }
 
   /// Creates the wallet and its fixed crypto account in one transaction, then
@@ -151,7 +159,7 @@ abstract final class WalletService {
             session,
             current.copyWith(
               label: cleanLabel,
-              updatedAt: DateTime.now().toUtc(),
+              updatedAt: clock(),
             ),
             transaction: tx,
           );
@@ -161,7 +169,7 @@ abstract final class WalletService {
             session,
             account.copyWith(
               name: cleanAccountName,
-              updatedAt: DateTime.now().toUtc(),
+              updatedAt: clock(),
             ),
             transaction: tx,
           );
@@ -182,7 +190,7 @@ abstract final class WalletService {
         balanceSource: AccountBalanceSource.valuations,
         onBudget: false,
       );
-      final now = DateTime.now().toUtc();
+      final now = clock();
       return Wallet.db.insertRow(
         session,
         Wallet(
@@ -255,11 +263,35 @@ abstract final class WalletService {
   /// the wallet is marked failed.
   static Future<WalletSyncResult> sync(
     Session session,
-    UuidValue walletId,
-  ) async {
-    var wallet = await _ownedWallet(session, walletId);
-    _requireWritable(await EntityAccess.requireOwned(session, wallet.entityId));
-    var startedAt = DateTime.now().toUtc();
+    UuidValue walletId, {
+    bool force = false,
+    SystemEntityOwner? systemOwner,
+  }) async {
+    var wallet = await _ownedWallet(
+      session,
+      walletId,
+      systemOwner: systemOwner,
+    );
+    _requireWritable(
+      await EntityAccess.requireOwned(
+        session,
+        wallet.entityId,
+        systemOwner: systemOwner,
+      ),
+    );
+
+    // Manual throttle: a sync within 5 minutes of the last one makes no
+    // provider call. The timestamp lives on the wallet row, so it is
+    // consistent across server instances.
+    if (!force) {
+      final now = clock();
+      if (wallet.lastSyncedAt != null &&
+          now.difference(wallet.lastSyncedAt!) < const Duration(minutes: 5)) {
+        return _throttledSyncResult(session, wallet);
+      }
+    }
+
+    var startedAt = clock();
     var attempt = 0;
 
     while (true) {
@@ -307,6 +339,7 @@ abstract final class WalletService {
           requestNetworks: networks,
           cursorsByNetwork: cursors,
           startedAt: startedAt,
+          systemOwner: systemOwner,
         );
         await _publish(
           session,
@@ -328,8 +361,12 @@ abstract final class WalletService {
             message: 'Wallet changed while syncing; retry the sync.',
           );
         }
-        wallet = await _ownedWallet(session, walletId);
-        startedAt = DateTime.now().toUtc();
+        wallet = await _ownedWallet(
+          session,
+          walletId,
+          systemOwner: systemOwner,
+        );
+        startedAt = clock();
       } on _AllNetworksFailed catch (failure, stackTrace) {
         _log.warning(
           'Wallet sync failed for $walletId: $failure',
@@ -353,6 +390,114 @@ abstract final class WalletService {
         rethrow;
       }
     }
+  }
+
+  /// Revalues a wallet from its stored quantities and cached prices without
+  /// any provider read. Updates today's account valuation only.
+  static Future<void> revalue(
+    Session session,
+    UuidValue walletId, {
+    SystemEntityOwner? systemOwner,
+  }) async {
+    final wallet = await _ownedWallet(
+      session,
+      walletId,
+      systemOwner: systemOwner,
+    );
+    _requireWritable(
+      await EntityAccess.requireOwned(
+        session,
+        wallet.entityId,
+        systemOwner: systemOwner,
+      ),
+    );
+
+    await session.db.transaction((tx) async {
+      final entity = await EntityAccess.requireOwned(
+        session,
+        wallet.entityId,
+        transaction: tx,
+        lockMode: LockMode.forNoKeyUpdate,
+        systemOwner: systemOwner,
+      );
+      _requireWritable(entity);
+
+      final account = await _lockWalletAccount(session, wallet.accountId, tx);
+      final current = await Wallet.db.findById(
+        session,
+        wallet.id!,
+        transaction: tx,
+        lockMode: LockMode.forUpdate,
+      );
+      if (current == null) throw NotFoundException();
+      if (current.accountId != account.id) {
+        throw StateError('Wallet ${current.id} changed its crypto account.');
+      }
+
+      final holdings = await WalletHolding.db.find(
+        session,
+        where: (t) => t.walletId.equals(wallet.id),
+        transaction: tx,
+      );
+      var total = BigInt.zero;
+      for (final holding in holdings) {
+        if (holding.valueMinor != null) {
+          total += BigInt.from(holding.valueMinor!);
+        }
+      }
+      final valuationDate = EntityClock.today(entity, now: clock());
+      await AccountValuationService.setInTransaction(
+        session,
+        tx,
+        wallet.accountId,
+        valuationDate,
+        _safeMinor(total, 'wallet total value'),
+        source: ValuationSource.wallet,
+        note: 'Wallet revaluation',
+      );
+
+      final now = clock();
+      await Wallet.db.updateRow(
+        session,
+        current.copyWith(updatedAt: now),
+        transaction: tx,
+      );
+    });
+  }
+
+  /// Returns the last stored sync result when a manual sync is throttled.
+  static Future<WalletSyncResult> _throttledSyncResult(
+    Session session,
+    Wallet wallet,
+  ) async {
+    final holdings = await WalletHolding.db.find(
+      session,
+      where: (t) => t.walletId.equals(wallet.id),
+    );
+    final valuation = await AccountValuation.db.findFirstRow(
+      session,
+      where: (t) => t.accountId.equals(wallet.accountId),
+      orderBy: (t) => t.valuationDate.desc(),
+    );
+    return WalletSyncResult(
+      walletId: wallet.id!,
+      insertedTransactions: 0,
+      updatedTransactions: 0,
+      holdingCount: holdings.length,
+      pricedHoldingCount: 0,
+      cachedHoldingCount: 0,
+      unpricedHoldingCount: 0,
+      nftHoldingCount: holdings.where((h) => h.isNft).length,
+      pricedNftHoldingCount: 0,
+      cachedNftHoldingCount: 0,
+      unpricedNftHoldingCount: 0,
+      totalValueMinor: valuation?.valueMinor,
+      valuationCurrencyCode: _valuationCurrency,
+      readNetworks: const [],
+      failedNetworks: const [],
+      syncedAt: wallet.lastSyncedAt ?? clock(),
+      warnings: const ['Sync throttled; returned the last result.'],
+    );
   }
 
   /// Reads what one address holds across its family's supported networks,
@@ -469,7 +614,7 @@ abstract final class WalletService {
         current.copyWith(
           // An explicit null clears the list, it does not keep it.
           scanNetworks: cleanNetworks,
-          updatedAt: DateTime.now().toUtc(),
+          updatedAt: clock(),
         ),
         transaction: tx,
       );
@@ -688,7 +833,7 @@ LIMIT @limit''',
           category: category == null ? current.category : cleanCategory,
           tags: tags == null ? current.tags : cleanTags,
           memo: memo == null ? current.memo : cleanMemo,
-          updatedAt: DateTime.now().toUtc(),
+          updatedAt: clock(),
         ),
         transaction: tx,
       );
@@ -754,6 +899,7 @@ LIMIT @limit''',
     required List<WalletNetwork> requestNetworks,
     required Map<WalletNetwork, String> cursorsByNetwork,
     required DateTime startedAt,
+    SystemEntityOwner? systemOwner,
   }) async {
     final outcome = await session.db.transaction((tx) async {
       final entity = await EntityAccess.requireOwned(
@@ -761,6 +907,7 @@ LIMIT @limit''',
         wallet.entityId,
         transaction: tx,
         lockMode: LockMode.forNoKeyUpdate,
+        systemOwner: systemOwner,
       );
       _requireWritable(entity);
 
@@ -934,7 +1081,7 @@ LIMIT @limit''',
       final persistedHoldings =
           <(WalletNetwork, String, HoldingPosition), WalletHolding>{};
       final transactions = <String, WalletTransaction>{};
-      final now = DateTime.now().toUtc();
+      final now = clock();
       var insertedTransactions = 0;
       var updatedTransactions = 0;
 
@@ -1163,7 +1310,7 @@ LIMIT @limit''',
       // One state row per network: a read refreshes lastReadAt and clears
       // the error, a failure records the reason and keeps the facts
       // (multichain-wallets.md 8.1).
-      final syncedAt = DateTime.now().toUtc();
+      final syncedAt = clock();
       for (final network in readNetworks) {
         await WalletNetworkState.db.upsertRow(
           session,
@@ -1522,7 +1669,7 @@ LIMIT @limit''',
           return;
         }
         final message = _capMessage(_userSafeFailureMessage(error));
-        final now = DateTime.now().toUtc();
+        final now = clock();
         await Wallet.db.updateRow(
           session,
           current.copyWith(
@@ -1579,11 +1726,16 @@ LIMIT @limit''',
 
   static Future<Wallet> _ownedWallet(
     Session session,
-    UuidValue walletId,
-  ) async {
+    UuidValue walletId, {
+    SystemEntityOwner? systemOwner,
+  }) async {
     final wallet = await Wallet.db.findById(session, walletId);
     if (wallet == null) throw NotFoundException();
-    await EntityAccess.requireOwned(session, wallet.entityId);
+    await EntityAccess.requireOwned(
+      session,
+      wallet.entityId,
+      systemOwner: systemOwner,
+    );
     return wallet;
   }
 

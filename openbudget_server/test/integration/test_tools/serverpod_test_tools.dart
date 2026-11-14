@@ -465,6 +465,8 @@ class _FutureCalls {
   late final fxRefresh = _FxRefreshFutureCall();
 
   late final recurringPost = _RecurringPostFutureCall();
+
+  late final walletRefresh = _WalletRefreshFutureCall();
 }
 
 class _AccountEndpoint {
@@ -6138,6 +6140,21 @@ class _RecurringPostFutureCall {
         (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild();
     try {
       await _iwv90kfd.RecurringPostPostDueFutureCall().invoke(
+        _localUniqueSession,
+        null,
+      );
+    } finally {
+      await _localUniqueSession.close();
+    }
+  }
+}
+
+class _WalletRefreshFutureCall {
+  Future<void> refresh(_ist.TestSessionBuilder sessionBuilder) async {
+    var _localUniqueSession =
+        (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild();
+    try {
+      await _iwv90kfd.WalletRefreshRefreshFutureCall().invoke(
         _localUniqueSession,
         null,
       );

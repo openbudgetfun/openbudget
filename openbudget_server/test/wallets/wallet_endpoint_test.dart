@@ -250,7 +250,7 @@ void main() {
 
       WalletService.debugProviderFactory = (_, _) =>
           _ScriptedProvider((_) async => _snapshot());
-      final synced = await endpoint.sync(book.session, wallet.id!);
+      final synced = await endpoint.sync(book.session, wallet.id!, force: true);
       expect(synced.walletId, wallet.id);
       final reread = await reloadWallet(wallet);
       expect(reread.syncStatus, SyncStatus.synced);
@@ -466,7 +466,11 @@ void main() {
           ),
         );
 
-        final result = await endpoint.sync(book.session, wallet.id!);
+        final result = await endpoint.sync(
+          book.session,
+          wallet.id!,
+          force: true,
+        );
         expect(result.holdingCount, 2);
         expect(result.pricedHoldingCount, 2);
         expect(result.nftHoldingCount, 1);
@@ -499,7 +503,11 @@ void main() {
           ),
         );
 
-        final result = await endpoint.sync(book.session, wallet.id!);
+        final result = await endpoint.sync(
+          book.session,
+          wallet.id!,
+          force: true,
+        );
         expect(result.pricedHoldingCount, 0);
         expect(result.unpricedHoldingCount, 1);
         expect(result.valuationCoverageRatio, 0);
@@ -542,7 +550,11 @@ void main() {
           ),
         );
 
-        final result = await endpoint.sync(book.session, wallet.id!);
+        final result = await endpoint.sync(
+          book.session,
+          wallet.id!,
+          force: true,
+        );
         expect(result.pricedHoldingCount, 0);
         expect(result.cachedHoldingCount, 1);
         expect(result.unpricedHoldingCount, 0);
@@ -583,7 +595,11 @@ void main() {
           ),
         );
 
-        final result = await endpoint.sync(book.session, wallet.id!);
+        final result = await endpoint.sync(
+          book.session,
+          wallet.id!,
+          force: true,
+        );
         expect(result.unpricedHoldingCount, 1);
         expect(result.warnings.join(' '), contains('Ignoring GBP price'));
         expect(result.warnings.join(' '), contains('invalid provider price'));
@@ -617,7 +633,7 @@ void main() {
           (_) async => throw const WalletProviderException('chain offline'),
         );
         await expectLater(
-          endpoint.sync(book.session, wallet.id!),
+          endpoint.sync(book.session, wallet.id!, force: true),
           throwsA(isA<WalletProviderException>()),
         );
 
@@ -664,11 +680,15 @@ void main() {
         });
         final wallet = await connect();
         WalletService.debugProviderFactory = (_, _) => provider;
-        final first = endpoint.sync(book.session, wallet.id!);
+        final first = endpoint.sync(book.session, wallet.id!, force: true);
         await firstStarted.future;
         final secondSession = server.authenticatedSession(book.userId);
         addTearDown(secondSession.close);
-        final second = await endpoint.sync(secondSession, wallet.id!);
+        final second = await endpoint.sync(
+          secondSession,
+          wallet.id!,
+          force: true,
+        );
         expect(second.totalValueMinor, 200);
 
         releaseFirst.complete();
@@ -699,7 +719,7 @@ void main() {
         calls = 0;
 
         await expectLater(
-          endpoint.sync(book.session, wallet.id!),
+          endpoint.sync(book.session, wallet.id!, force: true),
           throwsA(isA<ValidationException>()),
         );
         expect(calls, 0);
@@ -730,7 +750,7 @@ void main() {
       );
 
       await expectLater(
-        endpoint.sync(book.session, wallet.id!),
+        endpoint.sync(book.session, wallet.id!, force: true),
         throwsA(isA<ValidationException>()),
       );
       final holding = (await endpoint.listHoldings(
@@ -768,13 +788,21 @@ void main() {
         final wallet = await connect(provider: provider);
         expect((await reloadWallet(wallet)).lastSignature, 'sig-b');
 
-        final second = await endpoint.sync(book.session, wallet.id!);
+        final second = await endpoint.sync(
+          book.session,
+          wallet.id!,
+          force: true,
+        );
         expect(second.insertedTransactions, 1);
         expect(provider.untils, [null, 'sig-b']);
         final rows = await endpoint.listTransactions(book.session, wallet.id!);
         expect(rows.map((row) => row.signature), ['sig-c', 'sig-b', 'sig-a']);
 
-        final third = await endpoint.sync(book.session, wallet.id!);
+        final third = await endpoint.sync(
+          book.session,
+          wallet.id!,
+          force: true,
+        );
         expect(third.insertedTransactions, 0);
         expect(third.updatedTransactions, 0);
         expect(
@@ -801,7 +829,7 @@ void main() {
       WalletService.debugProviderFactory = (_, _) => provider;
 
       await expectLater(
-        endpoint.sync(book.session, wallet.id!),
+        endpoint.sync(book.session, wallet.id!, force: true),
         throwsA(isA<WalletProviderException>()),
       );
       expect((await reloadWallet(wallet)).lastSignature, 'sig-a');
@@ -840,7 +868,7 @@ void main() {
           transactions: [_transaction(signature, description: 'second')],
         ),
       );
-      await endpoint.sync(book.session, wallet.id!);
+      await endpoint.sync(book.session, wallet.id!, force: true);
       final reread = (await endpoint.listTransactions(
         book.session,
         wallet.id!,
@@ -1018,7 +1046,7 @@ void main() {
         ),
       );
 
-      await endpoint.sync(book.session, wallet.id!);
+      await endpoint.sync(book.session, wallet.id!, force: true);
 
       expect(
         events.events.map((event) => event.scope),
