@@ -6,7 +6,9 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/wallet_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
+import 'package:openbudget_app/src/features/accounts/widgets/add_wallet_step.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -110,6 +112,9 @@ void main() {
         institutionCatalogProvider.overrideWith(
           (ref, locationCode) async => testInstitutions,
         ),
+        supportedWalletNetworksProvider.overrideWith(
+          (ref) async => WalletNetwork.values,
+        ),
       ],
       child: MaterialApp.router(
         theme: OpenBudgetTheme.light,
@@ -135,6 +140,27 @@ void main() {
 
     await _scrollToAddUnlinked(tester);
     expect(find.text('Add an Unlinked Account'), findsOneWidget);
+  });
+
+  testWidgets('offers a crypto wallet beside the bank and opens the paste '
+      'field', (tester) async {
+    await tester.pumpWidget(buildSubject());
+    await _pumpToBankSearch(tester);
+
+    final button = find.widgetWithText(FilledButton, 'Add a crypto wallet');
+    await tester.scrollUntilVisible(
+      button,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+
+    // The step has its own title, paste field and Add button.
+    expect(find.text('Add a crypto wallet'), findsOneWidget);
+    expect(find.byKey(addWalletFieldKey), findsOneWidget);
+    expect(find.byKey(addWalletSubmitKey), findsOneWidget);
+    expect(find.textContaining('Solana'), findsNothing);
   });
 
   testWidgets('shows staged loading states before bank search', (tester) async {

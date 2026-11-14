@@ -1,3 +1,4 @@
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -11,6 +12,14 @@ part 'wallet_provider.g.dart';
 Future<List<Wallet>> walletList(Ref ref, String entityId) async {
   final client = ref.read(serverpodClientProvider);
   return client.wallet.list(UuidValue.fromString(entityId));
+}
+
+/// The networks the server can read now: each one's chain family has a
+/// provider and its secret is set. A chain missing from the list is off.
+@riverpod
+Future<List<WalletNetwork>> supportedWalletNetworks(Ref ref) async {
+  final client = ref.read(serverpodClientProvider);
+  return client.wallet.supportedNetworks();
 }
 
 /// The wallet that values one account, if any.
@@ -66,13 +75,18 @@ class WalletActions extends _$WalletActions {
   @override
   FutureOr<void> build() {}
 
-  /// Connects a wallet; the server creates its crypto account and syncs.
+  /// Connects a wallet; the server creates its crypto account and reads the
+  /// wallet for the first time before it answers.
+  ///
+  /// [scanNetworks] is the networks an EVM wallet reads (always including its
+  /// home network); every other chain reads its one network.
   Future<Wallet> connect({
     required String entityId,
     required WalletNetwork network,
     required String address,
     String? label,
     String? accountName,
+    List<WalletNetwork>? scanNetworks,
   }) async {
     final client = ref.read(serverpodClientProvider);
     final wallet = await client.wallet.connect(
@@ -81,8 +95,11 @@ class WalletActions extends _$WalletActions {
       address,
       label: label,
       accountName: accountName,
+      scanNetworks: scanNetworks,
     );
-    ref.invalidate(walletListProvider(entityId));
+    ref
+      ..invalidate(walletListProvider(entityId))
+      ..invalidate(accountListProvider(entityId));
     return wallet;
   }
 
