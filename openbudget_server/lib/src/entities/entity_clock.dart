@@ -1,5 +1,5 @@
 import 'package:openbudget_server/src/generated/protocol.dart';
-import 'package:timezone/data/latest.dart' as data;
+import 'package:timezone/data/latest_all.dart' as data;
 import 'package:timezone/timezone.dart' as tz;
 
 /// Civil dates in an entity's IANA time zone, including DST transitions.
