@@ -37,16 +37,13 @@ Map<String, Object?> buildGuidanceBlock({
   final block = <String, Object?>{
     'disclaimerKey': perimeter?.disclaimerKey,
     'scopeStatement': perimeter?.scopeStatement,
-    'scopeSentence': perimeter?.scopeStatement,
     'professional': perimeter?.professional,
-    'signpostTo': perimeter?.professional,
     'signposts': signposts,
     'reservedTopics': [
       if (perimeter != null)
         for (final topic in perimeter.reservedTopics) topic.id,
     ],
     'jurisdictionState': jurisdictionState,
-    'state': jurisdictionState,
     'crossBorder': crossBorder,
   };
   if (rulesVersion != null) {

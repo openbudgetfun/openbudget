@@ -304,10 +304,16 @@ class TaxSummaryService {
       entityId,
       transaction: tx,
     );
+    return startYearFor(entity, now: clock());
+  });
+
+  /// Pure helper: the start year a summary for [entity] covers at [now],
+  /// wrapping [_resolvePeriod] (docs/money-guide.md, section 5.3 clock).
+  static int startYearFor(Entity entity, {required DateTime now}) {
     final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
     final pack = jurisdiction == null ? null : packFor(jurisdiction);
-    return _resolvePeriod(entity, pack, null, clock()).startYear;
-  });
+    return _resolvePeriod(entity, pack, null, now).startYear;
+  }
 
   /// The summary period for [entity].
   ///

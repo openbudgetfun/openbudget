@@ -1,10 +1,10 @@
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_server/src/entities/entity_clock.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:openbudget_server/src/money_guide/guidance_block.dart';
 import 'package:openbudget_server/src/money_guide/knowledge/knowledge_card.dart';
 import 'package:openbudget_server/src/money_guide/knowledge/knowledge_cards.g.dart';
 import 'package:openbudget_server/src/money_guide/knowledge/knowledge_index.dart';
+import 'package:openbudget_server/src/tax/tax_summary_service.dart';
 
 /// Runs the `search_knowledge` tool for [entity] and returns its result as a
 /// map (docs/money-guide.md, section 5.3).
@@ -21,36 +21,23 @@ Map<String, Object?> searchKnowledgeResult({
   final requestedCountry = (countryArg ?? entity.countryCode).toUpperCase();
   final crossBorder = requestedCountry != entityCountry;
 
-  final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
-  final pack = jurisdiction == null
-      ? null
-      : TaxRules.forJurisdiction(jurisdiction);
-
   int year;
   if (taxYearArg != null) {
     year = taxYearArg;
-  } else if (pack != null) {
-    year = pack.taxYearFor(EntityClock.today(entity)).startYear;
   } else {
-    final country = Countries.byCode(entity.countryCode);
-    final individualTaxYear = entity.kind == EntityKind.company
-        ? null
-        : country?.individualTaxYear;
-    if (individualTaxYear != null) {
-      year = _yearContaining(DateTime.now().toUtc(), individualTaxYear);
-    } else {
-      year = DateTime.now().toUtc().year;
-    }
+    // The clock seam is the only way to honour a pinned now in search_knowledge.
+    // ignore: invalid_use_of_visible_for_testing_member
+    final now = TaxSummaryService.clock();
+    year = TaxSummaryService.startYearFor(entity, now: now);
   }
 
   // Cards read by id are not subject to the BM25 filters, so a card listed
   // in the entity brief can always be opened.
   final collected = <String, KnowledgeCard>{};
   for (final id in ids.take(4)) {
-    for (final card in knowledgeCards) {
-      if (card.id == id) {
-        collected[id] = card;
-      }
+    final card = _knowledgeCardsById[id];
+    if (card != null) {
+      collected[id] = card;
     }
   }
 
@@ -81,7 +68,6 @@ Map<String, Object?> searchKnowledgeResult({
   return {
     'cards': cards,
     'guidance': block,
-    if (crossBorder) 'crossBorder': true,
   };
 }
 
@@ -113,11 +99,7 @@ String? _rulesVersionFor(Entity entity, int year) {
   if (jurisdiction == null) return null;
   final pack = TaxRules.forJurisdiction(jurisdiction);
   if (!pack.supportedStartYears.contains(year)) return null;
-  try {
-    return pack.ruleSet(year).versionFor(jurisdiction);
-  } on Object catch (_) {
-    return null;
-  }
+  return pack.ruleSet(year).versionFor(jurisdiction);
 }
 
 String? _optionalString(Map<String, Object?> args, String key) {
@@ -151,13 +133,6 @@ List<String> _stringList(Map<String, Object?> args, String key) {
   return const [];
 }
 
-int _yearContaining(DateTime now, IndividualTaxYear taxYear) {
-  // Reuse TaxSummaryService logic indirectly by approximating: if now is before
-  // the tax year start in [now.year], use [now.year]-1.
-  final startThisYear = DateTime.utc(
-    now.year,
-    taxYear.startMonth,
-    taxYear.startDay,
-  );
-  return now.isBefore(startThisYear) ? now.year - 1 : now.year;
-}
+final Map<String, KnowledgeCard> _knowledgeCardsById = <String, KnowledgeCard>{
+  for (final card in knowledgeCards) card.id: card,
+};
