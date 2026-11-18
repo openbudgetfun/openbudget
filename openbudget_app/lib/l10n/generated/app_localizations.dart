@@ -2617,7 +2617,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportsUncategorised.
   ///
   /// In en, this message translates to:
-  /// **'Uncategorised'**
+  /// **'Uncategorized'**
   String get reportsUncategorised;
 
   /// No description provided for @reportsTitle.
@@ -5445,7 +5445,7 @@ abstract class AppLocalizations {
   /// No description provided for @editPlanLoadError.
   ///
   /// In en, this message translates to:
-  /// **'Failed to load plan setup.'**
+  /// **'Could not load your plan'**
   String get editPlanLoadError;
 
   /// No description provided for @budgetDetailCoverOverspendingError.
@@ -9759,7 +9759,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeBudgetUncategorised.
   ///
   /// In en, this message translates to:
-  /// **'{count} uncategorised'**
+  /// **'{count} uncategorized'**
   String homeBudgetUncategorised(int count);
 
   /// No description provided for @homeBudgetDueRecurring.
@@ -10455,7 +10455,7 @@ abstract class AppLocalizations {
   /// No description provided for @budgetBreakdownUncategorised.
   ///
   /// In en, this message translates to:
-  /// **'Uncategorised transactions'**
+  /// **'Uncategorized transactions'**
   String get budgetBreakdownUncategorised;
 
   /// No description provided for @reviewTransactionsSelectedCount.
@@ -11221,7 +11221,7 @@ abstract class AppLocalizations {
   /// No description provided for @walletAddInvalidKey.
   ///
   /// In en, this message translates to:
-  /// **'That extended key isn\'t one OpenBudget recognises.'**
+  /// **'That extended key isn\'t one OpenBudget recognizes.'**
   String get walletAddInvalidKey;
 
   /// No description provided for @walletAddRefusedPrivateKeyTitle.
@@ -11720,6 +11720,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OpenBudget already reads every chain this address can use.'**
   String get walletSettingsAllRead;
+
+  /// Shown under a load error when the device could not reach the server.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget couldn\'t reach the server. Check your connection and try again.'**
+  String get loadProblemOffline;
+
+  /// Shown under a load error when the server says the user is no longer signed in.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has ended. Sign in again to continue.'**
+  String get loadProblemSignedOut;
+
+  /// Shown under a load error when the requested item was not found or access was refused.
+  ///
+  /// In en, this message translates to:
+  /// **'This may have been deleted, or you no longer have access to it.'**
+  String get loadProblemNotFound;
+
+  /// Shown under a load error when the cause is unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our side. Try again in a moment.'**
+  String get loadProblemGeneric;
+
+  /// Screen reader hint for long-pressing the month title in the budget header, which opens the month picker.
+  ///
+  /// In en, this message translates to:
+  /// **'choose a month'**
+  String get budgetMonthLongPressHint;
+
+  /// Screen reader hint for long-pressing a transaction card, which opens the flag menu.
+  ///
+  /// In en, this message translates to:
+  /// **'set a flag'**
+  String get transactionFlagLongPressHint;
 }
 
 class _AppLocalizationsDelegate
