@@ -34,6 +34,9 @@ final class SiteFooter extends StatelessComponent {
         ),
         const a(href: '/#pricing', [Component.text('Pricing')]),
         const a(href: '/#questions', [Component.text('Questions')]),
+        const a(href: '/support', [Component.text('Support')]),
+        const a(href: '/privacy', [Component.text('Privacy')]),
+        const a(href: '/terms', [Component.text('Terms')]),
       ],
     ),
     p(classes: 'footer-small', [

@@ -1,0 +1,8 @@
+Welcome to OpenBudget, envelope budgeting across every currency you hold.
+
+- Assign money to envelopes month by month
+- Net worth in your currency, with the rate behind every conversion
+- Bank, cash, card and loan accounts, CSV import and crypto wallets
+- Recurring bills that post themselves
+- Separate books for you, a household or a business
+- OpenBudget Plus: tax reports for the UK, US, Nigeria and Germany, and the Money guide

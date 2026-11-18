@@ -4,17 +4,22 @@ The OpenBudget landing page at [openbudget.app](https://openbudget.app). It is a
 
 ## Layout
 
-| Path                       | What it holds                                                                                                           |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `lib/site_config.dart`     | Every link the site renders: the web app, the source, and the downloads.                                                |
-| `lib/main.server.dart`     | The entry point `jaspr build` renders.                                                                                  |
-| `lib/src/site.dart`        | The document: metadata, social cards, structured data, and which page to show.                                          |
-| `lib/src/sections/`        | The page's sections: masthead, hero, differences, pricing, questions, footer, and the envelope desk.                    |
-| `lib/src/components/`      | Shared pieces: the hand-drawn doodles, the download stamps, and the brand artwork read from `../brand/`.                |
-| `lib/src/demo_budget.dart` | The desk's envelopes, currencies and messages. `web/site.js` reads the same data from the page, so the two never drift. |
-| `web/`                     | Copied into the build as it is: `styles.css`, `site.js`, fonts, images, `robots.txt` and `_headers`.                    |
-| `tool/build.dart`          | Builds the deployable site.                                                                                             |
-| `tool/render_images.dart`  | Draws `favicon.svg`, `og.png` and `apple-touch-icon.png` from `brand/`.                                                 |
+| Path                       | What it holds                                                                                                                       |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `lib/site_config.dart`     | Every link the site renders: the web app, the source, and the downloads.                                                            |
+| `lib/main.server.dart`     | The entry point `jaspr build` renders.                                                                                              |
+| `lib/src/site.dart`        | The document: metadata, social cards, structured data, and which page to show.                                                      |
+| `lib/src/legal/`           | The words of the privacy policy, terms, support and account deletion pages, as data. `lib/src/pages/legal_page.dart` lays them out. |
+| `lib/src/sections/`        | The page's sections: masthead, hero, differences, pricing, questions, footer, and the envelope desk.                                |
+| `lib/src/components/`      | Shared pieces: the hand-drawn doodles, the download stamps, and the brand artwork read from `../brand/`.                            |
+| `lib/src/demo_budget.dart` | The desk's envelopes, currencies and messages. `web/site.js` reads the same data from the page, so the two never drift.             |
+| `web/`                     | Copied into the build as it is: `styles.css`, `site.js`, fonts, images, `robots.txt` and `_headers`.                                |
+| `tool/build.dart`          | Builds the deployable site.                                                                                                         |
+| `tool/render_images.dart`  | Draws `favicon.svg`, `og.png` and `apple-touch-icon.png` from `brand/`.                                                             |
+
+## Policy and help pages
+
+`/privacy`, `/terms`, `/support` and `/delete-account` are the URLs in the store listings (`openbudget_app/fastlane/metadata/`) and the ones the app's Settings screen is meant to open, so their paths must not change. The privacy policy describes what the code collects and sends. When a feature collects something new or calls a new outside service, update `lib/src/legal/privacy_policy.dart`, `SiteConfig.legalUpdated` and `openbudget_app/fastlane/store-privacy.md` in the same pull request. `SiteConfig.supportEmail` is the contact address every one of these pages prints.
 
 ## Prerequisites
 
@@ -48,19 +53,20 @@ This runs `jaspr build` with the sitemap domain taken from `siteConfig`, then re
 - `.dart_tool/`: a package config holding the build machine's absolute paths.
 - `.build.manifest`.
 
-None of these belong on a public host. The script fails unless `index.html`, `404.html` and `sitemap.xml` were all written, and then lists the output with sizes. A plain `jaspr build` also works, but it leaves those files in place.
+None of these belong on a public host. The script fails unless `index.html`, `404.html`, `sitemap.xml` and the four policy and help pages were all written, and then lists the output with sizes. A plain `jaspr build` also works, but it leaves those files in place.
 
-The output in `build/jaspr/` is about 250 KB uncompressed:
+The output in `build/jaspr/` is about 480 KB uncompressed:
 
-| File                                            | Notes                                                                         |
-| ----------------------------------------------- | ----------------------------------------------------------------------------- |
-| `index.html`                                    | The landing page. About 21 KB gzipped; the doodles and lockup are inline SVG. |
-| `404.html`                                      | The not-found page, marked `noindex` and left out of the sitemap.             |
-| `sitemap.xml`, `robots.txt`                     | For search engines.                                                           |
-| `styles.css`, `site.js`                         | The only stylesheet and script.                                               |
-| `fonts/*.woff2`, `fonts/OFL.txt`                | Four Skribble faces subset to Latin, about 16 KB each, and their licence.     |
-| `favicon.svg`, `apple-touch-icon.png`, `og.png` | Icons and the social card.                                                    |
-| `_headers`                                      | Security headers, and long-lived caching for the fonts.                       |
+| File                                                | Notes                                                                         |
+| --------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `index.html`                                        | The landing page. About 21 KB gzipped; the doodles and lockup are inline SVG. |
+| `404.html`                                          | The not-found page, marked `noindex` and left out of the sitemap.             |
+| `privacy/`, `terms/`, `support/`, `delete-account/` | The policy and help pages the store listings and the app link to.             |
+| `sitemap.xml`, `robots.txt`                         | For search engines.                                                           |
+| `styles.css`, `site.js`                             | The only stylesheet and script.                                               |
+| `fonts/*.woff2`, `fonts/OFL.txt`                    | Four Skribble faces subset to Latin, about 16 KB each, and their licence.     |
+| `favicon.svg`, `apple-touch-icon.png`, `og.png`     | Icons and the social card.                                                    |
+| `_headers`                                          | Security headers, and long-lived caching for the fonts.                       |
 
 ## Change a link or put a download live
 

@@ -11,7 +11,7 @@
 /// assets of every dependency), `.dart_tool/` (a package config holding the
 /// build machine's absolute paths) and `.build.manifest`. None of them
 /// belong on a public host. It fails unless the home page, the not-found
-/// page and the sitemap were all written.
+/// page, the policy and help pages and the sitemap were all written.
 library;
 
 import 'dart:io';
@@ -20,7 +20,16 @@ import 'package:openbudget_site/site_config.dart';
 
 const _output = 'build/jaspr';
 const _leftovers = ['packages', '.dart_tool', '.build.manifest'];
-const _requiredFiles = ['index.html', '404.html', 'sitemap.xml'];
+const _requiredFiles = [
+  'index.html',
+  '404.html',
+  'sitemap.xml',
+  // The store listings and the app link to these.
+  'privacy/index.html',
+  'terms/index.html',
+  'delete-account/index.html',
+  'support/index.html',
+];
 
 Future<void> main() async {
   final Process jaspr;
