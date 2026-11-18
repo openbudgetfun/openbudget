@@ -724,7 +724,7 @@
   "reportsLoadError": "Could not load report data",
   "reportsNetIncome": "Net Income",
   "reportsSpendingByCategory": "Spending by Category",
-  "reportsUncategorised": "Uncategorised",
+  "reportsUncategorised": "Uncategorized",
   "reportsTitle": "Reports",
   "reportsTransactions": "Transactions",
   "settingsAccountSection": "Account",
@@ -1464,7 +1464,7 @@
       }
     }
   },
-  "editPlanLoadError": "Failed to load plan setup.",
+  "editPlanLoadError": "Could not load your plan",
   "budgetDetailCoverOverspendingError": "Could not cover overspending.",
   "accountsMoreActions": "More actions",
   "accountsDismissNotification": "Dismiss notification",
@@ -2919,7 +2919,7 @@
       }
     }
   },
-  "homeBudgetUncategorised": "{count} uncategorised",
+  "homeBudgetUncategorised": "{count} uncategorized",
   "@homeBudgetUncategorised": {
     "placeholders": {
       "count": {
@@ -3315,7 +3315,7 @@
   "budgetBreakdownOverspentLastMonth": "Overspent last month",
   "budgetBreakdownAssignedInFuture": "Assigned in future months",
   "budgetBreakdownAvailable": "Available in envelopes",
-  "budgetBreakdownUncategorised": "Uncategorised transactions",
+  "budgetBreakdownUncategorised": "Uncategorized transactions",
   "reviewTransactionsSelectedCount": "{count} selected",
   "@reviewTransactionsSelectedCount": {
     "placeholders": {
@@ -3657,7 +3657,7 @@
   "walletAddButton": "Add wallet",
   "walletAddInvalidInput": "That doesn't look like a wallet address.",
   "walletAddInvalidChecksum": "One character is wrong. Check the address and try again.",
-  "walletAddInvalidKey": "That extended key isn't one OpenBudget recognises.",
+  "walletAddInvalidKey": "That extended key isn't one OpenBudget recognizes.",
   "walletAddRefusedPrivateKeyTitle": "That's a private key",
   "walletAddRefusedPrivateKeyMessage": "OpenBudget never needs it. We cleared the field. Don't share it with anyone.",
   "walletAddRefusedEvmKeyTitle": "That looks like a private key",
@@ -3931,5 +3931,29 @@
   "walletSettingsDisconnectCancel": "Keep wallet",
   "walletSettingsDisconnected": "Wallet disconnected",
   "walletSettingsDisconnectFailed": "Couldn't disconnect the wallet. Try again.",
-  "walletSettingsAllRead": "OpenBudget already reads every chain this address can use."
+  "walletSettingsAllRead": "OpenBudget already reads every chain this address can use.",
+  "loadProblemOffline": "OpenBudget couldn't reach the server. Check your connection and try again.",
+  "@loadProblemOffline": {
+    "description": "Shown under a load error when the device could not reach the server."
+  },
+  "loadProblemSignedOut": "Your session has ended. Sign in again to continue.",
+  "@loadProblemSignedOut": {
+    "description": "Shown under a load error when the server says the user is no longer signed in."
+  },
+  "loadProblemNotFound": "This may have been deleted, or you no longer have access to it.",
+  "@loadProblemNotFound": {
+    "description": "Shown under a load error when the requested item was not found or access was refused."
+  },
+  "loadProblemGeneric": "Something went wrong on our side. Try again in a moment.",
+  "@loadProblemGeneric": {
+    "description": "Shown under a load error when the cause is unknown."
+  },
+  "budgetMonthLongPressHint": "choose a month",
+  "@budgetMonthLongPressHint": {
+    "description": "Screen reader hint for long-pressing the month title in the budget header, which opens the month picker."
+  },
+  "transactionFlagLongPressHint": "set a flag",
+  "@transactionFlagLongPressHint": {
+    "description": "Screen reader hint for long-pressing a transaction card, which opens the flag menu."
+  }
 }

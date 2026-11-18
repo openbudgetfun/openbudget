@@ -12,6 +12,7 @@ import 'package:openbudget_app/src/features/accounts/utils/account_kind_labels.d
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -128,6 +129,7 @@ class AccountListScreen extends HookConsumerWidget {
             padding: const EdgeInsets.all(SpacingTokens.lg),
             child: ObStatePanel.problem(
               title: l10n.accountLoadError,
+              message: loadProblemMessage(l10n, error),
               action: ObStateAction(
                 label: l10n.homeRetry,
                 onPressed: () => ref.invalidate(accountListProvider(entityId)),

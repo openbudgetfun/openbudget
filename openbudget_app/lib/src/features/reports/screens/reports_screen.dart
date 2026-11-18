@@ -11,6 +11,7 @@ import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_figures.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -173,7 +174,7 @@ class _PreviewProblem extends HookWidget {
     final l10n = AppLocalizations.of(context);
     return ObStatePanel.problem(
       title: l10n.reportsLoadError,
-      message: error.toString(),
+      message: loadProblemMessage(l10n, error),
     );
   }
 }

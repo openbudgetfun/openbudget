@@ -5,6 +5,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_calendar_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -110,7 +111,7 @@ class RecurringCalendarScreen extends HookConsumerWidget {
                 children: [
                   ObStatePanel.problem(
                     title: l10n.scheduledCalendarLoadError,
-                    message: error.toString(),
+                    message: loadProblemMessage(l10n, error),
                   ),
                 ],
               ),

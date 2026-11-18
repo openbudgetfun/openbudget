@@ -31,6 +31,7 @@ import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -282,8 +283,12 @@ class BudgetDetailScreen extends HookConsumerWidget {
         body: Padding(
           padding: const EdgeInsets.all(SpacingTokens.md),
           child: ObStatePanel.problem(
-            title: l10n.appTitle,
-            message: l10n.budgetLoadError,
+            title: l10n.budgetLoadError,
+            message: loadProblemMessage(l10n, error),
+            action: ObStateAction(
+              label: l10n.homeRetry,
+              onPressed: () => ref.invalidate(budgetMonthProvider(entityId)),
+            ),
           ),
         ),
       ),

@@ -11,6 +11,7 @@ import 'package:openbudget_app/src/features/home/providers/entity_summary_provid
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -42,6 +43,7 @@ class HomeScreen extends HookConsumerWidget {
           padding: const EdgeInsets.all(SpacingTokens.md),
           child: ObStatePanel.problem(
             title: l10n.homeLoadError,
+            message: loadProblemMessage(l10n, error),
             action: ObStateAction(
               label: l10n.homeRetry,
               onPressed: () => ref.invalidate(entitySummariesProvider),

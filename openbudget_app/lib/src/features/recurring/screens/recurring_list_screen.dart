@@ -12,6 +12,7 @@ import 'package:openbudget_app/src/features/recurring/providers/recurring_list_p
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -69,7 +70,7 @@ class RecurringListScreen extends HookConsumerWidget {
           children: [
             ObStatePanel.problem(
               title: l10n.recurringLoadError,
-              message: error.toString(),
+              message: loadProblemMessage(l10n, error),
             ),
           ],
         ),

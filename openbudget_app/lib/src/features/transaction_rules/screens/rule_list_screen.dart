@@ -8,6 +8,7 @@ import 'package:openbudget_app/src/features/payees/providers/payee_list_provider
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_actions_provider.dart';
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -77,7 +78,7 @@ class RuleListScreen extends HookConsumerWidget {
             padding: const EdgeInsets.all(SpacingTokens.md),
             child: ObStatePanel.problem(
               title: l10n.transactionRulesLoadError,
-              message: error.toString(),
+              message: loadProblemMessage(l10n, error),
               action: ObStateAction(
                 label: l10n.homeRetry,
                 onPressed: () => ref.invalidate(ruleListProvider(entityId)),

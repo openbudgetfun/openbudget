@@ -54,6 +54,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Could not load payees'), findsOneWidget);
+      expect(
+        find.text('Something went wrong on our side. Try again in a moment.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Exception'), findsNothing);
       expect(find.byType(ObStatePanel), findsOneWidget);
       expect(
         find.byWidgetPredicate(

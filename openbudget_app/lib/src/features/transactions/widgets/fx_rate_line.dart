@@ -5,6 +5,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/providers/fx_rate_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/utils/date_labels.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -68,7 +69,7 @@ class FxRateLine extends HookConsumerWidget {
       error: (error, _) {
         final message = error is FxRateUnavailableException
             ? error.message
-            : error.toString();
+            : loadProblemMessage(l10n, error);
         return Padding(
           padding: const EdgeInsets.only(top: SpacingTokens.xs),
           child: Row(

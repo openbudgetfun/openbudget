@@ -7,6 +7,7 @@ import 'package:openbudget_app/src/features/reports/utils/report_month_label.dar
 import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_figures.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// Income and spending month by month, as a drawn ledger. Figures come
@@ -31,7 +32,7 @@ class SpendingTrendsScreen extends HookConsumerWidget {
           children: [
             ObStatePanel.problem(
               title: l10n.spendingTrendsLoadError,
-              message: error.toString(),
+              message: loadProblemMessage(l10n, error),
             ),
           ],
         ),
