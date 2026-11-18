@@ -1,0 +1,12 @@
+Welcome to OpenBudget, envelope budgeting across every currency you hold.
+
+- Plan month by month: assign money to envelopes, copy last month's plan, or let auto-assign fill them for you.
+- See your net worth in the currency you choose, with the rate and date behind every conversion.
+- Keep bank, cash, card and loan accounts together, link supported banks, import CSV files, and add Bitcoin, Solana and XRP Ledger wallets by address.
+- Recurring bills sit on a calendar and post themselves when they are due.
+- Keep separate books for yourself, a household or a business, with double-entry books for sole traders and companies.
+- With OpenBudget Plus, get tax reports for the UK, US, Nigeria and Germany, upcoming tax dates, and the Money guide, which shows its sources and never changes anything without you.
+- Sign in with Apple, Google or your email.
+- Every screen has a fresh hand-drawn look in light and dark.
+
+Tax reports and the Money guide are guidance, not regulated financial or tax advice.

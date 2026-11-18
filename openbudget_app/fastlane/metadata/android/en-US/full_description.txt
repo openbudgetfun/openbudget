@@ -1,0 +1,52 @@
+OpenBudget is envelope budgeting for people whose money lives in more than one currency. Give every dollar, pound, euro or naira a job, move it when life changes, and see exactly where it went.
+
+PLAN MONTH BY MONTH
+- Assign income to envelopes like Rent, Groceries and Savings until nothing is left unplanned.
+- Copy last month's plan, start from a template, or let quick budget and auto-assign fill envelopes for you.
+- Overspent and underfunded envelopes are labelled clearly, and moving money between them takes a couple of taps.
+- Set goals, track carryover and see the age of your money.
+
+EVERY CURRENCY, HONESTLY
+- Each account keeps its own currency: pounds, dollars, euros, naira, yen, rupees, cedis, bitcoin and more.
+- Net worth adds everything up in the currency you choose, and shows the rate and date behind every conversion.
+- When a rate is old it says so. When one is missing it tells you which accounts were left out instead of guessing.
+
+ALL YOUR ACCOUNTS IN ONE PLACE
+- Add bank, cash, credit card and loan accounts, reconcile them against your statement, and pay off cards.
+- Link supported banks to bring transactions in, or import them from a CSV file.
+- Add Bitcoin, Solana and XRP Ledger wallets by their public address and see your crypto by chain or by asset. OpenBudget never asks for a private key.
+
+TRANSACTIONS THAT STAY TIDY
+- Split, search, filter and bulk edit transactions, catch duplicates, and undo mistakes.
+- Recurring bills appear on a calendar and post themselves when they are due.
+- Payee rules file new transactions for you.
+
+BOOKS FOR YOUR SIDE BUSINESS
+- Keep separate books for yourself, a household, a sole trade or a company, each in its own currency.
+- Businesses can turn on double-entry books with a chart of accounts, journals, a trial balance and lock dates.
+
+KNOW WHAT YOU OWE IN TAX (OPENBUDGET PLUS)
+- Full tax reports for the UK, the US, Nigeria and Germany, for individuals, sole traders and companies.
+- See the balance due or refund, the bands behind each tax, upcoming filing dates, and legal savings your own figures point to.
+- Every figure shows its source and when it was last checked, and a "What we could not verify" list names the gaps.
+- In any other country, see your tax year, VAT or sales tax rates and a summary you can export for your accountant.
+
+THE MONEY GUIDE (OPENBUDGET PLUS)
+- Ask how much tax you may owe, where you could cut spending, or whether you are on track.
+- Answers show what the guide looked at and link to their sources.
+- Every change it suggests waits for you to apply or dismiss it. Nothing changes on its own.
+- Prefer your own setup? Connect your own OpenAI-compatible provider, or give Claude Code, Codex or any MCP client a revocable access token.
+
+A HAND-DRAWN LOOK
+Every screen is sketched by hand in a bright, printed style, in light and dark, and respects Reduce Motion.
+
+PRICING
+Budgeting, accounts, wallets, net worth and books are free. OpenBudget Plus adds tax reports and the Money guide, with $5 of guide usage included each month. Plus is $20 a month, billed through Google Play, and renews automatically until you cancel. Manage or cancel it in Google Play under Payments and subscriptions.
+
+YOUR DATA
+Your budget is stored on OpenBudget's servers so it is the same on your phone, computer and the web. We do not sell your data or show ads. The code is open source, so you can read exactly what happens to it.
+
+Tax reports and the Money guide are guidance to help you prepare, not regulated financial or tax advice.
+
+Privacy policy: https://openbudget.app/privacy
+Terms of service: https://openbudget.app/terms

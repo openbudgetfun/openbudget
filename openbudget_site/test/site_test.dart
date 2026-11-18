@@ -148,6 +148,118 @@ void main() {
     });
   });
 
+  group('policy and help pages', () {
+    for (final (path, title) in [
+      ('/privacy', 'Privacy policy'),
+      ('/terms', 'Terms of service'),
+      ('/delete-account', 'Deleting your account'),
+      ('/support', 'Support'),
+    ]) {
+      testServer('$path renders $title with its own metadata', (
+        tester,
+      ) async {
+        final page = await _render(tester, siteConfig, path);
+
+        expect(page.querySelector('title')!.text, '$title | OpenBudget');
+        expect(page.querySelector('h1')!.text, title);
+        expect(
+          _attribute(page, 'link[rel="canonical"]', 'href'),
+          'https://openbudget.app$path',
+        );
+        expect(_meta(page, 'og:url'), 'https://openbudget.app$path');
+        expect(page.querySelector('meta[name="robots"]'), isNull);
+        expect(
+          page.querySelector('.legal-updated')!.text,
+          'Last updated ${siteConfig.legalUpdated}',
+        );
+        expect(page.querySelectorAll('.legal-section h2'), isNotEmpty);
+        // The envelope desk and its script belong to the home page only.
+        expect(page.querySelector('#desk-data'), isNull);
+        expect(page.querySelector('script[src]'), isNull);
+        expect(
+          page.querySelector('script[type="application/ld+json"]'),
+          isNull,
+        );
+      });
+    }
+
+    testServer('answers with or without a trailing slash', (tester) async {
+      final page = await _render(tester, siteConfig, '/privacy/');
+
+      expect(page.querySelector('h1')!.text, 'Privacy policy');
+      expect(
+        _attribute(page, 'link[rel="canonical"]', 'href'),
+        'https://openbudget.app/privacy',
+      );
+    });
+
+    testServer('prints the configured support address as a mail link', (
+      tester,
+    ) async {
+      final config = SiteConfig(
+        siteUrl: Uri.parse('https://example.test/'),
+        webAppUrl: Uri.parse('https://app.example.test'),
+        sourceUrl: Uri.parse('https://source.example.test/openbudget'),
+        supportEmail: 'help@example.test',
+      );
+      for (final path in ['/privacy', '/terms', '/support']) {
+        final page = await _render(tester, config, path);
+
+        expect(
+          page.querySelector('a[href="mailto:help@example.test"]')!.text,
+          'help@example.test',
+          reason: path,
+        );
+        expect(page.outerHtml, isNot(contains('support@openbudget.app')));
+      }
+      final deletion = await _render(tester, config, '/delete-account');
+      expect(
+        deletion.querySelector('a[href^="mailto:help@example.test?subject="]'),
+        isNotNull,
+      );
+    });
+
+    testServer('the privacy policy names every service that receives data', (
+      tester,
+    ) async {
+      final page = await _render(tester, siteConfig, '/privacy');
+      final words = page.querySelector('#who-we-share-it-with')!.text;
+
+      for (final service in [
+        'Plaid',
+        'Helius',
+        'mempool.space',
+        'Blockstream',
+        'xrplcluster.com',
+        'CoinGecko',
+        'DefiLlama',
+        'Jupiter',
+        'Magic Eden',
+        'currencyapi.com',
+        'OpenCode Zen',
+        'RevenueCat',
+        'Stripe',
+        'PostHog',
+      ]) {
+        expect(words, contains(service));
+      }
+    });
+
+    testServer('every page links to them from the footer', (tester) async {
+      for (final path in ['/', '/privacy', notFoundRoute]) {
+        final page = await _render(tester, siteConfig, path);
+
+        expect(
+          page
+              .querySelectorAll('.footer-nav a')
+              .map((link) => link.attributes['href']),
+          containsAll(['/support', '/privacy', '/terms']),
+          reason: path,
+        );
+      }
+    });
+  });
+
   test('the favicon is the small mark from brand/', () {
     expect(
       File('web/favicon.svg').readAsStringSync(),
