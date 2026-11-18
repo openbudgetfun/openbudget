@@ -1,11 +1,25 @@
 # OpenBudget
 
 [![CI](https://github.com/openbudgetfun/openbudget/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/openbudgetfun/openbudget/actions/workflows/ci.yml)
-[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)](https://flutter.dev)
-[![Serverpod](https://img.shields.io/badge/Serverpod-3.3-blue)](https://serverpod.dev)
+[![Flutter](https://img.shields.io/badge/Flutter-3.47-02569B?logo=flutter)](https://flutter.dev)
+[![Serverpod](https://img.shields.io/badge/Serverpod-4.1-blue)](https://serverpod.dev)
 [![License](https://img.shields.io/github/license/openbudgetfun/openbudget)](LICENSE)
 
-Cross-platform envelope budgeting app with AI-driven financial intelligence.
+Envelope budgeting for people whose money lives in more than one currency. Give every dollar, pound, euro or naira a job, see your net worth across currencies, keep household and business books, and know what you owe in tax.
+
+[Website](https://openbudget.app) · [Web app](https://app.openbudget.app) · [How to use OpenBudget](docs/how-to-use-openbudget.md) · [Support](https://openbudget.app/support) · [Privacy](https://openbudget.app/privacy)
+
+## What it does
+
+- **Envelope budgeting.** Assign income to envelopes month by month, move money between them, set goals, and see what is overspent or underfunded at a glance.
+- **Every currency, honestly.** Each account keeps its own currency. Net worth converts into the one you choose and shows the rate, its source and its age.
+- **All your accounts.** Bank, cash, card and loan accounts, reconciliation, linked banks through Plaid, CSV import, and Bitcoin, Solana and XRP Ledger wallets by public address.
+- **Tidy transactions.** Splits, search, bulk edits, duplicate detection, payee rules, and recurring bills that post themselves.
+- **Books for a business.** Separate books for a person, a household, a sole trade or a company, with optional double-entry journals, a chart of accounts and a trial balance.
+- **Tax reports.** Full reports for the UK, the US, Nigeria and Germany with sources for every figure, and tax-year facts and an accountant export for every other country.
+- **The Money guide.** An assistant that answers questions about your budget and tax, cites its sources, and only ever proposes changes for you to apply. You can also connect your own OpenAI-compatible provider, or any MCP client through a revocable access token ([docs/agent-mcp.md](docs/agent-mcp.md)).
+
+Budgeting, accounts, wallets, net worth and books are free. OpenBudget Plus adds tax reports and the Money guide for $20 a month. Tax reports and the Money guide are guidance, not regulated financial or tax advice.
 
 ## Platforms
 
@@ -25,7 +39,7 @@ Cross-platform envelope budgeting app with AI-driven financial intelligence.
 
 ```bash
 # 1. Clone and enter the repo
-git clone https://github.com/openbudget/openbudget.git
+git clone https://github.com/openbudgetfun/openbudget.git
 cd openbudget
 
 # 2. Start the devenv shell (installs all tools automatically)
@@ -61,7 +75,10 @@ openbudget/
 ├── openbudget_ui/            # Shared widgets & theme
 ├── openbudget_lints/         # Centralized lint rules
 ├── openbudget_test_utils/    # Shared test helpers
-├── infra/                    # Pulumi infrastructure (AWS + GCP)
+├── openbudget_scripts/       # Repository tooling (brand rendering, checks)
+├── openbudget_site/          # The openbudget.app landing and policy pages
+├── brand/                    # Logo sources
+├── docs/                     # Guides, design notes and research
 ├── pubspec.yaml              # Workspace root
 └── devenv.nix                # Development environment config
 ```
@@ -203,6 +220,22 @@ In release builds, [PostHog](https://posthog.com) handles product analytics. It 
 ```bash
 flutter:app run --dart-define=POSTHOG_API_KEY=phc_xxx
 ```
+
+## Releases and store listings
+
+Versions and release notes come from changesets with [monochange](https://github.com/monochange/monochange). Every pull request that changes a package adds a file under `.changeset/`: a developer type lands in `CHANGELOG.md`, and a `user_*` type lands in `WHATS_NEW.md` and the in-app "What's new" sheet.
+
+```bash
+monochange run change --package openbudget_app --type user_feat --reason "..."
+monochange check               # Validate changesets and manifests
+monochange preview             # Dry-run the next release
+```
+
+The App Store and Google Play listing text lives in [`openbudget_app/fastlane/`](openbudget_app/fastlane/README.md): name, tagline, description, keywords and release notes, plus the answers for the stores' privacy forms in [`store-privacy.md`](openbudget_app/fastlane/store-privacy.md). The listings link to the privacy policy, terms, support and account deletion pages in `openbudget_site`.
+
+## Privacy
+
+OpenBudget stores what you enter on its server so your budget is the same on every device. It does not sell data, show ads, or track you across apps. The [privacy policy](https://openbudget.app/privacy) lists everything the code collects and every outside service that receives any of it, and [`store-privacy.md`](openbudget_app/fastlane/store-privacy.md) maps each item to the code behind it.
 
 ## Architecture
 

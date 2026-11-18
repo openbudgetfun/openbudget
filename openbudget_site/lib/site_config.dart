@@ -44,6 +44,8 @@ final class SiteConfig {
     this.macOSUrl,
     this.windowsUrl,
     this.linuxUrl,
+    this.supportEmail = 'support@openbudget.app',
+    this.legalUpdated = '18 November 2026',
   });
 
   /// Where this site is published; canonical and social links start here.
@@ -69,6 +71,14 @@ final class SiteConfig {
 
   /// The Linux download, once it ships.
   final Uri? linuxUrl;
+
+  /// The address for support, privacy and account deletion requests. The
+  /// privacy, terms, support and deletion pages all print it.
+  final String supportEmail;
+
+  /// When the privacy policy, terms, support and deletion pages last
+  /// changed, as people write a date. Update it with their words.
+  final String legalUpdated;
 
   /// Every download, in the order the site shows them.
   List<Download> get downloads => [

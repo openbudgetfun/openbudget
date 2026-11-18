@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/server.dart';
 import 'package:openbudget_site/site_config.dart';
+import 'package:openbudget_site/src/legal/legal_document.dart';
 import 'package:openbudget_site/src/pages/home_page.dart';
+import 'package:openbudget_site/src/pages/legal_page.dart';
 import 'package:openbudget_site/src/pages/not_found_page.dart';
 
 /// The route `jaspr build` saves as the not-found page.
@@ -22,13 +24,28 @@ final class OpenBudgetSite extends AsyncStatelessComponent {
 
   @override
   Future<Component> build(BuildContext context) async {
-    final isNotFound = context.url == notFoundRoute;
-    if (!isNotFound && kGenerateMode) {
-      // Static builds start from `/`; ask for the not-found page as well.
-      await ServerApp.requestRouteGeneration(notFoundRoute);
+    final legal = legalDocuments(config);
+    final path = context.url.split(RegExp('[?#]')).first;
+    // A static host may serve `/privacy` as `/privacy/`.
+    final document = legal[path] ?? legal[path.replaceAll(RegExp(r'/$'), '')];
+    final isNotFound = path == notFoundRoute;
+    if (!isNotFound && document == null && kGenerateMode) {
+      // Static builds start from `/`; ask for every other page as well.
+      for (final route in [notFoundRoute, ...legal.keys]) {
+        await ServerApp.requestRouteGeneration(route);
+      }
     }
-    final page = isNotFound ? _notFoundMeta : _homeMeta;
-    final pageUrl = config.resolve(isNotFound ? notFoundRoute : '/').toString();
+    final page = switch ((isNotFound, document)) {
+      (true, _) => _notFoundMeta,
+      (_, final LegalDocument document) => (
+        title: '${document.title} | OpenBudget',
+        description: document.description,
+      ),
+      _ => _homeMeta,
+    };
+    final pageUrl = config
+        .resolve(isNotFound ? notFoundRoute : document?.path ?? '/')
+        .toString();
     final imageUrl = config.resolve('/og.png').toString();
 
     return Document(
@@ -71,7 +88,7 @@ final class OpenBudgetSite extends AsyncStatelessComponent {
             attributes: const {'crossorigin': ''},
           ),
         const link(rel: 'stylesheet', href: '/styles.css'),
-        if (!isNotFound) ...[
+        if (!isNotFound && document == null) ...[
           const script(src: '/site.js', defer: true),
           script(
             content: _structuredData(config),
@@ -79,9 +96,14 @@ final class OpenBudgetSite extends AsyncStatelessComponent {
           ),
         ],
       ],
-      body: isNotFound
-          ? NotFoundPage(config: config)
-          : HomePage(config: config),
+      body: switch ((isNotFound, document)) {
+        (true, _) => NotFoundPage(config: config),
+        (_, final LegalDocument document) => LegalPage(
+          config: config,
+          document: document,
+        ),
+        _ => HomePage(config: config),
+      },
     );
   }
 }

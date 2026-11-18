@@ -1410,6 +1410,79 @@ html:not(.js) .desk-status {
   justify-content: center;
 }
 
+/* ---------- Policy and help pages ---------- */
+
+.legal {
+  padding: clamp(28px, 5vw, 64px) var(--gutter) clamp(56px, 8vw, 110px);
+}
+
+.legal-sheet {
+  max-width: 46em;
+  margin: 0 auto;
+  padding: clamp(24px, 4vw, 52px);
+  border: 2px solid var(--ink);
+  border-radius: var(--rough);
+  background: var(--sheet);
+  box-shadow: 6px 6px 0 var(--shadow);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.legal-title {
+  margin: 0;
+  font: 800 clamp(2.1rem, 1.4rem + 3vw, 3.4rem) / 1.05 var(--font-display);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.legal-updated {
+  margin: 10px 0 24px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+.legal-contents {
+  margin: 24px 0 8px;
+  padding: 16px 20px;
+  border: 2px dashed var(--line);
+  border-radius: 14px;
+}
+
+.legal-contents ol {
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.legal-section {
+  scroll-margin-top: 96px;
+}
+
+.legal-section h2 {
+  margin: 36px 0 8px;
+  font: 800 clamp(1.35rem, 1.1rem + 1vw, 1.75rem) / 1.2 var(--font-display);
+}
+
+.legal-sheet p,
+.legal-sheet li {
+  text-wrap: pretty;
+}
+
+.legal-sheet ul {
+  padding-left: 1.3em;
+}
+
+.legal-sheet li + li {
+  margin-top: 6px;
+}
+
+.legal-sheet a {
+  color: inherit;
+  text-decoration-color: var(--pink);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
 /* ---------- Flourishes ----------
    Everything here is decoration on a page that is already complete at
    rest. Motion lives inside prefers-reduced-motion: no-preference, and
