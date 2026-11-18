@@ -1622,11 +1622,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsCaliforniaPrivacyPolicy => 'California Privacy Policy';
 
   @override
-  String settingsComingSoon(String featureName) {
-    return '$featureName is coming soon.';
-  }
-
-  @override
   String get settingsCurrencyPlacement => 'Currency Placement';
 
   @override
@@ -1795,9 +1790,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPrivacyPolicy => 'Privacy Policy';
 
   @override
-  String get settingsSendDiagnostics => 'Send in Diagnostics';
-
-  @override
   String get settingsTermsOfService => 'Terms of Service';
 
   @override
@@ -1810,9 +1802,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String settingsVersion(String version) {
     return 'App Version $version';
   }
-
-  @override
-  String get settingsWriteAReview => 'Write a Review';
 
   @override
   String get settingsYourPrivacyChoices => 'Your Privacy Choices';
@@ -2335,11 +2324,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountSettingsDeleteSectionHint =>
-      'Account deletion is currently unavailable in this build. Open this page to review status and availability.';
+      'Permanently delete your OpenBudget account and everything in it.';
 
   @override
-  String get accountSettingsDeleteUnavailableHint =>
-      'No account data can be removed from this app yet.';
+  String get accountSettingsDeleteHint =>
+      'You will be asked to confirm on the next page.';
 
   @override
   String get settingsAccountsOverviewHint =>
@@ -2354,15 +2343,51 @@ class AppLocalizationsEn extends AppLocalizations {
       'Connect Plaid banks or add Solana wallets.';
 
   @override
-  String get deleteAccountUnavailableNotice =>
-      'Account deletion is currently unavailable in this build. No account or plan data can be removed from this screen.';
+  String get deleteAccountNotice =>
+      'Deleting your account is permanent. It cannot be undone and your data cannot be recovered.';
 
   @override
-  String get deleteAccountUnavailableHint =>
-      'Delete requests are disabled until backend account deletion is available.';
+  String get deleteAccountWhatIsDeletedTitle => 'What gets deleted';
 
   @override
-  String get deleteAccountUnavailableButton => 'Delete Account (Unavailable)';
+  String get deleteAccountWhatIsDeletedPlans =>
+      'Every plan, household and business you own, with their accounts, transactions, envelopes, books and tax profiles.';
+
+  @override
+  String get deleteAccountWhatIsDeletedLinks =>
+      'Your bank and wallet connections. Linked banks are disconnected.';
+
+  @override
+  String get deleteAccountWhatIsDeletedProfile =>
+      'Your sign-in, settings and Money guide conversations.';
+
+  @override
+  String get deleteAccountSubscriptionHint =>
+      'If you have OpenBudget Plus, cancel it first so you are not charged again. Subscriptions bought in the App Store or Google Play are cancelled in the store.';
+
+  @override
+  String get deleteAccountButton => 'Delete My Account';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountConfirmBody =>
+      'Your account and all of its data will be deleted now. This cannot be undone.';
+
+  @override
+  String get deleteAccountConfirmButton => 'Delete Forever';
+
+  @override
+  String get deleteAccountSubscriptionActive =>
+      'Cancel your OpenBudget Plus subscription before deleting your account.';
+
+  @override
+  String get deleteAccountFailed =>
+      'Could not delete your account. Please try again.';
+
+  @override
+  String get settingsCouldNotOpenLink => 'Could not open the link.';
 
   @override
   String get transactionCategoryLabel => 'Category';

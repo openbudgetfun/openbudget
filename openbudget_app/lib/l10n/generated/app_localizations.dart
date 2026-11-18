@@ -2728,12 +2728,6 @@ abstract class AppLocalizations {
   /// **'California Privacy Policy'**
   String get settingsCaliforniaPrivacyPolicy;
 
-  /// No description provided for @settingsComingSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'{featureName} is coming soon.'**
-  String settingsComingSoon(String featureName);
-
   /// No description provided for @settingsCurrencyPlacement.
   ///
   /// In en, this message translates to:
@@ -3040,12 +3034,6 @@ abstract class AppLocalizations {
   /// **'Privacy Policy'**
   String get settingsPrivacyPolicy;
 
-  /// No description provided for @settingsSendDiagnostics.
-  ///
-  /// In en, this message translates to:
-  /// **'Send in Diagnostics'**
-  String get settingsSendDiagnostics;
-
   /// No description provided for @settingsTermsOfService.
   ///
   /// In en, this message translates to:
@@ -3069,12 +3057,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'App Version {version}'**
   String settingsVersion(String version);
-
-  /// No description provided for @settingsWriteAReview.
-  ///
-  /// In en, this message translates to:
-  /// **'Write a Review'**
-  String get settingsWriteAReview;
 
   /// No description provided for @settingsYourPrivacyChoices.
   ///
@@ -4003,14 +3985,14 @@ abstract class AppLocalizations {
   /// No description provided for @accountSettingsDeleteSectionHint.
   ///
   /// In en, this message translates to:
-  /// **'Account deletion is currently unavailable in this build. Open this page to review status and availability.'**
+  /// **'Permanently delete your OpenBudget account and everything in it.'**
   String get accountSettingsDeleteSectionHint;
 
-  /// No description provided for @accountSettingsDeleteUnavailableHint.
+  /// No description provided for @accountSettingsDeleteHint.
   ///
   /// In en, this message translates to:
-  /// **'No account data can be removed from this app yet.'**
-  String get accountSettingsDeleteUnavailableHint;
+  /// **'You will be asked to confirm on the next page.'**
+  String get accountSettingsDeleteHint;
 
   /// No description provided for @settingsAccountsOverviewHint.
   ///
@@ -4030,23 +4012,83 @@ abstract class AppLocalizations {
   /// **'Connect Plaid banks or add Solana wallets.'**
   String get settingsManageBankConnectionsHint;
 
-  /// No description provided for @deleteAccountUnavailableNotice.
+  /// No description provided for @deleteAccountNotice.
   ///
   /// In en, this message translates to:
-  /// **'Account deletion is currently unavailable in this build. No account or plan data can be removed from this screen.'**
-  String get deleteAccountUnavailableNotice;
+  /// **'Deleting your account is permanent. It cannot be undone and your data cannot be recovered.'**
+  String get deleteAccountNotice;
 
-  /// No description provided for @deleteAccountUnavailableHint.
+  /// No description provided for @deleteAccountWhatIsDeletedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Delete requests are disabled until backend account deletion is available.'**
-  String get deleteAccountUnavailableHint;
+  /// **'What gets deleted'**
+  String get deleteAccountWhatIsDeletedTitle;
 
-  /// No description provided for @deleteAccountUnavailableButton.
+  /// No description provided for @deleteAccountWhatIsDeletedPlans.
   ///
   /// In en, this message translates to:
-  /// **'Delete Account (Unavailable)'**
-  String get deleteAccountUnavailableButton;
+  /// **'Every plan, household and business you own, with their accounts, transactions, envelopes, books and tax profiles.'**
+  String get deleteAccountWhatIsDeletedPlans;
+
+  /// No description provided for @deleteAccountWhatIsDeletedLinks.
+  ///
+  /// In en, this message translates to:
+  /// **'Your bank and wallet connections. Linked banks are disconnected.'**
+  String get deleteAccountWhatIsDeletedLinks;
+
+  /// No description provided for @deleteAccountWhatIsDeletedProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Your sign-in, settings and Money guide conversations.'**
+  String get deleteAccountWhatIsDeletedProfile;
+
+  /// No description provided for @deleteAccountSubscriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'If you have OpenBudget Plus, cancel it first so you are not charged again. Subscriptions bought in the App Store or Google Play are cancelled in the store.'**
+  String get deleteAccountSubscriptionHint;
+
+  /// No description provided for @deleteAccountButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete My Account'**
+  String get deleteAccountButton;
+
+  /// No description provided for @deleteAccountConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account?'**
+  String get deleteAccountConfirmTitle;
+
+  /// No description provided for @deleteAccountConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account and all of its data will be deleted now. This cannot be undone.'**
+  String get deleteAccountConfirmBody;
+
+  /// No description provided for @deleteAccountConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Forever'**
+  String get deleteAccountConfirmButton;
+
+  /// No description provided for @deleteAccountSubscriptionActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel your OpenBudget Plus subscription before deleting your account.'**
+  String get deleteAccountSubscriptionActive;
+
+  /// No description provided for @deleteAccountFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete your account. Please try again.'**
+  String get deleteAccountFailed;
+
+  /// No description provided for @settingsCouldNotOpenLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the link.'**
+  String get settingsCouldNotOpenLink;
 
   /// No description provided for @transactionCategoryLabel.
   ///
