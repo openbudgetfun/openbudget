@@ -312,7 +312,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('3 uncategorised'), findsOneWidget);
+      expect(find.text('3 uncategorized'), findsOneWidget);
       expect(find.text('2 recurring due'), findsOneWidget);
       expect(find.text('1 proposals'), findsOneWidget);
     });

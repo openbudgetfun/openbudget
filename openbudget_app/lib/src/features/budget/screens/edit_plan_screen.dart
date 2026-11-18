@@ -14,6 +14,7 @@ import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart'
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -39,14 +40,18 @@ class EditPlanScreen extends HookConsumerWidget {
         appBar: _EditPlanAppBar(entityId: entityId),
         body: Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
       ),
-      error: (_, _) => Scaffold(
+      error: (error, _) => Scaffold(
         backgroundColor: palette.canvas,
         appBar: _EditPlanAppBar(entityId: entityId),
         body: Padding(
           padding: const EdgeInsets.all(SpacingTokens.md),
           child: ObStatePanel.problem(
-            title: l10n.editPlanTitle,
-            message: l10n.editPlanLoadError,
+            title: l10n.editPlanLoadError,
+            message: loadProblemMessage(l10n, error),
+            action: ObStateAction(
+              label: l10n.homeRetry,
+              onPressed: () => ref.invalidate(budgetMonthProvider(entityId)),
+            ),
           ),
         ),
       ),

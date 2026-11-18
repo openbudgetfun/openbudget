@@ -13,6 +13,7 @@ import 'package:openbudget_app/src/providers/fx_rate_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/utils/date_labels.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -198,7 +199,14 @@ class CreateTransferScreen extends HookConsumerWidget {
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(SpacingTokens.lg),
-            child: ObStatePanel.problem(title: l10n.accountLoadError),
+            child: ObStatePanel.problem(
+              title: l10n.accountLoadError,
+              message: loadProblemMessage(l10n, error),
+              action: ObStateAction(
+                label: l10n.homeRetry,
+                onPressed: () => ref.invalidate(accountListAllProvider),
+              ),
+            ),
           ),
         ),
         data: (_) => Center(

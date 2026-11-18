@@ -89,44 +89,48 @@ class BudgetHeader extends HookConsumerWidget {
                   ),
                 ),
                 Expanded(
-                  child: GestureDetector(
-                    onTap: isCurrentMonth
-                        ? null
-                        : () => ref
-                              .read(selectedMonthProvider(entityId).notifier)
-                              .setMonth(MonthKey.fromDate(now)),
-                    onLongPress: () => _showMonthPicker(context, ref, l10n),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: SpacingTokens.xs,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Semantics(
-                            header: true,
-                            child: Text(
-                              '${_localizedMonth(l10n, calendarMonth)} $year',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: palette.ink,
+                  child: Semantics(
+                    button: !isCurrentMonth,
+                    onLongPressHint: l10n.budgetMonthLongPressHint,
+                    child: GestureDetector(
+                      onTap: isCurrentMonth
+                          ? null
+                          : () => ref
+                                .read(selectedMonthProvider(entityId).notifier)
+                                .setMonth(MonthKey.fromDate(now)),
+                      onLongPress: () => _showMonthPicker(context, ref, l10n),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: SpacingTokens.xs,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Semantics(
+                              header: true,
+                              child: Text(
+                                '${_localizedMonth(l10n, calendarMonth)} $year',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: palette.ink,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
                             ),
-                          ),
-                          if (!isCurrentMonth)
-                            Text(
-                              l10n.budgetGoToToday,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: palette.brand,
-                                fontWeight: FontWeight.w600,
+                            if (!isCurrentMonth)
+                              Text(
+                                l10n.budgetGoToToday,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: palette.brand,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

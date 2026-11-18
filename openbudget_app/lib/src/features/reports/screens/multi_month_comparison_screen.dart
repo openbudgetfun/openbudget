@@ -5,6 +5,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/multi_month_comparison_provider.dart';
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// Months side by side, written as one wide hand-ruled table.
@@ -48,7 +49,7 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
           children: [
             ObStatePanel.problem(
               title: l10n.comparisonLoadError,
-              message: error.toString(),
+              message: loadProblemMessage(l10n, error),
             ),
           ],
         ),

@@ -14,6 +14,7 @@ import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart'
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/features/tax/widgets/tax_category_row.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -64,11 +65,15 @@ class CategoryDetailScreen extends HookConsumerWidget {
       ),
       body: monthEnvelopeAsync.when(
         loading: () => Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
-        error: (_, _) => Padding(
+        error: (error, _) => Padding(
           padding: const EdgeInsets.all(SpacingTokens.md),
           child: ObStatePanel.problem(
-            title: l10n.appTitle,
-            message: l10n.budgetLoadError,
+            title: l10n.budgetLoadError,
+            message: loadProblemMessage(l10n, error),
+            action: ObStateAction(
+              label: l10n.homeRetry,
+              onPressed: () => ref.invalidate(budgetMonthProvider(entityId)),
+            ),
           ),
         ),
         data: (monthEnvelope) {
