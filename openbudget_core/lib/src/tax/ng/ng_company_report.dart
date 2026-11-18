@@ -72,7 +72,7 @@ String _percent(int basisPoints) {
 TaxReport _companyReport(TaxInput input, _NgTaxTable table) {
   final position = _businessPosition(
     entries: input.entries,
-    kind: TaxEntityKind.company,
+    kind: EntityKind.company,
     reclaimVat: input.profile.salesTaxRegistered,
   );
   // Old regime (CITA, secondary): a small company is one at or below the
@@ -211,13 +211,24 @@ TaxReport _companyReport(TaxInput input, _NgTaxTable table) {
 
   return TaxReport(
     year: input.year,
-    entityKind: TaxEntityKind.company,
+    entityKind: EntityKind.company,
     lines: lines,
     liabilities: liabilities,
     alreadyPaidMinor: position.taxPaid,
     assumptions: assumptions,
     sources: [for (final url in table.sourceUrls) Uri.parse(url)],
     rulesVerifiedOn: _ngRulesVerifiedOn,
+    rulesVersion: _ngRuleSetFor(
+      input.year.startYear,
+    ).versionFor(TaxJurisdiction.ng),
+    maturity: ngTaxManifest.maturity,
+    coverage: ngTaxManifest.sections,
+    caveats: _ngRuleSetFor(input.year.startYear).caveatsTouching(
+      sections: {
+        TaxSection.companyReturn,
+        if (input.profile.salesTaxRegistered) TaxSection.indirectTax,
+      },
+    ),
     uncategorizedCount: position.uncategorized,
   );
 }

@@ -1,0 +1,4 @@
+### Thrown when a user asks for more wallet previews than the hourly limit.
+exception: WalletPreviewRateLimitedException
+fields:
+  message: String, default='Too many wallet previews. Try again in a little while.'

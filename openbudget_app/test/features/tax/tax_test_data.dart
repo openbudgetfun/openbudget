@@ -1,43 +1,48 @@
 import 'dart:convert';
 
 import 'package:openbudget_app/src/features/tax/providers/tax_repository.dart';
+import 'package:openbudget_app/src/features/tax/providers/tax_url_launcher_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 
-const testBudgetId = '00000000-0000-0000-0000-0000000000a401';
+const testEntityId = '00000000-0000-0000-0000-0000000000a401';
 const testOwnerId = '00000000-0000-0000-0000-0000000000a402';
 const testEnvelopeId = '00000000-0000-0000-0000-0000000000a403';
 const testTransactionId = '00000000-0000-0000-0000-0000000000a404';
+const testTransactionLineId = '00000000-0000-0000-0000-0000000000a407';
 
-Budget testBudget({
-  String id = '00000000-0000-0000-0000-0000000000a401',
+/// Kept for the screens that still spell the id `testBudgetId`.
+const String testBudgetId = testEntityId;
+
+Entity testEntity({
+  String id = testEntityId,
   String name = 'My Budget',
-  String currencyCode = 'GBP',
-}) => Budget(
+  String baseCurrencyCode = 'GBP',
+  EntityKind kind = EntityKind.individual,
+  String countryCode = 'GB',
+}) => Entity(
   id: UuidValue.fromString(id),
   name: name,
-  currencyCode: currencyCode,
+  kind: kind,
+  countryCode: countryCode,
+  baseCurrencyCode: baseCurrencyCode,
+  timeZone: 'Europe/London',
+  fiscalYearEndMonth: 4,
+  fiscalYearEndDay: 5,
   ownerId: UuidValue.fromString(testOwnerId),
   createdAt: DateTime.utc(2026),
 );
 
 TaxProfileRecord taxProfileRecord({
-  String budgetId = testBudgetId,
   TaxProfile? profile,
-  String? linkedBudgetId,
   DateTime? updatedAt,
 }) {
   final resolved =
-      profile ?? const GbTaxProfile(entityKind: TaxEntityKind.individual);
+      profile ?? const GbTaxProfile(entityKind: EntityKind.individual);
   return TaxProfileRecord(
     id: UuidValue.fromString('00000000-0000-0000-0000-0000000000a405'),
-    budgetId: UuidValue.fromString(budgetId),
-    jurisdiction: resolved.jurisdiction.countryCode,
-    entityKind: resolved.entityKind.name,
+    entityId: UuidValue.fromString(testEntityId),
     profileJson: jsonEncode(resolved.toJson()),
-    linkedBudgetId: linkedBudgetId == null
-        ? null
-        : UuidValue.fromString(linkedBudgetId),
     createdAt: DateTime.utc(2026),
     updatedAt: updatedAt ?? DateTime.utc(2026, 6),
   );
@@ -71,23 +76,67 @@ TaxReportLineView taxLine({
   String? code = 'gb.ind.employment',
   String? reportReference = 'SA100 box 1',
   int entryCount = 12,
+  String? figureId,
 }) => TaxReportLineView(
   label: label,
   amountMinor: amountMinor,
   code: code,
   reportReference: reportReference,
   entryCount: entryCount,
+  figureId: figureId,
+);
+
+TaxRuleCaveatView taxCaveat({
+  String id = 'gb.hmrc-rounding-inferences',
+  String text =
+      'HMRC does not publish its per-slice rounding, so the pack infers it '
+      'from guidance.',
+  String grade = 'inferred',
+  List<String> sections = const ['personalReturn'],
+  List<String> keys = const [],
+  DateTime? recheckBy,
+  bool announced = false,
+}) => TaxRuleCaveatView(
+  id: id,
+  text: text,
+  grade: grade,
+  sections: sections,
+  keys: keys,
+  recheckBy: recheckBy ?? DateTime.utc(2027, 1, 30),
+  announced: announced,
+);
+
+TaxFigureView taxFigure({
+  String id = 'personalAllowance',
+  int value = 1257000,
+  String unit = 'currencyMinor',
+  String grade = 'primary',
+  DateTime? verifiedOn,
+  String source = 'https://www.gov.uk/income-tax-rates',
+}) => TaxFigureView(
+  id: id,
+  value: value,
+  unit: unit,
+  grade: grade,
+  verifiedOn: verifiedOn ?? DateTime.utc(2026, 4, 6),
+  source: source,
 );
 
 TaxOpportunityView taxOpportunity({
   String id = 'gb.pension_annual_allowance',
-  String title = 'Use your pension annual allowance',
+  String title = 'Pension annual allowance',
   String explanation =
       'Pay into a private pension to get tax relief at your marginal rate.',
   int? estimatedSavingMinor = 120000,
   DateTime? deadline,
   String source =
       'https://www.gov.uk/tax-on-your-private-pension/annual-allowance',
+  String ruleYear = '2026/27',
+  String grade = 'primary',
+  bool announced = false,
+  bool signpostOnly = false,
+  bool needsEvidence = false,
+  List<String> assumptions = const [],
 }) => TaxOpportunityView(
   id: id,
   title: title,
@@ -95,14 +144,91 @@ TaxOpportunityView taxOpportunity({
   estimatedSavingMinor: estimatedSavingMinor,
   deadline: deadline,
   source: source,
+  ruleYear: ruleYear,
+  grade: grade,
+  announced: announced,
+  signpostOnly: signpostOnly,
+  needsEvidence: needsEvidence,
+  assumptions: assumptions,
 );
+
+TaxDeadlineView taxDeadline({
+  String id = 'gb.sa.online-return',
+  String title = 'Self Assessment online return',
+  String kind = 'filing',
+  DateTime? dueDate,
+  int daysLeft = 81,
+  String periodLabel = '2025/26',
+  String source = 'https://www.gov.uk/self-assessment-tax-returns/deadlines',
+  String citation = 'GOV.UK Self Assessment deadlines',
+  String grade = 'primary',
+  bool dependsOnProfile = false,
+  String? note,
+  DateTime? rolledFrom,
+}) {
+  final due = dueDate ?? DateTime.utc(2027, 1, 31);
+  return TaxDeadlineView(
+    id: id,
+    title: title,
+    kind: kind,
+    dueDate: due,
+    daysLeft: daysLeft,
+    periodStart: DateTime.utc(2025, 4, 6),
+    periodEnd: DateTime.utc(2026, 4, 6),
+    periodLabel: periodLabel,
+    source: source,
+    citation: citation,
+    grade: grade,
+    dependsOnProfile: dependsOnProfile,
+    note: note,
+    rolledFrom: rolledFrom,
+  );
+}
+
+/// A realistic few dates for a UK individual, soonest first.
+List<TaxDeadlineView> testDeadlines() => [
+  taxDeadline(
+    id: 'gb.sa.coding-out',
+    title: 'Self Assessment online return for tax-code collection',
+    dueDate: DateTime.utc(2026, 12, 30),
+    daysLeft: 49,
+    note:
+        'Filing online by this day lets a balance under £3,000 be collected '
+        'through the tax code.',
+  ),
+  taxDeadline(),
+  taxDeadline(
+    id: 'gb.sa.balancing-payment',
+    title: 'Self Assessment balancing payment',
+    kind: 'payment',
+  ),
+  taxDeadline(
+    id: 'gb.sa.payment-on-account-1',
+    title: 'First payment on account',
+    kind: 'payment',
+    periodLabel: '2026/27',
+    note:
+        'Each instalment is half of the previous year’s Income Tax and '
+        'Class 4 bill.',
+    source: 'https://www.gov.uk/understand-self-assessment-bill/payments-on-account',
+    citation: 'GOV.UK payments on account',
+  ),
+  taxDeadline(
+    id: 'gb.sa.payment-on-account-2',
+    title: 'Second payment on account',
+    kind: 'payment',
+    dueDate: DateTime.utc(2027, 7, 31),
+    daysLeft: 262,
+    periodLabel: '2026/27',
+  ),
+];
 
 TaxReportView taxReportView({
   String jurisdiction = 'GB',
   int startYear = 2026,
   String yearLabel = '2026/27',
   String currencyCode = 'GBP',
-  String entityKind = 'individual',
+  EntityKind entityKind = EntityKind.individual,
   List<TaxReportLineView>? lines,
   List<TaxLiabilityView>? liabilities,
   int totalLiabilityMinor = 748000,
@@ -113,6 +239,11 @@ TaxReportView taxReportView({
   int uncategorizedCount = 0,
   int convertedEntryCount = 0,
   List<TaxOpportunityView>? opportunities,
+  String rulesVersion = 'gb-2026-r1',
+  String maturity = 'preview',
+  Map<String, String>? coverage,
+  List<TaxRuleCaveatView>? caveats,
+  List<TaxFigureView>? figures,
 }) => TaxReportView(
   jurisdiction: jurisdiction,
   startYear: startYear,
@@ -129,6 +260,11 @@ TaxReportView taxReportView({
   assumptions: assumptions ?? const ['No other income outside OpenBudget.'],
   sources: sources ?? const ['https://www.gov.uk/income-tax-rates'],
   rulesVerifiedOn: DateTime.utc(2026, 4),
+  rulesVersion: rulesVersion,
+  maturity: maturity,
+  coverage: coverage ?? const {'personalReturn': 'full'},
+  caveats: caveats ?? const [],
+  figures: figures ?? const [],
   uncategorizedCount: uncategorizedCount,
   convertedEntryCount: convertedEntryCount,
   opportunities: opportunities ?? [taxOpportunity()],
@@ -169,6 +305,119 @@ List<TaxCategoryView> testCategories() => [
   ),
 ];
 
+/// A transaction view whose line carries the tax coding the fake records.
+TransactionView taxTransactionView({
+  String? taxCategoryCode,
+  int? businessUsePercent,
+  int? salesTaxMinor,
+}) => TransactionView(
+  transaction: Transaction(
+    id: UuidValue.fromString(testTransactionId),
+    entityId: UuidValue.fromString(testEntityId),
+    accountId: UuidValue.fromString('00000000-0000-0000-0000-0000000000a408'),
+    date: DateTime.utc(2026, 5),
+    amountMinor: -4250,
+    baseAmountMinor: -4250,
+    fxRateDate: DateTime.utc(2026, 5),
+    description: 'Train ticket',
+  ),
+  lines: [
+    TransactionLine(
+      id: UuidValue.fromString(testTransactionLineId),
+      transactionId: UuidValue.fromString(testTransactionId),
+      amountMinor: -4250,
+      baseAmountMinor: -4250,
+      taxCategoryCode: taxCategoryCode,
+      businessUsePercent: businessUsePercent,
+      salesTaxMinor: salesTaxMinor,
+    ),
+  ],
+  accountCurrencyCode: 'GBP',
+  accountName: 'Current account',
+);
+
+/// A tax-ready summary for [countryCode], with the totals a Kenyan sole trader
+/// would see by default.
+TaxSummaryView taxSummaryView({
+  String countryCode = 'KE',
+  String currencyCode = 'KES',
+  EntityKind entityKind = EntityKind.individual,
+  int startYear = 2026,
+  String? yearLabel,
+  DateTime? yearStart,
+  DateTime? yearEnd,
+  bool isUniversal = true,
+  int totalIncomeMinor = 120000000,
+  int totalExpenseMinor = 45000000,
+  int totalReliefMinor = 0,
+  int totalTaxPaidMinor = 8000000,
+  int salesTaxCollectedMinor = 0,
+  int salesTaxPaidMinor = 0,
+  int uncategorizedCount = 0,
+  String disclaimerKey = 'taxSummaryDisclaimer',
+}) => TaxSummaryView(
+  entityId: UuidValue.fromString(testEntityId),
+  entityKind: entityKind,
+  countryCode: countryCode,
+  currencyCode: currencyCode,
+  startYear: startYear,
+  yearLabel: yearLabel ?? '$startYear',
+  yearStart: yearStart ?? DateTime.utc(startYear),
+  yearEnd: yearEnd ?? DateTime.utc(startYear + 1),
+  generatedAt: DateTime.utc(2026, 11, 13),
+  isUniversal: isUniversal,
+  rulesVerifiedOn: DateTime.utc(2026, 11, 13),
+  disclaimerKey: disclaimerKey,
+  incomeTotals: const [],
+  expenseTotals: const [],
+  reliefTotals: const [],
+  taxPaidTotals: const [],
+  totalIncomeMinor: totalIncomeMinor,
+  totalExpenseMinor: totalExpenseMinor,
+  totalReliefMinor: totalReliefMinor,
+  totalTaxPaidMinor: totalTaxPaidMinor,
+  salesTaxCollectedMinor: salesTaxCollectedMinor,
+  salesTaxPaidMinor: salesTaxPaidMinor,
+  salesTaxByRate: const [],
+  salesTaxByQuarter: const [],
+  wallets: const [],
+  fxNotes: const [],
+  rateSourcesUsed: const [],
+  uncategorizedCount: uncategorizedCount,
+);
+
+/// A signed export link as the server hands it out.
+const testExportLink =
+    'https://api.openbudget.test/tax/export?token=signed-token-for-tests';
+
+/// A [TaxUrlLauncher] that records what it was asked to open.
+class FakeTaxUrlLauncher implements TaxUrlLauncher {
+  FakeTaxUrlLauncher({this.opens = true, this.error});
+
+  /// What opening reports: false means the device had nothing to open it.
+  bool opens;
+
+  /// When set, opening throws it.
+  Exception? error;
+
+  final List<Uri> openedPages = [];
+  final List<Uri> openedDownloads = [];
+
+  @override
+  Future<bool> openPage(Uri url) async {
+    if (error != null) throw error!;
+    openedPages.add(url);
+    return opens;
+  }
+
+  @override
+  Future<bool> openDownload(Uri url) async {
+    if (error != null) throw error!;
+    openedDownloads.add(url);
+    return opens;
+  }
+}
+
 /// An in-memory [TaxRepository] for widget and provider tests.
 class FakeTaxRepository implements TaxRepository {
   FakeTaxRepository({
@@ -176,78 +425,85 @@ class FakeTaxRepository implements TaxRepository {
     this.categories,
     Map<int, TaxReportView>? reports,
     this.defaultReport,
+    this.deadlines = const [],
+    this.deadlinesError,
     this.profileError,
     this.categoriesError,
     this.reportError,
     this.saveError,
     this.envelopeError,
-    this.transactionError,
+    this.lineError,
+    this.defaultSummary,
+    this.summaryError,
+    this.exportLink = testExportLink,
+    this.exportError,
   }) : reports = reports ?? {};
 
   TaxProfileRecord? profile;
   List<TaxCategoryView>? categories;
   final Map<int, TaxReportView> reports;
   TaxReportView? defaultReport;
+  List<TaxDeadlineView> deadlines;
+  Exception? deadlinesError;
   Exception? profileError;
   Exception? categoriesError;
   Exception? reportError;
   Exception? saveError;
   Exception? envelopeError;
-  Exception? transactionError;
+  Exception? lineError;
+  TaxSummaryView? defaultSummary;
+  Exception? summaryError;
+  String exportLink;
+  Exception? exportError;
 
-  final List<({String budgetId, int startYear})> reportCalls = [];
+  final List<({String entityId, int startYear})> reportCalls = [];
+  final List<String> deadlineCalls = [];
+  final List<({String entityId, int? startYear})> summaryCalls = [];
+  final List<({String entityId, int? startYear})> exportCalls = [];
   final List<
     ({
-      String budgetId,
+      String entityId,
       String jurisdiction,
       String entityKind,
       String profileJson,
-      String? linkedBudgetId,
     })
   >
   savedProfiles = [];
   final List<({String envelopeId, String? code})> envelopeUpdates = [];
   final List<
     ({
-      String transactionId,
+      String transactionLineId,
       String? code,
       int? businessUsePercent,
-      int? salesTaxCents,
+      int? salesTaxMinor,
     })
   >
-  transactionUpdates = [];
+  lineUpdates = [];
 
   @override
-  Future<TaxProfileRecord?> getProfile(String budgetId) async {
+  Future<TaxProfileRecord?> getProfile(String entityId) async {
     if (profileError != null) throw profileError!;
     return profile;
   }
 
   @override
   Future<TaxProfileRecord> saveProfile({
-    required String budgetId,
+    required String entityId,
     required String jurisdiction,
     required String entityKind,
     required String profileJson,
-    String? linkedBudgetId,
   }) async {
     if (saveError != null) throw saveError!;
     savedProfiles.add((
-      budgetId: budgetId,
+      entityId: entityId,
       jurisdiction: jurisdiction,
       entityKind: entityKind,
       profileJson: profileJson,
-      linkedBudgetId: linkedBudgetId,
     ));
     final record = TaxProfileRecord(
       id: UuidValue.fromString('00000000-0000-0000-0000-0000000000a499'),
-      budgetId: UuidValue.fromString(budgetId),
-      jurisdiction: jurisdiction,
-      entityKind: entityKind,
+      entityId: UuidValue.fromString(entityId),
       profileJson: profileJson,
-      linkedBudgetId: linkedBudgetId == null
-          ? null
-          : UuidValue.fromString(linkedBudgetId),
       createdAt: DateTime.utc(2026),
       updatedAt: DateTime.utc(2026, 7),
     );
@@ -256,7 +512,7 @@ class FakeTaxRepository implements TaxRepository {
   }
 
   @override
-  Future<List<TaxCategoryView>> listCategories(String budgetId) async {
+  Future<List<TaxCategoryView>> listCategories(String entityId) async {
     if (categoriesError != null) throw categoriesError!;
     return categories ?? testCategories();
   }
@@ -270,52 +526,72 @@ class FakeTaxRepository implements TaxRepository {
     envelopeUpdates.add((envelopeId: envelopeId, code: code));
     return Envelope(
       id: UuidValue.fromString(envelopeId),
-      name: 'Rent',
+      entityId: UuidValue.fromString(testEntityId),
       categoryId: UuidValue.fromString(
         '00000000-0000-0000-0000-0000000000a406',
       ),
-      budgetedAmountCents: 0,
-      spentAmountCents: 0,
-      currencyCode: 'GBP',
+      name: 'Rent',
       sortOrder: 0,
       taxCategoryCode: code,
     );
   }
 
   @override
-  Future<Transaction> setTransactionTax({
-    required String transactionId,
+  Future<TransactionView> setLineTax({
+    required String transactionLineId,
     String? code,
     int? businessUsePercent,
-    int? salesTaxCents,
+    int? salesTaxMinor,
   }) async {
-    if (transactionError != null) throw transactionError!;
-    transactionUpdates.add((
-      transactionId: transactionId,
+    if (lineError != null) throw lineError!;
+    lineUpdates.add((
+      transactionLineId: transactionLineId,
       code: code,
       businessUsePercent: businessUsePercent,
-      salesTaxCents: salesTaxCents,
+      salesTaxMinor: salesTaxMinor,
     ));
-    return Transaction(
-      id: UuidValue.fromString(transactionId),
-      description: 'Train ticket',
-      amountCents: -4250,
-      currencyCode: 'GBP',
-      budgetId: UuidValue.fromString(testBudgetId),
-      transactionDate: DateTime.utc(2026, 5),
+    return taxTransactionView(
       taxCategoryCode: code,
       businessUsePercent: businessUsePercent,
-      salesTaxCents: salesTaxCents,
+      salesTaxMinor: salesTaxMinor,
     );
   }
 
   @override
-  Future<TaxReportView> getReport(String budgetId, int startYear) async {
-    reportCalls.add((budgetId: budgetId, startYear: startYear));
+  Future<TaxReportView> getReport(String entityId, int startYear) async {
+    reportCalls.add((entityId: entityId, startYear: startYear));
     if (reportError != null) throw reportError!;
     return reports[startYear] ??
         defaultReport ??
         taxReportView(startYear: startYear);
+  }
+
+  @override
+  Future<List<TaxDeadlineView>> listDeadlines(String entityId) async {
+    deadlineCalls.add(entityId);
+    if (deadlinesError != null) throw deadlinesError!;
+    return deadlines;
+  }
+
+  @override
+  Future<TaxSummaryView> getSummary(String entityId, {int? startYear}) async {
+    summaryCalls.add((entityId: entityId, startYear: startYear));
+    if (summaryError != null) throw summaryError!;
+    final summary = defaultSummary ?? taxSummaryView();
+    return startYear == null || startYear == summary.startYear
+        ? summary
+        : taxSummaryView(
+            countryCode: summary.countryCode,
+            currencyCode: summary.currencyCode,
+            startYear: startYear,
+          );
+  }
+
+  @override
+  Future<String> createExportLink(String entityId, {int? startYear}) async {
+    exportCalls.add((entityId: entityId, startYear: startYear));
+    if (exportError != null) throw exportError!;
+    return exportLink;
   }
 }
 

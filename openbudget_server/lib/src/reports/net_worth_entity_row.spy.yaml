@@ -1,0 +1,10 @@
+### One entity's part of a net worth, in the reporting currency.
+class: NetWorthEntityRow
+fields:
+  entityId: UuidValue
+  name: String
+  kind: EntityKind
+  assetsMinor: int
+  liabilitiesMinor: int
+  netWorthMinor: int
+  isComplete: bool

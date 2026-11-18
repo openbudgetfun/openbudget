@@ -1,4 +1,4 @@
-import 'package:openbudget_server/src/fx_rates/fx_rate_service.dart';
+import 'package:openbudget_server/src/fx_rates/fx_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -7,11 +7,37 @@ class FxRateEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
 
-  /// Returns the latest FX snapshot persisted by the backend.
+  /// Returns the latest daily FX rows persisted by the backend.
   Future<FxLatestSnapshot> latest(Session session) async =>
-      FxRateService.latest(session);
+      FxService.latest(session);
 
   /// Forces an immediate refresh from the upstream FX provider and persists it.
   Future<FxLatestSnapshot> refresh(Session session) async =>
-      FxRateService.refreshNow(session);
+      FxService.refreshNow(session);
+
+  /// Resolves the rate the server would use on [date].
+  ///
+  /// Throws [FxRateUnavailableException] when no rate exists; it never answers
+  /// with an identity rate for two different currencies.
+  Future<FxQuoteView> quote(
+    Session session,
+    String fromCurrencyCode,
+    String toCurrencyCode,
+    DateTime date,
+  ) async {
+    final quote = await FxService.rateOn(
+      session,
+      fromCurrencyCode,
+      toCurrencyCode,
+      date,
+    );
+    if (quote == null) {
+      throw FxRateUnavailableException(
+        fromCurrencyCode: fromCurrencyCode.trim().toUpperCase(),
+        toCurrencyCode: toCurrencyCode.trim().toUpperCase(),
+        date: date,
+      );
+    }
+    return quote;
+  }
 }

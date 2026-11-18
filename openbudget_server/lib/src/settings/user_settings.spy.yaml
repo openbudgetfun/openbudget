@@ -1,0 +1,13 @@
+### Per-user preferences that span entities.
+class: UserSettings
+table: user_settings
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  userId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  ### ISO 4217 code that combined net worth and cross-entity totals use.
+  reportingCurrencyCode: String
+  updatedAt: DateTime, default=now
+indexes:
+  user_settings_user_unique_idx:
+    fields: userId
+    unique: true

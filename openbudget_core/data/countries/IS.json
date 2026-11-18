@@ -1,0 +1,89 @@
+{
+  "code": "IS",
+  "name": "Iceland",
+  "servable": true,
+  "currencies": [
+    "ISK"
+  ],
+  "timeZones": [
+    "Atlantic/Reykjavik"
+  ],
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Virdisaukaskattur (VSK)",
+    "rates": [
+      {
+        "label": "standard",
+        "ratePerMillion": 240000,
+        "from": "2015-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      },
+      {
+        "label": "reduced",
+        "ratePerMillion": 110000,
+        "from": "2015-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Directorate of Internal Revenue (Skatturinn)",
+    "url": "https://www.skatturinn.is"
+  },
+  "sources": [
+    {
+      "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
+      "url": "https://raw.githubusercontent.com/eggert/tz/2026f/iso3166.tab",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "IANA Time Zone Database 2026f: zone.tab (country time zones)",
+      "url": "https://raw.githubusercontent.com/eggert/tz/2026f/zone.tab",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Skatturinn (Directorate of Internal Revenue, Iceland): Value Added Tax (VAT)",
+      "url": "https://www.skatturinn.is/english/companies/value-added-tax/",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "OECD Consumption Tax Trends: key findings for Iceland (24% standard and 11% reduced since 2015)",
+      "url": "https://www.oecd.org/content/dam/oecd/en/topics/policy-sub-issues/consumption-tax-trends/consumption-tax-trends-iceland.pdf",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    }
+  ],
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "Rates primary from Skatturinn's VAT page (24% and 11%, retrieved 2026-11-13); the page does not state effective dates, so from records the retrieval date.",
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Both rates have applied since 1 January 2015 (standard cut from 25.5%, reduced raised from 7%); a legislated cut to 22.5% planned for 2019 was never brought into force. Fuel was temporarily moved to the 11% reduced rate from 1 May to 31 August 2026 - a scope carve-out, not a rate change."
+  ]
+}

@@ -1,0 +1,10 @@
+### A colour the user marks a transaction with.
+enum: TransactionFlag
+serialized: byName
+values:
+  - red
+  - orange
+  - yellow
+  - green
+  - blue
+  - purple

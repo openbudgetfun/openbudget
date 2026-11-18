@@ -1,19 +1,18 @@
-### The per-budget period lock date.
+### The per-entity period lock date.
 ###
-### Posting or reversing into a date on or before [lockDate] is rejected.
-### Every change writes a `ledger_audit_event`, so the lock's history lives
-### in the audit trail rather than in append-only lock rows.
+### Posting, reversing or editing a transaction dated on or before lockDate
+### is rejected. Every change writes an audit_event, so the lock's history
+### lives in the audit trail.
 class: LedgerPeriodLock
 table: ledger_period_lock
 fields:
   id: UuidValue?, defaultPersist=random_v7
-  budgetId: UuidValue, relation(parent=budget)
-  ### Dates on or before this date are locked.
+  entityId: UuidValue, relation(parent=entity, onDelete=Cascade)
+  ### Calendar dates on or before this one are locked.
   lockDate: DateTime
-  ### The user who set the lock.
   setBy: UuidValue
   setAt: DateTime, default=now
 indexes:
-  ledger_period_lock_budget_unique_idx:
-    fields: budgetId
+  ledger_period_lock_entity_unique_idx:
+    fields: entityId
     unique: true

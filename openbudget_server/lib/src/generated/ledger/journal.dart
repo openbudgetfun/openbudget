@@ -12,41 +12,46 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod/serverpod.dart' as _is;
 
-/// A journal in a budget's books: a dated, referenced bundle of lines.
+/// A journal in an entity's books: a dated, referenced bundle of lines.
 ///
-/// Drafts may be edited or deleted. Posted journals are immutable —
-/// corrections are [Journal]s with `reversalOfJournalId` pointing back, and
-/// the original flips to `reversed`. No update or delete path exists for
-/// posted rows.
+/// Drafts may be edited or deleted. Posted journals are immutable:
+/// corrections are journals with reversalOfJournalId pointing back, and the
+/// original flips to reversed. No update or delete path exists for posted
+/// rows.
 abstract class Journal
     implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   Journal._({
     this.id,
-    required this.budgetId,
+    required this.entityId,
     required this.date,
     String? reference,
     this.narration,
-    String? status,
-    String? source,
+    _ifz8weqz.JournalStatus? status,
+    _ifz8weqz.JournalSource? source,
+    this.sourceTransactionId,
+    this.sourceRevision,
     this.postedAt,
     this.postedBy,
     this.reversalOfJournalId,
     DateTime? createdAt,
   }) : reference = reference ?? '',
-       status = status ?? 'draft',
-       source = source ?? 'manual',
+       status = status ?? _ifz8weqz.JournalStatus.draft,
+       source = source ?? _ifz8weqz.JournalSource.manual,
        createdAt = createdAt ?? DateTime.now();
 
   factory Journal({
     _is.UuidValue? id,
-    required _is.UuidValue budgetId,
+    required _is.UuidValue entityId,
     required DateTime date,
     String? reference,
     String? narration,
-    String? status,
-    String? source,
+    _ifz8weqz.JournalStatus? status,
+    _ifz8weqz.JournalSource? source,
+    _is.UuidValue? sourceTransactionId,
+    int? sourceRevision,
     DateTime? postedAt,
     _is.UuidValue? postedBy,
     _is.UuidValue? reversalOfJournalId,
@@ -58,14 +63,28 @@ abstract class Journal
       id: jsonSerialization['id'] == null
           ? null
           : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _is.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _is.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
       date: _is.DateTimeJsonExtension.fromJson(jsonSerialization['date']),
       reference: jsonSerialization['reference'] as String?,
       narration: jsonSerialization['narration'] as String?,
-      status: jsonSerialization['status'] as String?,
-      source: jsonSerialization['source'] as String?,
+      status: jsonSerialization['status'] == null
+          ? null
+          : _ifz8weqz.JournalStatus.fromJson(
+              (jsonSerialization['status'] as String),
+            ),
+      source: jsonSerialization['source'] == null
+          ? null
+          : _ifz8weqz.JournalSource.fromJson(
+              (jsonSerialization['source'] as String),
+            ),
+      sourceTransactionId: jsonSerialization['sourceTransactionId'] == null
+          ? null
+          : _is.UuidValueJsonExtension.fromJson(
+              jsonSerialization['sourceTransactionId'],
+            ),
+      sourceRevision: jsonSerialization['sourceRevision'] as int?,
       postedAt: jsonSerialization['postedAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['postedAt']),
@@ -90,27 +109,30 @@ abstract class Journal
   @override
   _is.UuidValue? id;
 
-  _is.UuidValue budgetId;
+  _is.UuidValue entityId;
 
-  /// Calendar date in the budget's time zone, not a UTC instant.
+  /// Calendar date in the entity's time zone.
   DateTime date;
 
   /// Human reference, such as `JB-2026-0001`.
   String reference;
 
-  /// Optional narrative.
   String? narration;
 
-  /// JournalStatus name: draft, posted or reversed.
-  String status;
+  _ifz8weqz.JournalStatus status;
 
-  /// JournalSource name: manual, opening, import or reversal.
-  String source;
+  _ifz8weqz.JournalSource source;
+
+  /// The transaction this journal posts, when source is `transaction`.
+  /// No foreign key: posted journals outlive deleted transactions.
+  _is.UuidValue? sourceTransactionId;
+
+  /// The transaction revision this journal posts.
+  int? sourceRevision;
 
   /// Server time of posting. Never trusted from the client.
   DateTime? postedAt;
 
-  /// The user who posted the journal.
   _is.UuidValue? postedBy;
 
   /// The posted journal this one reverses, when source is `reversal`.
@@ -126,12 +148,14 @@ abstract class Journal
   @_is.useResult
   Journal copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    _is.UuidValue? budgetId,
+    _is.UuidValue? entityId,
     DateTime? date,
     String? reference,
     String? narration,
-    String? status,
-    String? source,
+    _ifz8weqz.JournalStatus? status,
+    _ifz8weqz.JournalSource? source,
+    _is.UuidValue? sourceTransactionId = const _is.$UndefinedUuidValue(),
+    int? sourceRevision,
     DateTime? postedAt = const _is.$UndefinedDateTime(),
     _is.UuidValue? postedBy = const _is.$UndefinedUuidValue(),
     _is.UuidValue? reversalOfJournalId = const _is.$UndefinedUuidValue(),
@@ -142,12 +166,15 @@ abstract class Journal
     return {
       '__className__': 'Journal',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'date': date.toJson(),
       'reference': reference,
       if (narration != null) 'narration': narration,
-      'status': status,
-      'source': source,
+      'status': status.toJson(),
+      'source': source.toJson(),
+      if (sourceTransactionId != null)
+        'sourceTransactionId': sourceTransactionId?.toJson(),
+      if (sourceRevision != null) 'sourceRevision': sourceRevision,
       if (postedAt != null) 'postedAt': postedAt?.toJson(),
       if (postedBy != null) 'postedBy': postedBy?.toJson(),
       if (reversalOfJournalId != null)
@@ -161,12 +188,15 @@ abstract class Journal
     return {
       '__className__': 'Journal',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'date': date.toJson(),
       'reference': reference,
       if (narration != null) 'narration': narration,
-      'status': status,
-      'source': source,
+      'status': status.toJson(),
+      'source': source.toJson(),
+      if (sourceTransactionId != null)
+        'sourceTransactionId': sourceTransactionId?.toJson(),
+      if (sourceRevision != null) 'sourceRevision': sourceRevision,
       if (postedAt != null) 'postedAt': postedAt?.toJson(),
       if (postedBy != null) 'postedBy': postedBy?.toJson(),
       if (reversalOfJournalId != null)
@@ -208,24 +238,28 @@ class _Undefined {}
 class _JournalImpl extends Journal {
   _JournalImpl({
     _is.UuidValue? id,
-    required _is.UuidValue budgetId,
+    required _is.UuidValue entityId,
     required DateTime date,
     String? reference,
     String? narration,
-    String? status,
-    String? source,
+    _ifz8weqz.JournalStatus? status,
+    _ifz8weqz.JournalSource? source,
+    _is.UuidValue? sourceTransactionId,
+    int? sourceRevision,
     DateTime? postedAt,
     _is.UuidValue? postedBy,
     _is.UuidValue? reversalOfJournalId,
     DateTime? createdAt,
   }) : super._(
          id: id,
-         budgetId: budgetId,
+         entityId: entityId,
          date: date,
          reference: reference,
          narration: narration,
          status: status,
          source: source,
+         sourceTransactionId: sourceTransactionId,
+         sourceRevision: sourceRevision,
          postedAt: postedAt,
          postedBy: postedBy,
          reversalOfJournalId: reversalOfJournalId,
@@ -238,12 +272,14 @@ class _JournalImpl extends Journal {
   @override
   Journal copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    _is.UuidValue? budgetId,
+    _is.UuidValue? entityId,
     DateTime? date,
     String? reference,
     Object? narration = _Undefined,
-    String? status,
-    String? source,
+    _ifz8weqz.JournalStatus? status,
+    _ifz8weqz.JournalSource? source,
+    _is.UuidValue? sourceTransactionId = const _is.$UndefinedUuidValue(),
+    Object? sourceRevision = _Undefined,
     DateTime? postedAt = const _is.$UndefinedDateTime(),
     _is.UuidValue? postedBy = const _is.$UndefinedUuidValue(),
     _is.UuidValue? reversalOfJournalId = const _is.$UndefinedUuidValue(),
@@ -251,12 +287,18 @@ class _JournalImpl extends Journal {
   }) {
     return Journal(
       id: id is _is.UndefinedSentinel ? this.id : id,
-      budgetId: budgetId ?? this.budgetId,
+      entityId: entityId ?? this.entityId,
       date: date ?? this.date,
       reference: reference ?? this.reference,
       narration: narration is String? ? narration : this.narration,
       status: status ?? this.status,
       source: source ?? this.source,
+      sourceTransactionId: sourceTransactionId is _is.UndefinedSentinel
+          ? this.sourceTransactionId
+          : sourceTransactionId,
+      sourceRevision: sourceRevision is int?
+          ? sourceRevision
+          : this.sourceRevision,
       postedAt: postedAt is _is.UndefinedSentinel ? this.postedAt : postedAt,
       postedBy: postedBy is _is.UndefinedSentinel ? this.postedBy : postedBy,
       reversalOfJournalId: reversalOfJournalId is _is.UndefinedSentinel
@@ -270,9 +312,9 @@ class _JournalImpl extends Journal {
 class JournalUpdateTable extends _is.UpdateTable<JournalTable> {
   JournalUpdateTable(super.table);
 
-  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> entityId(_is.UuidValue value) =>
       _is.ColumnValue(
-        table.budgetId,
+        table.entityId,
         value,
       );
 
@@ -291,13 +333,29 @@ class JournalUpdateTable extends _is.UpdateTable<JournalTable> {
     value,
   );
 
-  _is.ColumnValue<String, String> status(String value) => _is.ColumnValue(
+  _is.ColumnValue<_ifz8weqz.JournalStatus, _ifz8weqz.JournalStatus> status(
+    _ifz8weqz.JournalStatus value,
+  ) => _is.ColumnValue(
     table.status,
     value,
   );
 
-  _is.ColumnValue<String, String> source(String value) => _is.ColumnValue(
+  _is.ColumnValue<_ifz8weqz.JournalSource, _ifz8weqz.JournalSource> source(
+    _ifz8weqz.JournalSource value,
+  ) => _is.ColumnValue(
     table.source,
+    value,
+  );
+
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> sourceTransactionId(
+    _is.UuidValue? value,
+  ) => _is.ColumnValue(
+    table.sourceTransactionId,
+    value,
+  );
+
+  _is.ColumnValue<int, int> sourceRevision(int? value) => _is.ColumnValue(
+    table.sourceRevision,
     value,
   );
 
@@ -331,8 +389,8 @@ class JournalUpdateTable extends _is.UpdateTable<JournalTable> {
 class JournalTable extends _is.Table<_is.UuidValue?> {
   JournalTable({super.tableRelation}) : super(tableName: 'journal') {
     updateTable = JournalUpdateTable(this);
-    budgetId = _is.ColumnUuid(
-      'budgetId',
+    entityId = _is.ColumnUuid(
+      'entityId',
       this,
     );
     date = _is.ColumnDateTime(
@@ -348,15 +406,25 @@ class JournalTable extends _is.Table<_is.UuidValue?> {
       'narration',
       this,
     );
-    status = _is.ColumnString(
+    status = _is.ColumnEnum(
       'status',
       this,
+      _is.EnumSerialization.byName,
       hasDefault: true,
     );
-    source = _is.ColumnString(
+    source = _is.ColumnEnum(
       'source',
       this,
+      _is.EnumSerialization.byName,
       hasDefault: true,
+    );
+    sourceTransactionId = _is.ColumnUuid(
+      'sourceTransactionId',
+      this,
+    );
+    sourceRevision = _is.ColumnInt(
+      'sourceRevision',
+      this,
     );
     postedAt = _is.ColumnDateTime(
       'postedAt',
@@ -379,27 +447,30 @@ class JournalTable extends _is.Table<_is.UuidValue?> {
 
   late final JournalUpdateTable updateTable;
 
-  late final _is.ColumnUuid budgetId;
+  late final _is.ColumnUuid entityId;
 
-  /// Calendar date in the budget's time zone, not a UTC instant.
+  /// Calendar date in the entity's time zone.
   late final _is.ColumnDateTime date;
 
   /// Human reference, such as `JB-2026-0001`.
   late final _is.ColumnString reference;
 
-  /// Optional narrative.
   late final _is.ColumnString narration;
 
-  /// JournalStatus name: draft, posted or reversed.
-  late final _is.ColumnString status;
+  late final _is.ColumnEnum<_ifz8weqz.JournalStatus> status;
 
-  /// JournalSource name: manual, opening, import or reversal.
-  late final _is.ColumnString source;
+  late final _is.ColumnEnum<_ifz8weqz.JournalSource> source;
+
+  /// The transaction this journal posts, when source is `transaction`.
+  /// No foreign key: posted journals outlive deleted transactions.
+  late final _is.ColumnUuid sourceTransactionId;
+
+  /// The transaction revision this journal posts.
+  late final _is.ColumnInt sourceRevision;
 
   /// Server time of posting. Never trusted from the client.
   late final _is.ColumnDateTime postedAt;
 
-  /// The user who posted the journal.
   late final _is.ColumnUuid postedBy;
 
   /// The posted journal this one reverses, when source is `reversal`.
@@ -410,12 +481,14 @@ class JournalTable extends _is.Table<_is.UuidValue?> {
   @override
   List<_is.Column> get columns => [
     id,
-    budgetId,
+    entityId,
     date,
     reference,
     narration,
     status,
     source,
+    sourceTransactionId,
+    sourceRevision,
     postedAt,
     postedBy,
     reversalOfJournalId,

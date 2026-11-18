@@ -1,49 +1,68 @@
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_server/src/budgets/budget_service.dart';
-import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/entities/entity_access.dart';
+import 'package:openbudget_server/src/entities/entity_realtime_notifier.dart';
+import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:serverpod/serverpod.dart';
 
-/// Business logic for managing categories within a budget.
+/// Owns category lifecycle within one entity's envelope plan.
 ///
-/// All methods verify budget ownership before operating on categories.
-class CategoryService {
+/// Every read and write crosses [EntityAccess], so a category is visible only
+/// to the owner of its entity. Categories are appended to the end of the
+/// entity's list and reordered only by supplying the complete list.
+abstract final class CategoryService {
   static final _log = ObLogger('CategoryService');
 
-  /// Creates a category within a budget, verifying ownership.
+  /// Creates a category at the end of the entity's list.
   static Future<Category> create(
     Session session, {
+    required UuidValue entityId,
     required String name,
-    required UuidValue budgetId,
-    required int sortOrder,
   }) async {
-    _log.info('Creating category name=$name budget=$budgetId');
-    await BudgetService.getById(session, budgetId: budgetId);
+    final categoryName = _requireName(name);
 
-    final category = Category(
-      name: name,
-      budgetId: budgetId,
-      sortOrder: sortOrder,
-      createdAt: DateTime.now(),
-    );
-    return Category.db.insertRow(session, category);
+    _log.info('Creating category name=$categoryName entity=$entityId');
+
+    final category = await session.db.transaction((tx) async {
+      final entity = _requireWritable(
+        await EntityAccess.requireOwned(
+          session,
+          entityId,
+          transaction: tx,
+          lock: true,
+        ),
+      );
+      final sortOrder = await _nextSortOrder(session, entity.id!, tx);
+
+      return Category.db.insertRow(
+        session,
+        Category(
+          entityId: entity.id!,
+          name: categoryName,
+          sortOrder: sortOrder,
+        ),
+        transaction: tx,
+      );
+    });
+
+    await _notify(session, category.entityId);
+    return category;
   }
 
-  /// Lists all categories for a budget, verifying ownership.
-  static Future<List<Category>> listForBudget(
+  /// Lists every category of an entity, hidden ones included.
+  static Future<List<Category>> list(
     Session session, {
-    required UuidValue budgetId,
+    required UuidValue entityId,
   }) async {
-    _log.info('Listing categories for budget=$budgetId');
-    await BudgetService.getById(session, budgetId: budgetId);
+    await EntityAccess.requireOwned(session, entityId);
 
     return Category.db.find(
       session,
-      where: (t) => t.budgetId.equals(budgetId),
-      orderBy: (t) => t.sortOrder,
+      where: (t) => t.entityId.equals(entityId),
+      orderByList: (t) => [t.sortOrder, t.id],
     );
   }
 
-  /// Fetches a single category, verifying budget ownership.
+  /// Loads one category after checking that the caller owns its entity.
   static Future<Category> getById(
     Session session, {
     required UuidValue categoryId,
@@ -53,81 +72,240 @@ class CategoryService {
       throw NotFoundException(message: 'Category not found');
     }
 
-    // Verify the user owns the parent budget.
-    await BudgetService.getById(session, budgetId: category.budgetId);
+    await EntityAccess.requireOwned(session, category.entityId);
     return category;
   }
 
-  /// Updates a category, verifying budget ownership.
+  /// Renames or hides one category without changing its position.
   static Future<Category> update(
     Session session, {
     required UuidValue categoryId,
     String? name,
-    int? sortOrder,
     bool? isHidden,
   }) async {
     _log.info('Updating category id=$categoryId');
-    final category = await getById(session, categoryId: categoryId);
 
-    final updated = category.copyWith(
-      name: name ?? category.name,
-      sortOrder: sortOrder ?? category.sortOrder,
-      isHidden: isHidden ?? category.isHidden,
-    );
-    return Category.db.updateRow(session, updated);
-  }
-
-  /// Batch-updates sort order for multiple categories in a single budget.
-  static Future<List<Category>> reorder(
-    Session session, {
-    required UuidValue budgetId,
-    required List<UuidValue> categoryIds,
-  }) async {
-    await BudgetService.getById(session, budgetId: budgetId);
-
-    if (categoryIds.isEmpty) return [];
-
-    final orderedCategoryIds = categoryIds.toSet().toList();
-    final requestedCategoryIds = orderedCategoryIds.toSet();
-
-    final categories = await Category.db.find(
-      session,
-      where: (t) =>
-          t.id.inSet(requestedCategoryIds) & t.budgetId.equals(budgetId),
-    );
-
-    if (categories.length != requestedCategoryIds.length) {
-      throw NotFoundException(
-        message: 'One or more categories were not found in this budget',
+    final updated = await session.db.transaction((tx) async {
+      final discovered = await Category.db.findById(
+        session,
+        categoryId,
+        transaction: tx,
       );
-    }
+      if (discovered == null) {
+        throw NotFoundException(message: 'Category not found');
+      }
 
-    final categoriesById = <UuidValue, Category>{
-      for (final category in categories) category.id!: category,
-    };
+      _requireWritable(
+        await EntityAccess.requireOwned(
+          session,
+          discovered.entityId,
+          transaction: tx,
+          lock: true,
+        ),
+      );
 
-    final results = <Category>[];
-    for (var i = 0; i < orderedCategoryIds.length; i++) {
-      final category = categoriesById[orderedCategoryIds[i]];
+      final category = await Category.db.findById(
+        session,
+        categoryId,
+        transaction: tx,
+        lockMode: LockMode.forUpdate,
+      );
       if (category == null) {
-        throw NotFoundException(
-          message: 'One or more categories were not found in this budget',
+        throw NotFoundException(message: 'Category not found');
+      }
+      if (category.entityId != discovered.entityId) {
+        throw ValidationException(
+          message: 'The category changed concurrently; retry the update',
         );
       }
 
-      final updated = category.copyWith(sortOrder: i);
-      results.add(await Category.db.updateRow(session, updated));
-    }
-    return results;
+      return Category.db.updateRow(
+        session,
+        category.copyWith(
+          name: name == null ? null : _requireName(name),
+          isHidden: isHidden,
+          updatedAt: _now(),
+        ),
+        transaction: tx,
+      );
+    });
+
+    await _notify(session, updated.entityId);
+    return updated;
   }
 
-  /// Deletes a category, verifying budget ownership.
-  static Future<Category> delete(
+  /// Rewrites the entity's category order from an exact list of its ids.
+  static Future<List<Category>> reorder(
+    Session session, {
+    required UuidValue entityId,
+    required List<UuidValue> categoryIds,
+  }) async {
+    _requireNoDuplicates(categoryIds);
+
+    final categories = await session.db.transaction((tx) async {
+      _requireWritable(
+        await EntityAccess.requireOwned(
+          session,
+          entityId,
+          transaction: tx,
+          lock: true,
+        ),
+      );
+
+      final owned = await Category.db.find(
+        session,
+        where: (t) => t.entityId.equals(entityId),
+        orderByList: (t) => [t.id],
+        transaction: tx,
+        lockMode: LockMode.forUpdate,
+      );
+      _requireExactSet(categoryIds, owned);
+
+      final byId = {for (final category in owned) category.id!: category};
+      final now = _now();
+      final updated = <Category>[];
+
+      for (var index = 0; index < categoryIds.length; index++) {
+        updated.add(
+          await Category.db.updateRow(
+            session,
+            byId[categoryIds[index]]!.copyWith(
+              sortOrder: index,
+              updatedAt: now,
+            ),
+            transaction: tx,
+          ),
+        );
+      }
+
+      return updated;
+    });
+
+    await _notify(session, entityId);
+    return categories;
+  }
+
+  /// Deletes an empty category.
+  ///
+  /// A category with any envelope, hidden ones included, is rejected rather
+  /// than cascading, because deleting it would silently remove plan history.
+  static Future<void> delete(
     Session session, {
     required UuidValue categoryId,
   }) async {
     _log.info('Deleting category id=$categoryId');
-    final category = await getById(session, categoryId: categoryId);
-    return Category.db.deleteRow(session, category);
+
+    final entityId = await session.db.transaction((tx) async {
+      final discovered = await Category.db.findById(
+        session,
+        categoryId,
+        transaction: tx,
+      );
+      if (discovered == null) {
+        throw NotFoundException(message: 'Category not found');
+      }
+
+      _requireWritable(
+        await EntityAccess.requireOwned(
+          session,
+          discovered.entityId,
+          transaction: tx,
+          lock: true,
+        ),
+      );
+
+      final category = await Category.db.findById(
+        session,
+        categoryId,
+        transaction: tx,
+        lockMode: LockMode.forUpdate,
+      );
+      if (category == null) {
+        throw NotFoundException(message: 'Category not found');
+      }
+      if (category.entityId != discovered.entityId) {
+        throw ValidationException(
+          message: 'The category changed concurrently; retry the delete',
+        );
+      }
+
+      final envelopeCount = await Envelope.db.count(
+        session,
+        where: (t) => t.categoryId.equals(categoryId),
+        transaction: tx,
+      );
+      if (envelopeCount > 0) {
+        throw ValidationException(
+          message: 'A category with envelopes cannot be deleted',
+        );
+      }
+
+      await Category.db.deleteRow(session, category, transaction: tx);
+      return category.entityId;
+    });
+
+    await _notify(session, entityId);
   }
+
+  static Future<int> _nextSortOrder(
+    Session session,
+    UuidValue entityId,
+    Transaction tx,
+  ) async {
+    final last = await Category.db.findFirstRow(
+      session,
+      where: (t) => t.entityId.equals(entityId),
+      orderBy: (t) => t.sortOrder.desc(),
+      transaction: tx,
+    );
+
+    return (last?.sortOrder ?? -1) + 1;
+  }
+
+  static String _requireName(String raw) {
+    final name = raw.trim();
+    if (name.isEmpty) {
+      throw ValidationException(message: 'Name is required');
+    }
+
+    return name;
+  }
+
+  static void _requireNoDuplicates(List<UuidValue> categoryIds) {
+    if (categoryIds.toSet().length != categoryIds.length) {
+      throw ValidationException(
+        message: 'reorder rejects duplicate category ids',
+      );
+    }
+  }
+
+  static void _requireExactSet(
+    List<UuidValue> requested,
+    List<Category> owned,
+  ) {
+    final requestedSet = requested.toSet();
+    final ownedSet = {for (final category in owned) category.id!};
+
+    if (requestedSet.length != ownedSet.length ||
+        !requestedSet.containsAll(ownedSet)) {
+      throw ValidationException(
+        message: 'reorder needs every category of the entity exactly once',
+      );
+    }
+  }
+
+  static Entity _requireWritable(Entity entity) {
+    if (entity.archivedAt != null) {
+      throw ValidationException(
+        message: 'An archived entity rejects category changes',
+      );
+    }
+
+    return entity;
+  }
+
+  static DateTime _now() => DateTime.now().toUtc();
+
+  static Future<void> _notify(Session session, UuidValue entityId) =>
+      EntityRealtimeNotifier.notify(session, entityId, ChangeScope.plan);
 }

@@ -1,5 +1,4 @@
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -13,21 +12,20 @@ class CategoryActions extends _$CategoryActions {
 
   Future<Category> createCategory({
     required String name,
-    required String budgetId,
-    required int sortOrder,
+    required String entityId,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
       final category = await client.category.create(
+        UuidValue.fromString(entityId),
         name,
-        UuidValue.fromString(budgetId),
-        sortOrder,
       );
       if (ref.mounted) {
         ref
-          ..invalidate(categoryListProvider(budgetId))
-          ..invalidate(budgetSummaryProvider(budgetId));
+          ..invalidate(categoryListProvider(entityId))
+          ..invalidate(budgetMonthGroupsProvider)
+          ..invalidate(budgetMonthProvider);
         state = const AsyncValue.data(null);
       }
       return category;
@@ -40,25 +38,20 @@ class CategoryActions extends _$CategoryActions {
   }
 
   Future<void> reorderCategories({
-    required String budgetId,
+    required String entityId,
     required List<String> categoryIds,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
       await client.category.reorder(
-        UuidValue.fromString(budgetId),
-        categoryIds
-            .map(
-              UuidValue.fromString,
-            )
-            .toList(),
+        UuidValue.fromString(entityId),
+        categoryIds.map(UuidValue.fromString).toList(),
       );
       if (ref.mounted) {
         ref
-          ..invalidate(categoryListProvider(budgetId))
-          ..invalidate(budgetSummaryProvider(budgetId))
-          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+          ..invalidate(categoryListProvider(entityId))
+          ..invalidate(budgetMonthGroupsProvider);
         state = const AsyncValue.data(null);
       }
     } on Exception catch (e, st) {
@@ -71,7 +64,7 @@ class CategoryActions extends _$CategoryActions {
 
   Future<void> toggleHidden({
     required String categoryId,
-    required String budgetId,
+    required String entityId,
     required bool isHidden,
   }) async {
     state = const AsyncValue.loading();
@@ -83,9 +76,8 @@ class CategoryActions extends _$CategoryActions {
       );
       if (ref.mounted) {
         ref
-          ..invalidate(categoryListProvider(budgetId))
-          ..invalidate(budgetSummaryProvider(budgetId))
-          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+          ..invalidate(categoryListProvider(entityId))
+          ..invalidate(budgetMonthGroupsProvider);
         state = const AsyncValue.data(null);
       }
     } on Exception catch (e, st) {
@@ -97,7 +89,7 @@ class CategoryActions extends _$CategoryActions {
 
   Future<Category> updateCategory({
     required String categoryId,
-    required String budgetId,
+    required String entityId,
     required String name,
   }) async {
     state = const AsyncValue.loading();
@@ -109,9 +101,8 @@ class CategoryActions extends _$CategoryActions {
       );
       if (ref.mounted) {
         ref
-          ..invalidate(categoryListProvider(budgetId))
-          ..invalidate(budgetSummaryProvider(budgetId))
-          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+          ..invalidate(categoryListProvider(entityId))
+          ..invalidate(budgetMonthGroupsProvider);
         state = const AsyncValue.data(null);
       }
       return category;
@@ -123,51 +114,21 @@ class CategoryActions extends _$CategoryActions {
     }
   }
 
-  Future<Category> deleteCategory({
+  /// Deletes an empty category; the server refuses while envelopes remain.
+  Future<void> deleteCategory({
     required String categoryId,
-    required String budgetId,
+    required String entityId,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
-      final deleted = await client.category.delete(
-        UuidValue.fromString(categoryId),
-      );
+      await client.category.delete(UuidValue.fromString(categoryId));
       if (ref.mounted) {
         ref
-          ..invalidate(categoryListProvider(budgetId))
-          ..invalidate(budgetSummaryProvider(budgetId));
+          ..invalidate(categoryListProvider(entityId))
+          ..invalidate(budgetMonthGroupsProvider);
         state = const AsyncValue.data(null);
       }
-      return deleted;
-    } on Exception catch (e, st) {
-      if (ref.mounted) {
-        state = AsyncValue.error(e, st);
-      }
-      rethrow;
-    }
-  }
-
-  /// Recreates a previously deleted category for undo support.
-  Future<Category> undoDeleteCategory({
-    required Category deletedCategory,
-    required String budgetId,
-  }) async {
-    state = const AsyncValue.loading();
-    final client = ref.read(serverpodClientProvider);
-    try {
-      final restored = await client.category.create(
-        deletedCategory.name,
-        UuidValue.fromString(budgetId),
-        deletedCategory.sortOrder,
-      );
-      if (ref.mounted) {
-        ref
-          ..invalidate(categoryListProvider(budgetId))
-          ..invalidate(budgetSummaryProvider(budgetId));
-        state = const AsyncValue.data(null);
-      }
-      return restored;
     } on Exception catch (e, st) {
       if (ref.mounted) {
         state = AsyncValue.error(e, st);

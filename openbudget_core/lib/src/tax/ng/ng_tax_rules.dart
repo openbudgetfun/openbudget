@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:openbudget_core/src/tax/ng/ng_calendar.dart';
+import 'package:openbudget_core/src/tax/ng/ng_profile.dart';
 import 'package:openbudget_core/src/tax/tax_model.dart';
 import 'package:openbudget_core/src/tax/tax_profile.dart';
 import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
@@ -11,6 +13,27 @@ part 'ng_opportunities.dart';
 part 'ng_reports.dart';
 part 'ng_tax_categories.dart';
 part 'ng_tax_rates.dart';
+
+/// What the Nigeria pack covers, and how mature it is.
+///
+/// The personal return leaves out the minimum-wage exemption and state and
+/// local levies, the business reports do not model prior-year capital
+/// allowances, and the company return does not compute the minimum effective
+/// tax rate for large groups. Capital gains, digital assets and the filing
+/// calendar are not built.
+const TaxPackManifest ngTaxManifest = TaxPackManifest(
+  maturity: TaxPackMaturity.preview,
+  sections: {
+    TaxSection.personalReturn: TaxSectionCoverage.partial,
+    TaxSection.selfEmployment: TaxSectionCoverage.partial,
+    TaxSection.companyReturn: TaxSectionCoverage.partial,
+    TaxSection.indirectTax: TaxSectionCoverage.partial,
+    TaxSection.capitalGains: TaxSectionCoverage.notBuilt,
+    TaxSection.digitalAssets: TaxSectionCoverage.notBuilt,
+    TaxSection.filingCalendar: TaxSectionCoverage.partial,
+    TaxSection.payroll: TaxSectionCoverage.notBuilt,
+  },
+);
 
 /// Nigeria's tax rules, under the regime the year of assessment selects.
 ///
@@ -55,7 +78,30 @@ final class NgTaxRules implements TaxRulePack {
   TaxJurisdiction get jurisdiction => TaxJurisdiction.ng;
 
   @override
+  List<TaxDeadline> deadlines(TaxYear period, TaxProfile profile) {
+    requireTaxDeadlineInput(this, period, profile);
+    return ngDeadlines(period, profile as NgTaxProfile);
+  }
+
+  @override
+  TaxPackManifest get manifest => ngTaxManifest;
+
+  @override
   Set<int> get supportedStartYears => _supportedStartYears;
+
+  @override
+  TaxRuleSet ruleSet(int startYear) => _ngRuleSetFor(startYear);
+
+  @override
+  TaxProfile profileFromJson(Map<String, Object?> json) =>
+      ngProfileFromJson(json);
+
+  @override
+  List<TaxProfileQuestion> profileQuestions(EntityKind kind) =>
+      taxProfileQuestionsFor(kind, [
+        ...commonTaxProfileQuestions,
+        ...ngTaxProfileQuestions,
+      ]);
 
   @override
   TaxYear taxYearFor(DateTime date) => taxYear(date.year);
@@ -70,22 +116,26 @@ final class NgTaxRules implements TaxRulePack {
   );
 
   @override
-  List<TaxCategory> categoriesFor(TaxEntityKind kind) => switch (kind) {
-    TaxEntityKind.individual => _NgTaxCategories.individual,
-    TaxEntityKind.soleTrader => _NgTaxCategories.soleTrader,
-    TaxEntityKind.company => _NgTaxCategories.company,
+  List<TaxCategory> categoriesFor(EntityKind kind) => switch (kind) {
+    EntityKind.individual => _NgTaxCategories.individual,
+    EntityKind.soleTrader => _NgTaxCategories.soleTrader,
+    EntityKind.company => _NgTaxCategories.company,
   };
 
   @override
   TaxCategory? category(String code) => _NgTaxCategories.byCode[code];
 
   @override
+  String? mapUniversalCategory(String universalCode, EntityKind kind) =>
+      _NgTaxCategories.mapUniversal(universalCode, kind);
+
+  @override
   TaxReport report(TaxInput input) {
     final table = _tableFor(input);
     return switch (input.profile.entityKind) {
-      TaxEntityKind.individual => _individualReport(input, table),
-      TaxEntityKind.soleTrader => _soleTraderReport(input, table),
-      TaxEntityKind.company => _companyReport(input, table),
+      EntityKind.individual => _individualReport(input, table),
+      EntityKind.soleTrader => _soleTraderReport(input, table),
+      EntityKind.company => _companyReport(input, table),
     };
   }
 
@@ -93,15 +143,24 @@ final class NgTaxRules implements TaxRulePack {
   List<TaxOpportunity> opportunities(TaxInput input, TaxReport report) {
     final table = _tableFor(input);
     return switch (input.profile.entityKind) {
-      TaxEntityKind.individual => _individualOpportunities(
+      EntityKind.individual => _individualOpportunities(
         input,
         report,
         table,
       ),
-      TaxEntityKind.soleTrader => _soleTraderOpportunities(input, table),
-      TaxEntityKind.company => _companyOpportunities(input, table),
+      EntityKind.soleTrader => _soleTraderOpportunities(input, table),
+      EntityKind.company => _companyOpportunities(input, table),
     };
   }
+}
+
+/// The rule set for [startYear], or the unsupported-year error.
+TaxRuleSet _ngRuleSetFor(int startYear) {
+  final ruleSet = _ngRuleSetsByStartYear[startYear];
+  if (ruleSet == null) {
+    throw UnsupportedTaxYearException(TaxJurisdiction.ng, startYear);
+  }
+  return ruleSet;
 }
 
 /// Validates [input] and returns the rate table for its year.

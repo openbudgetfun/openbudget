@@ -1,101 +1,125 @@
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/accounts/account_service.dart';
-import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// API surface for account operations.
 ///
-/// All methods require authentication.
+/// All methods require authentication and cross [AccountService] for the
+/// entity-ownership check.
 class AccountEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
 
-  /// Creates a new account within a budget.
+  /// Creates an account and its opening balance or first valuation.
   Future<Account> create(
     Session session,
+    UuidValue entityId,
     String name,
-    String accountType,
-    int balanceCents,
-    String currencyCode,
-    UuidValue budgetId, {
-    required bool onBudget,
-    required int sortOrder,
+    AccountKind kind,
+    String currencyCode, {
+    AccountBalanceSource? balanceSource,
+    bool? onBudget,
+    int? openingBalanceMinor,
+    DateTime? openingDate,
     UuidValue? institutionId,
-  }) async {
-    final account = await AccountService.create(
-      session,
-      name: name,
-      accountType: accountType,
-      balanceCents: balanceCents,
-      currencyCode: currencyCode,
-      budgetId: budgetId,
-      onBudget: onBudget,
-      sortOrder: sortOrder,
-      institutionId: institutionId,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(account.budgetId);
-    return account;
-  }
+    String? note,
+  }) => AccountService.create(
+    session,
+    entityId,
+    name,
+    kind,
+    currencyCode,
+    balanceSource: balanceSource,
+    onBudget: onBudget,
+    openingBalanceMinor: openingBalanceMinor,
+    openingDate: openingDate,
+    institutionId: institutionId,
+    note: note,
+  );
 
-  /// Lists all accounts for a budget.
-  Future<List<Account>> list(Session session, UuidValue budgetId) async =>
-      AccountService.listForBudget(session, budgetId: budgetId);
+  /// Lists every account of one owned entity.
+  Future<List<Account>> list(Session session, UuidValue entityId) =>
+      AccountService.list(session, entityId);
 
-  /// Lists creator-owned reusable accounts that can be added to another budget.
-  Future<List<Account>> listMine(
-    Session session, {
-    UuidValue? excludeBudgetId,
-  }) async =>
-      AccountService.listMine(session, excludeBudgetId: excludeBudgetId);
+  /// Lists every account in every entity the caller owns.
+  Future<List<Account>> listAll(Session session) =>
+      AccountService.listAll(session);
 
-  /// Adds one of the creator's existing accounts to another owned budget.
-  Future<Account> addMineToBudget(
-    Session session,
-    UuidValue sourceAccountId,
-    UuidValue budgetId,
-  ) async {
-    final account = await AccountService.addMineToBudget(
-      session,
-      sourceAccountId: sourceAccountId,
-      budgetId: budgetId,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(account.budgetId);
-    return account;
-  }
+  /// Loads one owned account.
+  Future<Account> get(Session session, UuidValue accountId) =>
+      AccountService.get(session, accountId);
 
-  /// Gets a single account by ID.
-  Future<Account> get(Session session, UuidValue accountId) async =>
-      AccountService.getById(session, accountId: accountId);
-
-  /// Updates an account by ID.
+  /// Updates mutable account metadata.
   Future<Account> update(
     Session session,
     UuidValue accountId, {
     String? name,
-    String? accountType,
-    int? balanceCents,
+    AccountKind? kind,
     bool? onBudget,
+    UuidValue? institutionId,
+    bool? clearInstitution,
+    String? note,
     int? sortOrder,
-    bool? isClosed,
-  }) async {
-    final account = await AccountService.update(
-      session,
-      accountId: accountId,
-      name: name,
-      accountType: accountType,
-      balanceCents: balanceCents,
-      onBudget: onBudget,
-      sortOrder: sortOrder,
-      isClosed: isClosed,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(account.budgetId);
-    return account;
-  }
+  }) => AccountService.update(
+    session,
+    accountId,
+    name: name,
+    kind: kind,
+    onBudget: onBudget,
+    institutionId: institutionId,
+    clearInstitution: clearInstitution ?? false,
+    note: note,
+    sortOrder: sortOrder,
+  );
 
-  /// Deletes an account by ID.
-  Future<Account> delete(Session session, UuidValue accountId) async {
-    final account = await AccountService.delete(session, accountId: accountId);
-    BudgetRealtimeNotifier.notifyBudgetChanged(account.budgetId);
-    return account;
-  }
+  /// Replaces the account order of one owned entity.
+  Future<List<Account>> reorder(
+    Session session,
+    UuidValue entityId,
+    List<UuidValue> accountIds,
+  ) => AccountService.reorder(session, entityId, accountIds);
+
+  /// Closes an account whose balance is zero.
+  Future<Account> close(Session session, UuidValue accountId) =>
+      AccountService.close(session, accountId);
+
+  /// Reopens a closed account.
+  Future<Account> reopen(Session session, UuidValue accountId) =>
+      AccountService.reopen(session, accountId);
+
+  /// Deletes the account, its transactions and its valuations.
+  Future<void> delete(Session session, UuidValue accountId) =>
+      AccountService.delete(session, accountId);
+
+  /// Returns the cached and cleared balances of one account.
+  Future<AccountBalancesView> getBalances(
+    Session session,
+    UuidValue accountId,
+  ) => AccountService.getBalances(session, accountId);
+
+  /// Lists one account's valuations newest-first.
+  Future<List<AccountValuation>> listValuations(
+    Session session,
+    UuidValue accountId,
+  ) => AccountService.listValuations(session, accountId);
+
+  /// Upserts one manual valuation.
+  Future<AccountValuation> setValuation(
+    Session session,
+    UuidValue accountId,
+    DateTime valuationDate,
+    int valueMinor, {
+    String? note,
+  }) => AccountService.setValuation(
+    session,
+    accountId,
+    valuationDate,
+    valueMinor,
+    note: note,
+  );
+
+  /// Deletes one valuation and recomputes the account balance.
+  Future<void> deleteValuation(Session session, UuidValue valuationId) =>
+      AccountService.deleteValuation(session, valuationId);
 }

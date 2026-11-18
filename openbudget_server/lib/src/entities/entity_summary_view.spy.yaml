@@ -1,0 +1,20 @@
+### One entity's headline figures for the home screen. `entity.listSummaries`
+### returns one per entity, so the home screen loads with one call.
+class: EntitySummaryView
+fields:
+  entity: Entity
+  ### The current budget month (yyyymm) in the entity's time zone.
+  month: int
+  ### Ready to Assign this month in base minor units. Null when the entity
+  ### has no on-budget account.
+  readyToAssignMinor: int?
+  overspentEnvelopeCount: int
+  ### Assets plus liabilities in base minor units, at today's rates.
+  netWorthMinor: int
+  ### False when some account could not be converted; netWorthMinor then
+  ### leaves it out.
+  netWorthComplete: bool
+  ### Transactions this month with an uncategorised outflow line on budget.
+  uncategorizedCount: int
+  pendingProposalCount: int
+  dueRecurringCount: int

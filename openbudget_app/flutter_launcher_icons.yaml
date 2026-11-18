@@ -5,12 +5,12 @@ flutter_launcher_icons:
   image_path: build/brand/app_icon.png
   ios: true
   remove_alpha_ios: true
-  background_color_ios: "#FCF8EF"
+  background_color_ios: "#FFF4DE"
   image_path_ios_dark_transparent: build/brand/app_icon_ios_dark.png
   image_path_ios_tinted_grayscale: build/brand/app_icon_ios_tinted.png
   desaturate_tinted_to_grayscale_ios: true
   android: true
-  adaptive_icon_background: "#FCF8EF"
+  adaptive_icon_background: "#FFF4DE"
   adaptive_icon_foreground: build/brand/android_foreground.png
   # The foreground is already laid out inside the 66dp safe zone.
   adaptive_icon_foreground_inset: 0
@@ -18,8 +18,8 @@ flutter_launcher_icons:
   web:
     generate: true
     image_path: build/brand/app_icon.png
-    background_color: "#FCF8EF"
-    theme_color: "#FCF8EF"
+    background_color: "#FFF4DE"
+    theme_color: "#FFF4DE"
   windows:
     generate: true
     image_path: build/brand/app_icon.png

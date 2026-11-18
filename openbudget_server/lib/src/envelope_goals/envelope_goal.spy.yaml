@@ -1,20 +1,20 @@
-### A savings goal or target for an envelope.
+### A savings or funding target for one envelope.
 class: EnvelopeGoal
 table: envelope_goal
 fields:
   id: UuidValue?, defaultPersist=random_v7
-  envelopeId: UuidValue, relation(parent=envelope)
-  ### Goal type: 'target_balance', 'monthly_funding', or 'target_by_date'.
-  goalType: String
-  ### Target amount in integer cents.
-  targetAmountCents: int
-  ### Target date for 'target_by_date' goals (nullable for other types).
+  entityId: UuidValue, relation(parent=entity, onDelete=Cascade)
+  envelopeId: UuidValue, relation(parent=envelope, onDelete=Cascade)
+  kind: EnvelopeGoalKind
+  ### Base-currency minor units, positive. The target balance for
+  ### targetBalance and targetByDate; the amount to assign each month for
+  ### monthlyFunding.
+  amountMinor: int
+  ### Calendar date; required for targetByDate, null otherwise.
   targetDate: DateTime?
-  ### Monthly funding amount in cents for 'monthly_funding' goals.
-  monthlyFundingCents: int?
   createdAt: DateTime, default=now
   updatedAt: DateTime, default=now
 indexes:
-  envelope_goal_envelope_idx:
+  envelope_goal_envelope_unique_idx:
     fields: envelopeId
     unique: true

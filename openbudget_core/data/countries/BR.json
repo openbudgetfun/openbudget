@@ -1,0 +1,80 @@
+{
+  "code": "BR",
+  "name": "Brazil",
+  "servable": true,
+  "currencies": [
+    "BRL"
+  ],
+  "timeZones": [
+    "America/Sao_Paulo",
+    "America/Noronha",
+    "America/Belem",
+    "America/Fortaleza",
+    "America/Recife",
+    "America/Araguaina",
+    "America/Maceio",
+    "America/Bahia",
+    "America/Campo_Grande",
+    "America/Cuiaba",
+    "America/Santarem",
+    "America/Porto_Velho",
+    "America/Boa_Vista",
+    "America/Manaus",
+    "America/Eirunepe",
+    "America/Rio_Branco"
+  ],
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "consumptionTax",
+    "localName": "ICMS (estadual), IPI, ISS e PIS/COFINS",
+    "rates": [],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Secretaria Especial da Receita Federal do Brasil",
+    "url": "https://www.gov.br/receitafederal"
+  },
+  "sources": [
+    {
+      "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
+      "url": "https://raw.githubusercontent.com/eggert/tz/2026f/iso3166.tab",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "IANA Time Zone Database 2026f: zone.tab (country time zones)",
+      "url": "https://raw.githubusercontent.com/eggert/tz/2026f/zone.tab",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "VATCalc: 2026 global VAT, GST and sales tax rates table (secondary compilation; the authority's own rate pages were not reachable for this country in this session)",
+      "url": "https://www.vatcalc.com/global/global-vat-gst-sales-tax-rates/",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    }
+  ],
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Brazil has no single national standard rate to record: consumption is taxed by the state-level ICMS (roughly 12% to 25% depending on state and transaction), the federal IPI, the municipal ISS and PIS/COFINS. No rate rows are recorded rather than guessing a national figure; the 2023 constitutional reform that replaces this system with CBS and IBS (transition to 2033) is not yet in its rated phase."
+  ]
+}

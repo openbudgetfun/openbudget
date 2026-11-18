@@ -1,0 +1,10 @@
+### What an entity is, for tax and for which features it may use.
+enum: EntityKind
+serialized: byName
+values:
+  ### A person or household. Envelope budgeting only.
+  - individual
+  ### A self-employed business whose profit is taxed on its owner's return.
+  - soleTrader
+  ### A limited company with its own return.
+  - company

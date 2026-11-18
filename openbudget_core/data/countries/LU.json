@@ -1,0 +1,159 @@
+{
+  "code": "LU",
+  "name": "Luxembourg",
+  "servable": true,
+  "currencies": [
+    "EUR"
+  ],
+  "timeZones": [
+    "Europe/Luxembourg"
+  ],
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "TVA",
+    "rates": [
+      {
+        "label": "standard",
+        "ratePerMillion": 170000,
+        "from": "2015-01-01",
+        "to": "2023-01-01",
+        "appliesTo": null,
+        "source": 5
+      },
+      {
+        "label": "standard",
+        "ratePerMillion": 160000,
+        "from": "2023-01-01",
+        "to": "2024-01-01",
+        "appliesTo": null,
+        "source": 4
+      },
+      {
+        "label": "standard",
+        "ratePerMillion": 170000,
+        "from": "2024-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      },
+      {
+        "label": "reduced",
+        "ratePerMillion": 80000,
+        "from": "2015-01-01",
+        "to": "2023-01-01",
+        "appliesTo": null,
+        "source": 5
+      },
+      {
+        "label": "reduced",
+        "ratePerMillion": 70000,
+        "from": "2023-01-01",
+        "to": "2024-01-01",
+        "appliesTo": null,
+        "source": 4
+      },
+      {
+        "label": "reduced",
+        "ratePerMillion": 80000,
+        "from": "2024-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      },
+      {
+        "label": "superReduced",
+        "ratePerMillion": 30000,
+        "from": "2015-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 5
+      },
+      {
+        "label": "parking",
+        "ratePerMillion": 140000,
+        "from": "2015-01-01",
+        "to": "2023-01-01",
+        "appliesTo": null,
+        "source": 5
+      },
+      {
+        "label": "parking",
+        "ratePerMillion": 130000,
+        "from": "2023-01-01",
+        "to": "2024-01-01",
+        "appliesTo": null,
+        "source": 4
+      },
+      {
+        "label": "parking",
+        "ratePerMillion": 140000,
+        "from": "2024-01-01",
+        "to": null,
+        "appliesTo": null,
+        "source": 4
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Administration des contributions directes (via Guichet.lu)",
+    "url": "https://guichet.public.lu"
+  },
+  "sources": [
+    {
+      "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
+      "url": "https://raw.githubusercontent.com/eggert/tz/2026f/iso3166.tab",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "IANA Time Zone Database 2026f: zone.tab (country time zones)",
+      "url": "https://raw.githubusercontent.com/eggert/tz/2026f/zone.tab",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "European Commission, Your Europe: VAT rules and rates - table of VAT rates applied in EU member countries",
+      "url": "https://europa.eu/youreurope/business/finance-and-tax/vat/vat-rules-rates/index_en.htm",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Luxembourg tax administration (AED) Circular 812-1: VAT rates applicable from 1 January 2024 - end of the temporary 2023 cut (PDF)",
+      "url": "https://pfi.public.lu/dam-assets/pdf/legislation/tva/circulaires/812-1-tva-taux-applicables-partir-01012024.pdf",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Government of Luxembourg: 2015 VAT rise confirmed - 17/14/8 from 1 January 2015, super-reduced 3% unchanged",
+      "url": "https://gouvernement.lu/fr/gouvernement/xavier-bettel/actualites.gouvernement2024+fr+actualites+toutes_actualites+articles+2014+03-mars+28-partenaires-sociaux.html",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    }
+  ],
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Luxembourg's 17% standard rate is listed by the Commission as still in force (table checked 2026-07-13); a legislated rise to 18% has been discussed in budget bills - re-check when the 2027 budget passes.",
+    "The 2015-01-01 rows reflect the 2-point rise of 1 January 2015 (15/12/6 to 17/14/8; the super-reduced 3% rate was unchanged). Under the 2023 solidarity package the standard, intermediate and reduced rates were cut by one point for 2023 (16/13/7) and returned to 17/14/8 on 1 January 2024 (AED Circular 812-1). The super-reduced row is a lower bound: 3% was unchanged in 2015 and applied before, but its true start was not sourced."
+  ]
+}

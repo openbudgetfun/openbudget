@@ -10,49 +10,61 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// A financial account within a budget (checking, savings, credit card, cash, etc.).
+/// Somewhere money or value is held or owed: a bank account, card, loan,
+/// wallet, house or car. Belongs to exactly one entity.
 abstract class Account
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   Account._({
     this.id,
+    required this.entityId,
     required this.name,
-    required this.accountType,
-    required this.balanceCents,
+    required this.kind,
     required this.currencyCode,
-    required this.budgetId,
-    this.creatorId,
+    required this.balanceSource,
+    int? balanceMinor,
+    bool? onBudget,
     this.institutionId,
-    required this.onBudget,
-    required this.sortOrder,
-    required this.isClosed,
-    this.sourceType,
-    this.externalAccountId,
-    this.connectionId,
-    this.lastSyncedAt,
-    this.syncStatus,
+    this.plaidConnectionId,
+    this.plaidAccountId,
+    this.reportedBalanceMinor,
+    this.reportedBalanceAt,
+    this.ledgerAccountId,
+    this.reconciledThroughDate,
+    this.note,
+    int? sortOrder,
+    this.closedAt,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+    DateTime? updatedAt,
+  }) : balanceMinor = balanceMinor ?? 0,
+       onBudget = onBudget ?? false,
+       sortOrder = sortOrder ?? 0,
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   factory Account({
     _isc.UuidValue? id,
+    required _isc.UuidValue entityId,
     required String name,
-    required String accountType,
-    required int balanceCents,
+    required _ifz8weqz.AccountKind kind,
     required String currencyCode,
-    required _isc.UuidValue budgetId,
-    _isc.UuidValue? creatorId,
+    required _ifz8weqz.AccountBalanceSource balanceSource,
+    int? balanceMinor,
+    bool? onBudget,
     _isc.UuidValue? institutionId,
-    required bool onBudget,
-    required int sortOrder,
-    required bool isClosed,
-    String? sourceType,
-    String? externalAccountId,
-    _isc.UuidValue? connectionId,
-    DateTime? lastSyncedAt,
-    String? syncStatus,
+    _isc.UuidValue? plaidConnectionId,
+    String? plaidAccountId,
+    int? reportedBalanceMinor,
+    DateTime? reportedBalanceAt,
+    _isc.UuidValue? ledgerAccountId,
+    DateTime? reconciledThroughDate,
+    String? note,
+    int? sortOrder,
+    DateTime? closedAt,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) = _AccountImpl;
 
   factory Account.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -60,42 +72,59 @@ abstract class Account
       id: jsonSerialization['id'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      name: jsonSerialization['name'] as String,
-      accountType: jsonSerialization['accountType'] as String,
-      balanceCents: jsonSerialization['balanceCents'] as int,
-      currencyCode: jsonSerialization['currencyCode'] as String,
-      budgetId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
-      creatorId: jsonSerialization['creatorId'] == null
+      name: jsonSerialization['name'] as String,
+      kind: _ifz8weqz.AccountKind.fromJson(
+        (jsonSerialization['kind'] as String),
+      ),
+      currencyCode: jsonSerialization['currencyCode'] as String,
+      balanceSource: _ifz8weqz.AccountBalanceSource.fromJson(
+        (jsonSerialization['balanceSource'] as String),
+      ),
+      balanceMinor: jsonSerialization['balanceMinor'] as int?,
+      onBudget: jsonSerialization['onBudget'] == null
           ? null
-          : _isc.UuidValueJsonExtension.fromJson(
-              jsonSerialization['creatorId'],
-            ),
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['onBudget']),
       institutionId: jsonSerialization['institutionId'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(
               jsonSerialization['institutionId'],
             ),
-      onBudget: _isc.BoolJsonExtension.fromJson(jsonSerialization['onBudget']),
-      sortOrder: jsonSerialization['sortOrder'] as int,
-      isClosed: _isc.BoolJsonExtension.fromJson(jsonSerialization['isClosed']),
-      sourceType: jsonSerialization['sourceType'] as String?,
-      externalAccountId: jsonSerialization['externalAccountId'] as String?,
-      connectionId: jsonSerialization['connectionId'] == null
+      plaidConnectionId: jsonSerialization['plaidConnectionId'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(
-              jsonSerialization['connectionId'],
+              jsonSerialization['plaidConnectionId'],
             ),
-      lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
+      plaidAccountId: jsonSerialization['plaidAccountId'] as String?,
+      reportedBalanceMinor: jsonSerialization['reportedBalanceMinor'] as int?,
+      reportedBalanceAt: jsonSerialization['reportedBalanceAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(
-              jsonSerialization['lastSyncedAt'],
+              jsonSerialization['reportedBalanceAt'],
             ),
-      syncStatus: jsonSerialization['syncStatus'] as String?,
+      ledgerAccountId: jsonSerialization['ledgerAccountId'] == null
+          ? null
+          : _isc.UuidValueJsonExtension.fromJson(
+              jsonSerialization['ledgerAccountId'],
+            ),
+      reconciledThroughDate: jsonSerialization['reconciledThroughDate'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(
+              jsonSerialization['reconciledThroughDate'],
+            ),
+      note: jsonSerialization['note'] as String?,
+      sortOrder: jsonSerialization['sortOrder'] as int?,
+      closedAt: jsonSerialization['closedAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['closedAt']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+      updatedAt: jsonSerialization['updatedAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
@@ -104,94 +133,110 @@ abstract class Account
   /// the id will be null.
   _isc.UuidValue? id;
 
+  _isc.UuidValue entityId;
+
   String name;
 
-  /// Account type: checking, savings, creditCard, cash, investment, other.
-  String accountType;
+  _ifz8weqz.AccountKind kind;
 
-  /// Current balance in integer cents.
-  int balanceCents;
-
-  /// ISO 4217 currency code.
+  /// ISO 4217 code. Every transaction and valuation amount on the account is
+  /// in this currency. Fixed after creation.
   String currencyCode;
 
-  _isc.UuidValue budgetId;
+  /// Fixed after creation.
+  _ifz8weqz.AccountBalanceSource balanceSource;
 
-  /// The authenticated user that created this account record.
-  _isc.UuidValue? creatorId;
+  /// Cached current balance in account-currency minor units, signed:
+  /// positive is owned, negative is owed. Equals the sum of the account's
+  /// transaction amounts, or its latest valuation. Written only by
+  /// `AccountBalanceService`.
+  int balanceMinor;
 
-  /// Optional linked financial institution for this account.
-  _isc.UuidValue? institutionId;
-
-  /// Whether this account is included in the budget's "on budget" calculations.
+  /// Whether the account's money is in the envelope plan.
   bool onBudget;
 
-  /// Sort order for display.
+  _isc.UuidValue? institutionId;
+
+  _isc.UuidValue? plaidConnectionId;
+
+  /// Plaid `account_id`, when linked through Plaid.
+  String? plaidAccountId;
+
+  /// Balance the institution last reported, in account minor units. Shown to
+  /// prompt a reconciliation; never used for budgeting or net worth.
+  int? reportedBalanceMinor;
+
+  DateTime? reportedBalanceAt;
+
+  /// The ledger account that mirrors this account in ledger-mode books.
+  _isc.UuidValue? ledgerAccountId;
+
+  /// Statement date of the last completed reconciliation.
+  DateTime? reconciledThroughDate;
+
+  String? note;
+
   int sortOrder;
 
-  /// Whether this account has been closed/archived.
-  bool isClosed;
-
-  /// Source of account data: manual, plaid, solana.
-  String? sourceType;
-
-  /// External source account identifier (e.g. Plaid account_id or wallet address).
-  String? externalAccountId;
-
-  /// Connection identifier used by external account sync providers.
-  _isc.UuidValue? connectionId;
-
-  /// Last time the account was synchronized from an external provider.
-  DateTime? lastSyncedAt;
-
-  /// Latest sync status for the account (e.g. synced, stale, error).
-  String? syncStatus;
+  DateTime? closedAt;
 
   DateTime createdAt;
+
+  DateTime updatedAt;
 
   /// Returns a shallow copy of this [Account]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
   Account copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? entityId,
     String? name,
-    String? accountType,
-    int? balanceCents,
+    _ifz8weqz.AccountKind? kind,
     String? currencyCode,
-    _isc.UuidValue? budgetId,
-    _isc.UuidValue? creatorId = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? institutionId = const _isc.$UndefinedUuidValue(),
+    _ifz8weqz.AccountBalanceSource? balanceSource,
+    int? balanceMinor,
     bool? onBudget,
+    _isc.UuidValue? institutionId = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? plaidConnectionId = const _isc.$UndefinedUuidValue(),
+    String? plaidAccountId,
+    int? reportedBalanceMinor,
+    DateTime? reportedBalanceAt = const _isc.$UndefinedDateTime(),
+    _isc.UuidValue? ledgerAccountId = const _isc.$UndefinedUuidValue(),
+    DateTime? reconciledThroughDate = const _isc.$UndefinedDateTime(),
+    String? note,
     int? sortOrder,
-    bool? isClosed,
-    String? sourceType,
-    String? externalAccountId,
-    _isc.UuidValue? connectionId = const _isc.$UndefinedUuidValue(),
-    DateTime? lastSyncedAt = const _isc.$UndefinedDateTime(),
-    String? syncStatus,
+    DateTime? closedAt = const _isc.$UndefinedDateTime(),
     DateTime? createdAt,
+    DateTime? updatedAt,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Account',
       if (id != null) 'id': id?.toJson(),
+      'entityId': entityId.toJson(),
       'name': name,
-      'accountType': accountType,
-      'balanceCents': balanceCents,
+      'kind': kind.toJson(),
       'currencyCode': currencyCode,
-      'budgetId': budgetId.toJson(),
-      if (creatorId != null) 'creatorId': creatorId?.toJson(),
-      if (institutionId != null) 'institutionId': institutionId?.toJson(),
+      'balanceSource': balanceSource.toJson(),
+      'balanceMinor': balanceMinor,
       'onBudget': onBudget,
+      if (institutionId != null) 'institutionId': institutionId?.toJson(),
+      if (plaidConnectionId != null)
+        'plaidConnectionId': plaidConnectionId?.toJson(),
+      if (plaidAccountId != null) 'plaidAccountId': plaidAccountId,
+      if (reportedBalanceMinor != null)
+        'reportedBalanceMinor': reportedBalanceMinor,
+      if (reportedBalanceAt != null)
+        'reportedBalanceAt': reportedBalanceAt?.toJson(),
+      if (ledgerAccountId != null) 'ledgerAccountId': ledgerAccountId?.toJson(),
+      if (reconciledThroughDate != null)
+        'reconciledThroughDate': reconciledThroughDate?.toJson(),
+      if (note != null) 'note': note,
       'sortOrder': sortOrder,
-      'isClosed': isClosed,
-      if (sourceType != null) 'sourceType': sourceType,
-      if (externalAccountId != null) 'externalAccountId': externalAccountId,
-      if (connectionId != null) 'connectionId': connectionId?.toJson(),
-      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
-      if (syncStatus != null) 'syncStatus': syncStatus,
+      if (closedAt != null) 'closedAt': closedAt?.toJson(),
       'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -200,22 +245,29 @@ abstract class Account
     return {
       '__className__': 'Account',
       if (id != null) 'id': id?.toJson(),
+      'entityId': entityId.toJson(),
       'name': name,
-      'accountType': accountType,
-      'balanceCents': balanceCents,
+      'kind': kind.toJson(),
       'currencyCode': currencyCode,
-      'budgetId': budgetId.toJson(),
-      if (creatorId != null) 'creatorId': creatorId?.toJson(),
-      if (institutionId != null) 'institutionId': institutionId?.toJson(),
+      'balanceSource': balanceSource.toJson(),
+      'balanceMinor': balanceMinor,
       'onBudget': onBudget,
+      if (institutionId != null) 'institutionId': institutionId?.toJson(),
+      if (plaidConnectionId != null)
+        'plaidConnectionId': plaidConnectionId?.toJson(),
+      if (plaidAccountId != null) 'plaidAccountId': plaidAccountId,
+      if (reportedBalanceMinor != null)
+        'reportedBalanceMinor': reportedBalanceMinor,
+      if (reportedBalanceAt != null)
+        'reportedBalanceAt': reportedBalanceAt?.toJson(),
+      if (ledgerAccountId != null) 'ledgerAccountId': ledgerAccountId?.toJson(),
+      if (reconciledThroughDate != null)
+        'reconciledThroughDate': reconciledThroughDate?.toJson(),
+      if (note != null) 'note': note,
       'sortOrder': sortOrder,
-      'isClosed': isClosed,
-      if (sourceType != null) 'sourceType': sourceType,
-      if (externalAccountId != null) 'externalAccountId': externalAccountId,
-      if (connectionId != null) 'connectionId': connectionId?.toJson(),
-      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
-      if (syncStatus != null) 'syncStatus': syncStatus,
+      if (closedAt != null) 'closedAt': closedAt?.toJson(),
       'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -230,40 +282,46 @@ class _Undefined {}
 class _AccountImpl extends Account {
   _AccountImpl({
     _isc.UuidValue? id,
+    required _isc.UuidValue entityId,
     required String name,
-    required String accountType,
-    required int balanceCents,
+    required _ifz8weqz.AccountKind kind,
     required String currencyCode,
-    required _isc.UuidValue budgetId,
-    _isc.UuidValue? creatorId,
+    required _ifz8weqz.AccountBalanceSource balanceSource,
+    int? balanceMinor,
+    bool? onBudget,
     _isc.UuidValue? institutionId,
-    required bool onBudget,
-    required int sortOrder,
-    required bool isClosed,
-    String? sourceType,
-    String? externalAccountId,
-    _isc.UuidValue? connectionId,
-    DateTime? lastSyncedAt,
-    String? syncStatus,
+    _isc.UuidValue? plaidConnectionId,
+    String? plaidAccountId,
+    int? reportedBalanceMinor,
+    DateTime? reportedBalanceAt,
+    _isc.UuidValue? ledgerAccountId,
+    DateTime? reconciledThroughDate,
+    String? note,
+    int? sortOrder,
+    DateTime? closedAt,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) : super._(
          id: id,
+         entityId: entityId,
          name: name,
-         accountType: accountType,
-         balanceCents: balanceCents,
+         kind: kind,
          currencyCode: currencyCode,
-         budgetId: budgetId,
-         creatorId: creatorId,
-         institutionId: institutionId,
+         balanceSource: balanceSource,
+         balanceMinor: balanceMinor,
          onBudget: onBudget,
+         institutionId: institutionId,
+         plaidConnectionId: plaidConnectionId,
+         plaidAccountId: plaidAccountId,
+         reportedBalanceMinor: reportedBalanceMinor,
+         reportedBalanceAt: reportedBalanceAt,
+         ledgerAccountId: ledgerAccountId,
+         reconciledThroughDate: reconciledThroughDate,
+         note: note,
          sortOrder: sortOrder,
-         isClosed: isClosed,
-         sourceType: sourceType,
-         externalAccountId: externalAccountId,
-         connectionId: connectionId,
-         lastSyncedAt: lastSyncedAt,
-         syncStatus: syncStatus,
+         closedAt: closedAt,
          createdAt: createdAt,
+         updatedAt: updatedAt,
        );
 
   /// Returns a shallow copy of this [Account]
@@ -272,51 +330,61 @@ class _AccountImpl extends Account {
   @override
   Account copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? entityId,
     String? name,
-    String? accountType,
-    int? balanceCents,
+    _ifz8weqz.AccountKind? kind,
     String? currencyCode,
-    _isc.UuidValue? budgetId,
-    _isc.UuidValue? creatorId = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? institutionId = const _isc.$UndefinedUuidValue(),
+    _ifz8weqz.AccountBalanceSource? balanceSource,
+    int? balanceMinor,
     bool? onBudget,
+    _isc.UuidValue? institutionId = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? plaidConnectionId = const _isc.$UndefinedUuidValue(),
+    Object? plaidAccountId = _Undefined,
+    Object? reportedBalanceMinor = _Undefined,
+    DateTime? reportedBalanceAt = const _isc.$UndefinedDateTime(),
+    _isc.UuidValue? ledgerAccountId = const _isc.$UndefinedUuidValue(),
+    DateTime? reconciledThroughDate = const _isc.$UndefinedDateTime(),
+    Object? note = _Undefined,
     int? sortOrder,
-    bool? isClosed,
-    Object? sourceType = _Undefined,
-    Object? externalAccountId = _Undefined,
-    _isc.UuidValue? connectionId = const _isc.$UndefinedUuidValue(),
-    DateTime? lastSyncedAt = const _isc.$UndefinedDateTime(),
-    Object? syncStatus = _Undefined,
+    DateTime? closedAt = const _isc.$UndefinedDateTime(),
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return Account(
       id: id is _isc.UndefinedSentinel ? this.id : id,
+      entityId: entityId ?? this.entityId,
       name: name ?? this.name,
-      accountType: accountType ?? this.accountType,
-      balanceCents: balanceCents ?? this.balanceCents,
+      kind: kind ?? this.kind,
       currencyCode: currencyCode ?? this.currencyCode,
-      budgetId: budgetId ?? this.budgetId,
-      creatorId: creatorId is _isc.UndefinedSentinel
-          ? this.creatorId
-          : creatorId,
+      balanceSource: balanceSource ?? this.balanceSource,
+      balanceMinor: balanceMinor ?? this.balanceMinor,
+      onBudget: onBudget ?? this.onBudget,
       institutionId: institutionId is _isc.UndefinedSentinel
           ? this.institutionId
           : institutionId,
-      onBudget: onBudget ?? this.onBudget,
+      plaidConnectionId: plaidConnectionId is _isc.UndefinedSentinel
+          ? this.plaidConnectionId
+          : plaidConnectionId,
+      plaidAccountId: plaidAccountId is String?
+          ? plaidAccountId
+          : this.plaidAccountId,
+      reportedBalanceMinor: reportedBalanceMinor is int?
+          ? reportedBalanceMinor
+          : this.reportedBalanceMinor,
+      reportedBalanceAt: reportedBalanceAt is _isc.UndefinedSentinel
+          ? this.reportedBalanceAt
+          : reportedBalanceAt,
+      ledgerAccountId: ledgerAccountId is _isc.UndefinedSentinel
+          ? this.ledgerAccountId
+          : ledgerAccountId,
+      reconciledThroughDate: reconciledThroughDate is _isc.UndefinedSentinel
+          ? this.reconciledThroughDate
+          : reconciledThroughDate,
+      note: note is String? ? note : this.note,
       sortOrder: sortOrder ?? this.sortOrder,
-      isClosed: isClosed ?? this.isClosed,
-      sourceType: sourceType is String? ? sourceType : this.sourceType,
-      externalAccountId: externalAccountId is String?
-          ? externalAccountId
-          : this.externalAccountId,
-      connectionId: connectionId is _isc.UndefinedSentinel
-          ? this.connectionId
-          : connectionId,
-      lastSyncedAt: lastSyncedAt is _isc.UndefinedSentinel
-          ? this.lastSyncedAt
-          : lastSyncedAt,
-      syncStatus: syncStatus is String? ? syncStatus : this.syncStatus,
+      closedAt: closedAt is _isc.UndefinedSentinel ? this.closedAt : closedAt,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

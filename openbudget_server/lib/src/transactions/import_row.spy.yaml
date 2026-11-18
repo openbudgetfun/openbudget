@@ -1,6 +1,14 @@
-### A single row of data for bulk transaction import.
+### One row of a bulk import into one account.
 class: ImportRow
 fields:
+  ### Calendar date.
+  date: DateTime
+  ### Signed amount in the account's minor units.
+  amountMinor: int
   description: String
-  amountCents: int
-  transactionDate: DateTime
+  payeeName: String?
+  memo: String?
+  ### Stable id from the source. When null the server derives
+  ### `csv:<sha256(date|amountMinor|description|n)>`, where n counts identical
+  ### rows earlier in the same file.
+  externalId: String?

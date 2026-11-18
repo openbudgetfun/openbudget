@@ -5,7 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/recent_moves_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
@@ -15,18 +15,19 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 enum _RecentMovesTab { all, moved, assigned }
 
 class RecentMovesScreen extends HookConsumerWidget {
-  const RecentMovesScreen({required this.budgetId, super.key});
+  const RecentMovesScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final selectedTab = useState(_RecentMovesTab.all);
-    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
-    final allEvents = ref.watch(recentMovesForBudgetProvider(budgetId));
-    final introSeen = ref.watch(recentMovesIntroSeenProvider(budgetId));
+    final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
+    final viewAsync = ref.watch(budgetMonthProvider(entityId));
+    final allEvents = ref.watch(recentMovesForBudgetProvider(entityId));
+    final introSeen = ref.watch(recentMovesIntroSeenProvider(entityId));
     final hideAmounts = ref.watch(hideAmountsProvider);
 
     useEffect(() {
@@ -35,7 +36,7 @@ class RecentMovesScreen extends HookConsumerWidget {
       unawaited(
         Future.microtask(() async {
           if (!context.mounted) return;
-          ref.read(recentMovesIntroSeenSetProvider.notifier).markSeen(budgetId);
+          ref.read(recentMovesIntroSeenSetProvider.notifier).markSeen(entityId);
           await showDialog<void>(
             context: context,
             builder: (_) => const _RecentMovesIntroDialog(),
@@ -74,7 +75,7 @@ class RecentMovesScreen extends HookConsumerWidget {
           ),
         ],
       ),
-      body: summaryAsync.when(
+      body: groupsAsync.when(
         loading: () => Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
         error: (_, _) => Padding(
           padding: const EdgeInsets.all(SpacingTokens.md),
@@ -83,10 +84,9 @@ class RecentMovesScreen extends HookConsumerWidget {
             message: l10n.reportsLoadError,
           ),
         ),
-        data: (summary) {
-          final currencyCode = summary.budget.currencyCode;
-
-          final envelopeNames = _buildEnvelopeNameMap(summary.categories);
+        data: (groups) {
+          final currencyCode = viewAsync.value?.currencyCode ?? '';
+          final envelopeNames = _buildEnvelopeNameMap(groups);
           final events = _filteredEvents(selectedTab.value, allEvents);
 
           return Column(
@@ -115,7 +115,7 @@ class RecentMovesScreen extends HookConsumerWidget {
                         onEnvelopeTap: (envelopeId) => context.pushNamed(
                           envelopeMovesRoute,
                           pathParameters: {
-                            'id': budgetId,
+                            'entityId': entityId,
                             'envelopeId': envelopeId,
                           },
                         ),
@@ -146,15 +146,13 @@ class RecentMovesScreen extends HookConsumerWidget {
   int _sortByOccurredAt(RecentMoveEvent a, RecentMoveEvent b) =>
       b.occurredAt.compareTo(a.occurredAt);
 
-  Map<String, String> _buildEnvelopeNameMap(
-    List<CategoryWithEnvelopes> groups,
-  ) {
+  Map<String, String> _buildEnvelopeNameMap(List<CategoryMonthGroup> groups) {
     final map = <String, String>{};
     for (final group in groups) {
-      for (final envelope in group.envelopes) {
-        final id = envelope.id?.toString();
+      for (final view in group.envelopes) {
+        final id = view.envelope.id?.toString();
         if (id != null && id.isNotEmpty) {
-          map[id] = envelope.name;
+          map[id] = view.envelope.name;
         }
       }
     }
@@ -229,20 +227,21 @@ class _RecentMovesIntroDialog extends HookWidget {
 
 class EnvelopeMovesScreen extends HookConsumerWidget {
   const EnvelopeMovesScreen({
-    required this.budgetId,
+    required this.entityId,
     required this.envelopeId,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final String envelopeId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
-    final allEvents = ref.watch(recentMovesForBudgetProvider(budgetId));
+    final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
+    final viewAsync = ref.watch(budgetMonthProvider(entityId));
+    final allEvents = ref.watch(recentMovesForBudgetProvider(entityId));
     final hideAmounts = ref.watch(hideAmountsProvider);
 
     final palette = theme.ob;
@@ -278,7 +277,7 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
           ),
         ],
       ),
-      body: summaryAsync.when(
+      body: groupsAsync.when(
         loading: () => Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
         error: (_, _) => Padding(
           padding: const EdgeInsets.all(SpacingTokens.md),
@@ -287,14 +286,14 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
             message: l10n.reportsLoadError,
           ),
         ),
-        data: (summary) {
-          final currencyCode = summary.budget.currencyCode;
+        data: (groups) {
+          final currencyCode = viewAsync.value?.currencyCode ?? '';
           final envelopeNames = <String, String>{};
-          for (final group in summary.categories) {
-            for (final envelope in group.envelopes) {
-              final id = envelope.id?.toString();
+          for (final group in groups) {
+            for (final view in group.envelopes) {
+              final id = view.envelope.id?.toString();
               if (id != null && id.isNotEmpty) {
-                envelopeNames[id] = envelope.name;
+                envelopeNames[id] = view.envelope.name;
               }
             }
           }
@@ -638,7 +637,7 @@ class _RecentMoveRow extends HookWidget {
     final palette = theme.ob;
     final amountText = hideAmounts
         ? hiddenAmountPlaceholder
-        : formatCentsForCode(event.amountCents, currencyCode);
+        : formatMinorForCode(event.amountMinor, currencyCode);
 
     final toName =
         envelopeNames[event.toEnvelopeId] ?? l10n.recentMovesUnnamedEnvelope;
@@ -731,15 +730,15 @@ class _EnvelopeMoveRow extends HookWidget {
         envelopeNames[event.toEnvelopeId] ?? l10n.recentMovesUnnamedEnvelope;
 
     final signedAmount = switch (event.type) {
-      RecentMoveType.assigned => event.amountCents,
+      RecentMoveType.assigned => event.amountMinor,
       RecentMoveType.moved =>
         event.toEnvelopeId == envelopeId
-            ? event.amountCents
-            : -event.amountCents,
+            ? event.amountMinor
+            : -event.amountMinor,
     };
     final amountText = hideAmounts
         ? hiddenAmountPlaceholder
-        : formatCentsForCode(signedAmount, currencyCode);
+        : formatMinorForCode(signedAmount, currencyCode);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(

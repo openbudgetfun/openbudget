@@ -1,0 +1,19 @@
+### What an account holds or owes.
+###
+### Whether a kind is a liability, may be on budget, and which balance
+### sources it allows are rules in `AccountKindRules`, never stored.
+enum: AccountKind
+serialized: byName
+values:
+  - cash
+  - checking
+  - savings
+  - creditCard
+  - loan
+  - mortgage
+  - investment
+  - crypto
+  - property
+  - vehicle
+  - otherAsset
+  - otherLiability

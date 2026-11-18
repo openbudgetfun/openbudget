@@ -9,19 +9,19 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AutoAssignDialog extends HookConsumerWidget {
   const AutoAssignDialog({
-    required this.budgetId,
+    required this.entityId,
     required this.currencyCode,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final String currencyCode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final proposalAsync = ref.watch(autoAssignProposalProvider(budgetId));
+    final proposalAsync = ref.watch(autoAssignProposalProvider(entityId));
     final isAssigning = useState(false);
 
     return AlertDialog(
@@ -92,8 +92,8 @@ class AutoAssignDialog extends HookConsumerWidget {
                         ),
                       ),
                       ObAmount(
-                        formatCentsForCode(
-                          proposal.totalAssignedCents,
+                        formatMinorForCode(
+                          proposal.totalAssignedMinor,
                           currencyCode,
                         ),
                         tone: ObTone.funded,
@@ -133,7 +133,7 @@ class AutoAssignDialog extends HookConsumerWidget {
                             ),
                             const SizedBox(width: SpacingTokens.sm),
                             ObAmount(
-                              '+${formatCentsForCode(item.addedCents, currencyCode)}',
+                              '+${formatMinorForCode(item.addedMinor, currencyCode)}',
                               tone: ObTone.funded,
                               style: theme.textTheme.bodyMedium,
                             ),
@@ -195,9 +195,10 @@ class AutoAssignDialog extends HookConsumerWidget {
 
     isAssigning.value = true;
     try {
-      final count = await ref
+      await ref
           .read(autoAssignActionsProvider.notifier)
-          .execute(budgetId: budgetId, items: proposal.items);
+          .execute(entityId: entityId, items: proposal.items);
+      final count = proposal.items.length;
       if (context.mounted) {
         showAppToast(
           context,

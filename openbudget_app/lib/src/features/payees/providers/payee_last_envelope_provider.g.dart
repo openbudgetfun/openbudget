@@ -68,7 +68,7 @@ final class PayeeLastEnvelopeProvider
   }
 }
 
-String _$payeeLastEnvelopeHash() => r'b987f3d9d79be1eafd5999d26e0715a86add8710';
+String _$payeeLastEnvelopeHash() => r'deeae6f4a9e283bd0fb8888ee6e821f8d5acd20f';
 
 /// Fetches the last-used envelope ID for a payee in a budget.
 ///
@@ -89,8 +89,8 @@ final class PayeeLastEnvelopeFamily extends $Family
   ///
   /// Returns null if the payee has no previous transactions with an envelope.
 
-  PayeeLastEnvelopeProvider call(String payeeId, String budgetId) =>
-      PayeeLastEnvelopeProvider._(argument: (payeeId, budgetId), from: this);
+  PayeeLastEnvelopeProvider call(String payeeId, String entityId) =>
+      PayeeLastEnvelopeProvider._(argument: (payeeId, entityId), from: this);
 
   @override
   String toString() => r'payeeLastEnvelopeProvider';

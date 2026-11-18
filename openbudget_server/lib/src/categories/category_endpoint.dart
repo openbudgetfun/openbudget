@@ -1,84 +1,55 @@
-import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/categories/category_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// API surface for category operations.
 ///
-/// All methods require authentication.
+/// All methods require authentication and delegate to [CategoryService],
+/// which owns the entity boundary.
 class CategoryEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
 
-  /// Creates a new category within a budget.
+  /// Creates a category at the end of the entity's list.
   Future<Category> create(
     Session session,
+    UuidValue entityId,
     String name,
-    UuidValue budgetId,
-    int sortOrder,
-  ) async {
-    final category = await CategoryService.create(
-      session,
-      name: name,
-      budgetId: budgetId,
-      sortOrder: sortOrder,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(category.budgetId);
-    return category;
-  }
+  ) => CategoryService.create(session, entityId: entityId, name: name);
 
-  /// Lists all categories for a budget.
-  Future<List<Category>> list(Session session, UuidValue budgetId) async =>
-      CategoryService.listForBudget(session, budgetId: budgetId);
+  /// Lists every category of an entity, hidden ones included.
+  Future<List<Category>> list(Session session, UuidValue entityId) =>
+      CategoryService.list(session, entityId: entityId);
 
-  /// Gets a single category by ID.
-  Future<Category> get(Session session, UuidValue categoryId) async =>
+  /// Loads one category by id.
+  Future<Category> get(Session session, UuidValue categoryId) =>
       CategoryService.getById(session, categoryId: categoryId);
 
-  /// Updates a category by ID.
+  /// Renames or hides a category.
   Future<Category> update(
     Session session,
     UuidValue categoryId, {
     String? name,
-    int? sortOrder,
     bool? isHidden,
-  }) async {
-    final category = await CategoryService.update(
-      session,
-      categoryId: categoryId,
-      name: name,
-      sortOrder: sortOrder,
-      isHidden: isHidden,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(category.budgetId);
-    return category;
-  }
+  }) => CategoryService.update(
+    session,
+    categoryId: categoryId,
+    name: name,
+    isHidden: isHidden,
+  );
 
-  /// Batch-reorders categories by their new position.
-  ///
-  /// The [categoryIds] list defines the new sort order: the first ID gets
-  /// sort order 0, the second gets 1, etc.
+  /// Rewrites the entity's category order from an exact id list.
   Future<List<Category>> reorder(
     Session session,
-    UuidValue budgetId,
+    UuidValue entityId,
     List<UuidValue> categoryIds,
-  ) async {
-    final categories = await CategoryService.reorder(
-      session,
-      budgetId: budgetId,
-      categoryIds: categoryIds,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
-    return categories;
-  }
+  ) => CategoryService.reorder(
+    session,
+    entityId: entityId,
+    categoryIds: categoryIds,
+  );
 
-  /// Deletes a category by ID.
-  Future<Category> delete(Session session, UuidValue categoryId) async {
-    final category = await CategoryService.delete(
-      session,
-      categoryId: categoryId,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(category.budgetId);
-    return category;
-  }
+  /// Deletes an empty category.
+  Future<void> delete(Session session, UuidValue categoryId) =>
+      CategoryService.delete(session, categoryId: categoryId);
 }

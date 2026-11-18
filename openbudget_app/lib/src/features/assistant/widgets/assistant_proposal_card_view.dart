@@ -14,12 +14,12 @@ enum _ProposalAction { apply, dismiss }
 /// A change the assistant suggests, with the two decisions a person can make.
 class AssistantProposalCardView extends HookConsumerWidget {
   const AssistantProposalCardView({
-    required this.budgetId,
+    required this.entityId,
     required this.proposal,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final AssistantProposalCard proposal;
 
   @override
@@ -37,9 +37,9 @@ class AssistantProposalCardView extends HookConsumerWidget {
       try {
         final actions = ref.read(assistantProposalActionsProvider.notifier);
         if (action == _ProposalAction.apply) {
-          await actions.apply(budgetId: budgetId, proposalId: proposal.id);
+          await actions.apply(entityId: entityId, proposalId: proposal.id);
         } else {
-          await actions.dismiss(budgetId: budgetId, proposalId: proposal.id);
+          await actions.dismiss(entityId: entityId, proposalId: proposal.id);
         }
 
         if (context.mounted) {

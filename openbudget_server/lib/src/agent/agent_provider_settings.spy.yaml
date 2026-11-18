@@ -3,16 +3,17 @@
 ### The API key is encrypted with AES-256-GCM before it reaches the database
 ### and is never returned to a client.
 class: AgentProviderSettings
+serverOnly: true
 table: agent_provider_settings
 fields:
   id: UuidValue?, defaultPersist=random_v7
-  userId: UuidValue
+  userId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
   ### HTTPS base URL of the provider's OpenAI-compatible API.
   baseUrl: String
   model: String
   ### Base64 AES-GCM ciphertext of the API key, including its MAC tag.
   encryptedApiKey: String
-  ### Base64 nonce used for [encryptedApiKey].
+  ### Base64 nonce used for encryptedApiKey.
   nonce: String
   ### The last four characters of the key, for display only.
   keyHint: String

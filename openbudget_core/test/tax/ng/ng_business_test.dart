@@ -43,7 +43,7 @@ void main() {
         expect(ngLine(report, 'Profit chargeable').amountMinor, 720_000_000);
         expect(report.liabilities, isEmpty);
         expect(report.alreadyPaidMinor, 0);
-        expect(report.entityKind, TaxEntityKind.soleTrader);
+        expect(report.entityKind, EntityKind.soleTrader);
       },
     );
 
@@ -226,7 +226,7 @@ void main() {
       TaxReport reportWith(NgSmallCompanyCeiling ceiling) => ngRules.report(
         TaxInput(
           profile: NgTaxProfile(
-            entityKind: TaxEntityKind.company,
+            entityKind: EntityKind.company,
             smallCompanyCeiling: ceiling,
           ),
           year: ngRules.taxYear(2026),
@@ -261,7 +261,7 @@ void main() {
 
     test('the profile ceiling round-trips through JSON', () {
       const profile = NgTaxProfile(
-        entityKind: TaxEntityKind.company,
+        entityKind: EntityKind.company,
         smallCompanyCeiling: NgSmallCompanyCeiling.ntaaIntended,
         mneGroupMember: true,
       );
@@ -270,7 +270,7 @@ void main() {
       expect(restored.mneGroupMember, isTrue);
 
       // Defaults keep older stored profiles valid.
-      const legacy = NgTaxProfile(entityKind: TaxEntityKind.company);
+      const legacy = NgTaxProfile(entityKind: EntityKind.company);
       final json = legacy.toJson()..remove('smallCompanyCeiling');
       final parsed = TaxProfile.fromJson(json) as NgTaxProfile;
       expect(parsed.smallCompanyCeiling, NgSmallCompanyCeiling.ntaGazette);
@@ -426,7 +426,7 @@ void main() {
       final report = ngRules.report(
         TaxInput(
           profile: const NgTaxProfile(
-            entityKind: TaxEntityKind.company,
+            entityKind: EntityKind.company,
             mneGroupMember: true,
           ),
           year: ngRules.taxYear(2026),

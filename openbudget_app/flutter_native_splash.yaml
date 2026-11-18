@@ -3,8 +3,8 @@
 # which then runs this generator. Colours are `ObSwatch.paper` and
 # `ObSwatch.night`.
 flutter_native_splash:
-  color: "#FCF8EF"
-  color_dark: "#1D2131"
+  color: "#FFF4DE"
+  color_dark: "#140F26"
   image: build/brand/splash.png
   image_dark: build/brand/splash_night.png
   android: true
@@ -12,9 +12,9 @@ flutter_native_splash:
   web: true
   fullscreen: true
   android_12:
-    color: "#FCF8EF"
-    color_dark: "#1D2131"
+    color: "#FFF4DE"
+    color_dark: "#140F26"
     image: build/brand/splash_android12.png
     image_dark: build/brand/splash_android12_night.png
-    icon_background_color: "#FCF8EF"
-    icon_background_color_dark: "#1D2131"
+    icon_background_color: "#FFF4DE"
+    icon_background_color_dark: "#140F26"

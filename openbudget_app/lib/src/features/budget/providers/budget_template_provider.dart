@@ -1,5 +1,4 @@
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -10,10 +9,20 @@ part 'budget_template_provider.g.dart';
 @riverpod
 Future<List<BudgetTemplate>> budgetTemplateList(
   Ref ref,
-  String budgetId,
+  String entityId,
 ) async {
   final client = ref.read(serverpodClientProvider);
-  return client.budgetTemplate.list(UuidValue.fromString(budgetId));
+  return client.budget.listTemplates(UuidValue.fromString(entityId));
+}
+
+/// One template's envelope lines, with this month's allocations.
+@riverpod
+Future<List<BudgetTemplateLine>> budgetTemplateLines(
+  Ref ref,
+  String templateId,
+) async {
+  final client = ref.read(serverpodClientProvider);
+  return client.budget.getTemplateLines(UuidValue.fromString(templateId));
 }
 
 @Riverpod(keepAlive: true)
@@ -21,62 +30,49 @@ class BudgetTemplateActions extends _$BudgetTemplateActions {
   @override
   void build() {}
 
-  /// Saves the current month's allocations as a named template.
+  /// Saves the selected month's exact sparse allocations as a template and
+  /// returns the new month view of `applyTemplate`.
   Future<BudgetTemplate> saveFromCurrentMonth({
-    required String budgetId,
+    required String entityId,
     required String name,
   }) async {
     final client = ref.read(serverpodClientProvider);
-    final selectedMonth = ref.read(selectedMonthProvider(budgetId));
+    final month = ref.read(selectedMonthProvider(entityId));
 
-    final budgetUuid = UuidValue.fromString(budgetId);
-    final template = await client.budgetTemplate.saveFromMonth(
-      budgetUuid,
+    final template = await client.budget.saveTemplate(
+      UuidValue.fromString(entityId),
+      month,
       name,
-      selectedMonth.year,
-      selectedMonth.month,
     );
 
-    ref.invalidate(budgetTemplateListProvider(budgetId));
+    ref.invalidate(budgetTemplateListProvider(entityId));
     return template;
   }
 
-  /// Applies a template to the currently selected month.
-  Future<void> applyTemplate({
+  /// Applies a template to the selected month; returns the new month view.
+  Future<BudgetMonthView?> applyTemplate({
     required String templateId,
-    required String budgetId,
+    required String entityId,
   }) async {
     final client = ref.read(serverpodClientProvider);
-    final selectedMonth = ref.read(selectedMonthProvider(budgetId));
+    final month = ref.read(selectedMonthProvider(entityId));
 
-    final templateUuid = UuidValue.fromString(templateId);
-    final budgetUuid = UuidValue.fromString(budgetId);
-    await client.budgetTemplate.applyToMonth(
-      templateUuid,
-      budgetUuid,
-      selectedMonth.year,
-      selectedMonth.month,
+    final view = await client.budget.applyTemplate(
+      UuidValue.fromString(templateId),
+      month,
     );
 
     ref
-      ..invalidate(
-        monthlyAllocationsProvider(
-          budgetId,
-          selectedMonth.year,
-          selectedMonth.month,
-        ),
-      )
-      ..invalidate(budgetMonthlySummaryProvider(budgetId));
+      ..invalidate(budgetTemplateListProvider(entityId))
+      ..invalidate(budgetMonthProvider(entityId))
+      ..invalidate(budgetMonthGroupsProvider);
+    return view;
   }
 
   /// Deletes a template.
-  Future<void> deleteTemplate({
-    required String templateId,
-    required String budgetId,
-  }) async {
+  Future<void> deleteTemplate({required String templateId}) async {
     final client = ref.read(serverpodClientProvider);
-    await client.budgetTemplate.delete(UuidValue.fromString(templateId));
-
-    ref.invalidate(budgetTemplateListProvider(budgetId));
+    await client.budget.deleteTemplate(UuidValue.fromString(templateId));
+    ref.invalidate(budgetTemplateListProvider);
   }
 }

@@ -4,18 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/screens/plan_settings_screen.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-const _budgetId = 'test-budget-id';
-final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000001');
+import '../../../fixtures/budget_month.dart';
 
-Budget _makeBudget({
+const _entityId = 'test-budget-id';
+Entity _makeBudget({
   String name = 'OpenBudget Plan',
   String currencyCode = 'USD',
-}) => Budget(name: name, currencyCode: currencyCode, ownerId: _ownerUuid);
+}) => testEntity(name: name, baseCurrencyCode: currencyCode);
 
 void main() {
   group('PlanSettingsScreen', () {
@@ -23,15 +23,15 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            budgetDetailProvider.overrideWith(
-              (ref, budgetId) async => _makeBudget(name: "Sam's Plan"),
+            entityDetailProvider.overrideWith(
+              (ref, entityId) async => _makeBudget(name: "Sam's Plan"),
             ),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const PlanSettingsScreen(budgetId: _budgetId),
+            home: const PlanSettingsScreen(entityId: _entityId),
           ),
         ),
       );
@@ -42,9 +42,9 @@ void main() {
       expect(find.text('Done'), findsOneWidget);
       expect(find.text("Sam's Plan"), findsOneWidget);
       expect(find.text('Currency'), findsOneWidget);
-      expect(find.text('Number Format'), findsOneWidget);
-      expect(find.text('Currency Placement'), findsOneWidget);
-      expect(find.text('Date Format'), findsOneWidget);
+      // The delete action sits at the bottom of the scrollable form.
+      await tester.drag(find.byType(ListView), const Offset(0, -300));
+      await tester.pump();
       expect(find.text('Delete Plan'), findsOneWidget);
     });
   });

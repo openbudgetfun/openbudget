@@ -3,8 +3,15 @@ import 'dart:math' as math;
 
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/agent/agent_access.dart';
-import 'package:openbudget_server/src/agent/agent_tax_reports.dart';
+import 'package:openbudget_server/src/budget/budget_month_service.dart';
+import 'package:openbudget_server/src/entities/entity_clock.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/money_guide/guidance_block.dart';
+import 'package:openbudget_server/src/money_guide/search_knowledge.dart';
+import 'package:openbudget_server/src/reports/net_worth_service.dart';
+import 'package:openbudget_server/src/reports/report_service.dart';
+import 'package:openbudget_server/src/tax/tax_service.dart';
+import 'package:openbudget_server/src/tax/tax_summary_service.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
 
 /// Everything a tool may read or write for one turn.
@@ -30,6 +37,12 @@ class AgentToolContext {
 ///
 /// Tools never apply a change. The propose tools insert a pending
 /// [AgentProposal] that the user applies or dismisses from the endpoint.
+///
+/// Reads go through the same services the app uses: the envelope month view
+/// from [BudgetMonthService], the tax position from [TaxService], net worth
+/// from [NetWorthService]. Every money value is reported as a `*Minor` integer
+/// next to an explicit ISO currency code; plan amounts are in the entity's
+/// base currency.
 class AgentToolRegistry {
   const AgentToolRegistry();
 
@@ -44,29 +57,38 @@ class AgentToolRegistry {
   /// deployment never offers the model a change it cannot make.
   List<Map<String, Object?>> definitions({required bool canPropose}) => [
     _tool(
-      name: 'list_budgets',
+      name: 'list_entities',
       description:
-          'List the budgets the user owns, with their currency. Start here '
-          'when you do not know which budget the user means.',
+          'List the entities (households, sole traders, companies) the user '
+          'owns, with their base currency. Start here when you do not know '
+          'which entity the user means.',
       properties: const {},
     ),
     _tool(
       name: 'list_envelopes',
       description:
-          "List the envelopes in one budget with this month's assigned, "
-          'carryover, activity and available amounts in minor units.',
+          "Read one month of an entity's envelope plan: every envelope's "
+          'assigned, carryover, activity and available amounts in base-currency '
+          'minor units, plus Ready to Assign and income.',
       properties: {
-        'budgetId': _uuidSchema('The budget to read.'),
+        'entityId': _uuidSchema('The entity to read.'),
+        'month': {
+          'type': 'integer',
+          'description':
+              'The plan month as yyyymm, such as 202611. Omit for the '
+              "entity's current month.",
+        },
       },
-      required: ['budgetId'],
+      required: ['entityId'],
     ),
     _tool(
       name: 'search_transactions',
       description:
-          "Search one budget's transactions by text, date range or both. "
-          'Returns at most 50 matches, newest first.',
+          "Search one entity's transactions by text, date range or both. "
+          'Returns at most 50 matches, newest first. Amounts carry both the '
+          'account currency and the base currency.',
       properties: {
-        'budgetId': _uuidSchema('The budget to search.'),
+        'entityId': _uuidSchema('The entity to search.'),
         'query': _stringSchema(
           'Text to look for in the description or memo, case-insensitive.',
         ),
@@ -84,15 +106,15 @@ class AgentToolRegistry {
           'description': 'How many matches to return, 1 to $_maxSearchLimit.',
         },
       },
-      required: ['budgetId'],
+      required: ['entityId'],
     ),
     _tool(
       name: 'get_tax_report',
       description:
-          "Compute the budget's tax report for a tax year. Cite the report's "
+          "Compute the entity's tax report for a tax year. Cite the report's "
           'sources and assumptions in the answer.',
       properties: {
-        'budgetId': _uuidSchema('The budget whose tax position to read.'),
+        'entityId': _uuidSchema('The entity whose tax position to read.'),
         'startYear': {
           'type': 'integer',
           'minimum': 1900,
@@ -102,44 +124,131 @@ class AgentToolRegistry {
               'current tax year.',
         },
       },
-      required: ['budgetId'],
+      required: ['entityId'],
     ),
     _tool(
       name: 'list_tax_categories',
       description:
-          'List the tax category codes available to this budget, with their '
+          'List the tax category codes available to this entity, with their '
           'labels and where they land on the return.',
       properties: {
-        'budgetId': _uuidSchema('The budget whose categories to list.'),
+        'entityId': _uuidSchema('The entity whose categories to list.'),
       },
-      required: ['budgetId'],
+      required: ['entityId'],
+    ),
+    _tool(
+      name: 'search_knowledge',
+      description:
+          "Find OpenBudget's sourced knowledge cards on tax law, crypto tax "
+          'and regulation, budgeting and money basics. Call it before stating '
+          'any rule, rate, threshold, allowance or deadline. Write the query '
+          'in English and add the official local term when you know it. Pass '
+          'ids to read cards listed in the brief.',
+      properties: {
+        'entityId': _uuidSchema('The entity the question is about.'),
+        'query': _stringSchema('The search query, in English.'),
+        'ids': {
+          'type': 'array',
+          'items': {'type': 'string'},
+          'maxItems': 4,
+          'description': 'Card ids to read directly, at most 4.',
+        },
+        'country': _stringSchema(
+          "ISO country code. Omit for the entity's country.",
+        ),
+        'taxYear': {
+          'type': 'integer',
+          'description':
+              'Start year of the tax year. Omit for the current one.',
+        },
+      },
+      required: ['entityId'],
+    ),
+    _tool(
+      name: 'get_net_worth',
+      description:
+          'Read net worth in minor units of a reporting currency, with '
+          'assets, liabilities, per-entity and per-currency breakdowns. '
+          'Omit the entity to cover every entity the user includes in net '
+          'worth.',
+      properties: {
+        'entityId': _uuidSchema(
+          'One entity to read. Omit for the user whole net-worth scope.',
+        ),
+        'currencyCode': _stringSchema(
+          'ISO 4217 reporting currency. Omit to use the user setting.',
+        ),
+      },
+    ),
+    _tool(
+      name: 'get_spending_summary',
+      description:
+          'Summarise up to 12 months of income and spending per envelope and '
+          'category group: totals, monthly averages and a trend.',
+      properties: {
+        'entityId': _uuidSchema('The entity to summarise.'),
+        'months': {
+          'type': 'integer',
+          'minimum': 1,
+          'maximum': 12,
+          'description':
+              'How many whole months to include, 1 to 12. Defaults to 12.',
+        },
+      },
+      required: ['entityId'],
+    ),
+    _tool(
+      name: 'get_tax_calendar',
+      description:
+          "List the entity's upcoming tax deadlines from the pack, or the "
+          'tax-year end for a country without a pack.',
+      properties: {
+        'entityId': _uuidSchema('The entity whose calendar to read.'),
+      },
+      required: ['entityId'],
+    ),
+    _tool(
+      name: 'get_tax_summary',
+      description:
+          'Read the tax-ready summary totals (U8) for any country, with '
+          'citeAs for each sourced figure.',
+      properties: {
+        'entityId': _uuidSchema('The entity whose summary to read.'),
+        'startYear': {
+          'type': 'integer',
+          'minimum': 1900,
+          'maximum': 2200,
+          'description':
+              'The calendar year the tax year starts in. Omit for the '
+              'current tax year.',
+        },
+      },
+      required: ['entityId'],
     ),
     if (canPropose) ...[
       _tool(
         name: 'propose_move_money',
         description:
             'Propose moving money between two envelopes in one month. This '
-            'does not move anything; the user applies the proposal.',
+            'does not move anything; the user applies the proposal. Amounts '
+            'are in the entity base-currency minor units.',
         properties: {
-          'budgetId': _uuidSchema('The budget to change.'),
+          'entityId': _uuidSchema('The entity whose plan to change.'),
           'fromEnvelopeId': _uuidSchema('The envelope to take money from.'),
           'toEnvelopeId': _uuidSchema('The envelope to give money to.'),
           'amountMinor': {
             'type': 'integer',
             'minimum': 1,
-            'description':
-                'How much to move, in minor units of the budget '
-                'currency.',
+            'description': 'How much to move, in base-currency minor units.',
           },
           'month': {
-            'type': 'string',
-            'pattern': r'^\d{4}-(0[1-9]|1[0-2])$',
-            'description': 'The budget month, such as 2026-11.',
+            'type': 'integer',
+            'description': 'The plan month as yyyymm, such as 202611.',
           },
           'reason': _stringSchema('Why this move helps, in one sentence.'),
         },
         required: [
-          'budgetId',
+          'entityId',
           'fromEnvelopeId',
           'toEnvelopeId',
           'amountMinor',
@@ -150,10 +259,11 @@ class AgentToolRegistry {
       _tool(
         name: 'propose_transaction_tax_category',
         description:
-            "Propose changing one transaction's tax category. This does not "
-            'change the transaction; the user applies the proposal.',
+            "Propose setting one transaction line's tax category. This does "
+            'not change the transaction; the user applies the proposal. '
+            'The search_transactions tool reports the line ids.',
         properties: {
-          'transactionId': _uuidSchema('The transaction to recategorise.'),
+          'transactionLineId': _uuidSchema('The transaction line to code.'),
           'code': _stringSchema('The tax category code to set.'),
           'businessUsePercent': {
             'type': 'integer',
@@ -163,7 +273,7 @@ class AgentToolRegistry {
           },
           'reason': _stringSchema('Why this category fits, in one sentence.'),
         },
-        required: ['transactionId', 'code', 'reason'],
+        required: ['transactionLineId', 'code', 'reason'],
       ),
       _tool(
         name: 'propose_envelope_tax_category',
@@ -200,7 +310,7 @@ class AgentToolRegistry {
       return _error(error.message);
     } on TaxRulesUnavailableException catch (error) {
       return _error(error.message);
-    } on TaxRateUnavailableException catch (error) {
+    } on FxRateUnavailableException catch (error) {
       return _error(error.message);
     } on FormatException catch (error) {
       return _error('The arguments were not valid: ${error.message}');
@@ -223,11 +333,16 @@ class AgentToolRegistry {
       );
     }
     return switch (name) {
-      'list_budgets' => _listBudgets(context),
+      'list_entities' => _listEntities(context),
       'list_envelopes' => _listEnvelopes(context, args),
       'search_transactions' => _searchTransactions(context, args),
       'get_tax_report' => _getTaxReport(context, args),
+      'search_knowledge' => _searchKnowledge(context, args),
       'list_tax_categories' => _listTaxCategories(context, args),
+      'get_net_worth' => _getNetWorth(context, args),
+      'get_spending_summary' => _getSpendingSummary(context, args),
+      'get_tax_calendar' => _getTaxCalendar(context, args),
+      'get_tax_summary' => _getTaxSummary(context, args),
       'propose_move_money' => _proposeMoveMoney(context, args),
       'propose_transaction_tax_category' => _proposeTransactionTaxCategory(
         context,
@@ -248,20 +363,22 @@ class AgentToolRegistry {
     _ => false,
   };
 
-  Future<String> _listBudgets(AgentToolContext context) async {
-    final budgets = await Budget.db.find(
+  Future<String> _listEntities(AgentToolContext context) async {
+    final entities = await Entity.db.find(
       context.session,
       where: (t) => t.ownerId.equals(context.userId),
-      orderBy: (t) => t.createdAt.desc(),
+      orderByList: (t) => [t.sortOrder, t.id],
     );
     return _json({
-      'budgets': [
-        for (final budget in budgets)
+      'entities': [
+        for (final entity in entities)
           {
-            'id': budget.id?.toString(),
-            'name': budget.name,
-            'currencyCode': budget.currencyCode,
-            'displayCurrencyCode': budget.displayCurrencyCode,
+            'id': entity.id?.toString(),
+            'name': entity.name,
+            'kind': entity.kind.name,
+            'countryCode': entity.countryCode,
+            'baseCurrencyCode': entity.baseCurrencyCode,
+            'isArchived': entity.archivedAt != null,
           },
       ],
     });
@@ -271,107 +388,61 @@ class AgentToolRegistry {
     AgentToolContext context,
     Map<String, Object?> args,
   ) async {
-    final budgetId = _requireUuid(args, 'budgetId');
-    final budget = await requireOwnedBudget(
+    final entityId = _requireUuid(args, 'entityId');
+    final entity = await requireOwnedEntity(
       context.session,
       userId: context.userId,
-      budgetId: budgetId,
+      entityId: entityId,
     );
+    final month = _optionalMonth(args, 'month') ?? _currentMonth(entity);
 
-    final now = DateTime.now();
-    final monthStart = DateTime(now.year, now.month);
-    final monthEnd = DateTime(now.year, now.month + 1);
-
-    final categories = await Category.db.find(
+    final view = await BudgetMonthService.month(
       context.session,
-      where: (t) => t.budgetId.equals(budgetId),
-      orderBy: (t) => t.sortOrder,
+      entityId: entityId,
+      month: month,
     );
+
     final categoryNames = {
-      for (final category in categories)
+      for (final category in view.categories)
         if (category.id != null) category.id!: category.name,
     };
-    final categoryIds = categoryNames.keys.toSet();
-    final envelopes = categoryIds.isEmpty
-        ? <Envelope>[]
-        : await Envelope.db.find(
-            context.session,
-            where: (t) => t.categoryId.inSet(categoryIds),
-            orderBy: (t) => t.sortOrder,
-          );
-
-    final allocations = await MonthlyAllocation.db.find(
-      context.session,
-      where: (t) =>
-          t.budgetId.equals(budgetId) &
-          t.year.equals(now.year) &
-          t.month.equals(now.month),
-    );
-    final allocationByEnvelope = {
-      for (final allocation in allocations) allocation.envelopeId: allocation,
-    };
-
-    final transactions = await Transaction.db.find(
-      context.session,
-      where: (t) =>
-          t.budgetId.equals(budgetId) &
-          (t.transactionDate >= monthStart) &
-          (t.transactionDate < monthEnd),
-    );
-    final activityByEnvelope = <UuidValue, int>{};
-    for (final transaction in transactions) {
-      final envelopeId = transaction.envelopeId;
-      if (envelopeId == null) continue;
-      activityByEnvelope[envelopeId] =
-          (activityByEnvelope[envelopeId] ?? 0) + transaction.amountCents;
-    }
 
     return _json({
-      'budgetId': budgetId.toString(),
-      'budgetName': budget.name,
-      'currencyCode': budget.currencyCode,
-      'month': _monthLabel(now.year, now.month),
+      'entityId': entityId.toString(),
+      'entityName': entity.name,
+      'month': month,
+      'currencyCode': view.currencyCode,
+      'readyToAssignMinor': view.summary.readyToAssignMinor,
+      'incomeMinor': view.summary.incomeMinor,
+      'assignedMinor': view.summary.allocatedMinor,
+      'activityMinor': view.summary.activityMinor,
+      'overspentLastMonthMinor': view.summary.overspentLastMonthMinor,
+      'assignedInFutureMinor': view.summary.assignedInFutureMinor,
       'envelopes': [
-        for (final envelope in envelopes)
-          _envelopeView(
-            envelope,
-            categoryName: categoryNames[envelope.categoryId],
-            allocation: allocationByEnvelope[envelope.id],
-            activityMinor: activityByEnvelope[envelope.id] ?? 0,
-          ),
+        for (final envelope in view.envelopes)
+          {
+            'id': envelope.envelope.id?.toString(),
+            'name': envelope.envelope.name,
+            'category': categoryNames[envelope.envelope.categoryId],
+            'goalUnderfundedMinor': envelope.goalUnderfundedMinor,
+            'carryoverMinor': envelope.carryoverMinor,
+            'assignedMinor': envelope.allocatedMinor,
+            'activityMinor': envelope.activityMinor,
+            'availableMinor': envelope.availableMinor,
+          },
       ],
     });
-  }
-
-  static Map<String, Object?> _envelopeView(
-    Envelope envelope, {
-    required String? categoryName,
-    required MonthlyAllocation? allocation,
-    required int activityMinor,
-  }) {
-    final assigned = allocation?.allocatedCents ?? 0;
-    final carryover = allocation?.carryoverCents ?? 0;
-    return {
-      'id': envelope.id?.toString(),
-      'name': envelope.name,
-      'category': categoryName,
-      'currencyCode': envelope.currencyCode,
-      'assignedMinor': assigned,
-      'carryoverMinor': carryover,
-      'activityMinor': activityMinor,
-      'availableMinor': assigned + carryover + activityMinor,
-    };
   }
 
   Future<String> _searchTransactions(
     AgentToolContext context,
     Map<String, Object?> args,
   ) async {
-    final budgetId = _requireUuid(args, 'budgetId');
-    await requireOwnedBudget(
+    final entityId = _requireUuid(args, 'entityId');
+    await requireOwnedEntity(
       context.session,
       userId: context.userId,
-      budgetId: budgetId,
+      entityId: entityId,
     );
     final query = _optionalString(args, 'query');
     final from = _optionalDate(args, 'fromDate');
@@ -386,53 +457,80 @@ class AgentToolRegistry {
     final rows = await Transaction.db.find(
       context.session,
       where: (t) {
-        var where = t.budgetId.equals(budgetId);
+        var where = t.entityId.equals(entityId);
         if (query != null) {
           where =
               where &
               (t.description.ilike('%$query%') | t.memo.ilike('%$query%'));
         }
         if (from != null) {
-          where = where & (t.transactionDate >= from);
+          where = where & (t.date >= from);
         }
         if (to != null) {
-          where = where & (t.transactionDate < to);
+          where = where & (t.date < to);
         }
         return where;
       },
-      orderBy: (t) => t.transactionDate.desc(),
+      orderByList: (t) => [t.date.desc(), t.id.desc()],
       limit: limit,
     );
 
-    final envelopeIds = {
-      for (final row in rows)
-        if (row.envelopeId != null) row.envelopeId!,
-    };
-    final envelopeNames = envelopeIds.isEmpty
-        ? const <UuidValue, String>{}
+    // Amounts are in the account's currency; base amounts in the entity's.
+    final accountIds = {for (final row in rows) row.accountId};
+    final accountsById = accountIds.isEmpty
+        ? const <UuidValue, Account>{}
         : {
-            for (final envelope in await Envelope.db.find(
+            for (final account in await Account.db.find(
               context.session,
-              where: (t) => t.id.inSet(envelopeIds),
+              where: (t) => t.id.inSet(accountIds),
             ))
-              if (envelope.id != null) envelope.id!: envelope.name,
+              if (account.id != null) account.id!: account,
           };
+    final baseCurrencyCode = (await Entity.db.findById(
+      context.session,
+      entityId,
+    ))?.baseCurrencyCode;
+
+    final transactionIds = {
+      for (final row in rows)
+        if (row.id != null) row.id!,
+    };
+    final linesByTransaction = <UuidValue, List<TransactionLine>>{};
+    if (transactionIds.isNotEmpty) {
+      for (final line in await TransactionLine.db.find(
+        context.session,
+        where: (t) => t.transactionId.inSet(transactionIds),
+        orderByList: (t) => [t.transactionId, t.sortOrder],
+      )) {
+        linesByTransaction.putIfAbsent(line.transactionId, () => []).add(line);
+      }
+    }
 
     return _json({
       'count': rows.length,
+      'baseCurrencyCode': baseCurrencyCode,
       'transactions': [
         for (final row in rows)
           {
             'id': row.id?.toString(),
             'description': row.description,
-            'amountMinor': row.amountCents,
-            'currencyCode': row.currencyCode,
-            'date': row.transactionDate.toIso8601String(),
-            'envelopeId': row.envelopeId?.toString(),
-            'envelope': envelopeNames[row.envelopeId],
+            'amountMinor': row.amountMinor,
+            'currencyCode': accountsById[row.accountId]?.currencyCode,
+            'baseAmountMinor': row.baseAmountMinor,
+            'date': row.date.toIso8601String(),
+            'status': row.status.name,
             'memo': row.memo,
-            'taxCategoryCode': row.taxCategoryCode,
-            'businessUsePercent': row.businessUsePercent,
+            'lines': [
+              for (final line
+                  in linesByTransaction[row.id!] ?? const <TransactionLine>[])
+                {
+                  'id': line.id?.toString(),
+                  'amountMinor': line.amountMinor,
+                  'envelopeId': line.envelopeId?.toString(),
+                  'taxCategoryCode': line.taxCategoryCode,
+                  'businessUsePercent': line.businessUsePercent,
+                },
+            ],
           },
       ],
     });
@@ -442,37 +540,400 @@ class AgentToolRegistry {
     AgentToolContext context,
     Map<String, Object?> args,
   ) async {
-    final budgetId = _requireUuid(args, 'budgetId');
-    await requireOwnedBudget(
+    final entityId = _requireUuid(args, 'entityId');
+    final entity = await requireOwnedEntity(
       context.session,
       userId: context.userId,
-      budgetId: budgetId,
+      entityId: entityId,
     );
+    // Entities in a country without a pack get the universal hint instead of
+    // an error, so the model can recover with get_tax_summary
+    // (docs/money-guide.md, section 7.6).
+    final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+    if (jurisdiction == null) {
+      final block = buildGuidanceBlock(entity: entity);
+      return _json({
+        'jurisdictionState': 'universal',
+        'use': 'get_tax_summary',
+        'guidance': block,
+      });
+    }
     final startYear = _optionalInt(args, 'startYear');
-    final report = await AgentTaxReports.report(
+    final report = await TaxService.report(
       context.session,
-      budgetId: budgetId,
+      entityId: entityId,
       startYear: startYear,
     );
-    return _json(report.toJson());
+    final block = buildGuidanceBlock(
+      entity: entity,
+      rulesVersion: report.rulesVersion,
+      maturity: report.maturity,
+    );
+    final json = report.toJson();
+    json['guidance'] = block;
+    if (report.sources.isNotEmpty) {
+      json['citeAs'] = 'report-${report.startYear}';
+    }
+    return _json(json);
+  }
+
+  Future<String> _searchKnowledge(
+    AgentToolContext context,
+    Map<String, Object?> args,
+  ) async {
+    final entityId = _requireUuid(args, 'entityId');
+    final entity = await requireOwnedEntity(
+      context.session,
+      userId: context.userId,
+      entityId: entityId,
+    );
+    final result = searchKnowledgeResult(entity: entity, args: args);
+    return _json(result);
   }
 
   Future<String> _listTaxCategories(
     AgentToolContext context,
     Map<String, Object?> args,
   ) async {
-    final budgetId = _requireUuid(args, 'budgetId');
-    await requireOwnedBudget(
+    final entityId = _requireUuid(args, 'entityId');
+    await requireOwnedEntity(
       context.session,
       userId: context.userId,
-      budgetId: budgetId,
+      entityId: entityId,
     );
-    final categories = await AgentTaxReports.categories(
+    final categories = await TaxService.listCategories(
       context.session,
-      budgetId: budgetId,
+      entityId: entityId,
     );
     return _json({
       'categories': [for (final category in categories) category.toJson()],
+    });
+  }
+
+  Future<String> _getSpendingSummary(
+    AgentToolContext context,
+    Map<String, Object?> args,
+  ) async {
+    final entityId = _requireUuid(args, 'entityId');
+    final entity = await requireOwnedEntity(
+      context.session,
+      userId: context.userId,
+      entityId: entityId,
+    );
+    final months = _optionalInt(args, 'months') ?? 12;
+    if (months < 1 || months > 12) {
+      throw ValidationException(message: 'months must be between 1 and 12.');
+    }
+
+    final monthKeys = _lastMonths(entity, months);
+    final fromMonth = monthKeys.first;
+    final toMonth = monthKeys.last;
+
+    final summaries = await BudgetMonthService.summaries(
+      context.session,
+      entityId: entityId,
+      fromMonth: fromMonth,
+      toMonth: toMonth,
+    );
+    final incomeByMonth = <int, int>{
+      for (final summary in summaries) summary.month: summary.incomeMinor,
+    };
+
+    final envelopeRows = await ReportService.spending(
+      context.session,
+      entityId,
+      fromMonth,
+      toMonth,
+      ReportGrouping.envelope,
+      true,
+    );
+    final categoryRows = await ReportService.spending(
+      context.session,
+      entityId,
+      fromMonth,
+      toMonth,
+      ReportGrouping.category,
+      true,
+    );
+
+    final monthlyOutflow = <int, int>{for (final month in monthKeys) month: 0};
+    for (final row in envelopeRows) {
+      final month = row.month;
+      if (month != null) {
+        monthlyOutflow[month] = (monthlyOutflow[month] ?? 0) + row.outflowMinor;
+      }
+    }
+
+    // Aggregate per envelope.
+    final envelopeTotals = <String, _EnvelopeTotals>{};
+    for (final row in envelopeRows) {
+      final key = row.groupId?.toString() ?? '';
+      final existing = envelopeTotals[key];
+      if (existing == null) {
+        envelopeTotals[key] = _EnvelopeTotals(
+          id: row.groupId,
+          name: row.name,
+          inflowMinor: row.inflowMinor,
+          outflowMinor: row.outflowMinor,
+        );
+      } else {
+        existing
+          ..inflowMinor += row.inflowMinor
+          ..outflowMinor += row.outflowMinor;
+      }
+    }
+
+    final sortedEnvelopes = envelopeTotals.values.toList()
+      ..sort((first, second) {
+        final byOutflow = first.outflowMinor.compareTo(second.outflowMinor);
+        if (byOutflow != 0) return byOutflow;
+        return first.name.compareTo(second.name);
+      });
+
+    final topEnvelopes = sortedEnvelopes.take(20).toList();
+    final otherEnvelopes = sortedEnvelopes.skip(20).toList();
+
+    var otherInflow = 0;
+    var otherOutflow = 0;
+    for (final entry in otherEnvelopes) {
+      otherInflow += entry.inflowMinor;
+      otherOutflow += entry.outflowMinor;
+    }
+
+    final envelopeJson = <Map<String, Object?>>[
+      for (final entry in topEnvelopes)
+        {
+          'id': entry.id?.toString(),
+          'name': entry.name,
+          'totalIncomeMinor': entry.inflowMinor,
+          'totalSpendingMinor': entry.outflowMinor,
+          'averageIncomeMinor': entry.inflowMinor ~/ months,
+          'averageSpendingMinor': entry.outflowMinor ~/ months,
+        },
+      if (otherEnvelopes.isNotEmpty)
+        {
+          'id': null,
+          'name': 'Other',
+          'totalIncomeMinor': otherInflow,
+          'totalSpendingMinor': otherOutflow,
+          'averageIncomeMinor': otherInflow ~/ months,
+          'averageSpendingMinor': otherOutflow ~/ months,
+        },
+    ];
+
+    // Aggregate per category group.
+    final categoryTotals = <String, _EnvelopeTotals>{};
+    for (final row in categoryRows) {
+      final key = row.groupId?.toString() ?? '';
+      final existing = categoryTotals[key];
+      if (existing == null) {
+        categoryTotals[key] = _EnvelopeTotals(
+          id: row.groupId,
+          name: row.name,
+          inflowMinor: row.inflowMinor,
+          outflowMinor: row.outflowMinor,
+        );
+      } else {
+        existing
+          ..inflowMinor += row.inflowMinor
+          ..outflowMinor += row.outflowMinor;
+      }
+    }
+    final sortedCategories = categoryTotals.values.toList()
+      ..sort((first, second) {
+        final byOutflow = first.outflowMinor.compareTo(second.outflowMinor);
+        if (byOutflow != 0) return byOutflow;
+        return first.name.compareTo(second.name);
+      });
+
+    final categoryJson = <Map<String, Object?>>[
+      for (final entry in sortedCategories)
+        {
+          'id': entry.id?.toString(),
+          'name': entry.name,
+          'totalIncomeMinor': entry.inflowMinor,
+          'totalSpendingMinor': entry.outflowMinor,
+          'averageIncomeMinor': entry.inflowMinor ~/ months,
+          'averageSpendingMinor': entry.outflowMinor ~/ months,
+        },
+    ];
+
+    var totalIncome = 0;
+    for (final month in monthKeys) {
+      totalIncome += incomeByMonth[month] ?? 0;
+    }
+    var totalSpending = 0;
+    for (final month in monthKeys) {
+      totalSpending += monthlyOutflow[month] ?? 0;
+    }
+
+    int? trend;
+    if (months >= 6) {
+      final lastMonths = monthKeys.sublist(monthKeys.length - 3);
+      final prevMonths = monthKeys.sublist(
+        monthKeys.length - 6,
+        monthKeys.length - 3,
+      );
+      var lastSum = 0;
+      var prevSum = 0;
+      for (final month in lastMonths) {
+        lastSum += monthlyOutflow[month] ?? 0;
+      }
+      for (final month in prevMonths) {
+        prevSum += monthlyOutflow[month] ?? 0;
+      }
+      if (prevSum != 0) {
+        trend = ((lastSum - prevSum) * 1000000) ~/ prevSum;
+      }
+    }
+
+    final block = buildGuidanceBlock(entity: entity);
+
+    return _json({
+      'entityId': entityId.toString(),
+      'currencyCode': entity.baseCurrencyCode,
+      'months': months,
+      'fromMonth': fromMonth,
+      'toMonth': toMonth,
+      'totalIncomeMinor': totalIncome,
+      'totalSpendingMinor': totalSpending,
+      'averageIncomeMinor': totalIncome ~/ months,
+      'averageSpendingMinor': totalSpending ~/ months,
+      'trendRatePerMillion': trend,
+      'envelopes': envelopeJson,
+      'categoryGroups': categoryJson,
+      'guidance': block,
+    });
+  }
+
+  Future<String> _getTaxCalendar(
+    AgentToolContext context,
+    Map<String, Object?> args,
+  ) async {
+    final entityId = _requireUuid(args, 'entityId');
+    final entity = await requireOwnedEntity(
+      context.session,
+      userId: context.userId,
+      entityId: entityId,
+    );
+
+    final block = buildGuidanceBlock(entity: entity);
+    final jurisdictionState = block['jurisdictionState'];
+
+    final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+    if (jurisdiction == null) {
+      final taxYearEnd = TaxSummaryService.currentYearLastDayFor(entity);
+      return _json({
+        'jurisdictionState': 'universal',
+        'deadlines': <Object?>[],
+        'taxYearEnd': taxYearEnd.toIso8601String().split('T').first,
+        'guidance': block,
+      });
+    }
+
+    final deadlines = await TaxService.listDeadlines(
+      context.session,
+      entityId: entityId,
+    );
+    return _json({
+      'jurisdictionState': jurisdictionState,
+      'deadlines': [
+        for (final deadline in deadlines.take(10)) deadline.toJson(),
+      ],
+      'guidance': block,
+    });
+  }
+
+  Future<String> _getTaxSummary(
+    AgentToolContext context,
+    Map<String, Object?> args,
+  ) async {
+    final entityId = _requireUuid(args, 'entityId');
+    final entity = await requireOwnedEntity(
+      context.session,
+      userId: context.userId,
+      entityId: entityId,
+    );
+    final startYear = _optionalInt(args, 'startYear');
+    final view = await TaxSummaryService.build(
+      context.session,
+      entityId: entityId,
+      startYear: startYear,
+    );
+    final block = buildGuidanceBlock(
+      entity: entity,
+      rulesVersion: view.rulesVersion,
+    );
+    final json = view.toJson();
+    json['guidance'] = block;
+    // Only a pack country has authority pages to cite; a universal-layer
+    // summary carries no citeAs.
+    final sources = _summarySources(entity, view);
+    if (sources.isNotEmpty) {
+      json['citeAs'] = 'summary-${view.startYear}';
+      json['sources'] = sources;
+    }
+    return _json(json);
+  }
+
+  /// The authority pages behind a summary's figures: the pack rule set's
+  /// sources for a pack country, none for the universal layer.
+  static List<String> _summarySources(Entity entity, TaxSummaryView view) {
+    if (view.rulesVersion == null) return const [];
+    final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+    if (jurisdiction == null) return const [];
+    final ruleSet = TaxRules.forJurisdiction(
+      jurisdiction,
+    ).ruleSet(view.startYear);
+    return [for (final source in ruleSet.sources) source.toString()];
+  }
+
+  Future<String> _getNetWorth(
+    AgentToolContext context,
+    Map<String, Object?> args,
+  ) async {
+    final entityId = _optionalUuid(args, 'entityId');
+    if (entityId != null) {
+      await requireOwnedEntity(
+        context.session,
+        userId: context.userId,
+        entityId: entityId,
+      );
+    }
+    final currencyCode = _optionalString(args, 'currencyCode');
+    final view = await NetWorthService.current(
+      context.session,
+      entityIds: entityId == null ? null : [entityId],
+      currencyCode: currencyCode,
+    );
+    return _json({
+      'currencyCode': view.currencyCode,
+      'asOf': view.asOf.toIso8601String(),
+      'netWorthMinor': view.netWorthMinor,
+      'assetsMinor': view.assetsMinor,
+      'liabilitiesMinor': view.liabilitiesMinor,
+      'isComplete': view.isComplete,
+      'missingCurrencyCodes': view.missingCurrencyCodes,
+      'hasStaleRates': view.hasStaleRates,
+      'entities': [
+        for (final row in view.entities)
+          {
+            'entityId': row.entityId.toString(),
+            'name': row.name,
+            'kind': row.kind.name,
+            'netWorthMinor': row.netWorthMinor,
+          },
+      ],
+      'currencies': [
+        for (final row in view.currencies)
+          {
+            'currencyCode': row.currencyCode,
+            'nativeMinor': row.nativeMinor,
+            'convertedMinor': row.convertedMinor,
+            'fxRate': row.fxRate,
+            'isStale': row.isStale,
+          },
+      ],
     });
   }
 
@@ -480,7 +941,7 @@ class AgentToolRegistry {
     AgentToolContext context,
     Map<String, Object?> args,
   ) async {
-    final budgetId = _requireUuid(args, 'budgetId');
+    final entityId = _requireUuid(args, 'entityId');
     final fromEnvelopeId = _requireUuid(args, 'fromEnvelopeId');
     final toEnvelopeId = _requireUuid(args, 'toEnvelopeId');
     final amountMinor = _requireInt(args, 'amountMinor');
@@ -498,38 +959,37 @@ class AgentToolRegistry {
       );
     }
 
-    final budget = await requireOwnedBudget(
+    final entity = await requireOwnedEntity(
       context.session,
       userId: context.userId,
-      budgetId: budgetId,
+      entityId: entityId,
     );
-    final fromEnvelope = await _requireEnvelopeInBudget(
+    final fromEnvelope = await _requireEnvelopeInEntity(
       context,
-      budgetId: budgetId,
+      entityId: entityId,
       envelopeId: fromEnvelopeId,
     );
-    final toEnvelope = await _requireEnvelopeInBudget(
+    final toEnvelope = await _requireEnvelopeInEntity(
       context,
-      budgetId: budgetId,
+      entityId: entityId,
       envelopeId: toEnvelopeId,
     );
 
     final proposal = await _insertProposal(
       context,
-      budgetId: budgetId,
+      entityId: entityId,
       kind: AgentProposalKind.moveMoney,
       payload: {
-        'budgetId': budgetId.toString(),
+        'entityId': entityId.toString(),
         'fromEnvelopeId': fromEnvelopeId.toString(),
         'toEnvelopeId': toEnvelopeId.toString(),
         'amountMinor': amountMinor,
-        'month': _monthLabel(month.$1, month.$2),
+        'month': month,
         'reason': reason,
       },
       summary:
-          'Move ${_formatAmount(amountMinor, budget.currencyCode)} from '
-          '${fromEnvelope.name} to ${toEnvelope.name} in '
-          '${_monthLabel(month.$1, month.$2)}.',
+          'Move ${_formatAmount(amountMinor, entity.baseCurrencyCode)} from '
+          '${fromEnvelope.name} to ${toEnvelope.name} in $month.',
     );
     return _proposalResult(proposal);
   }
@@ -538,7 +998,7 @@ class AgentToolRegistry {
     AgentToolContext context,
     Map<String, Object?> args,
   ) async {
-    final transactionId = _requireUuid(args, 'transactionId');
+    final transactionLineId = _requireUuid(args, 'transactionLineId');
     final code = _requireString(args, 'code');
     final businessUsePercent = _optionalInt(args, 'businessUsePercent');
     final reason = _requireString(args, 'reason');
@@ -550,21 +1010,28 @@ class AgentToolRegistry {
       );
     }
 
+    final line = await TransactionLine.db.findById(
+      context.session,
+      transactionLineId,
+    );
+    if (line == null) {
+      throw NotFoundException(message: 'Transaction line not found');
+    }
     final transaction = await Transaction.db.findById(
       context.session,
-      transactionId,
+      line.transactionId,
     );
     if (transaction == null) {
       throw NotFoundException(message: 'Transaction not found');
     }
-    await requireOwnedBudget(
+    final entity = await requireOwnedEntity(
       context.session,
       userId: context.userId,
-      budgetId: transaction.budgetId,
+      entityId: transaction.entityId,
     );
     await _requireTaxCategory(
       context,
-      budgetId: transaction.budgetId,
+      entityId: transaction.entityId,
       code: code,
     );
 
@@ -573,11 +1040,12 @@ class AgentToolRegistry {
         : ' at $businessUsePercent% business use';
     final proposal = await _insertProposal(
       context,
-      budgetId: transaction.budgetId,
+      entityId: transaction.entityId,
       kind: AgentProposalKind.setTransactionTaxCategory,
+      rulesVersion: _taxRulesVersion(entity),
       payload: {
-        'budgetId': transaction.budgetId.toString(),
-        'transactionId': transactionId.toString(),
+        'entityId': transaction.entityId.toString(),
+        'transactionLineId': transactionLineId.toString(),
         'code': code,
         'businessUsePercent': businessUsePercent,
         'reason': reason,
@@ -601,30 +1069,24 @@ class AgentToolRegistry {
     if (envelope == null) {
       throw NotFoundException(message: 'Envelope not found');
     }
-    final category = await Category.db.findById(
-      context.session,
-      envelope.categoryId,
-    );
-    if (category == null) {
-      throw NotFoundException(message: 'Category not found');
-    }
-    await requireOwnedBudget(
+    final entity = await requireOwnedEntity(
       context.session,
       userId: context.userId,
-      budgetId: category.budgetId,
+      entityId: envelope.entityId,
     );
     await _requireTaxCategory(
       context,
-      budgetId: category.budgetId,
+      entityId: envelope.entityId,
       code: code,
     );
 
     final proposal = await _insertProposal(
       context,
-      budgetId: category.budgetId,
+      entityId: envelope.entityId,
       kind: AgentProposalKind.setEnvelopeTaxCategory,
+      rulesVersion: _taxRulesVersion(entity),
       payload: {
-        'budgetId': category.budgetId.toString(),
+        'entityId': envelope.entityId.toString(),
         'envelopeId': envelopeId.toString(),
         'code': code,
         'reason': reason,
@@ -636,33 +1098,26 @@ class AgentToolRegistry {
     return _proposalResult(proposal);
   }
 
-  Future<Envelope> _requireEnvelopeInBudget(
+  Future<Envelope> _requireEnvelopeInEntity(
     AgentToolContext context, {
-    required UuidValue budgetId,
+    required UuidValue entityId,
     required UuidValue envelopeId,
   }) async {
     final envelope = await Envelope.db.findById(context.session, envelopeId);
-    if (envelope == null) {
-      throw NotFoundException(message: 'Envelope not found');
-    }
-    final category = await Category.db.findById(
-      context.session,
-      envelope.categoryId,
-    );
-    if (category == null || category.budgetId != budgetId) {
-      throw NotFoundException(message: 'Envelope not found in this budget');
+    if (envelope == null || envelope.entityId != entityId) {
+      throw NotFoundException(message: 'Envelope not found in this entity');
     }
     return envelope;
   }
 
   Future<void> _requireTaxCategory(
     AgentToolContext context, {
-    required UuidValue budgetId,
+    required UuidValue entityId,
     required String code,
   }) async {
-    final categories = await AgentTaxReports.categories(
+    final categories = await TaxService.listCategories(
       context.session,
-      budgetId: budgetId,
+      entityId: entityId,
     );
     if (!categories.any((category) => category.code == code)) {
       throw ValidationException(message: 'Unknown tax category "$code".');
@@ -671,22 +1126,40 @@ class AgentToolRegistry {
 
   Future<AgentProposal> _insertProposal(
     AgentToolContext context, {
-    required UuidValue budgetId,
+    required UuidValue entityId,
     required AgentProposalKind kind,
     required Map<String, Object?> payload,
     required String summary,
+    String? rulesVersion,
   }) => AgentProposal.db.insertRow(
     context.session,
     AgentProposal(
       userId: context.userId,
-      budgetId: budgetId,
+      entityId: entityId,
       conversationId: context.conversationId,
       kind: kind,
       payloadJson: jsonEncode(payload),
       summary: summary,
       status: AgentProposalStatus.pending,
+      rulesVersion: rulesVersion,
     ),
   );
+
+  /// The tax rule version a proposal about [entity] was made under.
+  ///
+  /// Tax tools only run for entities whose country has a pack, so an unknown
+  /// country here means the tool checks were bypassed.
+  String _taxRulesVersion(Entity entity) {
+    final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+    if (jurisdiction == null) {
+      throw ValidationException(
+        message: 'No tax rules are available for ${entity.countryCode}.',
+      );
+    }
+    final pack = TaxRules.forJurisdiction(jurisdiction);
+    final year = pack.taxYearFor(EntityClock.today(entity));
+    return pack.ruleSet(year.startYear).versionFor(jurisdiction);
+  }
 
   static String _proposalResult(AgentProposal proposal) => _json({
     'proposalId': proposal.id?.toString(),
@@ -694,8 +1167,24 @@ class AgentToolRegistry {
     'status': proposal.status.name,
   });
 
-  static String _monthLabel(int year, int month) =>
-      '$year-${month.toString().padLeft(2, '0')}';
+  static int _currentMonth(Entity entity) =>
+      MonthKey.fromDate(EntityClock.today(entity));
+
+  static List<int> _lastMonths(Entity entity, int months) {
+    final today = EntityClock.today(entity);
+    final result = <int>[];
+    var year = today.year;
+    var month = today.month;
+    for (var index = 0; index < months; index++) {
+      result.add(year * 100 + month);
+      month -= 1;
+      if (month == 0) {
+        month = 12;
+        year -= 1;
+      }
+    }
+    return result.reversed.toList();
+  }
 
   static String _formatAmount(int minor, String currencyCode) {
     final currency = CurrencyCode.tryParse(currencyCode);
@@ -778,7 +1267,16 @@ class AgentToolRegistry {
   }
 
   static UuidValue _requireUuid(Map<String, Object?> args, String key) {
-    final value = _requireString(args, key);
+    final value = _optionalUuid(args, key);
+    if (value == null) {
+      throw ValidationException(message: 'Argument "$key" is required.');
+    }
+    return value;
+  }
+
+  static UuidValue? _optionalUuid(Map<String, Object?> args, String key) {
+    final value = _optionalString(args, key);
+    if (value == null) return null;
     try {
       return UuidValue.withFormatValidation(value);
     } on FormatException {
@@ -800,20 +1298,43 @@ class AgentToolRegistry {
       );
     }
     if (exclusiveDay && value.length == 10) {
-      return DateTime(parsed.year, parsed.month, parsed.day + 1);
+      return DateTime.utc(parsed.year, parsed.month, parsed.day + 1);
     }
-    return parsed;
+    if (value.length == 10) {
+      // A plain date is a civil date: UTC midnight, like the stored column.
+      return DateTime.utc(parsed.year, parsed.month, parsed.day);
+    }
+    return parsed.toUtc();
   }
 
-  static (int, int) _requireMonth(
-    Map<String, Object?> args,
-    String key,
-  ) {
-    final value = _requireString(args, key);
-    final match = RegExp(r'^(\d{4})-(0[1-9]|1[0-2])$').firstMatch(value);
-    if (match == null) {
-      throw ValidationException(message: 'Argument "$key" must be YYYY-MM.');
+  static int _requireMonth(Map<String, Object?> args, String key) {
+    final value = _requireInt(args, key);
+    if (!MonthKey.isValid(value)) {
+      throw ValidationException(message: 'Argument "$key" must be yyyymm.');
     }
-    return (int.parse(match.group(1)!), int.parse(match.group(2)!));
+    return value;
   }
+
+  static int? _optionalMonth(Map<String, Object?> args, String key) {
+    final value = _optionalInt(args, key);
+    if (value == null) return null;
+    if (!MonthKey.isValid(value)) {
+      throw ValidationException(message: 'Argument "$key" must be yyyymm.');
+    }
+    return value;
+  }
+}
+
+class _EnvelopeTotals {
+  _EnvelopeTotals({
+    required this.id,
+    required this.name,
+    required this.inflowMinor,
+    required this.outflowMinor,
+  });
+
+  final UuidValue? id;
+  final String name;
+  int inflowMinor;
+  int outflowMinor;
 }

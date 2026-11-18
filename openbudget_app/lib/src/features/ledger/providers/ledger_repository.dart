@@ -1,5 +1,6 @@
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'ledger_repository.g.dart';
@@ -11,19 +12,19 @@ part 'ledger_repository.g.dart';
 /// have no update or delete path here: corrections go through
 /// [reverseJournal].
 abstract interface class LedgerRepository {
-  Future<Budget> enableLedger(String budgetId);
+  Future<Entity> enableLedger(String entityId);
 
   Future<List<LedgerAccount>> listAccounts(
-    String budgetId, {
+    String entityId, {
     required bool includeArchived,
   });
 
   Future<LedgerAccount> createAccount({
-    required String budgetId,
+    required String entityId,
     required String code,
     required String name,
-    required String type,
-    String? systemRole,
+    required LedgerAccountType type,
+    LedgerSystemRole? systemRole,
     String? currencyCode,
     String? taxCategoryCode,
   });
@@ -31,11 +32,11 @@ abstract interface class LedgerRepository {
   Future<LedgerAccount> archiveAccount(String accountId);
 
   Future<Journal> saveDraftJournal({
-    required String budgetId,
+    required String entityId,
     required DateTime date,
     required List<JournalLineInput> lines,
     required String reference,
-    required String source,
+    required JournalSource source,
     String? journalId,
     String? narration,
   });
@@ -50,7 +51,7 @@ abstract interface class LedgerRepository {
   });
 
   Future<List<Journal>> listJournals(
-    String budgetId, {
+    String entityId, {
     DateTime? fromDate,
     DateTime? toDate,
   });
@@ -58,12 +59,12 @@ abstract interface class LedgerRepository {
   /// One journal's lines, oldest first.
   Future<List<JournalLine>> listJournalLines(String journalId);
 
-  Future<LedgerPeriodLock> setLockDate(String budgetId, DateTime lockDate);
+  Future<LedgerPeriodLock> setLockDate(String entityId, DateTime lockDate);
 
   /// The budget's stored period lock date, or null when none is set.
-  Future<LedgerPeriodLock?> getLockDate(String budgetId);
+  Future<LedgerPeriodLock?> getLockDate(String entityId);
 
-  Future<TrialBalanceView> trialBalance(String budgetId, DateTime asOf);
+  Future<TrialBalanceView> trialBalance(String entityId, DateTime asOf);
 }
 
 /// The production [LedgerRepository], backed by the Serverpod client.
@@ -73,29 +74,29 @@ class ServerpodLedgerRepository implements LedgerRepository {
   final Client _client;
 
   @override
-  Future<Budget> enableLedger(String budgetId) =>
-      _client.ledger.enableLedger(UuidValue.fromString(budgetId));
+  Future<Entity> enableLedger(String entityId) =>
+      _client.ledger.enableLedger(UuidValue.fromString(entityId));
 
   @override
   Future<List<LedgerAccount>> listAccounts(
-    String budgetId, {
+    String entityId, {
     required bool includeArchived,
   }) => _client.ledger.listAccounts(
-    UuidValue.fromString(budgetId),
+    UuidValue.fromString(entityId),
     includeArchived: includeArchived,
   );
 
   @override
   Future<LedgerAccount> createAccount({
-    required String budgetId,
+    required String entityId,
     required String code,
     required String name,
-    required String type,
-    String? systemRole,
+    required LedgerAccountType type,
+    LedgerSystemRole? systemRole,
     String? currencyCode,
     String? taxCategoryCode,
   }) => _client.ledger.createAccount(
-    UuidValue.fromString(budgetId),
+    UuidValue.fromString(entityId),
     code,
     name,
     type,
@@ -110,15 +111,15 @@ class ServerpodLedgerRepository implements LedgerRepository {
 
   @override
   Future<Journal> saveDraftJournal({
-    required String budgetId,
+    required String entityId,
     required DateTime date,
     required List<JournalLineInput> lines,
     required String reference,
-    required String source,
+    required JournalSource source,
     String? journalId,
     String? narration,
   }) => _client.ledger.saveDraftJournal(
-    UuidValue.fromString(budgetId),
+    UuidValue.fromString(entityId),
     date,
     lines,
     journalId: journalId == null ? null : UuidValue.fromString(journalId),
@@ -146,13 +147,14 @@ class ServerpodLedgerRepository implements LedgerRepository {
 
   @override
   Future<List<Journal>> listJournals(
-    String budgetId, {
+    String entityId, {
     DateTime? fromDate,
     DateTime? toDate,
   }) => _client.ledger.listJournals(
-    UuidValue.fromString(budgetId),
+    UuidValue.fromString(entityId),
     fromDate: fromDate,
     toDate: toDate,
+    limit: 200,
   );
 
   @override
@@ -160,19 +162,19 @@ class ServerpodLedgerRepository implements LedgerRepository {
       _client.ledger.listJournalLines(UuidValue.fromString(journalId));
 
   @override
-  Future<LedgerPeriodLock> setLockDate(String budgetId, DateTime lockDate) =>
+  Future<LedgerPeriodLock> setLockDate(String entityId, DateTime lockDate) =>
       _client.ledger.setLockDate(
-        UuidValue.fromString(budgetId),
+        UuidValue.fromString(entityId),
         lockDate,
       );
 
   @override
-  Future<LedgerPeriodLock?> getLockDate(String budgetId) =>
-      _client.ledger.getLockDate(UuidValue.fromString(budgetId));
+  Future<LedgerPeriodLock?> getLockDate(String entityId) =>
+      _client.ledger.getLockDate(UuidValue.fromString(entityId));
 
   @override
-  Future<TrialBalanceView> trialBalance(String budgetId, DateTime asOf) =>
-      _client.ledger.trialBalance(UuidValue.fromString(budgetId), asOf);
+  Future<TrialBalanceView> trialBalance(String entityId, DateTime asOf) =>
+      _client.ledger.trialBalance(UuidValue.fromString(entityId), asOf);
 }
 
 @riverpod

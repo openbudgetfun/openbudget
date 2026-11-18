@@ -1,0 +1,8 @@
+### Where an external connection's last sync stands. Staleness is derived
+### from lastSyncedAt, never stored.
+enum: SyncStatus
+serialized: byName
+values:
+  - pending
+  - synced
+  - failed

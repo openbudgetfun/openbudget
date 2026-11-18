@@ -1,0 +1,22 @@
+### A move between two accounts the user owns, possibly in two currencies
+### and two entities.
+class: TransferInput
+fields:
+  fromAccountId: UuidValue
+  toAccountId: UuidValue
+  ### Calendar date of both legs.
+  date: DateTime
+  ### What left, positive, in the from-account's minor units.
+  fromAmountMinor: int
+  ### What arrived, positive, in the to-account's minor units. Required
+  ### when the currencies differ unless useMarketRate is true; must be null
+  ### or equal to fromAmountMinor when they match.
+  toAmountMinor: int?
+  ### Compute toAmountMinor at the market rate when it is null.
+  useMarketRate: bool, default=false
+  ### Envelope of the outflow leg. Allowed only when the money leaves the
+  ### entity's envelope plan: the from-account is on budget and the
+  ### to-account is off budget or in another entity.
+  envelopeId: UuidValue?
+  memo: String?
+  status: TransactionStatus, default=uncleared

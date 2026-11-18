@@ -21,6 +21,7 @@ abstract class TaxReportLineView
     this.code,
     this.reportReference,
     required this.entryCount,
+    this.figureId,
   });
 
   factory TaxReportLineView({
@@ -29,6 +30,7 @@ abstract class TaxReportLineView
     String? code,
     String? reportReference,
     required int entryCount,
+    String? figureId,
   }) = _TaxReportLineViewImpl;
 
   factory TaxReportLineView.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -38,6 +40,7 @@ abstract class TaxReportLineView
       code: jsonSerialization['code'] as String?,
       reportReference: jsonSerialization['reportReference'] as String?,
       entryCount: jsonSerialization['entryCount'] as int,
+      figureId: jsonSerialization['figureId'] as String?,
     );
   }
 
@@ -52,6 +55,11 @@ abstract class TaxReportLineView
 
   int entryCount;
 
+  /// The named TaxFigure this line presents, when it presents one. Lines
+  /// whose figure is secondary-grade show a "from a secondary source"
+  /// badge.
+  String? figureId;
+
   /// Returns a shallow copy of this [TaxReportLineView]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
@@ -61,6 +69,7 @@ abstract class TaxReportLineView
     String? code,
     String? reportReference,
     int? entryCount,
+    String? figureId,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -71,6 +80,7 @@ abstract class TaxReportLineView
       if (code != null) 'code': code,
       if (reportReference != null) 'reportReference': reportReference,
       'entryCount': entryCount,
+      if (figureId != null) 'figureId': figureId,
     };
   }
 
@@ -83,6 +93,7 @@ abstract class TaxReportLineView
       if (code != null) 'code': code,
       if (reportReference != null) 'reportReference': reportReference,
       'entryCount': entryCount,
+      if (figureId != null) 'figureId': figureId,
     };
   }
 
@@ -101,12 +112,14 @@ class _TaxReportLineViewImpl extends TaxReportLineView {
     String? code,
     String? reportReference,
     required int entryCount,
+    String? figureId,
   }) : super._(
          label: label,
          amountMinor: amountMinor,
          code: code,
          reportReference: reportReference,
          entryCount: entryCount,
+         figureId: figureId,
        );
 
   /// Returns a shallow copy of this [TaxReportLineView]
@@ -119,6 +132,7 @@ class _TaxReportLineViewImpl extends TaxReportLineView {
     Object? code = _Undefined,
     Object? reportReference = _Undefined,
     int? entryCount,
+    Object? figureId = _Undefined,
   }) {
     return TaxReportLineView(
       label: label ?? this.label,
@@ -128,6 +142,7 @@ class _TaxReportLineViewImpl extends TaxReportLineView {
           ? reportReference
           : this.reportReference,
       entryCount: entryCount ?? this.entryCount,
+      figureId: figureId is String? ? figureId : this.figureId,
     );
   }
 }

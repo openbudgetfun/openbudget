@@ -64,7 +64,7 @@ final class AccountListProvider
   }
 }
 
-String _$accountListHash() => r'441872a31d0fc55157a891065adb3a5b00924431';
+String _$accountListHash() => r'b473867d3f60aa88ab7e10868d59311cd9f14424';
 
 final class AccountListFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<Account>>, String> {
@@ -77,9 +77,56 @@ final class AccountListFamily extends $Family
         isAutoDispose: true,
       );
 
-  AccountListProvider call(String budgetId) =>
-      AccountListProvider._(argument: budgetId, from: this);
+  AccountListProvider call(String entityId) =>
+      AccountListProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'accountListProvider';
 }
+
+/// Every account in every entity the user owns, for pickers that cross
+/// entities (transfers).
+
+@ProviderFor(accountListAll)
+final accountListAllProvider = AccountListAllProvider._();
+
+/// Every account in every entity the user owns, for pickers that cross
+/// entities (transfers).
+
+final class AccountListAllProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Account>>,
+          List<Account>,
+          FutureOr<List<Account>>
+        >
+    with $FutureModifier<List<Account>>, $FutureProvider<List<Account>> {
+  /// Every account in every entity the user owns, for pickers that cross
+  /// entities (transfers).
+  AccountListAllProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'accountListAllProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$accountListAllHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Account>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Account>> create(Ref ref) {
+    return accountListAll(ref);
+  }
+}
+
+String _$accountListAllHash() => r'c69187184f963f128558f2292dc97d966daed3d6';

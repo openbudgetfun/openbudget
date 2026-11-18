@@ -1,645 +1,379 @@
+import 'dart:convert';
+
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_server/src/accounts/account_service.dart';
-import 'package:openbudget_server/src/budgets/budget_service.dart';
-import 'package:openbudget_server/src/categories/category_service.dart';
-import 'package:openbudget_server/src/common/currency_validation.dart';
-import 'package:openbudget_server/src/envelopes/envelope_service.dart';
-import 'package:openbudget_server/src/generated/protocol.dart';
-import 'package:openbudget_server/src/payees/payee_service.dart';
-import 'package:serverpod/serverpod.dart' hide Transaction;
+import 'package:openbudget_server/src/entities/entity_access.dart';
+import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/generated/transactions/transaction.dart'
+    as model;
+import 'package:openbudget_server/src/transactions/transaction_writer.dart';
+import 'package:serverpod/serverpod.dart';
 
-/// Business logic for managing transactions within a budget.
+/// Reads and writes transactions through the single [TransactionWriter].
 ///
-/// All methods verify budget ownership before operating on transactions.
-class TransactionService {
-  static final _log = ObLogger('TransactionService');
+/// Every method crosses [EntityAccess] directly or through the writer, so a
+/// transaction is visible only to the owner of its entity. The service never
+/// assigns a cached balance or resolves an FX rate itself: both belong to the
+/// writer, which keeps metadata edits from re-pricing or re-balancing history.
+abstract final class TransactionService {
+  /// The largest page `list` returns, matching the documented 1-200 range.
+  static const maxPageLimit = 200;
 
-  /// Creates a transaction within a budget, verifying ownership.
-  static Future<Transaction> create(
-    Session session, {
-    required String description,
-    required int amountCents,
-    required String currencyCode,
-    required UuidValue budgetId,
-    required DateTime transactionDate,
-    UuidValue? envelopeId,
-    UuidValue? payeeId,
-    String? memo,
-  }) async {
-    _log.info('Creating transaction desc=$description amount=$amountCents');
-    await BudgetService.getById(session, budgetId: budgetId);
-    await _validateTransactionReferences(
-      session,
-      budgetId: budgetId,
-      envelopeId: envelopeId,
-      payeeId: payeeId,
-    );
-    final normalizedCurrencyCode = requireSupportedCurrency(currencyCode);
+  /// The largest bulk status or flag request.
+  static const int maxBulkIds = TransactionWriter.maxBulkTransactionIds;
 
-    final transaction = Transaction(
-      description: description,
-      amountCents: amountCents,
-      currencyCode: normalizedCurrencyCode,
-      envelopeId: envelopeId,
-      budgetId: budgetId,
-      payeeId: payeeId,
-      memo: memo,
-      transactionDate: transactionDate,
-      createdAt: DateTime.now(),
-    );
-    return Transaction.db.insertRow(session, transaction);
-  }
+  /// The most matches [findDuplicates] returns.
+  static const maxDuplicateMatches = 20;
 
-  /// Lists all transactions for a budget, verifying ownership.
-  static Future<List<Transaction>> listForBudget(
-    Session session, {
-    required UuidValue budgetId,
-  }) async {
-    await BudgetService.getById(session, budgetId: budgetId);
+  static const _maxCursorLength = 100;
+  static const _cursorPattern = r'^[A-Za-z0-9_-]+$';
+  static const _cursorDatePattern = r'^\d{4}-\d{2}-\d{2}$';
 
-    return Transaction.db.find(
-      session,
-      where: (t) => t.budgetId.equals(budgetId),
-      orderBy: (t) => t.transactionDate.desc(),
-    );
-  }
+  /// Creates a transaction header, its lines and its balance movement.
+  static Future<TransactionView> create(
+    Session session,
+    TransactionInput input,
+  ) => TransactionWriter.create(session, input);
 
-  /// Lists transactions for a budget within a specific month.
-  static Future<List<Transaction>> listForBudgetMonth(
-    Session session, {
-    required UuidValue budgetId,
-    required int year,
-    required int month,
-  }) async {
-    await BudgetService.getById(session, budgetId: budgetId);
+  /// Loads one owned transaction with its lines and transfer peer.
+  static Future<TransactionView> get(
+    Session session,
+    UuidValue transactionId,
+  ) => TransactionWriter.get(session, transactionId);
 
-    final start = DateTime(year, month);
-    final end = DateTime(year, month + 1);
+  /// Replaces a transaction and its lines.
+  static Future<TransactionView> update(
+    Session session,
+    UuidValue transactionId,
+    TransactionInput input,
+  ) => TransactionWriter.update(session, transactionId, input);
 
-    return Transaction.db.find(
-      session,
-      where: (t) =>
-          t.budgetId.equals(budgetId) &
-          (t.transactionDate >= start) &
-          (t.transactionDate < end),
-      orderBy: (t) => t.transactionDate.desc(),
-    );
-  }
+  /// Deletes a transaction, both legs of a transfer, and their balances.
+  static Future<void> delete(Session session, UuidValue transactionId) =>
+      TransactionWriter.delete(session, transactionId);
 
-  /// Fetches a single transaction, verifying budget ownership.
-  static Future<Transaction> getById(
-    Session session, {
-    required UuidValue transactionId,
-  }) async {
-    final transaction = await Transaction.db.findById(session, transactionId);
-    if (transaction == null) {
-      throw NotFoundException(message: 'Transaction not found');
-    }
+  /// Sets one status on a page of owned transactions.
+  static Future<int> setStatus(
+    Session session,
+    List<UuidValue> transactionIds,
+    TransactionStatus status,
+  ) => TransactionWriter.setStatus(session, transactionIds, status);
 
-    // Verify the user owns the parent budget.
-    await BudgetService.getById(session, budgetId: transaction.budgetId);
-    return transaction;
-  }
+  /// Sets or clears one flag on a page of owned transactions.
+  static Future<int> setFlag(
+    Session session,
+    List<UuidValue> transactionIds,
+    TransactionFlag? flag,
+  ) => TransactionWriter.setFlag(session, transactionIds, flag);
 
-  /// Updates a transaction, verifying budget ownership.
-  static Future<Transaction> update(
-    Session session, {
-    required UuidValue transactionId,
-    String? description,
-    int? amountCents,
-    UuidValue? envelopeId,
-    UuidValue? payeeId,
-    DateTime? transactionDate,
-    String? memo,
-    String? flagColor,
-  }) async {
-    final transaction = await getById(session, transactionId: transactionId);
-    await _validateTransactionReferences(
-      session,
-      budgetId: transaction.budgetId,
-      envelopeId: envelopeId,
-      payeeId: payeeId,
-    );
+  /// Creates [from leg, to leg] and their link atomically.
+  static Future<List<TransactionView>> createTransfer(
+    Session session,
+    TransferInput input,
+  ) => TransactionWriter.createTransfer(session, input);
 
-    final updated = transaction.copyWith(
-      description: description ?? transaction.description,
-      amountCents: amountCents ?? transaction.amountCents,
-      envelopeId: envelopeId ?? transaction.envelopeId,
-      payeeId: payeeId ?? transaction.payeeId,
-      transactionDate: transactionDate ?? transaction.transactionDate,
-      memo: memo ?? transaction.memo,
-      flagColor: flagColor ?? transaction.flagColor,
-    );
-    return Transaction.db.updateRow(session, updated);
-  }
+  /// Replaces both legs of an existing transfer atomically.
+  static Future<List<TransactionView>> updateTransfer(
+    Session session,
+    UuidValue transferId,
+    TransferInput input,
+  ) => TransactionWriter.updateTransfer(session, transferId, input);
 
-  /// Sets or clears the flag color on a transaction.
-  static Future<Transaction> setFlag(
-    Session session, {
-    required UuidValue transactionId,
-    String? flagColor,
-  }) async {
-    final transaction = await getById(session, transactionId: transactionId);
-    final updated = transaction.copyWith(flagColor: flagColor);
-    return Transaction.db.updateRow(session, updated);
-  }
+  /// Reconciles one transactions account against a statement balance.
+  static Future<ReconcileResult> reconcile(
+    Session session,
+    UuidValue accountId,
+    DateTime statementDate,
+    int statementBalanceMinor,
+    // The documented reconcile signature keeps createAdjustment positional.
+    // ignore: avoid_positional_boolean_parameters
+    bool createAdjustment,
+  ) => TransactionWriter.reconcile(
+    session,
+    accountId,
+    statementDate,
+    statementBalanceMinor,
+    createAdjustment,
+  );
 
-  /// Creates a transfer between two accounts within a budget.
+  /// Imports rows into one owned transactions account idempotently.
   ///
-  /// This creates two linked transactions: an outflow from the source account
-  /// and an inflow to the destination account, linked by `transferPairId`.
-  static Future<List<Transaction>> createTransfer(
-    Session session, {
-    required String description,
-    required int amountCents,
-    required String currencyCode,
-    required UuidValue budgetId,
-    required UuidValue fromAccountId,
-    required UuidValue toAccountId,
-    required DateTime transactionDate,
-  }) async {
-    _log.info(
-      'Creating transfer from=$fromAccountId to=$toAccountId amount=$amountCents',
-    );
-    await BudgetService.getById(session, budgetId: budgetId);
-    final normalizedCurrencyCode = requireSupportedCurrency(currencyCode);
-    await _assertAccountBelongsToBudget(
-      session,
-      accountId: fromAccountId,
-      budgetId: budgetId,
-    );
-    await _assertAccountBelongsToBudget(
-      session,
-      accountId: toAccountId,
-      budgetId: budgetId,
-    );
+  /// Valid rows commit together; invalid rows come back with their 0-based
+  /// index in [ImportResult.errors]. The contract lives in
+  /// [TransactionWriter.importRows].
+  static Future<ImportResult> importRows(
+    Session session,
+    UuidValue accountId,
+    List<ImportRow> rows,
+  ) => TransactionWriter.importRows(session, accountId, rows);
 
-    if (fromAccountId == toAccountId) {
+  /// Lists one keyset page of an owned entity's transactions.
+  ///
+  /// Rows are newest first by `(date desc, id desc)`. Every filter is
+  /// inclusive where it names a boundary. The cursor is opaque base64url of
+  /// `yyyy-mm-dd|uuid`, and `nextCursor` is null on the last page.
+  static Future<TransactionPage> list(
+    Session session,
+    TransactionQuery query,
+  ) async {
+    if (query.limit < 1 || query.limit > maxPageLimit) {
       throw ValidationException(
-        message: 'Source and destination accounts must be different',
+        message: 'limit must be between 1 and $maxPageLimit',
       );
     }
+    _requireCivilDate(query.fromDate, 'fromDate');
+    _requireCivilDate(query.toDate, 'toDate');
+    final cursor = _decodeCursor(query.cursor);
 
-    return session.db.transaction((dbTransaction) async {
-      final outflow = Transaction(
-        description: description,
-        amountCents: -amountCents.abs(),
-        currencyCode: normalizedCurrencyCode,
-        budgetId: budgetId,
-        accountId: fromAccountId,
-        transactionDate: transactionDate,
-        createdAt: DateTime.now(),
-      );
-      final savedOutflow = await Transaction.db.insertRow(
-        session,
-        outflow,
-        transaction: dbTransaction,
-      );
+    await EntityAccess.requireOwned(session, query.entityId);
+    await _requireFilterReferences(session, query);
 
-      final inflow = Transaction(
-        description: description,
-        amountCents: amountCents.abs(),
-        currencyCode: normalizedCurrencyCode,
-        budgetId: budgetId,
-        accountId: toAccountId,
-        transferPairId: savedOutflow.id,
-        transactionDate: transactionDate,
-        createdAt: DateTime.now(),
-      );
-      final savedInflow = await Transaction.db.insertRow(
-        session,
-        inflow,
-        transaction: dbTransaction,
-      );
+    final search = _likePattern(query.search);
+    final ids = await _pageIds(session, query, cursor, search);
+    final hasMore = ids.length > query.limit;
+    final pageIds = hasMore ? ids.sublist(0, query.limit) : ids;
+    if (pageIds.isEmpty) {
+      return TransactionPage(items: const []);
+    }
 
-      final linkedOutflow = savedOutflow.copyWith(
-        transferPairId: savedInflow.id,
-      );
-      final updatedOutflow = await Transaction.db.updateRow(
-        session,
-        linkedOutflow,
-        transaction: dbTransaction,
-      );
-
-      return [updatedOutflow, savedInflow];
-    });
-  }
-
-  /// Lists transactions for a specific account.
-  static Future<List<Transaction>> listForAccount(
-    Session session, {
-    required UuidValue accountId,
-    required UuidValue budgetId,
-  }) async {
-    await BudgetService.getById(session, budgetId: budgetId);
-
-    return Transaction.db.find(
+    final rows = await model.Transaction.db.find(
       session,
-      where: (t) => t.budgetId.equals(budgetId) & t.accountId.equals(accountId),
-      orderBy: (t) => t.transactionDate.desc(),
+      where: (t) => t.id.inSet(pageIds.toSet()),
     );
+    final rowsById = {for (final row in rows) row.id!: row};
+    final ordered = [
+      for (final id in pageIds)
+        if (rowsById[id] != null) rowsById[id]!,
+    ];
+    if (ordered.isEmpty) {
+      return TransactionPage(items: const []);
+    }
+
+    final items = await TransactionWriter.views(session, ordered);
+    final nextCursor = hasMore && ordered.length == pageIds.length
+        ? _encodeCursor(ordered.last.date, ordered.last.id!)
+        : null;
+    return TransactionPage(items: items, nextCursor: nextCursor);
   }
 
-  /// Toggles the cleared status of a transaction.
-  static Future<Transaction> toggleCleared(
-    Session session, {
-    required UuidValue transactionId,
-  }) async {
-    final transaction = await getById(session, transactionId: transactionId);
-    final updated = transaction.copyWith(cleared: !transaction.cleared);
-    return Transaction.db.updateRow(session, updated);
-  }
+  /// Finds transactions in [accountId] with the same signed amount and a date
+  /// within three civil days of [date].
+  ///
+  /// The result is bounded by [maxDuplicateMatches], so a review screen can
+  /// scan a suspicious row without an unbounded transaction list.
+  static Future<List<TransactionView>> findDuplicates(
+    Session session,
+    UuidValue accountId,
+    DateTime date,
+    int amountMinor,
+  ) async {
+    if (!isCivilDate(date)) {
+      throw ValidationException(message: 'date must be a UTC calendar date');
+    }
+    final account = await Account.db.findById(session, accountId);
+    if (account == null) {
+      throw NotFoundException(message: 'Account not found');
+    }
+    await EntityAccess.requireOwned(session, account.entityId);
 
-  /// Reconciles an account by marking all cleared transactions as reconciled
-  /// and returning the count of reconciled transactions.
-  static Future<int> reconcileAccount(
-    Session session, {
-    required UuidValue accountId,
-    required UuidValue budgetId,
-  }) async {
-    await BudgetService.getById(session, budgetId: budgetId);
-
-    final cleared = await Transaction.db.find(
+    final rows = await model.Transaction.db.find(
       session,
       where: (t) =>
-          t.budgetId.equals(budgetId) &
           t.accountId.equals(accountId) &
-          t.cleared.equals(true) &
-          t.reconciled.equals(false),
+          t.amountMinor.equals(amountMinor) &
+          (t.date >= date.subtract(const Duration(days: 3))) &
+          (t.date <= date.add(const Duration(days: 3))),
+      orderByList: (t) => [t.date.desc(), t.id.desc()],
+      limit: maxDuplicateMatches,
     );
-
-    for (final txn in cleared) {
-      await Transaction.db.updateRow(session, txn.copyWith(reconciled: true));
-    }
-
-    return cleared.length;
+    return TransactionWriter.views(session, rows);
   }
 
-  /// Reconciles an account with a statement balance.
-  ///
-  /// Computes the cleared balance (sum of all cleared & unreconciled
-  /// transactions plus previously reconciled transactions). If it differs
-  /// from [statementBalanceCents], an adjustment transaction is created.
-  /// All cleared transactions are then marked reconciled.
-  ///
-  /// Returns a list containing: [reconciledCount, adjustmentCents].
-  static Future<List<int>> reconcileWithBalance(
-    Session session, {
-    required UuidValue accountId,
-    required UuidValue budgetId,
-    required int statementBalanceCents,
-  }) async {
-    final budget = await BudgetService.getById(session, budgetId: budgetId);
-
-    // Sum all transactions for this account to get the current balance.
-    final allTransactions = await Transaction.db.find(
-      session,
-      where: (t) => t.budgetId.equals(budgetId) & t.accountId.equals(accountId),
-    );
-
-    // Cleared balance = sum of all reconciled + cleared transactions.
-    var clearedBalanceCents = 0;
-    for (final txn in allTransactions) {
-      if (txn.reconciled || txn.cleared) {
-        clearedBalanceCents += txn.amountCents;
-      }
-    }
-
-    final adjustmentCents = statementBalanceCents - clearedBalanceCents;
-
-    // Create adjustment transaction if needed.
-    if (adjustmentCents != 0) {
-      final adjustment = Transaction(
-        budgetId: budgetId,
-        accountId: accountId,
-        amountCents: adjustmentCents,
-        currencyCode: budget.currencyCode,
-        description: 'Reconciliation adjustment',
-        transactionDate: DateTime.now(),
-        cleared: true,
-        reconciled: true,
-        createdAt: DateTime.now(),
-      );
-      await Transaction.db.insertRow(session, adjustment);
-    }
-
-    // Mark all cleared transactions as reconciled.
-    final count = await reconcileAccount(
-      session,
-      accountId: accountId,
-      budgetId: budgetId,
-    );
-
-    return [count, adjustmentCents];
-  }
-
-  /// Calculates the "Age of Money" for a budget using FIFO matching.
-  ///
-  /// Returns the average number of days between income receipt and spending
-  /// for the most recent outflows, or null if insufficient data.
-  static Future<int?> ageOfMoney(
-    Session session, {
-    required UuidValue budgetId,
-  }) async {
-    await BudgetService.getById(session, budgetId: budgetId);
-
-    final transactions = await Transaction.db.find(
-      session,
-      where: (t) => t.budgetId.equals(budgetId),
-      orderBy: (t) => t.transactionDate,
-    );
-
-    if (transactions.isEmpty) return null;
-
-    // Separate inflows and outflows (exclude transfers), sorted oldest first.
-    final inflows = transactions
-        .where((t) => t.amountCents > 0 && t.transferPairId == null)
-        .toList();
-    final outflows = transactions
-        .where((t) => t.amountCents < 0 && t.transferPairId == null)
-        .toList();
-
-    if (inflows.isEmpty || outflows.isEmpty) return null;
-
-    // FIFO: match each outflow cent to the oldest available inflow cent.
-    final remainingCents = inflows.map((i) => i.amountCents).toList();
-    var inflowIdx = 0;
-    final ages = <int>[];
-
-    for (final outflow in outflows) {
-      var remaining = outflow.amountCents.abs();
-
-      while (remaining > 0 && inflowIdx < remainingCents.length) {
-        final available = remainingCents[inflowIdx];
-        final consumed = remaining < available ? remaining : available;
-        final ageDays = outflow.transactionDate
-            .difference(inflows[inflowIdx].transactionDate)
-            .inDays;
-
-        if (ageDays >= 0) {
-          ages.add(ageDays);
-        }
-
-        remaining -= consumed;
-        remainingCents[inflowIdx] -= consumed;
-
-        if (remainingCents[inflowIdx] <= 0) {
-          inflowIdx++;
-        }
-      }
-    }
-
-    if (ages.isEmpty) return null;
-
-    // Return average of the last 10 ages for recency.
-    final recentAges = ages.length > 10 ? ages.sublist(ages.length - 10) : ages;
-    final sum = recentAges.fold<int>(0, (s, a) => s + a);
-    return (sum / recentAges.length).round();
-  }
-
-  /// Creates a split transaction: a parent with multiple sub-transactions.
-  ///
-  /// The parent holds the total amount (no envelope). Each split has its own
-  /// envelope and amount. The sum of split amounts must equal the parent.
-  static Future<List<Transaction>> createSplit(
-    Session session, {
-    required String description,
-    required int totalAmountCents,
-    required String currencyCode,
-    required UuidValue budgetId,
-    required DateTime transactionDate,
-    required List<SplitItem> splits,
-    UuidValue? payeeId,
-    UuidValue? accountId,
-  }) async {
-    _log.info(
-      'Creating split transaction desc=$description splits=${splits.length}',
-    );
-    await BudgetService.getById(session, budgetId: budgetId);
-    await _validateTransactionReferences(
-      session,
-      budgetId: budgetId,
-      payeeId: payeeId,
-    );
-    final normalizedCurrencyCode = requireSupportedCurrency(currencyCode);
+  static Future<void> _requireFilterReferences(
+    Session session,
+    TransactionQuery query,
+  ) async {
+    final accountId = query.accountId;
     if (accountId != null) {
-      await _assertAccountBelongsToBudget(
-        session,
-        accountId: accountId,
-        budgetId: budgetId,
-      );
-    }
-
-    for (final split in splits) {
-      if (split.envelopeId != null) {
-        await _assertEnvelopeBelongsToBudget(
-          session,
-          budgetId: budgetId,
-          envelopeId: split.envelopeId!,
-        );
+      final account = await Account.db.findById(session, accountId);
+      if (account == null || account.entityId != query.entityId) {
+        throw NotFoundException(message: 'Account not found');
       }
     }
 
-    // Validate split amounts sum to total.
-    final splitSum = splits.fold<int>(0, (sum, s) => sum + s.amountCents.abs());
-    if (splitSum != totalAmountCents.abs()) {
-      throw ValidationException(
-        message:
-            'Split amounts must equal total: $splitSum != ${totalAmountCents.abs()}',
-      );
-    }
-
-    return session.db.transaction((dbTransaction) async {
-      // Create parent transaction (no envelope).
-      final parent = Transaction(
-        description: description,
-        amountCents: totalAmountCents,
-        currencyCode: normalizedCurrencyCode,
-        budgetId: budgetId,
-        payeeId: payeeId,
-        accountId: accountId,
-        transactionDate: transactionDate,
-        createdAt: DateTime.now(),
-      );
-      final savedParent = await Transaction.db.insertRow(
-        session,
-        parent,
-        transaction: dbTransaction,
-      );
-
-      final results = <Transaction>[savedParent];
-
-      // Create child split transactions.
-      for (final split in splits) {
-        final child = Transaction(
-          description: split.memo ?? description,
-          amountCents: totalAmountCents.isNegative
-              ? -split.amountCents.abs()
-              : split.amountCents.abs(),
-          currencyCode: normalizedCurrencyCode,
-          budgetId: budgetId,
-          envelopeId: split.envelopeId,
-          payeeId: payeeId,
-          accountId: accountId,
-          parentTransactionId: savedParent.id,
-          transactionDate: transactionDate,
-          createdAt: DateTime.now(),
-        );
-        final saved = await Transaction.db.insertRow(
-          session,
-          child,
-          transaction: dbTransaction,
-        );
-        results.add(saved);
-      }
-
-      return results;
-    });
-  }
-
-  /// Lists the sub-transactions (splits) for a parent transaction.
-  static Future<List<Transaction>> listSplits(
-    Session session, {
-    required UuidValue parentTransactionId,
-  }) async {
-    final parent = await getById(session, transactionId: parentTransactionId);
-    return Transaction.db.find(
-      session,
-      where: (t) => t.parentTransactionId.equals(parent.id),
-      orderBy: (t) => t.createdAt,
-    );
-  }
-
-  /// Bulk creates transactions from import data.
-  ///
-  /// All transactions are created within a single budget, verified once.
-  /// Returns the count of successfully created transactions.
-  static Future<int> bulkCreate(
-    Session session, {
-    required UuidValue budgetId,
-    required String currencyCode,
-    required List<ImportRow> rows,
-    UuidValue? accountId,
-  }) async {
-    _log.info('Bulk creating ${rows.length} transactions for budget=$budgetId');
-    await BudgetService.getById(session, budgetId: budgetId);
-    final normalizedCurrencyCode = requireSupportedCurrency(currencyCode);
-
-    var count = 0;
-    for (final row in rows) {
-      final transaction = Transaction(
-        description: row.description,
-        amountCents: row.amountCents,
-        currencyCode: normalizedCurrencyCode,
-        budgetId: budgetId,
-        accountId: accountId,
-        transactionDate: row.transactionDate,
-        createdAt: DateTime.now(),
-      );
-      await Transaction.db.insertRow(session, transaction);
-      count++;
-    }
-
-    return count;
-  }
-
-  /// Finds potential duplicate transactions for a given amount and date.
-  ///
-  /// Matches transactions with the same absolute amount within ±1 day
-  /// of the given date. Returns up to 5 potential duplicates.
-  static Future<List<Transaction>> findDuplicates(
-    Session session, {
-    required UuidValue budgetId,
-    required int amountCents,
-    required DateTime transactionDate,
-  }) async {
-    await BudgetService.getById(session, budgetId: budgetId);
-
-    final dayBefore = transactionDate.subtract(const Duration(days: 1));
-    final dayAfter = transactionDate.add(const Duration(days: 1));
-
-    return Transaction.db.find(
-      session,
-      where: (t) =>
-          t.budgetId.equals(budgetId) &
-          t.amountCents.equals(amountCents) &
-          (t.transactionDate >= dayBefore) &
-          (t.transactionDate <= dayAfter),
-      orderBy: (t) => t.transactionDate.desc(),
-      limit: 5,
-    );
-  }
-
-  /// Deletes a transaction, verifying budget ownership.
-  static Future<Transaction> delete(
-    Session session, {
-    required UuidValue transactionId,
-  }) async {
-    _log.info('Deleting transaction id=$transactionId');
-    final transaction = await getById(session, transactionId: transactionId);
-    return Transaction.db.deleteRow(session, transaction);
-  }
-
-  static Future<void> _assertAccountBelongsToBudget(
-    Session session, {
-    required UuidValue accountId,
-    required UuidValue budgetId,
-  }) async {
-    final account = await AccountService.getById(session, accountId: accountId);
-    if (account.budgetId != budgetId) {
-      throw NotFoundException(message: 'Account not found in this budget');
-    }
-  }
-
-  static Future<void> _assertEnvelopeBelongsToBudget(
-    Session session, {
-    required UuidValue envelopeId,
-    required UuidValue budgetId,
-  }) async {
-    final envelope = await EnvelopeService.getById(
-      session,
-      envelopeId: envelopeId,
-    );
-    final category = await CategoryService.getById(
-      session,
-      categoryId: envelope.categoryId,
-    );
-    if (category.budgetId != budgetId) {
-      throw NotFoundException(message: 'Envelope not found in this budget');
-    }
-  }
-
-  static Future<void> _assertPayeeBelongsToBudget(
-    Session session, {
-    required UuidValue payeeId,
-    required UuidValue budgetId,
-  }) async {
-    final payee = await PayeeService.getById(session, payeeId: payeeId);
-    if (payee.budgetId != budgetId) {
-      throw NotFoundException(message: 'Payee not found in this budget');
-    }
-  }
-
-  static Future<void> _validateTransactionReferences(
-    Session session, {
-    required UuidValue budgetId,
-    UuidValue? envelopeId,
-    UuidValue? payeeId,
-  }) async {
+    final envelopeId = query.envelopeId;
     if (envelopeId != null) {
-      await _assertEnvelopeBelongsToBudget(
-        session,
-        budgetId: budgetId,
-        envelopeId: envelopeId,
-      );
+      final envelope = await Envelope.db.findById(session, envelopeId);
+      if (envelope == null || envelope.entityId != query.entityId) {
+        throw NotFoundException(message: 'Envelope not found');
+      }
     }
 
+    final payeeId = query.payeeId;
     if (payeeId != null) {
-      await _assertPayeeBelongsToBudget(
-        session,
-        budgetId: budgetId,
-        payeeId: payeeId,
+      final payee = await Payee.db.findById(session, payeeId);
+      if (payee == null || payee.entityId != query.entityId) {
+        throw NotFoundException(message: 'Payee not found');
+      }
+    }
+  }
+
+  /// One query selects the page's ids, so ownership and every filter are
+  /// applied before a row is loaded. Values are named parameters; only the
+  /// sort order and predicate shape are fixed SQL.
+  static Future<List<UuidValue>> _pageIds(
+    Session session,
+    TransactionQuery query,
+    _Cursor? cursor,
+    String? search,
+  ) async {
+    final rows = await session.db.unsafeQuery(
+      r'''
+SELECT t.id::text
+FROM "transaction" t
+JOIN account a ON a.id = t."accountId"
+LEFT JOIN payee p ON p.id = t."payeeId"
+WHERE t."entityId" = @entityId::uuid
+  AND (@accountId::uuid IS NULL OR t."accountId" = @accountId::uuid)
+  AND (@envelopeId::uuid IS NULL OR EXISTS (
+    SELECT 1 FROM transaction_line l
+    WHERE l."transactionId" = t.id
+      AND l."envelopeId" = @envelopeId::uuid))
+  AND (@payeeId::uuid IS NULL OR t."payeeId" = @payeeId::uuid)
+  AND (@fromDate::timestamp IS NULL OR t.date >= @fromDate::timestamp)
+  AND (@toDate::timestamp IS NULL OR t.date <= @toDate::timestamp)
+  AND (@status::text IS NULL OR t.status = @status::text)
+  AND (@search::text IS NULL
+    OR t.description ILIKE @search::text ESCAPE E'\\'
+    OR t.memo ILIKE @search::text ESCAPE E'\\'
+    OR p.name ILIKE @search::text ESCAPE E'\\')
+  AND (
+    @uncategorizedOnly::boolean = false
+    OR (
+      a."onBudget"
+      AND EXISTS (
+        SELECT 1 FROM transaction_line l
+        WHERE l."transactionId" = t.id
+          AND l."envelopeId" IS NULL
+          AND l."amountMinor" < 0)
+      AND NOT EXISTS (
+        SELECT 1
+        FROM transfer tf
+        JOIN "transaction" peer ON peer.id = CASE
+          WHEN tf."fromTransactionId" = t.id THEN tf."toTransactionId"
+          ELSE tf."fromTransactionId"
+        END
+        JOIN account pa ON pa.id = peer."accountId"
+        WHERE (tf."fromTransactionId" = t.id OR tf."toTransactionId" = t.id)
+          AND peer."entityId" = t."entityId"
+          AND pa."onBudget")
+    )
+  )
+  AND (@cursorDate::timestamp IS NULL
+    OR t.date < @cursorDate::timestamp
+    OR (t.date = @cursorDate::timestamp AND t.id < @cursorId::uuid))
+ORDER BY t.date DESC, t.id DESC
+LIMIT @limit::integer
+''',
+      parameters: QueryParameters.named({
+        'entityId': query.entityId.toString(),
+        'accountId': query.accountId?.toString(),
+        'envelopeId': query.envelopeId?.toString(),
+        'payeeId': query.payeeId?.toString(),
+        'fromDate': query.fromDate,
+        'toDate': query.toDate,
+        'status': query.status?.name,
+        'search': search,
+        'uncategorizedOnly': query.uncategorizedOnly,
+        'cursorDate': cursor?.date,
+        'cursorId': cursor?.id.toString(),
+        'limit': query.limit + 1,
+      }),
+    );
+    return [for (final row in rows) UuidValue.fromString(row[0] as String)];
+  }
+
+  /// Escapes SQL `LIKE` metacharacters so a user's `%`, `_` or `\` matches
+  /// itself. The surrounding `%` are the only wildcards.
+  static String? _likePattern(String? search) {
+    if (search == null || search.isEmpty) return null;
+    final escaped = search
+        .replaceAll(r'\', r'\\')
+        .replaceAll('%', r'\%')
+        .replaceAll('_', r'\_');
+    return '%$escaped%';
+  }
+
+  static _Cursor? _decodeCursor(String? raw) {
+    if (raw == null) return null;
+    if (raw.isEmpty ||
+        raw.length > _maxCursorLength ||
+        !RegExp(_cursorPattern).hasMatch(raw)) {
+      throw ValidationException(message: 'Invalid transaction cursor');
+    }
+
+    final String decoded;
+    try {
+      decoded = utf8.decode(base64Url.decode(base64Url.normalize(raw)));
+    } on FormatException {
+      throw ValidationException(message: 'Invalid transaction cursor');
+    }
+    if (decoded.length != 47 || decoded[10] != '|') {
+      throw ValidationException(message: 'Invalid transaction cursor');
+    }
+
+    final dateText = decoded.substring(0, 10);
+    if (!RegExp(_cursorDatePattern).hasMatch(dateText)) {
+      throw ValidationException(message: 'Invalid transaction cursor');
+    }
+    final date = _parseCursorDate(dateText);
+    if (date == null) {
+      throw ValidationException(message: 'Invalid transaction cursor');
+    }
+
+    final UuidValue id;
+    try {
+      id = UuidValue.withValidation(decoded.substring(11));
+    } on FormatException {
+      throw ValidationException(message: 'Invalid transaction cursor');
+    }
+    return _Cursor(date, id);
+  }
+
+  static String _encodeCursor(DateTime date, UuidValue id) {
+    final text =
+        '${date.year.toString().padLeft(4, '0')}-'
+        '${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}|${id.uuid}';
+    return base64Url.encode(utf8.encode(text)).replaceAll('=', '');
+  }
+
+  /// Parses the cursor's civil day without throwing for an out-of-range value.
+  static DateTime? _parseCursorDate(String text) {
+    final year = int.parse(text.substring(0, 4));
+    final month = int.parse(text.substring(5, 7));
+    final day = int.parse(text.substring(8, 10));
+    if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
+      return null;
+    }
+    final date = DateTime.utc(year, month, day);
+    if (date.year != year || date.month != month || date.day != day) {
+      return null;
+    }
+    return date;
+  }
+
+  static void _requireCivilDate(DateTime? date, String field) {
+    if (date != null && !isCivilDate(date)) {
+      throw ValidationException(
+        message: '$field must be a UTC calendar date',
       );
     }
   }
+}
+
+final class _Cursor {
+  const _Cursor(this.date, this.id);
+
+  final DateTime date;
+  final UuidValue id;
 }

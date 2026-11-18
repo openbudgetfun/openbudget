@@ -1,0 +1,15 @@
+### One account's part of a net worth.
+class: NetWorthAccountRow
+fields:
+  accountId: UuidValue
+  entityId: UuidValue
+  name: String
+  kind: AccountKind
+  isLiability: bool
+  currencyCode: String
+  ### Balance on asOf in account minor units.
+  balanceMinor: int
+  ### The same in the reporting currency; null when no rate was available.
+  convertedMinor: int?
+  ### For valuation-sourced accounts: the date of the valuation used.
+  valuationDate: DateTime?

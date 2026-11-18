@@ -37,8 +37,8 @@ The first release of the OpenBudget workspace: a Flutter app on Serverpod 4.1 wi
 
 ## OpenBudget Plus
 
-- `entitlement` table, `EntitlementService` and `BillingEndpoint.getEntitlement`. Each rail records its own subscription row; access holds through `currentPeriodEnd` and the period ending last wins. `BillingPlan` fixes $10 a month with $1 of built-in agent usage.
-- Stripe Checkout and billing portal sessions with signed webhooks, RevenueCat App Store and Play Store webhooks, and the Solana Subscriptions Delegation Program rail with a wallet ownership challenge, on-chain verification and an hourly collector that charges 10 USDC per 30-day period. Confirming a Solana subscription never charges twice, and a failed first payment grants nothing.
+- `entitlement` table, `EntitlementService` and `BillingEndpoint.getEntitlement`. Each rail records its own subscription row; access holds through `currentPeriodEnd` and the period ending last wins. `BillingPlan` fixes $20 a month with $5 of built-in agent usage.
+- Stripe Checkout and billing portal sessions with signed webhooks, RevenueCat App Store and Play Store webhooks, and the Solana Subscriptions Delegation Program rail with a wallet ownership challenge, on-chain verification and an hourly collector that charges 20 USDC per 30-day period. Confirming a Solana subscription never charges twice, and a failed first payment grants nothing.
 - The app's `/plus` screen offers RevenueCat on mobile, Stripe on web and desktop, and Solana USDC on web.
 
 ## Agent

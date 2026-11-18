@@ -28,7 +28,7 @@ void main() {
             themeMode: ThemeMode.dark,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const AppIconScreen(budgetId: 'test-budget-id'),
+            home: const AppIconScreen(entityId: 'test-budget-id'),
           ),
         ),
       );

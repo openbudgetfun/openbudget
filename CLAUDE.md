@@ -121,7 +121,7 @@ Use `GoRouter` for all navigation. Routes are defined in `app_router.dart` with 
 
 ### Accounting and Tax Domain Skills
 
-Bookkeeping, invoicing, payroll and tax-return work follows the researched rules in `.claude/skills/` (also linked at `.agents/skills/`), not memory. Load the matching skill before changing that code: `double-entry-ledger`, `xero-migration`, `uk-personal-tax`, `uk-company-tax`, `uk-vat-payroll`, `us-federal-tax`, `nigeria-tax`, `germany-tax`, and `tax-planning-guardrails` for anything the assistant suggests. Each skill lists the figures it could not verify and when to re-check them. The scope and build order are in `docs/accounting-roadmap.md`.
+Bookkeeping, invoicing, payroll and tax-return work follows the researched rules in `.claude/skills/` (also linked at `.agents/skills/`), not memory. Load the matching skill before changing that code: `double-entry-ledger`, `xero-migration`, `uk-personal-tax`, `uk-company-tax`, `uk-vat-payroll`, `us-federal-tax`, `nigeria-tax`, `germany-tax`, and `tax-planning-guardrails` for anything the assistant suggests. Each skill lists the figures it could not verify and when to re-check them. The scope and build order are in `docs/accounting-roadmap.md`. The plan for 20 countries and the universal layer is in `docs/tax-jurisdictions.md`, and the assistant (the Money guide) is designed in `docs/money-guide.md`.
 
 ## Version Management & Releases
 

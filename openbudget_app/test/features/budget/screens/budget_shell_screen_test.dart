@@ -3,12 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_realtime_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/entity_events_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_shell_screen.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  const budgetId = 'test-budget-1';
+  const entityId = 'test-budget-1';
 
   Widget buildSubject() {
     // Use non-parameterized paths to satisfy GoRouter constraints in tests.
@@ -18,7 +18,7 @@ void main() {
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) => BudgetShellScreen(
             navigationShell: navigationShell,
-            budgetId: budgetId,
+            entityId: entityId,
           ),
           branches: [
             StatefulShellBranch(
@@ -63,7 +63,11 @@ void main() {
     );
 
     return ProviderScope(
-      overrides: [budgetRealtimeProvider.overrideWith((ref, budgetId) {})],
+      overrides: [
+        entityEventsProvider(entityId).overrideWith(
+          (ref) => const Stream.empty(),
+        ),
+      ],
       child: MaterialApp.router(
         theme: OpenBudgetTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -91,6 +95,26 @@ void main() {
       expect(find.text('Add'), findsOneWidget);
       expect(find.text('Reflect'), findsOneWidget);
       expect(find.text('More'), findsOneWidget);
+    });
+
+    testWidgets('draws the Add tab as a pink sticker', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      final plus = find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.add,
+        ),
+      );
+      expect(plus, findsOneWidget);
+      final sticker = tester.widget<Container>(
+        find.ancestor(of: plus, matching: find.byType(Container)).first,
+      );
+      final decoration = sticker.decoration! as ObRoughDecoration;
+      expect(decoration.color, const ObPalette.paper().action);
+      expect(decoration.shadow, const ObPalette.paper().printShadow);
     });
 
     testWidgets('shows Plan tab content initially', (tester) async {

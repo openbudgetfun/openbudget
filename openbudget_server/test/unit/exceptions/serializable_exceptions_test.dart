@@ -41,7 +41,11 @@ void main() {
         ForbiddenException(),
         ValidationException(),
         TaxRulesUnavailableException(),
-        TaxRateUnavailableException(),
+        FxRateUnavailableException(
+          fromCurrencyCode: 'USD',
+          toCurrencyCode: 'GBP',
+          date: DateTime.utc(2026, 2, 2),
+        ),
         EntitlementRequiredException(),
         BillingRailUnavailableException(),
         BillingProviderException(provider: 'stripe', details: 'status 502'),

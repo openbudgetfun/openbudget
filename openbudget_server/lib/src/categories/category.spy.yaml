@@ -1,14 +1,15 @@
-### A grouping of envelopes within a budget.
+### A group of envelopes in an entity's envelope plan.
 class: Category
 table: category
 fields:
   id: UuidValue?, defaultPersist=random_v7
+  entityId: UuidValue, relation(parent=entity, onDelete=Cascade)
   name: String
-  budgetId: UuidValue, relation(parent=budget)
-  sortOrder: int
-  ### Whether this category is hidden from the default budget view.
-  isHidden: bool?, default=false
+  sortOrder: int, default=0
+  ### Hidden categories are left out of the default Plan view.
+  isHidden: bool, default=false
   createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
 indexes:
-  category_budget_idx:
-    fields: budgetId
+  category_entity_idx:
+    fields: entityId, sortOrder

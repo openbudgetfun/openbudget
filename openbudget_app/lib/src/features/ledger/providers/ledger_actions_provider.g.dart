@@ -44,7 +44,7 @@ final class LedgerActionsProvider
   }
 }
 
-String _$ledgerActionsHash() => r'614a45cc00c21f5b3b734e764c027af7bb30f1fe';
+String _$ledgerActionsHash() => r'c6dd6029d54e1f5ea45565bd8cbc0c839ce3a375';
 
 /// Writes to the books, then refreshes what the writes change.
 

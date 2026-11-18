@@ -53,7 +53,7 @@ final class _BusinessPosition {
 /// Computes the profit position for a sole trade or a company.
 _BusinessPosition _businessPosition({
   required List<TaxEntry> entries,
-  required TaxEntityKind kind,
+  required EntityKind kind,
   required bool reclaimVat,
 }) {
   final totals = _totals(
@@ -311,7 +311,7 @@ List<TaxReportLine> _vatLines(
 TaxReport _soleTraderReport(TaxInput input, _NgTaxTable table) {
   final position = _businessPosition(
     entries: input.entries,
-    kind: TaxEntityKind.soleTrader,
+    kind: EntityKind.soleTrader,
     reclaimVat: input.profile.salesTaxRegistered,
   );
   final registered = input.profile.salesTaxRegistered;
@@ -347,13 +347,24 @@ TaxReport _soleTraderReport(TaxInput input, _NgTaxTable table) {
 
   return TaxReport(
     year: input.year,
-    entityKind: TaxEntityKind.soleTrader,
+    entityKind: EntityKind.soleTrader,
     lines: lines,
     liabilities: [?vat],
     alreadyPaidMinor: 0,
     assumptions: assumptions,
     sources: [for (final url in table.sourceUrls) Uri.parse(url)],
     rulesVerifiedOn: _ngRulesVerifiedOn,
+    rulesVersion: _ngRuleSetFor(
+      input.year.startYear,
+    ).versionFor(TaxJurisdiction.ng),
+    maturity: ngTaxManifest.maturity,
+    coverage: ngTaxManifest.sections,
+    caveats: _ngRuleSetFor(input.year.startYear).caveatsTouching(
+      sections: {
+        TaxSection.selfEmployment,
+        if (registered) TaxSection.indirectTax,
+      },
+    ),
     uncategorizedCount: position.uncategorized,
   );
 }

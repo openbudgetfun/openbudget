@@ -31,7 +31,7 @@ void main() {
         const ObAmount(r'$240.00', tone: ObTone.funded, highlighted: true),
       );
       final text = tester.widget<Text>(find.text(r'$240.00'));
-      expect(text.style?.color, ObSwatch.ink);
+      expect(text.style?.color, const ObPalette.paper().onHighlighter);
       expect(find.byType(ObHighlighter), findsOneWidget);
     });
 
@@ -126,6 +126,7 @@ void main() {
         ),
       );
       expect(find.text('No envelopes yet'), findsOneWidget);
+      expect(find.byType(ObSpotDoodle), findsOneWidget);
       expect(find.byType(WiredDoodle), findsOneWidget);
       await tester.tap(find.text('Add envelope'));
       expect(tapped, 1);
@@ -248,6 +249,55 @@ void main() {
       );
       expect(find.byType(SkribbleIcon), findsNWidgets(3));
       expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('ObReadableWidth', () {
+    Future<EdgeInsets> paddingAt(WidgetTester tester, double width) async {
+      late EdgeInsets given;
+      tester.view
+        ..physicalSize = const Size(1200, 800)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: width,
+              height: 400,
+              child: ObReadableWidth(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                maxWidth: 600,
+                builder: (context, padding) {
+                  given = padding;
+                  return const SizedBox.expand();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      return given;
+    }
+
+    testWidgets('passes the padding through on a narrow window', (
+      tester,
+    ) async {
+      expect(
+        await paddingAt(tester, 360),
+        const EdgeInsets.fromLTRB(16, 8, 16, 32),
+      );
+    });
+
+    testWidgets('centres a column no wider than maxWidth on a wide one', (
+      tester,
+    ) async {
+      // (1000 - 600) / 2 = 200 of gutter on each side, on top of 16.
+      expect(
+        await paddingAt(tester, 1000),
+        const EdgeInsets.fromLTRB(216, 8, 216, 32),
+      );
     });
   });
 }

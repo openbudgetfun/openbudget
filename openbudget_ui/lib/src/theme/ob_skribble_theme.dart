@@ -16,7 +16,7 @@ abstract final class ObSkribbleTheme {
   /// animations; the final rough shape then appears immediately.
   static WiredThemeData of(
     BuildContext context, {
-    WiredRoughness roughnessLevel = WiredRoughness.gentle,
+    WiredRoughness roughnessLevel = WiredRoughness.expressive,
   }) {
     final palette = Theme.of(context).ob;
     return WiredThemeData(
@@ -27,7 +27,7 @@ abstract final class ObSkribbleTheme {
       // Progress fills, slider and switch tracks, and selections take the
       // quiet highlight; ink draws the shape and the value on top.
       markerColor: palette.highlight,
-      strokeWidth: 2.2,
+      strokeWidth: 2.5,
       roughnessLevel: roughnessLevel,
       fontFamily: obTextTypeface,
       motionEnabled: !MediaQuery.disableAnimationsOf(context),
@@ -43,7 +43,7 @@ abstract final class ObSkribbleTheme {
 class ObWiredScope extends HookWidget {
   const ObWiredScope({
     required this.child,
-    this.roughnessLevel = WiredRoughness.gentle,
+    this.roughnessLevel = WiredRoughness.expressive,
     super.key,
   });
 

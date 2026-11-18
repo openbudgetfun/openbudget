@@ -3,10 +3,11 @@
 ### Only the SHA-256 hash is stored, so a lost token can never be recovered,
 ### only revoked and replaced.
 class: AgentAccessToken
+serverOnly: true
 table: agent_access_token
 fields:
   id: UuidValue?, defaultPersist=random_v7
-  userId: UuidValue
+  userId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
   ### The user's label for the client, such as "Claude Code".
   name: String
   ### Lowercase hex SHA-256 of the full token.

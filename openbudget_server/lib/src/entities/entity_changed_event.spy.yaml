@@ -1,0 +1,10 @@
+### Tells a subscribed client which part of an entity changed, so it reloads
+### only the providers that depend on it.
+class: EntityChangedEvent
+fields:
+  entityId: UuidValue
+  scope: ChangeScope
+  ### The budget month affected, when the change has one.
+  month: int?
+  ### The account affected, when the change has one.
+  accountId: UuidValue?

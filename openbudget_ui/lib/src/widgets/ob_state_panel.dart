@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:openbudget_ui/src/flourish/ob_spot_doodle.dart';
 import 'package:openbudget_ui/src/theme/ob_palette.dart';
 import 'package:openbudget_ui/src/theme/ob_rough_decoration.dart';
 import 'package:skribble/skribble.dart';
@@ -19,9 +20,10 @@ enum _ObStateKind { empty, problem }
 /// did not work.
 ///
 /// Both are a paper panel with a plain title, what is known, and the next
-/// action. An empty state leads with a doodle on its tone's wash because it
-/// is an invitation. A problem stays on quiet paper with a red-pencil rule,
-/// and its message stays selectable so it can be reported.
+/// action. An empty state is an invitation: it leads with a doodle that
+/// draws itself on over a blot of spot ink. A problem stays quiet: a small
+/// cloud on the overspent wash, and a message that stays selectable so it
+/// can be reported.
 class ObStatePanel extends HookWidget {
   const ObStatePanel.empty({
     required this.title,
@@ -52,7 +54,9 @@ class ObStatePanel extends HookWidget {
   /// The drawing an empty state leads with. Decoration only.
   final WiredDoodleKind doodle;
 
-  /// The wash behind an empty state's doodle.
+  /// Picks the blot behind an empty state's doodle: the action pink for
+  /// [ObTone.brand], the highlighter for [ObTone.neutral], and the tone's
+  /// wash otherwise.
   final ObTone tone;
 
   @override
@@ -64,41 +68,45 @@ class ObStatePanel extends HookWidget {
     final messageStyle = theme.textTheme.bodyMedium?.copyWith(
       color: palette.mutedInk,
     );
+    final spot = switch (tone) {
+      ObTone.brand => palette.action,
+      ObTone.neutral => palette.highlighter,
+      _ => palette.wash(tone),
+    };
+    final align = isProblem
+        ? CrossAxisAlignment.start
+        : CrossAxisAlignment.center;
+    final textAlign = isProblem ? TextAlign.start : TextAlign.center;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
       decoration: ObRoughDecoration(
         color: palette.surface,
         outline: palette.quietPen,
+        radius: 18,
         seed: 67,
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: align,
         children: [
-          ExcludeSemantics(
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: ObRoughDecoration(
-                color: palette.wash(tone),
-                outline: palette.quietPen,
-                radius: 14,
-                seed: 71,
-              ),
-              child: WiredDoodle(
-                kind: doodle,
-                size: 48,
-                seed: 3,
-                color: palette.hue(tone),
-              ),
-            ),
+          ObSpotDoodle(
+            kind: doodle,
+            spot: spot,
+            size: isProblem ? 72 : 112,
+            seed: isProblem ? 5 : 3,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: isProblem ? 12 : 16),
           Semantics(
             header: true,
             child: Text(
               title,
-              style: theme.textTheme.titleLarge?.copyWith(color: palette.ink),
+              textAlign: textAlign,
+              style:
+                  (isProblem
+                          ? theme.textTheme.titleLarge
+                          : theme.textTheme.headlineSmall)
+                      ?.copyWith(color: palette.ink),
             ),
           ),
           if (message case final text?) ...[
@@ -106,11 +114,12 @@ class ObStatePanel extends HookWidget {
             if (isProblem)
               SelectableText(text, style: messageStyle)
             else
-              Text(text, style: messageStyle),
+              Text(text, textAlign: textAlign, style: messageStyle),
           ],
           if (actions.isNotEmpty) ...[
             const SizedBox(height: 20),
             Wrap(
+              alignment: isProblem ? WrapAlignment.start : WrapAlignment.center,
               spacing: 12,
               runSpacing: 12,
               children: [
@@ -157,9 +166,9 @@ class ObLoadingPanel extends HookWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             WiredLoadingIndicator(
-              size: 28,
-              color: palette.ink,
-              strokeWidth: 2.2,
+              size: 32,
+              color: palette.brand,
+              strokeWidth: 3,
             ),
             const SizedBox(height: 12),
             Text(

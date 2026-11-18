@@ -1,0 +1,11 @@
+### How `report.cryptoBreakdown` groups the entity's counted wallet value.
+enum: CryptoBreakdownGrouping
+serialized: byName
+values:
+  ### One row per network, so the app can ink each chain in its own colour.
+  - byChain
+  ### One row per asset. Natives and the catalogue's canonical tokens merge
+  ### across networks (all USDC is one row); every other token is one row per
+  ### network and asset. The top eight rows are listed, the rest become one
+  ### "Other" row.
+  - byAsset

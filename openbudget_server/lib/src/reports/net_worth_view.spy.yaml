@@ -1,0 +1,24 @@
+### Net worth of a set of entities on one date in one reporting currency.
+### Every total is a sum of the same per-account conversions (section 6.5),
+### so the breakdowns always add up.
+class: NetWorthView
+fields:
+  ### ISO 4217 reporting currency.
+  currencyCode: String
+  ### Calendar date the balances and rates are for.
+  asOf: DateTime
+  ### Non-liability accounts, converted.
+  assetsMinor: int
+  ### Liability accounts, converted; normally negative.
+  liabilitiesMinor: int
+  ### assetsMinor + liabilitiesMinor.
+  netWorthMinor: int
+  ### False when some currency had no rate; its accounts are left out of
+  ### the totals and listed in missingCurrencyCodes.
+  isComplete: bool
+  missingCurrencyCodes: List<String>
+  ### True when any rate used is stale.
+  hasStaleRates: bool
+  currencies: List<NetWorthCurrencyRow>
+  entities: List<NetWorthEntityRow>
+  accounts: List<NetWorthAccountRow>

@@ -1,0 +1,14 @@
+# A recorded turn that meets every gate of universal-04.
+id: universal-04-pass
+question: universal-04
+expect:
+  verdict: pass
+steps:
+  - tool: search_knowledge
+    arguments:
+      entityId: "{{entityId}}"
+      query: AER annual equivalent rate savings
+  - say: >-
+      AER is the annual equivalent rate: what a savings balance earns over a
+      full year with compounding included [^universal-money-what-aer-means].
+      It says nothing about fees or access rules.

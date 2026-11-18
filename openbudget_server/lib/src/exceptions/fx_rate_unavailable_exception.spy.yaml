@@ -1,0 +1,9 @@
+### Thrown when a write needs an exchange rate that the server does not have.
+### The app answers by asking the user for a manual rate.
+exception: FxRateUnavailableException
+fields:
+  message: String, default='Exchange rate not available'
+  fromCurrencyCode: String
+  toCurrencyCode: String
+  ### Calendar date the rate was needed for.
+  date: DateTime

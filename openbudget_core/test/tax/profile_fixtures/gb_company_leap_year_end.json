@@ -1,0 +1,8 @@
+{
+  "jurisdiction": "GB",
+  "entityKind": "company",
+  "salesTaxRegistered": false,
+  "scottishTaxpayer": false,
+  "accountingPeriodEndMonth": 2,
+  "accountingPeriodEndDay": 29
+}

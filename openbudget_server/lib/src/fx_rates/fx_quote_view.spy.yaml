@@ -1,0 +1,12 @@
+### The rate the server would use to convert between two currencies on a date.
+class: FxQuoteView
+fields:
+  fromCurrencyCode: String
+  toCurrencyCode: String
+  ### Units of toCurrencyCode per one fromCurrencyCode, exact decimal string.
+  rate: String
+  ### Calendar date of the rate actually used (on or before the asked date).
+  rateDate: DateTime
+  source: FxRateSource
+  fetchedAt: DateTime?
+  isStale: bool

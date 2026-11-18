@@ -1,0 +1,46 @@
+{
+  "comment": "Hand-kept time-zone defaults for countries that span several IANA zones. Without an entry here a multi-zone country would default to whichever zone zone.tab lists first, which is often an obscure one. Two entry shapes: {\"default\": \"Zone\"} keeps every zone.tab zone and moves the chosen one to the front, and {\"timeZones\": [...]} replaces the list outright, for countries whose zone.tab entries are mostly irrelevant subdivisions (the US) or enclaves (Germany's Büsingen). Every country with more than one zone in data/zone.tab must have an entry here; the countries schema test enforces that.",
+  "countries": {
+    "AR": { "default": "America/Argentina/Buenos_Aires" },
+    "AQ": { "default": "Antarctica/McMurdo" },
+    "AU": { "default": "Australia/Sydney" },
+    "BR": { "default": "America/Sao_Paulo" },
+    "CA": { "default": "America/Toronto" },
+    "CD": { "default": "Africa/Kinshasa" },
+    "CL": { "default": "America/Santiago" },
+    "CN": { "default": "Asia/Shanghai" },
+    "CY": { "default": "Asia/Nicosia" },
+    "DE": { "timeZones": ["Europe/Berlin"] },
+    "EC": { "default": "America/Guayaquil" },
+    "ES": { "default": "Europe/Madrid" },
+    "FM": { "default": "Pacific/Pohnpei" },
+    "GL": { "default": "America/Nuuk" },
+    "ID": { "default": "Asia/Jakarta" },
+    "KI": { "default": "Pacific/Tarawa" },
+    "KZ": { "default": "Asia/Almaty" },
+    "MH": { "default": "Pacific/Majuro" },
+    "MN": { "default": "Asia/Ulaanbaatar" },
+    "MX": { "default": "America/Mexico_City" },
+    "MY": { "default": "Asia/Kuala_Lumpur" },
+    "NZ": { "default": "Pacific/Auckland" },
+    "PF": { "default": "Pacific/Tahiti" },
+    "PG": { "default": "Pacific/Port_Moresby" },
+    "PS": { "default": "Asia/Gaza" },
+    "PT": { "default": "Europe/Lisbon" },
+    "RU": { "default": "Europe/Moscow" },
+    "UA": { "default": "Europe/Kyiv" },
+    "UM": { "default": "Pacific/Midway" },
+    "US": {
+      "timeZones": [
+        "America/New_York",
+        "America/Chicago",
+        "America/Denver",
+        "America/Phoenix",
+        "America/Los_Angeles",
+        "America/Anchorage",
+        "Pacific/Honolulu"
+      ]
+    },
+    "UZ": { "default": "Asia/Tashkent" }
+  }
+}

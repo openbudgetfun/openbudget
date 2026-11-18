@@ -1,0 +1,16 @@
+# The model cites a key no tool returned. The server strips it, and the
+# no-stripped-citations gate must fail.
+id: universal-01-invented-citation
+question: universal-01
+expect:
+  verdict: fail
+  failedGates: [noStrippedCitations]
+steps:
+  - tool: search_knowledge
+    arguments:
+      entityId: "{{entityId}}"
+      ids: [universal-budgeting-sinking-funds]
+  - say: >-
+      Divide the £480 by the eight months left: £60 a month goes into a
+      sinking-fund envelope [^universal-budgeting-sinking-funds]. Insurers usually charge less when you pay
+      for the year at once [^invented-key].

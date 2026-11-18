@@ -3,50 +3,47 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/ledger/ledger_formatting.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_actions_provider.dart';
-import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-/// Entity kinds whose budgets may keep books: everything a business runs.
-final _bookkeepingEntityKinds = <String>{
-  TaxEntityKind.soleTrader.name,
-  TaxEntityKind.company.name,
+/// Entity kinds whose books may be kept: everything a business runs.
+const _bookkeepingEntityKinds = <EntityKind>{
+  EntityKind.soleTrader,
+  EntityKind.company,
 };
 
-/// The More-screen entry into a budget's double-entry books.
+/// The More-screen entry into an entity's double-entry books.
 ///
-/// Only budgets whose tax profile is a sole trader or company show the
-/// tile. In envelope mode the tile offers to enable books behind a
-/// one-way-switch confirmation; once enabled it opens the Books screen.
+/// Only entities whose kind is a sole trader or company show the tile. In
+/// envelope mode the tile offers to enable books behind a one-way-switch
+/// confirmation; once enabled it opens the Books screen.
 class BooksEntryTile extends HookConsumerWidget {
-  const BooksEntryTile({required this.budgetId, super.key});
+  const BooksEntryTile({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final profileAsync = ref.watch(taxProfileProvider(budgetId));
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final entityAsync = ref.watch(entityDetailProvider(entityId));
     final isEnabling = useState(false);
 
-    final entityKind = profileAsync.value?.entityKind;
-    final budget = budgetAsync.value;
-    if (entityKind == null ||
-        budget == null ||
+    final entity = entityAsync.value;
+    final entityKind = entity?.kind;
+    if (entity == null ||
+        entityKind == null ||
         !_bookkeepingEntityKinds.contains(entityKind)) {
       return const SizedBox.shrink();
     }
 
-    final isLedger =
-        AccountingMode.tryParse(budget.accountingMode) == AccountingMode.ledger;
+    final isLedger = entity.accountingMode == AccountingMode.ledger;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -74,7 +71,7 @@ class BooksEntryTile extends HookConsumerWidget {
                     await _openBooks(context);
                     return;
                   }
-                  final confirmed = await _confirmEnable(context, budget.name);
+                  final confirmed = await _confirmEnable(context, entity.name);
                   if (!confirmed) return;
                   if (!context.mounted) return;
                   await _enable(context, ref, isEnabling);
@@ -86,17 +83,17 @@ class BooksEntryTile extends HookConsumerWidget {
 
   Future<void> _openBooks(BuildContext context) => context.pushNamed(
     booksRoute,
-    pathParameters: {'id': budgetId},
+    pathParameters: {'entityId': entityId},
   );
 
-  Future<bool> _confirmEnable(BuildContext context, String budgetName) async {
+  Future<bool> _confirmEnable(BuildContext context, String entityName) async {
     final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         key: const Key('books-enable-dialog'),
         title: Text(l10n.booksEnableDialogTitle),
-        content: Text(l10n.booksEnableDialogBody(budgetName)),
+        content: Text(l10n.booksEnableDialogBody(entityName)),
         actions: [
           TextButton(
             key: const Key('books-enable-cancel'),
@@ -125,7 +122,7 @@ class BooksEntryTile extends HookConsumerWidget {
       await ref
           .read(ledgerActionsProvider.notifier)
           .enableLedger(
-            budgetId: budgetId,
+            entityId: entityId,
           );
       if (!context.mounted) return;
       showAppToast(

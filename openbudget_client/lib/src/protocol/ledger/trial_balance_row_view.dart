@@ -10,12 +10,14 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// One row of a computed trial balance.
+/// One row of a computed trial balance, in base-currency minor units.
 abstract class TrialBalanceRowView
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   TrialBalanceRowView._({
+    required this.ledgerAccountId,
     required this.accountCode,
     required this.accountName,
     required this.accountType,
@@ -26,10 +28,11 @@ abstract class TrialBalanceRowView
   });
 
   factory TrialBalanceRowView({
+    required _isc.UuidValue ledgerAccountId,
     required String accountCode,
     required String accountName,
-    required String accountType,
-    String? systemRole,
+    required _ifz8weqz.LedgerAccountType accountType,
+    _ifz8weqz.LedgerSystemRole? systemRole,
     required int debitMinor,
     required int creditMinor,
     required int netMinor,
@@ -37,32 +40,37 @@ abstract class TrialBalanceRowView
 
   factory TrialBalanceRowView.fromJson(Map<String, dynamic> jsonSerialization) {
     return TrialBalanceRowView(
+      ledgerAccountId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['ledgerAccountId'],
+      ),
       accountCode: jsonSerialization['accountCode'] as String,
       accountName: jsonSerialization['accountName'] as String,
-      accountType: jsonSerialization['accountType'] as String,
-      systemRole: jsonSerialization['systemRole'] as String?,
+      accountType: _ifz8weqz.LedgerAccountType.fromJson(
+        (jsonSerialization['accountType'] as String),
+      ),
+      systemRole: jsonSerialization['systemRole'] == null
+          ? null
+          : _ifz8weqz.LedgerSystemRole.fromJson(
+              (jsonSerialization['systemRole'] as String),
+            ),
       debitMinor: jsonSerialization['debitMinor'] as int,
       creditMinor: jsonSerialization['creditMinor'] as int,
       netMinor: jsonSerialization['netMinor'] as int,
     );
   }
 
-  /// LedgerAccount code.
+  _isc.UuidValue ledgerAccountId;
+
   String accountCode;
 
-  /// LedgerAccount name.
   String accountName;
 
-  /// LedgerAccountType name.
-  String accountType;
+  _ifz8weqz.LedgerAccountType accountType;
 
-  /// LedgerSystemRole name, when the account is a system account.
-  String? systemRole;
+  _ifz8weqz.LedgerSystemRole? systemRole;
 
-  /// Total debits in functional minor units.
   int debitMinor;
 
-  /// Total credits in functional minor units.
   int creditMinor;
 
   /// Balance with debits positive.
@@ -72,10 +80,11 @@ abstract class TrialBalanceRowView
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
   TrialBalanceRowView copyWith({
+    _isc.UuidValue? ledgerAccountId,
     String? accountCode,
     String? accountName,
-    String? accountType,
-    String? systemRole,
+    _ifz8weqz.LedgerAccountType? accountType,
+    _ifz8weqz.LedgerSystemRole? systemRole,
     int? debitMinor,
     int? creditMinor,
     int? netMinor,
@@ -84,10 +93,11 @@ abstract class TrialBalanceRowView
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'TrialBalanceRowView',
+      'ledgerAccountId': ledgerAccountId.toJson(),
       'accountCode': accountCode,
       'accountName': accountName,
-      'accountType': accountType,
-      if (systemRole != null) 'systemRole': systemRole,
+      'accountType': accountType.toJson(),
+      if (systemRole != null) 'systemRole': systemRole?.toJson(),
       'debitMinor': debitMinor,
       'creditMinor': creditMinor,
       'netMinor': netMinor,
@@ -98,10 +108,11 @@ abstract class TrialBalanceRowView
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'TrialBalanceRowView',
+      'ledgerAccountId': ledgerAccountId.toJson(),
       'accountCode': accountCode,
       'accountName': accountName,
-      'accountType': accountType,
-      if (systemRole != null) 'systemRole': systemRole,
+      'accountType': accountType.toJson(),
+      if (systemRole != null) 'systemRole': systemRole?.toJson(),
       'debitMinor': debitMinor,
       'creditMinor': creditMinor,
       'netMinor': netMinor,
@@ -118,14 +129,16 @@ class _Undefined {}
 
 class _TrialBalanceRowViewImpl extends TrialBalanceRowView {
   _TrialBalanceRowViewImpl({
+    required _isc.UuidValue ledgerAccountId,
     required String accountCode,
     required String accountName,
-    required String accountType,
-    String? systemRole,
+    required _ifz8weqz.LedgerAccountType accountType,
+    _ifz8weqz.LedgerSystemRole? systemRole,
     required int debitMinor,
     required int creditMinor,
     required int netMinor,
   }) : super._(
+         ledgerAccountId: ledgerAccountId,
          accountCode: accountCode,
          accountName: accountName,
          accountType: accountType,
@@ -140,19 +153,23 @@ class _TrialBalanceRowViewImpl extends TrialBalanceRowView {
   @_isc.useResult
   @override
   TrialBalanceRowView copyWith({
+    _isc.UuidValue? ledgerAccountId,
     String? accountCode,
     String? accountName,
-    String? accountType,
+    _ifz8weqz.LedgerAccountType? accountType,
     Object? systemRole = _Undefined,
     int? debitMinor,
     int? creditMinor,
     int? netMinor,
   }) {
     return TrialBalanceRowView(
+      ledgerAccountId: ledgerAccountId ?? this.ledgerAccountId,
       accountCode: accountCode ?? this.accountCode,
       accountName: accountName ?? this.accountName,
       accountType: accountType ?? this.accountType,
-      systemRole: systemRole is String? ? systemRole : this.systemRole,
+      systemRole: systemRole is _ifz8weqz.LedgerSystemRole?
+          ? systemRole
+          : this.systemRole,
       debitMinor: debitMinor ?? this.debitMinor,
       creditMinor: creditMinor ?? this.creditMinor,
       netMinor: netMinor ?? this.netMinor,

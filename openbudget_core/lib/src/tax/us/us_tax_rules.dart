@@ -1,11 +1,33 @@
 import 'package:openbudget_core/src/tax/tax_model.dart';
 import 'package:openbudget_core/src/tax/tax_profile.dart';
 import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
+import 'package:openbudget_core/src/tax/us/us_calendar.dart';
+import 'package:openbudget_core/src/tax/us/us_profile.dart';
 import 'package:openbudget_core/src/tax/us/us_tax_categories.dart';
 import 'package:openbudget_core/src/tax/us/us_tax_tables.dart';
 
 export 'package:openbudget_core/src/tax/us/us_tax_categories.dart';
 export 'package:openbudget_core/src/tax/us/us_tax_tables.dart';
+
+/// What the United States federal pack covers, and how mature it is.
+///
+/// State income and sales taxes, the alternative minimum tax and several
+/// credits are outside the pack, so the personal and company returns are
+/// partial. The federal government levies no general sales tax, so indirect
+/// tax is not applicable.
+const TaxPackManifest usTaxManifest = TaxPackManifest(
+  maturity: TaxPackMaturity.preview,
+  sections: {
+    TaxSection.personalReturn: TaxSectionCoverage.partial,
+    TaxSection.selfEmployment: TaxSectionCoverage.full,
+    TaxSection.companyReturn: TaxSectionCoverage.partial,
+    TaxSection.indirectTax: TaxSectionCoverage.notApplicable,
+    TaxSection.capitalGains: TaxSectionCoverage.partial,
+    TaxSection.digitalAssets: TaxSectionCoverage.notBuilt,
+    TaxSection.filingCalendar: TaxSectionCoverage.partial,
+    TaxSection.payroll: TaxSectionCoverage.notBuilt,
+  },
+);
 
 /// The United States federal tax rules.
 ///
@@ -25,7 +47,36 @@ final class UsTaxRules implements TaxRulePack {
   TaxJurisdiction get jurisdiction => TaxJurisdiction.us;
 
   @override
+  List<TaxDeadline> deadlines(TaxYear period, TaxProfile profile) {
+    requireTaxDeadlineInput(this, period, profile);
+    return usDeadlines(period, profile as UsTaxProfile);
+  }
+
+  @override
+  TaxPackManifest get manifest => usTaxManifest;
+
+  @override
   Set<int> get supportedStartYears => const {2025, 2026};
+
+  @override
+  TaxRuleSet ruleSet(int startYear) {
+    final ruleSet = usRuleSetsByStartYear[startYear];
+    if (ruleSet == null) {
+      throw UnsupportedTaxYearException(TaxJurisdiction.us, startYear);
+    }
+    return ruleSet;
+  }
+
+  @override
+  TaxProfile profileFromJson(Map<String, Object?> json) =>
+      usProfileFromJson(json);
+
+  @override
+  List<TaxProfileQuestion> profileQuestions(EntityKind kind) =>
+      taxProfileQuestionsFor(kind, [
+        ...commonTaxProfileQuestions,
+        ...usTaxProfileQuestions,
+      ]);
 
   @override
   TaxYear taxYear(int startYear) => TaxYear(
@@ -40,27 +91,31 @@ final class UsTaxRules implements TaxRulePack {
   TaxYear taxYearFor(DateTime date) => taxYear(date.year);
 
   @override
-  List<TaxCategory> categoriesFor(TaxEntityKind kind) => switch (kind) {
-    TaxEntityKind.individual => usIndividualCategories,
-    TaxEntityKind.soleTrader => usScheduleCCategories,
-    TaxEntityKind.company => usCompanyCategories,
+  List<TaxCategory> categoriesFor(EntityKind kind) => switch (kind) {
+    EntityKind.individual => usIndividualCategories,
+    EntityKind.soleTrader => usScheduleCCategories,
+    EntityKind.company => usCompanyCategories,
   };
 
   @override
   TaxCategory? category(String code) => _categoriesByCode[code];
 
   @override
+  String? mapUniversalCategory(String universalCode, EntityKind kind) =>
+      usMapUniversalCategory(universalCode, kind);
+
+  @override
   TaxReport report(TaxInput input) {
     _requireUsInput(input);
     final table = _tableFor(input.year.startYear);
     return switch (input.profile.entityKind) {
-      TaxEntityKind.individual => _individualReport(
+      EntityKind.individual => _individualReport(
         input,
         table,
         _filingStatus(input.profile),
       ),
-      TaxEntityKind.soleTrader => _soleTraderReport(input),
-      TaxEntityKind.company => _companyReport(input),
+      EntityKind.soleTrader => _soleTraderReport(input),
+      EntityKind.company => _companyReport(input),
     };
   }
 
@@ -69,13 +124,13 @@ final class UsTaxRules implements TaxRulePack {
     _requireUsInput(input);
     final table = _tableFor(input.year.startYear);
     return switch (input.profile.entityKind) {
-      TaxEntityKind.individual => _individualOpportunities(
+      EntityKind.individual => _individualOpportunities(
         input,
         report,
         table,
       ),
-      TaxEntityKind.company => _companyOpportunities(report),
-      TaxEntityKind.soleTrader => const [],
+      EntityKind.company => _companyOpportunities(report),
+      EntityKind.soleTrader => const [],
     };
   }
 
@@ -111,7 +166,7 @@ final class UsTaxRules implements TaxRulePack {
     ),
   };
 
-  _CategoryTotals _totalsFor(TaxInput input, TaxEntityKind kind) {
+  _CategoryTotals _totalsFor(TaxInput input, EntityKind kind) {
     final known = {for (final category in categoriesFor(kind)) category.code};
     final amounts = <String, int>{};
     final counts = <String, int>{};
@@ -154,7 +209,7 @@ final class UsTaxRules implements TaxRulePack {
       };
 
   _ScheduleCComputation _scheduleCComputation(TaxInput input) {
-    final totals = _totalsFor(input, TaxEntityKind.soleTrader);
+    final totals = _totalsFor(input, EntityKind.soleTrader);
     final amounts = Map<String, int>.of(totals.amounts);
     final rawHomeOffice = amounts['us.sch_c.home_office'] ?? 0;
     // The $1,500 cap applies to the simplified method only; the regular
@@ -197,7 +252,7 @@ final class UsTaxRules implements TaxRulePack {
   }
 
   _CompanyComputation _companyComputation(TaxInput input) {
-    final totals = _totalsFor(input, TaxEntityKind.company);
+    final totals = _totalsFor(input, EntityKind.company);
     final grossReceipts = totals['us.co.gross_receipts'];
     final returns = totals['us.co.returns_and_allowances'];
     final costOfGoodsSold = totals['us.co.cost_of_goods_sold'];
@@ -250,7 +305,7 @@ final class UsTaxRules implements TaxRulePack {
     };
     final status = profile.filingStatus;
     final year = input.year.startYear;
-    final totals = _totalsFor(input, TaxEntityKind.individual);
+    final totals = _totalsFor(input, EntityKind.individual);
     var linkedBusinessProfit = 0;
     var linkedBusinessWages = 0;
     var linkedBusinessUbia = 0;
@@ -258,7 +313,7 @@ final class UsTaxRules implements TaxRulePack {
     var linkedBusinessCount = 0;
     var linkedUncategorized = 0;
     for (final linked in input.linked) {
-      if (linked.profile.entityKind != TaxEntityKind.soleTrader ||
+      if (linked.profile.entityKind != EntityKind.soleTrader ||
           linked.profile.jurisdiction != TaxJurisdiction.us ||
           linked.year.startYear != input.year.startYear) {
         continue;
@@ -832,6 +887,7 @@ final class UsTaxRules implements TaxRulePack {
     UsTaxYearTable table,
     UsFilingStatus status,
   ) {
+    final rules = ruleSet(input.year.startYear);
     final computation = _individualComputation(input, table);
     final uncategorizedCount =
         computation.totals.uncategorizedCount +
@@ -872,6 +928,13 @@ final class UsTaxRules implements TaxRulePack {
           label: 'Standard deduction',
           amountMinor: computation.standardDeduction,
           reportReference: 'Form 1040, line 12e',
+          figureId: switch (status) {
+            UsFilingStatus.marriedFilingJointly ||
+            UsFilingStatus.qualifyingSurvivingSpouse =>
+              'standardDeductionJoint',
+            UsFilingStatus.single => 'standardDeductionSingle',
+            _ => null,
+          },
         ),
       if (computation.usingItemized && computation.saltClaimed > 0)
         TaxReportLine(
@@ -951,7 +1014,7 @@ final class UsTaxRules implements TaxRulePack {
     ];
     return TaxReport(
       year: input.year,
-      entityKind: TaxEntityKind.individual,
+      entityKind: EntityKind.individual,
       lines: lines,
       liabilities: [
         if (computation.incomeTax > 0)
@@ -1018,11 +1081,26 @@ final class UsTaxRules implements TaxRulePack {
       ),
       sources: usTaxSources,
       rulesVerifiedOn: usRulesVerifiedOn,
+      rulesVersion: rules.versionFor(TaxJurisdiction.us),
+      maturity: manifest.maturity,
+      coverage: manifest.sections,
+      caveats: rules.caveatsTouching(
+        sections: {
+          TaxSection.personalReturn,
+          // Schedule C profit and the self-employment tax it creates flow
+          // into the 1040 through linked businesses.
+          if (computation.seTax.tax > 0 || computation.linkedBusinessCount > 0)
+            TaxSection.selfEmployment,
+          if (computation.capitalGainsSlices.isNotEmpty)
+            TaxSection.capitalGains,
+        },
+      ),
       uncategorizedCount: uncategorizedCount,
     );
   }
 
   TaxReport _soleTraderReport(TaxInput input) {
+    final rules = ruleSet(input.year.startYear);
     final computation = _scheduleCComputation(input);
     final lines = <TaxReportLine>[
       ..._categoryLines(computation.totals, usScheduleCCategories),
@@ -1054,7 +1132,7 @@ final class UsTaxRules implements TaxRulePack {
     ];
     return TaxReport(
       year: input.year,
-      entityKind: TaxEntityKind.soleTrader,
+      entityKind: EntityKind.soleTrader,
       lines: lines,
       liabilities: const [],
       alreadyPaidMinor: 0,
@@ -1064,11 +1142,18 @@ final class UsTaxRules implements TaxRulePack {
       ),
       sources: usTaxSources,
       rulesVerifiedOn: usRulesVerifiedOn,
+      rulesVersion: rules.versionFor(TaxJurisdiction.us),
+      maturity: manifest.maturity,
+      coverage: manifest.sections,
+      caveats: rules.caveatsTouching(
+        sections: {TaxSection.selfEmployment},
+      ),
       uncategorizedCount: computation.totals.uncategorizedCount,
     );
   }
 
   TaxReport _companyReport(TaxInput input) {
+    final rules = ruleSet(input.year.startYear);
     final computation = _companyComputation(input);
     final balanceDue = computation.tax - computation.alreadyPaid;
     final lines = <TaxReportLine>[
@@ -1118,7 +1203,7 @@ final class UsTaxRules implements TaxRulePack {
     ];
     return TaxReport(
       year: input.year,
-      entityKind: TaxEntityKind.company,
+      entityKind: EntityKind.company,
       lines: lines,
       liabilities: [
         if (computation.tax > 0)
@@ -1139,6 +1224,12 @@ final class UsTaxRules implements TaxRulePack {
       assumptions: _companyAssumptions(computation.totals.uncategorizedCount),
       sources: usTaxSources,
       rulesVerifiedOn: usRulesVerifiedOn,
+      rulesVersion: rules.versionFor(TaxJurisdiction.us),
+      maturity: manifest.maturity,
+      coverage: manifest.sections,
+      caveats: rules.caveatsTouching(
+        sections: {TaxSection.companyReturn},
+      ),
       uncategorizedCount: computation.totals.uncategorizedCount,
     );
   }
@@ -1285,8 +1376,14 @@ final class UsTaxRules implements TaxRulePack {
                 'assumes no employees, no other plan contributions, and no '
                 'age-50 catch-up. Estimated room: ${_dollarAmount(room)}.',
             estimatedSavingMinor: _savingForDeduction(room, computation, table),
+            ruleYear: input.year.label,
             deadline: deadline,
             source: Uri.parse('https://www.irs.gov/publications/p560'),
+            assumptions: const [
+              'The business has no employees other than the owner and their spouse.',
+              'No other retirement plan contributions were made this year.',
+              'The age-50 catch-up is not modeled.',
+            ],
           ),
         );
       }
@@ -1311,9 +1408,15 @@ final class UsTaxRules implements TaxRulePack {
             computation,
             table,
           ),
+          ruleYear: input.year.label,
           source: Uri.parse(
             'https://www.irs.gov/newsroom/qualified-business-income-deduction',
           ),
+          assumptions: const [
+            'The deduction shown is the one this report already applied; the saving values it at the marginal rate.',
+            'W-2 wages and unadjusted basis of qualified property are the recorded totals across all linked businesses.',
+            'Each business is computed together here, not on separate Form 8995-A worksheets.',
+          ],
         ),
       );
     }
@@ -1350,12 +1453,18 @@ final class UsTaxRules implements TaxRulePack {
             computation,
             table,
           ),
+          ruleYear: input.year.label,
           deadline: deadline,
           source: Uri.parse(
             'https://www.irs.gov/retirement-plans/'
             'cola-increases-for-dollar-limitations-on-benefits-and-'
             'contributions',
           ),
+          assumptions: const [
+            'Neither you nor your spouse is covered by a workplace retirement plan; coverage would phase the deduction out.',
+            'Taxable compensation is at least the contribution room shown.',
+            'The age-50 catch-up is not modeled.',
+          ],
         ),
       );
     }
@@ -1382,8 +1491,14 @@ final class UsTaxRules implements TaxRulePack {
             computation,
             table,
           ),
+          ruleYear: input.year.label,
           deadline: deadline,
           source: Uri.parse('https://www.irs.gov/publications/p969'),
+          assumptions: const [
+            'High-deductible health plan coverage for all of December, with no disqualifying coverage, is not verified.',
+            'Employer contributions and the age-55 catch-up are not modeled.',
+            'The self-only limit is used for the room estimate.',
+          ],
         ),
       );
     }
@@ -1400,8 +1515,8 @@ final class UsTaxRules implements TaxRulePack {
         TaxOpportunity(
           id: 'us.standard_vs_itemized',
           title: itemizing
-              ? 'Itemize deductions'
-              : 'Take the standard deduction',
+              ? 'Itemized deductions above the standard deduction'
+              : 'Standard deduction compared with itemized',
           explanation: itemizing
               ? 'Your itemized total exceeds the standard deduction by '
                     '${_dollarAmount(difference)}. This report already uses '
@@ -1414,7 +1529,12 @@ final class UsTaxRules implements TaxRulePack {
             computation,
             table,
           ),
+          ruleYear: input.year.label,
           source: Uri.parse('https://www.irs.gov/pub/irs-pdf/f1040sa.pdf'),
+          assumptions: const [
+            'The report already deducts the larger of the two totals, so the amount shown is the difference, not an extra saving.',
+            'Itemized deductions are taken as entered; only the SALT cap is recomputed.',
+          ],
         ),
       );
     }
@@ -1431,11 +1551,17 @@ final class UsTaxRules implements TaxRulePack {
       opportunities.add(
         TaxOpportunity(
           id: 'us.tax_loss_harvesting',
-          title: 'Harvest capital losses',
+          title: 'Capital losses and your net gains',
           explanation: r'A loss equal to your net capital gains would offset them. Losses must be realized by December 31. If losses exceed gains, up to $3,000 ($1,500 if married filing separately) can offset ordinary income and the excess carries forward.',
           estimatedSavingMinor: saving,
+          ruleYear: input.year.label,
           deadline: DateTime.utc(year, 12, 31),
           source: Uri.parse('https://www.irs.gov/taxtopics/tc409'),
+          assumptions: const [
+            'The wash sale rule disallows a loss on securities repurchased within 30 days; no specific security is identified here.',
+            'The estimate values the offset at your marginal rates; state tax is outside it.',
+            'Which asset, if any, to sell is a choice this guidance does not make.',
+          ],
         ),
       );
     }
@@ -1445,7 +1571,7 @@ final class UsTaxRules implements TaxRulePack {
       opportunities.add(
         TaxOpportunity(
           id: 'us.estimated_tax',
-          title: 'Pay quarterly estimated tax',
+          title: 'Quarterly estimated tax payments',
           explanation:
               'This report shows ${_dollarAmount(report.balanceDueMinor)} '
               'still due. To avoid an underpayment penalty, pay at least 90% '
@@ -1454,11 +1580,16 @@ final class UsTaxRules implements TaxRulePack {
               'more than ${_dollarAmount(15000000)} '
               '(${_dollarAmount(7500000)} if married filing separately). '
               'Payments are due ${_dateList(estimatedTaxDates)}.',
+          ruleYear: input.year.label,
           deadline: estimatedTaxDates.last,
           source: Uri.parse(
             'https://www.irs.gov/businesses/small-businesses-self-employed/'
             'estimated-taxes',
           ),
+          assumptions: const [
+            'The safe-harbor percentages are the federal ones; state estimated tax is separate.',
+            'The prior year\u2019s tax is outside these books, so no prior-year safe harbor is computed here.',
+          ],
         ),
       );
     }
@@ -1473,13 +1604,18 @@ final class UsTaxRules implements TaxRulePack {
     return [
       TaxOpportunity(
         id: 'us.company_estimated_tax',
-        title: 'Pay corporate estimated tax',
+        title: 'Corporate estimated tax payments',
         explanation: r'A corporation generally must pay estimated tax if it expects to owe $500 or more when the return is filed. Payments are due on the 15th day of the 4th, 6th, 9th, and 12th months of the tax year.',
+        ruleYear: report.year.label,
         deadline: DateTime.utc(report.year.startYear, 12, 15),
         source: Uri.parse(
           'https://www.irs.gov/businesses/small-businesses-self-employed/'
           'estimated-taxes',
         ),
+        assumptions: const [
+          r'The rule of thumb is the federal one: expected tax of $500 or more when the return is filed.',
+          'No underpayment penalty is computed.',
+        ],
       ),
     ];
   }

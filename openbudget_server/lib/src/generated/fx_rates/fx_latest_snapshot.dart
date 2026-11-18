@@ -15,11 +15,13 @@ import 'package:serverpod/serverpod.dart' as _is;
 
 import '../fx_rates/fx_rate_quote.dart' as _i2nu4x3y;
 
-/// Latest FX rates payload returned to clients.
+/// The latest daily rates, for display only. Conversions that are stored
+/// happen on the server.
 abstract class FxLatestSnapshot
     implements _is.SerializableModel, _is.ProtocolSerialization {
   FxLatestSnapshot._({
     required this.baseCurrencyCode,
+    required this.rateDate,
     required this.fetchedAt,
     required this.isStale,
     required this.rates,
@@ -27,6 +29,7 @@ abstract class FxLatestSnapshot
 
   factory FxLatestSnapshot({
     required String baseCurrencyCode,
+    required DateTime rateDate,
     required DateTime fetchedAt,
     required bool isStale,
     required List<_i2nu4x3y.FxRateQuote> rates,
@@ -35,6 +38,9 @@ abstract class FxLatestSnapshot
   factory FxLatestSnapshot.fromJson(Map<String, dynamic> jsonSerialization) {
     return FxLatestSnapshot(
       baseCurrencyCode: jsonSerialization['baseCurrencyCode'] as String,
+      rateDate: _is.DateTimeJsonExtension.fromJson(
+        jsonSerialization['rateDate'],
+      ),
       fetchedAt: _is.DateTimeJsonExtension.fromJson(
         jsonSerialization['fetchedAt'],
       ),
@@ -45,10 +51,15 @@ abstract class FxLatestSnapshot
     );
   }
 
+  /// Always USD.
   String baseCurrencyCode;
+
+  /// Calendar date of the rates.
+  DateTime rateDate;
 
   DateTime fetchedAt;
 
+  /// True when fetchedAt is more than 48 hours old.
   bool isStale;
 
   List<_i2nu4x3y.FxRateQuote> rates;
@@ -58,6 +69,7 @@ abstract class FxLatestSnapshot
   @_is.useResult
   FxLatestSnapshot copyWith({
     String? baseCurrencyCode,
+    DateTime? rateDate,
     DateTime? fetchedAt,
     bool? isStale,
     List<_i2nu4x3y.FxRateQuote>? rates,
@@ -67,6 +79,7 @@ abstract class FxLatestSnapshot
     return {
       '__className__': 'FxLatestSnapshot',
       'baseCurrencyCode': baseCurrencyCode,
+      'rateDate': rateDate.toJson(),
       'fetchedAt': fetchedAt.toJson(),
       'isStale': isStale,
       'rates': rates.toJson(valueToJson: (v) => v.toJson()),
@@ -78,6 +91,7 @@ abstract class FxLatestSnapshot
     return {
       '__className__': 'FxLatestSnapshot',
       'baseCurrencyCode': baseCurrencyCode,
+      'rateDate': rateDate.toJson(),
       'fetchedAt': fetchedAt.toJson(),
       'isStale': isStale,
       'rates': rates.toJson(valueToJson: (v) => v.toJsonForProtocol()),
@@ -93,11 +107,13 @@ abstract class FxLatestSnapshot
 class _FxLatestSnapshotImpl extends FxLatestSnapshot {
   _FxLatestSnapshotImpl({
     required String baseCurrencyCode,
+    required DateTime rateDate,
     required DateTime fetchedAt,
     required bool isStale,
     required List<_i2nu4x3y.FxRateQuote> rates,
   }) : super._(
          baseCurrencyCode: baseCurrencyCode,
+         rateDate: rateDate,
          fetchedAt: fetchedAt,
          isStale: isStale,
          rates: rates,
@@ -109,12 +125,14 @@ class _FxLatestSnapshotImpl extends FxLatestSnapshot {
   @override
   FxLatestSnapshot copyWith({
     String? baseCurrencyCode,
+    DateTime? rateDate,
     DateTime? fetchedAt,
     bool? isStale,
     List<_i2nu4x3y.FxRateQuote>? rates,
   }) {
     return FxLatestSnapshot(
       baseCurrencyCode: baseCurrencyCode ?? this.baseCurrencyCode,
+      rateDate: rateDate ?? this.rateDate,
       fetchedAt: fetchedAt ?? this.fetchedAt,
       isStale: isStale ?? this.isStale,
       rates: rates ?? this.rates.map((e0) => e0.copyWith()).toList(),

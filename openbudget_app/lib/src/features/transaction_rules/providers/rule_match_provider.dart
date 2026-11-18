@@ -11,10 +11,10 @@ part 'rule_match_provider.g.dart';
 Future<String?> ruleMatchEnvelope(
   Ref ref,
   String payeeId,
-  String budgetId,
+  String entityId,
 ) async {
   final client = ref.read(serverpodClientProvider);
-  final budgetUuid = UuidValue.fromString(budgetId);
+  final budgetUuid = UuidValue.fromString(entityId);
   final payeeUuid = UuidValue.fromString(payeeId);
   final envelopeId = await client.transactionRule.findMatchingEnvelope(
     budgetUuid,

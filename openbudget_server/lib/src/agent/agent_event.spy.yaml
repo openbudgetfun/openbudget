@@ -12,3 +12,10 @@ fields:
   ### Cost of the model call that just finished, for
   ### [AgentEventKind.usage]. Zero for BYO calls.
   costMicroUsd: int?
+  ### The sources the reply's citations resolved to, for
+  ### [AgentEventKind.textDelta]. The text already has unresolved keys
+  ### stripped.
+  citations: List<AgentCitation>?
+  ### Whether the reply touches tax or investments, for
+  ### [AgentEventKind.textDelta].
+  touchesTaxOrInvestment: bool?

@@ -1,0 +1,9 @@
+# Seeded fixture entities for the Money guide eval. A golden file names one of
+# these, and the harness creates it through the entity endpoint before the
+# file's questions run.
+fixtures:
+  gb_individual:
+    kind: individual
+    country: GB
+    currency: GBP
+    timeZone: Europe/London

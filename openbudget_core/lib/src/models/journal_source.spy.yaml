@@ -1,0 +1,13 @@
+### What produced a journal.
+enum: JournalSource
+serialized: byName
+values:
+  - manual
+  - opening
+  - imported
+  - reversal
+  ### Posted from one revision of a bank transaction.
+  - transaction
+  ### Period-end or user-requested FX revaluation. Balanced in base currency
+  ### only; lines may carry a zero transaction-currency amount.
+  - revaluation

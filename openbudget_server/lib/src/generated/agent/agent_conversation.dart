@@ -14,13 +14,13 @@ import 'dart:async' as _ida;
 
 import 'package:serverpod/serverpod.dart' as _is;
 
-/// One chat between a user and the financial assistant about a budget.
+/// One chat between a user and the financial assistant about an entity.
 abstract class AgentConversation
     implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   AgentConversation._({
     this.id,
     required this.userId,
-    required this.budgetId,
+    required this.entityId,
     required this.title,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -30,7 +30,7 @@ abstract class AgentConversation
   factory AgentConversation({
     _is.UuidValue? id,
     required _is.UuidValue userId,
-    required _is.UuidValue budgetId,
+    required _is.UuidValue entityId,
     required String title,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -42,8 +42,8 @@ abstract class AgentConversation
           ? null
           : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       userId: _is.UuidValueJsonExtension.fromJson(jsonSerialization['userId']),
-      budgetId: _is.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _is.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
       title: jsonSerialization['title'] as String,
       createdAt: jsonSerialization['createdAt'] == null
@@ -64,7 +64,7 @@ abstract class AgentConversation
 
   _is.UuidValue userId;
 
-  _is.UuidValue budgetId;
+  _is.UuidValue entityId;
 
   /// Short title, taken from the first message.
   String title;
@@ -82,7 +82,7 @@ abstract class AgentConversation
   AgentConversation copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
     _is.UuidValue? userId,
-    _is.UuidValue? budgetId,
+    _is.UuidValue? entityId,
     String? title,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -93,7 +93,7 @@ abstract class AgentConversation
       '__className__': 'AgentConversation',
       if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'title': title,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
@@ -106,7 +106,7 @@ abstract class AgentConversation
       '__className__': 'AgentConversation',
       if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'title': title,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
@@ -145,14 +145,14 @@ class _AgentConversationImpl extends AgentConversation {
   _AgentConversationImpl({
     _is.UuidValue? id,
     required _is.UuidValue userId,
-    required _is.UuidValue budgetId,
+    required _is.UuidValue entityId,
     required String title,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
          id: id,
          userId: userId,
-         budgetId: budgetId,
+         entityId: entityId,
          title: title,
          createdAt: createdAt,
          updatedAt: updatedAt,
@@ -165,7 +165,7 @@ class _AgentConversationImpl extends AgentConversation {
   AgentConversation copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
     _is.UuidValue? userId,
-    _is.UuidValue? budgetId,
+    _is.UuidValue? entityId,
     String? title,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -173,7 +173,7 @@ class _AgentConversationImpl extends AgentConversation {
     return AgentConversation(
       id: id is _is.UndefinedSentinel ? this.id : id,
       userId: userId ?? this.userId,
-      budgetId: budgetId ?? this.budgetId,
+      entityId: entityId ?? this.entityId,
       title: title ?? this.title,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -191,9 +191,9 @@ class AgentConversationUpdateTable
         value,
       );
 
-  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> entityId(_is.UuidValue value) =>
       _is.ColumnValue(
-        table.budgetId,
+        table.entityId,
         value,
       );
 
@@ -223,8 +223,8 @@ class AgentConversationTable extends _is.Table<_is.UuidValue?> {
       'userId',
       this,
     );
-    budgetId = _is.ColumnUuid(
-      'budgetId',
+    entityId = _is.ColumnUuid(
+      'entityId',
       this,
     );
     title = _is.ColumnString(
@@ -247,7 +247,7 @@ class AgentConversationTable extends _is.Table<_is.UuidValue?> {
 
   late final _is.ColumnUuid userId;
 
-  late final _is.ColumnUuid budgetId;
+  late final _is.ColumnUuid entityId;
 
   /// Short title, taken from the first message.
   late final _is.ColumnString title;
@@ -260,7 +260,7 @@ class AgentConversationTable extends _is.Table<_is.UuidValue?> {
   List<_is.Column> get columns => [
     id,
     userId,
-    budgetId,
+    entityId,
     title,
     createdAt,
     updatedAt,

@@ -16,6 +16,84 @@ void main() {
     });
   });
 
+  group('formatRatePerMillion', () {
+    test("writes Quebec's QST exactly, never through a double", () {
+      expect(formatRatePerMillion(99750), '9.975');
+    });
+
+    test('drops trailing zeros and keeps whole rates whole', () {
+      expect(formatRatePerMillion(160000), '16');
+      expect(formatRatePerMillion(175000), '17.5');
+      expect(formatRatePerMillion(50000), '5');
+    });
+
+    test('keeps every digit down to a millionth of a percent point', () {
+      expect(formatRatePerMillion(5000), '0.5');
+      expect(formatRatePerMillion(1), '0.0001');
+      expect(formatRatePerMillion(10001), '1.0001');
+      expect(formatRatePerMillion(0), '0');
+    });
+
+    test('writes a negative rate with its sign', () {
+      expect(formatRatePerMillion(-25000), '-2.5');
+    });
+
+    test("uses the reader's decimal separator", () {
+      expect(formatRatePerMillion(99750, decimalSeparator: ','), '9,975');
+    });
+  });
+
+  group('ratesInForce', () {
+    IndirectTaxRate rate(DateTime from, DateTime? to) => IndirectTaxRate(
+      label: 'standard',
+      ratePerMillion: 160000,
+      from: from,
+      to: to,
+      source: 0,
+    );
+
+    test('includes the first day and excludes the day the rate ends', () {
+      final rates = [rate(DateTime.utc(2021), DateTime.utc(2023, 7))];
+
+      expect(ratesInForce(rates, DateTime.utc(2021)), hasLength(1));
+      expect(ratesInForce(rates, DateTime.utc(2023, 6, 30)), hasLength(1));
+      expect(ratesInForce(rates, DateTime.utc(2023, 7)), isEmpty);
+      expect(ratesInForce(rates, DateTime.utc(2020, 12, 31)), isEmpty);
+    });
+
+    test('keeps a rate with no end date in force', () {
+      final rates = [rate(DateTime.utc(2021), null)];
+
+      expect(ratesInForce(rates, DateTime.utc(2040)), hasLength(1));
+    });
+
+    test('compares by calendar day, ignoring the time of day', () {
+      final rates = [rate(DateTime.utc(2021), DateTime.utc(2023, 7))];
+
+      expect(
+        ratesInForce(rates, DateTime.utc(2023, 6, 30, 23, 59)),
+        hasLength(1),
+      );
+    });
+  });
+
+  group('webLink', () {
+    test('accepts http and https addresses', () {
+      expect(
+        webLink('https://www.kra.go.ke'),
+        Uri.parse('https://www.kra.go.ke'),
+      );
+      expect(webLink('http://localhost:8082/x'), isNotNull);
+    });
+
+    test('rejects anything else', () {
+      expect(webLink('javascript:alert(1)'), isNull);
+      expect(webLink('mailto:someone@example.com'), isNull);
+      expect(webLink('www.kra.go.ke'), isNull);
+      expect(webLink(''), isNull);
+    });
+  });
+
   group('currentTaxYearStart', () {
     test('uses the UK year that contains 6 April', () {
       expect(
@@ -88,6 +166,45 @@ void main() {
       expect(
         taxErrorMessage(Exception('socket closed'), 'fallback'),
         'fallback',
+      );
+    });
+  });
+  group('shortSourceLabel', () {
+    SourceInfo source(String title, String url) => SourceInfo(
+      title: title,
+      url: url,
+      grade: SourceGrade.secondary,
+      retrievedOn: DateTime.utc(2026, 11, 13),
+    );
+
+    test('is the website, without www', () {
+      expect(
+        shortSourceLabel(
+          source(
+            'afriref: Kenya — VAT standard rate',
+            'https://afriref.dev/ke',
+          ),
+        ),
+        'afriref.dev',
+      );
+      expect(
+        shortSourceLabel(source('HMRC', 'https://www.gov.uk/vat-rates')),
+        'gov.uk',
+      );
+    });
+
+    test('falls back to the title before the first dash or colon', () {
+      expect(
+        shortSourceLabel(source('Tax Act — s. 4: rates', 'not a url')),
+        'Tax Act',
+      );
+      expect(
+        shortSourceLabel(source('Tax Act: rates — s. 4', 'not a url')),
+        'Tax Act',
+      );
+      expect(
+        shortSourceLabel(source('Plain title', 'not a url')),
+        'Plain title',
       );
     });
   });

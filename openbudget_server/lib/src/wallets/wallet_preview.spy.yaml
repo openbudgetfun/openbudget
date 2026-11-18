@@ -1,0 +1,13 @@
+### What one address holds, before it is connected: one row per network of
+### its chain family, so the app can offer a picker (multichain-wallets.md
+### 5.5). A preview reads and rate limits; it writes nothing.
+class: WalletPreview
+fields:
+  ### The parsed input's home network: the first supported network of its
+  ### chain family.
+  network: WalletNetwork
+  ### The address in its family's canonical form (core WalletAddressParser).
+  address: String
+  ### One row per network the preview tried, in display order.
+  networks: List<WalletPreviewNetwork>
+  warnings: List<String>

@@ -1,2 +1,13 @@
 tags:
   integration: {}
+
+  # The live Money guide eval calls the real model and costs money, so it is
+  # skipped unless it is asked for by name. Run it from this directory:
+  #
+  #   msr --reason "Money guide eval" dart test --run-skipped -t live_eval \
+  #     test/money_guide/live_eval_test.dart
+  live_eval:
+    skip: >-
+      Calls the real model and costs money. Run it on purpose with
+      `msr --reason "Money guide eval" dart test --run-skipped -t live_eval
+      test/money_guide/live_eval_test.dart`.

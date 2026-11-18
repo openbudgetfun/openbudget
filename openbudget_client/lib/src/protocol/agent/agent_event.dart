@@ -13,6 +13,7 @@
 import 'package:openbudget_client/src/protocol/protocol.dart' as _irkl4crj;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
+import '../agent/agent_citation.dart' as _ijdmzl8e;
 import '../agent/agent_event_kind.dart' as _izvlfgta;
 import '../agent/agent_proposal.dart' as _icn0jr7x;
 
@@ -26,6 +27,8 @@ abstract class AgentEvent
     this.toolName,
     this.proposal,
     this.costMicroUsd,
+    this.citations,
+    this.touchesTaxOrInvestment,
   });
 
   factory AgentEvent({
@@ -35,6 +38,8 @@ abstract class AgentEvent
     String? toolName,
     _icn0jr7x.AgentProposal? proposal,
     int? costMicroUsd,
+    List<_ijdmzl8e.AgentCitation>? citations,
+    bool? touchesTaxOrInvestment,
   }) = _AgentEventImpl;
 
   factory AgentEvent.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -53,6 +58,17 @@ abstract class AgentEvent
               jsonSerialization['proposal'],
             ),
       costMicroUsd: jsonSerialization['costMicroUsd'] as int?,
+      citations: jsonSerialization['citations'] == null
+          ? null
+          : _irkl4crj.Protocol().deserialize<List<_ijdmzl8e.AgentCitation>>(
+              jsonSerialization['citations'],
+            ),
+      touchesTaxOrInvestment:
+          jsonSerialization['touchesTaxOrInvestment'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(
+              jsonSerialization['touchesTaxOrInvestment'],
+            ),
     );
   }
 
@@ -73,6 +89,15 @@ abstract class AgentEvent
   /// [AgentEventKind.usage]. Zero for BYO calls.
   int? costMicroUsd;
 
+  /// The sources the reply's citations resolved to, for
+  /// [AgentEventKind.textDelta]. The text already has unresolved keys
+  /// stripped.
+  List<_ijdmzl8e.AgentCitation>? citations;
+
+  /// Whether the reply touches tax or investments, for
+  /// [AgentEventKind.textDelta].
+  bool? touchesTaxOrInvestment;
+
   /// Returns a shallow copy of this [AgentEvent]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
@@ -83,6 +108,9 @@ abstract class AgentEvent
     String? toolName,
     _icn0jr7x.AgentProposal? proposal = const _UndefinedAgentEvent$proposal(),
     int? costMicroUsd,
+    List<_ijdmzl8e.AgentCitation>? citations =
+        const _isc.$UndefinedList<_ijdmzl8e.AgentCitation>(),
+    bool? touchesTaxOrInvestment,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -94,6 +122,10 @@ abstract class AgentEvent
       if (toolName != null) 'toolName': toolName,
       if (proposal != null) 'proposal': proposal?.toJson(),
       if (costMicroUsd != null) 'costMicroUsd': costMicroUsd,
+      if (citations != null)
+        'citations': citations?.toJson(valueToJson: (v) => v.toJson()),
+      if (touchesTaxOrInvestment != null)
+        'touchesTaxOrInvestment': touchesTaxOrInvestment,
     };
   }
 
@@ -107,6 +139,12 @@ abstract class AgentEvent
       if (toolName != null) 'toolName': toolName,
       if (proposal != null) 'proposal': proposal?.toJsonForProtocol(),
       if (costMicroUsd != null) 'costMicroUsd': costMicroUsd,
+      if (citations != null)
+        'citations': citations?.toJson(
+          valueToJson: (v) => v.toJsonForProtocol(),
+        ),
+      if (touchesTaxOrInvestment != null)
+        'touchesTaxOrInvestment': touchesTaxOrInvestment,
     };
   }
 
@@ -131,6 +169,8 @@ class _AgentEventImpl extends AgentEvent {
     String? toolName,
     _icn0jr7x.AgentProposal? proposal,
     int? costMicroUsd,
+    List<_ijdmzl8e.AgentCitation>? citations,
+    bool? touchesTaxOrInvestment,
   }) : super._(
          kind: kind,
          conversationId: conversationId,
@@ -138,6 +178,8 @@ class _AgentEventImpl extends AgentEvent {
          toolName: toolName,
          proposal: proposal,
          costMicroUsd: costMicroUsd,
+         citations: citations,
+         touchesTaxOrInvestment: touchesTaxOrInvestment,
        );
 
   /// Returns a shallow copy of this [AgentEvent]
@@ -151,6 +193,9 @@ class _AgentEventImpl extends AgentEvent {
     Object? toolName = _Undefined,
     _icn0jr7x.AgentProposal? proposal = const _UndefinedAgentEvent$proposal(),
     Object? costMicroUsd = _Undefined,
+    List<_ijdmzl8e.AgentCitation>? citations =
+        const _isc.$UndefinedList<_ijdmzl8e.AgentCitation>(),
+    Object? touchesTaxOrInvestment = _Undefined,
   }) {
     return AgentEvent(
       kind: kind ?? this.kind,
@@ -161,6 +206,12 @@ class _AgentEventImpl extends AgentEvent {
           ? this.proposal?.copyWith()
           : proposal,
       costMicroUsd: costMicroUsd is int? ? costMicroUsd : this.costMicroUsd,
+      citations: citations is _isc.UndefinedSentinel
+          ? this.citations?.map((e0) => e0.copyWith()).toList()
+          : citations,
+      touchesTaxOrInvestment: touchesTaxOrInvestment is bool?
+          ? touchesTaxOrInvestment
+          : this.touchesTaxOrInvestment,
     );
   }
 }

@@ -47,3 +47,71 @@ String taxErrorMessage(Object error, String fallback) => switch (error) {
   ValidationException(:final message) when message.isNotEmpty => message,
   _ => fallback,
 };
+
+/// An indirect-tax rate written the way a person reads it, such as `9.975`
+/// or `16`, without the percent sign.
+///
+/// [ratePerMillion] is millionths of the taxed amount, so 1% is `10000`. The
+/// text is built from the integer's digits: no double is involved, so no
+/// rate is ever rounded or nudged by floating point. [decimalSeparator] is
+/// the locale's.
+String formatRatePerMillion(
+  int ratePerMillion, {
+  String decimalSeparator = '.',
+}) {
+  final sign = ratePerMillion < 0 ? '-' : '';
+  final magnitude = ratePerMillion.abs();
+  final whole = magnitude ~/ 10000;
+  final fraction = (magnitude % 10000)
+      .toString()
+      .padLeft(4, '0')
+      .replaceFirst(RegExp(r'0+$'), '');
+  return fraction.isEmpty
+      ? '$sign$whole'
+      : '$sign$whole$decimalSeparator$fraction';
+}
+
+/// The rates in [rates] that apply on [date], in dataset order.
+///
+/// A rate applies from its `from` day up to, but not including, its `to`
+/// day; a null `to` is a rate still in force. Dates compare by calendar day.
+List<IndirectTaxRate> ratesInForce(List<IndirectTaxRate> rates, DateTime date) {
+  final day = DateTime.utc(date.year, date.month, date.day);
+  return [
+    for (final rate in rates)
+      if (!rate.from.isAfter(day) &&
+          (rate.to == null || day.isBefore(rate.to!)))
+        rate,
+  ];
+}
+
+/// [value] as a link to open outside the app, or null unless it is a plain
+/// http or https address.
+Uri? webLink(String value) {
+  final uri = Uri.tryParse(value);
+  if (uri == null || uri.host.isEmpty) {
+    return null;
+  }
+  return uri.scheme == 'https' || uri.scheme == 'http' ? uri : null;
+}
+
+/// A short name for [source], to show where a figure comes from.
+///
+/// This is the source website without a leading `www.`, such as `afriref.dev`.
+/// A source with no web address falls back to the part of its title before the
+/// first ` — ` or `:`. The full title stays available for the link's spoken
+/// label and tooltip.
+String shortSourceLabel(SourceInfo source) {
+  final host = webLink(source.url)?.host;
+  if (host != null) {
+    return host.startsWith('www.') ? host.substring(4) : host;
+  }
+  final title = source.title;
+  final ends = [
+    ' — ',
+    ':',
+  ].map(title.indexOf).where((index) => index > 0).toList();
+  return ends.isEmpty
+      ? title.trim()
+      : title.substring(0, ends.reduce((a, b) => a < b ? a : b)).trim();
+}

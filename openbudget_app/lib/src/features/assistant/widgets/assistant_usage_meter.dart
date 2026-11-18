@@ -90,7 +90,10 @@ class AssistantUsageMeter extends HookWidget {
                 ),
                 fraction: fraction,
                 tone: ObTone.brand,
-                hint: null,
+                hint: switch (view.conversationsLeft) {
+                  final int left => l10n.assistantConversationsLeft(left),
+                  null => null,
+                },
               ),
               if (pendingChip case final chip?) ...[
                 const SizedBox(height: SpacingTokens.xs),

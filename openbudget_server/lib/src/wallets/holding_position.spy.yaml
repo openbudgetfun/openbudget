@@ -1,0 +1,11 @@
+### Whether a holding is spendable now, or staked or unclaimed. Every
+### position counts toward net worth; the app shows them apart.
+enum: HoldingPosition
+serialized: byName
+values:
+  ### Spendable now.
+  - available
+  ### Staked, frozen or delegated: still owned, not spendable now.
+  - staked
+  ### Rewards earned but not yet claimed or withdrawn.
+  - unclaimedRewards

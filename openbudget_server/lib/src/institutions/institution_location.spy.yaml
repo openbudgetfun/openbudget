@@ -3,10 +3,10 @@ class: InstitutionLocation
 table: institution_location
 fields:
   id: UuidValue?, defaultPersist=random_v7
-  institutionId: UuidValue, relation(parent=institution)
+  institutionId: UuidValue, relation(parent=institution, onDelete=Cascade)
   ### ISO 3166 country code (e.g. US, GB) or regional marker (e.g. EU).
   locationCode: String
-  ### Whether this institution should be shown in "Popular options" for location.
+  ### Whether this institution is shown in "Popular options" for the location.
   isPopular: bool, default=false
   ### Lower rank means higher priority in popular ordering.
   popularityRank: int?

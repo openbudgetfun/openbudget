@@ -1,0 +1,31 @@
+### One allocation of a transaction to an envelope, a ledger account and a
+### tax treatment. A transaction has one or more lines that sum exactly to it.
+class: TransactionLine
+table: transaction_line
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  transactionId: UuidValue, relation(parent=transaction, onDelete=Cascade)
+  ### Part of the transaction amount, account-currency minor units, signed.
+  amountMinor: int
+  ### Part of the base amount, base-currency minor units, signed.
+  baseAmountMinor: int
+  ### Null on an on-budget account means Ready to Assign (inflow) or
+  ### uncategorised (outflow). Always null on off-budget accounts.
+  envelopeId: UuidValue?, relation(parent=envelope, onDelete=NoAction)
+  ### Coding in ledger-mode books; null posts to the suspense account.
+  ledgerAccountId: UuidValue?, relation(parent=ledger_account, onDelete=NoAction)
+  ### Tax category code; overrides the envelope's default when set.
+  taxCategoryCode: String?
+  ### Share of the line used for business, 0-100.
+  businessUsePercent: int?
+  ### Sales tax included in amountMinor, account-currency minor units.
+  salesTaxMinor: int?
+  memo: String?
+  sortOrder: int, default=0
+indexes:
+  transaction_line_transaction_idx:
+    fields: transactionId
+  transaction_line_envelope_idx:
+    fields: envelopeId
+  transaction_line_ledger_account_idx:
+    fields: ledgerAccountId

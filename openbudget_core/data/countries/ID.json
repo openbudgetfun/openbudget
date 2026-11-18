@@ -1,0 +1,99 @@
+{
+  "code": "ID",
+  "name": "Indonesia",
+  "servable": true,
+  "currencies": [
+    "IDR"
+  ],
+  "timeZones": [
+    "Asia/Jakarta",
+    "Asia/Pontianak",
+    "Asia/Makassar",
+    "Asia/Jayapura"
+  ],
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "vat",
+    "localName": "Pajak Pertambahan Nilai (PPN)",
+    "rates": [
+      {
+        "label": "standard",
+        "ratePerMillion": 100000,
+        "from": "2022-01-01",
+        "to": "2022-04-01",
+        "appliesTo": null,
+        "source": 3
+      },
+      {
+        "label": "standard",
+        "ratePerMillion": 110000,
+        "from": "2022-04-01",
+        "to": null,
+        "appliesTo": "effective general rate; nominally 12% from 2025-01-01 charged on an 11/12 base",
+        "source": 3
+      },
+      {
+        "label": "luxury",
+        "ratePerMillion": 120000,
+        "from": "2025-01-01",
+        "to": null,
+        "appliesTo": "luxury goods subject to the luxury-goods sales tax (LGST)",
+        "source": 4
+      }
+    ],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Direktorat Jenderal Pajak (DJP)",
+    "url": "https://www.pajak.go.id"
+  },
+  "sources": [
+    {
+      "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
+      "url": "https://raw.githubusercontent.com/eggert/tz/2026f/iso3166.tab",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "IANA Time Zone Database 2026f: zone.tab (country time zones)",
+      "url": "https://raw.githubusercontent.com/eggert/tz/2026f/zone.tab",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Direktorat Jenderal Pajak: Multitarif, era baru PPN Indonesia — standard rate 11% from April 2022 under the HPP Law (Law 7/2021), 10% before",
+      "url": "https://pajak.go.id/id/artikel/multitarif-era-baru-ppn-indonesia",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "PMK 131/2024 (JDIH Kementerian Keuangan): 12% VAT from 1 January 2025 — charged on the full base for luxury goods (LGST) and on an 11/12 'other value' base for everything else, keeping the effective rate at 11%",
+      "url": "https://jdih.kemenkeu.go.id/dok/pmk-131-tahun-2024/summary",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    }
+  ],
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass.",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "From 1 January 2025 the nominal rate is 12%, but PMK 131/2024 charges it on an 11/12 base for everything except luxury goods, so the effective general rate stays 11%; luxury-goods supplies to end consumers paid the transitional effective 11% during January 2025 and the full 12% from 1 February 2025."
+  ]
+}

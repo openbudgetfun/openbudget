@@ -3,10 +3,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
-import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/reporting_currency_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
@@ -15,14 +14,14 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class CurrencySettingsScreen extends HookConsumerWidget {
-  const CurrencySettingsScreen({required this.budgetId, super.key});
+  const CurrencySettingsScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final settingsAsync = ref.watch(userSettingsProvider);
     final numberFormat = ref.watch(numberFormatStyleProvider);
     final currencyPlacement = ref.watch(currencyPlacementStyleProvider);
 
@@ -31,7 +30,7 @@ class CurrencySettingsScreen extends HookConsumerWidget {
         leading: TextButton(
           onPressed: () => context.goNamed(
             planSettingsRoute,
-            pathParameters: {'id': budgetId},
+            pathParameters: {'entityId': entityId},
           ),
           child: Text(l10n.dialogCancel),
         ),
@@ -42,20 +41,22 @@ class CurrencySettingsScreen extends HookConsumerWidget {
           TextButton(
             onPressed: () => context.goNamed(
               planSettingsRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
             child: Text(l10n.dialogDone),
           ),
         ],
       ),
-      body: budgetAsync.when(
+      body: settingsAsync.when(
         loading: () => ObLoadingPanel(label: l10n.settingsLoading),
         error: (_, _) => Padding(
           padding: const EdgeInsets.all(SpacingTokens.md),
           child: ObStatePanel.problem(title: l10n.settingsLoadError),
         ),
-        data: (budget) {
-          final selectedCurrency = CurrencyCode.tryParse(budget.currencyCode);
+        data: (settings) {
+          final selectedCurrency = CurrencyCode.tryParse(
+            settings.reportingCurrencyCode,
+          );
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(
@@ -70,9 +71,11 @@ class CurrencySettingsScreen extends HookConsumerWidget {
                 child: Column(
                   children: [
                     _SettingsTile(
-                      title: l10n.settingsCurrency,
+                      title: l10n.settingsReportingCurrency,
                       value: selectedCurrency == null
-                          ? normalizeCurrencyCode(budget.currencyCode)
+                          ? normalizeCurrencyCode(
+                              settings.reportingCurrencyCode,
+                            )
                           : '${selectedCurrency.displayName} - ${selectedCurrency.code}',
                       isNavigation: true,
                       onTap: () =>
@@ -132,14 +135,10 @@ class CurrencySettingsScreen extends HookConsumerWidget {
     if (selected == null || selected == current || !context.mounted) return;
 
     try {
-      final client = ref.read(serverpodClientProvider);
-      await client.budget.update(
-        UuidValue.fromString(budgetId),
-        currencyCode: selected.code,
-      );
-      ref
-        ..invalidate(budgetDetailProvider(budgetId))
-        ..invalidate(budgetSummaryProvider(budgetId));
+      await ref
+          .read(reportingCurrencyActionsProvider.notifier)
+          .setReportingCurrency(selected.code);
+      ref.invalidate(netWorthProvider);
 
       if (!context.mounted) return;
       showAppToast(

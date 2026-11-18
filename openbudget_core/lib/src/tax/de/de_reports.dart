@@ -4,10 +4,10 @@ import 'package:meta/meta.dart';
 import 'package:openbudget_core/src/tax/de/de_assessment.dart';
 import 'package:openbudget_core/src/tax/de/de_categories.dart';
 import 'package:openbudget_core/src/tax/de/de_format.dart';
+import 'package:openbudget_core/src/tax/de/de_profile.dart';
 import 'package:openbudget_core/src/tax/de/de_tables.dart';
 import 'package:openbudget_core/src/tax/de/de_tariff.dart';
 import 'package:openbudget_core/src/tax/tax_model.dart';
-import 'package:openbudget_core/src/tax/tax_profile.dart';
 import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 
 /// A sole trader's EÜR, reduced to the figures the report needs.
@@ -160,9 +160,9 @@ TaxReport deReport(TaxInput input, DeTaxTable table) {
     );
   }
   return switch (profile.entityKind) {
-    TaxEntityKind.individual => _individualReport(input, profile, table),
-    TaxEntityKind.soleTrader => _soleTraderReport(input, profile, table),
-    TaxEntityKind.company => _companyReport(input, profile, table),
+    EntityKind.individual => _individualReport(input, profile, table),
+    EntityKind.soleTrader => _soleTraderReport(input, profile, table),
+    EntityKind.company => _companyReport(input, profile, table),
   };
 }
 
@@ -290,7 +290,7 @@ DeIndividualAssessment deIndividual(TaxInput input, DeTaxTable table) {
   for (final linked in input.linked) {
     final linkedProfile = linked.profile;
     if (linkedProfile is DeTaxProfile &&
-        linkedProfile.entityKind == TaxEntityKind.soleTrader &&
+        linkedProfile.entityKind == EntityKind.soleTrader &&
         linkedProfile.einkunftsArt == DeEinkunftsArt.gewerblich) {
       // Only a Gewerbebetrieb pays Gewerbesteuer and earns the § 35 credit;
       // a Freiberufler files Anlage S and owes none.
@@ -299,7 +299,7 @@ DeIndividualAssessment deIndividual(TaxInput input, DeTaxTable table) {
       tradeTaxMessbetrag += business.messbetragMinor;
       tradeTaxPaidByBusinesses += business.tradeTaxMinor;
     } else if (linkedProfile is DeTaxProfile &&
-        linkedProfile.entityKind == TaxEntityKind.soleTrader) {
+        linkedProfile.entityKind == EntityKind.soleTrader) {
       businessProfit += deEuer(linked, table).profitMinor;
     }
   }
@@ -518,6 +518,7 @@ TaxReport _individualReport(
           assessment.sparerPauschbetrag,
         ),
         reportReference: '§ 20 Abs. 9 EStG',
+        figureId: 'sparerPauschbetrag',
       ),
     if (assessment.basisrente > 0)
       TaxReportLine(
@@ -634,6 +635,17 @@ TaxReport _individualReport(
     ),
     sources: deSources,
     rulesVerifiedOn: deRulesVerifiedOn,
+    rulesVersion: deRuleSetFor(
+      input.year.startYear,
+    ).versionFor(TaxJurisdiction.de),
+    maturity: deTaxManifest.maturity,
+    coverage: deTaxManifest.sections,
+    caveats: deRuleSetFor(input.year.startYear).caveatsTouching(
+      sections: {
+        TaxSection.personalReturn,
+        if (assessment.businessProfit != 0) TaxSection.selfEmployment,
+      },
+    ),
     uncategorizedCount: _uncategorizedCount(input),
   );
 }
@@ -730,6 +742,17 @@ TaxReport _soleTraderReport(
     ],
     sources: deSources,
     rulesVerifiedOn: deRulesVerifiedOn,
+    rulesVersion: deRuleSetFor(
+      input.year.startYear,
+    ).versionFor(TaxJurisdiction.de),
+    maturity: deTaxManifest.maturity,
+    coverage: deTaxManifest.sections,
+    caveats: deRuleSetFor(input.year.startYear).caveatsTouching(
+      sections: {
+        TaxSection.selfEmployment,
+        if (chargesVat && vatDue != 0) TaxSection.indirectTax,
+      },
+    ),
     uncategorizedCount: _uncategorizedCount(input),
   );
 }
@@ -831,6 +854,17 @@ TaxReport _companyReport(
     ],
     sources: deSources,
     rulesVerifiedOn: deRulesVerifiedOn,
+    rulesVersion: deRuleSetFor(
+      input.year.startYear,
+    ).versionFor(TaxJurisdiction.de),
+    maturity: deTaxManifest.maturity,
+    coverage: deTaxManifest.sections,
+    caveats: deRuleSetFor(input.year.startYear).caveatsTouching(
+      sections: {
+        TaxSection.companyReturn,
+        if (chargesVat && company.vatDueMinor != 0) TaxSection.indirectTax,
+      },
+    ),
     uncategorizedCount: _uncategorizedCount(input),
   );
 }

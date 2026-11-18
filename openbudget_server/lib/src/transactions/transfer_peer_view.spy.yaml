@@ -1,0 +1,11 @@
+### The other leg of a transfer, as seen from one leg.
+class: TransferPeerView
+fields:
+  transferId: UuidValue
+  transactionId: UuidValue
+  accountId: UuidValue
+  accountName: String
+  entityId: UuidValue
+  ### Signed amount of the other leg in its own account's minor units.
+  amountMinor: int
+  currencyCode: String

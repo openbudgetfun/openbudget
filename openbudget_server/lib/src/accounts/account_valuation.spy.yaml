@@ -1,0 +1,19 @@
+### The value of an account from a calendar date onwards, for accounts whose
+### balance comes from valuations (a house, a car, a brokerage, a wallet).
+class: AccountValuation
+table: account_valuation
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  accountId: UuidValue, relation(parent=account, onDelete=Cascade)
+  ### Calendar date the value applies from.
+  valuationDate: DateTime
+  ### Value in account-currency minor units, signed like Account.balanceMinor.
+  valueMinor: int
+  source: ValuationSource
+  note: String?
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  account_valuation_account_date_unique_idx:
+    fields: accountId, valuationDate
+    unique: true

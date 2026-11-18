@@ -11,11 +11,11 @@ part 'payee_last_envelope_provider.g.dart';
 Future<String?> payeeLastEnvelope(
   Ref ref,
   String payeeId,
-  String budgetId,
+  String entityId,
 ) async {
   final client = ref.read(serverpodClientProvider);
   final payeeUuid = UuidValue.fromString(payeeId);
-  final budgetUuid = UuidValue.fromString(budgetId);
+  final budgetUuid = UuidValue.fromString(entityId);
   final envelopeId = await client.payee.lastUsedEnvelopeId(
     payeeUuid,
     budgetUuid,

@@ -135,6 +135,7 @@ const demoMessages = {
   'hint': 'Drag or tap an envelope to fill it.',
   'left': '{amount} still needs an envelope.',
   'done': 'Every {word} is in an envelope.',
+  'postmark': 'All assigned',
   'sealed': '{name} is full, so it is sealed.',
   'valueText': '{amount} of {target}',
 };

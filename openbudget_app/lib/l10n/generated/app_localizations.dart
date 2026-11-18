@@ -586,6 +586,12 @@ abstract class AppLocalizations {
   /// **'Assign Money'**
   String get budgetAssignMoney;
 
+  /// No description provided for @budgetAgeOfMoneyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough history yet'**
+  String get budgetAgeOfMoneyEmpty;
+
   /// No description provided for @budgetAddCategory.
   ///
   /// In en, this message translates to:
@@ -2608,6 +2614,12 @@ abstract class AppLocalizations {
   /// **'Spending by Category'**
   String get reportsSpendingByCategory;
 
+  /// No description provided for @reportsUncategorised.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorised'**
+  String get reportsUncategorised;
+
   /// No description provided for @reportsTitle.
   ///
   /// In en, this message translates to:
@@ -3655,7 +3667,7 @@ abstract class AppLocalizations {
   /// No description provided for @transferSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Transfer completed'**
+  /// **'Transfer saved'**
   String get transferSuccess;
 
   /// No description provided for @transferTitle.
@@ -4057,7 +4069,7 @@ abstract class AppLocalizations {
   /// No description provided for @addAccountConnectWallet.
   ///
   /// In en, this message translates to:
-  /// **'Connect Solana Wallet'**
+  /// **'Add a crypto wallet'**
   String get addAccountConnectWallet;
 
   /// No description provided for @addAccountUnlinkedTitle.
@@ -4087,7 +4099,7 @@ abstract class AppLocalizations {
   /// No description provided for @addAccountSuccessAddAnother.
   ///
   /// In en, this message translates to:
-  /// **'Add Another'**
+  /// **'Add another'**
   String get addAccountSuccessAddAnother;
 
   /// No description provided for @addAccountSelectTypePlaceholder.
@@ -4101,12 +4113,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading institutions...'**
   String get addAccountLoadingInstitutions;
-
-  /// No description provided for @addAccountConnectWalletButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Connect Wallet'**
-  String get addAccountConnectWalletButton;
 
   /// No description provided for @dialogNext.
   ///
@@ -4173,36 +4179,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add an Unlinked Account'**
   String get addAccountAddUnlinked;
-
-  /// No description provided for @addAccountWalletConnectionDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Connect a Solana wallet in read-only mode. OpenBudget imports native SPL balances and keeps fiat valuation synced.'**
-  String get addAccountWalletConnectionDescription;
-
-  /// No description provided for @addAccountWalletAddressLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Wallet Address'**
-  String get addAccountWalletAddressLabel;
-
-  /// No description provided for @addAccountWalletAddressHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Paste Solana wallet address'**
-  String get addAccountWalletAddressHint;
-
-  /// No description provided for @addAccountWalletLabelOptional.
-  ///
-  /// In en, this message translates to:
-  /// **'Wallet Label (optional)'**
-  String get addAccountWalletLabelOptional;
-
-  /// No description provided for @addAccountWalletLabelHint.
-  ///
-  /// In en, this message translates to:
-  /// **'My Solana Wallet'**
-  String get addAccountWalletLabelHint;
 
   /// No description provided for @addAccountWalletIncludeInBudgetTotals.
   ///
@@ -4303,7 +4279,7 @@ abstract class AppLocalizations {
   /// No description provided for @addAccountTypeLineOfCredit.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Line Of Credit'**
+  /// **'Line of Credit'**
   String get addAccountTypeLineOfCredit;
 
   /// No description provided for @addAccountSectionMortgagesAndLoans.
@@ -4321,37 +4297,37 @@ abstract class AppLocalizations {
   /// No description provided for @addAccountTypeMortgage.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Mortgage'**
+  /// **'Mortgage'**
   String get addAccountTypeMortgage;
 
   /// No description provided for @addAccountTypeAutoLoan.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Auto Loan'**
+  /// **'Auto Loan'**
   String get addAccountTypeAutoLoan;
 
   /// No description provided for @addAccountTypeStudentLoan.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Student Loan'**
+  /// **'Student Loan'**
   String get addAccountTypeStudentLoan;
 
   /// No description provided for @addAccountTypePersonalLoan.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Personal Loan'**
+  /// **'Personal Loan'**
   String get addAccountTypePersonalLoan;
 
   /// No description provided for @addAccountTypeMedicalDebt.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Medical Debt'**
+  /// **'Medical Debt'**
   String get addAccountTypeMedicalDebt;
 
   /// No description provided for @addAccountTypeOtherDebt.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Other Debt'**
+  /// **'Other Debt'**
   String get addAccountTypeOtherDebt;
 
   /// No description provided for @addAccountSectionTrackingAccounts.
@@ -4375,7 +4351,7 @@ abstract class AppLocalizations {
   /// No description provided for @addAccountTypeLiability.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Liability'**
+  /// **'Liability'**
   String get addAccountTypeLiability;
 
   /// No description provided for @addAccountSectionDigitalAssets.
@@ -4393,7 +4369,7 @@ abstract class AppLocalizations {
   /// No description provided for @addAccountTypeSolanaWallet.
   ///
   /// In en, this message translates to:
-  /// **'Add Account Type Solana Wallet'**
+  /// **'Solana Wallet'**
   String get addAccountTypeSolanaWallet;
 
   /// No description provided for @accountEditNicknameLabel.
@@ -5324,7 +5300,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'In {month}'**
-  String accountDetailLoanInMonth(String month);
+  String accountDetailLoanInMonth(int month);
 
   /// No description provided for @accountDetailWalletSyncSummary.
   ///
@@ -6070,7 +6046,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Tax year {year}'**
-  String taxYearLabel(String year);
+  String taxYearLabel(int year);
 
   /// No description provided for @taxPreviousYear.
   ///
@@ -6216,6 +6192,396 @@ abstract class AppLocalizations {
   /// **'Guidance'**
   String get taxOpportunitySource;
 
+  /// Heading of the card that offers the tax summary download.
+  ///
+  /// In en, this message translates to:
+  /// **'Take it to your accountant'**
+  String get taxExportTitle;
+
+  /// No description provided for @taxExportMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A ZIP with this tax year\'s summary and every line behind it. The download link works for 10 minutes.'**
+  String get taxExportMessage;
+
+  /// Button that makes a signed download link for the tax summary and opens it.
+  ///
+  /// In en, this message translates to:
+  /// **'Export tax summary'**
+  String get taxExportButton;
+
+  /// Spoken while the export button is busy.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing your download'**
+  String get taxExportPreparing;
+
+  /// No description provided for @taxExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t prepare your download. Check your connection and try again.'**
+  String get taxExportFailed;
+
+  /// No description provided for @taxExportOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your download is ready, but this device wouldn\'t open it. Try again in a moment.'**
+  String get taxExportOpenFailed;
+
+  /// Section header for the next filing and payment dates on the tax overview.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get taxUpcomingTitle;
+
+  /// Chip on an upcoming date that is for sending a return.
+  ///
+  /// In en, this message translates to:
+  /// **'Filing'**
+  String get taxUpcomingKindFiling;
+
+  /// Chip on an upcoming date that is for paying tax.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get taxUpcomingKindPayment;
+
+  /// Chip on an upcoming date when the return and the payment fall due together.
+  ///
+  /// In en, this message translates to:
+  /// **'Filing and payment'**
+  String get taxUpcomingKindFilingAndPayment;
+
+  /// How far away an upcoming filing or payment date is.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Due today} =1{Due tomorrow} other{In {count} days}}'**
+  String taxUpcomingDaysLeft(int count);
+
+  /// The period an upcoming date covers, such as 2025/26.
+  ///
+  /// In en, this message translates to:
+  /// **'For {period}'**
+  String taxUpcomingPeriod(String period);
+
+  /// Chip on an upcoming date whose day or relevance comes from the person's tax profile answers.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on your tax profile'**
+  String get taxUpcomingDependsOnProfile;
+
+  /// Note on a date the tax authority's rules moved to the next working day.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved from {date}, a weekend or holiday'**
+  String taxUpcomingMoved(String date);
+
+  /// Badge on an upcoming date that was worked out from guidance rather than read from the authority's own page.
+  ///
+  /// In en, this message translates to:
+  /// **'Date not confirmed by the authority'**
+  String get taxUpcomingInferredBadge;
+
+  /// Link that opens the authority page behind an upcoming date.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {citation}'**
+  String taxUpcomingSource(String citation);
+
+  /// No description provided for @taxUpcomingSourceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens the authority\'s page'**
+  String get taxUpcomingSourceHint;
+
+  /// No description provided for @taxUpcomingShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all {count} dates'**
+  String taxUpcomingShowAll(int count);
+
+  /// No description provided for @taxUpcomingShowFewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Show fewer dates'**
+  String get taxUpcomingShowFewer;
+
+  /// No description provided for @taxUpcomingEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No filing or payment dates in the next year.'**
+  String get taxUpcomingEmpty;
+
+  /// No description provided for @taxUpcomingLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your upcoming dates.'**
+  String get taxUpcomingLoadError;
+
+  /// Heading of the panel shown for a country without a tax rule pack.
+  ///
+  /// In en, this message translates to:
+  /// **'No full tax rules for {country} yet'**
+  String taxUniversalIntroTitle(String country);
+
+  /// No description provided for @taxUniversalIntroMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget can\'t work out what you owe here yet. It can show your tax year, the rates we know about, and a summary of your records to hand to an accountant.'**
+  String get taxUniversalIntroMessage;
+
+  /// The tax year, written as the country writes it, such as 2026 or 2026/27.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax year {label}'**
+  String taxUniversalYearLabel(String label);
+
+  /// The first and last day of the tax year.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} to {end}'**
+  String taxUniversalYearPeriod(String start, String end);
+
+  /// No description provided for @taxUniversalYearLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding your tax year'**
+  String get taxUniversalYearLoading;
+
+  /// No description provided for @taxSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your year so far'**
+  String get taxSummaryTitle;
+
+  /// No description provided for @taxSummaryIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income this tax year'**
+  String get taxSummaryIncome;
+
+  /// No description provided for @taxSummaryExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get taxSummaryExpenses;
+
+  /// No description provided for @taxSummaryReliefs.
+  ///
+  /// In en, this message translates to:
+  /// **'Reliefs'**
+  String get taxSummaryReliefs;
+
+  /// No description provided for @taxSummaryTaxPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax already paid'**
+  String get taxSummaryTaxPaid;
+
+  /// A tile in the summary; the placeholder is the country's indirect tax, such as VAT.
+  ///
+  /// In en, this message translates to:
+  /// **'{tax} collected'**
+  String taxSummarySalesTaxCollected(String tax);
+
+  /// A tile in the summary; the placeholder is the country's indirect tax, such as VAT.
+  ///
+  /// In en, this message translates to:
+  /// **'{tax} paid'**
+  String taxSummarySalesTaxPaid(String tax);
+
+  /// No description provided for @taxSummaryLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your summary.'**
+  String get taxSummaryLoadError;
+
+  /// No description provided for @taxSummaryDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'This summarises what you\'ve recorded in OpenBudget. It is not a tax return. Guidance only, not tax advice. Check figures with a qualified adviser before filing.'**
+  String get taxSummaryDisclaimer;
+
+  /// Heading over a country's indirect-tax rates.
+  ///
+  /// In en, this message translates to:
+  /// **'{tax} rates'**
+  String taxIndirectTitle(String tax);
+
+  /// No description provided for @taxIndirectKindVat.
+  ///
+  /// In en, this message translates to:
+  /// **'VAT'**
+  String get taxIndirectKindVat;
+
+  /// No description provided for @taxIndirectKindGst.
+  ///
+  /// In en, this message translates to:
+  /// **'GST'**
+  String get taxIndirectKindGst;
+
+  /// No description provided for @taxIndirectKindSalesTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales tax'**
+  String get taxIndirectKindSalesTax;
+
+  /// No description provided for @taxIndirectKindConsumptionTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Consumption tax'**
+  String get taxIndirectKindConsumptionTax;
+
+  /// No description provided for @taxIndirectKindNone.
+  ///
+  /// In en, this message translates to:
+  /// **'VAT or sales tax'**
+  String get taxIndirectKindNone;
+
+  /// No description provided for @taxIndirectLocalName.
+  ///
+  /// In en, this message translates to:
+  /// **'Known locally as {name}'**
+  String taxIndirectLocalName(String name);
+
+  /// No description provided for @taxIndirectNone.
+  ///
+  /// In en, this message translates to:
+  /// **'{country} doesn\'t charge VAT or sales tax.'**
+  String taxIndirectNone(String country);
+
+  /// No description provided for @taxIndirectUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'We haven\'t looked up the VAT or sales tax rates for this country yet.'**
+  String get taxIndirectUnknown;
+
+  /// No description provided for @taxIndirectNoRateForYear.
+  ///
+  /// In en, this message translates to:
+  /// **'We don\'t have a rate for this tax year.'**
+  String get taxIndirectNoRateForYear;
+
+  /// A rate with its percent sign; the placeholder is already written in the reader's decimal style.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}%'**
+  String taxRatePercent(String rate);
+
+  /// No description provided for @taxRateAppliesTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to {scope}'**
+  String taxRateAppliesTo(String scope);
+
+  /// No description provided for @taxRateSince.
+  ///
+  /// In en, this message translates to:
+  /// **'In force since {date}'**
+  String taxRateSince(String date);
+
+  /// Short link text for a figure's source: the source's website, such as afriref.dev.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {name}'**
+  String taxRateSource(String name);
+
+  /// Spoken label of the link that opens a rate's source.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source: {title}'**
+  String taxRateSourceOpen(String title);
+
+  /// Heading of the card with the turnover above which a business must register for VAT or sales tax.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration threshold'**
+  String get taxRegistrationThresholdTitle;
+
+  /// What a registration threshold is counted over, said after the amount.
+  ///
+  /// In en, this message translates to:
+  /// **'{period, select, annualTurnover{a year in turnover} rolling12Months{in turnover over any 12 months} calendarYear{in turnover in a calendar year} fourConsecutiveQuarters{in turnover over four quarters in a row} annualTurnoverGoodsOnly{a year in turnover from goods} annualTurnoverSmallBusinessExclusion{a year in turnover, with a small-business exclusion} other{in turnover}}'**
+  String taxRegistrationThresholdPeriod(String period);
+
+  /// Badge on a figure taken from the authority's own publication.
+  ///
+  /// In en, this message translates to:
+  /// **'From the tax authority'**
+  String get taxGradePrimaryBadge;
+
+  /// Badge on a figure worked out from other facts, not published as stated.
+  ///
+  /// In en, this message translates to:
+  /// **'Our best estimate'**
+  String get taxGradeInferredBadge;
+
+  /// Badge on a figure from general reference material.
+  ///
+  /// In en, this message translates to:
+  /// **'Background information'**
+  String get taxGradeBackgroundBadge;
+
+  /// No description provided for @taxRegionalRatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rates by region'**
+  String get taxRegionalRatesTitle;
+
+  /// No description provided for @taxRegionalRatesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Some regions add their own tax on top.'**
+  String get taxRegionalRatesHint;
+
+  /// No description provided for @taxAuthorityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax authority'**
+  String get taxAuthorityTitle;
+
+  /// Spoken label and tooltip of the link to a tax authority's website.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the {name} website'**
+  String taxAuthorityOpen(String name);
+
+  /// No description provided for @taxLinkOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t open that page. Try again in a moment.'**
+  String get taxLinkOpenFailed;
+
+  /// First line of the summary card under What we could not verify: how many of the shown figures are not from the tax authority itself.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One of the figures above comes from a secondary source, not the tax authority\'s own pages.} other{{count} of the figures above come from secondary sources, not the tax authority\'s own pages.}}'**
+  String taxUniversalCaveatSecondary(int count);
+
+  /// No description provided for @taxUniversalCaveatAssumed.
+  ///
+  /// In en, this message translates to:
+  /// **'The tax year and, for companies, the year-end date are defaults OpenBudget assumed for {country}. Check them with the tax authority before you file.'**
+  String taxUniversalCaveatAssumed(String country);
+
+  /// No description provided for @taxResearchNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Research notes'**
+  String get taxResearchNotesTitle;
+
+  /// No description provided for @taxResearchNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The notes behind these figures, as our researchers wrote them.'**
+  String get taxResearchNotesHint;
+
+  /// No description provided for @taxUniversalVerifiedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Country facts checked on {date}'**
+  String taxUniversalVerifiedOn(String date);
+
   /// No description provided for @taxHowWorkedOutTitle.
   ///
   /// In en, this message translates to:
@@ -6245,6 +6611,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Guidance only, not tax advice. Check figures with a qualified adviser before filing.'**
   String get taxDisclaimer;
+
+  /// Banner on the tax overview when the country pack is still in preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview: these figures have not yet been checked by a tax professional.'**
+  String get taxPreviewBanner;
+
+  /// Section header for the rule-pack caveats the report touched.
+  ///
+  /// In en, this message translates to:
+  /// **'What we could not verify'**
+  String get taxUnverifiedTitle;
+
+  /// Badge on a report line computed from a secondary-source figure.
+  ///
+  /// In en, this message translates to:
+  /// **'From a secondary source'**
+  String get taxSecondarySourceBadge;
+
+  /// Badge on a caveat describing a change that is announced but not enacted.
+  ///
+  /// In en, this message translates to:
+  /// **'Announced, not yet law'**
+  String get taxAnnouncedBadge;
 
   /// No description provided for @taxProfileTitle.
   ///
@@ -6336,42 +6726,6 @@ abstract class AppLocalizations {
   /// **'Germany'**
   String get taxJurisdictionDe;
 
-  /// No description provided for @taxSalesTaxRegistered.
-  ///
-  /// In en, this message translates to:
-  /// **'Registered for sales tax or VAT'**
-  String get taxSalesTaxRegistered;
-
-  /// No description provided for @taxSalesTaxRegisteredHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Turn this on if you charge and reclaim sales tax on these books.'**
-  String get taxSalesTaxRegisteredHint;
-
-  /// No description provided for @taxGbScottishTaxpayer.
-  ///
-  /// In en, this message translates to:
-  /// **'Scottish taxpayer'**
-  String get taxGbScottishTaxpayer;
-
-  /// No description provided for @taxGbScottishTaxpayerHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Use Scottish income tax rates.'**
-  String get taxGbScottishTaxpayerHint;
-
-  /// No description provided for @taxGbStudentLoanPlan.
-  ///
-  /// In en, this message translates to:
-  /// **'Student loan plan'**
-  String get taxGbStudentLoanPlan;
-
-  /// No description provided for @taxGbStudentLoanNone.
-  ///
-  /// In en, this message translates to:
-  /// **'No student loan'**
-  String get taxGbStudentLoanNone;
-
   /// No description provided for @taxGbStudentLoanPlan1.
   ///
   /// In en, this message translates to:
@@ -6401,60 +6755,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Postgraduate loan'**
   String get taxGbStudentLoanPostgraduate;
-
-  /// No description provided for @taxGbPostgraduateLoanHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Repay 6% of income above £21,000 on top of any undergraduate plan.'**
-  String get taxGbPostgraduateLoanHint;
-
-  /// No description provided for @taxGbAccountingPeriodEnd.
-  ///
-  /// In en, this message translates to:
-  /// **'Accounting period end'**
-  String get taxGbAccountingPeriodEnd;
-
-  /// No description provided for @taxGbAccountingPeriodEndHint.
-  ///
-  /// In en, this message translates to:
-  /// **'The company\'s year end. Corporation Tax runs on these periods, not the tax year.'**
-  String get taxGbAccountingPeriodEndHint;
-
-  /// No description provided for @taxGbAccountingPeriodMonth.
-  ///
-  /// In en, this message translates to:
-  /// **'Month'**
-  String get taxGbAccountingPeriodMonth;
-
-  /// No description provided for @taxGbAccountingPeriodDay.
-  ///
-  /// In en, this message translates to:
-  /// **'Day'**
-  String get taxGbAccountingPeriodDay;
-
-  /// No description provided for @taxGbAssociatedCompanies.
-  ///
-  /// In en, this message translates to:
-  /// **'Associated companies'**
-  String get taxGbAssociatedCompanies;
-
-  /// No description provided for @taxGbAssociatedCompaniesHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Other companies under common control. Each one divides the £50,000 and £250,000 limits.'**
-  String get taxGbAssociatedCompaniesHint;
-
-  /// No description provided for @taxGbAssociatedCompaniesError.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter the number of associated companies as a whole number, such as 0.'**
-  String get taxGbAssociatedCompaniesError;
-
-  /// No description provided for @taxUsFilingStatus.
-  ///
-  /// In en, this message translates to:
-  /// **'Filing status'**
-  String get taxUsFilingStatus;
 
   /// No description provided for @taxUsFilingSingle.
   ///
@@ -6486,84 +6786,6 @@ abstract class AppLocalizations {
   /// **'Qualifying surviving spouse'**
   String get taxUsFilingQualifyingSurvivingSpouse;
 
-  /// No description provided for @taxUsForeignEarnedIncomeExclusion.
-  ///
-  /// In en, this message translates to:
-  /// **'Foreign earned income exclusion'**
-  String get taxUsForeignEarnedIncomeExclusion;
-
-  /// No description provided for @taxUsForeignEarnedIncomeExclusionHint.
-  ///
-  /// In en, this message translates to:
-  /// **'The amount you excluded on Form 2555 this year. It is added back when the investment income and deduction phase-outs check your income.'**
-  String get taxUsForeignEarnedIncomeExclusionHint;
-
-  /// No description provided for @taxUsDependentsUnder17.
-  ///
-  /// In en, this message translates to:
-  /// **'Dependents under 17'**
-  String get taxUsDependentsUnder17;
-
-  /// No description provided for @taxUsDependents17OrOlder.
-  ///
-  /// In en, this message translates to:
-  /// **'Dependents 17 or older'**
-  String get taxUsDependents17OrOlder;
-
-  /// No description provided for @taxUsDependentsCountHint.
-  ///
-  /// In en, this message translates to:
-  /// **'The number of people you claim as dependents.'**
-  String get taxUsDependentsCountHint;
-
-  /// No description provided for @taxUsDependentsSsn.
-  ///
-  /// In en, this message translates to:
-  /// **'All dependents have an SSN'**
-  String get taxUsDependentsSsn;
-
-  /// No description provided for @taxUsDependentsSsnHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Only dependents with an SSN valid for employment earn a credit.'**
-  String get taxUsDependentsSsnHint;
-
-  /// No description provided for @taxUsTaxpayer65OrOlder.
-  ///
-  /// In en, this message translates to:
-  /// **'You are 65 or older'**
-  String get taxUsTaxpayer65OrOlder;
-
-  /// No description provided for @taxUsSpouse65OrOlder.
-  ///
-  /// In en, this message translates to:
-  /// **'Your spouse is 65 or older'**
-  String get taxUsSpouse65OrOlder;
-
-  /// No description provided for @taxUsTaxpayerHasSsn.
-  ///
-  /// In en, this message translates to:
-  /// **'You have an SSN'**
-  String get taxUsTaxpayerHasSsn;
-
-  /// No description provided for @taxUsSpouseHasSsn.
-  ///
-  /// In en, this message translates to:
-  /// **'Your spouse has an SSN'**
-  String get taxUsSpouseHasSsn;
-
-  /// No description provided for @taxUsSsnHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Required for the tips, overtime, and senior deductions.'**
-  String get taxUsSsnHint;
-
-  /// No description provided for @taxUsHomeOfficeMethod.
-  ///
-  /// In en, this message translates to:
-  /// **'Home office method'**
-  String get taxUsHomeOfficeMethod;
-
   /// No description provided for @taxUsHomeOfficeSimplified.
   ///
   /// In en, this message translates to:
@@ -6576,150 +6798,6 @@ abstract class AppLocalizations {
   /// **'Regular (Form 8829)'**
   String get taxUsHomeOfficeRegular;
 
-  /// No description provided for @taxUsSpecifiedServiceTrade.
-  ///
-  /// In en, this message translates to:
-  /// **'Specified service business'**
-  String get taxUsSpecifiedServiceTrade;
-
-  /// No description provided for @taxUsSpecifiedServiceTradeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Consulting, law, health and similar businesses phase out of the qualified business income deduction.'**
-  String get taxUsSpecifiedServiceTradeHint;
-
-  /// No description provided for @taxNgAnnualRent.
-  ///
-  /// In en, this message translates to:
-  /// **'Annual rent paid'**
-  String get taxNgAnnualRent;
-
-  /// No description provided for @taxNgAnnualRentHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Used for rent relief under the Nigeria Tax Act.'**
-  String get taxNgAnnualRentHint;
-
-  /// No description provided for @taxNgAnnualRentError.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter the annual rent as a number, such as 1200000.'**
-  String get taxNgAnnualRentError;
-
-  /// No description provided for @taxNgSmallCompanyCeiling.
-  ///
-  /// In en, this message translates to:
-  /// **'Small company turnover ceiling'**
-  String get taxNgSmallCompanyCeiling;
-
-  /// No description provided for @taxNgSmallCompanyCeilingHint.
-  ///
-  /// In en, this message translates to:
-  /// **'The two Nigerian Acts disagree: the Nigeria Tax Act gazette says N50,000,000 and the Administration Act says N100,000,000. Pick the figure that should decide your company\'s small company status.'**
-  String get taxNgSmallCompanyCeilingHint;
-
-  /// No description provided for @taxNgSmallCompanyCeilingGazette.
-  ///
-  /// In en, this message translates to:
-  /// **'N50,000,000 (Nigeria Tax Act gazette)'**
-  String get taxNgSmallCompanyCeilingGazette;
-
-  /// No description provided for @taxNgSmallCompanyCeilingIntended.
-  ///
-  /// In en, this message translates to:
-  /// **'N100,000,000 (Administration Act)'**
-  String get taxNgSmallCompanyCeilingIntended;
-
-  /// No description provided for @taxNgMneGroupMember.
-  ///
-  /// In en, this message translates to:
-  /// **'Member of a multinational group'**
-  String get taxNgMneGroupMember;
-
-  /// No description provided for @taxNgMneGroupMemberHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Multinational group members may owe the 15% minimum effective tax rate whatever their turnover.'**
-  String get taxNgMneGroupMemberHint;
-
-  /// No description provided for @taxDeJointAssessment.
-  ///
-  /// In en, this message translates to:
-  /// **'Joint assessment'**
-  String get taxDeJointAssessment;
-
-  /// No description provided for @taxDeJointAssessmentHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Spouses assessed together with income splitting.'**
-  String get taxDeJointAssessmentHint;
-
-  /// No description provided for @taxDeSpouseEmployed.
-  ///
-  /// In en, this message translates to:
-  /// **'Spouse also earns wages'**
-  String get taxDeSpouseEmployed;
-
-  /// No description provided for @taxDeSpouseEmployedHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Each employed spouse claims their own worker\'s flat-rate allowance and files their own Anlage N.'**
-  String get taxDeSpouseEmployedHint;
-
-  /// No description provided for @taxDeChurchTax.
-  ///
-  /// In en, this message translates to:
-  /// **'Church tax'**
-  String get taxDeChurchTax;
-
-  /// No description provided for @taxDeChurchTaxHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Kirchensteuer on top of income tax.'**
-  String get taxDeChurchTaxHint;
-
-  /// No description provided for @taxDeChurchState.
-  ///
-  /// In en, this message translates to:
-  /// **'State (Land) of the church tax'**
-  String get taxDeChurchState;
-
-  /// No description provided for @taxDeChurchStateHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Sets the rate: 8% in Bavaria and Baden-Württemberg, 9% elsewhere. Leave it out to assume 9%.'**
-  String get taxDeChurchStateHint;
-
-  /// No description provided for @taxDeChurchStateNone.
-  ///
-  /// In en, this message translates to:
-  /// **'Not specified (assume 9%)'**
-  String get taxDeChurchStateNone;
-
-  /// No description provided for @taxDeChildren.
-  ///
-  /// In en, this message translates to:
-  /// **'Children (Kindergeld)'**
-  String get taxDeChildren;
-
-  /// No description provided for @taxDeChildrenHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Children you receive Kindergeld for; a full twelve months per child is assumed.'**
-  String get taxDeChildrenHint;
-
-  /// No description provided for @taxDeEinkunftsArt.
-  ///
-  /// In en, this message translates to:
-  /// **'Type of self-employment'**
-  String get taxDeEinkunftsArt;
-
-  /// No description provided for @taxDeEinkunftsArtHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Freiberufler owe no trade tax and file Anlage S; Gewerbetreibende owe Gewerbesteuer and file Anlage G.'**
-  String get taxDeEinkunftsArtHint;
-
   /// No description provided for @taxDeEinkunftsArtFreiberuflich.
   ///
   /// In en, this message translates to:
@@ -6731,66 +6809,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gewerbetreibender (trade)'**
   String get taxDeEinkunftsArtGewerblich;
-
-  /// No description provided for @taxDeStatutoryPension.
-  ///
-  /// In en, this message translates to:
-  /// **'Statutory pension contributions'**
-  String get taxDeStatutoryPension;
-
-  /// No description provided for @taxDeStatutoryPensionHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Employee and employer share per year; they reduce the Rürup (Basisrente) deduction.'**
-  String get taxDeStatutoryPensionHint;
-
-  /// No description provided for @taxDePriorTurnover.
-  ///
-  /// In en, this message translates to:
-  /// **'Previous year\'s turnover'**
-  String get taxDePriorTurnover;
-
-  /// No description provided for @taxDePriorTurnoverHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Total turnover of last year; it decides the Kleinunternehmer test (at most €25,000 prior year, €100,000 this year).'**
-  String get taxDePriorTurnoverHint;
-
-  /// No description provided for @taxDeCommuteKm.
-  ///
-  /// In en, this message translates to:
-  /// **'Commute: one-way distance (km)'**
-  String get taxDeCommuteKm;
-
-  /// No description provided for @taxDeCommuteKmHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Full kilometres to your first workplace, shortest route (Anlage N).'**
-  String get taxDeCommuteKmHint;
-
-  /// No description provided for @taxDeCommuteDays.
-  ///
-  /// In en, this message translates to:
-  /// **'Commute: days travelled'**
-  String get taxDeCommuteDays;
-
-  /// No description provided for @taxDeCommuteDaysHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Days you actually visited the workplace; illness, holiday and home-office days do not count.'**
-  String get taxDeCommuteDaysHint;
-
-  /// No description provided for @taxDeNumberError.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a whole number of 0 or more.'**
-  String get taxDeNumberError;
-
-  /// No description provided for @taxDeAmountError.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter the amount as a number, such as 4800.'**
-  String get taxDeAmountError;
 
   /// No description provided for @taxDeBundeslandBw.
   ///
@@ -6888,17 +6906,617 @@ abstract class AppLocalizations {
   /// **'Thuringia'**
   String get taxDeBundeslandTh;
 
-  /// No description provided for @taxDeSmallBusinessExemption.
+  /// No description provided for @taxProfileCountError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number of 0 or more.'**
+  String get taxProfileCountError;
+
+  /// No description provided for @taxProfileAmountError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount as a number, such as 4800.'**
+  String get taxProfileAmountError;
+
+  /// No description provided for @taxQCommonEntityKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Entity kind'**
+  String get taxQCommonEntityKind;
+
+  /// No description provided for @taxQCommonEntityKindIndividual.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual'**
+  String get taxQCommonEntityKindIndividual;
+
+  /// No description provided for @taxQCommonEntityKindSoleTrader.
+  ///
+  /// In en, this message translates to:
+  /// **'Sole trader'**
+  String get taxQCommonEntityKindSoleTrader;
+
+  /// No description provided for @taxQCommonEntityKindCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get taxQCommonEntityKindCompany;
+
+  /// No description provided for @taxQCommonSalesTaxRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered for sales tax or VAT'**
+  String get taxQCommonSalesTaxRegistered;
+
+  /// No description provided for @taxQCommonSalesTaxRegisteredHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn this on if you charge and reclaim sales tax on these books.'**
+  String get taxQCommonSalesTaxRegisteredHelp;
+
+  /// No description provided for @taxQCommonTaxResident.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax resident of this country'**
+  String get taxQCommonTaxResident;
+
+  /// No description provided for @taxQCommonTaxResidentHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Residence decides which rules apply to you. Tax-saving ideas wait until you answer this.'**
+  String get taxQCommonTaxResidentHelp;
+
+  /// No description provided for @taxQCommonUsPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'US person'**
+  String get taxQCommonUsPerson;
+
+  /// No description provided for @taxQCommonUsPersonHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'US citizens, green card holders and people who meet the substantial presence test owe US filings wherever they live.'**
+  String get taxQCommonUsPersonHelp;
+
+  /// No description provided for @taxQGbScottishTaxpayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Scottish taxpayer'**
+  String get taxQGbScottishTaxpayer;
+
+  /// No description provided for @taxQGbScottishTaxpayerHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Scottish income tax rates.'**
+  String get taxQGbScottishTaxpayerHelp;
+
+  /// No description provided for @taxQGbStudentLoanPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Student loan plan'**
+  String get taxQGbStudentLoanPlan;
+
+  /// No description provided for @taxQGbStudentLoanPlanPlan1.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan 1'**
+  String get taxQGbStudentLoanPlanPlan1;
+
+  /// No description provided for @taxQGbStudentLoanPlanPlan2.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan 2'**
+  String get taxQGbStudentLoanPlanPlan2;
+
+  /// No description provided for @taxQGbStudentLoanPlanPlan4.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan 4'**
+  String get taxQGbStudentLoanPlanPlan4;
+
+  /// No description provided for @taxQGbStudentLoanPlanPlan5.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan 5'**
+  String get taxQGbStudentLoanPlanPlan5;
+
+  /// No description provided for @taxQGbStudentLoanPlanNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No student loan'**
+  String get taxQGbStudentLoanPlanNone;
+
+  /// No description provided for @taxQGbPostgraduateLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Postgraduate loan'**
+  String get taxQGbPostgraduateLoan;
+
+  /// No description provided for @taxQGbPostgraduateLoanHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Repay 6% of income above £21,000 on top of any undergraduate plan.'**
+  String get taxQGbPostgraduateLoanHelp;
+
+  /// No description provided for @taxQGbAccountingPeriodEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounting period end'**
+  String get taxQGbAccountingPeriodEnd;
+
+  /// No description provided for @taxQGbAccountingPeriodEndHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The company\'s year end. Corporation Tax runs on these periods, not the tax year.'**
+  String get taxQGbAccountingPeriodEndHelp;
+
+  /// No description provided for @taxQGbAccountingPeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get taxQGbAccountingPeriodMonth;
+
+  /// No description provided for @taxQGbAccountingPeriodDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get taxQGbAccountingPeriodDay;
+
+  /// No description provided for @taxQGbAssociatedCompanies.
+  ///
+  /// In en, this message translates to:
+  /// **'Associated companies'**
+  String get taxQGbAssociatedCompanies;
+
+  /// No description provided for @taxQGbAssociatedCompaniesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Other companies under common control. Each one divides the £50,000 and £250,000 limits.'**
+  String get taxQGbAssociatedCompaniesHelp;
+
+  /// No description provided for @taxQUsFilingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Filing status'**
+  String get taxQUsFilingStatus;
+
+  /// No description provided for @taxQUsFilingStatusSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'Single'**
+  String get taxQUsFilingStatusSingle;
+
+  /// No description provided for @taxQUsFilingStatusMarriedFilingJointly.
+  ///
+  /// In en, this message translates to:
+  /// **'Married filing jointly'**
+  String get taxQUsFilingStatusMarriedFilingJointly;
+
+  /// No description provided for @taxQUsFilingStatusMarriedFilingSeparately.
+  ///
+  /// In en, this message translates to:
+  /// **'Married filing separately'**
+  String get taxQUsFilingStatusMarriedFilingSeparately;
+
+  /// No description provided for @taxQUsFilingStatusHeadOfHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Head of household'**
+  String get taxQUsFilingStatusHeadOfHousehold;
+
+  /// No description provided for @taxQUsFilingStatusQualifyingSurvivingSpouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Qualifying surviving spouse'**
+  String get taxQUsFilingStatusQualifyingSurvivingSpouse;
+
+  /// No description provided for @taxQUsTaxpayerHasSsn.
+  ///
+  /// In en, this message translates to:
+  /// **'You have an SSN'**
+  String get taxQUsTaxpayerHasSsn;
+
+  /// No description provided for @taxQUsTaxpayerHasSsnHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Required for the tips, overtime, and senior deductions.'**
+  String get taxQUsTaxpayerHasSsnHelp;
+
+  /// No description provided for @taxQUsSpouseHasSsn.
+  ///
+  /// In en, this message translates to:
+  /// **'Your spouse has an SSN'**
+  String get taxQUsSpouseHasSsn;
+
+  /// No description provided for @taxQUsSpouseHasSsnHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Required for the tips, overtime, and senior deductions.'**
+  String get taxQUsSpouseHasSsnHelp;
+
+  /// No description provided for @taxQUsTaxpayer65OrOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'You are 65 or older'**
+  String get taxQUsTaxpayer65OrOlder;
+
+  /// No description provided for @taxQUsSpouse65OrOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'Your spouse is 65 or older'**
+  String get taxQUsSpouse65OrOlder;
+
+  /// No description provided for @taxQUsDependentsUnder17.
+  ///
+  /// In en, this message translates to:
+  /// **'Dependents under 17'**
+  String get taxQUsDependentsUnder17;
+
+  /// No description provided for @taxQUsDependentsUnder17Help.
+  ///
+  /// In en, this message translates to:
+  /// **'The number of people you claim as dependents.'**
+  String get taxQUsDependentsUnder17Help;
+
+  /// No description provided for @taxQUsDependents17OrOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'Dependents 17 or older'**
+  String get taxQUsDependents17OrOlder;
+
+  /// No description provided for @taxQUsDependents17OrOlderHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The number of people you claim as dependents.'**
+  String get taxQUsDependents17OrOlderHelp;
+
+  /// No description provided for @taxQUsDependentsHaveSsn.
+  ///
+  /// In en, this message translates to:
+  /// **'All dependents have an SSN'**
+  String get taxQUsDependentsHaveSsn;
+
+  /// No description provided for @taxQUsDependentsHaveSsnHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Only dependents with an SSN valid for employment earn a credit.'**
+  String get taxQUsDependentsHaveSsnHelp;
+
+  /// No description provided for @taxQUsForeignEarnedIncomeExclusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Foreign earned income exclusion'**
+  String get taxQUsForeignEarnedIncomeExclusion;
+
+  /// No description provided for @taxQUsForeignEarnedIncomeExclusionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount you excluded on Form 2555 this year. It is added back when the investment income and deduction phase-outs check your income.'**
+  String get taxQUsForeignEarnedIncomeExclusionHelp;
+
+  /// No description provided for @taxQUsSpecifiedServiceTrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Specified service business'**
+  String get taxQUsSpecifiedServiceTrade;
+
+  /// No description provided for @taxQUsSpecifiedServiceTradeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Consulting, law, health and similar businesses phase out of the qualified business income deduction.'**
+  String get taxQUsSpecifiedServiceTradeHelp;
+
+  /// No description provided for @taxQUsHomeOfficeMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Home office method'**
+  String get taxQUsHomeOfficeMethod;
+
+  /// No description provided for @taxQUsHomeOfficeMethodSimplified.
+  ///
+  /// In en, this message translates to:
+  /// **'Simplified (\$5 per square foot)'**
+  String get taxQUsHomeOfficeMethodSimplified;
+
+  /// No description provided for @taxQUsHomeOfficeMethodRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular (Form 8829)'**
+  String get taxQUsHomeOfficeMethodRegular;
+
+  /// No description provided for @taxQNgAnnualRent.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual rent paid'**
+  String get taxQNgAnnualRent;
+
+  /// No description provided for @taxQNgAnnualRentHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for rent relief under the Nigeria Tax Act.'**
+  String get taxQNgAnnualRentHelp;
+
+  /// No description provided for @taxQNgSmallCompanyCeiling.
+  ///
+  /// In en, this message translates to:
+  /// **'Small company turnover ceiling'**
+  String get taxQNgSmallCompanyCeiling;
+
+  /// No description provided for @taxQNgSmallCompanyCeilingHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The two Nigerian Acts disagree: the Nigeria Tax Act gazette says N50,000,000 and the Administration Act says N100,000,000. Pick the figure that should decide your company\'s small company status.'**
+  String get taxQNgSmallCompanyCeilingHelp;
+
+  /// No description provided for @taxQNgSmallCompanyCeilingGazette.
+  ///
+  /// In en, this message translates to:
+  /// **'N50,000,000 (Nigeria Tax Act gazette)'**
+  String get taxQNgSmallCompanyCeilingGazette;
+
+  /// No description provided for @taxQNgSmallCompanyCeilingIntended.
+  ///
+  /// In en, this message translates to:
+  /// **'N100,000,000 (Administration Act)'**
+  String get taxQNgSmallCompanyCeilingIntended;
+
+  /// No description provided for @taxQNgMneGroupMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member of a multinational group'**
+  String get taxQNgMneGroupMember;
+
+  /// No description provided for @taxQNgMneGroupMemberHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Multinational group members may owe the 15% minimum effective tax rate whatever their turnover.'**
+  String get taxQNgMneGroupMemberHelp;
+
+  /// No description provided for @taxQDeJointAssessment.
+  ///
+  /// In en, this message translates to:
+  /// **'Joint assessment'**
+  String get taxQDeJointAssessment;
+
+  /// No description provided for @taxQDeJointAssessmentHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouses assessed together with income splitting.'**
+  String get taxQDeJointAssessmentHelp;
+
+  /// No description provided for @taxQDeSpouseEmployed.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse also earns wages'**
+  String get taxQDeSpouseEmployed;
+
+  /// No description provided for @taxQDeSpouseEmployedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Each employed spouse claims their own worker\'s flat-rate allowance and files their own Anlage N.'**
+  String get taxQDeSpouseEmployedHelp;
+
+  /// No description provided for @taxQDeChurchTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Church tax'**
+  String get taxQDeChurchTax;
+
+  /// No description provided for @taxQDeChurchTaxHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Kirchensteuer on top of income tax.'**
+  String get taxQDeChurchTaxHelp;
+
+  /// No description provided for @taxQDeChurchState.
+  ///
+  /// In en, this message translates to:
+  /// **'State (Land) of the church tax'**
+  String get taxQDeChurchState;
+
+  /// No description provided for @taxQDeChurchStateHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sets the rate: 8% in Bavaria and Baden-Württemberg, 9% elsewhere. Leave it out to assume 9%.'**
+  String get taxQDeChurchStateHelp;
+
+  /// No description provided for @taxQDeChurchStateBadenWuerttemberg.
+  ///
+  /// In en, this message translates to:
+  /// **'Baden-Württemberg'**
+  String get taxQDeChurchStateBadenWuerttemberg;
+
+  /// No description provided for @taxQDeChurchStateBayern.
+  ///
+  /// In en, this message translates to:
+  /// **'Bavaria'**
+  String get taxQDeChurchStateBayern;
+
+  /// No description provided for @taxQDeChurchStateBerlin.
+  ///
+  /// In en, this message translates to:
+  /// **'Berlin'**
+  String get taxQDeChurchStateBerlin;
+
+  /// No description provided for @taxQDeChurchStateBrandenburg.
+  ///
+  /// In en, this message translates to:
+  /// **'Brandenburg'**
+  String get taxQDeChurchStateBrandenburg;
+
+  /// No description provided for @taxQDeChurchStateBremen.
+  ///
+  /// In en, this message translates to:
+  /// **'Bremen'**
+  String get taxQDeChurchStateBremen;
+
+  /// No description provided for @taxQDeChurchStateHamburg.
+  ///
+  /// In en, this message translates to:
+  /// **'Hamburg'**
+  String get taxQDeChurchStateHamburg;
+
+  /// No description provided for @taxQDeChurchStateHessen.
+  ///
+  /// In en, this message translates to:
+  /// **'Hesse'**
+  String get taxQDeChurchStateHessen;
+
+  /// No description provided for @taxQDeChurchStateMecklenburgVorpommern.
+  ///
+  /// In en, this message translates to:
+  /// **'Mecklenburg-Vorpommern'**
+  String get taxQDeChurchStateMecklenburgVorpommern;
+
+  /// No description provided for @taxQDeChurchStateNiedersachsen.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower Saxony'**
+  String get taxQDeChurchStateNiedersachsen;
+
+  /// No description provided for @taxQDeChurchStateNordrheinWestfalen.
+  ///
+  /// In en, this message translates to:
+  /// **'North Rhine-Westphalia'**
+  String get taxQDeChurchStateNordrheinWestfalen;
+
+  /// No description provided for @taxQDeChurchStateRheinlandPfalz.
+  ///
+  /// In en, this message translates to:
+  /// **'Rhineland-Palatinate'**
+  String get taxQDeChurchStateRheinlandPfalz;
+
+  /// No description provided for @taxQDeChurchStateSaarland.
+  ///
+  /// In en, this message translates to:
+  /// **'Saarland'**
+  String get taxQDeChurchStateSaarland;
+
+  /// No description provided for @taxQDeChurchStateSachsen.
+  ///
+  /// In en, this message translates to:
+  /// **'Saxony'**
+  String get taxQDeChurchStateSachsen;
+
+  /// No description provided for @taxQDeChurchStateSachsenAnhalt.
+  ///
+  /// In en, this message translates to:
+  /// **'Saxony-Anhalt'**
+  String get taxQDeChurchStateSachsenAnhalt;
+
+  /// No description provided for @taxQDeChurchStateSchleswigHolstein.
+  ///
+  /// In en, this message translates to:
+  /// **'Schleswig-Holstein'**
+  String get taxQDeChurchStateSchleswigHolstein;
+
+  /// No description provided for @taxQDeChurchStateThueringen.
+  ///
+  /// In en, this message translates to:
+  /// **'Thuringia'**
+  String get taxQDeChurchStateThueringen;
+
+  /// No description provided for @taxQDeChurchStateNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified (assume 9%)'**
+  String get taxQDeChurchStateNone;
+
+  /// No description provided for @taxQDeChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Children (Kindergeld)'**
+  String get taxQDeChildren;
+
+  /// No description provided for @taxQDeChildrenHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Children you receive Kindergeld for; a full twelve months per child is assumed.'**
+  String get taxQDeChildrenHelp;
+
+  /// No description provided for @taxQDeStatutoryPension.
+  ///
+  /// In en, this message translates to:
+  /// **'Statutory pension contributions'**
+  String get taxQDeStatutoryPension;
+
+  /// No description provided for @taxQDeStatutoryPensionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee and employer share per year; they reduce the Rürup (Basisrente) deduction.'**
+  String get taxQDeStatutoryPensionHelp;
+
+  /// No description provided for @taxQDeCommuteKm.
+  ///
+  /// In en, this message translates to:
+  /// **'Commute: one-way distance (km)'**
+  String get taxQDeCommuteKm;
+
+  /// No description provided for @taxQDeCommuteKmHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Full kilometres to your first workplace, shortest route (Anlage N).'**
+  String get taxQDeCommuteKmHelp;
+
+  /// No description provided for @taxQDeCommuteDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Commute: days travelled'**
+  String get taxQDeCommuteDays;
+
+  /// No description provided for @taxQDeCommuteDaysHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Days you actually visited the workplace; illness, holiday and home-office days do not count.'**
+  String get taxQDeCommuteDaysHelp;
+
+  /// No description provided for @taxQDeSmallBusinessExemption.
   ///
   /// In en, this message translates to:
   /// **'Small business VAT exemption'**
-  String get taxDeSmallBusinessExemption;
+  String get taxQDeSmallBusinessExemption;
 
-  /// No description provided for @taxDeSmallBusinessExemptionHint.
+  /// No description provided for @taxQDeSmallBusinessExemptionHelp.
   ///
   /// In en, this message translates to:
   /// **'Kleinunternehmerregelung: no VAT charged or reclaimed.'**
-  String get taxDeSmallBusinessExemptionHint;
+  String get taxQDeSmallBusinessExemptionHelp;
+
+  /// No description provided for @taxQDeEinkunftsArt.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of self-employment'**
+  String get taxQDeEinkunftsArt;
+
+  /// No description provided for @taxQDeEinkunftsArtHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Freiberufler owe no trade tax and file Anlage S; Gewerbetreibende owe Gewerbesteuer and file Anlage G.'**
+  String get taxQDeEinkunftsArtHelp;
+
+  /// No description provided for @taxQDeEinkunftsArtFreiberuflich.
+  ///
+  /// In en, this message translates to:
+  /// **'Freiberufler (liberal profession)'**
+  String get taxQDeEinkunftsArtFreiberuflich;
+
+  /// No description provided for @taxQDeEinkunftsArtGewerblich.
+  ///
+  /// In en, this message translates to:
+  /// **'Gewerbetreibender (trade)'**
+  String get taxQDeEinkunftsArtGewerblich;
+
+  /// No description provided for @taxQDePriorTurnover.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous year\'s turnover'**
+  String get taxQDePriorTurnover;
+
+  /// No description provided for @taxQDePriorTurnoverHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Total turnover of last year; it decides the Kleinunternehmer test (at most €25,000 prior year, €100,000 this year).'**
+  String get taxQDePriorTurnoverHelp;
 
   /// No description provided for @taxLinkedBudget.
   ///
@@ -7110,10 +7728,16 @@ abstract class AppLocalizations {
   /// **'Apply'**
   String get assistantApply;
 
+  /// Spoken label of an inline citation chip in a Money guide reply.
+  ///
+  /// In en, this message translates to:
+  /// **'Source {number}: {title}'**
+  String assistantCitationSemantics(int number, String title);
+
   /// No description provided for @assistantComposerHint.
   ///
   /// In en, this message translates to:
-  /// **'Ask about this plan…'**
+  /// **'Ask about money, tax or crypto…'**
   String get assistantComposerHint;
 
   /// No description provided for @assistantConversationDelete.
@@ -7158,6 +7782,12 @@ abstract class AppLocalizations {
   /// **'Conversations'**
   String get assistantConversations;
 
+  /// Estimate of how many typical Money guide conversations the remaining allowance covers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No full conversations left this month} =1{About 1 conversation left this month} other{About {count} conversations left this month}}'**
+  String assistantConversationsLeft(int count);
+
   /// No description provided for @assistantConversationsLoadError.
   ///
   /// In en, this message translates to:
@@ -7167,7 +7797,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantDisclaimer.
   ///
   /// In en, this message translates to:
-  /// **'Guidance only, not financial or tax advice.'**
+  /// **'Guidance, not regulated financial advice.'**
   String get assistantDisclaimer;
 
   /// No description provided for @assistantDismiss.
@@ -7179,19 +7809,19 @@ abstract class AppLocalizations {
   /// No description provided for @assistantEmptyMessage.
   ///
   /// In en, this message translates to:
-  /// **'I can read your budget, explain what changed, and suggest moves for you to approve. I never change anything on my own.'**
+  /// **'Ask about your plan, your taxes or your crypto. I show what the rules say and what your figures show, with sources. You decide what to do, and I never change anything on my own.'**
   String get assistantEmptyMessage;
 
   /// No description provided for @assistantEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'Ask about this plan'**
+  /// **'Ask the Money guide'**
   String get assistantEmptyTitle;
 
   /// No description provided for @assistantErrorAllowanceMessage.
   ///
   /// In en, this message translates to:
-  /// **'You\'ve used this month\'s included assistant usage. It resets with your next billing period, or you can connect your own provider and keep going now.'**
+  /// **'You\'ve used this month\'s included Money guide usage. It resets with your next billing period, or you can connect your own provider and keep going now.'**
   String get assistantErrorAllowanceMessage;
 
   /// No description provided for @assistantErrorAllowanceTitle.
@@ -7203,7 +7833,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantErrorEntitlementMessage.
   ///
   /// In en, this message translates to:
-  /// **'The included assistant is part of OpenBudget Plus. Subscribe to keep chatting, or connect your own OpenAI-compatible provider.'**
+  /// **'The Money guide is part of OpenBudget Plus. Subscribe to keep asking, or connect your own OpenAI-compatible provider.'**
   String get assistantErrorEntitlementMessage;
 
   /// No description provided for @assistantErrorEntitlementTitle.
@@ -7227,7 +7857,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantErrorNetworkTitle.
   ///
   /// In en, this message translates to:
-  /// **'Couldn\'t reach the assistant'**
+  /// **'Couldn\'t reach the Money guide'**
   String get assistantErrorNetworkTitle;
 
   /// No description provided for @assistantErrorProviderMessage.
@@ -7239,7 +7869,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantErrorProviderTitle.
   ///
   /// In en, this message translates to:
-  /// **'The assistant has no provider right now'**
+  /// **'The Money guide has no provider right now'**
   String get assistantErrorProviderTitle;
 
   /// No description provided for @assistantErrorTryAgain.
@@ -7257,7 +7887,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantErrorUnknownTitle.
   ///
   /// In en, this message translates to:
-  /// **'The assistant couldn\'t finish'**
+  /// **'The Money guide couldn\'t finish'**
   String get assistantErrorUnknownTitle;
 
   /// No description provided for @assistantErrorUseOwnProvider.
@@ -7365,7 +7995,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantProposalsEmptyMessage.
   ///
   /// In en, this message translates to:
-  /// **'When the assistant suggests a move, it waits here for you to apply or dismiss it.'**
+  /// **'When the Money guide suggests a move, it waits here for you to apply or dismiss it.'**
   String get assistantProposalsEmptyMessage;
 
   /// No description provided for @assistantProposalsEmptyTitle.
@@ -7401,7 +8031,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantProposalsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Assistant proposals'**
+  /// **'Money guide suggestions'**
   String get assistantProposalsTitle;
 
   /// No description provided for @assistantProviderApiKey.
@@ -7437,7 +8067,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantProviderIntro.
   ///
   /// In en, this message translates to:
-  /// **'Connect an OpenAI-compatible provider to talk to the assistant with your own key.'**
+  /// **'Connect an OpenAI-compatible provider to use the Money guide with your own key.'**
   String get assistantProviderIntro;
 
   /// No description provided for @assistantProviderKeyRequired.
@@ -7509,7 +8139,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantProviderRemoveMessage.
   ///
   /// In en, this message translates to:
-  /// **'The assistant will go back to the included provider, which needs OpenBudget Plus.'**
+  /// **'The Money guide will go back to the included provider, which needs OpenBudget Plus.'**
   String get assistantProviderRemoveMessage;
 
   /// No description provided for @assistantProviderRemoveTitle.
@@ -7557,13 +8187,13 @@ abstract class AppLocalizations {
   /// No description provided for @assistantProviderSettingsRow.
   ///
   /// In en, this message translates to:
-  /// **'Assistant provider'**
+  /// **'Money guide provider'**
   String get assistantProviderSettingsRow;
 
   /// No description provided for @assistantProviderTitle.
   ///
   /// In en, this message translates to:
-  /// **'Assistant provider'**
+  /// **'Money guide provider'**
   String get assistantProviderTitle;
 
   /// No description provided for @assistantProviderUrlInvalid.
@@ -7578,6 +8208,36 @@ abstract class AppLocalizations {
   /// **'Enter the provider\'s HTTPS base URL.'**
   String get assistantProviderUrlRequired;
 
+  /// Under a Money guide reply about tax or investments for a German entity. A literal English rendering of the German addition in guidanceDisclaimers (openbudget_core); have a German speaker review before launch.
+  ///
+  /// In en, this message translates to:
+  /// **'General information, not tax advice for your individual case. Rules change. For your situation, ask a Steuerberater or a Lohnsteuerhilfeverein.'**
+  String get assistantReplyDisclaimerDe;
+
+  /// No description provided for @assistantReplyDisclaimerGb.
+  ///
+  /// In en, this message translates to:
+  /// **'Information only, not tax, legal or investment advice, and it doesn\'t recommend any investment, pension or ISA product. Rules change, so check with a qualified professional.'**
+  String get assistantReplyDisclaimerGb;
+
+  /// Under a Money guide reply about tax or investments for an entity whose country has no tax rule pack. Deliberately not the same text as the fixed footer (assistantDisclaimer).
+  ///
+  /// In en, this message translates to:
+  /// **'Information only, not tax, legal or investment advice. Rules change, so check with a qualified professional before you act on it.'**
+  String get assistantReplyDisclaimerGeneric;
+
+  /// No description provided for @assistantReplyDisclaimerNg.
+  ///
+  /// In en, this message translates to:
+  /// **'Information only, not tax, legal or investment advice. Rules change, so confirm with a registered tax practitioner and the tax authority before relying on this.'**
+  String get assistantReplyDisclaimerNg;
+
+  /// No description provided for @assistantReplyDisclaimerUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Information only, not tax, legal or investment advice. A general educational calculation, not a written federal tax opinion. Rules change, so check with a qualified professional.'**
+  String get assistantReplyDisclaimerUs;
+
   /// No description provided for @assistantRetry.
   ///
   /// In en, this message translates to:
@@ -7589,6 +8249,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send message'**
   String get assistantSend;
+
+  /// Badge on a source that describes a rule that is announced but not yet law.
+  ///
+  /// In en, this message translates to:
+  /// **'Announced, not yet law'**
+  String get assistantSourceAnnouncedBadge;
+
+  /// When a cited source was last checked.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked {date}'**
+  String assistantSourceChecked(String date);
+
+  /// Spoken label of a source's number in the sources sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Source {number}'**
+  String assistantSourceNumber(int number);
+
+  /// Link that opens a cited source; authority is its website, such as gov.uk.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {authority}'**
+  String assistantSourceOpen(String authority);
+
+  /// Spoken label of the link that opens a cited source.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source: {title}'**
+  String assistantSourceOpenSemantics(String title);
+
+  /// Button under a Money guide reply that opens its sources.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 source} other{{count} sources}}'**
+  String assistantSourcesButton(int count);
+
+  /// Line under the sources sheet title.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the rules and figures in this answer come from. Open one to read it at the source.'**
+  String get assistantSourcesIntro;
+
+  /// Title of the sheet that lists a reply's sources.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources'**
+  String get assistantSourcesTitle;
 
   /// No description provided for @assistantSuggestionCuts.
   ///
@@ -7611,8 +8319,26 @@ abstract class AppLocalizations {
   /// No description provided for @assistantTitle.
   ///
   /// In en, this message translates to:
-  /// **'Assistant'**
+  /// **'Money guide'**
   String get assistantTitle;
+
+  /// No description provided for @assistantToolGetNetWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Looked at your net worth'**
+  String get assistantToolGetNetWorth;
+
+  /// No description provided for @assistantToolGetSpendingSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Looked at your spending'**
+  String get assistantToolGetSpendingSummary;
+
+  /// No description provided for @assistantToolGetTaxCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked your tax deadlines'**
+  String get assistantToolGetTaxCalendar;
 
   /// No description provided for @assistantToolGetTaxReport.
   ///
@@ -7620,11 +8346,23 @@ abstract class AppLocalizations {
   /// **'Looked at your tax report'**
   String get assistantToolGetTaxReport;
 
+  /// No description provided for @assistantToolGetTaxSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Looked at your tax summary'**
+  String get assistantToolGetTaxSummary;
+
   /// No description provided for @assistantToolListBudgets.
   ///
   /// In en, this message translates to:
   /// **'Looked at your plan'**
   String get assistantToolListBudgets;
+
+  /// No description provided for @assistantToolListEntities.
+  ///
+  /// In en, this message translates to:
+  /// **'Looked at your budgets'**
+  String get assistantToolListEntities;
 
   /// No description provided for @assistantToolListEnvelopes.
   ///
@@ -7656,6 +8394,12 @@ abstract class AppLocalizations {
   /// **'Drafted a tax category change'**
   String get assistantToolProposeTransactionTax;
 
+  /// No description provided for @assistantToolSearchKnowledge.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked the sourced rules'**
+  String get assistantToolSearchKnowledge;
+
   /// No description provided for @assistantToolSearchTransactions.
   ///
   /// In en, this message translates to:
@@ -7671,7 +8415,7 @@ abstract class AppLocalizations {
   /// No description provided for @assistantTyping.
   ///
   /// In en, this message translates to:
-  /// **'The assistant is thinking…'**
+  /// **'The Money guide is thinking…'**
   String get assistantTyping;
 
   /// No description provided for @assistantUntitledConversation.
@@ -7707,7 +8451,7 @@ abstract class AppLocalizations {
   /// No description provided for @plusNavSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Tax reports, the assistant and more'**
+  /// **'Tax reports, the Money guide and more'**
   String get plusNavSubtitle;
 
   /// No description provided for @plusHeroHeadline.
@@ -7719,13 +8463,13 @@ abstract class AppLocalizations {
   /// No description provided for @plusHeroBody.
   ///
   /// In en, this message translates to:
-  /// **'Tax reports, a built-in assistant that knows your budget, and room to bring your own agent.'**
+  /// **'Tax reports, a Money guide that knows your budget, and room to bring your own agent.'**
   String get plusHeroBody;
 
   /// No description provided for @plusPriceAmount.
   ///
   /// In en, this message translates to:
-  /// **'\$10'**
+  /// **'\$20'**
   String get plusPriceAmount;
 
   /// No description provided for @plusPricePeriod.
@@ -7743,7 +8487,7 @@ abstract class AppLocalizations {
   /// No description provided for @plusIncludedUsage.
   ///
   /// In en, this message translates to:
-  /// **'\$1 of assistant usage included every month'**
+  /// **'\$5 of Money guide usage included every month'**
   String get plusIncludedUsage;
 
   /// No description provided for @plusBenefitsTitle.
@@ -7767,13 +8511,13 @@ abstract class AppLocalizations {
   /// No description provided for @plusBenefitAssistantTitle.
   ///
   /// In en, this message translates to:
-  /// **'The assistant'**
+  /// **'The Money guide'**
   String get plusBenefitAssistantTitle;
 
   /// No description provided for @plusBenefitAssistantBody.
   ///
   /// In en, this message translates to:
-  /// **'Ask questions about your money, with \$1 of usage included each month.'**
+  /// **'Ask questions about your money, with \$5 of usage included each month.'**
   String get plusBenefitAssistantBody;
 
   /// No description provided for @plusBenefitAgentTitle.
@@ -8849,6 +9593,2133 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We couldn\'t load this journal\'s lines. Try again.'**
   String get journalLinesLoadError;
+
+  /// No description provided for @createEntityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your books'**
+  String get createEntityTitle;
+
+  /// No description provided for @createEntityKindLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What are these books for?'**
+  String get createEntityKindLabel;
+
+  /// No description provided for @entityKindPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get entityKindPersonal;
+
+  /// No description provided for @entityKindSoleTrader.
+  ///
+  /// In en, this message translates to:
+  /// **'Sole trader'**
+  String get entityKindSoleTrader;
+
+  /// No description provided for @entityKindCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get entityKindCompany;
+
+  /// No description provided for @createEntityCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get createEntityCountry;
+
+  /// No description provided for @createEntityTimeZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Time zone'**
+  String get createEntityTimeZone;
+
+  /// No description provided for @createEntityFiscalYearEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial year ends'**
+  String get createEntityFiscalYearEnd;
+
+  /// No description provided for @createEntityFiscalYearValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day} of month {month}'**
+  String createEntityFiscalYearValue(int day, int month);
+
+  /// No description provided for @createEntityTaxYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax year'**
+  String get createEntityTaxYear;
+
+  /// A tax year as two dates, such as '6 Apr to 5 Apr'.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} to {end}'**
+  String createEntityTaxYearValue(String start, String end);
+
+  /// No description provided for @createEntityPickCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a country'**
+  String get createEntityPickCountry;
+
+  /// No description provided for @createEntityPickCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a currency'**
+  String get createEntityPickCurrency;
+
+  /// No description provided for @createEntityPickTimeZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a time zone'**
+  String get createEntityPickTimeZone;
+
+  /// No description provided for @createEntitySearchCountries.
+  ///
+  /// In en, this message translates to:
+  /// **'Search countries or codes'**
+  String get createEntitySearchCountries;
+
+  /// No description provided for @createEntitySearchCurrencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Search currencies or codes'**
+  String get createEntitySearchCurrencies;
+
+  /// No description provided for @createEntitySearchTimeZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Search time zones'**
+  String get createEntitySearchTimeZones;
+
+  /// No description provided for @createEntityClearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get createEntityClearSearch;
+
+  /// No description provided for @createEntityPickerSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get createEntityPickerSelected;
+
+  /// No description provided for @createEntityResultCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 result} other{{count} results}}'**
+  String createEntityResultCount(int count);
+
+  /// No description provided for @createEntityNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches “{query}”'**
+  String createEntityNoMatch(String query);
+
+  /// No description provided for @createEntitySectionTaxRules.
+  ///
+  /// In en, this message translates to:
+  /// **'With tax rules built in'**
+  String get createEntitySectionTaxRules;
+
+  /// No description provided for @createEntitySectionAllCountries.
+  ///
+  /// In en, this message translates to:
+  /// **'All countries'**
+  String get createEntitySectionAllCountries;
+
+  /// No description provided for @createEntitySectionCountryCurrencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Used in {country}'**
+  String createEntitySectionCountryCurrencies(String country);
+
+  /// No description provided for @createEntitySectionAllCurrencies.
+  ///
+  /// In en, this message translates to:
+  /// **'All currencies'**
+  String get createEntitySectionAllCurrencies;
+
+  /// No description provided for @entityDeleteNameField.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the entity\'s name to confirm'**
+  String get entityDeleteNameField;
+
+  /// No description provided for @homeBudgetNetWorthShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Net worth {amount}'**
+  String homeBudgetNetWorthShort(String amount);
+
+  /// No description provided for @homeBudgetUncategorised.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} uncategorised'**
+  String homeBudgetUncategorised(int count);
+
+  /// No description provided for @homeBudgetDueRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recurring due'**
+  String homeBudgetDueRecurring(int count);
+
+  /// No description provided for @homeBudgetPendingProposals.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} proposals'**
+  String homeBudgetPendingProposals(int count);
+
+  /// No description provided for @netWorthAssetsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets {amount}'**
+  String netWorthAssetsLabel(String amount);
+
+  /// No description provided for @netWorthLiabilitiesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Liabilities {amount}'**
+  String netWorthLiabilitiesLabel(String amount);
+
+  /// No description provided for @netWorthMissingCurrencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Not included: no rate for {currencies}'**
+  String netWorthMissingCurrencies(String currencies);
+
+  /// No description provided for @netWorthRatesFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Rates as of {date}'**
+  String netWorthRatesFrom(String date);
+
+  /// No description provided for @netWorthIncompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Some accounts are not included'**
+  String get netWorthIncompleteTitle;
+
+  /// No description provided for @netWorthIncompleteLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Not included: {count, plural, =1{1 account} other{{count} accounts}} in {currency} (no rate)'**
+  String netWorthIncompleteLine(int count, String currency);
+
+  /// No description provided for @netWorthTabByEntity.
+  ///
+  /// In en, this message translates to:
+  /// **'By entity'**
+  String get netWorthTabByEntity;
+
+  /// No description provided for @netWorthTabByCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'By currency'**
+  String get netWorthTabByCurrency;
+
+  /// No description provided for @netWorthTabByAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'By account'**
+  String get netWorthTabByAccount;
+
+  /// No description provided for @cryptoBreakdownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Crypto'**
+  String get cryptoBreakdownTitle;
+
+  /// No description provided for @cryptoBreakdownByChain.
+  ///
+  /// In en, this message translates to:
+  /// **'By chain'**
+  String get cryptoBreakdownByChain;
+
+  /// No description provided for @cryptoBreakdownByAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'By asset'**
+  String get cryptoBreakdownByAsset;
+
+  /// No description provided for @cryptoBreakdownWallets.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Across 1 wallet} other{Across {count} wallets}}'**
+  String cryptoBreakdownWallets(int count);
+
+  /// Text alternative for the crypto overprint bar. grouping is the selected toggle label; shares lists each row and its share.
+  ///
+  /// In en, this message translates to:
+  /// **'{grouping}: {shares}'**
+  String cryptoBreakdownBarLabel(String grouping, String shares);
+
+  /// No description provided for @cryptoBreakdownBarShare.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} {share}'**
+  String cryptoBreakdownBarShare(String name, String share);
+
+  /// No description provided for @cryptoBreakdownShareUnderOne.
+  ///
+  /// In en, this message translates to:
+  /// **'<1%'**
+  String get cryptoBreakdownShareUnderOne;
+
+  /// No description provided for @cryptoBreakdownOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get cryptoBreakdownOther;
+
+  /// No description provided for @cryptoBreakdownOtherHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 smaller holding} other{{count} smaller holdings}}'**
+  String cryptoBreakdownOtherHoldings(int count);
+
+  /// No description provided for @cryptoBreakdownChainHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 holding} other{{count} holdings}}'**
+  String cryptoBreakdownChainHoldings(int count);
+
+  /// No description provided for @cryptoBreakdownNetworksMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} +{count}'**
+  String cryptoBreakdownNetworksMore(String names, int count);
+
+  /// No description provided for @cryptoBreakdownEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is counted yet. Tokens without a price are left out until one is found.'**
+  String get cryptoBreakdownEmpty;
+
+  /// No description provided for @cryptoBreakdownFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens that look like scams and tokens without a price are left out.'**
+  String get cryptoBreakdownFootnote;
+
+  /// No description provided for @cryptoBreakdownMissingRates.
+  ///
+  /// In en, this message translates to:
+  /// **'No exchange rate for {currencies}, so those holdings are left out of this figure.'**
+  String cryptoBreakdownMissingRates(String currencies);
+
+  /// No description provided for @cryptoBreakdownLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your crypto breakdown'**
+  String get cryptoBreakdownLoadError;
+
+  /// No description provided for @netWorthValuedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Valued {date}'**
+  String netWorthValuedOn(String date);
+
+  /// No description provided for @netWorthRateLine.
+  ///
+  /// In en, this message translates to:
+  /// **'1 {native} = {rate} {reporting}'**
+  String netWorthRateLine(String native, String rate, String reporting);
+
+  /// No description provided for @netWorthIncompletePoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Point based on incomplete data'**
+  String get netWorthIncompletePoint;
+
+  /// No description provided for @netWorthHistory3M.
+  ///
+  /// In en, this message translates to:
+  /// **'3M'**
+  String get netWorthHistory3M;
+
+  /// No description provided for @netWorthHistory1Y.
+  ///
+  /// In en, this message translates to:
+  /// **'1Y'**
+  String get netWorthHistory1Y;
+
+  /// No description provided for @netWorthHistoryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get netWorthHistoryAll;
+
+  /// No description provided for @netWorthAccountsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 account} other{{count} accounts}}'**
+  String netWorthAccountsCount(int count);
+
+  /// No description provided for @entityCountInNetWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Count in my net worth'**
+  String get entityCountInNetWorth;
+
+  /// No description provided for @entityCountInNetWorthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Include this entity\'s accounts in your combined net worth.'**
+  String get entityCountInNetWorthHint;
+
+  /// No description provided for @settingsReportingCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Reporting currency'**
+  String get settingsReportingCurrency;
+
+  /// No description provided for @addAccountCurrencyQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What currency is this account in?'**
+  String get addAccountCurrencyQuestion;
+
+  /// No description provided for @addAccountSelectCurrencyPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a currency'**
+  String get addAccountSelectCurrencyPlaceholder;
+
+  /// No description provided for @addAccountOnBudgetQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget this account together with the plan'**
+  String get addAccountOnBudgetQuestion;
+
+  /// No description provided for @addAccountOnBudgetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'On-budget accounts feed Ready to Assign.'**
+  String get addAccountOnBudgetHint;
+
+  /// No description provided for @addAccountTrackByQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How should this account be tracked?'**
+  String get addAccountTrackByQuestion;
+
+  /// No description provided for @addAccountTrackByTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'By transactions'**
+  String get addAccountTrackByTransactions;
+
+  /// No description provided for @addAccountTrackByValue.
+  ///
+  /// In en, this message translates to:
+  /// **'By value'**
+  String get addAccountTrackByValue;
+
+  /// No description provided for @addAccountOpeningToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening balance is from today'**
+  String get addAccountOpeningToday;
+
+  /// No description provided for @addAccountTypeProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Property'**
+  String get addAccountTypeProperty;
+
+  /// No description provided for @addAccountTypeVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get addAccountTypeVehicle;
+
+  /// No description provided for @addAccountTypeOtherAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Other asset'**
+  String get addAccountTypeOtherAsset;
+
+  /// No description provided for @accountGroupAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get accountGroupAssets;
+
+  /// No description provided for @accountGroupLiabilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Liabilities'**
+  String get accountGroupLiabilities;
+
+  /// No description provided for @accountBaseEquivalent.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {amount} in base currency'**
+  String accountBaseEquivalent(String amount);
+
+  /// No description provided for @accountsConnectionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank connections'**
+  String get accountsConnectionsTitle;
+
+  /// No description provided for @accountsConnectionPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get accountsConnectionPending;
+
+  /// No description provided for @accountsConnectionSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get accountsConnectionSynced;
+
+  /// No description provided for @accountsConnectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed'**
+  String get accountsConnectionFailed;
+
+  /// No description provided for @accountsConnectionRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get accountsConnectionRemove;
+
+  /// No description provided for @accountsConnectionRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this connection?'**
+  String get accountsConnectionRemoveTitle;
+
+  /// No description provided for @accountsConnectionRemoveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The bank link is removed. Accounts keep their history.'**
+  String get accountsConnectionRemoveMessage;
+
+  /// No description provided for @transactionTransferPeer.
+  ///
+  /// In en, this message translates to:
+  /// **'to {accountName}'**
+  String transactionTransferPeer(String accountName);
+
+  /// No description provided for @transactionBaseAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} in base currency'**
+  String transactionBaseAmount(String amount);
+
+  /// No description provided for @accountDetailReconcile.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile'**
+  String get accountDetailReconcile;
+
+  /// No description provided for @accountDetailReportedBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank says {amount}'**
+  String accountDetailReportedBalance(String amount);
+
+  /// No description provided for @accountDetailClearedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared {amount}'**
+  String accountDetailClearedLabel(String amount);
+
+  /// No description provided for @accountDetailUnclearedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncleared {amount}'**
+  String accountDetailUnclearedLabel(String amount);
+
+  /// No description provided for @accountDetailValuationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Value history'**
+  String get accountDetailValuationsTitle;
+
+  /// No description provided for @accountDetailUpdateValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Update value'**
+  String get accountDetailUpdateValue;
+
+  /// No description provided for @accountDetailValuedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Valued {date}'**
+  String accountDetailValuedOn(String date);
+
+  /// No description provided for @accountDetailHoldingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Holdings'**
+  String get accountDetailHoldingsTitle;
+
+  /// No description provided for @accountHoldingsValueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Value {amount}'**
+  String accountHoldingsValueLabel(String amount);
+
+  /// No description provided for @accountHoldingsCostLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost {amount}'**
+  String accountHoldingsCostLabel(String amount);
+
+  /// No description provided for @accountHoldingsPnlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'P&L {amount}'**
+  String accountHoldingsPnlLabel(String amount);
+
+  /// No description provided for @accountHoldingsQuantityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity {quantity}'**
+  String accountHoldingsQuantityLabel(String quantity);
+
+  /// No description provided for @accountReconcileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile {accountName}'**
+  String accountReconcileTitle(String accountName);
+
+  /// No description provided for @accountReconcileStatementField.
+  ///
+  /// In en, this message translates to:
+  /// **'Statement balance'**
+  String get accountReconcileStatementField;
+
+  /// No description provided for @accountReconcileDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Difference {amount}'**
+  String accountReconcileDifference(String amount);
+
+  /// No description provided for @accountReconcileCreateAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'Post the difference as an adjustment'**
+  String get accountReconcileCreateAdjustment;
+
+  /// No description provided for @accountReconcileSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile'**
+  String get accountReconcileSubmit;
+
+  /// No description provided for @accountReconcileSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} transactions reconciled'**
+  String accountReconcileSuccess(int count);
+
+  /// No description provided for @accountReconcileNoDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Already balanced — nothing to do'**
+  String get accountReconcileNoDifference;
+
+  /// No description provided for @accountValuationValueField.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get accountValuationValueField;
+
+  /// No description provided for @accountValuationDateField.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get accountValuationDateField;
+
+  /// No description provided for @accountValuationSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Value saved'**
+  String get accountValuationSaved;
+
+  /// No description provided for @accountDetailTransactionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get accountDetailTransactionsTitle;
+
+  /// No description provided for @transactionLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get transactionLoadMore;
+
+  /// No description provided for @accountReconcileFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile failed — check the statement balance'**
+  String get accountReconcileFailed;
+
+  /// No description provided for @fxRateLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching rate…'**
+  String get fxRateLoading;
+
+  /// No description provided for @fxRateSetRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Set rate'**
+  String get fxRateSetRate;
+
+  /// No description provided for @fxRateSetRateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your own rate'**
+  String get fxRateSetRateTitle;
+
+  /// No description provided for @fxRateRateField.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange rate'**
+  String get fxRateRateField;
+
+  /// No description provided for @fxRateInvalidRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a positive rate, e.g. 0.79'**
+  String get fxRateInvalidRate;
+
+  /// No description provided for @fxRateUseThisRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this rate'**
+  String get fxRateUseThisRate;
+
+  /// No description provided for @fxRateStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Stale'**
+  String get fxRateStale;
+
+  /// No description provided for @fxRateApproximate.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {amount}'**
+  String fxRateApproximate(String amount);
+
+  /// No description provided for @fxRateUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No exchange rate'**
+  String get fxRateUnavailableTitle;
+
+  /// No description provided for @linesEditorSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Split into lines'**
+  String get linesEditorSplit;
+
+  /// No description provided for @linesEditorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lines'**
+  String get linesEditorTitle;
+
+  /// No description provided for @linesEditorLineLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {index}'**
+  String linesEditorLineLabel(int index);
+
+  /// No description provided for @linesEditorLineAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {index} amount'**
+  String linesEditorLineAmount(int index);
+
+  /// No description provided for @linesEditorAddLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a line'**
+  String get linesEditorAddLine;
+
+  /// No description provided for @linesEditorRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} left to allocate'**
+  String linesEditorRemaining(String amount);
+
+  /// A transaction's calendar date, written the way the reader's locale writes dates.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String transactionDateFullLabel(DateTime date);
+
+  /// No description provided for @importTargetAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Import into account'**
+  String get importTargetAccount;
+
+  /// No description provided for @transferFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From account'**
+  String get transferFrom;
+
+  /// No description provided for @transferTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To account'**
+  String get transferTo;
+
+  /// No description provided for @transferAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get transferAmountLabel;
+
+  /// No description provided for @transferSentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent'**
+  String get transferSentLabel;
+
+  /// No description provided for @transferReceivedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get transferReceivedLabel;
+
+  /// No description provided for @transferUseTodayRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Use today\'s rate'**
+  String get transferUseTodayRate;
+
+  /// No description provided for @transferEnvelopeLeavesPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope (money leaves the plan)'**
+  String get transferEnvelopeLeavesPlan;
+
+  /// No description provided for @transferCrossEntityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfers between your entities convert into each entity\'s base currency. Money never appears or disappears.'**
+  String get transferCrossEntityHint;
+
+  /// No description provided for @budgetBreakdownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget breakdown'**
+  String get budgetBreakdownTitle;
+
+  /// No description provided for @budgetBreakdownHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the amount to see where it comes from'**
+  String get budgetBreakdownHint;
+
+  /// No description provided for @budgetBreakdownFxDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange-rate difference'**
+  String get budgetBreakdownFxDifference;
+
+  /// No description provided for @budgetBreakdownOverspentLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Overspent last month'**
+  String get budgetBreakdownOverspentLastMonth;
+
+  /// No description provided for @budgetBreakdownAssignedInFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned in future months'**
+  String get budgetBreakdownAssignedInFuture;
+
+  /// No description provided for @budgetBreakdownAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available in envelopes'**
+  String get budgetBreakdownAvailable;
+
+  /// No description provided for @budgetBreakdownUncategorised.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorised transactions'**
+  String get budgetBreakdownUncategorised;
+
+  /// No description provided for @reviewTransactionsSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String reviewTransactionsSelectedCount(int count);
+
+  /// No description provided for @transactionKindTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get transactionKindTransfer;
+
+  /// No description provided for @transactionBaseEquivalent.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {amount} in base currency'**
+  String transactionBaseEquivalent(String amount);
+
+  /// No description provided for @loadMoreButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get loadMoreButton;
+
+  /// No description provided for @creditCardOwes.
+  ///
+  /// In en, this message translates to:
+  /// **'Owes {amount}'**
+  String creditCardOwes(String amount);
+
+  /// No description provided for @setGoalSetAsideMonthlyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Every month'**
+  String get setGoalSetAsideMonthlyLabel;
+
+  /// No description provided for @setGoalTargetBalanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target balance'**
+  String get setGoalTargetBalanceLabel;
+
+  /// No description provided for @setGoalTargetByDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'By the date'**
+  String get setGoalTargetByDateLabel;
+
+  /// No description provided for @setGoalHaveAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'To have {amount}'**
+  String setGoalHaveAmount(String amount);
+
+  /// No description provided for @envelopeDeleteMoveHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move its history to which envelope?'**
+  String get envelopeDeleteMoveHistoryTitle;
+
+  /// No description provided for @netWorthHeadlineEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Combined net worth'**
+  String get netWorthHeadlineEyebrow;
+
+  /// No description provided for @netWorthHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get netWorthHistoryTitle;
+
+  /// No description provided for @netWorthIncompleteLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashed where a currency has no rate'**
+  String get netWorthIncompleteLegend;
+
+  /// No description provided for @netWorthNoRate.
+  ///
+  /// In en, this message translates to:
+  /// **'No {currency} rate · not counted'**
+  String netWorthNoRate(String currency);
+
+  /// No description provided for @netWorthEntityIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaves out unconverted accounts'**
+  String get netWorthEntityIncomplete;
+
+  /// No description provided for @netWorthRateDated.
+  ///
+  /// In en, this message translates to:
+  /// **'{rateLine} · {date}'**
+  String netWorthRateDated(String rateLine, String date);
+
+  /// No description provided for @fxRateSourceMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'market rate'**
+  String get fxRateSourceMarket;
+
+  /// No description provided for @fxRateSourceImplied.
+  ///
+  /// In en, this message translates to:
+  /// **'implied rate'**
+  String get fxRateSourceImplied;
+
+  /// No description provided for @fxRateSourceManual.
+  ///
+  /// In en, this message translates to:
+  /// **'your rate'**
+  String get fxRateSourceManual;
+
+  /// No description provided for @fxRateSourceIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'same currency'**
+  String get fxRateSourceIdentity;
+
+  /// No description provided for @fxRateConvertsTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Converts to about {amount}'**
+  String fxRateConvertsTo(String amount);
+
+  /// No description provided for @accountDetailBalanceEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get accountDetailBalanceEyebrow;
+
+  /// No description provided for @accountDetailValueEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Current value'**
+  String get accountDetailValueEyebrow;
+
+  /// No description provided for @accountReconcileClearedNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared in OpenBudget'**
+  String get accountReconcileClearedNow;
+
+  /// No description provided for @accountReconcileMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches your statement'**
+  String get accountReconcileMatches;
+
+  /// No description provided for @accountValuationChange.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} since the last valuation'**
+  String accountValuationChange(String amount);
+
+  /// No description provided for @accountHoldingsUnpriced.
+  ///
+  /// In en, this message translates to:
+  /// **'No price yet'**
+  String get accountHoldingsUnpriced;
+
+  /// No description provided for @accountHoldingsCostUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost unknown'**
+  String get accountHoldingsCostUnknown;
+
+  /// No description provided for @walletHoldingsNetworkSolana.
+  ///
+  /// In en, this message translates to:
+  /// **'Solana'**
+  String get walletHoldingsNetworkSolana;
+
+  /// No description provided for @walletHoldingsNetworkSolanaDevnet.
+  ///
+  /// In en, this message translates to:
+  /// **'Solana Devnet'**
+  String get walletHoldingsNetworkSolanaDevnet;
+
+  /// No description provided for @walletHoldingsNetworkBitcoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Bitcoin'**
+  String get walletHoldingsNetworkBitcoin;
+
+  /// No description provided for @walletHoldingsNetworkEthereum.
+  ///
+  /// In en, this message translates to:
+  /// **'Ethereum'**
+  String get walletHoldingsNetworkEthereum;
+
+  /// No description provided for @walletHoldingsNetworkBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Base'**
+  String get walletHoldingsNetworkBase;
+
+  /// No description provided for @walletHoldingsNetworkArbitrumOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Arbitrum One'**
+  String get walletHoldingsNetworkArbitrumOne;
+
+  /// No description provided for @walletHoldingsNetworkOpMainnet.
+  ///
+  /// In en, this message translates to:
+  /// **'OP Mainnet'**
+  String get walletHoldingsNetworkOpMainnet;
+
+  /// No description provided for @walletHoldingsNetworkPolygonPos.
+  ///
+  /// In en, this message translates to:
+  /// **'Polygon PoS'**
+  String get walletHoldingsNetworkPolygonPos;
+
+  /// No description provided for @walletHoldingsNetworkBnbSmartChain.
+  ///
+  /// In en, this message translates to:
+  /// **'BNB Smart Chain'**
+  String get walletHoldingsNetworkBnbSmartChain;
+
+  /// No description provided for @walletHoldingsNetworkAvalancheCChain.
+  ///
+  /// In en, this message translates to:
+  /// **'Avalanche C-Chain'**
+  String get walletHoldingsNetworkAvalancheCChain;
+
+  /// No description provided for @walletHoldingsNetworkTron.
+  ///
+  /// In en, this message translates to:
+  /// **'Tron'**
+  String get walletHoldingsNetworkTron;
+
+  /// No description provided for @walletHoldingsNetworkXrpl.
+  ///
+  /// In en, this message translates to:
+  /// **'XRP Ledger'**
+  String get walletHoldingsNetworkXrpl;
+
+  /// No description provided for @walletHoldingsNetworkHyperliquid.
+  ///
+  /// In en, this message translates to:
+  /// **'Hyperliquid'**
+  String get walletHoldingsNetworkHyperliquid;
+
+  /// No description provided for @walletHoldingsNetworkDogecoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Dogecoin'**
+  String get walletHoldingsNetworkDogecoin;
+
+  /// No description provided for @walletHoldingsNetworkLitecoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Litecoin'**
+  String get walletHoldingsNetworkLitecoin;
+
+  /// No description provided for @walletHoldingsNetworkCardano.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardano'**
+  String get walletHoldingsNetworkCardano;
+
+  /// No description provided for @walletHoldingsNetworkTon.
+  ///
+  /// In en, this message translates to:
+  /// **'TON'**
+  String get walletHoldingsNetworkTon;
+
+  /// No description provided for @walletHoldingsNetworkSui.
+  ///
+  /// In en, this message translates to:
+  /// **'Sui'**
+  String get walletHoldingsNetworkSui;
+
+  /// No description provided for @walletHoldingsNetworkAptos.
+  ///
+  /// In en, this message translates to:
+  /// **'Aptos'**
+  String get walletHoldingsNetworkAptos;
+
+  /// How long ago a wallet read or a price was, under an hour. Read after "Read", "from" or "Showing amounts from".
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{less than a minute ago} =1{1 minute ago} other{{count} minutes ago}}'**
+  String walletHoldingsAgeMinutes(int count);
+
+  /// No description provided for @walletHoldingsAgeHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hour ago} other{{count} hours ago}}'**
+  String walletHoldingsAgeHours(int count);
+
+  /// No description provided for @walletHoldingsAgeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day ago} other{{count} days ago}}'**
+  String walletHoldingsAgeDays(int count);
+
+  /// A network section's second line: when its holdings were last read. {age} is a phrase such as "2 hours ago".
+  ///
+  /// In en, this message translates to:
+  /// **'Read {age}'**
+  String walletHoldingsReadAgo(String age);
+
+  /// No description provided for @walletHoldingsNeverRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Not read yet'**
+  String get walletHoldingsNeverRead;
+
+  /// No description provided for @walletHoldingsNothingCounted.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing counted'**
+  String get walletHoldingsNothingCounted;
+
+  /// What a screen reader says for a network section's header: the network, its subtotal and its read status.
+  ///
+  /// In en, this message translates to:
+  /// **'{network}, {total}, {status}'**
+  String walletHoldingsSectionSemantics(
+    String network,
+    String total,
+    String status,
+  );
+
+  /// No description provided for @walletHoldingsReadFailedWithAmounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{network} couldn\'t be read. Showing amounts from {age}.'**
+  String walletHoldingsReadFailedWithAmounts(String network, String age);
+
+  /// No description provided for @walletHoldingsReadFailedWithoutAmounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{network} couldn\'t be read yet. There are no amounts to show.'**
+  String walletHoldingsReadFailedWithoutAmounts(String network);
+
+  /// No description provided for @walletHoldingsStaked.
+  ///
+  /// In en, this message translates to:
+  /// **'Staked'**
+  String get walletHoldingsStaked;
+
+  /// No description provided for @walletHoldingsRewards.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewards'**
+  String get walletHoldingsRewards;
+
+  /// A chip on a holding whose price is a cached one. {age} is a phrase such as "3 days ago".
+  ///
+  /// In en, this message translates to:
+  /// **'Price from {age}'**
+  String walletHoldingsOldPrice(String age);
+
+  /// No description provided for @walletHoldingsOldPriceUndated.
+  ///
+  /// In en, this message translates to:
+  /// **'Old price'**
+  String get walletHoldingsOldPriceUndated;
+
+  /// No description provided for @walletHoldingsHiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hidden} other{{count} hidden}}'**
+  String walletHoldingsHiddenTitle(int count);
+
+  /// No description provided for @walletHoldingsHiddenUnpriced.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} without a price'**
+  String walletHoldingsHiddenUnpriced(int count);
+
+  /// No description provided for @walletHoldingsHiddenSuspected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} suspected spam'**
+  String walletHoldingsHiddenSuspected(int count);
+
+  /// No description provided for @walletHoldingsHiddenByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hidden by you'**
+  String walletHoldingsHiddenByYou(int count);
+
+  /// No description provided for @walletHoldingsReasonUnpriced.
+  ///
+  /// In en, this message translates to:
+  /// **'No price'**
+  String get walletHoldingsReasonUnpriced;
+
+  /// No description provided for @walletHoldingsReasonSuspected.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspected spam'**
+  String get walletHoldingsReasonSuspected;
+
+  /// No description provided for @walletHoldingsReasonHiddenByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden by you'**
+  String get walletHoldingsReasonHiddenByYou;
+
+  /// No description provided for @walletHoldingsHiddenDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{network} · Quantity {quantity}'**
+  String walletHoldingsHiddenDetail(String network, String quantity);
+
+  /// No description provided for @walletHoldingsShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get walletHoldingsShow;
+
+  /// No description provided for @walletHoldingsHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get walletHoldingsHide;
+
+  /// No description provided for @walletHoldingsShowSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Show {name}'**
+  String walletHoldingsShowSemantics(String name);
+
+  /// No description provided for @walletHoldingsHideSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide {name}'**
+  String walletHoldingsHideSemantics(String name);
+
+  /// No description provided for @walletHoldingsVerdictFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update {name}. Try again.'**
+  String walletHoldingsVerdictFailed(String name);
+
+  /// A transaction row's second line: the payee or other detail, then the date.
+  ///
+  /// In en, this message translates to:
+  /// **'{detail} · {date}'**
+  String transactionDetailAndDate(String detail, String date);
+
+  /// After the change in net worth over the chart's range.
+  ///
+  /// In en, this message translates to:
+  /// **'since {date}'**
+  String netWorthChangeSince(String date);
+
+  /// Under a foreign account's balance when no rate converts it into the base currency.
+  ///
+  /// In en, this message translates to:
+  /// **'No {currency} rate'**
+  String accountNoRateShort(String currency);
+
+  /// No description provided for @universalCategoryIncomeEmployment.
+  ///
+  /// In en, this message translates to:
+  /// **'Employment income'**
+  String get universalCategoryIncomeEmployment;
+
+  /// No description provided for @universalCategoryIncomeSelfEmployment.
+  ///
+  /// In en, this message translates to:
+  /// **'Business turnover'**
+  String get universalCategoryIncomeSelfEmployment;
+
+  /// No description provided for @universalCategoryIncomeInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest'**
+  String get universalCategoryIncomeInterest;
+
+  /// No description provided for @universalCategoryIncomeDividends.
+  ///
+  /// In en, this message translates to:
+  /// **'Dividends'**
+  String get universalCategoryIncomeDividends;
+
+  /// No description provided for @universalCategoryIncomeRent.
+  ///
+  /// In en, this message translates to:
+  /// **'Rent'**
+  String get universalCategoryIncomeRent;
+
+  /// No description provided for @universalCategoryIncomePension.
+  ///
+  /// In en, this message translates to:
+  /// **'Pension income'**
+  String get universalCategoryIncomePension;
+
+  /// No description provided for @universalCategoryIncomeCapitalGainsProceeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset sale proceeds'**
+  String get universalCategoryIncomeCapitalGainsProceeds;
+
+  /// No description provided for @universalCategoryIncomeCapitalGainsCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset acquisition cost'**
+  String get universalCategoryIncomeCapitalGainsCost;
+
+  /// No description provided for @universalCategoryIncomeDigitalAssetProceeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital asset sale proceeds'**
+  String get universalCategoryIncomeDigitalAssetProceeds;
+
+  /// No description provided for @universalCategoryIncomeDigitalAssetCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital asset acquisition cost'**
+  String get universalCategoryIncomeDigitalAssetCost;
+
+  /// No description provided for @universalCategoryIncomeDigitalAssetIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital asset income'**
+  String get universalCategoryIncomeDigitalAssetIncome;
+
+  /// No description provided for @universalCategoryIncomeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other income'**
+  String get universalCategoryIncomeOther;
+
+  /// No description provided for @universalCategoryExpenseCostOfGoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost of goods'**
+  String get universalCategoryExpenseCostOfGoods;
+
+  /// No description provided for @universalCategoryExpenseOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'Office supplies'**
+  String get universalCategoryExpenseOffice;
+
+  /// No description provided for @universalCategoryExpenseRent.
+  ///
+  /// In en, this message translates to:
+  /// **'Rent'**
+  String get universalCategoryExpenseRent;
+
+  /// No description provided for @universalCategoryExpenseUtilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Utilities'**
+  String get universalCategoryExpenseUtilities;
+
+  /// No description provided for @universalCategoryExpensePhoneAndInternet.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone and internet'**
+  String get universalCategoryExpensePhoneAndInternet;
+
+  /// No description provided for @universalCategoryExpenseSoftware.
+  ///
+  /// In en, this message translates to:
+  /// **'Software'**
+  String get universalCategoryExpenseSoftware;
+
+  /// No description provided for @universalCategoryExpenseTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get universalCategoryExpenseTravel;
+
+  /// No description provided for @universalCategoryExpenseVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get universalCategoryExpenseVehicle;
+
+  /// No description provided for @universalCategoryExpenseMeals.
+  ///
+  /// In en, this message translates to:
+  /// **'Meals and entertainment'**
+  String get universalCategoryExpenseMeals;
+
+  /// No description provided for @universalCategoryExpenseProfessionalFees.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional fees'**
+  String get universalCategoryExpenseProfessionalFees;
+
+  /// No description provided for @universalCategoryExpenseInsurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance'**
+  String get universalCategoryExpenseInsurance;
+
+  /// No description provided for @universalCategoryExpenseEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment'**
+  String get universalCategoryExpenseEquipment;
+
+  /// No description provided for @universalCategoryExpenseWages.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff costs'**
+  String get universalCategoryExpenseWages;
+
+  /// No description provided for @universalCategoryExpenseBankFees.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank fees'**
+  String get universalCategoryExpenseBankFees;
+
+  /// No description provided for @universalCategoryExpenseMarketing.
+  ///
+  /// In en, this message translates to:
+  /// **'Marketing'**
+  String get universalCategoryExpenseMarketing;
+
+  /// No description provided for @universalCategoryExpenseTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get universalCategoryExpenseTraining;
+
+  /// No description provided for @universalCategoryExpenseOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other business expenses'**
+  String get universalCategoryExpenseOther;
+
+  /// No description provided for @universalCategoryReliefPension.
+  ///
+  /// In en, this message translates to:
+  /// **'Pension contributions'**
+  String get universalCategoryReliefPension;
+
+  /// No description provided for @universalCategoryReliefCharitable.
+  ///
+  /// In en, this message translates to:
+  /// **'Charitable gifts'**
+  String get universalCategoryReliefCharitable;
+
+  /// No description provided for @universalCategoryReliefMedical.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical'**
+  String get universalCategoryReliefMedical;
+
+  /// No description provided for @universalCategoryReliefEducation.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get universalCategoryReliefEducation;
+
+  /// No description provided for @universalCategoryReliefChildcare.
+  ///
+  /// In en, this message translates to:
+  /// **'Childcare'**
+  String get universalCategoryReliefChildcare;
+
+  /// No description provided for @universalCategoryReliefMortgageInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Mortgage interest'**
+  String get universalCategoryReliefMortgageInterest;
+
+  /// No description provided for @universalCategoryReliefSocialContributions.
+  ///
+  /// In en, this message translates to:
+  /// **'Social contributions'**
+  String get universalCategoryReliefSocialContributions;
+
+  /// No description provided for @universalCategoryTaxIncomeTaxWithheld.
+  ///
+  /// In en, this message translates to:
+  /// **'Income tax withheld'**
+  String get universalCategoryTaxIncomeTaxWithheld;
+
+  /// No description provided for @universalCategoryTaxInstalments.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax instalments'**
+  String get universalCategoryTaxInstalments;
+
+  /// No description provided for @universalCategoryTaxSalesTaxPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales tax paid on purchases'**
+  String get universalCategoryTaxSalesTaxPaid;
+
+  /// No description provided for @universalCategoryTaxSalesTaxCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales tax collected on sales'**
+  String get universalCategoryTaxSalesTaxCollected;
+
+  /// No description provided for @universalCategoryOutOfScopeTransfers.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfers'**
+  String get universalCategoryOutOfScopeTransfers;
+
+  /// No description provided for @universalCategoryOutOfScopeLoans.
+  ///
+  /// In en, this message translates to:
+  /// **'Loans'**
+  String get universalCategoryOutOfScopeLoans;
+
+  /// No description provided for @universalCategoryOutOfScopeGiftsReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Gifts received'**
+  String get universalCategoryOutOfScopeGiftsReceived;
+
+  /// No description provided for @universalCategoryOutOfScopeOwnerCapitalAndDrawings.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner capital and drawings'**
+  String get universalCategoryOutOfScopeOwnerCapitalAndDrawings;
+
+  /// No description provided for @walletAddIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an address or extended public key. OpenBudget only reads your wallet: it never holds a key and can\'t move anything.'**
+  String get walletAddIntro;
+
+  /// No description provided for @walletAddFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet address'**
+  String get walletAddFieldLabel;
+
+  /// No description provided for @walletAddFieldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an address or extended public key'**
+  String get walletAddFieldHint;
+
+  /// No description provided for @walletAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add wallet'**
+  String get walletAddButton;
+
+  /// No description provided for @walletAddInvalidInput.
+  ///
+  /// In en, this message translates to:
+  /// **'That doesn\'t look like a wallet address.'**
+  String get walletAddInvalidInput;
+
+  /// No description provided for @walletAddInvalidChecksum.
+  ///
+  /// In en, this message translates to:
+  /// **'One character is wrong. Check the address and try again.'**
+  String get walletAddInvalidChecksum;
+
+  /// No description provided for @walletAddInvalidKey.
+  ///
+  /// In en, this message translates to:
+  /// **'That extended key isn\'t one OpenBudget recognises.'**
+  String get walletAddInvalidKey;
+
+  /// No description provided for @walletAddRefusedPrivateKeyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s a private key'**
+  String get walletAddRefusedPrivateKeyTitle;
+
+  /// No description provided for @walletAddRefusedPrivateKeyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget never needs it. We cleared the field. Don\'t share it with anyone.'**
+  String get walletAddRefusedPrivateKeyMessage;
+
+  /// No description provided for @walletAddRefusedEvmKeyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'That looks like a private key'**
+  String get walletAddRefusedEvmKeyTitle;
+
+  /// No description provided for @walletAddRefusedEvmKeyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'That looks like a private key, not an address. OpenBudget never needs it. We cleared the field.'**
+  String get walletAddRefusedEvmKeyMessage;
+
+  /// No description provided for @walletAddRefusedTestnetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mainnet only'**
+  String get walletAddRefusedTestnetTitle;
+
+  /// No description provided for @walletAddRefusedTestnetMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget only supports mainnet addresses.'**
+  String get walletAddRefusedTestnetMessage;
+
+  /// No description provided for @walletAddRefusedMultisigTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Multisig keys aren\'t supported yet'**
+  String get walletAddRefusedMultisigTitle;
+
+  /// No description provided for @walletAddRefusedMultisigMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A multisig wallet needs every co-signer\'s key. That\'s coming later.'**
+  String get walletAddRefusedMultisigMessage;
+
+  /// No description provided for @walletAddRefusedExchangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s an exchange account'**
+  String get walletAddRefusedExchangeTitle;
+
+  /// No description provided for @walletAddRefusedExchangeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'That X-address points at an exchange account. Use the address for your own account.'**
+  String get walletAddRefusedExchangeMessage;
+
+  /// No description provided for @walletAddDetectedAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'A {chain} address.'**
+  String walletAddDetectedAddress(String chain);
+
+  /// No description provided for @walletAddDetectedKey.
+  ///
+  /// In en, this message translates to:
+  /// **'A {chain} extended public key. OpenBudget finds every address it makes, and never needs a private key.'**
+  String walletAddDetectedKey(String chain);
+
+  /// No description provided for @walletAddDetectedEvm.
+  ///
+  /// In en, this message translates to:
+  /// **'One address that can hold assets on {count} networks.'**
+  String walletAddDetectedEvm(int count);
+
+  /// The second line of a chain stamp for an address that works on several networks, such as "+ 6" under Ethereum.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {count}'**
+  String walletAddStampMore(int count);
+
+  /// No description provided for @walletAddScriptTypeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll check which kind of address this key makes.'**
+  String get walletAddScriptTypeUnknown;
+
+  /// No description provided for @walletAddWhichChain.
+  ///
+  /// In en, this message translates to:
+  /// **'Which chain is this address on?'**
+  String get walletAddWhichChain;
+
+  /// No description provided for @walletAddUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{chain} isn\'t available yet'**
+  String walletAddUnavailableTitle(String chain);
+
+  /// No description provided for @walletAddUnavailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget can\'t read that chain right now. Try again later.'**
+  String get walletAddUnavailableMessage;
+
+  /// No description provided for @walletAddPreviewLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for assets on {networks}…'**
+  String walletAddPreviewLoading(String networks);
+
+  /// No description provided for @walletAddPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where should OpenBudget look?'**
+  String get walletAddPickerTitle;
+
+  /// No description provided for @walletAddPickerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a chain to include it or leave it out. Ethereum is always read, because that\'s where your address lives.'**
+  String get walletAddPickerHint;
+
+  /// No description provided for @walletAddNetworkNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing'**
+  String get walletAddNetworkNothing;
+
+  /// No description provided for @walletAddNetworkNoPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'No price'**
+  String get walletAddNetworkNoPrice;
+
+  /// No description provided for @walletAddNetworkUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t read'**
+  String get walletAddNetworkUnreadable;
+
+  /// No description provided for @walletAddPreviewFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t look ahead'**
+  String get walletAddPreviewFailedTitle;
+
+  /// No description provided for @walletAddPreviewFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t check which chains hold assets. You can still add the wallet. It will read Ethereum.'**
+  String get walletAddPreviewFailedMessage;
+
+  /// No description provided for @walletAddPreviewRateLimitedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve looked up a lot of wallets. Try again in a little while, or add this one now and it will read Ethereum.'**
+  String get walletAddPreviewRateLimitedMessage;
+
+  /// No description provided for @walletAddPreviewRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get walletAddPreviewRetry;
+
+  /// No description provided for @walletAddNamesTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'{first} and {second}'**
+  String walletAddNamesTwo(String first, String second);
+
+  /// No description provided for @walletAddNamesThree.
+  ///
+  /// In en, this message translates to:
+  /// **'{first}, {second} and {third}'**
+  String walletAddNamesThree(String first, String second, String third);
+
+  /// No description provided for @walletAddNamesMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{first}, {second}, {third} and {count} more'**
+  String walletAddNamesMore(
+    String first,
+    String second,
+    String third,
+    int count,
+  );
+
+  /// Shown while a new wallet is read for the first time. {networks} is a list such as "Ethereum, Base and Arbitrum One".
+  ///
+  /// In en, this message translates to:
+  /// **'Reading {networks}…'**
+  String walletAddReading(String networks);
+
+  /// No description provided for @walletAddReadingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The first read takes a few seconds.'**
+  String get walletAddReadingHint;
+
+  /// No description provided for @walletAddUnreadableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read your wallet'**
+  String get walletAddUnreadableTitle;
+
+  /// No description provided for @walletAddUnreadableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach {networks}. The wallet is in your accounts, and OpenBudget will keep trying.'**
+  String walletAddUnreadableMessage(String networks);
+
+  /// No description provided for @walletAddRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get walletAddRetry;
+
+  /// No description provided for @walletAddFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t add the wallet'**
+  String get walletAddFailedTitle;
+
+  /// No description provided for @walletAddFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Check your connection and try again.'**
+  String get walletAddFailedMessage;
+
+  /// No description provided for @walletAddedPostmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get walletAddedPostmark;
+
+  /// No description provided for @walletAddedPostmarkChains.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} chains'**
+  String walletAddedPostmarkChains(int count);
+
+  /// No description provided for @walletAddedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet added'**
+  String get walletAddedTitle;
+
+  /// No description provided for @walletAddedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{accountName} is in your accounts. Its holdings show in the account\'s details.'**
+  String walletAddedMessage(String accountName);
+
+  /// The name given to a new wallet's account, such as "Ethereum wallet (0xAb…12cD)".
+  ///
+  /// In en, this message translates to:
+  /// **'{chain} wallet ({address})'**
+  String walletAddAccountNameAddress(String chain, String address);
+
+  /// The name given to a Bitcoin HD wallet's account, such as "Bitcoin wallet, zpub".
+  ///
+  /// In en, this message translates to:
+  /// **'{chain} wallet, {keyType}'**
+  String walletAddAccountNameKey(String chain, String keyType);
+
+  /// No description provided for @walletAddStampDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'detected'**
+  String get walletAddStampDetected;
+
+  /// No description provided for @walletAddStampIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'included'**
+  String get walletAddStampIncluded;
+
+  /// No description provided for @walletAddStampLeftOut.
+  ///
+  /// In en, this message translates to:
+  /// **'left out'**
+  String get walletAddStampLeftOut;
+
+  /// No description provided for @walletAddPickerSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 network selected} other{{count} networks selected}}'**
+  String walletAddPickerSelectedCount(int count);
+
+  /// No description provided for @walletSettingsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet settings'**
+  String get walletSettingsButton;
+
+  /// No description provided for @walletSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet settings'**
+  String get walletSettingsTitle;
+
+  /// No description provided for @walletSettingsNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet name'**
+  String get walletSettingsNameLabel;
+
+  /// No description provided for @walletSettingsNameSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save name'**
+  String get walletSettingsNameSave;
+
+  /// No description provided for @walletSettingsNameSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet renamed'**
+  String get walletSettingsNameSaved;
+
+  /// No description provided for @walletSettingsNameFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t rename the wallet. Try again.'**
+  String get walletSettingsNameFailed;
+
+  /// No description provided for @walletSettingsNetworksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chains OpenBudget reads'**
+  String get walletSettingsNetworksTitle;
+
+  /// No description provided for @walletSettingsNotRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Not read'**
+  String get walletSettingsNotRead;
+
+  /// No description provided for @walletSettingsNetworksSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save chains'**
+  String get walletSettingsNetworksSave;
+
+  /// No description provided for @walletSettingsNetworksSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Chains updated'**
+  String get walletSettingsNetworksSaved;
+
+  /// No description provided for @walletSettingsNetworksFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update the chains. Try again.'**
+  String get walletSettingsNetworksFailed;
+
+  /// No description provided for @walletSettingsNetworksReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved, but {networks} couldn\'t be read yet. OpenBudget will keep trying.'**
+  String walletSettingsNetworksReadFailed(String networks);
+
+  /// No description provided for @walletSettingsSingleChain.
+  ///
+  /// In en, this message translates to:
+  /// **'{chain} wallets are read on one chain, so there\'s nothing to choose.'**
+  String walletSettingsSingleChain(String chain);
+
+  /// No description provided for @walletSettingsLookAhead.
+  ///
+  /// In en, this message translates to:
+  /// **'Look for assets on other chains'**
+  String get walletSettingsLookAhead;
+
+  /// No description provided for @walletSettingsFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Found assets on {networks}'**
+  String walletSettingsFoundTitle(String networks);
+
+  /// No description provided for @walletSettingsFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'They\'re picked above. Save the chains to start reading them.'**
+  String get walletSettingsFoundMessage;
+
+  /// No description provided for @walletSettingsNothingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing new found'**
+  String get walletSettingsNothingTitle;
+
+  /// No description provided for @walletSettingsNothingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{OpenBudget looked at 1 other chain and found no assets there.} other{OpenBudget looked at {count} other chains and found no assets there.}}'**
+  String walletSettingsNothingMessage(int count);
+
+  /// No description provided for @walletSettingsLookAheadFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t check the other chains. Try again in a moment.'**
+  String get walletSettingsLookAheadFailedMessage;
+
+  /// No description provided for @walletSettingsLookAheadRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve looked up a lot of wallets. Try again in a little while.'**
+  String get walletSettingsLookAheadRateLimited;
+
+  /// No description provided for @walletSettingsRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop reading {networks}?'**
+  String walletSettingsRemoveTitle(String networks);
+
+  /// No description provided for @walletSettingsRemoveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} on {networks} will drop out of your net worth. Your assets stay where they are, and you can add the chain back any time.'**
+  String walletSettingsRemoveMessage(String amount, String networks);
+
+  /// No description provided for @walletSettingsRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop reading'**
+  String get walletSettingsRemoveConfirm;
+
+  /// No description provided for @walletSettingsRemoveCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep reading'**
+  String get walletSettingsRemoveCancel;
+
+  /// No description provided for @walletSettingsDisconnectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get walletSettingsDisconnectTitle;
+
+  /// No description provided for @walletSettingsDisconnectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget stops reading this wallet. The account and its history stay in your accounts.'**
+  String get walletSettingsDisconnectHint;
+
+  /// No description provided for @walletSettingsDisconnectButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect wallet'**
+  String get walletSettingsDisconnectButton;
+
+  /// No description provided for @walletSettingsDisconnectConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect {name}?'**
+  String walletSettingsDisconnectConfirmTitle(String name);
+
+  /// No description provided for @walletSettingsDisconnectConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget stops reading this wallet and its value stops updating. The account and its history stay, and you can add the wallet again later.'**
+  String get walletSettingsDisconnectConfirmMessage;
+
+  /// No description provided for @walletSettingsDisconnectConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get walletSettingsDisconnectConfirm;
+
+  /// No description provided for @walletSettingsDisconnectCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep wallet'**
+  String get walletSettingsDisconnectCancel;
+
+  /// No description provided for @walletSettingsDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet disconnected'**
+  String get walletSettingsDisconnected;
+
+  /// No description provided for @walletSettingsDisconnectFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t disconnect the wallet. Try again.'**
+  String get walletSettingsDisconnectFailed;
+
+  /// No description provided for @walletSettingsAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget already reads every chain this address can use.'**
+  String get walletSettingsAllRead;
 }
 
 class _AppLocalizationsDelegate

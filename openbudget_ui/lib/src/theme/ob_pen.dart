@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 import 'package:skribble/skribble.dart';
@@ -12,7 +13,7 @@ import 'package:skribble/skribble.dart';
 /// pressed, or gains focus never re-rolls its wobble.
 abstract final class ObPen {
   /// The pen weight cards and controls are drawn with (`DESIGN.md`).
-  static const double strokeWidth = 2.2;
+  static const double strokeWidth = 2.5;
 
   /// How far inside its box the centre of an outline lands.
   ///
@@ -45,15 +46,51 @@ abstract final class ObPen {
     if (size.isEmpty || color.a == 0 || strokeWidth <= 0) {
       return;
     }
+    // Like an RRect, a corner never rounds past half the shorter side.
+    final corner = math.max<double>(
+      0,
+      math.min(radius, size.shortestSide / 2 - inset(strokeWidth: strokeWidth)),
+    );
     _cached(
-      ('outline', size, color.toARGB32(), radius, strokeWidth, seed),
+      ('outline', size, color.toARGB32(), corner, strokeWidth, seed),
       () => WiredRoundedRectangleBase(
-        borderRadius: BorderRadius.circular(radius),
+        borderRadius: BorderRadius.circular(corner),
         fillColor: color.withValues(alpha: 0),
         borderColor: color,
         strokeWidth: strokeWidth,
       ).prepare(size, DrawConfig.build(seed: seed), NoFiller()),
     ).paint(canvas);
+  }
+
+  /// Inks a hand-drawn ring that fits inside [size], such as a postmark.
+  static void circle(
+    Canvas canvas,
+    Size size, {
+    required Color color,
+    double strokeWidth = ObPen.strokeWidth,
+    int seed = 1,
+  }) {
+    if (size.isEmpty || color.a == 0 || strokeWidth <= 0) {
+      return;
+    }
+    _cached(('circle', size, color.toARGB32(), strokeWidth, seed), () {
+      final config = DrawConfig.build(seed: seed);
+      final paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..color = color;
+      final reach = inset(strokeWidth: strokeWidth) * 2;
+      return RoughDrawing(
+        Generator(config, NoFiller()).ellipse(
+          size.width / 2,
+          size.height / 2,
+          size.width - reach,
+          size.height - reach,
+        ),
+        paint,
+        paint,
+      );
+    }).paint(canvas);
   }
 
   /// Inks a hatched oval flourish, tilted inside [size].

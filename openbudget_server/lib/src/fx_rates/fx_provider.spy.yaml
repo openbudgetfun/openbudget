@@ -1,0 +1,5 @@
+### Which upstream service supplied a rate.
+enum: FxProvider
+serialized: byName
+values:
+  - currencyapi

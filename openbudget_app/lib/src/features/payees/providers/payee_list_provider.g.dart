@@ -64,7 +64,7 @@ final class PayeeListProvider
   }
 }
 
-String _$payeeListHash() => r'03706a6df255bf7d2528b1ceb69e073f7ac9844d';
+String _$payeeListHash() => r'93da51ac608f06915f6f4af2d0edac48776caece';
 
 final class PayeeListFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<Payee>>, String> {
@@ -77,8 +77,8 @@ final class PayeeListFamily extends $Family
         isAutoDispose: true,
       );
 
-  PayeeListProvider call(String budgetId) =>
-      PayeeListProvider._(argument: budgetId, from: this);
+  PayeeListProvider call(String entityId) =>
+      PayeeListProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'payeeListProvider';

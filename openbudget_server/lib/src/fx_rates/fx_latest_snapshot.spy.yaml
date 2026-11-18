@@ -1,7 +1,12 @@
-### Latest FX rates payload returned to clients.
+### The latest daily rates, for display only. Conversions that are stored
+### happen on the server.
 class: FxLatestSnapshot
 fields:
+  ### Always USD.
   baseCurrencyCode: String
+  ### Calendar date of the rates.
+  rateDate: DateTime
   fetchedAt: DateTime
+  ### True when fetchedAt is more than 48 hours old.
   isStale: bool
   rates: List<FxRateQuote>

@@ -68,7 +68,7 @@ final class RuleMatchEnvelopeProvider
   }
 }
 
-String _$ruleMatchEnvelopeHash() => r'7e166f600d4917dc98570a7960a498744c0b4060';
+String _$ruleMatchEnvelopeHash() => r'2c924b0c39fb7a02964876861b0e853b17c1a37b';
 
 /// Finds the matching envelope for a payee based on transaction rules.
 ///
@@ -89,8 +89,8 @@ final class RuleMatchEnvelopeFamily extends $Family
   ///
   /// Returns null if no rule matches or the payee has no rule.
 
-  RuleMatchEnvelopeProvider call(String payeeId, String budgetId) =>
-      RuleMatchEnvelopeProvider._(argument: (payeeId, budgetId), from: this);
+  RuleMatchEnvelopeProvider call(String payeeId, String entityId) =>
+      RuleMatchEnvelopeProvider._(argument: (payeeId, entityId), from: this);
 
   @override
   String toString() => r'ruleMatchEnvelopeProvider';

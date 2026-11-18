@@ -2,26 +2,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
 
 void main() {
-  group('parseBudgetAmountInputToCents', () {
+  group('parseBudgetAmountInputToMinor', () {
     test('converts keypad digits into exact minor units', () {
       expect(
-        parseBudgetAmountInputToCents(input: '1234', currencyCode: 'USD'),
+        parseBudgetAmountInputToMinor(input: '1234', currencyCode: 'USD'),
         123400,
       );
       expect(
-        parseBudgetAmountInputToCents(input: '1200', currencyCode: 'JPY'),
+        parseBudgetAmountInputToMinor(input: '1200', currencyCode: 'JPY'),
         1200,
       );
       expect(
-        parseBudgetAmountInputToCents(input: '-1234', currencyCode: 'USD'),
+        parseBudgetAmountInputToMinor(input: '-1234', currencyCode: 'USD'),
         -123400,
       );
       expect(
-        parseBudgetAmountInputToCents(input: '', currencyCode: 'USD'),
+        parseBudgetAmountInputToMinor(input: '', currencyCode: 'USD'),
         isNull,
       );
       expect(
-        parseBudgetAmountInputToCents(input: '-', currencyCode: 'USD'),
+        parseBudgetAmountInputToMinor(input: '-', currencyCode: 'USD'),
         isNull,
       );
     });
@@ -30,11 +30,11 @@ void main() {
       // The keypad only appends digits and a single leading minus, so a dotted
       // amount is refused rather than reinterpreted.
       expect(
-        parseBudgetAmountInputToCents(input: '12.345', currencyCode: 'USD'),
+        parseBudgetAmountInputToMinor(input: '12.345', currencyCode: 'USD'),
         isNull,
       );
       expect(
-        parseBudgetAmountInputToCents(input: 'abc', currencyCode: 'USD'),
+        parseBudgetAmountInputToMinor(input: 'abc', currencyCode: 'USD'),
         isNull,
       );
     });

@@ -3,12 +3,16 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/agent/agent_access.dart';
-import 'package:openbudget_server/src/agent/agent_prompt.dart';
 import 'package:openbudget_server/src/agent/agent_provider_resolver.dart';
 import 'package:openbudget_server/src/agent/agent_tool_registry.dart';
 import 'package:openbudget_server/src/agent/agent_usage_service.dart';
 import 'package:openbudget_server/src/agent/chat_completions_client.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/money_guide/citation_resolver.dart';
+import 'package:openbudget_server/src/money_guide/context_budget.dart';
+import 'package:openbudget_server/src/money_guide/money_guide_prompt.dart';
+import 'package:openbudget_server/src/tax/tax_service.dart';
+import 'package:openbudget_server/src/tax/tax_summary_service.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// Runs agent conversations: history, tools, metering and persistence.
@@ -40,7 +44,7 @@ abstract final class AgentService {
   /// proposed, one `textDelta` with the assistant's reply, and finally `done`.
   static Stream<AgentEvent> chat(
     Session session, {
-    required UuidValue budgetId,
+    required UuidValue entityId,
     required String message,
     UuidValue? conversationId,
   }) async* {
@@ -49,23 +53,30 @@ abstract final class AgentService {
     if (trimmed.isEmpty) {
       throw ValidationException(message: 'Message must not be empty.');
     }
+    if (estimateTokens(trimmed) > ContextBudget.maxMessageTokens) {
+      throw ValidationException(message: 'Message is too long.');
+    }
 
     // Resolve before writing anything, so a missing plan or key leaves no
     // half-started conversation behind.
     await AgentProviderResolver.resolve(session, userId);
-    await requireOwnedBudget(session, userId: userId, budgetId: budgetId);
+    final entity = await requireOwnedEntity(
+      session,
+      userId: userId,
+      entityId: entityId,
+    );
 
     final conversation = conversationId == null
         ? await _createConversation(
             session,
             userId: userId,
-            budgetId: budgetId,
+            entityId: entityId,
             title: _titleFor(trimmed),
           )
         : await _requireConversation(
             session,
             userId: userId,
-            budgetId: budgetId,
+            entityId: entityId,
             conversationId: conversationId,
           );
     final id = conversation.id!;
@@ -80,19 +91,52 @@ abstract final class AgentService {
 
     const registry = AgentToolRegistry();
     final tools = registry.definitions(canPropose: true);
+    final citations = await _citationCatalogue(session, id);
+    // One brief per turn: the static rules and the brief stay identical
+    // across the turn's model calls, so the provider can cache them.
+    final systemMessages = MoneyGuidePrompt.systemMessages(
+      await _entityBrief(session, entity),
+    );
+    // What every call carries besides the conversation, so the history can
+    // be kept under the ceiling.
+    final fixedTokens =
+        estimateTokens(jsonEncode(systemMessages)) +
+        estimateTokens(jsonEncode(tools));
+    int? turnStart;
+    var loggedCompactions = 0;
 
     for (var call = 0; call < maxModelCalls; call++) {
       // Recheck on every pass: an earlier call in this turn may have used up
       // the remaining allowance.
       final provider = await AgentProviderResolver.resolve(session, userId);
+      final window = ContextBudget.window(
+        await _storedMessages(session, id),
+        fixedTokens: fixedTokens,
+      );
+      if (!window.fits) {
+        throw ValidationException(
+          message:
+              'This conversation is too long to continue. '
+              'Start a new one.',
+        );
+      }
+      // The new user message is the last one stored before the first call.
+      final firstPosition = turnStart ??= window.messages.length - 1;
+      final compactionsThisTurn = window.compactionPositions
+          .where((position) => position >= firstPosition)
+          .length;
+      if (compactionsThisTurn > loggedCompactions) {
+        loggedCompactions = compactionsThisTurn;
+        _log.info(
+          'Compacted history conversation=$id '
+          'elided=${window.elidedResults} tokens=${window.historyTokens}',
+        );
+      }
       final result = await _client.complete(
         endpoint: provider.endpoint,
         apiKey: provider.apiKey,
         model: provider.model,
-        messages: [
-          {'role': 'system', 'content': AgentPrompt.system},
-          ...await _history(session, id),
-        ],
+        messages: [...systemMessages, ...window.messages],
         tools: tools,
       );
 
@@ -111,7 +155,20 @@ abstract final class AgentService {
       );
 
       final reply = result.message;
-      final content = reply.content ?? '';
+      // Resolve before anything is stored or sent, so the stored text, the
+      // streamed text and the history the model sees next all agree. The
+      // reply arrives whole, so no chunk can split a key.
+      final resolution = citations.resolve(reply.content ?? '');
+      final content = resolution.text;
+      if (resolution.strippedCount > 0) {
+        _log.info(
+          'Stripped ${resolution.strippedCount} unresolved citation keys '
+          'conversation=$id',
+        );
+      }
+      final resolvedCitations = [
+        for (final source in resolution.sources) _citationFor(source),
+      ];
       await _appendMessage(
         session,
         conversationId: id,
@@ -120,6 +177,12 @@ abstract final class AgentService {
         toolCallsJson: reply.toolCalls.isEmpty
             ? null
             : jsonEncode([for (final call in reply.toolCalls) call.toJson()]),
+        citationsJson: resolvedCitations.isEmpty
+            ? null
+            : jsonEncode([
+                for (final citation in resolvedCitations) citation.toJson(),
+              ]),
+        touchesTaxOrInvestment: resolution.touchesTaxOrInvestment,
       );
 
       if (reply.toolCalls.isEmpty) {
@@ -132,6 +195,8 @@ abstract final class AgentService {
           kind: AgentEventKind.textDelta,
           conversationId: id,
           text: content,
+          citations: resolvedCitations,
+          touchesTaxOrInvestment: resolution.touchesTaxOrInvestment,
         );
         break;
       }
@@ -156,6 +221,7 @@ abstract final class AgentService {
           content: output,
           toolCallId: toolCall.id,
         );
+        citations.addToolResult(output);
         final proposal = await _proposalFrom(session, output);
         if (proposal != null) {
           yield AgentEvent(
@@ -172,17 +238,34 @@ abstract final class AgentService {
     yield AgentEvent(kind: AgentEventKind.done, conversationId: id);
   }
 
-  /// Lists the user's conversations for one budget, newest first.
+  /// The Money guide's entity brief, with the guardrail answers recorded on
+  /// the entity's tax profile.
+  static Future<String> _entityBrief(Session session, Entity entity) async {
+    final record = TaxJurisdiction.fromCountryCode(entity.countryCode) == null
+        ? null
+        : await TaxService.getProfile(session, entityId: entity.id!);
+    final answers = record == null
+        ? const <String, Object?>{}
+        : jsonDecode(record.profileJson) as Map<String, Object?>;
+    return MoneyGuidePrompt.brief(
+      entity: entity,
+      now: TaxSummaryService.now(),
+      taxResident: answers['taxResident'] == true,
+      usPerson: answers['usPerson'] == true,
+    );
+  }
+
+  /// Lists the user's conversations for one entity, newest first.
   static Future<List<AgentConversation>> listConversations(
     Session session, {
-    required UuidValue budgetId,
+    required UuidValue entityId,
   }) async {
     final userId = requireAgentUserId(session);
-    await requireOwnedBudget(session, userId: userId, budgetId: budgetId);
+    await requireOwnedEntity(session, userId: userId, entityId: entityId);
 
     return AgentConversation.db.find(
       session,
-      where: (t) => t.budgetId.equals(budgetId) & t.userId.equals(userId),
+      where: (t) => t.entityId.equals(entityId) & t.userId.equals(userId),
       orderBy: (t) => t.updatedAt.desc(),
     );
   }
@@ -240,7 +323,7 @@ abstract final class AgentService {
   static Future<AgentConversation> _createConversation(
     Session session, {
     required UuidValue userId,
-    required UuidValue budgetId,
+    required UuidValue entityId,
     required String title,
   }) {
     final now = DateTime.now().toUtc();
@@ -248,7 +331,7 @@ abstract final class AgentService {
       session,
       AgentConversation(
         userId: userId,
-        budgetId: budgetId,
+        entityId: entityId,
         title: title,
         createdAt: now,
         updatedAt: now,
@@ -260,7 +343,7 @@ abstract final class AgentService {
     Session session, {
     required UuidValue userId,
     required UuidValue conversationId,
-    UuidValue? budgetId,
+    UuidValue? entityId,
   }) async {
     final conversation = await AgentConversation.db.findById(
       session,
@@ -268,7 +351,7 @@ abstract final class AgentService {
     );
     if (conversation == null ||
         conversation.userId != userId ||
-        (budgetId != null && conversation.budgetId != budgetId)) {
+        (entityId != null && conversation.entityId != entityId)) {
       throw NotFoundException(message: 'Conversation not found');
     }
     return conversation;
@@ -281,6 +364,8 @@ abstract final class AgentService {
     required String content,
     String? toolCallsJson,
     String? toolCallId,
+    String? citationsJson,
+    bool touchesTaxOrInvestment = false,
   }) => AgentMessage.db.insertRow(
     session,
     AgentMessage(
@@ -289,8 +374,40 @@ abstract final class AgentService {
       content: content,
       toolCallsJson: toolCallsJson,
       toolCallId: toolCallId,
+      citationsJson: citationsJson,
+      touchesTaxOrInvestment: touchesTaxOrInvestment,
       createdAt: DateTime.now().toUtc(),
     ),
+  );
+
+  /// Reads the keys every tool result stored in the conversation makes
+  /// citable, so a later turn can cite what an earlier turn retrieved.
+  static Future<CitationCatalogue> _citationCatalogue(
+    Session session,
+    UuidValue conversationId,
+  ) async {
+    final toolMessages = await AgentMessage.db.find(
+      session,
+      where: (t) =>
+          t.conversationId.equals(conversationId) &
+          t.role.equals(AgentMessageRole.tool),
+      orderBy: (t) => t.createdAt,
+    );
+    final catalogue = CitationCatalogue();
+    for (final message in toolMessages) {
+      catalogue.addToolResult(message.content);
+    }
+    return catalogue;
+  }
+
+  static AgentCitation _citationFor(CitationSource source) => AgentCitation(
+    key: source.key,
+    title: source.title,
+    url: source.url,
+    authority: source.authority,
+    verifiedOn: source.verifiedOn,
+    grade: source.grade,
+    announced: source.announced,
   );
 
   static Future<void> _touch(
@@ -303,56 +420,16 @@ abstract final class AgentService {
     );
   }
 
-  static Future<List<Map<String, Object?>>> _history(
+  /// Every stored message of the conversation, oldest first. Compaction runs
+  /// over these rows and never rewrites them.
+  static Future<List<AgentMessage>> _storedMessages(
     Session session,
     UuidValue conversationId,
-  ) async {
-    final messages = await AgentMessage.db.find(
-      session,
-      where: (t) => t.conversationId.equals(conversationId),
-      orderBy: (t) => t.createdAt,
-    );
-
-    final history = <Map<String, Object?>>[];
-    for (final message in messages) {
-      switch (message.role) {
-        case AgentMessageRole.user:
-          history.add({'role': 'user', 'content': message.content});
-        case AgentMessageRole.assistant:
-          history.add(_assistantMessage(message));
-        case AgentMessageRole.tool:
-          final toolCallId = message.toolCallId;
-          if (toolCallId != null) {
-            history.add({
-              'role': 'tool',
-              'tool_call_id': toolCallId,
-              'content': message.content,
-            });
-          }
-      }
-    }
-    return history;
-  }
-
-  static Map<String, Object?> _assistantMessage(AgentMessage message) {
-    final toolCalls = _decodeToolCalls(message.toolCallsJson);
-    return {
-      'role': 'assistant',
-      'content': message.content.isEmpty ? null : message.content,
-      'tool_calls': ?toolCalls,
-    };
-  }
-
-  static List<Object?>? _decodeToolCalls(String? json) {
-    if (json == null || json.isEmpty) return null;
-    final Object? decoded;
-    try {
-      decoded = jsonDecode(json);
-    } on FormatException {
-      return null;
-    }
-    return decoded is List ? decoded : null;
-  }
+  ) => AgentMessage.db.find(
+    session,
+    where: (t) => t.conversationId.equals(conversationId),
+    orderByList: (t) => [t.createdAt, t.id],
+  );
 
   static Future<String> _runTool(
     AgentToolRegistry registry,

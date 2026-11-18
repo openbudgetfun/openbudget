@@ -16,6 +16,10 @@ void main() {
     final periodEnd = DateTime.utc(2026, 12);
     final midPeriod = DateTime.utc(2026, 11, 15);
 
+    setUp(
+      () => ensureAuthUsers(sessionBuilder, [userId.uuid, otherUserId.uuid]),
+    );
+
     Future<Entitlement> record({
       UuidValue? user,
       EntitlementSource source = EntitlementSource.stripe,

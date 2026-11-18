@@ -32,10 +32,11 @@ void main() {
   Widget buildSubject({
     SocialSignInDefines defines = _noDefines,
     TargetPlatform platform = TargetPlatform.android,
+    ThemeData? theme,
   }) => ProviderScope(
     overrides: [socialSignInDefinesProvider.overrideWithValue(defines)],
     child: MaterialApp(
-      theme: OpenBudgetTheme.light.copyWith(platform: platform),
+      theme: (theme ?? OpenBudgetTheme.light).copyWith(platform: platform),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const LoginScreen(),
@@ -56,6 +57,57 @@ void main() {
       expect(find.text('Forgot Password?'), findsOneWidget);
       expect(find.text('Create Account'), findsOneWidget);
       expect(find.byType(TextField), findsNWidgets(2));
+    });
+
+    testWidgets('draws the email and password icons inside their outlines', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject(theme: OpenBudgetTheme.dark));
+      await tester.pump();
+
+      final fields = find.byType(InputDecorator);
+      expect(fields, findsNWidgets(2));
+      for (var index = 0; index < 2; index++) {
+        final field = tester.getRect(fields.at(index));
+        // Inside the heaviest outline pen, wobble included.
+        final inner = field.deflate(ObPen.inset(strokeWidth: 3) + 3);
+        final icon = find.descendant(
+          of: find.descendant(
+            of: fields.at(index),
+            matching: find.byType(ObFieldIcon),
+          ),
+          matching: find.byType(SkribbleIcon),
+        );
+        final glyph = tester.getRect(icon);
+        // The icon box is the glyph, not a 48pt slot it draws in a corner of.
+        expect(
+          glyph.size,
+          Size.square(tester.widget<SkribbleIcon>(icon).size!),
+        );
+        expect(
+          glyph.left >= inner.left &&
+              glyph.top >= inner.top &&
+              glyph.right <= inner.right &&
+              glyph.bottom <= inner.bottom,
+          isTrue,
+          reason: 'field $index: the glyph at $glyph leaves $inner',
+        );
+        expect(glyph.center.dy, moreOrLessEquals(field.center.dy, epsilon: 1));
+      }
+    });
+
+    testWidgets('inks the highlighted headline so it reads in both themes', (
+      tester,
+    ) async {
+      for (final theme in [OpenBudgetTheme.light, OpenBudgetTheme.dark]) {
+        // A fresh tree, so the theme is not caught mid-transition.
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpWidget(buildSubject(theme: theme));
+        await tester.pump();
+
+        final headline = tester.widget<Text>(find.text('Welcome back'));
+        expect(headline.style?.color, theme.ob.onHighlighter);
+      }
     });
 
     testWidgets(

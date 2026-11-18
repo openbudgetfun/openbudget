@@ -12,11 +12,3 @@ Future<List<Institution>> institutionCatalog(
   final client = ref.read(serverpodClientProvider);
   return client.institution.list(locationCode: locationCode);
 }
-
-@riverpod
-Future<List<Account>> myReusableAccounts(Ref ref, String budgetId) async {
-  final client = ref.read(serverpodClientProvider);
-  return client.account.listMine(
-    excludeBudgetId: UuidValue.fromString(budgetId),
-  );
-}

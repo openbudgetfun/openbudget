@@ -1,0 +1,10 @@
+# The model states the rule from memory: no tool call, no citation.
+id: universal-02-no-source
+question: universal-02
+expect:
+  verdict: fail
+  failedGates: [tools, cites]
+steps:
+  - say: >-
+      Zero-based budgeting means income minus expenses is zero, so assign
+      every pound of income to an envelope.

@@ -8,12 +8,14 @@ part of 'spending_trends_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Fetches spending reports for the last [months] months.
+/// Income, expenses and net income for the last [months] months, from one
+/// `report.monthSummaries` call.
 
 @ProviderFor(spendingTrends)
 final spendingTrendsProvider = SpendingTrendsFamily._();
 
-/// Fetches spending reports for the last [months] months.
+/// Income, expenses and net income for the last [months] months, from one
+/// `report.monthSummaries` call.
 
 final class SpendingTrendsProvider
     extends
@@ -25,7 +27,8 @@ final class SpendingTrendsProvider
     with
         $FutureModifier<SpendingTrendsData>,
         $FutureProvider<SpendingTrendsData> {
-  /// Fetches spending reports for the last [months] months.
+  /// Income, expenses and net income for the last [months] months, from one
+  /// `report.monthSummaries` call.
   SpendingTrendsProvider._({
     required SpendingTrendsFamily super.from,
     required (String, {int months}) super.argument,
@@ -70,9 +73,10 @@ final class SpendingTrendsProvider
   }
 }
 
-String _$spendingTrendsHash() => r'04c4cb10da2d0885578893833f4ab897c707946b';
+String _$spendingTrendsHash() => r'592f70064a026d1c5451b4902f09250e194d0bbc';
 
-/// Fetches spending reports for the last [months] months.
+/// Income, expenses and net income for the last [months] months, from one
+/// `report.monthSummaries` call.
 
 final class SpendingTrendsFamily extends $Family
     with
@@ -89,11 +93,12 @@ final class SpendingTrendsFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Fetches spending reports for the last [months] months.
+  /// Income, expenses and net income for the last [months] months, from one
+  /// `report.monthSummaries` call.
 
-  SpendingTrendsProvider call(String budgetId, {int months = 6}) =>
+  SpendingTrendsProvider call(String entityId, {int months = 6}) =>
       SpendingTrendsProvider._(
-        argument: (budgetId, months: months),
+        argument: (entityId, months: months),
         from: this,
       );
 

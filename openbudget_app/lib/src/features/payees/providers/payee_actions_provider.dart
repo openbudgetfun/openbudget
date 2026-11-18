@@ -12,17 +12,17 @@ class PayeeActions extends _$PayeeActions {
 
   Future<Payee> createPayee({
     required String name,
-    required String budgetId,
+    required String entityId,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
       final payee = await client.payee.create(
         name,
-        UuidValue.fromString(budgetId),
+        UuidValue.fromString(entityId),
       );
       if (ref.mounted) {
-        ref.invalidate(payeeListProvider(budgetId));
+        ref.invalidate(payeeListProvider(entityId));
         state = const AsyncValue.data(null);
       }
       return payee;
@@ -36,7 +36,7 @@ class PayeeActions extends _$PayeeActions {
 
   Future<Payee> updatePayee({
     required String payeeId,
-    required String budgetId,
+    required String entityId,
     String? name,
   }) async {
     state = const AsyncValue.loading();
@@ -47,7 +47,7 @@ class PayeeActions extends _$PayeeActions {
         name: name,
       );
       if (ref.mounted) {
-        ref.invalidate(payeeListProvider(budgetId));
+        ref.invalidate(payeeListProvider(entityId));
         state = const AsyncValue.data(null);
       }
       return payee;
@@ -62,7 +62,7 @@ class PayeeActions extends _$PayeeActions {
   Future<int> mergePayees({
     required String sourcePayeeId,
     required String targetPayeeId,
-    required String budgetId,
+    required String entityId,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
@@ -72,7 +72,7 @@ class PayeeActions extends _$PayeeActions {
         UuidValue.fromString(targetPayeeId),
       );
       if (ref.mounted) {
-        ref.invalidate(payeeListProvider(budgetId));
+        ref.invalidate(payeeListProvider(entityId));
         state = const AsyncValue.data(null);
       }
       return count;
@@ -86,7 +86,7 @@ class PayeeActions extends _$PayeeActions {
 
   Future<Payee> deletePayee({
     required String payeeId,
-    required String budgetId,
+    required String entityId,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
@@ -95,7 +95,7 @@ class PayeeActions extends _$PayeeActions {
         UuidValue.fromString(payeeId),
       );
       if (ref.mounted) {
-        ref.invalidate(payeeListProvider(budgetId));
+        ref.invalidate(payeeListProvider(entityId));
         state = const AsyncValue.data(null);
       }
       return deleted;
@@ -110,17 +110,17 @@ class PayeeActions extends _$PayeeActions {
   /// Recreates a previously deleted payee for undo support.
   Future<Payee> undoDeletePayee({
     required Payee deletedPayee,
-    required String budgetId,
+    required String entityId,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
       final restored = await client.payee.create(
         deletedPayee.name,
-        UuidValue.fromString(budgetId),
+        UuidValue.fromString(entityId),
       );
       if (ref.mounted) {
-        ref.invalidate(payeeListProvider(budgetId));
+        ref.invalidate(payeeListProvider(entityId));
         state = const AsyncValue.data(null);
       }
       return restored;

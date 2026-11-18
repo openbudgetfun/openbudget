@@ -10,14 +10,17 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:openbudget_server/src/generated/protocol.dart' as _is0sbm8r;
 import 'package:serverpod/serverpod.dart' as _is;
 
+import '../tax/tax_figure_view.dart' as _i1qdlon8;
 import '../tax/tax_liability_view.dart' as _iyg1xvx7;
 import '../tax/tax_opportunity_view.dart' as _i7gx5xr1;
 import '../tax/tax_report_line_view.dart' as _i8pphqdm;
+import '../tax/tax_rule_caveat_view.dart' as _ihcq0ud7;
 
-/// The computed tax position for one budget and tax year.
+/// The computed tax position for one entity and tax year.
 abstract class TaxReportView
     implements _is.SerializableModel, _is.ProtocolSerialization {
   TaxReportView._({
@@ -35,7 +38,12 @@ abstract class TaxReportView
     required this.balanceDueMinor,
     required this.assumptions,
     required this.sources,
+    required this.caveats,
+    required this.figures,
     required this.rulesVerifiedOn,
+    required this.rulesVersion,
+    required this.maturity,
+    required this.coverage,
     required this.uncategorizedCount,
     required this.convertedEntryCount,
     required this.opportunities,
@@ -47,7 +55,7 @@ abstract class TaxReportView
     required String yearLabel,
     required DateTime yearStart,
     required DateTime yearEnd,
-    required String entityKind,
+    required _ifz8weqz.EntityKind entityKind,
     required String currencyCode,
     required List<_i8pphqdm.TaxReportLineView> lines,
     required List<_iyg1xvx7.TaxLiabilityView> liabilities,
@@ -56,7 +64,12 @@ abstract class TaxReportView
     required int balanceDueMinor,
     required List<String> assumptions,
     required List<String> sources,
+    required List<_ihcq0ud7.TaxRuleCaveatView> caveats,
+    required List<_i1qdlon8.TaxFigureView> figures,
     required DateTime rulesVerifiedOn,
+    required String rulesVersion,
+    required String maturity,
+    required Map<String, String> coverage,
     required int uncategorizedCount,
     required int convertedEntryCount,
     required List<_i7gx5xr1.TaxOpportunityView> opportunities,
@@ -71,7 +84,9 @@ abstract class TaxReportView
         jsonSerialization['yearStart'],
       ),
       yearEnd: _is.DateTimeJsonExtension.fromJson(jsonSerialization['yearEnd']),
-      entityKind: jsonSerialization['entityKind'] as String,
+      entityKind: _ifz8weqz.EntityKind.fromJson(
+        (jsonSerialization['entityKind'] as String),
+      ),
       currencyCode: jsonSerialization['currencyCode'] as String,
       lines: _is0sbm8r.Protocol()
           .deserialize<List<_i8pphqdm.TaxReportLineView>>(
@@ -90,8 +105,20 @@ abstract class TaxReportView
       sources: _is0sbm8r.Protocol().deserialize<List<String>>(
         jsonSerialization['sources'],
       ),
+      caveats: _is0sbm8r.Protocol()
+          .deserialize<List<_ihcq0ud7.TaxRuleCaveatView>>(
+            jsonSerialization['caveats'],
+          ),
+      figures: _is0sbm8r.Protocol().deserialize<List<_i1qdlon8.TaxFigureView>>(
+        jsonSerialization['figures'],
+      ),
       rulesVerifiedOn: _is.DateTimeJsonExtension.fromJson(
         jsonSerialization['rulesVerifiedOn'],
+      ),
+      rulesVersion: jsonSerialization['rulesVersion'] as String,
+      maturity: jsonSerialization['maturity'] as String,
+      coverage: _is0sbm8r.Protocol().deserialize<Map<String, String>>(
+        jsonSerialization['coverage'],
       ),
       uncategorizedCount: jsonSerialization['uncategorizedCount'] as int,
       convertedEntryCount: jsonSerialization['convertedEntryCount'] as int,
@@ -115,8 +142,8 @@ abstract class TaxReportView
 
   DateTime yearEnd;
 
-  /// TaxEntityKind name.
-  String entityKind;
+  /// The entity kind.
+  _ifz8weqz.EntityKind entityKind;
 
   /// ISO 4217 code every amount in this report is in.
   String currencyCode;
@@ -139,8 +166,24 @@ abstract class TaxReportView
   /// The authority pages the rates came from.
   List<String> sources;
 
+  /// What could not be verified for the sections and rules this report
+  /// used: the "What we could not verify" list.
+  List<_ihcq0ud7.TaxRuleCaveatView> caveats;
+
+  /// The named figures this report's lines quote, with their grades.
+  List<_i1qdlon8.TaxFigureView> figures;
+
   /// When the rule figures were last checked against the sources.
   DateTime rulesVerifiedOn;
+
+  /// The rule pack version that produced the report: `gb-2026-r1`.
+  String rulesVersion;
+
+  /// Whether the pack's figures have been checked by a tax professional.
+  String maturity;
+
+  /// How completely the pack covers each section, by section name.
+  Map<String, String> coverage;
 
   /// Entries the rule pack does not know, plus transactions with no category.
   int uncategorizedCount;
@@ -159,7 +202,7 @@ abstract class TaxReportView
     String? yearLabel,
     DateTime? yearStart,
     DateTime? yearEnd,
-    String? entityKind,
+    _ifz8weqz.EntityKind? entityKind,
     String? currencyCode,
     List<_i8pphqdm.TaxReportLineView>? lines,
     List<_iyg1xvx7.TaxLiabilityView>? liabilities,
@@ -168,7 +211,12 @@ abstract class TaxReportView
     int? balanceDueMinor,
     List<String>? assumptions,
     List<String>? sources,
+    List<_ihcq0ud7.TaxRuleCaveatView>? caveats,
+    List<_i1qdlon8.TaxFigureView>? figures,
     DateTime? rulesVerifiedOn,
+    String? rulesVersion,
+    String? maturity,
+    Map<String, String>? coverage,
     int? uncategorizedCount,
     int? convertedEntryCount,
     List<_i7gx5xr1.TaxOpportunityView>? opportunities,
@@ -182,7 +230,7 @@ abstract class TaxReportView
       'yearLabel': yearLabel,
       'yearStart': yearStart.toJson(),
       'yearEnd': yearEnd.toJson(),
-      'entityKind': entityKind,
+      'entityKind': entityKind.toJson(),
       'currencyCode': currencyCode,
       'lines': lines.toJson(valueToJson: (v) => v.toJson()),
       'liabilities': liabilities.toJson(valueToJson: (v) => v.toJson()),
@@ -191,7 +239,12 @@ abstract class TaxReportView
       'balanceDueMinor': balanceDueMinor,
       'assumptions': assumptions.toJson(),
       'sources': sources.toJson(),
+      'caveats': caveats.toJson(valueToJson: (v) => v.toJson()),
+      'figures': figures.toJson(valueToJson: (v) => v.toJson()),
       'rulesVerifiedOn': rulesVerifiedOn.toJson(),
+      'rulesVersion': rulesVersion,
+      'maturity': maturity,
+      'coverage': coverage.toJson(),
       'uncategorizedCount': uncategorizedCount,
       'convertedEntryCount': convertedEntryCount,
       'opportunities': opportunities.toJson(valueToJson: (v) => v.toJson()),
@@ -207,7 +260,7 @@ abstract class TaxReportView
       'yearLabel': yearLabel,
       'yearStart': yearStart.toJson(),
       'yearEnd': yearEnd.toJson(),
-      'entityKind': entityKind,
+      'entityKind': entityKind.toJson(),
       'currencyCode': currencyCode,
       'lines': lines.toJson(valueToJson: (v) => v.toJsonForProtocol()),
       'liabilities': liabilities.toJson(
@@ -218,7 +271,12 @@ abstract class TaxReportView
       'balanceDueMinor': balanceDueMinor,
       'assumptions': assumptions.toJson(),
       'sources': sources.toJson(),
+      'caveats': caveats.toJson(valueToJson: (v) => v.toJsonForProtocol()),
+      'figures': figures.toJson(valueToJson: (v) => v.toJsonForProtocol()),
       'rulesVerifiedOn': rulesVerifiedOn.toJson(),
+      'rulesVersion': rulesVersion,
+      'maturity': maturity,
+      'coverage': coverage.toJson(),
       'uncategorizedCount': uncategorizedCount,
       'convertedEntryCount': convertedEntryCount,
       'opportunities': opportunities.toJson(
@@ -240,7 +298,7 @@ class _TaxReportViewImpl extends TaxReportView {
     required String yearLabel,
     required DateTime yearStart,
     required DateTime yearEnd,
-    required String entityKind,
+    required _ifz8weqz.EntityKind entityKind,
     required String currencyCode,
     required List<_i8pphqdm.TaxReportLineView> lines,
     required List<_iyg1xvx7.TaxLiabilityView> liabilities,
@@ -249,7 +307,12 @@ class _TaxReportViewImpl extends TaxReportView {
     required int balanceDueMinor,
     required List<String> assumptions,
     required List<String> sources,
+    required List<_ihcq0ud7.TaxRuleCaveatView> caveats,
+    required List<_i1qdlon8.TaxFigureView> figures,
     required DateTime rulesVerifiedOn,
+    required String rulesVersion,
+    required String maturity,
+    required Map<String, String> coverage,
     required int uncategorizedCount,
     required int convertedEntryCount,
     required List<_i7gx5xr1.TaxOpportunityView> opportunities,
@@ -268,7 +331,12 @@ class _TaxReportViewImpl extends TaxReportView {
          balanceDueMinor: balanceDueMinor,
          assumptions: assumptions,
          sources: sources,
+         caveats: caveats,
+         figures: figures,
          rulesVerifiedOn: rulesVerifiedOn,
+         rulesVersion: rulesVersion,
+         maturity: maturity,
+         coverage: coverage,
          uncategorizedCount: uncategorizedCount,
          convertedEntryCount: convertedEntryCount,
          opportunities: opportunities,
@@ -284,7 +352,7 @@ class _TaxReportViewImpl extends TaxReportView {
     String? yearLabel,
     DateTime? yearStart,
     DateTime? yearEnd,
-    String? entityKind,
+    _ifz8weqz.EntityKind? entityKind,
     String? currencyCode,
     List<_i8pphqdm.TaxReportLineView>? lines,
     List<_iyg1xvx7.TaxLiabilityView>? liabilities,
@@ -293,7 +361,12 @@ class _TaxReportViewImpl extends TaxReportView {
     int? balanceDueMinor,
     List<String>? assumptions,
     List<String>? sources,
+    List<_ihcq0ud7.TaxRuleCaveatView>? caveats,
+    List<_i1qdlon8.TaxFigureView>? figures,
     DateTime? rulesVerifiedOn,
+    String? rulesVersion,
+    String? maturity,
+    Map<String, String>? coverage,
     int? uncategorizedCount,
     int? convertedEntryCount,
     List<_i7gx5xr1.TaxOpportunityView>? opportunities,
@@ -314,7 +387,22 @@ class _TaxReportViewImpl extends TaxReportView {
       balanceDueMinor: balanceDueMinor ?? this.balanceDueMinor,
       assumptions: assumptions ?? this.assumptions.map((e0) => e0).toList(),
       sources: sources ?? this.sources.map((e0) => e0).toList(),
+      caveats: caveats ?? this.caveats.map((e0) => e0.copyWith()).toList(),
+      figures: figures ?? this.figures.map((e0) => e0.copyWith()).toList(),
       rulesVerifiedOn: rulesVerifiedOn ?? this.rulesVerifiedOn,
+      rulesVersion: rulesVersion ?? this.rulesVersion,
+      maturity: maturity ?? this.maturity,
+      coverage:
+          coverage ??
+          this.coverage.map(
+            (
+              key0,
+              value0,
+            ) => MapEntry(
+              key0,
+              value0,
+            ),
+          ),
       uncategorizedCount: uncategorizedCount ?? this.uncategorizedCount,
       convertedEntryCount: convertedEntryCount ?? this.convertedEntryCount,
       opportunities:

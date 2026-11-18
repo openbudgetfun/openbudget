@@ -35,18 +35,18 @@ TaxInput ngInput({
 /// An individual resident in Nigeria.
 NgTaxProfile ngIndividual({int annualRentNaira = 0, bool vat = false}) =>
     NgTaxProfile(
-      entityKind: TaxEntityKind.individual,
+      entityKind: EntityKind.individual,
       annualRentMinor: annualRentNaira * 100,
       salesTaxRegistered: vat,
     );
 
 /// A sole trade owned by a Nigerian individual.
 NgTaxProfile ngSoleTrader({bool vat = false}) =>
-    NgTaxProfile(entityKind: TaxEntityKind.soleTrader, salesTaxRegistered: vat);
+    NgTaxProfile(entityKind: EntityKind.soleTrader, salesTaxRegistered: vat);
 
 /// A Nigerian company.
 NgTaxProfile ngCompany({bool vat = false}) =>
-    NgTaxProfile(entityKind: TaxEntityKind.company, salesTaxRegistered: vat);
+    NgTaxProfile(entityKind: EntityKind.company, salesTaxRegistered: vat);
 
 /// The report line whose label starts with [prefix].
 TaxReportLine ngLine(TaxReport report, String prefix) =>

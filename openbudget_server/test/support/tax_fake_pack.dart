@@ -12,9 +12,9 @@ class FakeTaxPack implements TaxRulePack {
     label: 'Turnover',
     kind: TaxCategoryKind.income,
     entityKinds: {
-      TaxEntityKind.individual,
-      TaxEntityKind.soleTrader,
-      TaxEntityKind.company,
+      EntityKind.individual,
+      EntityKind.soleTrader,
+      EntityKind.company,
     },
   );
 
@@ -23,9 +23,9 @@ class FakeTaxPack implements TaxRulePack {
     label: 'Office costs',
     kind: TaxCategoryKind.expense,
     entityKinds: {
-      TaxEntityKind.individual,
-      TaxEntityKind.soleTrader,
-      TaxEntityKind.company,
+      EntityKind.individual,
+      EntityKind.soleTrader,
+      EntityKind.company,
     },
   );
 
@@ -33,7 +33,7 @@ class FakeTaxPack implements TaxRulePack {
     code: 'gb.test.employment',
     label: 'Employment',
     kind: TaxCategoryKind.income,
-    entityKinds: {TaxEntityKind.individual},
+    entityKinds: {EntityKind.individual},
   );
 
   static const List<TaxCategory> categories = [
@@ -42,11 +42,49 @@ class FakeTaxPack implements TaxRulePack {
     employment,
   ];
 
+  static const TaxPackManifest fakeManifest = TaxPackManifest(
+    maturity: TaxPackMaturity.preview,
+    sections: {
+      TaxSection.personalReturn: TaxSectionCoverage.partial,
+      TaxSection.selfEmployment: TaxSectionCoverage.partial,
+      TaxSection.companyReturn: TaxSectionCoverage.partial,
+      TaxSection.indirectTax: TaxSectionCoverage.notBuilt,
+      TaxSection.capitalGains: TaxSectionCoverage.notBuilt,
+      TaxSection.digitalAssets: TaxSectionCoverage.notBuilt,
+      TaxSection.filingCalendar: TaxSectionCoverage.notBuilt,
+      TaxSection.payroll: TaxSectionCoverage.notBuilt,
+    },
+  );
+
   @override
   TaxJurisdiction get jurisdiction => TaxJurisdiction.gb;
 
   @override
+  TaxPackManifest get manifest => fakeManifest;
+
+  @override
+  TaxProfile profileFromJson(Map<String, Object?> json) =>
+      TaxRules.forJurisdiction(TaxJurisdiction.gb).profileFromJson(json);
+
+  @override
+  List<TaxProfileQuestion> profileQuestions(EntityKind kind) =>
+      TaxRules.forJurisdiction(TaxJurisdiction.gb).profileQuestions(kind);
+
+  @override
   final Set<int> supportedStartYears;
+
+  @override
+  TaxRuleSet ruleSet(int startYear) {
+    if (!supportedStartYears.contains(startYear)) {
+      throw UnsupportedTaxYearException(jurisdiction, startYear);
+    }
+    return TaxRuleSet(
+      startYear: startYear,
+      revision: 1,
+      verifiedOn: DateTime.utc(2026, 4, 6),
+      sources: [Uri.parse('https://example.test/fake-tax')],
+    );
+  }
 
   @override
   TaxYear taxYearFor(DateTime date) => taxYear(date.toUtc().year);
@@ -66,7 +104,7 @@ class FakeTaxPack implements TaxRulePack {
   }
 
   @override
-  List<TaxCategory> categoriesFor(TaxEntityKind kind) => [
+  List<TaxCategory> categoriesFor(EntityKind kind) => [
     for (final category in categories)
       if (category.entityKinds.contains(kind)) category,
   ];
@@ -77,6 +115,56 @@ class FakeTaxPack implements TaxRulePack {
       if (category.code == code) return category;
     }
     return null;
+  }
+
+  @override
+  String? mapUniversalCategory(String universalCode, EntityKind kind) =>
+      switch (universalCode) {
+        'universal.income.employment' =>
+          kind == EntityKind.individual ? FakeTaxPack.employment.code : null,
+        'universal.expense.office' => FakeTaxPack.officeCosts.code,
+        _ => null,
+      };
+
+  /// Three fixed dates per year, so tests can assert which years and days the
+  /// service draws on: an instalment inside the year, the return the January
+  /// after it and an amendment limit a year later.
+  @override
+  List<TaxDeadline> deadlines(TaxYear period, TaxProfile profile) {
+    requireTaxDeadlineInput(this, period, profile);
+    final year = period.startYear;
+    TaxDeadline deadline(
+      String id,
+      DateTime dueDate,
+      TaxDeadlineKind kind, {
+      bool dependsOnProfile = false,
+    }) => TaxDeadline(
+      id: 'gb.test.$id',
+      title: 'Test $id',
+      kind: kind,
+      dueDate: dueDate,
+      periodStart: period.start,
+      periodEnd: period.end,
+      periodLabel: period.label,
+      source: Uri.parse('https://example.test/fake-deadline'),
+      citation: 'Test rule',
+      grade: TaxEvidenceGrade.primary,
+      dependsOnProfile: dependsOnProfile,
+    );
+    return sortTaxDeadlines([
+      deadline(
+        'instalment',
+        DateTime.utc(year, 6, 30),
+        TaxDeadlineKind.payment,
+      ),
+      deadline(
+        'return',
+        DateTime.utc(year + 1, 1, 31),
+        TaxDeadlineKind.filing,
+        dependsOnProfile: true,
+      ),
+      deadline('amend', DateTime.utc(year + 2, 1, 31), TaxDeadlineKind.filing),
+    ]);
   }
 
   @override
@@ -102,6 +190,12 @@ class FakeTaxPack implements TaxRulePack {
     assumptions: const ['Test pack assumption.'],
     sources: [Uri.parse('https://example.test/fake-tax')],
     rulesVerifiedOn: DateTime.utc(2026, 4, 6),
+    rulesVersion: ruleSet(input.year.startYear).versionFor(jurisdiction),
+    maturity: manifest.maturity,
+    coverage: manifest.sections,
+    caveats: ruleSet(input.year.startYear).caveatsTouching(
+      sections: {TaxSection.personalReturn},
+    ),
     uncategorizedCount: input.entries
         .where((entry) => category(entry.categoryCode) == null)
         .length,
@@ -116,6 +210,8 @@ class FakeTaxPack implements TaxRulePack {
       estimatedSavingMinor: 1234,
       deadline: input.year.end,
       source: Uri.parse('https://example.test/fake-tax/opportunity'),
+      ruleYear: input.year.label,
+      assumptions: const ['A test-only assumption.'],
     ),
   ];
 }

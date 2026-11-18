@@ -77,20 +77,20 @@ void main() {
   group('TaxProfile', () {
     for (final profile in <TaxProfile>[
       const GbTaxProfile(
-        entityKind: TaxEntityKind.individual,
+        entityKind: EntityKind.individual,
         scottishTaxpayer: true,
         studentLoanPlan: GbStudentLoanPlan.plan2,
       ),
       const UsTaxProfile(
-        entityKind: TaxEntityKind.soleTrader,
+        entityKind: EntityKind.soleTrader,
         filingStatus: UsFilingStatus.marriedFilingJointly,
       ),
       const NgTaxProfile(
-        entityKind: TaxEntityKind.individual,
+        entityKind: EntityKind.individual,
         annualRentMinor: 240000000,
       ),
       const DeTaxProfile(
-        entityKind: TaxEntityKind.company,
+        entityKind: EntityKind.company,
         salesTaxRegistered: true,
         smallBusinessExemption: false,
       ),

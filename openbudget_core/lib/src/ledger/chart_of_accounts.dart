@@ -42,32 +42,58 @@ class LedgerChartTemplate {
 
   final TaxJurisdiction jurisdiction;
 
-  final TaxEntityKind entityKind;
+  final EntityKind entityKind;
 
   final List<ChartAccountTemplate> accounts;
 
-  /// Returns the template for a set of books, or null when the combination
-  /// has no starter chart yet.
+  /// Returns the template for a set of books, or null when the books have
+  /// no starter chart.
+  ///
+  /// Personal books never get a ledger. Business books in a jurisdiction
+  /// with a chart of their own get it; business books in any other country
+  /// get the country-neutral [generic] chart, so ledger mode works in
+  /// every country.
   static LedgerChartTemplate? forBooks({
     required TaxJurisdiction jurisdiction,
-    required TaxEntityKind entityKind,
+    required EntityKind entityKind,
   }) =>
-      _templates[(
-        jurisdiction,
-        entityKind,
-      )];
+      _templates[(jurisdiction, entityKind)] ??
+      generic(jurisdiction: jurisdiction, entityKind: entityKind);
+
+  /// The country-neutral starter chart, for countries without a rule pack
+  /// or a chart of their own.
+  ///
+  /// Names follow IFRS wording and carry no country's tax vocabulary
+  /// beyond the generic indirect-tax control account; [jurisdiction] is
+  /// stamped on the template so the books keep their country. Returns
+  /// null for personal books, which never carry a ledger.
+  static LedgerChartTemplate? generic({
+    required TaxJurisdiction jurisdiction,
+    required EntityKind entityKind,
+  }) {
+    if (entityKind == EntityKind.individual) {
+      return null;
+    }
+    return LedgerChartTemplate(
+      jurisdiction: jurisdiction,
+      entityKind: entityKind,
+      accounts: entityKind == EntityKind.company
+          ? _genericCompanyAccounts()
+          : _genericSoleTraderAccounts(),
+    );
+  }
 }
 
 /// All starter charts, keyed by (jurisdiction, entity kind).
-final Map<(TaxJurisdiction, TaxEntityKind), LedgerChartTemplate> _templates = {
-  (TaxJurisdiction.gb, TaxEntityKind.company): _gbCompany(),
-  (TaxJurisdiction.gb, TaxEntityKind.soleTrader): _gbSoleTrader(),
-  (TaxJurisdiction.us, TaxEntityKind.company): _usCompany(),
-  (TaxJurisdiction.us, TaxEntityKind.soleTrader): _usSoleTrader(),
-  (TaxJurisdiction.ng, TaxEntityKind.company): _ngCompany(),
-  (TaxJurisdiction.ng, TaxEntityKind.soleTrader): _ngSoleTrader(),
-  (TaxJurisdiction.de, TaxEntityKind.company): _deCompany(),
-  (TaxJurisdiction.de, TaxEntityKind.soleTrader): _deSoleTrader(),
+final Map<(TaxJurisdiction, EntityKind), LedgerChartTemplate> _templates = {
+  (TaxJurisdiction.gb, EntityKind.company): _gbCompany(),
+  (TaxJurisdiction.gb, EntityKind.soleTrader): _gbSoleTrader(),
+  (TaxJurisdiction.us, EntityKind.company): _usCompany(),
+  (TaxJurisdiction.us, EntityKind.soleTrader): _usSoleTrader(),
+  (TaxJurisdiction.ng, EntityKind.company): _ngCompany(),
+  (TaxJurisdiction.ng, EntityKind.soleTrader): _ngSoleTrader(),
+  (TaxJurisdiction.de, EntityKind.company): _deCompany(),
+  (TaxJurisdiction.de, EntityKind.soleTrader): _deSoleTrader(),
 };
 
 // -- Shared role accounts ---------------------------------------------------
@@ -168,8 +194,14 @@ ChartAccountTemplate _plain(
 /// codes are illustrative.
 LedgerChartTemplate _gbCompany() => LedgerChartTemplate(
   jurisdiction: TaxJurisdiction.gb,
-  entityKind: TaxEntityKind.company,
+  entityKind: EntityKind.company,
   accounts: [
+    const ChartAccountTemplate(
+      code: '1099',
+      name: 'Bank clearing',
+      type: LedgerAccountType.asset,
+      systemRole: LedgerSystemRole.bankClearing,
+    ),
     _bank('1000', 'Bank current account'),
     _ar('1100', 'Trade debtors'),
     _ap('2100', 'Trade creditors'),
@@ -206,8 +238,14 @@ LedgerChartTemplate _gbCompany() => LedgerChartTemplate(
 /// no corporation tax or directors' loan account.
 LedgerChartTemplate _gbSoleTrader() => LedgerChartTemplate(
   jurisdiction: TaxJurisdiction.gb,
-  entityKind: TaxEntityKind.soleTrader,
+  entityKind: EntityKind.soleTrader,
   accounts: [
+    const ChartAccountTemplate(
+      code: '1099',
+      name: 'Bank clearing',
+      type: LedgerAccountType.asset,
+      systemRole: LedgerSystemRole.bankClearing,
+    ),
     _bank('1000', 'Business bank account'),
     _ar('1100', 'Trade debtors'),
     _ap('2100', 'Trade creditors'),
@@ -242,8 +280,14 @@ LedgerChartTemplate _gbSoleTrader() => LedgerChartTemplate(
 /// later; US chart guidance was not researched, so codes stay illustrative.
 LedgerChartTemplate _usCompany() => LedgerChartTemplate(
   jurisdiction: TaxJurisdiction.us,
-  entityKind: TaxEntityKind.company,
+  entityKind: EntityKind.company,
   accounts: [
+    const ChartAccountTemplate(
+      code: '1099',
+      name: 'Bank clearing',
+      type: LedgerAccountType.asset,
+      systemRole: LedgerSystemRole.bankClearing,
+    ),
     _bank('1000', 'Operating bank account'),
     _ar('1100', 'Accounts receivable'),
     _ap('2100', 'Accounts payable'),
@@ -279,8 +323,14 @@ LedgerChartTemplate _usCompany() => LedgerChartTemplate(
 /// corporate equity; no shareholder loans.
 LedgerChartTemplate _usSoleTrader() => LedgerChartTemplate(
   jurisdiction: TaxJurisdiction.us,
-  entityKind: TaxEntityKind.soleTrader,
+  entityKind: EntityKind.soleTrader,
   accounts: [
+    const ChartAccountTemplate(
+      code: '1099',
+      name: 'Bank clearing',
+      type: LedgerAccountType.asset,
+      systemRole: LedgerSystemRole.bankClearing,
+    ),
     _bank('1000', 'Business bank account'),
     _ar('1100', 'Accounts receivable'),
     _ap('2100', 'Accounts payable'),
@@ -314,8 +364,14 @@ LedgerChartTemplate _usSoleTrader() => LedgerChartTemplate(
 /// company income tax, PenCom/NSITF inside payroll liabilities.
 LedgerChartTemplate _ngCompany() => LedgerChartTemplate(
   jurisdiction: TaxJurisdiction.ng,
-  entityKind: TaxEntityKind.company,
+  entityKind: EntityKind.company,
   accounts: [
+    const ChartAccountTemplate(
+      code: '1099',
+      name: 'Bank clearing',
+      type: LedgerAccountType.asset,
+      systemRole: LedgerSystemRole.bankClearing,
+    ),
     _bank('1000', 'Bank current account'),
     _ar('1100', 'Trade debtors'),
     _plain('1150', 'Withholding tax receivable', LedgerAccountType.asset),
@@ -352,8 +408,14 @@ LedgerChartTemplate _ngCompany() => LedgerChartTemplate(
 /// and the directors' loan account.
 LedgerChartTemplate _ngSoleTrader() => LedgerChartTemplate(
   jurisdiction: TaxJurisdiction.ng,
-  entityKind: TaxEntityKind.soleTrader,
+  entityKind: EntityKind.soleTrader,
   accounts: [
+    const ChartAccountTemplate(
+      code: '1099',
+      name: 'Bank clearing',
+      type: LedgerAccountType.asset,
+      systemRole: LedgerSystemRole.bankClearing,
+    ),
     _bank('1000', 'Business bank account'),
     _ar('1100', 'Trade debtors'),
     _plain('1150', 'Withholding tax receivable', LedgerAccountType.asset),
@@ -396,8 +458,14 @@ LedgerChartTemplate _ngSoleTrader() => LedgerChartTemplate(
 /// splits them; the law requires proper books, not a specific chart.
 LedgerChartTemplate _deCompany() => LedgerChartTemplate(
   jurisdiction: TaxJurisdiction.de,
-  entityKind: TaxEntityKind.company,
+  entityKind: EntityKind.company,
   accounts: [
+    const ChartAccountTemplate(
+      code: '1099',
+      name: 'Bank clearing',
+      type: LedgerAccountType.asset,
+      systemRole: LedgerSystemRole.bankClearing,
+    ),
     _bank('1800', 'Bank'),
     _ar('1200', 'Forderungen aus Lieferungen und Leistungen'),
     _ap('3300', 'Verbindlichkeiten aus Lieferungen und Leistungen'),
@@ -432,8 +500,14 @@ LedgerChartTemplate _deCompany() => LedgerChartTemplate(
 /// corporate equity; no directors' loan account.
 LedgerChartTemplate _deSoleTrader() => LedgerChartTemplate(
   jurisdiction: TaxJurisdiction.de,
-  entityKind: TaxEntityKind.soleTrader,
+  entityKind: EntityKind.soleTrader,
   accounts: [
+    const ChartAccountTemplate(
+      code: '1099',
+      name: 'Bank clearing',
+      type: LedgerAccountType.asset,
+      systemRole: LedgerSystemRole.bankClearing,
+    ),
     _bank('1800', 'Bank'),
     _ar('1200', 'Forderungen aus Lieferungen und Leistungen'),
     _ap('3300', 'Verbindlichkeiten aus Lieferungen und Leistungen'),
@@ -463,3 +537,86 @@ LedgerChartTemplate _deSoleTrader() => LedgerChartTemplate(
     _suspense('9990', 'Verrechnungskonto'),
   ],
 );
+
+// -- Generic template ---------------------------------------------------------
+//
+// Countries without a tax pack (every jurisdiction the later country
+// batches add) share this chart. IFRS-style names, no country's tax
+// accounts; codes follow the same numbering scheme as the country charts
+// and stay illustrative.
+
+/// Generic company: shareholder loans replace sole-trader drawings; the
+/// indirect-tax control account stands in for every country's VAT, GST or
+/// sales-tax control.
+List<ChartAccountTemplate> _genericCompanyAccounts() => [
+  const ChartAccountTemplate(
+    code: '1099',
+    name: 'Bank clearing',
+    type: LedgerAccountType.asset,
+    systemRole: LedgerSystemRole.bankClearing,
+  ),
+  _bank('1000', 'Bank account'),
+  _ar('1100', 'Trade receivables'),
+  _ap('2100', 'Trade payables'),
+  _vatControl('2200', 'Indirect tax payable/receivable'),
+  _payroll('2300', 'Payroll liabilities'),
+  const ChartAccountTemplate(
+    code: '2500',
+    name: 'Shareholder loan account',
+    type: LedgerAccountType.asset,
+    systemRole: LedgerSystemRole.directorsLoan,
+  ),
+  _plain('3000', 'Share capital', LedgerAccountType.equity),
+  _retainedEarnings('3100', 'Retained earnings'),
+  _openingBalanceEquity('3200', 'Opening balance equity'),
+  _plain('3300', 'Dividends declared', LedgerAccountType.equity),
+  _plain('4000', 'Revenue', LedgerAccountType.income),
+  _plain('4100', 'Other income', LedgerAccountType.income),
+  _plain('5000', 'Cost of sales', LedgerAccountType.expense),
+  _plain('5100', 'Salaries and wages', LedgerAccountType.expense),
+  _plain('5200', 'Rent and utilities', LedgerAccountType.expense),
+  _plain('5300', 'Software subscriptions', LedgerAccountType.expense),
+  _plain('5400', 'Professional fees', LedgerAccountType.expense),
+  _plain('5500', 'Bank charges', LedgerAccountType.expense),
+  _realisedFx('5800', 'Realised exchange differences'),
+  _unrealisedFx('5810', 'Unrealised exchange differences'),
+  _rounding('9900', 'Rounding'),
+  _suspense('9990', 'Suspense'),
+];
+
+/// Generic sole trader: owner's capital and drawings replace share capital
+/// and the shareholder loan account.
+List<ChartAccountTemplate> _genericSoleTraderAccounts() => [
+  const ChartAccountTemplate(
+    code: '1099',
+    name: 'Bank clearing',
+    type: LedgerAccountType.asset,
+    systemRole: LedgerSystemRole.bankClearing,
+  ),
+  _bank('1000', 'Business bank account'),
+  _ar('1100', 'Trade receivables'),
+  _ap('2100', 'Trade payables'),
+  _vatControl('2200', 'Indirect tax payable/receivable'),
+  _payroll('2300', 'Payroll liabilities'),
+  _plain('3000', "Owner's capital", LedgerAccountType.equity),
+  _retainedEarnings('3100', 'Retained earnings'),
+  _openingBalanceEquity('3200', 'Opening balance equity'),
+  const ChartAccountTemplate(
+    code: '3300',
+    name: "Owner's drawings",
+    type: LedgerAccountType.equity,
+    systemRole: LedgerSystemRole.ownerDrawings,
+  ),
+  _plain('4000', 'Revenue', LedgerAccountType.income),
+  _plain('4100', 'Other income', LedgerAccountType.income),
+  _plain('5000', 'Cost of sales', LedgerAccountType.expense),
+  _plain('5100', 'Salaries and wages', LedgerAccountType.expense),
+  _plain('5200', 'Rent and utilities', LedgerAccountType.expense),
+  _plain('5300', 'Software subscriptions', LedgerAccountType.expense),
+  _plain('5400', 'Professional fees', LedgerAccountType.expense),
+  _plain('5500', 'Bank charges', LedgerAccountType.expense),
+  _realisedFx('5800', 'Realised exchange differences'),
+  _unrealisedFx('5810', 'Unrealised exchange differences'),
+  _rounding('9900', 'Rounding'),
+  _suspense('9990', 'Suspense'),
+];

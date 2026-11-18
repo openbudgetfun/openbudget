@@ -25,7 +25,7 @@ TaxInput individualInput(
   List<TaxInput> linked = const [],
 }) => TaxInput(
   profile: DeTaxProfile(
-    entityKind: TaxEntityKind.individual,
+    entityKind: EntityKind.individual,
     jointAssessment: joint,
     churchTax: church,
     churchTaxState: churchState,
@@ -49,7 +49,7 @@ TaxInput soleTraderInput(
   int year = 2026,
 }) => TaxInput(
   profile: DeTaxProfile(
-    entityKind: TaxEntityKind.soleTrader,
+    entityKind: EntityKind.soleTrader,
     salesTaxRegistered: vatRegistered,
     smallBusinessExemption: smallBusinessExemption,
     einkunftsArt: einkunftsArt,
@@ -61,7 +61,7 @@ TaxInput soleTraderInput(
 
 TaxInput companyInput(List<TaxEntry> entries, {int year = 2026}) => TaxInput(
   profile: const DeTaxProfile(
-    entityKind: TaxEntityKind.company,
+    entityKind: EntityKind.company,
     salesTaxRegistered: true,
     smallBusinessExemption: false,
   ),
@@ -109,7 +109,7 @@ void main() {
       expect(
         () => rules.report(
           TaxInput(
-            profile: const DeTaxProfile(entityKind: TaxEntityKind.individual),
+            profile: const DeTaxProfile(entityKind: EntityKind.individual),
             year: TaxYear(
               jurisdiction: TaxJurisdiction.de,
               startYear: 2024,
@@ -719,6 +719,27 @@ void main() {
       expect(ids, isNot(contains('de.sparer_pauschbetrag')));
     });
 
+    test('the Basisrente row follows the named figure grade per year', () {
+      TaxOpportunity basisrente(int year) {
+        final input = individualInput(
+          [entry('de.ind.arbeitslohn', 100000, year: year)],
+          year: year,
+        );
+        return rules
+            .opportunities(input, rules.report(input))
+            .firstWhere((item) => item.id == 'de.basisrente_hoechstbetrag');
+      }
+
+      final y2026 = basisrente(2026);
+      expect(y2026.grade, TaxEvidenceGrade.primary);
+      expect(y2026.estimatedSavingMinor, greaterThan(0));
+      // The 2025 cap is only derived, so the row is graded inferred and
+      // quantifies nothing.
+      final y2025 = basisrente(2025);
+      expect(y2025.grade, TaxEvidenceGrade.inferred);
+      expect(y2025.estimatedSavingMinor, isNull);
+    });
+
     test('filing deadlines roll off weekends (§ 108 Abs. 3 AO)', () {
       // VZ 2026: 31 Jul 2027 is a Saturday, so Monday 2 Aug 2027.
       final input2026 = individualInput([
@@ -819,7 +840,7 @@ void main() {
       );
     });
 
-    test('a shareholder sees the salary-or-dividend comparison', () {
+    test('a shareholder sees the signpost-only salary-or-dividend row', () {
       final company = companyInput([entry('de.co.umsatzerloese', 150000)]);
       final input = individualInput(
         [entry('de.ind.arbeitslohn', 100000)],
@@ -828,7 +849,13 @@ void main() {
       final opportunity = rules
           .opportunities(input, rules.report(input))
           .firstWhere((item) => item.id == 'de.geschaeftsfuehrer_vergleich');
-      expect(opportunity.estimatedSavingMinor, greaterThan(0));
+      // GmbH owner-pay comparisons are signpost-only under the German
+      // perimeter: the row explains the rule, names the vGA risk and
+      // quantifies nothing.
+      expect(opportunity.signpostOnly, isTrue);
+      expect(opportunity.estimatedSavingMinor, isNull);
+      expect(opportunity.explanation, contains('verdeckte Gewinnausschüttung'));
+      expect(opportunity.explanation, contains('Steuerberater'));
     });
 
     test('every opportunity cites an official source', () {
@@ -849,7 +876,7 @@ void main() {
 
   group('category catalog', () {
     test('every entity kind has categories in return order', () {
-      for (final kind in TaxEntityKind.values) {
+      for (final kind in EntityKind.values) {
         final categories = rules.categoriesFor(kind);
         expect(categories, isNotEmpty);
         expect(

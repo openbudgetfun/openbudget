@@ -1,0 +1,15 @@
+### Sales tax grouped by quarter of the summary period.
+###
+### Q1 starts on the period's first day; every quarter is three calendar
+### months.
+class: TaxSummarySalesTaxQuarterView
+fields:
+  ### `Q1` to `Q4`, counted from the start of the summary period.
+  label: String
+  periodStart: DateTime
+  ### First day after the quarter, exclusive.
+  periodEnd: DateTime
+  ### Tax charged to customers in the quarter, after business-use share.
+  collectedMinor: int
+  ### Tax paid on purchases in the quarter, after business-use share.
+  paidMinor: int

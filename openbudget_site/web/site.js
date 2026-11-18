@@ -27,6 +27,45 @@
     revealed.forEach((element) => element.classList.add("is-inview"));
   }
 
+  // Doodles pencil themselves on as their entry scrolls in. Only stroked
+  // paths draw; fills are already there.
+  document.querySelectorAll("[data-reveal] svg path").forEach((path) => {
+    const style = window.getComputedStyle(path);
+    if (style.stroke === "none" || path.closest("a, button")) return;
+    path.setAttribute("pathLength", "1");
+    path.classList.add("doodle-ink");
+  });
+
+  // Ink bursts ----------------------------------------------------------------
+
+  const inks = ["--pink", "--teal", "--sunflower", "--sky", "--tangerine", "--lilac"];
+
+  // Throws a handful of spot-ink pieces out from (x, y) inside [host].
+  function burst(host, x, y, { count = 14, reach = 70 } = {}) {
+    if (reducedMotion.matches) return;
+    const layer = document.createElement("span");
+    layer.className = "ink-burst";
+    layer.setAttribute("aria-hidden", "true");
+    layer.style.left = `${x}px`;
+    layer.style.top = `${y}px`;
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement("span");
+      const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
+      const distance = reach * (0.55 + Math.random() * 0.45);
+      piece.className = "ink-piece";
+      piece.dataset.shape = ["dot", "dash", "ring"][i % 3];
+      piece.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
+      piece.style.setProperty("--dy", `${Math.sin(angle) * distance}px`);
+      piece.style.setProperty("--spin", `${Math.round((Math.random() - 0.5) * 540)}deg`);
+      piece.style.setProperty("--piece", `var(${inks[i % inks.length]})`);
+      piece.style.setProperty("--size", `${6 + Math.round(Math.random() * 5)}px`);
+      piece.style.rotate = `${angle}rad`;
+      layer.append(piece);
+    }
+    host.append(layer);
+    window.setTimeout(() => layer.remove(), 1000);
+  }
+
   // The envelope desk -------------------------------------------------------
 
   const desk = document.querySelector("[data-desk]");
@@ -67,6 +106,41 @@
     envelope.element.classList.remove("is-stamping");
     void envelope.element.offsetWidth;
     envelope.element.classList.add("is-stamping");
+    // Money landed: a small burst of ink around the seal.
+    const deskRect = desk.getBoundingClientRect();
+    const sealRect = envelope.element.querySelector(".envelope-seal")?.getBoundingClientRect();
+    if (sealRect) {
+      burst(
+        desk,
+        sealRect.left + sealRect.width / 2 - deskRect.left,
+        sealRect.top + sealRect.height / 2 - deskRect.top,
+        { count: 10, reach: 46 },
+      );
+    }
+  }
+
+  // Every envelope full: stamp the sheet and throw a bigger burst.
+  let postmark = null;
+  function celebrate(done, fromVisitor) {
+    if (!done) {
+      postmark?.remove();
+      postmark = null;
+      return;
+    }
+    if (postmark || !fromVisitor) return;
+    postmark = document.createElement("span");
+    postmark.className = "desk-postmark";
+    postmark.setAttribute("aria-hidden", "true");
+    postmark.textContent = data.messages.postmark;
+    desk.querySelector(".desk-sheet")?.append(postmark);
+    const deskRect = desk.getBoundingClientRect();
+    const amountRect = readyOutput.getBoundingClientRect();
+    burst(
+      desk,
+      amountRect.left + amountRect.width / 2 - deskRect.left,
+      amountRect.top + amountRect.height / 2 - deskRect.top,
+      { count: 22, reach: 120 },
+    );
   }
 
   function render({ fromVisitor }) {
@@ -96,6 +170,7 @@
 
     readyOutput.textContent = format(ready);
     desk.toggleAttribute("data-done", ready === 0);
+    celebrate(ready === 0, fromVisitor);
 
     if (ready === 0) {
       announce(fillIn(messages.done, { word: currency.word }));

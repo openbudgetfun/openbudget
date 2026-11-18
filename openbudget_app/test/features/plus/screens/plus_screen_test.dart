@@ -83,7 +83,7 @@ void main() {
       await _pumpPlus(tester, container);
       await tester.pumpAndSettle();
 
-      expect(find.text(r'$10'), findsOneWidget);
+      expect(find.text(r'$20'), findsOneWidget);
       expect(find.text('Get more from every envelope'), findsOneWidget);
       expect(find.text('Subscribe in the App Store'), findsOneWidget);
       expect(find.text('Pay with card'), findsNothing);
@@ -194,7 +194,7 @@ void main() {
       await tester.tap(find.text('Try again'));
       await tester.pumpAndSettle();
 
-      expect(find.text(r'$10'), findsOneWidget);
+      expect(find.text(r'$20'), findsOneWidget);
     });
   });
 
@@ -219,7 +219,7 @@ void main() {
         expect(find.text('Paid with Card'), findsOneWidget);
         expect(find.text('$datePrefix$_formattedPeriodEnd'), findsOneWidget);
         expect(find.text('Manage'), findsOneWidget);
-        expect(find.text(r'$10'), findsNothing);
+        expect(find.text(r'$20'), findsNothing);
       });
     }
 
@@ -378,7 +378,7 @@ void main() {
 
       expect(solana.calls, 1);
       expect(find.text('The wallet request was cancelled.'), findsOneWidget);
-      expect(find.text(r'$10'), findsOneWidget);
+      expect(find.text(r'$20'), findsOneWidget);
     });
 
     testWidgets('restore purchases reports success', (tester) async {

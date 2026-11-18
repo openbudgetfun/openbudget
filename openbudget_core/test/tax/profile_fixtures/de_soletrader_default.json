@@ -1,0 +1,15 @@
+{
+  "jurisdiction": "DE",
+  "entityKind": "soleTrader",
+  "salesTaxRegistered": false,
+  "jointAssessment": false,
+  "churchTax": false,
+  "smallBusinessExemption": true,
+  "einkunftsArt": "gewerblich",
+  "children": 0,
+  "spouseEmployed": false,
+  "statutoryPensionMinor": 0,
+  "previousYearTurnoverMinor": 0,
+  "commuteKmOneWay": 0,
+  "commuteDays": 0
+}

@@ -1,0 +1,16 @@
+{
+  "jurisdiction": "DE",
+  "entityKind": "individual",
+  "salesTaxRegistered": true,
+  "jointAssessment": true,
+  "churchTax": true,
+  "churchTaxState": "bayern",
+  "smallBusinessExemption": false,
+  "einkunftsArt": "freiberuflich",
+  "children": 2,
+  "spouseEmployed": true,
+  "statutoryPensionMinor": 480000,
+  "previousYearTurnoverMinor": 6000000,
+  "commuteKmOneWay": 12,
+  "commuteDays": 220
+}

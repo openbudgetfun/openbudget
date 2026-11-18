@@ -1,39 +1,47 @@
-### A financial account within a budget (checking, savings, credit card, cash, etc.).
+### Somewhere money or value is held or owed: a bank account, card, loan,
+### wallet, house or car. Belongs to exactly one entity.
 class: Account
 table: account
 fields:
   id: UuidValue?, defaultPersist=random_v7
+  entityId: UuidValue, relation(parent=entity, onDelete=Cascade)
   name: String
-  ### Account type: checking, savings, creditCard, cash, investment, other.
-  accountType: String
-  ### Current balance in integer cents.
-  balanceCents: int
-  ### ISO 4217 currency code.
+  kind: AccountKind
+  ### ISO 4217 code. Every transaction and valuation amount on the account is
+  ### in this currency. Fixed after creation.
   currencyCode: String
-  budgetId: UuidValue, relation(parent=budget)
-  ### The authenticated user that created this account record.
-  creatorId: UuidValue?
-  ### Optional linked financial institution for this account.
-  institutionId: UuidValue?, relation(parent=institution)
-  ### Whether this account is included in the budget's "on budget" calculations.
-  onBudget: bool
-  ### Sort order for display.
-  sortOrder: int
-  ### Whether this account has been closed/archived.
-  isClosed: bool
-  ### Source of account data: manual, plaid, solana.
-  sourceType: String?
-  ### External source account identifier (e.g. Plaid account_id or wallet address).
-  externalAccountId: String?
-  ### Connection identifier used by external account sync providers.
-  connectionId: UuidValue?
-  ### Last time the account was synchronized from an external provider.
-  lastSyncedAt: DateTime?
-  ### Latest sync status for the account (e.g. synced, stale, error).
-  syncStatus: String?
+  ### Fixed after creation.
+  balanceSource: AccountBalanceSource
+  ### Cached current balance in account-currency minor units, signed:
+  ### positive is owned, negative is owed. Equals the sum of the account's
+  ### transaction amounts, or its latest valuation. Written only by
+  ### `AccountBalanceService`.
+  balanceMinor: int, default=0
+  ### Whether the account's money is in the envelope plan.
+  onBudget: bool, default=false
+  institutionId: UuidValue?, relation(parent=institution, onDelete=SetNull)
+  plaidConnectionId: UuidValue?, relation(parent=plaid_connection, onDelete=SetNull)
+  ### Plaid `account_id`, when linked through Plaid.
+  plaidAccountId: String?
+  ### Balance the institution last reported, in account minor units. Shown to
+  ### prompt a reconciliation; never used for budgeting or net worth.
+  reportedBalanceMinor: int?
+  reportedBalanceAt: DateTime?
+  ### The ledger account that mirrors this account in ledger-mode books.
+  ledgerAccountId: UuidValue?, relation(parent=ledger_account, onDelete=NoAction)
+  ### Statement date of the last completed reconciliation.
+  reconciledThroughDate: DateTime?
+  note: String?
+  sortOrder: int, default=0
+  closedAt: DateTime?
   createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
 indexes:
-  account_budget_idx:
-    fields: budgetId
-  account_budget_external_idx:
-    fields: budgetId, externalAccountId
+  account_entity_idx:
+    fields: entityId, sortOrder
+  account_plaid_unique_idx:
+    fields: plaidConnectionId, plaidAccountId
+    unique: true
+  account_ledger_account_unique_idx:
+    fields: ledgerAccountId
+    unique: true

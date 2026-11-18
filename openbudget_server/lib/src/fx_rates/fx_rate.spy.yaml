@@ -1,0 +1,21 @@
+### One currency's daily rate against USD, the provider's base.
+class: FxRate
+serverOnly: true
+table: fx_rate
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ### Calendar date (UTC) the rate is for.
+  rateDate: DateTime
+  ### ISO 4217 code.
+  currencyCode: String
+  ### Units of currencyCode per 1 USD, exact decimal string.
+  rate: String
+  provider: FxProvider
+  ### Last time the provider was asked for this day's rate.
+  fetchedAt: DateTime
+indexes:
+  fx_rate_currency_date_unique_idx:
+    fields: currencyCode, rateDate
+    unique: true
+  fx_rate_date_idx:
+    fields: rateDate

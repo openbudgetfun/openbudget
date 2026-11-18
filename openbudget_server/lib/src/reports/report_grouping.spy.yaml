@@ -1,0 +1,7 @@
+### How `report.spending` groups its rows.
+enum: ReportGrouping
+serialized: byName
+values:
+  - envelope
+  - category
+  - payee

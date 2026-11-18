@@ -1,0 +1,19 @@
+### One thing a rule pack could not verify, in plain language, as data
+### (docs/tax-jurisdictions.md, section 5.4). A report carries only the
+### caveats that touch the sections and rule keys it used.
+class: TaxRuleCaveatView
+fields:
+  ### Stable identifier, prefixed by country: `gb.student-loan-unearned-threshold`.
+  id: String
+  ### One plain sentence saying what could not be verified.
+  text: String
+  ### `primary`, `secondary` or `inferred`.
+  grade: String
+  ### The report sections the caveat touches, by section name.
+  sections: List<String>
+  ### The rule keys and figure ids the caveat touches.
+  keys: List<String>
+  ### The last day the caveat is trusted without a re-check.
+  recheckBy: DateTime
+  ### True when the caveat describes a change announced but not yet law.
+  announced: bool

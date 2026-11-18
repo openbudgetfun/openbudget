@@ -10,10 +10,10 @@ part 'assistant_proposals_provider.g.dart';
 @riverpod
 class AssistantProposals extends _$AssistantProposals {
   @override
-  Future<AssistantProposalsState> build(String budgetId) async {
+  Future<AssistantProposalsState> build(String entityId) async {
     final proposals = await ref
         .watch(assistantApiProvider)
-        .listProposals(budgetId, pendingOnly: false);
+        .listProposals(entityId, pendingOnly: false);
     final cards = proposals.map(proposalCardFrom).toList();
 
     return AssistantProposalsState(

@@ -21,25 +21,28 @@ abstract class AgentProposal
   AgentProposal._({
     this.id,
     required this.userId,
-    required this.budgetId,
+    required this.entityId,
     this.conversationId,
     required this.kind,
     required this.payloadJson,
     required this.summary,
-    required this.status,
+    _irqal209.AgentProposalStatus? status,
+    this.rulesVersion,
     DateTime? createdAt,
     this.resolvedAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+  }) : status = status ?? _irqal209.AgentProposalStatus.pending,
+       createdAt = createdAt ?? DateTime.now();
 
   factory AgentProposal({
     _isc.UuidValue? id,
     required _isc.UuidValue userId,
-    required _isc.UuidValue budgetId,
+    required _isc.UuidValue entityId,
     _isc.UuidValue? conversationId,
     required _i4huex49.AgentProposalKind kind,
     required String payloadJson,
     required String summary,
-    required _irqal209.AgentProposalStatus status,
+    _irqal209.AgentProposalStatus? status,
+    String? rulesVersion,
     DateTime? createdAt,
     DateTime? resolvedAt,
   }) = _AgentProposalImpl;
@@ -50,8 +53,8 @@ abstract class AgentProposal
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       userId: _isc.UuidValueJsonExtension.fromJson(jsonSerialization['userId']),
-      budgetId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
       conversationId: jsonSerialization['conversationId'] == null
           ? null
@@ -63,9 +66,12 @@ abstract class AgentProposal
       ),
       payloadJson: jsonSerialization['payloadJson'] as String,
       summary: jsonSerialization['summary'] as String,
-      status: _irqal209.AgentProposalStatus.fromJson(
-        (jsonSerialization['status'] as String),
-      ),
+      status: jsonSerialization['status'] == null
+          ? null
+          : _irqal209.AgentProposalStatus.fromJson(
+              (jsonSerialization['status'] as String),
+            ),
+      rulesVersion: jsonSerialization['rulesVersion'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -84,7 +90,7 @@ abstract class AgentProposal
 
   _isc.UuidValue userId;
 
-  _isc.UuidValue budgetId;
+  _isc.UuidValue entityId;
 
   /// The conversation that produced it, when it came from chat.
   _isc.UuidValue? conversationId;
@@ -99,6 +105,9 @@ abstract class AgentProposal
 
   _irqal209.AgentProposalStatus status;
 
+  /// Version of the tax rule pack and guardrails the proposal was made under.
+  String? rulesVersion;
+
   DateTime createdAt;
 
   DateTime? resolvedAt;
@@ -109,12 +118,13 @@ abstract class AgentProposal
   AgentProposal copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     _isc.UuidValue? userId,
-    _isc.UuidValue? budgetId,
+    _isc.UuidValue? entityId,
     _isc.UuidValue? conversationId = const _isc.$UndefinedUuidValue(),
     _i4huex49.AgentProposalKind? kind,
     String? payloadJson,
     String? summary,
     _irqal209.AgentProposalStatus? status,
+    String? rulesVersion,
     DateTime? createdAt,
     DateTime? resolvedAt = const _isc.$UndefinedDateTime(),
   });
@@ -124,12 +134,13 @@ abstract class AgentProposal
       '__className__': 'AgentProposal',
       if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       if (conversationId != null) 'conversationId': conversationId?.toJson(),
       'kind': kind.toJson(),
       'payloadJson': payloadJson,
       'summary': summary,
       'status': status.toJson(),
+      if (rulesVersion != null) 'rulesVersion': rulesVersion,
       'createdAt': createdAt.toJson(),
       if (resolvedAt != null) 'resolvedAt': resolvedAt?.toJson(),
     };
@@ -141,12 +152,13 @@ abstract class AgentProposal
       '__className__': 'AgentProposal',
       if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       if (conversationId != null) 'conversationId': conversationId?.toJson(),
       'kind': kind.toJson(),
       'payloadJson': payloadJson,
       'summary': summary,
       'status': status.toJson(),
+      if (rulesVersion != null) 'rulesVersion': rulesVersion,
       'createdAt': createdAt.toJson(),
       if (resolvedAt != null) 'resolvedAt': resolvedAt?.toJson(),
     };
@@ -158,27 +170,31 @@ abstract class AgentProposal
   }
 }
 
+class _Undefined {}
+
 class _AgentProposalImpl extends AgentProposal {
   _AgentProposalImpl({
     _isc.UuidValue? id,
     required _isc.UuidValue userId,
-    required _isc.UuidValue budgetId,
+    required _isc.UuidValue entityId,
     _isc.UuidValue? conversationId,
     required _i4huex49.AgentProposalKind kind,
     required String payloadJson,
     required String summary,
-    required _irqal209.AgentProposalStatus status,
+    _irqal209.AgentProposalStatus? status,
+    String? rulesVersion,
     DateTime? createdAt,
     DateTime? resolvedAt,
   }) : super._(
          id: id,
          userId: userId,
-         budgetId: budgetId,
+         entityId: entityId,
          conversationId: conversationId,
          kind: kind,
          payloadJson: payloadJson,
          summary: summary,
          status: status,
+         rulesVersion: rulesVersion,
          createdAt: createdAt,
          resolvedAt: resolvedAt,
        );
@@ -190,19 +206,20 @@ class _AgentProposalImpl extends AgentProposal {
   AgentProposal copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     _isc.UuidValue? userId,
-    _isc.UuidValue? budgetId,
+    _isc.UuidValue? entityId,
     _isc.UuidValue? conversationId = const _isc.$UndefinedUuidValue(),
     _i4huex49.AgentProposalKind? kind,
     String? payloadJson,
     String? summary,
     _irqal209.AgentProposalStatus? status,
+    Object? rulesVersion = _Undefined,
     DateTime? createdAt,
     DateTime? resolvedAt = const _isc.$UndefinedDateTime(),
   }) {
     return AgentProposal(
       id: id is _isc.UndefinedSentinel ? this.id : id,
       userId: userId ?? this.userId,
-      budgetId: budgetId ?? this.budgetId,
+      entityId: entityId ?? this.entityId,
       conversationId: conversationId is _isc.UndefinedSentinel
           ? this.conversationId
           : conversationId,
@@ -210,6 +227,7 @@ class _AgentProposalImpl extends AgentProposal {
       payloadJson: payloadJson ?? this.payloadJson,
       summary: summary ?? this.summary,
       status: status ?? this.status,
+      rulesVersion: rulesVersion is String? ? rulesVersion : this.rulesVersion,
       createdAt: createdAt ?? this.createdAt,
       resolvedAt: resolvedAt is _isc.UndefinedSentinel
           ? this.resolvedAt

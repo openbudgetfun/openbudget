@@ -1,0 +1,67 @@
+### The tax-ready summary for one entity and year (docs/tax-jurisdictions.md, 8.7).
+###
+### Every amount except the wallet figures is in [currencyCode], the entity's
+### base currency for a universal-layer country and the pack's currency for a
+### pack country. Wallet figures carry their own stored P&L currency.
+class: TaxSummaryView
+fields:
+  entityId: UuidValue
+  ### The entity kind.
+  entityKind: EntityKind
+  ### ISO 3166-1 alpha-2 country code.
+  countryCode: String
+  ### ISO 4217 code every amount except the wallet figures is in.
+  currencyCode: String
+  ### The calendar year the summary period starts in.
+  startYear: int
+  ### How the year is written: `2026/27` or `2026`.
+  yearLabel: String
+  ### First day of the period, at midnight, as a date-only UTC value.
+  yearStart: DateTime
+  ### First day of the next period, exclusive.
+  yearEnd: DateTime
+  ### When this summary was built.
+  generatedAt: DateTime
+  ### True when the summary comes from the universal layer, because the
+  ### entity's country has no rule pack.
+  isUniversal: bool
+  ### The rule pack version that owns the figures: `gb-2026-r1`. Null for a
+  ### universal-layer country, where [rulesVerifiedOn] says how current the
+  ### country data is.
+  rulesVersion: String?
+  ### When the figures were last checked against their sources: the pack
+  ### rule set's date, or the country data's `verifiedOn`.
+  rulesVerifiedOn: DateTime?
+  ### The ARB key of the disclaimer to show beside the summary.
+  disclaimerKey: String
+  ### Income totals by category, in catalogue order.
+  incomeTotals: List<TaxSummaryCategoryTotalView>
+  ### Expense totals by category, after business-use share, in catalogue
+  ### order.
+  expenseTotals: List<TaxSummaryCategoryTotalView>
+  ### Relief totals by category, in catalogue order.
+  reliefTotals: List<TaxSummaryCategoryTotalView>
+  ### Tax already paid or withheld, by category, in catalogue order.
+  taxPaidTotals: List<TaxSummaryCategoryTotalView>
+  totalIncomeMinor: int
+  totalExpenseMinor: int
+  totalReliefMinor: int
+  totalTaxPaidMinor: int
+  ### Sales tax charged to customers, after business-use share.
+  salesTaxCollectedMinor: int
+  ### Sales tax paid on purchases, after business-use share.
+  salesTaxPaidMinor: int
+  ### The same sales tax grouped by the rate each line implies.
+  salesTaxByRate: List<TaxSummarySalesTaxRateView>
+  ### The same sales tax grouped by quarter of the summary period.
+  salesTaxByQuarter: List<TaxSummarySalesTaxQuarterView>
+  ### Estimated wallet disposals, one row per wallet and P&L currency.
+  wallets: List<TaxSummaryWalletView>
+  ### The exchange rates the converted lines used, one row per distinct
+  ### rate.
+  fxNotes: List<TaxSummaryFxNoteView>
+  ### The distinct rate sources the converted lines used: `market`,
+  ### `manual`, `identity`.
+  rateSourcesUsed: List<String>
+  ### Lines dated in the period that carry no tax category.
+  uncategorizedCount: int

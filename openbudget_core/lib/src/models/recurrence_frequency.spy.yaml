@@ -1,0 +1,11 @@
+### How often a recurring transaction repeats. Occurrence dates are expanded
+### by `nextOccurrence` in `openbudget_core`, shared by the server's posting
+### job and the app's calendar.
+enum: RecurrenceFrequency
+serialized: byName
+values:
+  - daily
+  - weekly
+  - biweekly
+  - monthly
+  - yearly

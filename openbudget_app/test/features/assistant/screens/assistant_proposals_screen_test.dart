@@ -18,7 +18,7 @@ Future<ProviderContainer> _pumpProposals(
   addTearDown(container.dispose);
 
   await tester.pumpApp(
-    const AssistantProposalsScreen(budgetId: testBudgetId),
+    const AssistantProposalsScreen(entityId: testBudgetId),
     container: container,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
@@ -81,7 +81,7 @@ void main() {
     expect(find.text('Nothing waiting'), findsOneWidget);
     expect(
       find.text(
-        'When the assistant suggests a move, it waits here for you to apply '
+        'When the Money guide suggests a move, it waits here for you to apply '
         'or dismiss it.',
       ),
       findsOneWidget,

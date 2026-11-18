@@ -1,0 +1,10 @@
+### The kind of record an audit event is about.
+enum: AuditSubject
+serialized: byName
+values:
+  - entity
+  - account
+  - transaction
+  - ledgerAccount
+  - journal
+  - periodLock

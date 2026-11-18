@@ -5,7 +5,7 @@ import 'package:openbudget_app/src/features/budget/providers/recent_moves_provid
 void main() {
   group('RecentMovesNotifier.undoLast', () {
     test('removes most recent events and returns false when empty', () {
-      const budgetId = 'budget-1';
+      const entityId = 'budget-1';
       const envelopeA = 'envelope-a';
       const envelopeB = 'envelope-b';
 
@@ -14,33 +14,33 @@ void main() {
 
       final notifier = container.read(recentMovesProvider.notifier)
         ..recordAssigned(
-          budgetId: budgetId,
+          entityId: entityId,
           envelopeId: envelopeA,
-          amountCents: 5000,
+          amountMinor: 5000,
         )
         ..recordMove(
-          budgetId: budgetId,
+          entityId: entityId,
           fromEnvelopeId: envelopeA,
           toEnvelopeId: envelopeB,
-          amountCents: 1200,
+          amountMinor: 1200,
         );
 
       expect(
-        container.read(recentMovesForBudgetProvider(budgetId)).length,
+        container.read(recentMovesForBudgetProvider(entityId)).length,
         equals(2),
       );
 
-      expect(notifier.undoLast(budgetId: budgetId), isTrue);
+      expect(notifier.undoLast(entityId: entityId), isTrue);
       final afterFirstUndo = container.read(
-        recentMovesForBudgetProvider(budgetId),
+        recentMovesForBudgetProvider(entityId),
       );
       expect(afterFirstUndo.length, equals(1));
       expect(afterFirstUndo.first.type, equals(RecentMoveType.assigned));
 
-      expect(notifier.undoLast(budgetId: budgetId), isTrue);
-      expect(container.read(recentMovesForBudgetProvider(budgetId)), isEmpty);
+      expect(notifier.undoLast(entityId: entityId), isTrue);
+      expect(container.read(recentMovesForBudgetProvider(entityId)), isEmpty);
 
-      expect(notifier.undoLast(budgetId: budgetId), isFalse);
+      expect(notifier.undoLast(entityId: entityId), isFalse);
     });
   });
 }

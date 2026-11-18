@@ -5,15 +5,15 @@ import 'package:openbudget_client/openbudget_client.dart';
 /// Keeping them behind an interface lets tests drive every state without a
 /// server, and keeps the screens unaware of the generated client.
 abstract interface class AssistantApi {
-  /// Streams one assistant turn in [budgetId].
+  /// Streams one assistant turn in [entityId].
   Stream<AgentEvent> chat({
-    required String budgetId,
+    required String entityId,
     required String message,
     String? conversationId,
   });
 
   /// Lists the conversations in one budget, newest first.
-  Future<List<AgentConversation>> listConversations(String budgetId);
+  Future<List<AgentConversation>> listConversations(String entityId);
 
   /// Returns the visible messages of one conversation.
   Future<List<AgentMessage>> getMessages(String conversationId);
@@ -39,7 +39,7 @@ abstract interface class AssistantApi {
 
   /// Lists the changes the assistant proposed for one budget.
   Future<List<AgentProposal>> listProposals(
-    String budgetId, {
+    String entityId, {
     bool pendingOnly = true,
   });
 
@@ -58,18 +58,18 @@ class ServerpodAssistantApi implements AssistantApi {
 
   @override
   Stream<AgentEvent> chat({
-    required String budgetId,
+    required String entityId,
     required String message,
     String? conversationId,
   }) => _endpoint.chat(
-    UuidValue.fromString(budgetId),
+    UuidValue.fromString(entityId),
     conversationId == null ? null : UuidValue.fromString(conversationId),
     message,
   );
 
   @override
-  Future<List<AgentConversation>> listConversations(String budgetId) =>
-      _endpoint.listConversations(UuidValue.fromString(budgetId));
+  Future<List<AgentConversation>> listConversations(String entityId) =>
+      _endpoint.listConversations(UuidValue.fromString(entityId));
 
   @override
   Future<List<AgentMessage>> getMessages(String conversationId) =>
@@ -98,10 +98,10 @@ class ServerpodAssistantApi implements AssistantApi {
 
   @override
   Future<List<AgentProposal>> listProposals(
-    String budgetId, {
+    String entityId, {
     bool pendingOnly = true,
   }) => _endpoint.listProposals(
-    UuidValue.fromString(budgetId),
+    UuidValue.fromString(entityId),
     pendingOnly: pendingOnly,
   );
 

@@ -1,0 +1,34 @@
+### One filing or payment date from the country's filing calendar, with the
+### period it covers and the authority page it came from.
+class: TaxDeadlineView
+fields:
+  ### Stable identifier of the rule, prefixed by country:
+  ### `gb.sa.online-return`. Every instance of a recurring rule shares it.
+  id: String
+  ### A neutral noun phrase in the authority's own language.
+  title: String
+  ### `filing`, `payment` or `filingAndPayment`.
+  kind: String
+  ### The day the deadline falls, after any weekend or holiday roll-forward.
+  dueDate: DateTime
+  ### The whole days from the entity's local today to [dueDate].
+  daysLeft: int
+  ### First day of the period the deadline covers.
+  periodStart: DateTime
+  ### First day after the period the deadline covers.
+  periodEnd: DateTime
+  ### How the authority names the period: `2025/26` or `1. Quartal 2026`.
+  periodLabel: String
+  ### The authority page the rule came from.
+  source: String
+  ### The provision behind the date: `§ 149 Abs. 2 AO`.
+  citation: String
+  ### `primary`, `secondary` or `inferred`.
+  grade: String
+  ### True when the profile's answers decide whether it applies or when it
+  ### falls.
+  dependsOnProfile: bool
+  ### When it applies, or what the date assumes.
+  note: String?
+  ### The date before a weekend or holiday moved it, when one did.
+  rolledFrom: DateTime?

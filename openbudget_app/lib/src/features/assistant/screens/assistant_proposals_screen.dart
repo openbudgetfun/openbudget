@@ -8,14 +8,14 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 /// Every proposal the assistant is waiting on for one budget, plus the ones
 /// already resolved.
 class AssistantProposalsScreen extends HookConsumerWidget {
-  const AssistantProposalsScreen({required this.budgetId, super.key});
+  const AssistantProposalsScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final proposals = ref.watch(assistantProposalsProvider(budgetId));
+    final proposals = ref.watch(assistantProposalsProvider(entityId));
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.assistantProposalsTitle)),
@@ -28,7 +28,7 @@ class AssistantProposalsScreen extends HookConsumerWidget {
             action: ObStateAction(
               label: l10n.assistantRetry,
               onPressed: () =>
-                  ref.invalidate(assistantProposalsProvider(budgetId)),
+                  ref.invalidate(assistantProposalsProvider(entityId)),
             ),
           ),
         ),
@@ -71,7 +71,7 @@ class AssistantProposalsScreen extends HookConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: SpacingTokens.xs),
                     child: AssistantProposalCardView(
-                      budgetId: budgetId,
+                      entityId: entityId,
                       proposal: proposal,
                     ),
                   ),
@@ -90,7 +90,7 @@ class AssistantProposalsScreen extends HookConsumerWidget {
                           bottom: SpacingTokens.xs,
                         ),
                         child: AssistantProposalCardView(
-                          budgetId: budgetId,
+                          entityId: entityId,
                           proposal: proposal,
                         ),
                       ),

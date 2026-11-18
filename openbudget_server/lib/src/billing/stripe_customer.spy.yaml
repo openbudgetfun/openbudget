@@ -1,10 +1,11 @@
-### Links an OpenBudget user to their Stripe customer for billing portal and
-### checkout reuse.
+### Links an OpenBudget user to their Stripe customer for checkout and the
+### billing portal.
 class: StripeCustomer
+serverOnly: true
 table: stripe_customer
 fields:
   id: UuidValue?, defaultPersist=random_v7
-  userId: UuidValue
+  userId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
   customerId: String
   createdAt: DateTime, default=now
 indexes:

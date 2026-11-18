@@ -137,7 +137,7 @@ String _structuredData(SiteConfig config) => jsonEncode({
     {
       '@type': 'Offer',
       'name': 'OpenBudget Plus',
-      'price': '10',
+      'price': '20',
       'priceCurrency': 'USD',
     },
   ],

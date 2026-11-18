@@ -4,12 +4,11 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'age_of_money_provider.g.dart';
 
-/// Fetches the "Age of Money" metric for a budget.
-///
-/// Returns the average number of days between income receipt and spending,
-/// or null if there is insufficient data.
+/// The mean age in days of the entity's last ten outflows' money, straight
+/// from `report.ageOfMoney`. Null means the entity has too little history
+/// for a meaningful figure.
 @riverpod
-Future<int?> ageOfMoney(Ref ref, String budgetId) async {
+Future<int?> ageOfMoney(Ref ref, String entityId) async {
   final client = ref.read(serverpodClientProvider);
-  return client.transaction.ageOfMoney(UuidValue.fromString(budgetId));
+  return client.report.ageOfMoney(UuidValue.fromString(entityId));
 }

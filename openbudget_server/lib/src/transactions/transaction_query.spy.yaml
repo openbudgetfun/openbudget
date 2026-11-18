@@ -1,0 +1,20 @@
+### Filters and keyset cursor for `transaction.list`. Rows come newest first,
+### ordered by (date desc, id desc).
+class: TransactionQuery
+fields:
+  entityId: UuidValue
+  accountId: UuidValue?
+  envelopeId: UuidValue?
+  payeeId: UuidValue?
+  ### Inclusive calendar dates.
+  fromDate: DateTime?
+  toDate: DateTime?
+  status: TransactionStatus?
+  ### Only transactions with an uncategorised outflow line on budget.
+  uncategorizedOnly: bool, default=false
+  ### Case-insensitive match on description, memo and payee name.
+  search: String?
+  ### 1-200.
+  limit: int, default=50
+  ### The nextCursor of the previous page.
+  cursor: String?

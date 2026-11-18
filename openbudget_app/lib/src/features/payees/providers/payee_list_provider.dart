@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'payee_list_provider.g.dart';
 
 @riverpod
-Future<List<Payee>> payeeList(Ref ref, String budgetId) async {
+Future<List<Payee>> payeeList(Ref ref, String entityId) async {
   final client = ref.read(serverpodClientProvider);
-  return client.payee.list(UuidValue.fromString(budgetId));
+  return client.payee.list(UuidValue.fromString(entityId));
 }

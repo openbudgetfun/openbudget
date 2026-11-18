@@ -1,0 +1,6 @@
+### One envelope's new allocation in `budget.setAllocations`.
+class: AllocationInput
+fields:
+  envelopeId: UuidValue
+  ### The new total for the month in base minor units. 0 deletes the row.
+  allocatedMinor: int

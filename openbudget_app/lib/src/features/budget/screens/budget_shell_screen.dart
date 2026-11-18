@@ -5,7 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_realtime_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/entity_events_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/add_transaction_sheet.dart';
 import 'package:openbudget_app/src/features/whats_new/hooks/use_whats_new_auto_prompt.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
@@ -14,16 +14,16 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 class BudgetShellScreen extends HookConsumerWidget {
   const BudgetShellScreen({
     required this.navigationShell,
-    required this.budgetId,
+    required this.entityId,
     super.key,
   });
 
   final StatefulNavigationShell navigationShell;
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(budgetRealtimeProvider(budgetId));
+    ref.watch(entityEventsProvider(entityId));
     useWhatsNewAutoPrompt(context, ref);
 
     final l10n = AppLocalizations.of(context);
@@ -56,8 +56,8 @@ class BudgetShellScreen extends HookConsumerWidget {
               label: l10n.tabAccounts,
             ),
             NavigationDestination(
-              icon: const SkribbleIcon(data: OpenBudgetIcons.addCircle),
-              selectedIcon: const SkribbleIcon(data: OpenBudgetIcons.addCircle),
+              icon: const _AddSticker(),
+              selectedIcon: const _AddSticker(),
               label: l10n.tabAdd,
             ),
             NavigationDestination(
@@ -96,24 +96,24 @@ class BudgetShellScreen extends HookConsumerWidget {
       final action = await showModalBottomSheet<AddTransactionAction>(
         context: context,
         showDragHandle: false,
-        builder: (_) => AddTransactionSheet(budgetId: budgetId),
+        builder: (_) => AddTransactionSheet(entityId: entityId),
       );
       if (!context.mounted || action == null) return;
       switch (action) {
         case AddTransactionAction.income:
           await context.pushNamed(
             addIncomeRoute,
-            pathParameters: {'id': budgetId},
+            pathParameters: {'entityId': entityId},
           );
         case AddTransactionAction.expense:
           await context.pushNamed(
             addExpenseRoute,
-            pathParameters: {'id': budgetId},
+            pathParameters: {'entityId': entityId},
           );
         case AddTransactionAction.transfer:
           await context.pushNamed(
             createTransferRoute,
-            pathParameters: {'id': budgetId},
+            pathParameters: {'entityId': entityId},
           );
       }
       return;
@@ -206,20 +206,49 @@ class BudgetShellScreen extends HookConsumerWidget {
       case _MoreQuickAction.settings:
         await context.pushNamed(
           settingsRoute,
-          pathParameters: {'id': budgetId},
+          pathParameters: {'entityId': entityId},
         );
       case _MoreQuickAction.recurring:
         await context.pushNamed(
           recurringListRoute,
-          pathParameters: {'id': budgetId},
+          pathParameters: {'entityId': entityId},
         );
       case _MoreQuickAction.payees:
         await context.pushNamed(
           payeeListRoute,
-          pathParameters: {'id': budgetId},
+          pathParameters: {'entityId': entityId},
         );
     }
   }
 }
 
 enum _MoreQuickAction { settings, recurring, payees }
+
+/// The Add tab's icon: a hot-pink sticker on a hard print shadow, so the
+/// one action in the bar stands out from the places it goes.
+class _AddSticker extends HookWidget {
+  const _AddSticker();
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = Theme.of(context).ob;
+    return Container(
+      width: 48,
+      height: 34,
+      alignment: Alignment.center,
+      decoration: ObRoughDecoration(
+        color: palette.action,
+        outline: palette.ink,
+        strokeWidth: 2.2,
+        seed: 29,
+        shadow: palette.printShadow,
+        shadowOffset: const Offset(3, 3),
+      ),
+      child: SkribbleIcon(
+        data: OpenBudgetIcons.add,
+        size: 20,
+        color: palette.onAction,
+      ),
+    );
+  }
+}

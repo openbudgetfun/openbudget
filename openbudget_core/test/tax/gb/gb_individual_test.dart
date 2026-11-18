@@ -27,7 +27,7 @@ TaxInput _individualInput({
   List<TaxInput> linked = const [],
 }) => TaxInput(
   profile: GbTaxProfile(
-    entityKind: TaxEntityKind.individual,
+    entityKind: EntityKind.individual,
     scottishTaxpayer: scottish,
     studentLoanPlan: loan,
     postgraduateLoan: postgraduateLoan,
@@ -56,7 +56,7 @@ TaxReport _report({
 );
 
 TaxInput _soleTraderInput({int startYear = 2026, int turnover = 0}) => TaxInput(
-  profile: const GbTaxProfile(entityKind: TaxEntityKind.soleTrader),
+  profile: const GbTaxProfile(entityKind: EntityKind.soleTrader),
   year: _gb.taxYear(startYear),
   entries: [_pounds('gb.se.turnover', turnover)],
 );
@@ -102,7 +102,7 @@ void main() {
       expect(
         () => _gb.report(
           TaxInput(
-            profile: const GbTaxProfile(entityKind: TaxEntityKind.individual),
+            profile: const GbTaxProfile(entityKind: EntityKind.individual),
             year: future,
             entries: const [],
           ),
@@ -501,7 +501,7 @@ void main() {
 
     test('accounting period and associates round-trip for a company', () {
       const profile = GbTaxProfile(
-        entityKind: TaxEntityKind.company,
+        entityKind: EntityKind.company,
         accountingPeriodEndMonth: 12,
         associatedCompanies: 2,
       );
@@ -516,7 +516,7 @@ void main() {
 
     test('defaults keep the stored JSON shape', () {
       const profile = GbTaxProfile(
-        entityKind: TaxEntityKind.individual,
+        entityKind: EntityKind.individual,
         scottishTaxpayer: true,
         studentLoanPlan: GbStudentLoanPlan.plan2,
       );
@@ -538,7 +538,7 @@ void main() {
         startYear: 2025,
         linked: [
           TaxInput(
-            profile: const GbTaxProfile(entityKind: TaxEntityKind.soleTrader),
+            profile: const GbTaxProfile(entityKind: EntityKind.soleTrader),
             year: _gb.taxYear(2025),
             entries: [
               _pounds('gb.se.turnover', 61000),
@@ -809,7 +809,7 @@ void main() {
 
     test('trading allowance is compared with actual expenses', () {
       final trade = TaxInput(
-        profile: const GbTaxProfile(entityKind: TaxEntityKind.soleTrader),
+        profile: const GbTaxProfile(entityKind: EntityKind.soleTrader),
         year: _gb.taxYear(2026),
         entries: [
           _pounds('gb.se.turnover', 30000),
@@ -822,6 +822,44 @@ void main() {
           .firstWhere((item) => item.id == 'gb.trading_allowance');
       // £600 more deducted than the actual expenses, at 20%.
       expect(opportunity.estimatedSavingMinor, 12000);
+    });
+  });
+
+  group('caveats', () {
+    test('a report that uses the student-loan rules lists the student-loan '
+        'caveats and no German ones', () {
+      final report = _report(
+        loan: GbStudentLoanPlan.plan2,
+        entries: [_pounds('gb.ind.employment', 60000)],
+      );
+
+      expect(
+        report.caveats.map((caveat) => caveat.id),
+        contains('gb.student-loan-unearned-threshold'),
+      );
+      for (final caveat in report.caveats) {
+        expect(
+          caveat.id,
+          startsWith('gb.'),
+          reason: '${caveat.id} is not a GB caveat',
+        );
+      }
+      // The report carried only caveats its sections and keys touched:
+      // every caveat is one of its rule set's.
+      final ruleSet = _gb.ruleSet(report.year.startYear);
+      expect(
+        report.caveats.toSet().difference(ruleSet.caveats.toSet()),
+        isEmpty,
+      );
+    });
+
+    test('a report with no student loan carries no student-loan caveat', () {
+      final report = _report(entries: [_pounds('gb.ind.employment', 30000)]);
+
+      expect(
+        report.caveats.map((caveat) => caveat.id),
+        isNot(contains('gb.student-loan-unearned-threshold')),
+      );
     });
   });
 }

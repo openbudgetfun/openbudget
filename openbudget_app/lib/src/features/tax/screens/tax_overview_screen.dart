@@ -4,9 +4,16 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
 import 'package:openbudget_app/src/features/tax/tax_formatting.dart';
 import 'package:openbudget_app/src/features/tax/tax_labels.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_caveat_card.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_disclaimer_bar.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_export_card.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_upcoming_section.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_year_switcher.dart';
+import 'package:openbudget_app/src/features/tax/widgets/universal_tax_panel.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -15,16 +22,33 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// The budget's tax position for a chosen year, with the workings behind it.
 class TaxOverviewScreen extends HookConsumerWidget {
-  const TaxOverviewScreen({required this.budgetId, super.key});
+  const TaxOverviewScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final palette = theme.ob;
-    final profileAsync = ref.watch(taxProfileProvider(budgetId));
+    final entityAsync = ref.watch(entityDetailProvider(entityId));
+    final entity = entityAsync.value;
+
+    // A country with no tax rule pack has no profile to set up and no report
+    // to compute, so it gets the universal panel instead.
+    if (entity != null &&
+        TaxJurisdiction.fromCountryCode(entity.countryCode) == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.taxOverviewTitle)),
+        body: UniversalTaxPanel(entityId: entityId, entity: entity),
+      );
+    }
+    if (entity == null && entityAsync.isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.taxOverviewTitle)),
+        body: Center(child: ObLoadingPanel(label: l10n.taxOverviewLoading)),
+      );
+    }
+
+    final profileAsync = ref.watch(taxProfileProvider(entityId));
     final hasProfile = profileAsync.hasValue && profileAsync.value != null;
 
     return Scaffold(
@@ -37,7 +61,7 @@ class TaxOverviewScreen extends HookConsumerWidget {
               icon: const SkribbleIcon(data: OpenBudgetIcons.edit),
               onPressed: () => context.pushNamed(
                 taxProfileRoute,
-                pathParameters: {'id': budgetId},
+                pathParameters: {'entityId': entityId},
               ),
             ),
         ],
@@ -54,7 +78,7 @@ class TaxOverviewScreen extends HookConsumerWidget {
               message: taxErrorMessage(error, l10n.taxProfileLoadError),
               action: ObStateAction(
                 label: l10n.taxCategoryLoadRetry,
-                onPressed: () => ref.invalidate(taxProfileProvider(budgetId)),
+                onPressed: () => ref.invalidate(taxProfileProvider(entityId)),
               ),
             ),
           ),
@@ -70,7 +94,7 @@ class TaxOverviewScreen extends HookConsumerWidget {
                       label: l10n.taxSetupAction,
                       onPressed: () => context.pushNamed(
                         taxProfileRoute,
-                        pathParameters: {'id': budgetId},
+                        pathParameters: {'entityId': entityId},
                       ),
                     ),
                   ),
@@ -79,37 +103,14 @@ class TaxOverviewScreen extends HookConsumerWidget {
             : _TaxReportBody(
                 key: ValueKey(
                   '${record.updatedAt.microsecondsSinceEpoch}-'
-                  '${record.jurisdiction}',
+                  '${record.profileJson.hashCode}',
                 ),
-                budgetId: budgetId,
+                entityId: entityId,
                 record: record,
               ),
       ),
       bottomNavigationBar: hasProfile
-          ? DecoratedBox(
-              decoration: BoxDecoration(
-                color: palette.surface,
-                border: Border(top: BorderSide(color: palette.line)),
-              ),
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    SpacingTokens.md,
-                    SpacingTokens.sm,
-                    SpacingTokens.md,
-                    SpacingTokens.sm,
-                  ),
-                  child: Text(
-                    l10n.taxDisclaimer,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: palette.mutedInk,
-                    ),
-                  ),
-                ),
-              ),
-            )
+          ? TaxDisclaimerBar(text: l10n.taxDisclaimer)
           : null,
     );
   }
@@ -117,25 +118,29 @@ class TaxOverviewScreen extends HookConsumerWidget {
 
 class _TaxReportBody extends HookConsumerWidget {
   const _TaxReportBody({
-    required this.budgetId,
+    required this.entityId,
     required this.record,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final TaxProfileRecord record;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final jurisdiction = TaxJurisdiction.fromCountryCode(record.jurisdiction);
+    final entityAsync = ref.watch(entityDetailProvider(entityId));
+    final entity = entityAsync.value;
+    final jurisdiction = entity == null
+        ? null
+        : TaxJurisdiction.fromCountryCode(entity.countryCode);
     if (jurisdiction == null) {
       return Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(SpacingTokens.lg),
           child: ObStatePanel.problem(
             title: l10n.taxOverviewLoadError,
-            message: record.jurisdiction,
+            message: entity?.countryCode ?? '',
           ),
         ),
       );
@@ -143,14 +148,14 @@ class _TaxReportBody extends HookConsumerWidget {
 
     final selectedYear = useState<int?>(null);
     final startYear = selectedYear.value ?? currentTaxYearStart(jurisdiction);
-    final reportAsync = ref.watch(taxReportProvider(budgetId, startYear));
+    final reportAsync = ref.watch(taxReportProvider(entityId, startYear));
     final report = reportAsync.value;
-    final entityKind = _entityKind(record.entityKind);
+    final entityKind = entity?.kind;
 
     return Column(
       children: [
-        _YearSwitcher(
-          label: l10n.taxYearLabel(report?.yearLabel ?? startYear.toString()),
+        TaxYearSwitcher(
+          label: l10n.taxYearLabel(report?.startYear ?? startYear),
           onPrevious: () => selectedYear.value = startYear - 1,
           onNext: () => selectedYear.value = startYear + 1,
         ),
@@ -172,7 +177,7 @@ class _TaxReportBody extends HookConsumerWidget {
                   action: ObStateAction(
                     label: l10n.taxCategoryLoadRetry,
                     onPressed: () => ref.invalidate(
-                      taxReportProvider(budgetId, startYear),
+                      taxReportProvider(entityId, startYear),
                     ),
                   ),
                 ),
@@ -180,7 +185,7 @@ class _TaxReportBody extends HookConsumerWidget {
             ),
             data: (report) => RefreshIndicator(
               onRefresh: () async =>
-                  ref.invalidate(taxReportProvider(budgetId, startYear)),
+                  ref.invalidate(taxReportProvider(entityId, startYear)),
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(
                   SpacingTokens.md,
@@ -189,6 +194,10 @@ class _TaxReportBody extends HookConsumerWidget {
                   SpacingTokens.xl,
                 ),
                 children: [
+                  if (report.maturity == TaxPackMaturity.preview.name) ...[
+                    const _PreviewBanner(),
+                    const SizedBox(height: SpacingTokens.sm),
+                  ],
                   Wrap(
                     spacing: SpacingTokens.xs,
                     runSpacing: SpacingTokens.xs,
@@ -217,7 +226,7 @@ class _TaxReportBody extends HookConsumerWidget {
                           borderRadius: BorderRadius.circular(RadiusTokens.md),
                           onTap: () => context.pushNamed(
                             transactionListRoute,
-                            pathParameters: {'id': budgetId},
+                            pathParameters: {'entityId': entityId},
                           ),
                           child: ObToneChip(
                             label: l10n.taxUncategorizedCount(
@@ -274,6 +283,7 @@ class _TaxReportBody extends HookConsumerWidget {
                         liability: liability,
                         currency: report.currencyCode,
                       ),
+                  TaxUpcomingSection(entityId: entityId),
                   ObSectionHeader(
                     title: l10n.taxReportLinesTitle,
                     padding: const EdgeInsets.fromLTRB(
@@ -300,7 +310,29 @@ class _TaxReportBody extends HookConsumerWidget {
                         currency: report.currencyCode,
                       ),
                   ],
+                  if (report.caveats.isNotEmpty) ...[
+                    ObSectionHeader(
+                      title: l10n.taxUnverifiedTitle,
+                      padding: const EdgeInsets.fromLTRB(
+                        0,
+                        SpacingTokens.lg,
+                        0,
+                        SpacingTokens.xs,
+                      ),
+                    ),
+                    for (final caveat in report.caveats)
+                      TaxCaveatCard(
+                        key: Key('tax-caveat-${caveat.id}'),
+                        text: caveat.text,
+                        announced: caveat.announced,
+                      ),
+                  ],
                   const SizedBox(height: SpacingTokens.md),
+                  TaxExportCard(
+                    entityId: entityId,
+                    startYear: report.startYear,
+                  ),
+                  const SizedBox(height: SpacingTokens.xs),
                   _HowWorkedOutCard(report: report),
                 ],
               ),
@@ -312,44 +344,34 @@ class _TaxReportBody extends HookConsumerWidget {
   }
 }
 
-class _YearSwitcher extends HookWidget {
-  const _YearSwitcher({
-    required this.label,
-    required this.onPrevious,
-    required this.onNext,
-  });
-
-  final String label;
-  final VoidCallback onPrevious;
-  final VoidCallback onNext;
+/// The preview warning shown while a country pack awaits review.
+class _PreviewBanner extends HookWidget {
+  const _PreviewBanner();
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.md),
+    final palette = theme.ob;
+
+    return ObCard(
+      key: const Key('tax-preview-banner'),
+      tone: ObTone.review,
+      padding: const EdgeInsets.all(SpacingTokens.md),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconButton(
-            key: const Key('tax-year-previous'),
-            tooltip: l10n.taxPreviousYear,
-            onPressed: onPrevious,
-            icon: const SkribbleIcon(data: OpenBudgetIcons.chevronLeft),
+          SkribbleIcon(
+            data: OpenBudgetIcons.warning,
+            size: 20,
+            color: palette.hue(ObTone.review),
           ),
+          const SizedBox(width: SpacingTokens.sm),
           Expanded(
             child: Text(
-              label,
-              key: const Key('tax-year-label'),
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium,
+              l10n.taxPreviewBanner,
+              style: theme.textTheme.bodyMedium?.copyWith(color: palette.ink),
             ),
-          ),
-          IconButton(
-            key: const Key('tax-year-next'),
-            tooltip: l10n.taxNextYear,
-            onPressed: onNext,
-            icon: const SkribbleIcon(data: OpenBudgetIcons.chevronRight),
           ),
         ],
       ),
@@ -375,7 +397,7 @@ class _BalanceHero extends HookWidget {
         : isRefund
         ? l10n.taxRefundDue
         : l10n.taxNothingToPay;
-    final amount = formatCentsForCode(balance.abs(), currency);
+    final amount = formatMinorForCode(balance.abs(), currency);
 
     return ObCard(
       tone: isRefund
@@ -406,7 +428,7 @@ class _BalanceHero extends HookWidget {
               Expanded(
                 child: _Metric(
                   label: l10n.taxTotalLiability,
-                  amount: formatCentsForCode(
+                  amount: formatMinorForCode(
                     report.totalLiabilityMinor,
                     currency,
                   ),
@@ -419,7 +441,7 @@ class _BalanceHero extends HookWidget {
               Expanded(
                 child: _Metric(
                   label: l10n.taxAlreadyPaid,
-                  amount: formatCentsForCode(report.alreadyPaidMinor, currency),
+                  amount: formatMinorForCode(report.alreadyPaidMinor, currency),
                 ),
               ),
             ],
@@ -502,7 +524,7 @@ class _LiabilityCard extends HookWidget {
                       ),
                     ),
                     ObAmount(
-                      formatCentsForCode(liability.amountMinor, currency),
+                      formatMinorForCode(liability.amountMinor, currency),
                       style: theme.textTheme.titleSmall,
                     ),
                     if (hasBands) ...[
@@ -575,7 +597,7 @@ class _LiabilityCard extends HookWidget {
                                   ),
                                 ),
                                 ObAmount(
-                                  formatCentsForCode(band.baseMinor, currency),
+                                  formatMinorForCode(band.baseMinor, currency),
                                   style: theme.textTheme.bodySmall,
                                 ),
                               ],
@@ -593,7 +615,7 @@ class _LiabilityCard extends HookWidget {
                                   ),
                                 ),
                                 ObAmount(
-                                  formatCentsForCode(band.taxMinor, currency),
+                                  formatMinorForCode(band.taxMinor, currency),
                                   style: theme.textTheme.bodySmall,
                                 ),
                               ],
@@ -660,6 +682,19 @@ class _ReportLinesCard extends HookWidget {
                                   color: palette.ink,
                                 ),
                               ),
+                              if (_isSecondaryFigure(report, line))
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: SpacingTokens.xs,
+                                  ),
+                                  child: ObToneChip(
+                                    key: const Key(
+                                      'tax-secondary-source-badge',
+                                    ),
+                                    label: l10n.taxSecondarySourceBadge,
+                                    tone: ObTone.review,
+                                  ),
+                                ),
                               if (line.reportReference case final reference?)
                                 Text(
                                   reference,
@@ -679,7 +714,7 @@ class _ReportLinesCard extends HookWidget {
                         ),
                         const SizedBox(width: SpacingTokens.sm),
                         ObAmount(
-                          formatCentsForCode(line.amountMinor, currency),
+                          formatMinorForCode(line.amountMinor, currency),
                           style: theme.textTheme.bodyMedium,
                         ),
                       ],
@@ -690,6 +725,17 @@ class _ReportLinesCard extends HookWidget {
             ),
     );
   }
+}
+
+/// Whether [line] presents a figure whose evidence grade is secondary.
+bool _isSecondaryFigure(TaxReportView report, TaxReportLineView line) {
+  final figureId = line.figureId;
+  if (figureId == null) {
+    return false;
+  }
+  return report.figures.any(
+    (figure) => figure.id == figureId && figure.grade == 'secondary',
+  );
 }
 
 class _OpportunityCard extends HookWidget {
@@ -729,7 +775,7 @@ class _OpportunityCard extends HookWidget {
               if (saving != null)
                 ObToneChip(
                   label: l10n.taxOpportunitySaving(
-                    formatCentsForCode(saving, currency),
+                    formatMinorForCode(saving, currency),
                   ),
                   tone: ObTone.funded,
                   icon: const SkribbleIcon(
@@ -866,10 +912,3 @@ class _HowWorkedOutCard extends HookWidget {
 }
 
 bool _isRulesUnavailable(Object error) => error is TaxRulesUnavailableException;
-
-TaxEntityKind? _entityKind(String name) {
-  for (final kind in TaxEntityKind.values) {
-    if (kind.name == name) return kind;
-  }
-  return null;
-}

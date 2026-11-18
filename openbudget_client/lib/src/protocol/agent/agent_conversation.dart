@@ -12,13 +12,13 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// One chat between a user and the financial assistant about a budget.
+/// One chat between a user and the financial assistant about an entity.
 abstract class AgentConversation
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   AgentConversation._({
     this.id,
     required this.userId,
-    required this.budgetId,
+    required this.entityId,
     required this.title,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -28,7 +28,7 @@ abstract class AgentConversation
   factory AgentConversation({
     _isc.UuidValue? id,
     required _isc.UuidValue userId,
-    required _isc.UuidValue budgetId,
+    required _isc.UuidValue entityId,
     required String title,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -40,8 +40,8 @@ abstract class AgentConversation
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       userId: _isc.UuidValueJsonExtension.fromJson(jsonSerialization['userId']),
-      budgetId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
       title: jsonSerialization['title'] as String,
       createdAt: jsonSerialization['createdAt'] == null
@@ -60,7 +60,7 @@ abstract class AgentConversation
 
   _isc.UuidValue userId;
 
-  _isc.UuidValue budgetId;
+  _isc.UuidValue entityId;
 
   /// Short title, taken from the first message.
   String title;
@@ -75,7 +75,7 @@ abstract class AgentConversation
   AgentConversation copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     _isc.UuidValue? userId,
-    _isc.UuidValue? budgetId,
+    _isc.UuidValue? entityId,
     String? title,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -86,7 +86,7 @@ abstract class AgentConversation
       '__className__': 'AgentConversation',
       if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'title': title,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
@@ -99,7 +99,7 @@ abstract class AgentConversation
       '__className__': 'AgentConversation',
       if (id != null) 'id': id?.toJson(),
       'userId': userId.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'title': title,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
@@ -116,14 +116,14 @@ class _AgentConversationImpl extends AgentConversation {
   _AgentConversationImpl({
     _isc.UuidValue? id,
     required _isc.UuidValue userId,
-    required _isc.UuidValue budgetId,
+    required _isc.UuidValue entityId,
     required String title,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
          id: id,
          userId: userId,
-         budgetId: budgetId,
+         entityId: entityId,
          title: title,
          createdAt: createdAt,
          updatedAt: updatedAt,
@@ -136,7 +136,7 @@ class _AgentConversationImpl extends AgentConversation {
   AgentConversation copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     _isc.UuidValue? userId,
-    _isc.UuidValue? budgetId,
+    _isc.UuidValue? entityId,
     String? title,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -144,7 +144,7 @@ class _AgentConversationImpl extends AgentConversation {
     return AgentConversation(
       id: id is _isc.UndefinedSentinel ? this.id : id,
       userId: userId ?? this.userId,
-      budgetId: budgetId ?? this.budgetId,
+      entityId: entityId ?? this.entityId,
       title: title ?? this.title,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

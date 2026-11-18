@@ -1,4 +1,4 @@
-### The computed tax position for one budget and tax year.
+### The computed tax position for one entity and tax year.
 class: TaxReportView
 fields:
   ### ISO 3166-1 alpha-2 country code.
@@ -9,8 +9,8 @@ fields:
   yearLabel: String
   yearStart: DateTime
   yearEnd: DateTime
-  ### TaxEntityKind name.
-  entityKind: String
+  ### The entity kind.
+  entityKind: EntityKind
   ### ISO 4217 code every amount in this report is in.
   currencyCode: String
   ### Category totals and computed figures, in return order.
@@ -24,8 +24,19 @@ fields:
   assumptions: List<String>
   ### The authority pages the rates came from.
   sources: List<String>
+  ### What could not be verified for the sections and rules this report
+  ### used: the "What we could not verify" list.
+  caveats: List<TaxRuleCaveatView>
+  ### The named figures this report's lines quote, with their grades.
+  figures: List<TaxFigureView>
   ### When the rule figures were last checked against the sources.
   rulesVerifiedOn: DateTime
+  ### The rule pack version that produced the report: `gb-2026-r1`.
+  rulesVersion: String
+  ### Whether the pack's figures have been checked by a tax professional.
+  maturity: String
+  ### How completely the pack covers each section, by section name.
+  coverage: Map<String, String>
   ### Entries the rule pack does not know, plus transactions with no category.
   uncategorizedCount: int
   ### Entries converted from another currency at their transaction date.

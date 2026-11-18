@@ -1,0 +1,14 @@
+# The reply cites the card but never states the figure the fixture expects.
+id: universal-01-missing-figure
+question: universal-01
+expect:
+  verdict: fail
+  failedGates: [mentions]
+steps:
+  - tool: search_knowledge
+    arguments:
+      entityId: "{{entityId}}"
+      ids: [universal-budgeting-sinking-funds]
+  - say: >-
+      Set some money aside each month in a sinking-fund envelope so the
+      renewal does not land all at once [^universal-budgeting-sinking-funds].

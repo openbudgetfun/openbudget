@@ -2,6 +2,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:openbudget_site/site_config.dart';
 import 'package:openbudget_site/src/components/brand_artwork.dart';
+import 'package:openbudget_site/src/components/github_mark.dart';
 
 /// The foot of every page.
 final class SiteFooter extends StatelessComponent {
@@ -26,9 +27,11 @@ final class SiteFooter extends StatelessComponent {
         a(href: config.webAppUrl.toString(), const [
           Component.text('Open the web app'),
         ]),
-        a(href: config.sourceUrl.toString(), const [
-          Component.text('Source on GitHub'),
-        ]),
+        a(
+          href: config.sourceUrl.toString(),
+          classes: 'with-mark',
+          const [GithubMark(), Component.text('Source on GitHub')],
+        ),
         const a(href: '/#pricing', [Component.text('Pricing')]),
         const a(href: '/#questions', [Component.text('Questions')]),
       ],

@@ -67,7 +67,7 @@ abstract class InstitutionLocation
   /// ISO 3166 country code (e.g. US, GB) or regional marker (e.g. EU).
   String locationCode;
 
-  /// Whether this institution should be shown in "Popular options" for location.
+  /// Whether this institution is shown in "Popular options" for the location.
   bool isPopular;
 
   /// Lower rank means higher priority in popular ordering.
@@ -255,7 +255,7 @@ class InstitutionLocationTable extends _is.Table<_is.UuidValue?> {
   /// ISO 3166 country code (e.g. US, GB) or regional marker (e.g. EU).
   late final _is.ColumnString locationCode;
 
-  /// Whether this institution should be shown in "Popular options" for location.
+  /// Whether this institution is shown in "Popular options" for the location.
   late final _is.ColumnBool isPopular;
 
   /// Lower rank means higher priority in popular ordering.

@@ -1,0 +1,18 @@
+### One audit trail entry for an entity. Never updated or deleted.
+class: AuditEvent
+table: audit_event
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  entityId: UuidValue, relation(parent=entity, onDelete=Cascade)
+  ### The acting user, or the nil UUID for system actions.
+  actorId: UuidValue
+  action: AuditAction
+  subjectType: AuditSubject?
+  subjectId: UuidValue?
+  ### JSON object with the action's details, including the before state of
+  ### edited or deleted rows.
+  payloadJson: String, default='{}'
+  createdAt: DateTime, default=now
+indexes:
+  audit_event_entity_created_idx:
+    fields: entityId, createdAt

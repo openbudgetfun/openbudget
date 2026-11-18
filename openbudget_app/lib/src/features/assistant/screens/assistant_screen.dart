@@ -13,15 +13,17 @@ import 'package:openbudget_app/src/features/assistant/widgets/assistant_message_
 import 'package:openbudget_app/src/features/assistant/widgets/assistant_proposal_card_view.dart';
 import 'package:openbudget_app/src/features/assistant/widgets/assistant_text.dart';
 import 'package:openbudget_app/src/features/assistant/widgets/assistant_usage_meter.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// The financial assistant: a conversation about one budget, the changes it
 /// proposes, and how much of the included usage is left.
 class AssistantScreen extends HookConsumerWidget {
-  const AssistantScreen({required this.budgetId, super.key});
+  const AssistantScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   static const composerFieldKey = Key('assistant-composer-field');
   static const sendButtonKey = Key('assistant-send-button');
@@ -33,9 +35,19 @@ class AssistantScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final chat = ref.watch(assistantChatProvider(budgetId));
+    final chat = ref.watch(assistantChatProvider(entityId));
     final usage = ref.watch(assistantUsageProvider);
-    final proposals = ref.watch(assistantProposalsProvider(budgetId));
+    final proposals = ref.watch(assistantProposalsProvider(entityId));
+    // The entity's country picks each reply's disclaimer; until it loads, or
+    // for a country with no rule pack, replies carry the generic one.
+    final jurisdiction = ref.watch(
+      entityDetailProvider(entityId).select(
+        (entity) => switch (entity.value?.countryCode) {
+          final code? => TaxJurisdiction.fromCountryCode(code),
+          null => null,
+        },
+      ),
+    );
     final controller = useTextEditingController();
     final scrollController = useScrollController();
     final hasText = useState(false);
@@ -67,18 +79,18 @@ class AssistantScreen extends HookConsumerWidget {
       final text = controller.text.trim();
       if (text.isEmpty || chat.isStreaming) return;
       controller.clear();
-      ref.read(assistantChatProvider(budgetId).notifier).send(text);
+      ref.read(assistantChatProvider(entityId).notifier).send(text);
     }
 
     void sendPrompt(String prompt) {
-      ref.read(assistantChatProvider(budgetId).notifier).send(prompt);
+      ref.read(assistantChatProvider(entityId).notifier).send(prompt);
     }
 
     Future<void> openConversations() => showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      builder: (_) => AssistantConversationsSheet(budgetId: budgetId),
+      builder: (_) => AssistantConversationsSheet(entityId: entityId),
     );
 
     return Scaffold(
@@ -99,7 +111,7 @@ class AssistantScreen extends HookConsumerWidget {
             tooltip: l10n.assistantOpenProposals,
             onPressed: () => context.pushNamed(
               assistantProposalsRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
             icon: SkribbleIcon(
               data: OpenBudgetIcons.note,
@@ -122,7 +134,7 @@ class AssistantScreen extends HookConsumerWidget {
               pendingProposals: proposals.asData?.value.pending.length ?? 0,
               onOpenProposals: () => context.pushNamed(
                 assistantProposalsRoute,
-                pathParameters: {'id': budgetId},
+                pathParameters: {'entityId': entityId},
               ),
             ),
           ),
@@ -147,8 +159,9 @@ class AssistantScreen extends HookConsumerWidget {
                               bottom: SpacingTokens.xs,
                             ),
                             child: _TimelineItemView(
-                              budgetId: budgetId,
+                              entityId: entityId,
                               item: item,
+                              jurisdiction: jurisdiction,
                             ),
                           ),
                       if (chat.isStreaming)
@@ -162,10 +175,10 @@ class AssistantScreen extends HookConsumerWidget {
                         ),
                       if (chat.failure case final failure?)
                         AssistantFailurePanel(
-                          budgetId: budgetId,
+                          entityId: entityId,
                           failure: failure,
                           onRetry: () => ref
-                              .read(assistantChatProvider(budgetId).notifier)
+                              .read(assistantChatProvider(entityId).notifier)
                               .retryLastMessage(),
                         ),
                     ],
@@ -266,10 +279,15 @@ class _EmptyConversation extends HookWidget {
 }
 
 class _TimelineItemView extends HookWidget {
-  const _TimelineItemView({required this.budgetId, required this.item});
+  const _TimelineItemView({
+    required this.entityId,
+    required this.item,
+    required this.jurisdiction,
+  });
 
-  final String budgetId;
+  final String entityId;
   final AssistantTimelineItem item;
+  final TaxJurisdiction? jurisdiction;
 
   @override
   Widget build(BuildContext context) {
@@ -280,15 +298,22 @@ class _TimelineItemView extends HookWidget {
         text: text,
         isUser: true,
       ),
-      AssistantAssistantMessage(:final text) => AssistantMessageBubble(
-        text: text,
-        isUser: false,
-      ),
+      AssistantAssistantMessage(
+        :final text,
+        :final sources,
+        :final touchesTaxOrInvestment,
+      ) =>
+        AssistantReplyBubble(
+          text: text,
+          sources: sources,
+          touchesTaxOrInvestment: touchesTaxOrInvestment,
+          jurisdiction: jurisdiction,
+        ),
       AssistantToolCall(:final toolName) => AssistantToolChip(
         label: assistantToolLabel(l10n, toolName),
       ),
       AssistantProposalItem(:final proposal) => AssistantProposalCardView(
-        budgetId: budgetId,
+        entityId: entityId,
         proposal: proposal,
       ),
     };

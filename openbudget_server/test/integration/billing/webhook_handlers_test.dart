@@ -7,6 +7,7 @@ import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart' show UuidValue;
 import 'package:test/test.dart';
 
+import '../helpers/auth_helper.dart';
 import '../test_tools/serverpod_test_tools.dart';
 
 void main() {
@@ -71,6 +72,13 @@ void main() {
   };
 
   withServerpod('Given StripeWebhookHandler', (sessionBuilder, endpoints) {
+    setUp(
+      () => ensureAuthUsers(sessionBuilder, [
+        for (final group in ['1', '2'])
+          for (var index = 1; index <= 5; index++)
+            '20000000-0000-4000-a000-000000000$group${index.toString().padLeft(2, '0')}',
+      ]),
+    );
     test('then a valid subscription event records an entitlement', () async {
       final userId = UuidValue.fromString(
         '20000000-0000-4000-a000-000000000101',
@@ -204,6 +212,16 @@ void main() {
     sessionBuilder,
     endpoints,
   ) {
+    setUp(
+      () => ensureAuthUsers(sessionBuilder, [
+        '20000000-0000-4000-a000-000000000201',
+        '20000000-0000-4000-a000-000000000202',
+        '20000000-0000-4000-a000-000000000203',
+        '20000000-0000-4000-a000-000000000204',
+        '20000000-0000-4000-a000-000000000205',
+      ]),
+    );
+
     test('then a valid App Store event records an entitlement', () async {
       final userId = UuidValue.fromString(
         '20000000-0000-4000-a000-000000000201',

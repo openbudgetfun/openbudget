@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/main.dart';
 import 'package:openbudget_app/src/features/agent_access/screens/agent_access_screen.dart';
 import 'package:openbudget_app/src/features/assistant/screens/assistant_screen.dart';
-import 'package:openbudget_core/openbudget_core.dart';
+import 'package:openbudget_app/src/features/assistant/widgets/assistant_message_bubble.dart';
+import 'package:openbudget_app/src/features/assistant/widgets/assistant_sources_sheet.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_question_field.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 import 'test_data.dart';
@@ -167,8 +170,7 @@ class BudgetShellPage {
       _destination(OpenBudgetIcons.envelopeOpen, OpenBudgetIcons.envelope);
   Finder get accountsTab =>
       _destination(OpenBudgetIcons.bank, OpenBudgetIcons.wallet);
-  Finder get addTab =>
-      _destination(OpenBudgetIcons.addCircle, OpenBudgetIcons.addCircle);
+  Finder get addTab => _destination(OpenBudgetIcons.add, OpenBudgetIcons.add);
   Finder get reflectTab =>
       _destination(OpenBudgetIcons.pieChart, OpenBudgetIcons.barChart);
   Finder get moreTab =>
@@ -257,35 +259,58 @@ class AccountDetailPage {
 
   final WidgetTester tester;
 
-  Finder get moreButton => _skribbleIcon(OpenBudgetIcons.more);
-  Finder get editAccountMenuItem => find.text('Edit Account');
+  /// The app-bar edit action; hidden while the account is closed.
+  Finder get editButton => find.byTooltip('Edit Account');
+  Finder get reconcileButton => find.widgetWithText(FilledButton, 'Reconcile');
 
-  Future<void> openOverflowMenu() async {
-    await tester.tap(moreButton);
+  Future<void> editViaAppBar() async {
+    await tester.tap(editButton);
     await tester.pumpAndSettle();
   }
 
-  Future<void> openEditAccount() async {
-    await openOverflowMenu();
-    await tester.tap(editAccountMenuItem);
-    await tester.pumpAndSettle();
+  Finder get reconcileSheet => find.byKey(const Key('account-reconcile-sheet'));
+  Finder get reconcileDifference =>
+      find.byKey(const Key('account-reconcile-difference'));
+
+  Future<void> openReconcileSheet() async {
+    await scrollAndTap(tester, reconcileButton);
   }
 }
 
-/// Page object for the full-screen edit account form.
-class EditAccountFormPage {
-  EditAccountFormPage(this.tester);
+/// Page object for the account type picker inside add account.
+class AccountTypePickerPage {
+  AccountTypePickerPage(this.tester);
 
   final WidgetTester tester;
 
-  Finder get closeAccountButton => find.text('Close Account');
+  Finder get addUnlinkedButton =>
+      find.byKey(const Key('add-account-add-unlinked-button'));
+  Finder get typeTile =>
+      find.byKey(const Key('add-account-unlinked-type-tile'));
 
-  /// Scrolls the form until the close action is built and visible.
-  ///
-  /// The restyle added enough sections above it that the button starts past the
-  /// lazy list's cache extent at 800x600.
-  Future<void> scrollToCloseAccount() =>
-      scrollIntoView(tester, closeAccountButton);
+  /// The picker row for an account type key such as `loan` or `crypto`.
+  Finder option(String key) =>
+      find.byKey(ValueKey('add-account-type-option-$key'));
+
+  /// Opens the unlinked-account form, then its type picker.
+  Future<void> open() async {
+    await scrollAndTap(tester, addUnlinkedButton);
+    await scrollAndTap(tester, typeTile);
+  }
+}
+
+/// Page object for the home screen's entity cards and combined net worth.
+class MultiCurrencyHomePage {
+  MultiCurrencyHomePage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get combinedNetWorth =>
+      find.byKey(const Key('home-combined-net-worth'));
+  Finder entityCard(String name) => find.text(name);
+
+  /// The note naming the currencies the server could not convert.
+  Finder missingCurrencies(String codes) => find.textContaining(codes);
 }
 
 /// Page object for the add transaction bottom sheet.
@@ -375,7 +400,7 @@ class MoreTabPage {
   final WidgetTester tester;
 
   Finder get title => find.text('More').first;
-  Finder get assistantTile => find.text('Assistant');
+  Finder get assistantTile => find.text('Money guide');
   Finder get recurringTile => find.text('Recurring Transactions');
   Finder get payeesTile => find.text('Payees');
   Finder get rulesTile => find.text('Transaction Rules');
@@ -426,8 +451,17 @@ class JournalEditorPage {
 
   Finder get title => find.text('New journal').first;
   Finder get editTitle => find.text('Edit draft').first;
-  Finder get referenceField => find.byKey(const Key('journal-reference-field'));
-  Finder get narrationField => find.byKey(const Key('journal-narration-field'));
+
+  /// The text inputs live inside [ObTextField] wrappers, so the finders
+  /// descend to the [EditableText] the tester can drive.
+  Finder get referenceField => find.descendant(
+    of: find.byKey(const Key('journal-reference-field')),
+    matching: find.byType(EditableText),
+  );
+  Finder get narrationField => find.descendant(
+    of: find.byKey(const Key('journal-narration-field')),
+    matching: find.byType(EditableText),
+  );
   Finder get addLineButton => find.byKey(const Key('journal-add-line'));
   Finder get balancedChip => find.byKey(const Key('journal-balanced-chip'));
   Finder get totalsCard => find.byKey(const Key('journal-totals'));
@@ -439,33 +473,22 @@ class JournalEditorPage {
 
   Finder lineAccount(int index) =>
       find.byKey(Key('journal-line-account-$index'));
-  Finder lineAmount(int index) => find.byKey(Key('journal-line-amount-$index'));
+  Finder lineAmount(int index) => find.descendant(
+    of: find.byKey(Key('journal-line-amount-$index')),
+    matching: find.byType(EditableText),
+  );
   Finder lineCredit(int index) => find.descendant(
     of: find.byKey(Key('journal-line-side-$index')),
     matching: find.text('Credit'),
   );
 
   /// The amount currently typed into line [index]'s field.
-  String lineAmountValue(int index) => tester
-      .widget<EditableText>(
-        find.descendant(
-          of: lineAmount(index),
-          matching: find.byType(EditableText),
-        ),
-      )
-      .controller
-      .text;
+  String lineAmountValue(int index) =>
+      tester.widget<EditableText>(lineAmount(index)).controller.text;
 
   /// The reference currently typed into the reference field.
-  String referenceValue() => tester
-      .widget<EditableText>(
-        find.descendant(
-          of: referenceField,
-          matching: find.byType(EditableText),
-        ),
-      )
-      .controller
-      .text;
+  String referenceValue() =>
+      tester.widget<EditableText>(referenceField).controller.text;
 
   Future<void> setReference(String text) async {
     await tester.enterText(referenceField, text);
@@ -555,29 +578,108 @@ class CategoryDetailPage {
       scrollIntoView(tester, renameCategoryButton);
 }
 
-/// Page object for the financial assistant.
+/// Page object for the Money guide.
 class AssistantPage {
   AssistantPage(this.tester);
 
   final WidgetTester tester;
 
-  Finder get title => find.text('Assistant').first;
-  Finder get emptyTitle => find.text('Ask about this plan');
+  Finder get title => find.text('Money guide').first;
+  Finder get emptyTitle => find.text('Ask the Money guide');
   Finder get suggestionTax => find.text('How much tax will I owe this year?');
   Finder get suggestionCuts => find.text('Where can I cut spending?');
   Finder get suggestionGoals => find.text('Am I on track for my goals?');
   Finder get composerField => find.byKey(AssistantScreen.composerFieldKey);
   Finder get sendButton => find.byKey(AssistantScreen.sendButtonKey);
-  Finder get typingIndicator => find.text('The assistant is thinking…');
+  Finder get typingIndicator => find.text('The Money guide is thinking…');
   Finder get applyButton => find.text('Apply').first;
   Finder get dismissButton => find.text('Dismiss').first;
   Finder get appliedChip => find.text('Applied');
   Finder get dismissedChip => find.text('Dismissed');
   Finder get disclaimer =>
-      find.text('Guidance only, not financial or tax advice.');
+      find.text('Guidance, not regulated financial advice.');
 
   Finder toolChip(String label) => find.text(label);
   Finder proposalSummary(String summary) => find.text(summary);
+
+  /// A reply, by its opening words; citation chips sit inside its text.
+  Finder reply(String text) => find.textContaining(text, findRichText: true);
+
+  /// The reply text that carries the inline mark for citation [number].
+  Finder citationMark(int number) => find.descendant(
+    of: find.byType(AssistantReplyBubble),
+    matching: find.byWidgetPredicate(
+      (widget) => widget is RichText && _hasMark(widget.text, number),
+    ),
+  );
+
+  static bool _hasMark(InlineSpan text, int number) {
+    var found = false;
+    text.visitChildren((span) {
+      found =
+          span is TextSpan &&
+          span.recognizer != null &&
+          span.text == assistantCitationMark('$number');
+      return !found;
+    });
+    return found;
+  }
+
+  /// Taps the first inline mark for citation [number], at its glyphs.
+  Future<void> tapCitationMark(int number) async {
+    final paragraph = tester.renderObject<RenderParagraph>(
+      citationMark(number).first,
+    );
+    final mark = assistantCitationMark('$number');
+    final start = paragraph.text
+        .toPlainText(includeSemanticsLabels: false)
+        .indexOf(mark);
+    final box = paragraph
+        .getBoxesForSelection(
+          TextSelection(baseOffset: start, extentOffset: start + mark.length),
+        )
+        .first
+        .toRect();
+    await tester.tapAt(paragraph.localToGlobal(box.center));
+    await tester.pumpAndSettle();
+  }
+
+  Finder get sourcesButton => find.byKey(AssistantReplyBubble.sourcesButtonKey);
+  Finder get replyDisclaimer => find.byKey(AssistantReplyBubble.disclaimerKey);
+
+  /// The disclaimer under a reply for a UK entity, which is its own wording
+  /// and never the footer's.
+  Finder get gbReplyDisclaimer => find.descendant(
+    of: replyDisclaimer,
+    matching: find.textContaining('ISA product', findRichText: true),
+  );
+  Finder get composerHint => find.text('Ask about money, tax or crypto…');
+  Finder get sourcesSheet => find.byKey(AssistantSourcesSheet.sheetKey);
+  Finder sourceTitle(String title) =>
+      find.descendant(of: sourcesSheet, matching: find.text(title));
+  Finder get secondaryBadge => find.descendant(
+    of: sourcesSheet,
+    matching: find.text('From a secondary source'),
+  );
+  Finder get announcedBadge => find.descendant(
+    of: sourcesSheet,
+    matching: find.text('Announced, not yet law'),
+  );
+  Finder conversationsLeft(int count) =>
+      find.text('About $count conversations left this month');
+
+  Future<void> ask(String question) async {
+    await tester.enterText(composerField, question);
+    await tester.pump();
+    await tester.tap(sendButton);
+    await tester.pumpAndSettle();
+  }
+
+  /// Closes the sources sheet by tapping the dimmed page above it.
+  Future<void> closeSourcesSheet() async {
+    await tester.tapAt(const Offset(20, 20));
+    await tester.pumpAndSettle();
+  }
 
   Future<void> sendSuggestion(String prompt) async {
     await tester.tap(find.text(prompt));
@@ -603,7 +705,7 @@ class PlusPage {
 
   Finder get settingsRow => find.text('OpenBudget Plus');
   Finder get title => find.text('OpenBudget Plus').first;
-  Finder get price => find.text(r'$10');
+  Finder get price => find.text(r'$20');
   Finder get planTitle => find.text('Your OpenBudget Plus plan');
   Finder get activeChip => find.text('Active');
   Finder get storeButton => find.text('Subscribe in the App Store');
@@ -684,6 +786,218 @@ Finder _iconFinder(WiredSvgIconData data) => find.byWidgetPredicate(
   (widget) => widget is SkribbleIcon && widget.data == data,
 );
 
+/// Page object for the create entity screen and its pickers.
+class CreateEntityPage {
+  CreateEntityPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get title => find.text('Create your books');
+  Finder get nameField => find.byKey(const Key('create-entity-name-field'));
+  Finder get kindPersonal => find.text('Personal');
+  Finder get kindSoleTrader => find.text('Sole trader');
+  Finder get kindCompany => find.text('Company');
+  Finder get countryRow => find.text('United Kingdom');
+  Finder get createButton => find.byKey(
+    const Key('create-entity-create-button'),
+  );
+
+  Finder get countryField => find.byKey(const Key('create-entity-country-row'));
+  Finder get currencyField =>
+      find.byKey(const Key('create-entity-currency-row'));
+  Finder get timeZoneField =>
+      find.byKey(const Key('create-entity-time-zone-row'));
+  Finder get taxYearField =>
+      find.byKey(const Key('create-entity-tax-year-row'));
+
+  /// The picker sheet that is open, if any.
+  Finder get pickerSheet => find.byType(BottomSheet);
+
+  /// The picker's search field.
+  Finder get pickerSearch => find.descendant(
+    of: pickerSheet,
+    matching: find.byType(TextField),
+  );
+
+  /// The row for [label] in the open picker (not the form row behind it).
+  Finder pickerRow(String label) => find.descendant(
+    of: pickerSheet,
+    matching: find.widgetWithText(InkWell, label),
+  );
+
+  /// What [field] currently shows: its value line, under the label.
+  String valueOf(Finder field) => tester
+      .widgetList<Text>(find.descendant(of: field, matching: find.byType(Text)))
+      .map((text) => text.data)
+      .whereType<String>()
+      .last;
+
+  /// Opens a form row's picker.
+  Future<void> open(Finder field) async {
+    await scrollAndTap(tester, field);
+  }
+
+  /// Types [query] into the open picker's search field.
+  Future<void> search(String query) async {
+    await tester.enterText(pickerSearch, query);
+    await tester.pumpAndSettle();
+  }
+
+  /// Opens the country picker, searches for [query] and picks [name].
+  Future<void> chooseCountry(String query, String name) async {
+    await open(countryField);
+    await search(query);
+    await tester.tap(pickerRow(name));
+    await tester.pumpAndSettle();
+  }
+
+  /// Opens the currency picker, searches for [query] and picks [name].
+  Future<void> chooseCurrency(String query, String name) async {
+    await open(currencyField);
+    await search(query);
+    await tester.tap(pickerRow(name));
+    await tester.pumpAndSettle();
+  }
+
+  /// Fills the name and submits with the pre-selected defaults (a personal
+  /// GB entity in GBP). [navigatesTo] is the first thing the flow waits for
+  /// on the screen the create redirects to; the real add account screen
+  /// shows "Add Accounts" in its app bar.
+  Future<String> create({
+    String name = 'My First Budget',
+    Finder? navigatesTo,
+  }) async {
+    await tester.enterText(nameField, name);
+    // Let the focused field finish scrolling its caret into view before the
+    // button is scrolled, or the two scrolls fight and the tap lands below
+    // the fold.
+    await tester.pumpAndSettle();
+    // The create button sits below the fold on the 800x600 surface.
+    await scrollAndTap(tester, createButton);
+    // Wait for the async create + the redirect into the next screen.
+    await waitForFinder(tester, navigatesTo ?? find.text('Add Accounts'));
+    await tester.pumpAndSettle();
+    return name;
+  }
+}
+
+/// Page object for the net worth screen.
+class NetWorthPage {
+  NetWorthPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get title => find.text('Net Worth').first;
+  Finder get headline => find.byKey(const Key('net-worth-headline'));
+  Finder get currencyChip => find.byKey(
+    const Key('net-worth-currency-chip'),
+  );
+  Finder get staleBadge => find.byKey(const Key('net-worth-stale-badge'));
+  Finder get incompleteCard =>
+      find.byKey(const Key('net-worth-incomplete-card'));
+  Finder get trustLine => find.textContaining('Rates as of');
+  Finder get tabByEntity => find.byKey(const Key('net-worth-tab-by-entity'));
+  Finder get tabByCurrency =>
+      find.byKey(const Key('net-worth-tab-by-currency'));
+  Finder get tabByAccount => find.byKey(const Key('net-worth-tab-by-account'));
+
+  /// "1 USD = 0.79 GBP · Nov 8" — the rate line behind a converted figure.
+  Finder rateLine(String from, String to) => find.textContaining('1 $from = ');
+
+  Finder currencyRow(String currencyCode) => find.text(currencyCode).first;
+
+  /// Opens the currency picker sheet and picks [code].
+  Future<void> switchReportingCurrency(String code) async {
+    await scrollIntoView(tester, currencyChip);
+    await tester.tap(currencyChip);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text(code).last,
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text(code).last);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> showByCurrency() => scrollAndTap(tester, tabByCurrency);
+
+  Future<void> showByAccount() => scrollAndTap(tester, tabByAccount);
+
+  // The Crypto section: the overprint bar, its rows and the chain / asset
+  // toggle.
+  Finder get cryptoSection => find.byKey(const Key('crypto-breakdown-section'));
+  Finder get cryptoTotal => find.byKey(const Key('crypto-breakdown-total'));
+  Finder get cryptoToggleByChain =>
+      find.byKey(const Key('crypto-breakdown-toggle-by-chain'));
+  Finder get cryptoToggleByAsset =>
+      find.byKey(const Key('crypto-breakdown-toggle-by-asset'));
+
+  /// The overprint bar for `byChain` or `byAsset`.
+  Finder cryptoBar(String grouping) =>
+      find.byKey(ValueKey('crypto-breakdown-bar-$grouping'));
+
+  /// One row, by the key the server gave its slice (`ethereumMainnet`,
+  /// `asset:USDC`, `other`).
+  Finder cryptoRow(String key) =>
+      find.byKey(ValueKey('crypto-breakdown-row-$key'));
+
+  Future<void> showCryptoByChain() => scrollAndTap(tester, cryptoToggleByChain);
+
+  Future<void> showCryptoByAsset() => scrollAndTap(tester, cryptoToggleByAsset);
+}
+
+/// Page object for the cross-currency transfer form.
+class TransferPage {
+  TransferPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get title => find.text('Transfer').first;
+  Finder get fromPicker => find.byKey(const Key('transfer-from-picker'));
+  Finder get toPicker => find.byKey(const Key('transfer-to-picker'));
+  Finder get sentField => find.byKey(const Key('transfer-sent-amount-field'));
+  Finder get receivedField => find.byKey(
+    const Key('transfer-received-amount-field'),
+  );
+  Finder get amountField => find.byKey(const Key('transfer-amount-field'));
+  Finder get impliedRate => find.byKey(const Key('transfer-implied-rate'));
+  Finder get useTodayRate => find.text("Use today's rate");
+  Finder get submitButton => find.byKey(
+    const Key('transfer-submit-button'),
+  );
+
+  /// Picks an account on either picker by its "Name (CUR)" item text.
+  Future<void> pickAccount({required String from, String? to}) async {
+    await tester.tap(fromPicker);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(from).last);
+    await tester.pumpAndSettle();
+    if (to != null) {
+      await tester.tap(toPicker);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(to).last);
+      await tester.pumpAndSettle();
+    }
+  }
+
+  Future<void> enterSent(String text) async {
+    await tester.enterText(sentField, text);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> enterReceived(String text) async {
+    await tester.enterText(receivedField, text);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> submit() async {
+    await scrollIntoView(tester, submitButton);
+    await tester.tap(submitButton);
+    await tester.pumpAndSettle();
+  }
+}
+
 /// Page object for the tax overview.
 class TaxOverviewPage {
   TaxOverviewPage(this.tester);
@@ -700,6 +1014,66 @@ class TaxOverviewPage {
     'Guidance only, not tax advice. Check figures with a qualified adviser '
     'before filing.',
   );
+  Finder get exportButton => find.byKey(const Key('tax-export-button'));
+  Finder get exportError => find.byKey(const Key('tax-export-error'));
+  Finder get upcoming => find.byKey(const Key('tax-upcoming'));
+  Finder get upcomingToggle => find.byKey(const Key('tax-upcoming-toggle'));
+  Finder get upcomingSourceLinks =>
+      find.byKey(const Key('tax-deadline-source'));
+
+  /// One upcoming date's card, by rule id and due day (`yyyymmdd`).
+  Finder deadline(String id, String day) =>
+      find.byKey(Key('tax-deadline-$id-$day'));
+
+  /// Every upcoming date's card.
+  Finder get deadlines => find.byWidgetPredicate(
+    (widget) =>
+        widget.key is ValueKey<String> &&
+        (widget.key! as ValueKey<String>).value.startsWith('tax-deadline-') &&
+        RegExp(r'-\d{8}$').hasMatch((widget.key! as ValueKey<String>).value),
+  );
+
+  /// Scrolls the Upcoming list into view.
+  Future<void> showUpcoming() => scrollIntoView(tester, upcoming);
+
+  /// Makes the export link and opens it, scrolling to the button first.
+  Future<void> export() async {
+    await scrollIntoView(tester, exportButton);
+    await tester.tap(exportButton);
+    await tester.pumpAndSettle();
+  }
+}
+
+/// Page object for the tax overview of a country with no tax pack.
+class UniversalTaxPage {
+  UniversalTaxPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get introTitle => find.text(TaxExportData.kenyaIntroTitle);
+  Finder get yearLabel => find.byKey(const Key('tax-year-label'));
+  Finder get summaryHero => find.byKey(const Key('tax-summary-hero'));
+  Finder get ratesTitle => find.text(TaxExportData.vatRatesTitle);
+  Finder get standardRate => find.text(TaxExportData.kenyaStandardRate);
+  Finder get secondaryBadge =>
+      find.byKey(const Key('tax-secondary-source-badge'));
+  Finder get authorityLink => find.byKey(const Key('tax-authority-link'));
+  Finder get exportButton => find.byKey(const Key('tax-export-button'));
+  Finder get exportError => find.byKey(const Key('tax-export-error'));
+
+  /// Makes the export link and opens it, scrolling to the button first.
+  Future<void> export() async {
+    await scrollIntoView(tester, exportButton);
+    await tester.tap(exportButton);
+    await tester.pumpAndSettle();
+  }
+
+  /// Opens the tax authority's website, scrolling to the link first.
+  Future<void> openAuthority() async {
+    await scrollIntoView(tester, authorityLink);
+    await tester.tap(authorityLink);
+    await tester.pumpAndSettle();
+  }
 }
 
 /// Page object for the tax profile form.
@@ -709,13 +1083,31 @@ class TaxProfilePage {
   final WidgetTester tester;
 
   Finder get title => find.text('Tax profile').first;
-  Finder get countryField =>
-      find.byType(DropdownButtonFormField<TaxJurisdiction>);
-  Finder get entityField => find.byType(DropdownButtonFormField<TaxEntityKind>);
-  Finder get scottishTaxpayerToggle => find.text('Scottish taxpayer');
-  Finder get studentLoanField => find.byType(DropdownButtonFormField<String>);
-  Finder get annualRentField => find.byType(TextField).first;
+
+  /// A question's field is found by the question's key, not its wording,
+  /// so the same page object serves every country's questions.
+  Finder question(String key) => find.byKey(taxQuestionFieldKey(key));
+
+  /// The jurisdiction comes from the entity now; the kind dropdown is the
+  /// only entity-level control left on the form.
+  Finder get entityField => question('entityKind');
+  Finder get scottishTaxpayerToggle => question('scottishTaxpayer');
+  Finder get taxResidentToggle => question('taxResident');
+  Finder get studentLoanField => question('studentLoanPlan');
+  Finder get annualRentField => question('annualRentMinor');
   Finder get saveButton => find.text('Save profile');
+
+  /// Scrolls [field] into view and taps it, for a switch or a dropdown.
+  Future<void> tapQuestion(Finder field) async {
+    await tester.scrollUntilVisible(
+      field,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(field);
+    await tester.pumpAndSettle();
+  }
 
   Future<void> save() async {
     await tester.scrollUntilVisible(
@@ -727,4 +1119,143 @@ class TaxProfilePage {
     await tester.tap(saveButton);
     await tester.pumpAndSettle();
   }
+}
+
+/// Page object for the expense form's FX affordances: the live rate line
+/// under the amount field and the manual-rate sheet it opens.
+class ExpenseFxPage {
+  ExpenseFxPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get fxLine => find.byKey(const Key('expense-fx-line'));
+  Finder get amountField => find.byKey(const Key('expense-amount-field'));
+  Finder get splitButton => find.byKey(const Key('expense-split-button'));
+  Finder get linesEditor => find.byKey(const Key('expense-lines-editor'));
+  Finder get setRateButton => find.text('Set rate').first;
+  Finder get manualRateSheet => find.text('Use your own rate').first;
+  Finder get manualRateField => find.byKey(const Key('manual-rate-field'));
+  Finder get manualRateUseButton => find.byKey(
+    const Key('manual-rate-use-button'),
+  );
+
+  /// Opens the manual-rate sheet and enters [rate].
+  Future<void> setManualRate(String rate) async {
+    await tester.tap(setRateButton);
+    await tester.pumpAndSettle();
+    await tester.enterText(manualRateField, rate);
+    await tester.pumpAndSettle();
+    await tester.tap(manualRateUseButton);
+    await tester.pumpAndSettle();
+  }
+}
+
+/// Page object for the add-a-wallet step of the add account flow.
+class AddWalletPage {
+  AddWalletPage(this.tester);
+
+  final WidgetTester tester;
+
+  /// The bank search step's "Add a crypto wallet" button.
+  Finder get entryButton =>
+      find.widgetWithText(FilledButton, 'Add a crypto wallet');
+  Finder get addressField => find.byKey(const Key('add-wallet-address-field'));
+  Finder get addButton => find.byKey(const Key('add-wallet-submit'));
+  Finder get detectedStamp =>
+      find.byKey(const Key('add-wallet-detected-stamp'));
+  Finder get doneButton => find.byKey(const Key('add-wallet-done'));
+  Finder get addAnotherButton =>
+      find.byKey(const Key('add-wallet-add-another'));
+
+  /// The postmark that lands when the wallet is in.
+  Finder get postmark => find.byType(ObPostmark);
+
+  /// The stamp for [network] (a `WalletNetwork` name, such as `baseMainnet`)
+  /// in the EVM picker.
+  Finder networkStamp(String network) =>
+      find.byKey(ValueKey('add-wallet-network-$network'));
+
+  Finder get pickerTitle => find.text('Where should OpenBudget look?');
+  Finder get refusalTitle => find.text("That's a private key");
+  Finder get unreadableTitle => find.text("Couldn't read your wallet");
+
+  /// Opens the wallet step from the bank search step.
+  Future<void> open() => scrollAndTap(tester, entryButton);
+
+  /// Pastes [text] into the field, as a person pasting from their wallet.
+  Future<void> paste(String text) async {
+    await tester.enterText(addressField, text);
+    await tester.pumpAndSettle();
+  }
+
+  /// What the field holds right now.
+  String get fieldText =>
+      tester.widget<TextField>(addressField).controller?.text ?? '';
+
+  /// Whether the Add wallet button can be tapped.
+  bool get canAdd => tester.widget<FilledButton>(addButton).onPressed != null;
+
+  Future<void> toggleNetwork(String network) async {
+    await tester.ensureVisible(networkStamp(network));
+    await tester.tap(networkStamp(network));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> tapAdd() async {
+    await tester.tap(addButton);
+    await tester.pump();
+  }
+}
+
+/// Page object for a wallet account's settings sheet on account detail.
+class WalletSettingsPage {
+  WalletSettingsPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get openButton => find.byKey(const Key('wallet-settings-button'));
+  Finder get nameField => find.byKey(const Key('wallet-settings-name-field'));
+  Finder get saveNameButton =>
+      find.byKey(const Key('wallet-settings-name-save'));
+  Finder get saveChainsButton =>
+      find.byKey(const Key('wallet-settings-save-networks'));
+  Finder get lookAheadButton =>
+      find.byKey(const Key('wallet-settings-look-ahead'));
+  Finder get removeConfirmButton =>
+      find.byKey(const Key('wallet-settings-remove-confirm'));
+  Finder get removeCancelButton =>
+      find.byKey(const Key('wallet-settings-remove-cancel'));
+  Finder get disconnectButton =>
+      find.byKey(const Key('wallet-settings-disconnect'));
+
+  /// The stamp for [network] (a `WalletNetwork` name, such as `baseMainnet`)
+  /// in the chain editor.
+  Finder networkStamp(String network) =>
+      find.byKey(ValueKey('wallet-settings-network-$network'));
+
+  Future<void> open() => scrollAndTap(tester, openButton);
+
+  /// Closes the sheet, as the system back gesture does.
+  Future<void> close() async {
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+  }
+
+  /// Scrolls account detail to the holdings, one section per chain.
+  Future<void> showHoldings() => scrollIntoView(tester, find.text('Holdings'));
+
+  Future<void> rename(String name) async {
+    await tester.enterText(nameField, name);
+    await tester.pumpAndSettle();
+    await scrollAndTap(tester, saveNameButton);
+  }
+
+  Future<void> toggleNetwork(String network) =>
+      scrollAndTap(tester, networkStamp(network));
+
+  Future<void> saveChains() => scrollAndTap(tester, saveChainsButton);
+
+  Future<void> confirmRemoval() => scrollAndTap(tester, removeConfirmButton);
+
+  Future<void> lookForOtherChains() => scrollAndTap(tester, lookAheadButton);
 }

@@ -12,14 +12,13 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// A saved allocation template that can be applied to any month.
+/// A saved set of allocations that can be applied to any month.
 abstract class BudgetTemplate
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   BudgetTemplate._({
     this.id,
-    required this.budgetId,
+    required this.entityId,
     required this.name,
-    required this.allocationData,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : createdAt = createdAt ?? DateTime.now(),
@@ -27,9 +26,8 @@ abstract class BudgetTemplate
 
   factory BudgetTemplate({
     _isc.UuidValue? id,
-    required _isc.UuidValue budgetId,
+    required _isc.UuidValue entityId,
     required String name,
-    required String allocationData,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _BudgetTemplateImpl;
@@ -39,11 +37,10 @@ abstract class BudgetTemplate
       id: jsonSerialization['id'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
       name: jsonSerialization['name'] as String,
-      allocationData: jsonSerialization['allocationData'] as String,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -58,13 +55,10 @@ abstract class BudgetTemplate
   /// the id will be null.
   _isc.UuidValue? id;
 
-  _isc.UuidValue budgetId;
+  _isc.UuidValue entityId;
 
-  /// User-chosen name for the template (e.g. "Standard Month").
+  /// User-chosen name, such as "Standard month".
   String name;
-
-  /// JSON-encoded map of envelope ID → allocated cents.
-  String allocationData;
 
   DateTime createdAt;
 
@@ -75,9 +69,8 @@ abstract class BudgetTemplate
   @_isc.useResult
   BudgetTemplate copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? budgetId,
+    _isc.UuidValue? entityId,
     String? name,
-    String? allocationData,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -86,9 +79,8 @@ abstract class BudgetTemplate
     return {
       '__className__': 'BudgetTemplate',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'name': name,
-      'allocationData': allocationData,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -99,9 +91,8 @@ abstract class BudgetTemplate
     return {
       '__className__': 'BudgetTemplate',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'name': name,
-      'allocationData': allocationData,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -116,16 +107,14 @@ abstract class BudgetTemplate
 class _BudgetTemplateImpl extends BudgetTemplate {
   _BudgetTemplateImpl({
     _isc.UuidValue? id,
-    required _isc.UuidValue budgetId,
+    required _isc.UuidValue entityId,
     required String name,
-    required String allocationData,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
          id: id,
-         budgetId: budgetId,
+         entityId: entityId,
          name: name,
-         allocationData: allocationData,
          createdAt: createdAt,
          updatedAt: updatedAt,
        );
@@ -136,17 +125,15 @@ class _BudgetTemplateImpl extends BudgetTemplate {
   @override
   BudgetTemplate copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? budgetId,
+    _isc.UuidValue? entityId,
     String? name,
-    String? allocationData,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return BudgetTemplate(
       id: id is _isc.UndefinedSentinel ? this.id : id,
-      budgetId: budgetId ?? this.budgetId,
+      entityId: entityId ?? this.entityId,
       name: name ?? this.name,
-      allocationData: allocationData ?? this.allocationData,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -24,7 +24,7 @@ TaxInput _soleTraderInput({
   bool vat = false,
 }) => TaxInput(
   profile: GbTaxProfile(
-    entityKind: TaxEntityKind.soleTrader,
+    entityKind: EntityKind.soleTrader,
     salesTaxRegistered: vat,
   ),
   year: _gb.taxYear(startYear),
@@ -37,7 +37,7 @@ TaxInput _companyInput({
   bool vat = false,
 }) => TaxInput(
   profile: GbTaxProfile(
-    entityKind: TaxEntityKind.company,
+    entityKind: EntityKind.company,
     salesTaxRegistered: vat,
   ),
   year: _gb.taxYear(startYear),
@@ -345,7 +345,7 @@ void main() {
     test('associated companies divide the limits (CTM03935, vector 8)', () {
       final input = TaxInput(
         profile: const GbTaxProfile(
-          entityKind: TaxEntityKind.company,
+          entityKind: EntityKind.company,
           associatedCompanies: 1,
         ),
         year: _gb.taxYear(2026),
@@ -423,7 +423,7 @@ void main() {
     });
 
     test('each kind only sees its own catalog', () {
-      final soleTrader = _gb.categoriesFor(TaxEntityKind.soleTrader);
+      final soleTrader = _gb.categoriesFor(EntityKind.soleTrader);
       expect(soleTrader.first.code, 'gb.se.turnover');
       expect(
         soleTrader.any((category) => category.code.startsWith('gb.ind.')),
@@ -433,7 +433,7 @@ void main() {
         soleTrader.any((category) => category.code.startsWith('gb.vat.')),
         isTrue,
       );
-      final company = _gb.categoriesFor(TaxEntityKind.company);
+      final company = _gb.categoriesFor(EntityKind.company);
       expect(company.first.code, 'gb.co.turnover');
       expect(
         company.any((category) => category.code.startsWith('gb.vat.')),
@@ -443,7 +443,7 @@ void main() {
 
     test('codes are unique and prefixed', () {
       final codes = _gb
-          .categoriesFor(TaxEntityKind.individual)
+          .categoriesFor(EntityKind.individual)
           .map((category) => category.code);
       expect(codes.toSet(), hasLength(codes.length));
       expect(codes.every((code) => code.startsWith('gb.')), isTrue);
@@ -485,7 +485,7 @@ void main() {
         entries: [_pounds('gb.co.turnover', 60000)],
       );
       final input = TaxInput(
-        profile: const GbTaxProfile(entityKind: TaxEntityKind.individual),
+        profile: const GbTaxProfile(entityKind: EntityKind.individual),
         year: _gb.taxYear(2026),
         entries: const [],
         linked: [company],
@@ -504,7 +504,7 @@ void main() {
         entries: [_pounds('gb.co.turnover', 100000)],
       );
       final input = TaxInput(
-        profile: const GbTaxProfile(entityKind: TaxEntityKind.individual),
+        profile: const GbTaxProfile(entityKind: EntityKind.individual),
         year: _gb.taxYear(2026),
         entries: const [],
         linked: [company],
@@ -529,7 +529,7 @@ void main() {
         ],
       );
       final input = TaxInput(
-        profile: const GbTaxProfile(entityKind: TaxEntityKind.individual),
+        profile: const GbTaxProfile(entityKind: EntityKind.individual),
         year: _gb.taxYear(2026),
         entries: const [],
         linked: [company],
@@ -551,7 +551,7 @@ void main() {
         ],
       );
       final input = TaxInput(
-        profile: const GbTaxProfile(entityKind: TaxEntityKind.individual),
+        profile: const GbTaxProfile(entityKind: EntityKind.individual),
         year: _gb.taxYear(2026),
         entries: const [],
         linked: [company],
@@ -571,7 +571,7 @@ void main() {
         entries: [_pounds('gb.co.turnover', 100000)],
       );
       final input = TaxInput(
-        profile: const GbTaxProfile(entityKind: TaxEntityKind.individual),
+        profile: const GbTaxProfile(entityKind: EntityKind.individual),
         year: _gb.taxYear(2026),
         entries: const [],
         linked: [company],

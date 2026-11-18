@@ -1,0 +1,12 @@
+### One line of a TransactionInput. Base amounts are always computed on the
+### server.
+class: TransactionLineInput
+fields:
+  ### Signed account minor units; the lines must sum to the transaction.
+  amountMinor: int
+  envelopeId: UuidValue?
+  ledgerAccountId: UuidValue?
+  taxCategoryCode: String?
+  businessUsePercent: int?
+  salesTaxMinor: int?
+  memo: String?

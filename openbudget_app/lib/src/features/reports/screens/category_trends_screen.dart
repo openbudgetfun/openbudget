@@ -3,26 +3,22 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/category_trends_provider.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_group_names.dart';
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
-import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// One line per category, one drawn bar per month.
 class CategoryTrendsScreen extends HookConsumerWidget {
-  const CategoryTrendsScreen({required this.budgetId, super.key});
+  const CategoryTrendsScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final trendsAsync = ref.watch(categoryTrendsProvider(budgetId));
-    final converter = ref
-        .watch(displayCurrencyConverterProvider(budgetId))
-        .asData
-        ?.value;
+    final trendsAsync = ref.watch(categoryTrendsProvider(entityId));
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.categoryTrendsTitle)),
@@ -53,8 +49,6 @@ class CategoryTrendsScreen extends HookConsumerWidget {
             );
           }
 
-          final sourceCurrency = data.currencyCode;
-
           return ListView(
             padding: const EdgeInsets.fromLTRB(
               SpacingTokens.md,
@@ -79,8 +73,7 @@ class CategoryTrendsScreen extends HookConsumerWidget {
                   child: _CategoryTrendCard(
                     category: category,
                     months: data.months,
-                    sourceCurrency: sourceCurrency,
-                    converter: converter,
+                    currencyCode: data.currencyCode,
                   ),
                 ),
             ],
@@ -95,40 +88,34 @@ class _CategoryTrendCard extends HookWidget {
   const _CategoryTrendCard({
     required this.category,
     required this.months,
-    required this.sourceCurrency,
-    required this.converter,
+    required this.currencyCode,
   });
 
   final CategoryTrendLine category;
-  final List<MonthLabel> months;
-  final String sourceCurrency;
-  final DisplayCurrencyConverter? converter;
+  final List<int> months;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final maxCents = category.monthlyCents.fold<int>(
+    final maxMinor = category.monthlyMinor.fold<int>(
       0,
       (max, v) => v > max ? v : max,
     );
-    String format(int cents) =>
-        converter?.formatAmount(
-          amountCents: cents,
-          currencyCode: sourceCurrency,
-        ) ??
-        formatCentsForCode(cents, sourceCurrency);
+    String format(int minor) => formatMinorForCode(minor, currencyCode);
+    final categoryName = reportGroupLabel(l10n, category.categoryName);
 
     return Semantics(
       container: true,
       label: reportChartSummary(
         l10n,
-        title: category.categoryName,
+        title: categoryName,
         entries: [
           for (final (index, month) in months.indexed)
             (
-              reportMonthLabel(l10n, month.month, month.year),
-              format(category.monthlyCents[index]),
+              reportYyyymmLabel(l10n, month),
+              format(category.monthlyMinor[index]),
             ),
         ],
       ),
@@ -142,14 +129,14 @@ class _CategoryTrendCard extends HookWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      category.categoryName,
+                      categoryName,
                       style: theme.textTheme.titleSmall,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.sm),
                   ObAmount(
-                    format(category.totalCents),
+                    format(category.totalMinor),
                     style: theme.textTheme.titleSmall,
                   ),
                 ],
@@ -162,7 +149,7 @@ class _CategoryTrendCard extends HookWidget {
                     SizedBox(
                       width: 44,
                       child: Text(
-                        reportMonthAxisLabel(l10n, month.month),
+                        reportYyyymmAxisLabel(l10n, month),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.ob.mutedInk,
                         ),
@@ -170,8 +157,8 @@ class _CategoryTrendCard extends HookWidget {
                     ),
                     Expanded(
                       child: ReportTrackBar(
-                        fraction: maxCents > 0
-                            ? category.monthlyCents[index] / maxCents
+                        fraction: maxMinor > 0
+                            ? category.monthlyMinor[index] / maxMinor
                             : 0,
                         tone: ObTone.brand,
                         height: 12,
@@ -182,7 +169,7 @@ class _CategoryTrendCard extends HookWidget {
                     SizedBox(
                       width: 88,
                       child: ObAmount(
-                        format(category.monthlyCents[index]),
+                        format(category.monthlyMinor[index]),
                         style: theme.textTheme.bodySmall,
                         textAlign: TextAlign.end,
                       ),

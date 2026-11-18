@@ -1,0 +1,12 @@
+### Whether a holding counts toward net worth.
+enum: SpamVerdict
+serialized: byName
+values:
+  ### Counted when priced.
+  - clean
+  ### Matched a spam rule; not counted until the user allows it.
+  - suspected
+  ### The user hid it; never counted.
+  - hiddenByUser
+  ### The user allowed it; counted when priced, whatever the rules say.
+  - allowedByUser

@@ -1,0 +1,41 @@
+{
+  "result": {
+    "account": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
+    "ledger_hash": "AEC588805049D8291B3DB7B6F2FE41A8BD2ACBD8674438A4CE9BA30FC7ED859C",
+    "ledger_index": 108309950,
+    "limit": 200,
+    "lines": [
+      {
+        "account": "rKUK9omZqVEnraCipKNFb5q4tuNTeqEDZS",
+        "balance": "0",
+        "currency": "BTC",
+        "limit": "0",
+        "limit_peer": "10",
+        "quality_in": 0,
+        "quality_out": 0
+      },
+      {
+        "account": "rngJ9Co6MPZxJcyepRv2hMPV1HqaeGCdVU",
+        "balance": "0",
+        "currency": "USD",
+        "limit": "0",
+        "limit_peer": "250",
+        "no_ripple_peer": true,
+        "quality_in": 0,
+        "quality_out": 0
+      },
+      {
+        "account": "rGgEwKunXUypZEXvPnyM6bqXb3LVVVnPw6",
+        "balance": "0",
+        "currency": "USD",
+        "limit": "0",
+        "limit_peer": "0.1",
+        "quality_in": 0,
+        "quality_out": 0
+      }
+    ],
+    "marker": "0E08B8DF9D4CC7DEA3DBBC867EEEE0F1EEDE71A1797325233D8D56DD9BAF95CC,7",
+    "validated": true,
+    "status": "success"
+  }
+}

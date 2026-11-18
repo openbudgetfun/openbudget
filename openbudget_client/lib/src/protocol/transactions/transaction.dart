@@ -10,55 +10,70 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// A financial transaction within a budget, optionally assigned to an envelope.
+import '../transactions/transaction_flag.dart' as _i2fej0yw;
+import '../transactions/transaction_kind.dart' as _iwdxlbcu;
+import '../transactions/transaction_status.dart' as _i45koviu;
+
+/// Money moving into or out of one account on one calendar date.
+///
+/// The header is the movement; its lines allocate it to envelopes, ledger
+/// accounts and tax treatments. Written only through TransactionWriter.
 abstract class Transaction
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   Transaction._({
     this.id,
-    required this.description,
-    required this.amountCents,
-    required this.currencyCode,
-    this.envelopeId,
-    required this.budgetId,
-    this.accountId,
+    required this.entityId,
+    required this.accountId,
+    required this.date,
+    required this.amountMinor,
+    required this.baseAmountMinor,
+    String? fxRate,
+    required this.fxRateDate,
+    _ifz8weqz.FxRateSource? fxRateSource,
+    _iwdxlbcu.TransactionKind? kind,
+    _i45koviu.TransactionStatus? status,
+    this.flag,
     this.payeeId,
-    required this.transactionDate,
-    this.transferPairId,
-    this.parentTransactionId,
+    String? description,
     this.memo,
-    bool? cleared,
-    bool? reconciled,
-    this.flagColor,
-    this.taxCategoryCode,
-    this.businessUsePercent,
-    this.salesTaxCents,
+    this.externalId,
+    this.recurringTransactionId,
+    int? revision,
     DateTime? createdAt,
-  }) : cleared = cleared ?? false,
-       reconciled = reconciled ?? false,
-       createdAt = createdAt ?? DateTime.now();
+    DateTime? updatedAt,
+  }) : fxRate = fxRate ?? '1',
+       fxRateSource = fxRateSource ?? _ifz8weqz.FxRateSource.identity,
+       kind = kind ?? _iwdxlbcu.TransactionKind.standard,
+       status = status ?? _i45koviu.TransactionStatus.uncleared,
+       description = description ?? '',
+       revision = revision ?? 0,
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   factory Transaction({
     _isc.UuidValue? id,
-    required String description,
-    required int amountCents,
-    required String currencyCode,
-    _isc.UuidValue? envelopeId,
-    required _isc.UuidValue budgetId,
-    _isc.UuidValue? accountId,
+    required _isc.UuidValue entityId,
+    required _isc.UuidValue accountId,
+    required DateTime date,
+    required int amountMinor,
+    required int baseAmountMinor,
+    String? fxRate,
+    required DateTime fxRateDate,
+    _ifz8weqz.FxRateSource? fxRateSource,
+    _iwdxlbcu.TransactionKind? kind,
+    _i45koviu.TransactionStatus? status,
+    _i2fej0yw.TransactionFlag? flag,
     _isc.UuidValue? payeeId,
-    required DateTime transactionDate,
-    _isc.UuidValue? transferPairId,
-    _isc.UuidValue? parentTransactionId,
+    String? description,
     String? memo,
-    bool? cleared,
-    bool? reconciled,
-    String? flagColor,
-    String? taxCategoryCode,
-    int? businessUsePercent,
-    int? salesTaxCents,
+    String? externalId,
+    _isc.UuidValue? recurringTransactionId,
+    int? revision,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) = _TransactionImpl;
 
   factory Transaction.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -66,52 +81,58 @@ abstract class Transaction
       id: jsonSerialization['id'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      description: jsonSerialization['description'] as String,
-      amountCents: jsonSerialization['amountCents'] as int,
-      currencyCode: jsonSerialization['currencyCode'] as String,
-      envelopeId: jsonSerialization['envelopeId'] == null
-          ? null
-          : _isc.UuidValueJsonExtension.fromJson(
-              jsonSerialization['envelopeId'],
-            ),
-      budgetId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
-      accountId: jsonSerialization['accountId'] == null
+      accountId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['accountId'],
+      ),
+      date: _isc.DateTimeJsonExtension.fromJson(jsonSerialization['date']),
+      amountMinor: jsonSerialization['amountMinor'] as int,
+      baseAmountMinor: jsonSerialization['baseAmountMinor'] as int,
+      fxRate: jsonSerialization['fxRate'] as String?,
+      fxRateDate: _isc.DateTimeJsonExtension.fromJson(
+        jsonSerialization['fxRateDate'],
+      ),
+      fxRateSource: jsonSerialization['fxRateSource'] == null
           ? null
-          : _isc.UuidValueJsonExtension.fromJson(
-              jsonSerialization['accountId'],
+          : _ifz8weqz.FxRateSource.fromJson(
+              (jsonSerialization['fxRateSource'] as String),
+            ),
+      kind: jsonSerialization['kind'] == null
+          ? null
+          : _iwdxlbcu.TransactionKind.fromJson(
+              (jsonSerialization['kind'] as String),
+            ),
+      status: jsonSerialization['status'] == null
+          ? null
+          : _i45koviu.TransactionStatus.fromJson(
+              (jsonSerialization['status'] as String),
+            ),
+      flag: jsonSerialization['flag'] == null
+          ? null
+          : _i2fej0yw.TransactionFlag.fromJson(
+              (jsonSerialization['flag'] as String),
             ),
       payeeId: jsonSerialization['payeeId'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['payeeId']),
-      transactionDate: _isc.DateTimeJsonExtension.fromJson(
-        jsonSerialization['transactionDate'],
-      ),
-      transferPairId: jsonSerialization['transferPairId'] == null
-          ? null
-          : _isc.UuidValueJsonExtension.fromJson(
-              jsonSerialization['transferPairId'],
-            ),
-      parentTransactionId: jsonSerialization['parentTransactionId'] == null
-          ? null
-          : _isc.UuidValueJsonExtension.fromJson(
-              jsonSerialization['parentTransactionId'],
-            ),
+      description: jsonSerialization['description'] as String?,
       memo: jsonSerialization['memo'] as String?,
-      cleared: jsonSerialization['cleared'] == null
+      externalId: jsonSerialization['externalId'] as String?,
+      recurringTransactionId:
+          jsonSerialization['recurringTransactionId'] == null
           ? null
-          : _isc.BoolJsonExtension.fromJson(jsonSerialization['cleared']),
-      reconciled: jsonSerialization['reconciled'] == null
-          ? null
-          : _isc.BoolJsonExtension.fromJson(jsonSerialization['reconciled']),
-      flagColor: jsonSerialization['flagColor'] as String?,
-      taxCategoryCode: jsonSerialization['taxCategoryCode'] as String?,
-      businessUsePercent: jsonSerialization['businessUsePercent'] as int?,
-      salesTaxCents: jsonSerialization['salesTaxCents'] as int?,
+          : _isc.UuidValueJsonExtension.fromJson(
+              jsonSerialization['recurringTransactionId'],
+            ),
+      revision: jsonSerialization['revision'] as int?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+      updatedAt: jsonSerialization['updatedAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
@@ -120,103 +141,105 @@ abstract class Transaction
   /// the id will be null.
   _isc.UuidValue? id;
 
-  String description;
+  /// Always the account's entity; never changes.
+  _isc.UuidValue entityId;
 
-  /// Amount in integer cents. Positive = inflow, negative = outflow.
-  int amountCents;
+  _isc.UuidValue accountId;
 
-  /// ISO 4217 currency code.
-  String currencyCode;
+  /// Calendar date in the entity's time zone, at UTC midnight.
+  DateTime date;
 
-  _isc.UuidValue? envelopeId;
+  /// Signed amount in account-currency minor units: positive in, negative out.
+  int amountMinor;
 
-  _isc.UuidValue budgetId;
+  /// The same movement in the entity's base-currency minor units.
+  int baseAmountMinor;
 
-  /// The account this transaction belongs to (optional for backwards compat).
-  _isc.UuidValue? accountId;
+  /// Base currency per one unit of the account currency, exact decimal.
+  String fxRate;
 
-  /// The payee associated with this transaction.
+  /// Calendar date of the rate actually used.
+  DateTime fxRateDate;
+
+  _ifz8weqz.FxRateSource fxRateSource;
+
+  _iwdxlbcu.TransactionKind kind;
+
+  _i45koviu.TransactionStatus status;
+
+  _i2fej0yw.TransactionFlag? flag;
+
   _isc.UuidValue? payeeId;
 
-  DateTime transactionDate;
+  /// Statement text or a short title.
+  String description;
 
-  /// If this transaction is part of a transfer, this links to the paired transaction.
-  _isc.UuidValue? transferPairId;
-
-  /// If this is a split sub-transaction, links to the parent transaction.
-  _isc.UuidValue? parentTransactionId;
-
-  /// Optional user memo or note for additional context.
   String? memo;
 
-  /// Whether this transaction has been cleared by the user.
-  bool cleared;
+  /// Provider id for imported rows (Plaid transaction_id, `csv:<sha256>`),
+  /// unique per account, so imports are idempotent.
+  String? externalId;
 
-  /// Whether this transaction has been reconciled.
-  bool reconciled;
+  _isc.UuidValue? recurringTransactionId;
 
-  /// Optional flag color for marking transactions (red, orange, yellow, green, blue, purple).
-  String? flagColor;
-
-  /// Tax category overriding the envelope's default, when set.
-  String? taxCategoryCode;
-
-  /// Percentage of the transaction used for business, from 0 to 100.
-  int? businessUsePercent;
-
-  /// Sales tax included in amountCents, when the receipt shows it.
-  int? salesTaxCents;
+  /// Increments whenever date, amount, account or lines change; ledger-mode
+  /// books post one journal per revision.
+  int revision;
 
   DateTime createdAt;
+
+  DateTime updatedAt;
 
   /// Returns a shallow copy of this [Transaction]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
   Transaction copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    String? description,
-    int? amountCents,
-    String? currencyCode,
-    _isc.UuidValue? envelopeId = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? budgetId,
-    _isc.UuidValue? accountId = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? entityId,
+    _isc.UuidValue? accountId,
+    DateTime? date,
+    int? amountMinor,
+    int? baseAmountMinor,
+    String? fxRate,
+    DateTime? fxRateDate,
+    _ifz8weqz.FxRateSource? fxRateSource,
+    _iwdxlbcu.TransactionKind? kind,
+    _i45koviu.TransactionStatus? status,
+    _i2fej0yw.TransactionFlag? flag,
     _isc.UuidValue? payeeId = const _isc.$UndefinedUuidValue(),
-    DateTime? transactionDate,
-    _isc.UuidValue? transferPairId = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? parentTransactionId = const _isc.$UndefinedUuidValue(),
+    String? description,
     String? memo,
-    bool? cleared,
-    bool? reconciled,
-    String? flagColor,
-    String? taxCategoryCode,
-    int? businessUsePercent,
-    int? salesTaxCents,
+    String? externalId,
+    _isc.UuidValue? recurringTransactionId = const _isc.$UndefinedUuidValue(),
+    int? revision,
     DateTime? createdAt,
+    DateTime? updatedAt,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Transaction',
       if (id != null) 'id': id?.toJson(),
-      'description': description,
-      'amountCents': amountCents,
-      'currencyCode': currencyCode,
-      if (envelopeId != null) 'envelopeId': envelopeId?.toJson(),
-      'budgetId': budgetId.toJson(),
-      if (accountId != null) 'accountId': accountId?.toJson(),
+      'entityId': entityId.toJson(),
+      'accountId': accountId.toJson(),
+      'date': date.toJson(),
+      'amountMinor': amountMinor,
+      'baseAmountMinor': baseAmountMinor,
+      'fxRate': fxRate,
+      'fxRateDate': fxRateDate.toJson(),
+      'fxRateSource': fxRateSource.toJson(),
+      'kind': kind.toJson(),
+      'status': status.toJson(),
+      if (flag != null) 'flag': flag?.toJson(),
       if (payeeId != null) 'payeeId': payeeId?.toJson(),
-      'transactionDate': transactionDate.toJson(),
-      if (transferPairId != null) 'transferPairId': transferPairId?.toJson(),
-      if (parentTransactionId != null)
-        'parentTransactionId': parentTransactionId?.toJson(),
+      'description': description,
       if (memo != null) 'memo': memo,
-      'cleared': cleared,
-      'reconciled': reconciled,
-      if (flagColor != null) 'flagColor': flagColor,
-      if (taxCategoryCode != null) 'taxCategoryCode': taxCategoryCode,
-      if (businessUsePercent != null) 'businessUsePercent': businessUsePercent,
-      if (salesTaxCents != null) 'salesTaxCents': salesTaxCents,
+      if (externalId != null) 'externalId': externalId,
+      if (recurringTransactionId != null)
+        'recurringTransactionId': recurringTransactionId?.toJson(),
+      'revision': revision,
       'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -225,25 +248,26 @@ abstract class Transaction
     return {
       '__className__': 'Transaction',
       if (id != null) 'id': id?.toJson(),
-      'description': description,
-      'amountCents': amountCents,
-      'currencyCode': currencyCode,
-      if (envelopeId != null) 'envelopeId': envelopeId?.toJson(),
-      'budgetId': budgetId.toJson(),
-      if (accountId != null) 'accountId': accountId?.toJson(),
+      'entityId': entityId.toJson(),
+      'accountId': accountId.toJson(),
+      'date': date.toJson(),
+      'amountMinor': amountMinor,
+      'baseAmountMinor': baseAmountMinor,
+      'fxRate': fxRate,
+      'fxRateDate': fxRateDate.toJson(),
+      'fxRateSource': fxRateSource.toJson(),
+      'kind': kind.toJson(),
+      'status': status.toJson(),
+      if (flag != null) 'flag': flag?.toJson(),
       if (payeeId != null) 'payeeId': payeeId?.toJson(),
-      'transactionDate': transactionDate.toJson(),
-      if (transferPairId != null) 'transferPairId': transferPairId?.toJson(),
-      if (parentTransactionId != null)
-        'parentTransactionId': parentTransactionId?.toJson(),
+      'description': description,
       if (memo != null) 'memo': memo,
-      'cleared': cleared,
-      'reconciled': reconciled,
-      if (flagColor != null) 'flagColor': flagColor,
-      if (taxCategoryCode != null) 'taxCategoryCode': taxCategoryCode,
-      if (businessUsePercent != null) 'businessUsePercent': businessUsePercent,
-      if (salesTaxCents != null) 'salesTaxCents': salesTaxCents,
+      if (externalId != null) 'externalId': externalId,
+      if (recurringTransactionId != null)
+        'recurringTransactionId': recurringTransactionId?.toJson(),
+      'revision': revision,
       'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -258,44 +282,46 @@ class _Undefined {}
 class _TransactionImpl extends Transaction {
   _TransactionImpl({
     _isc.UuidValue? id,
-    required String description,
-    required int amountCents,
-    required String currencyCode,
-    _isc.UuidValue? envelopeId,
-    required _isc.UuidValue budgetId,
-    _isc.UuidValue? accountId,
+    required _isc.UuidValue entityId,
+    required _isc.UuidValue accountId,
+    required DateTime date,
+    required int amountMinor,
+    required int baseAmountMinor,
+    String? fxRate,
+    required DateTime fxRateDate,
+    _ifz8weqz.FxRateSource? fxRateSource,
+    _iwdxlbcu.TransactionKind? kind,
+    _i45koviu.TransactionStatus? status,
+    _i2fej0yw.TransactionFlag? flag,
     _isc.UuidValue? payeeId,
-    required DateTime transactionDate,
-    _isc.UuidValue? transferPairId,
-    _isc.UuidValue? parentTransactionId,
+    String? description,
     String? memo,
-    bool? cleared,
-    bool? reconciled,
-    String? flagColor,
-    String? taxCategoryCode,
-    int? businessUsePercent,
-    int? salesTaxCents,
+    String? externalId,
+    _isc.UuidValue? recurringTransactionId,
+    int? revision,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) : super._(
          id: id,
-         description: description,
-         amountCents: amountCents,
-         currencyCode: currencyCode,
-         envelopeId: envelopeId,
-         budgetId: budgetId,
+         entityId: entityId,
          accountId: accountId,
+         date: date,
+         amountMinor: amountMinor,
+         baseAmountMinor: baseAmountMinor,
+         fxRate: fxRate,
+         fxRateDate: fxRateDate,
+         fxRateSource: fxRateSource,
+         kind: kind,
+         status: status,
+         flag: flag,
          payeeId: payeeId,
-         transactionDate: transactionDate,
-         transferPairId: transferPairId,
-         parentTransactionId: parentTransactionId,
+         description: description,
          memo: memo,
-         cleared: cleared,
-         reconciled: reconciled,
-         flagColor: flagColor,
-         taxCategoryCode: taxCategoryCode,
-         businessUsePercent: businessUsePercent,
-         salesTaxCents: salesTaxCents,
+         externalId: externalId,
+         recurringTransactionId: recurringTransactionId,
+         revision: revision,
          createdAt: createdAt,
+         updatedAt: updatedAt,
        );
 
   /// Returns a shallow copy of this [Transaction]
@@ -304,57 +330,49 @@ class _TransactionImpl extends Transaction {
   @override
   Transaction copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    String? description,
-    int? amountCents,
-    String? currencyCode,
-    _isc.UuidValue? envelopeId = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? budgetId,
-    _isc.UuidValue? accountId = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? entityId,
+    _isc.UuidValue? accountId,
+    DateTime? date,
+    int? amountMinor,
+    int? baseAmountMinor,
+    String? fxRate,
+    DateTime? fxRateDate,
+    _ifz8weqz.FxRateSource? fxRateSource,
+    _iwdxlbcu.TransactionKind? kind,
+    _i45koviu.TransactionStatus? status,
+    Object? flag = _Undefined,
     _isc.UuidValue? payeeId = const _isc.$UndefinedUuidValue(),
-    DateTime? transactionDate,
-    _isc.UuidValue? transferPairId = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? parentTransactionId = const _isc.$UndefinedUuidValue(),
+    String? description,
     Object? memo = _Undefined,
-    bool? cleared,
-    bool? reconciled,
-    Object? flagColor = _Undefined,
-    Object? taxCategoryCode = _Undefined,
-    Object? businessUsePercent = _Undefined,
-    Object? salesTaxCents = _Undefined,
+    Object? externalId = _Undefined,
+    _isc.UuidValue? recurringTransactionId = const _isc.$UndefinedUuidValue(),
+    int? revision,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return Transaction(
       id: id is _isc.UndefinedSentinel ? this.id : id,
-      description: description ?? this.description,
-      amountCents: amountCents ?? this.amountCents,
-      currencyCode: currencyCode ?? this.currencyCode,
-      envelopeId: envelopeId is _isc.UndefinedSentinel
-          ? this.envelopeId
-          : envelopeId,
-      budgetId: budgetId ?? this.budgetId,
-      accountId: accountId is _isc.UndefinedSentinel
-          ? this.accountId
-          : accountId,
+      entityId: entityId ?? this.entityId,
+      accountId: accountId ?? this.accountId,
+      date: date ?? this.date,
+      amountMinor: amountMinor ?? this.amountMinor,
+      baseAmountMinor: baseAmountMinor ?? this.baseAmountMinor,
+      fxRate: fxRate ?? this.fxRate,
+      fxRateDate: fxRateDate ?? this.fxRateDate,
+      fxRateSource: fxRateSource ?? this.fxRateSource,
+      kind: kind ?? this.kind,
+      status: status ?? this.status,
+      flag: flag is _i2fej0yw.TransactionFlag? ? flag : this.flag,
       payeeId: payeeId is _isc.UndefinedSentinel ? this.payeeId : payeeId,
-      transactionDate: transactionDate ?? this.transactionDate,
-      transferPairId: transferPairId is _isc.UndefinedSentinel
-          ? this.transferPairId
-          : transferPairId,
-      parentTransactionId: parentTransactionId is _isc.UndefinedSentinel
-          ? this.parentTransactionId
-          : parentTransactionId,
+      description: description ?? this.description,
       memo: memo is String? ? memo : this.memo,
-      cleared: cleared ?? this.cleared,
-      reconciled: reconciled ?? this.reconciled,
-      flagColor: flagColor is String? ? flagColor : this.flagColor,
-      taxCategoryCode: taxCategoryCode is String?
-          ? taxCategoryCode
-          : this.taxCategoryCode,
-      businessUsePercent: businessUsePercent is int?
-          ? businessUsePercent
-          : this.businessUsePercent,
-      salesTaxCents: salesTaxCents is int? ? salesTaxCents : this.salesTaxCents,
+      externalId: externalId is String? ? externalId : this.externalId,
+      recurringTransactionId: recurringTransactionId is _isc.UndefinedSentinel
+          ? this.recurringTransactionId
+          : recurringTransactionId,
+      revision: revision ?? this.revision,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

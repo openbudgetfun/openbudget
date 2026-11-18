@@ -1,0 +1,16 @@
+### Which part of an entity an EntityChangedEvent is about.
+enum: ChangeScope
+serialized: byName
+values:
+  ### The entity row itself, its settings or its tax profile.
+  - entity
+  ### Accounts, balances or valuations.
+  - accounts
+  ### Transactions, transfers or lines. Balances and the plan may also change.
+  - transactions
+  ### Categories, envelopes, allocations, goals or templates.
+  - plan
+  ### Ledger accounts, journals or the lock date.
+  - ledger
+  ### Assistant proposals.
+  - proposals

@@ -1,239 +1,186 @@
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/fx_rates/fx_quote_selection.dart';
+import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:openbudget_server/src/tax/tax_entry_builder.dart';
 import 'package:openbudget_server/src/tax/tax_fx_rates.dart';
-import 'package:serverpod/serverpod.dart' hide Transaction;
+import 'package:serverpod/serverpod.dart';
 import 'package:test/test.dart';
-
-import '../../support/tax_fake_pack.dart';
-
-final _budgetId = UuidValue.fromString(
-  '11111111-1111-4111-8111-111111111111',
-);
-final _categoryId = UuidValue.fromString(
-  '22222222-2222-4222-8222-222222222222',
-);
-final _envelopeId = UuidValue.fromString(
-  '33333333-3333-4333-8333-333333333333',
-);
 
 final _year = TaxYear(
   jurisdiction: TaxJurisdiction.gb,
   startYear: 2026,
-  start: DateTime.utc(2026),
-  end: DateTime.utc(2027),
+  start: DateTime.utc(2026, 4, 6),
+  end: DateTime.utc(2027, 4, 6),
   label: '2026/27',
 );
 
-Envelope _envelope({
-  UuidValue? id,
-  String? taxCategoryCode,
-}) => Envelope(
-  id: id ?? _envelopeId,
-  name: 'Envelope',
-  categoryId: _categoryId,
-  budgetedAmountCents: 0,
-  spentAmountCents: 0,
-  currencyCode: 'GBP',
-  sortOrder: 0,
-  taxCategoryCode: taxCategoryCode,
+UuidValue _id(int suffix) => UuidValue.fromString(
+  '00000000-0000-4000-8000-${suffix.toString().padLeft(12, '0')}',
 );
 
-Transaction _transaction({
-  UuidValue? id,
+TaxFxRates _rates({bool withGbp = true}) => TaxFxRates(
+  rates: [
+    FxDailyRate(
+      currencyCode: 'USD',
+      rateDate: DateTime.utc(2026, 5, 9),
+      rate: '1',
+      fetchedAt: DateTime.utc(2026, 5, 9, 2),
+    ),
+    if (withGbp)
+      FxDailyRate(
+        currencyCode: 'GBP',
+        rateDate: DateTime.utc(2026, 5, 9),
+        rate: '0.8',
+        fetchedAt: DateTime.utc(2026, 5, 9, 2),
+      ),
+  ],
+  evaluatedAt: DateTime.utc(2026, 5, 10),
+);
+
+TaxEntrySourceLine _line({
+  int id = 1,
+  DateTime? date,
   String description = 'Transaction',
-  int amountCents = -10000,
   String currencyCode = 'GBP',
-  UuidValue? envelopeId,
-  DateTime? transactionDate,
-  UuidValue? transferPairId,
-  UuidValue? parentTransactionId,
+  int amountMinor = -10000,
   String? taxCategoryCode,
+  String? envelopeTaxCategoryCode,
   int? businessUsePercent,
-  int? salesTaxCents,
-}) => Transaction(
-  id: id,
+  int? salesTaxMinor,
+  bool isTransfer = false,
+}) => TaxEntrySourceLine(
+  id: _id(id),
+  date: date ?? DateTime.utc(2026, 5, 10),
   description: description,
-  amountCents: amountCents,
   currencyCode: currencyCode,
-  budgetId: _budgetId,
-  envelopeId: envelopeId,
-  transactionDate: transactionDate ?? DateTime.utc(2026, 1, 15),
-  transferPairId: transferPairId,
-  parentTransactionId: parentTransactionId,
+  amountMinor: amountMinor,
   taxCategoryCode: taxCategoryCode,
+  envelopeTaxCategoryCode: envelopeTaxCategoryCode,
   businessUsePercent: businessUsePercent,
-  salesTaxCents: salesTaxCents,
+  salesTaxMinor: salesTaxMinor,
+  isTransfer: isTransfer,
 );
 
-TaxFxRates _rates() => TaxFxRates([
-  TaxFxSnapshotRates(
-    baseCurrencyCode: 'USD',
-    fetchedAt: DateTime.utc(2026, 1, 10),
-    rates: const {'USD': 1, 'GBP': 0.8, 'EUR': 0.9},
-  ),
-  TaxFxSnapshotRates(
-    baseCurrencyCode: 'USD',
-    fetchedAt: DateTime.utc(2026, 2, 10),
-    rates: const {'USD': 1, 'GBP': 0.9},
-  ),
-]);
+TaxEntryBuildResult _build(
+  List<TaxEntrySourceLine> lines, {
+  TaxFxRates? rates,
+}) => buildTaxEntries(
+  lines: lines,
+  year: _year,
+  rates: rates ?? _rates(),
+  targetCurrencyCode: 'GBP',
+);
 
 void main() {
-  group('Given tax entries are built from transactions', () {
-    test(
-      'when both set then the transaction category wins over the envelope',
-      () {
-        final envelope = _envelope(
-          taxCategoryCode: FakeTaxPack.officeCosts.code,
-        );
-        final transactions = [
-          _transaction(
-            id: UuidValue.fromString('55555555-5555-4555-8555-555555555555'),
-            envelopeId: envelope.id,
-          ),
-          _transaction(
-            id: UuidValue.fromString('66666666-6666-4666-8666-666666666666'),
-            amountCents: -5000,
-            envelopeId: envelope.id,
-            taxCategoryCode: FakeTaxPack.turnover.code,
-          ),
-        ];
+  group('Given tax entries are built from stored transaction lines', () {
+    test('when a transaction has several lines then each gets one entry', () {
+      final result = _build([
+        _line(
+          amountMinor: -4000,
+          taxCategoryCode: 'gb.ind.self_employment',
+        ),
+        _line(
+          id: 2,
+          amountMinor: -6000,
+          taxCategoryCode: 'gb.ind.self_employment',
+        ),
+      ]);
 
-        final result = buildTaxEntries(
-          transactions: transactions,
-          envelopesById: {envelope.id!: envelope},
-          year: _year,
-          rates: _rates(),
-          targetCurrencyCode: 'GBP',
-        );
-
-        expect(result.entries, hasLength(2));
-        expect(result.entries[0].categoryCode, FakeTaxPack.officeCosts.code);
-        expect(result.entries[0].amountMinor, 10000);
-        expect(result.entries[1].categoryCode, FakeTaxPack.turnover.code);
-        expect(result.uncategorizedCount, 0);
-        expect(result.convertedCount, 0);
-      },
-    );
-
-    test(
-      'when transfers and split parents are present then neither is taxed',
-      () {
-        final parentId = UuidValue.fromString(
-          '77777777-7777-4777-8777-777777777777',
-        );
-        final transfer = _transaction(
-          id: UuidValue.fromString('88888888-8888-4888-8888-888888888888'),
-          amountCents: -30000,
-          envelopeId: _envelopeId,
-          transferPairId: UuidValue.fromString(
-            '99999999-9999-4999-8999-999999999999',
-          ),
-          taxCategoryCode: FakeTaxPack.officeCosts.code,
-        );
-        final parent = _transaction(
-          id: parentId,
-          amountCents: -20000,
-          envelopeId: _envelopeId,
-          taxCategoryCode: FakeTaxPack.officeCosts.code,
-        );
-        final children = [
-          _transaction(
-            id: UuidValue.fromString('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
-            amountCents: -12000,
-            envelopeId: _envelopeId,
-            parentTransactionId: parentId,
-            taxCategoryCode: FakeTaxPack.officeCosts.code,
-          ),
-          _transaction(
-            id: UuidValue.fromString('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'),
-            amountCents: -8000,
-            envelopeId: _envelopeId,
-            parentTransactionId: parentId,
-            taxCategoryCode: FakeTaxPack.officeCosts.code,
-          ),
-        ];
-        final envelope = _envelope(
-          taxCategoryCode: FakeTaxPack.officeCosts.code,
-        );
-
-        final result = buildTaxEntries(
-          transactions: [transfer, parent, ...children],
-          envelopesById: {envelope.id!: envelope},
-          year: _year,
-          rates: _rates(),
-          targetCurrencyCode: 'GBP',
-        );
-
-        expect(result.entries, hasLength(2));
-        expect(result.entries.map((entry) => entry.amountMinor), [12000, 8000]);
-        expect(result.uncategorizedCount, 0);
-      },
-    );
-
-    test('when a transaction has no category then it is only counted', () {
-      final envelope = _envelope();
-      final result = buildTaxEntries(
-        transactions: [
-          _transaction(
-            id: UuidValue.fromString('cccccccc-cccc-4ccc-8ccc-cccccccccccc'),
-          ),
-          _transaction(
-            id: UuidValue.fromString('dddddddd-dddd-4ddd-8ddd-dddddddddddd'),
-            envelopeId: envelope.id,
-          ),
-        ],
-        envelopesById: {envelope.id!: envelope},
-        year: _year,
-        rates: _rates(),
-        targetCurrencyCode: 'GBP',
+      expect(result.entries, hasLength(2));
+      expect(result.entries.map((entry) => entry.amountMinor), [4000, 6000]);
+      expect(
+        result.entries.map((entry) => entry.sourceId),
+        [_id(1).toString(), _id(2).toString()],
       );
-
-      expect(result.entries, isEmpty);
-      expect(result.uncategorizedCount, 2);
-    });
-
-    test('when the transaction is outside the tax year then it is skipped', () {
-      final envelope = _envelope(taxCategoryCode: FakeTaxPack.turnover.code);
-      final result = buildTaxEntries(
-        transactions: [
-          _transaction(
-            envelopeId: envelope.id,
-            transactionDate: DateTime.utc(2025, 12, 31),
-          ),
-          _transaction(
-            envelopeId: envelope.id,
-            transactionDate: DateTime.utc(2027),
-          ),
-        ],
-        envelopesById: {envelope.id!: envelope},
-        year: _year,
-        rates: _rates(),
-        targetCurrencyCode: 'GBP',
-      );
-
-      expect(result.entries, isEmpty);
       expect(result.uncategorizedCount, 0);
     });
 
-    test('when business use and sales tax are set then both pass through', () {
-      final envelope = _envelope(taxCategoryCode: FakeTaxPack.turnover.code);
-      final result = buildTaxEntries(
-        transactions: [
-          _transaction(
-            amountCents: -12345,
-            envelopeId: envelope.id,
-            businessUsePercent: 50,
-            salesTaxCents: 2000,
-            description: 'Mixed-use receipt',
-          ),
-        ],
-        envelopesById: {envelope.id!: envelope},
-        year: _year,
-        rates: _rates(),
-        targetCurrencyCode: 'GBP',
+    test('when both codes exist then the line category wins', () {
+      final result = _build([
+        _line(
+          envelopeTaxCategoryCode: 'gb.ind.self_employment',
+          taxCategoryCode: 'gb.ind.employment',
+        ),
+      ]);
+
+      expect(result.entries.single.categoryCode, 'gb.ind.employment');
+    });
+
+    test('when the line has no code then the envelope default applies', () {
+      final result = _build([
+        _line(envelopeTaxCategoryCode: 'gb.ind.self_employment'),
+      ]);
+
+      expect(result.entries.single.categoryCode, 'gb.ind.self_employment');
+    });
+
+    test('when neither side has a code then only a counter moves', () {
+      final result = _build([_line()]);
+
+      expect(result.entries, isEmpty);
+      expect(result.uncategorizedCount, 1);
+    });
+
+    test('when a leg is a transfer then it is outside tax', () {
+      final result = _build([
+        _line(
+          taxCategoryCode: 'gb.ind.self_employment',
+          isTransfer: true,
+        ),
+      ]);
+
+      expect(result.entries, isEmpty);
+      expect(result.uncategorizedCount, 0);
+      expect(
+        taxFxRequestsFor(
+          lines: [
+            _line(
+              currencyCode: 'USD',
+              taxCategoryCode: 'gb.ind.self_employment',
+              isTransfer: true,
+            ),
+          ],
+          year: _year,
+          targetCurrencyCode: 'GBP',
+        ),
+        isEmpty,
       );
+    });
+
+    test('when a line is outside the year then it is skipped before all '
+        'counters', () {
+      final result = _build([
+        _line(date: _year.start.subtract(const Duration(days: 1))),
+        _line(date: _year.end),
+        _line(
+          date: _year.start,
+          taxCategoryCode: 'gb.ind.self_employment',
+        ),
+        _line(
+          date: _year.end.subtract(const Duration(days: 1)),
+          taxCategoryCode: 'gb.ind.self_employment',
+        ),
+      ]);
+
+      expect(result.entries, hasLength(2));
+      expect(result.uncategorizedCount, 0);
+      expect(
+        result.entries.map((entry) => entry.date),
+        [_year.start, _year.end.subtract(const Duration(days: 1))],
+      );
+    });
+
+    test('when business use and sales tax are stored then both pass through '
+        'exactly', () {
+      final result = _build([
+        _line(
+          amountMinor: -12345,
+          businessUsePercent: 50,
+          salesTaxMinor: -2000,
+          taxCategoryCode: 'gb.ind.self_employment',
+          description: 'Mixed-use receipt',
+        ),
+      ]);
 
       final entry = result.entries.single;
       expect(entry.amountMinor, 12345);
@@ -243,178 +190,51 @@ void main() {
       expect(entry.note, 'Mixed-use receipt');
     });
 
-    test('when a transaction is in another currency then it is converted', () {
-      final envelope = _envelope(taxCategoryCode: FakeTaxPack.turnover.code);
-      final result = buildTaxEntries(
-        transactions: [
-          _transaction(
-            currencyCode: 'USD',
-            envelopeId: envelope.id,
-            transactionDate: DateTime.utc(2026, 1, 15),
-          ),
-          _transaction(
-            amountCents: -8000,
-            envelopeId: envelope.id,
-            transactionDate: DateTime.utc(2026, 1, 16),
-          ),
-        ],
-        envelopesById: {envelope.id!: envelope},
-        year: _year,
-        rates: _rates(),
-        targetCurrencyCode: 'GBP',
-      );
+    test('when a line is in another currency then it is converted once', () {
+      final result = _build([
+        _line(
+          currencyCode: 'USD',
+          amountMinor: -12500,
+          taxCategoryCode: 'gb.ind.self_employment',
+        ),
+        _line(
+          id: 2,
+          amountMinor: -8000,
+          taxCategoryCode: 'gb.ind.self_employment',
+        ),
+      ]);
 
-      expect(result.entries.map((entry) => entry.amountMinor), [8000, 8000]);
+      expect(result.entries.map((entry) => entry.amountMinor), [10000, 8000]);
       expect(result.convertedCount, 1);
     });
-  });
 
-  group('Given FX snapshots', () {
-    test('when converting in either direction then rates are divided', () {
-      final rates = _rates();
-      final date = DateTime.utc(2026, 1, 20);
-
-      expect(
-        rates.convert(
-          amountMinor: 10000,
-          fromCurrencyCode: 'USD',
-          toCurrencyCode: 'GBP',
-          date: date,
-        ),
-        8000,
-      );
-      expect(
-        rates.convert(
-          amountMinor: 8000,
-          fromCurrencyCode: 'GBP',
-          toCurrencyCode: 'USD',
-          date: date,
-        ),
-        10000,
-      );
-      expect(
-        rates.convert(
-          amountMinor: 8000,
-          fromCurrencyCode: 'GBP',
-          toCurrencyCode: 'EUR',
-          date: date,
-        ),
-        9000,
-      );
-    });
-
-    test('when currencies have different minor units then amounts rescale', () {
-      final rates = TaxFxRates([
-        TaxFxSnapshotRates(
-          baseCurrencyCode: 'USD',
-          fetchedAt: DateTime.utc(2026, 1, 10),
-          rates: const {'JPY': 150, 'GBP': 0.8},
+    test('when sales tax is in another currency then it is converted once', () {
+      final result = _build([
+        _line(
+          currencyCode: 'USD',
+          amountMinor: -12500,
+          salesTaxMinor: -2500,
+          taxCategoryCode: 'gb.ind.self_employment',
         ),
       ]);
 
-      // 15,000 yen (JPY has no minor unit) is 100 dollars, so 80 pounds.
+      expect(result.entries.single.amountMinor, 10000);
+      expect(result.entries.single.salesTaxMinor, 2000);
+    });
+
+    test('when a request has no rate then building fails explicitly', () {
       expect(
-        rates.convert(
-          amountMinor: 15000,
-          fromCurrencyCode: 'JPY',
-          toCurrencyCode: 'GBP',
-          date: DateTime.utc(2026, 1, 15),
+        () => _build(
+          [
+            _line(
+              currencyCode: 'USD',
+              taxCategoryCode: 'gb.ind.self_employment',
+            ),
+          ],
+          rates: _rates(withGbp: false),
         ),
-        8000,
+        throwsA(isA<FxRateUnavailableException>()),
       );
-      // And back: 80 pounds is 15,000 yen.
-      expect(
-        rates.convert(
-          amountMinor: 8000,
-          fromCurrencyCode: 'GBP',
-          toCurrencyCode: 'JPY',
-          date: DateTime.utc(2026, 1, 15),
-        ),
-        15000,
-      );
-    });
-
-    test('when a currency is not supported then conversion throws', () {
-      final rates = TaxFxRates([
-        TaxFxSnapshotRates(
-          baseCurrencyCode: 'USD',
-          fetchedAt: DateTime.utc(2026, 1, 10),
-          rates: const {'XYZ': 2, 'GBP': 0.8},
-        ),
-      ]);
-
-      expect(
-        () => rates.convert(
-          amountMinor: 100,
-          fromCurrencyCode: 'XYZ',
-          toCurrencyCode: 'GBP',
-          date: DateTime.utc(2026, 1, 15),
-        ),
-        throwsA(isA<TaxRateUnavailableException>()),
-      );
-    });
-
-    test('when a snapshot predates the date then the latest one wins', () {
-      final rates = _rates();
-      final converted = rates.convert(
-        amountMinor: 10000,
-        fromCurrencyCode: 'USD',
-        toCurrencyCode: 'GBP',
-        date: DateTime.utc(2026, 2, 15),
-      );
-
-      expect(converted, 9000);
-    });
-
-    test('when every snapshot is newer then the earliest one is used', () {
-      final rates = _rates();
-      final converted = rates.convert(
-        amountMinor: 10000,
-        fromCurrencyCode: 'USD',
-        toCurrencyCode: 'GBP',
-        date: DateTime.utc(2026, 1, 5),
-      );
-
-      expect(converted, 8000);
-    });
-
-    test('when the currency is missing then conversion throws', () {
-      final rates = _rates();
-
-      expect(
-        () => rates.convert(
-          amountMinor: 10000,
-          fromCurrencyCode: 'EUR',
-          toCurrencyCode: 'GBP',
-          date: DateTime.utc(2026, 2, 15),
-        ),
-        throwsA(isA<TaxRateUnavailableException>()),
-      );
-    });
-
-    test('when no snapshot exists then conversion throws', () {
-      final rates = TaxFxRates([]);
-
-      expect(
-        () => rates.convert(
-          amountMinor: 10000,
-          fromCurrencyCode: 'USD',
-          toCurrencyCode: 'GBP',
-          date: DateTime.utc(2026, 1, 15),
-        ),
-        throwsA(isA<TaxRateUnavailableException>()),
-      );
-    });
-
-    test('when the currencies match then no snapshot is needed', () {
-      final converted = TaxFxRates([]).convert(
-        amountMinor: 10000,
-        fromCurrencyCode: 'GBP',
-        toCurrencyCode: 'GBP',
-        date: DateTime.utc(2026, 1, 15),
-      );
-
-      expect(converted, 10000);
     });
   });
 }

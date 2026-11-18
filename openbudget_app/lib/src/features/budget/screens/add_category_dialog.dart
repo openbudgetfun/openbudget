@@ -8,12 +8,12 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AddCategoryDialog extends HookConsumerWidget {
   const AddCategoryDialog({
-    required this.budgetId,
+    required this.entityId,
     required this.nextSortOrder,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final int nextSortOrder;
 
   @override
@@ -36,7 +36,7 @@ class AddCategoryDialog extends HookConsumerWidget {
         controller: nameController,
         decoration: InputDecoration(
           labelText: l10n.budgetCategoryNameLabel,
-          prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.category),
+          prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.category),
         ),
         autofocus: true,
         textInputAction: TextInputAction.done,
@@ -81,8 +81,7 @@ class AddCategoryDialog extends HookConsumerWidget {
           .read(categoryActionsProvider.notifier)
           .createCategory(
             name: name,
-            budgetId: budgetId,
-            sortOrder: nextSortOrder,
+            entityId: entityId,
           );
       if (!context.mounted) return;
       showAppToast(

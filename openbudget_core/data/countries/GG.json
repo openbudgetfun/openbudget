@@ -1,0 +1,65 @@
+{
+  "code": "GG",
+  "name": "Guernsey",
+  "servable": true,
+  "currencies": [
+    "GBP"
+  ],
+  "timeZones": [
+    "Europe/Guernsey"
+  ],
+  "individualTaxYear": {
+    "startMonth": 1,
+    "startDay": 1,
+    "calendar": "gregorian"
+  },
+  "companyYearEndDefault": {
+    "month": 12,
+    "day": 31
+  },
+  "indirectTax": {
+    "kind": "none",
+    "localName": null,
+    "rates": [],
+    "registrationThreshold": null,
+    "returnFrequency": null,
+    "subdivisions": []
+  },
+  "authority": {
+    "name": "Revenue Service (States of Guernsey)",
+    "url": "https://www.gov.gg/revenue"
+  },
+  "sources": [
+    {
+      "title": "IANA Time Zone Database 2026f: iso3166.tab (country codes and English names)",
+      "url": "https://raw.githubusercontent.com/eggert/tz/2026f/iso3166.tab",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "IANA Time Zone Database 2026f: zone.tab (country time zones)",
+      "url": "https://raw.githubusercontent.com/eggert/tz/2026f/zone.tab",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "Unicode CLDR (release-46): supplemental currency data (territory-to-currency map)",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/release-46/cldr-json/cldr-core/supplemental/currencyData.json",
+      "grade": "secondary",
+      "retrievedOn": "2026-11-13"
+    },
+    {
+      "title": "States of Guernsey: Revenue Service pages (income tax and social security; no GST is levied)",
+      "url": "https://www.gov.gg/revenue",
+      "grade": "primary",
+      "retrievedOn": "2026-11-13"
+    }
+  ],
+  "verifiedOn": "2026-11-13",
+  "recheckBy": "2027-05-13",
+  "caveats": [
+    "individualTaxYear is the calendar year, inferred from the country's annual assessment cycle (grade I); not confirmed on the authority's own pages in this pass. (grade S; Guernsey's basis year is the calendar year).",
+    "companyYearEndDefault is a 31 December app default for new entities (grade I), not a statutory requirement; companies may choose other year ends under national law.",
+    "Guernsey levies no VAT, GST or sales tax (grade P for the absence: the States of Guernsey's own revenue pages list income tax and social security only; the long-debated GST introduction has not been enacted)."
+  ]
+}

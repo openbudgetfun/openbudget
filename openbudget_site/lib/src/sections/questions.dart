@@ -65,7 +65,7 @@ const List<_Answer> _answers = [
     question: 'Is OpenBudget really free?',
     answer:
         'Yes. Budgeting, your accounts, net worth and books cost nothing. '
-        r'OpenBudget Plus adds tax reports and the assistant for $10 a month, '
+        r'OpenBudget Plus adds tax reports and the assistant for $20 a month, '
         'billed in US dollars, and you can cancel whenever you like.',
   ),
   (

@@ -1,0 +1,14 @@
+Entity: sole trader in GB, base currency GBP, time zone Europe/London.
+Tax year now: 2026/27, 2026-04-06 to 2027-04-05.
+Jurisdiction: preview, rules gb-2026-r1.
+Sections: personal income tax preview; self-employment preview; company tax preview; VAT or sales tax preview; capital gains preview; digital assets universal; filing calendar preview; payroll universal.
+Profile: tax resident of GB not recorded; US person not recorded.
+Perimeter: tax illustration. Reserved, so explain in general and signpost: Personal recommendations on investments and pensions; Statements about what "people like you" do.
+Signpost to: an authorised financial adviser or MoneyHelper.
+Disclaimer key: gb.
+Cards for GB: none.
+Universal cards (id: title):
+- universal-budgeting-sinking-funds: Sinking funds spread the cost of known one-off expenses
+- universal-budgeting-zero-based-envelopes: Zero-based envelopes give every unit of income a job
+- universal-crypto-crypto-tax-reporting: Tax offices exchange crypto-asset reports automatically from 2027
+- universal-money-what-aer-means: AER is the yearly savings rate with compounding included

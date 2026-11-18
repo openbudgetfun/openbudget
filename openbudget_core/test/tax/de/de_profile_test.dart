@@ -3,6 +3,7 @@
 // assumption, and a sole trader without an Einkunftsart is gewerblich.
 import 'dart:convert';
 
+import 'package:openbudget_core/src/tax/de/de_profile.dart';
 import 'package:openbudget_core/src/tax/tax_model.dart';
 import 'package:openbudget_core/src/tax/tax_profile.dart';
 import 'package:test/test.dart';
@@ -13,7 +14,7 @@ DeTaxProfile parse(Map<String, Object?> json) =>
 void main() {
   test('round-trips every input', () {
     const profile = DeTaxProfile(
-      entityKind: TaxEntityKind.individual,
+      entityKind: EntityKind.individual,
       jointAssessment: true,
       churchTax: true,
       churchTaxState: DeBundesland.bayern,
@@ -63,11 +64,11 @@ void main() {
   });
 
   test('the Bundesland sets the church rate: BY and BW 8 %, others 9 %', () {
-    const profile = DeTaxProfile(entityKind: TaxEntityKind.individual);
+    const profile = DeTaxProfile(entityKind: EntityKind.individual);
     for (final state in DeBundesland.values) {
       expect(
         DeTaxProfile(
-          entityKind: TaxEntityKind.individual,
+          entityKind: EntityKind.individual,
           churchTaxState: state,
         ).churchTaxRateBasisPoints,
         state == DeBundesland.bayern || state == DeBundesland.badenWuerttemberg
@@ -79,7 +80,7 @@ void main() {
     // The state wins over the bare flag.
     expect(
       const DeTaxProfile(
-        entityKind: TaxEntityKind.individual,
+        entityKind: EntityKind.individual,
         churchTax: true,
         churchTaxState: DeBundesland.bayern,
       ).churchTaxRateBasisPoints,
@@ -89,7 +90,7 @@ void main() {
   });
 
   test('a sole trader defaults to gewerblich, as the old pack did', () {
-    const profile = DeTaxProfile(entityKind: TaxEntityKind.soleTrader);
+    const profile = DeTaxProfile(entityKind: EntityKind.soleTrader);
     expect(profile.einkunftsArt, DeEinkunftsArt.gewerblich);
     final freiberuflich = parse({
       'jurisdiction': 'DE',

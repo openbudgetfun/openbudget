@@ -12,36 +12,39 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// An envelope within a category, tracking budgeted and spent amounts.
+/// A pot of money for one purpose in an entity's envelope plan. Its
+/// activity and available balance are derived, never stored.
 abstract class Envelope
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   Envelope._({
     this.id,
-    required this.name,
+    required this.entityId,
     required this.categoryId,
-    required this.budgetedAmountCents,
-    required this.spentAmountCents,
-    required this.currencyCode,
-    required this.sortOrder,
+    required this.name,
+    int? sortOrder,
     this.note,
     this.taxCategoryCode,
+    this.defaultLedgerAccountId,
     bool? isHidden,
     DateTime? createdAt,
-  }) : isHidden = isHidden ?? false,
-       createdAt = createdAt ?? DateTime.now();
+    DateTime? updatedAt,
+  }) : sortOrder = sortOrder ?? 0,
+       isHidden = isHidden ?? false,
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   factory Envelope({
     _isc.UuidValue? id,
-    required String name,
+    required _isc.UuidValue entityId,
     required _isc.UuidValue categoryId,
-    required int budgetedAmountCents,
-    required int spentAmountCents,
-    required String currencyCode,
-    required int sortOrder,
+    required String name,
+    int? sortOrder,
     String? note,
     String? taxCategoryCode,
+    _isc.UuidValue? defaultLedgerAccountId,
     bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) = _EnvelopeImpl;
 
   factory Envelope.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -49,22 +52,31 @@ abstract class Envelope
       id: jsonSerialization['id'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      name: jsonSerialization['name'] as String,
+      entityId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
+      ),
       categoryId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['categoryId'],
       ),
-      budgetedAmountCents: jsonSerialization['budgetedAmountCents'] as int,
-      spentAmountCents: jsonSerialization['spentAmountCents'] as int,
-      currencyCode: jsonSerialization['currencyCode'] as String,
-      sortOrder: jsonSerialization['sortOrder'] as int,
+      name: jsonSerialization['name'] as String,
+      sortOrder: jsonSerialization['sortOrder'] as int?,
       note: jsonSerialization['note'] as String?,
       taxCategoryCode: jsonSerialization['taxCategoryCode'] as String?,
+      defaultLedgerAccountId:
+          jsonSerialization['defaultLedgerAccountId'] == null
+          ? null
+          : _isc.UuidValueJsonExtension.fromJson(
+              jsonSerialization['defaultLedgerAccountId'],
+            ),
       isHidden: jsonSerialization['isHidden'] == null
           ? null
           : _isc.BoolJsonExtension.fromJson(jsonSerialization['isHidden']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+      updatedAt: jsonSerialization['updatedAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
@@ -73,64 +85,61 @@ abstract class Envelope
   /// the id will be null.
   _isc.UuidValue? id;
 
-  String name;
+  _isc.UuidValue entityId;
 
   _isc.UuidValue categoryId;
 
-  /// Budgeted amount stored as integer cents to avoid floating-point issues.
-  int budgetedAmountCents;
+  String name;
 
-  /// Spent amount stored as integer cents.
-  int spentAmountCents;
-
-  /// ISO 4217 currency code.
-  String currencyCode;
-
-  /// Display order within the parent category.
   int sortOrder;
 
-  /// Optional user-facing note providing context for the envelope.
   String? note;
 
-  /// Default tax category for transactions in this envelope.
+  /// Default tax category for lines assigned to this envelope.
   String? taxCategoryCode;
 
-  /// Whether this envelope is hidden from the default budget view.
-  bool? isHidden;
+  /// Default ledger account for lines assigned to this envelope in
+  /// ledger-mode books.
+  _isc.UuidValue? defaultLedgerAccountId;
+
+  bool isHidden;
 
   DateTime createdAt;
+
+  DateTime updatedAt;
 
   /// Returns a shallow copy of this [Envelope]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
   Envelope copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    String? name,
+    _isc.UuidValue? entityId,
     _isc.UuidValue? categoryId,
-    int? budgetedAmountCents,
-    int? spentAmountCents,
-    String? currencyCode,
+    String? name,
     int? sortOrder,
     String? note,
     String? taxCategoryCode,
+    _isc.UuidValue? defaultLedgerAccountId = const _isc.$UndefinedUuidValue(),
     bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Envelope',
       if (id != null) 'id': id?.toJson(),
-      'name': name,
+      'entityId': entityId.toJson(),
       'categoryId': categoryId.toJson(),
-      'budgetedAmountCents': budgetedAmountCents,
-      'spentAmountCents': spentAmountCents,
-      'currencyCode': currencyCode,
+      'name': name,
       'sortOrder': sortOrder,
       if (note != null) 'note': note,
       if (taxCategoryCode != null) 'taxCategoryCode': taxCategoryCode,
-      if (isHidden != null) 'isHidden': isHidden,
+      if (defaultLedgerAccountId != null)
+        'defaultLedgerAccountId': defaultLedgerAccountId?.toJson(),
+      'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -139,16 +148,17 @@ abstract class Envelope
     return {
       '__className__': 'Envelope',
       if (id != null) 'id': id?.toJson(),
-      'name': name,
+      'entityId': entityId.toJson(),
       'categoryId': categoryId.toJson(),
-      'budgetedAmountCents': budgetedAmountCents,
-      'spentAmountCents': spentAmountCents,
-      'currencyCode': currencyCode,
+      'name': name,
       'sortOrder': sortOrder,
       if (note != null) 'note': note,
       if (taxCategoryCode != null) 'taxCategoryCode': taxCategoryCode,
-      if (isHidden != null) 'isHidden': isHidden,
+      if (defaultLedgerAccountId != null)
+        'defaultLedgerAccountId': defaultLedgerAccountId?.toJson(),
+      'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -163,28 +173,28 @@ class _Undefined {}
 class _EnvelopeImpl extends Envelope {
   _EnvelopeImpl({
     _isc.UuidValue? id,
-    required String name,
+    required _isc.UuidValue entityId,
     required _isc.UuidValue categoryId,
-    required int budgetedAmountCents,
-    required int spentAmountCents,
-    required String currencyCode,
-    required int sortOrder,
+    required String name,
+    int? sortOrder,
     String? note,
     String? taxCategoryCode,
+    _isc.UuidValue? defaultLedgerAccountId,
     bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) : super._(
          id: id,
-         name: name,
+         entityId: entityId,
          categoryId: categoryId,
-         budgetedAmountCents: budgetedAmountCents,
-         spentAmountCents: spentAmountCents,
-         currencyCode: currencyCode,
+         name: name,
          sortOrder: sortOrder,
          note: note,
          taxCategoryCode: taxCategoryCode,
+         defaultLedgerAccountId: defaultLedgerAccountId,
          isHidden: isHidden,
          createdAt: createdAt,
+         updatedAt: updatedAt,
        );
 
   /// Returns a shallow copy of this [Envelope]
@@ -193,31 +203,33 @@ class _EnvelopeImpl extends Envelope {
   @override
   Envelope copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    String? name,
+    _isc.UuidValue? entityId,
     _isc.UuidValue? categoryId,
-    int? budgetedAmountCents,
-    int? spentAmountCents,
-    String? currencyCode,
+    String? name,
     int? sortOrder,
     Object? note = _Undefined,
     Object? taxCategoryCode = _Undefined,
-    Object? isHidden = _Undefined,
+    _isc.UuidValue? defaultLedgerAccountId = const _isc.$UndefinedUuidValue(),
+    bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return Envelope(
       id: id is _isc.UndefinedSentinel ? this.id : id,
-      name: name ?? this.name,
+      entityId: entityId ?? this.entityId,
       categoryId: categoryId ?? this.categoryId,
-      budgetedAmountCents: budgetedAmountCents ?? this.budgetedAmountCents,
-      spentAmountCents: spentAmountCents ?? this.spentAmountCents,
-      currencyCode: currencyCode ?? this.currencyCode,
+      name: name ?? this.name,
       sortOrder: sortOrder ?? this.sortOrder,
       note: note is String? ? note : this.note,
       taxCategoryCode: taxCategoryCode is String?
           ? taxCategoryCode
           : this.taxCategoryCode,
-      isHidden: isHidden is bool? ? isHidden : this.isHidden,
+      defaultLedgerAccountId: defaultLedgerAccountId is _isc.UndefinedSentinel
+          ? this.defaultLedgerAccountId
+          : defaultLedgerAccountId,
+      isHidden: isHidden ?? this.isHidden,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

@@ -12,16 +12,16 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// The per-budget period lock date.
+/// The per-entity period lock date.
 ///
-/// Posting or reversing into a date on or before [lockDate] is rejected.
-/// Every change writes a `ledger_audit_event`, so the lock's history lives
-/// in the audit trail rather than in append-only lock rows.
+/// Posting, reversing or editing a transaction dated on or before lockDate
+/// is rejected. Every change writes an audit_event, so the lock's history
+/// lives in the audit trail.
 abstract class LedgerPeriodLock
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   LedgerPeriodLock._({
     this.id,
-    required this.budgetId,
+    required this.entityId,
     required this.lockDate,
     required this.setBy,
     DateTime? setAt,
@@ -29,7 +29,7 @@ abstract class LedgerPeriodLock
 
   factory LedgerPeriodLock({
     _isc.UuidValue? id,
-    required _isc.UuidValue budgetId,
+    required _isc.UuidValue entityId,
     required DateTime lockDate,
     required _isc.UuidValue setBy,
     DateTime? setAt,
@@ -40,8 +40,8 @@ abstract class LedgerPeriodLock
       id: jsonSerialization['id'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
       lockDate: _isc.DateTimeJsonExtension.fromJson(
         jsonSerialization['lockDate'],
@@ -58,12 +58,11 @@ abstract class LedgerPeriodLock
   /// the id will be null.
   _isc.UuidValue? id;
 
-  _isc.UuidValue budgetId;
+  _isc.UuidValue entityId;
 
-  /// Dates on or before this date are locked.
+  /// Calendar dates on or before this one are locked.
   DateTime lockDate;
 
-  /// The user who set the lock.
   _isc.UuidValue setBy;
 
   DateTime setAt;
@@ -73,7 +72,7 @@ abstract class LedgerPeriodLock
   @_isc.useResult
   LedgerPeriodLock copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? budgetId,
+    _isc.UuidValue? entityId,
     DateTime? lockDate,
     _isc.UuidValue? setBy,
     DateTime? setAt,
@@ -83,7 +82,7 @@ abstract class LedgerPeriodLock
     return {
       '__className__': 'LedgerPeriodLock',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'lockDate': lockDate.toJson(),
       'setBy': setBy.toJson(),
       'setAt': setAt.toJson(),
@@ -95,7 +94,7 @@ abstract class LedgerPeriodLock
     return {
       '__className__': 'LedgerPeriodLock',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'lockDate': lockDate.toJson(),
       'setBy': setBy.toJson(),
       'setAt': setAt.toJson(),
@@ -111,13 +110,13 @@ abstract class LedgerPeriodLock
 class _LedgerPeriodLockImpl extends LedgerPeriodLock {
   _LedgerPeriodLockImpl({
     _isc.UuidValue? id,
-    required _isc.UuidValue budgetId,
+    required _isc.UuidValue entityId,
     required DateTime lockDate,
     required _isc.UuidValue setBy,
     DateTime? setAt,
   }) : super._(
          id: id,
-         budgetId: budgetId,
+         entityId: entityId,
          lockDate: lockDate,
          setBy: setBy,
          setAt: setAt,
@@ -129,14 +128,14 @@ class _LedgerPeriodLockImpl extends LedgerPeriodLock {
   @override
   LedgerPeriodLock copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? budgetId,
+    _isc.UuidValue? entityId,
     DateTime? lockDate,
     _isc.UuidValue? setBy,
     DateTime? setAt,
   }) {
     return LedgerPeriodLock(
       id: id is _isc.UndefinedSentinel ? this.id : id,
-      budgetId: budgetId ?? this.budgetId,
+      entityId: entityId ?? this.entityId,
       lockDate: lockDate ?? this.lockDate,
       setBy: setBy ?? this.setBy,
       setAt: setAt ?? this.setAt,

@@ -28,7 +28,7 @@ TaxInput saltInput({
     entryDollars(year, 'us.ind.itemized_deductions', itemizedDollars),
   ],
   profile: UsTaxProfile(
-    entityKind: TaxEntityKind.individual,
+    entityKind: EntityKind.individual,
     filingStatus: status,
     foreignEarnedIncomeExclusionMinor: feieDollars * 100,
   ),
@@ -281,7 +281,7 @@ void main() {
           year: 2025,
           entries: [entryDollars(2025, 'us.ind.wages', 90000)],
           profile: const UsTaxProfile(
-            entityKind: TaxEntityKind.individual,
+            entityKind: EntityKind.individual,
             taxpayer65OrOlder: true,
           ),
         ),
@@ -298,7 +298,7 @@ void main() {
           year: 2025,
           entries: [entryDollars(2025, 'us.ind.wages', 175000)],
           profile: const UsTaxProfile(
-            entityKind: TaxEntityKind.individual,
+            entityKind: EntityKind.individual,
             taxpayer65OrOlder: true,
           ),
         ),
@@ -316,7 +316,7 @@ void main() {
           year: 2025,
           entries: [entryDollars(2025, 'us.ind.wages', 160000)],
           profile: const UsTaxProfile(
-            entityKind: TaxEntityKind.individual,
+            entityKind: EntityKind.individual,
             filingStatus: UsFilingStatus.marriedFilingJointly,
             taxpayer65OrOlder: true,
             spouse65OrOlder: true,
@@ -344,7 +344,7 @@ void main() {
               entryDollars(2025, 'us.ind.qualified_overtime_premium', 5000),
             ],
             profile: const UsTaxProfile(
-              entityKind: TaxEntityKind.individual,
+              entityKind: EntityKind.individual,
               filingStatus: UsFilingStatus.marriedFilingSeparately,
               taxpayer65OrOlder: true,
             ),
@@ -369,7 +369,7 @@ void main() {
             entryDollars(2025, 'us.ind.qualified_tips', 5000),
           ],
           profile: const UsTaxProfile(
-            entityKind: TaxEntityKind.individual,
+            entityKind: EntityKind.individual,
             taxpayerHasSsn: false,
           ),
         ),
@@ -395,7 +395,7 @@ void main() {
             entryDollars(2026, 'us.sch_c.home_office', 2000),
           ],
           profile: const UsTaxProfile(
-            entityKind: TaxEntityKind.soleTrader,
+            entityKind: EntityKind.soleTrader,
             homeOfficeMethod: UsHomeOfficeMethod.regular,
           ),
         ),

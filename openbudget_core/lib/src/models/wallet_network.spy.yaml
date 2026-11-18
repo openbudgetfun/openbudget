@@ -1,0 +1,24 @@
+### Which chain and network a wallet, holding, transaction or price is on.
+### Stored by name: append values, never rename one.
+enum: WalletNetwork
+serialized: byName
+values:
+  - solanaMainnet
+  - solanaDevnet
+  - bitcoinMainnet
+  - ethereumMainnet
+  - baseMainnet
+  - arbitrumOne
+  - opMainnet
+  - polygonPos
+  - bnbSmartChain
+  - avalancheCChain
+  - tronMainnet
+  - xrplMainnet
+  - hyperliquid
+  - dogecoinMainnet
+  - litecoinMainnet
+  - cardanoMainnet
+  - tonMainnet
+  - suiMainnet
+  - aptosMainnet

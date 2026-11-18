@@ -1,0 +1,16 @@
+### What an audit event records.
+enum: AuditAction
+serialized: byName
+values:
+  - ledgerEnabled
+  - ledgerAccountCreated
+  - ledgerAccountArchived
+  - journalPosted
+  - journalReversed
+  - lockSet
+  ### A transaction in a ledger-mode entity was edited after posting.
+  - transactionEdited
+  ### A transaction in a ledger-mode entity was deleted after posting.
+  - transactionDeleted
+  ### The nightly check found and repaired a cached balance.
+  - balanceRepaired

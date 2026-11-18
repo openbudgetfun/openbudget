@@ -1,0 +1,6 @@
+### Net worth at evenly spaced dates, for a chart.
+class: NetWorthHistoryView
+fields:
+  currencyCode: String
+  granularity: NetWorthGranularity
+  points: List<NetWorthPoint>

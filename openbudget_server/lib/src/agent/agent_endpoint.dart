@@ -9,14 +9,14 @@ import 'package:serverpod/serverpod.dart';
 /// The financial assistant: chat, its history, its proposals and the user's
 /// own provider settings.
 ///
-/// Every method requires a signed-in user and checks that the budget, chat or
+/// Every method requires a signed-in user and checks that the entity, chat or
 /// proposal belongs to them. The assistant never changes financial data; it
 /// creates proposals that `applyProposal` carries out on the user's behalf.
 class AgentEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
 
-  /// Streams one assistant turn in budget `budgetId`.
+  /// Streams one assistant turn in entity `entityId`.
   ///
   /// A null [conversationId] starts a conversation titled from [message].
   /// Events are `usage` after each model call, `toolCall` before a tool runs,
@@ -24,21 +24,21 @@ class AgentEndpoint extends Endpoint {
   /// a final `done`.
   Stream<AgentEvent> chat(
     Session session,
-    UuidValue budgetId,
+    UuidValue entityId,
     UuidValue? conversationId,
     String message,
   ) => AgentService.chat(
     session,
-    budgetId: budgetId,
+    entityId: entityId,
     conversationId: conversationId,
     message: message,
   );
 
-  /// Lists the user's conversations in one budget, newest first.
+  /// Lists the user's conversations in one entity, newest first.
   Future<List<AgentConversation>> listConversations(
     Session session,
-    UuidValue budgetId,
-  ) => AgentService.listConversations(session, budgetId: budgetId);
+    UuidValue entityId,
+  ) => AgentService.listConversations(session, entityId: entityId);
 
   /// Returns the visible user and assistant messages of a conversation.
   Future<List<AgentMessage>> getMessages(
@@ -83,18 +83,18 @@ class AgentEndpoint extends Endpoint {
   Future<void> clearProviderSettings(Session session) =>
       AgentProviderSettingsService.clear(session, requireAgentUserId(session));
 
-  /// Lists the changes the assistant proposed for one budget.
+  /// Lists the changes the assistant proposed for one entity.
   Future<List<AgentProposal>> listProposals(
     Session session,
-    UuidValue budgetId, {
+    UuidValue entityId, {
     bool pendingOnly = true,
   }) => AgentProposalService.list(
     session,
-    budgetId: budgetId,
+    entityId: entityId,
     pendingOnly: pendingOnly,
   );
 
-  /// Applies a pending proposal through the normal budget and tax services.
+  /// Applies a pending proposal through the normal plan and tax services.
   Future<AgentProposal> applyProposal(
     Session session,
     UuidValue proposalId,

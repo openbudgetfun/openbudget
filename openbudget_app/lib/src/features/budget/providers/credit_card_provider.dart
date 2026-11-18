@@ -1,8 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
+import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'credit_card_provider.g.dart';
@@ -10,67 +11,69 @@ part 'credit_card_provider.g.dart';
 class CreditCardPaymentInfo extends Equatable {
   const CreditCardPaymentInfo({
     required this.account,
-    required this.spentCents,
-    required this.paymentCents,
+    required this.spentMinor,
+    required this.balanceMinor,
   });
 
   final Account account;
-  final int spentCents;
-  final int paymentCents;
+
+  /// The month's spending on the card, in the card's currency, positive.
+  final int spentMinor;
+
+  /// What the card owes (the liability balance, positive).
+  final int balanceMinor;
 
   @override
-  List<Object?> get props => [account, spentCents, paymentCents];
+  List<Object?> get props => [account, spentMinor, balanceMinor];
 }
 
-/// Computes credit card payment information for all credit card accounts
-/// in a budget, based on the selected month's transactions.
+/// Each card's month spending and balance.
+///
+/// Spending comes from `transaction.list` filtered by account and the
+/// selected month's dates; payment envelopes are deferred (Q3).
 @riverpod
 Future<List<CreditCardPaymentInfo>> creditCardPayments(
   Ref ref,
-  String budgetId,
+  String entityId,
 ) async {
-  final selectedMonth = ref.watch(selectedMonthProvider(budgetId));
-  final accounts = await ref.watch(accountListProvider(budgetId).future);
-  final transactions = await ref.watch(
-    monthlyTransactionsProvider(
-      budgetId,
-      selectedMonth.year,
-      selectedMonth.month,
-    ).future,
-  );
+  final month = ref.watch(selectedMonthProvider(entityId));
+  final accounts = await ref.watch(accountListProvider(entityId).future);
 
-  final creditCards = accounts.where(
-    (a) => a.accountType == 'creditCard' && !a.isClosed,
-  );
+  final cards = accounts
+      .where((a) => a.kind == AccountKind.creditCard && a.closedAt == null)
+      .toList();
+  if (cards.isEmpty) return const [];
 
-  if (creditCards.isEmpty) return [];
+  final client = ref.read(serverpodClientProvider);
+  final firstDay = MonthKey.toFirstDate(month);
+  final lastDay = MonthKey.toLastDate(month);
+  final entityUuid = UuidValue.fromString(entityId);
 
   final result = <CreditCardPaymentInfo>[];
-
-  for (final card in creditCards) {
+  for (final card in cards) {
     final cardId = card.id?.toString() ?? '';
-
-    // Sum spending on this card for the month (negative amounts = spending).
-    final cardTransactions = transactions.where(
-      (t) => t.accountId?.toString() == cardId,
+    final query = TransactionQuery(
+      entityId: entityUuid,
+      accountId: UuidValue.fromString(cardId),
+      fromDate: firstDay,
+      toDate: lastDay,
+      limit: 200,
     );
-
-    final spentCents = cardTransactions
-        .where((t) => t.amountCents < 0)
-        .fold<int>(0, (sum, t) => sum + t.amountCents.abs());
-
-    // Payment amount is the positive balance on the card (what you owe).
-    // Card balance is negative (liability), so payment = abs(balance).
-    final paymentCents = card.balanceCents.abs();
+    final page = await client.transaction.list(query);
+    final spentMinor = page.items
+        .where((view) => view.transaction.amountMinor < 0)
+        .fold<int>(
+          0,
+          (sum, view) => sum + view.transaction.amountMinor.abs(),
+        );
 
     result.add(
       CreditCardPaymentInfo(
         account: card,
-        spentCents: spentCents,
-        paymentCents: paymentCents,
+        spentMinor: spentMinor,
+        balanceMinor: card.balanceMinor.abs(),
       ),
     );
   }
-
   return result;
 }

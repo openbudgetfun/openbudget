@@ -1,0 +1,7 @@
+### A three-level confidence tier.
+enum: Confidence
+serialized: byName
+values:
+  - high
+  - medium
+  - low

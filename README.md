@@ -94,7 +94,28 @@ flutter:app run --flavor prod -t lib/main_prod.dart -d android
 
 # Build web
 flutter:app build web
+
+# Seeker on USB, plus Postgres, Redis, and Serverpod.
+# Prefers this machine's Tailscale address, then the LAN address,
+# then USB port forwarding when the phone cannot route there.
+devenv shell dev:seeker
+devenv shell dev:seeker:status
+devenv shell dev:seeker:reload
+devenv shell dev:seeker:hot-restart
+devenv shell dev:seeker:stop
 ```
+
+`dev:seeker` discovers the attached Android device. Set
+`SEEKER_DEVICE_ID=<serial>` only when more than one device is ready, and keep
+`adb` (Android platform tools) on `PATH`. The runner probes the API port from
+the phone and picks Tailscale, then LAN, then `adb reverse`. `OPENBUDGET_API_URL`
+set in the environment wins and is never rewritten; otherwise `.tmp/flutter.env`
+records the chosen URL. Start, stop, and restart serialize per checkout, while
+status and reload stay available. The runner records the chosen device serial
+and each reverse mapping it creates, so stop only signals the process this
+checkout started and removes only those mappings on that device. Preexisting
+`adb reverse` rules are reused, never overwritten, and another attached phone
+is never touched. Postgres, Redis, and Serverpod keep running for the next run.
 
 Environment routing defaults:
 

@@ -8,3 +8,7 @@ fields:
   usedMicroUsd: int
   ### When the allowance next resets, when the user is subscribed.
   periodEnd: DateTime?
+  ### About how many typical conversations the remaining allowance covers,
+  ### from the user's own median cost per conversation. Null until the user
+  ### has had three conversations, and for bring-your-own providers.
+  conversationsLeft: int?

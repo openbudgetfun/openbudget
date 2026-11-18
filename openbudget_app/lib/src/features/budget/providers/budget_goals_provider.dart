@@ -1,106 +1,71 @@
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_goal_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'budget_goals_provider.g.dart';
 
-/// Fetches all envelope goals for a budget and returns them as a map
-/// keyed by envelope ID string for quick lookup.
+/// All envelope goals of the entity, keyed by envelope id. The month view
+/// already carries each envelope's goal; this covers screens that edit
+/// goals across envelopes.
 @riverpod
-Future<Map<String, EnvelopeGoal>> budgetGoals(Ref ref, String budgetId) async {
-  final categories = await ref.watch(categoryListProvider(budgetId).future);
-  final allEnvelopeIds = <String>[];
-
-  for (final category in categories) {
-    final categoryId = category.id?.toString() ?? '';
-    final envelopes = await ref.watch(envelopeListProvider(categoryId).future);
-    for (final envelope in envelopes) {
-      final id = envelope.id?.toString();
-      if (id != null) {
-        allEnvelopeIds.add(id);
-      }
-    }
-  }
-
-  if (allEnvelopeIds.isEmpty) return {};
-
-  final goals = await ref.watch(envelopeGoalsProvider(allEnvelopeIds).future);
-  final map = <String, EnvelopeGoal>{};
-  for (final goal in goals) {
-    map[goal.envelopeId.toString()] = goal;
-  }
-  return map;
+Future<Map<String, EnvelopeGoal>> budgetGoals(Ref ref, String entityId) async {
+  final goals = await ref.watch(envelopeGoalsProvider(entityId).future);
+  return {for (final goal in goals) goal.envelopeId.toString(): goal};
 }
 
-/// Computes the underfunded amount in cents for an envelope given its goal.
-///
-/// Returns 0 if fully funded, or a positive number representing how many
-/// cents still need to be assigned.
-int computeUnderfundedCents({
-  required EnvelopeGoal goal,
-  required int budgetedCents,
-  required int availableCents,
-}) {
-  switch (goal.goalType) {
-    case 'target_balance':
-      final needed = goal.targetAmountCents - availableCents;
-      return needed > 0 ? needed : 0;
+/// Presentation for a goal against its month view row. The arithmetic
+/// itself lives in core `goal_math.dart`; the month view carries the
+/// underfunded amount, so this only formats progress.
+class GoalPresentation {
+  const GoalPresentation({
+    required this.underfundedMinor,
+    required this.progress,
+  });
 
-    case 'monthly_funding':
-      final target = goal.monthlyFundingCents ?? goal.targetAmountCents;
-      final needed = target - budgetedCents;
-      return needed > 0 ? needed : 0;
+  /// From `EnvelopeMonthView.goalUnderfundedMinor`.
+  final int underfundedMinor;
 
-    case 'target_by_date':
-      if (goal.targetDate == null) {
-        final needed = goal.targetAmountCents - availableCents;
-        return needed > 0 ? needed : 0;
-      }
-      final now = DateTime.now();
-      final target = goal.targetDate!;
-      if (target.isBefore(now)) {
-        final needed = goal.targetAmountCents - availableCents;
-        return needed > 0 ? needed : 0;
-      }
-      final remainingMonths =
-          (target.year - now.year) * 12 + (target.month - now.month);
-      if (remainingMonths <= 0) {
-        final needed = goal.targetAmountCents - availableCents;
-        return needed > 0 ? needed : 0;
-      }
-      final totalNeeded = goal.targetAmountCents - availableCents;
-      if (totalNeeded <= 0) return 0;
-      final monthlyNeeded = (totalNeeded / remainingMonths).ceil();
-      final needed = monthlyNeeded - budgetedCents;
-      return needed > 0 ? needed : 0;
-
-    default:
-      return 0;
-  }
+  /// 0.0 to 1.0, how funded the goal is.
+  final double progress;
 }
 
-/// Computes the funding progress as a fraction (0.0 to 1.0+).
-double computeFundingProgress({
-  required EnvelopeGoal goal,
-  required int budgetedCents,
-  required int availableCents,
+GoalPresentation goalPresentation({
+  required EnvelopeMonthView monthEnvelope,
 }) {
-  switch (goal.goalType) {
-    case 'target_balance':
-      if (goal.targetAmountCents <= 0) return 1;
-      return availableCents / goal.targetAmountCents;
-
-    case 'monthly_funding':
-      final target = goal.monthlyFundingCents ?? goal.targetAmountCents;
-      if (target <= 0) return 1;
-      return budgetedCents / target;
-
-    case 'target_by_date':
-      if (goal.targetAmountCents <= 0) return 1;
-      return availableCents / goal.targetAmountCents;
-
-    default:
-      return 1;
+  final goal = monthEnvelope.goal;
+  if (goal == null || goal.amountMinor <= 0) {
+    return const GoalPresentation(underfundedMinor: 0, progress: 1);
   }
+  final underfunded = monthEnvelope.goalUnderfundedMinor;
+  final funded = goal.amountMinor - underfunded;
+  final progress = goal.amountMinor <= 0
+      ? 1.0
+      : (funded / goal.amountMinor).clamp(0.0, 1.0);
+  return GoalPresentation(underfundedMinor: underfunded, progress: progress);
+}
+
+/// Builds the core funding record for the set-goal dialog's preview, so the
+/// dialog can show what a goal would need without writing it.
+int previewUnderfundedMinor({
+  required EnvelopeGoalKind kind,
+  required int amountMinor,
+  required int month,
+  required int carryoverMinor,
+  required int allocatedMinor,
+  required int activityMinor,
+  DateTime? targetDate,
+}) {
+  final funding = (
+    kind: kind.name,
+    amountMinor: amountMinor,
+    targetDate: targetDate,
+  );
+  return underfundedMinor(
+    funding,
+    month,
+    carryoverMinor,
+    allocatedMinor,
+    activityMinor,
+  );
 }

@@ -1,0 +1,22 @@
+### Everything needed to create or replace a transaction. One shape for the
+### app, imports, recurring posting and the assistant.
+class: TransactionInput
+fields:
+  accountId: UuidValue
+  ### Calendar date.
+  date: DateTime
+  ### Signed amount in account minor units.
+  amountMinor: int
+  ### A manual rate (base per one account-currency unit, exact decimal).
+  ### Null uses the market rate for the date.
+  fxRate: String?
+  payeeId: UuidValue?
+  ### Creates or reuses a payee by exact name when payeeId is null.
+  payeeName: String?
+  description: String, default=''
+  memo: String?
+  status: TransactionStatus, default=uncleared
+  flag: TransactionFlag?
+  ### Empty means one line for the whole amount with no envelope; the
+  ### payee's rule may then fill the envelope.
+  lines: List<TransactionLineInput>

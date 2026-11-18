@@ -1,0 +1,127 @@
+name: tax-freshness
+
+# The weekly freshness report for the tax reference data (docs/
+# tax-jurisdictions.md, section 7). It runs the `tax_freshness` tool over the
+# country dataset and keeps one GitHub issue open per overdue country,
+# labelled `tax-freshness`; issues whose country is no longer overdue are
+# closed. Rule-set caveats join the report in task C2.
+#
+# Deliberately not a pull-request check, and never a required one: a calendar
+# date passing would fail unrelated pull requests. The workflow only ever
+# reads the repository and writes issues.
+
+on:
+  schedule:
+    # Mondays 07:23 UTC, off the top of the hour so scheduled jobs do not
+    # all queue at once.
+    - cron: "23 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: tax-freshness
+  cancel-in-progress: false
+
+jobs:
+  report:
+    # A scheduled run on a fork would open issues there; keep the sync on
+    # the upstream repository, as the release workflow does.
+    if: github.repository == 'openbudgetfun/openbudget'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: run the freshness tool
+        run: |
+          dart run openbudget_core:tax_freshness --json > tax-freshness.json
+          cat tax-freshness.json
+        shell: devenv shell -- bash -e {0}
+
+      - name: sync one issue per overdue country
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          label=tax-freshness
+          prefix='Tax data re-check:'
+          report=tax-freshness.json
+
+          # Create the label when missing; --force keeps reruns quiet.
+          gh label create "$label" --color D93F0B \
+            --description 'Tax reference data due for a re-check' --force
+
+          as_of="$(jq -r '.asOf' "$report")"
+
+          # The open issues carrying the label, as "number<TAB>title".
+          gh issue list --state open --label "$label" --limit 500 \
+            --json number,title \
+            --jq '.[] | [.number, .title] | @tsv' > open-issues.tsv
+
+          # Issue numbers this run confirmed are still overdue.
+          : > matched-numbers.tsv
+
+          # Open or update one issue per overdue country. The workflow
+          # reports countries; rule-set caveats (task C2) extend this step.
+          while IFS=$'\t' read -r code name verified recheck days; do
+            title="$prefix $code $name"
+            body="The tax reference data for **$code — $name** is due for a re-check.
+
+          - Verified on: $verified
+          - Re-check due: $recheck
+          - Overdue by $days day(s) as of $as_of
+
+          To resolve: re-verify the country's fields against the sources in
+          \`openbudget_core/data/countries/$code.json\`, update its
+          \`verifiedOn\` and \`recheckBy\` (plus any figures that changed),
+          and land the change in a pull request. The weekly freshness
+          workflow refreshes this body while the data is overdue and closes
+          the issue when it is no longer overdue."
+
+            number="$(awk -F '\t' -v t="$title" '$2 == t {print $1; exit}' open-issues.tsv)"
+            if [[ -z "$number" ]]; then
+              url="$(gh issue create --title "$title" --body "$body" --label "$label")"
+              number="${url##*/}"
+            else
+              # Refresh the body only when it drifted, so an unchanged state
+              # produces no notification.
+              if [[ "$(gh issue view "$number" --json body --jq '.body')" != "$body" ]]; then
+                gh issue edit "$number" --body "$body"
+              fi
+            fi
+            printf '%s\n' "$number" >> matched-numbers.tsv
+          done < <(
+            jq -r '.overdue[]
+                  | select(.kind == "country")
+                  | [.key, .title, (.verifiedOn // "unknown"), .recheckBy, (.overdueDays | tostring)]
+                  | @tsv' "$report"
+          )
+
+          # Close issues whose country is no longer overdue. A title that
+          # does not carry a two-letter code after the prefix is left alone
+          # rather than closed.
+          while IFS=$'\t' read -r number title; do
+            if grep -qxF "$number" matched-numbers.tsv; then
+              continue
+            fi
+            code="$(printf '%s\n' "${title#"$prefix"}" | awk 'NF {print $1; exit}')"
+            if [[ ! "$code" =~ ^[A-Z]{2}$ ]]; then
+              echo "::warning::Skipping unexpected issue #$number title: $title"
+              continue
+            fi
+            gh issue close "$number" --comment \
+              "The re-check for $code is no longer overdue; closing (tax-freshness run for $as_of)."
+          done < open-issues.tsv
+
+          rm -f open-issues.tsv matched-numbers.tsv
+        shell: bash

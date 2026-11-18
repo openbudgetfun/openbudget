@@ -7,8 +7,8 @@ part 'recurring_list_provider.g.dart';
 @riverpod
 Future<List<RecurringTransaction>> recurringList(
   Ref ref,
-  String budgetId,
+  String entityId,
 ) async {
   final client = ref.read(serverpodClientProvider);
-  return client.recurringTransaction.list(UuidValue.fromString(budgetId));
+  return client.recurringTransaction.list(UuidValue.fromString(entityId));
 }

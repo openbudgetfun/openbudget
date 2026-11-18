@@ -8,14 +8,18 @@ part of 'credit_card_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Computes credit card payment information for all credit card accounts
-/// in a budget, based on the selected month's transactions.
+/// Each card's month spending and balance.
+///
+/// Spending comes from `transaction.list` filtered by account and the
+/// selected month's dates; payment envelopes are deferred (Q3).
 
 @ProviderFor(creditCardPayments)
 final creditCardPaymentsProvider = CreditCardPaymentsFamily._();
 
-/// Computes credit card payment information for all credit card accounts
-/// in a budget, based on the selected month's transactions.
+/// Each card's month spending and balance.
+///
+/// Spending comes from `transaction.list` filtered by account and the
+/// selected month's dates; payment envelopes are deferred (Q3).
 
 final class CreditCardPaymentsProvider
     extends
@@ -27,8 +31,10 @@ final class CreditCardPaymentsProvider
     with
         $FutureModifier<List<CreditCardPaymentInfo>>,
         $FutureProvider<List<CreditCardPaymentInfo>> {
-  /// Computes credit card payment information for all credit card accounts
-  /// in a budget, based on the selected month's transactions.
+  /// Each card's month spending and balance.
+  ///
+  /// Spending comes from `transaction.list` filtered by account and the
+  /// selected month's dates; payment envelopes are deferred (Q3).
   CreditCardPaymentsProvider._({
     required CreditCardPaymentsFamily super.from,
     required String super.argument,
@@ -74,10 +80,12 @@ final class CreditCardPaymentsProvider
 }
 
 String _$creditCardPaymentsHash() =>
-    r'b91aa0beb8758964081d44b3ea3e9934ed2b6559';
+    r'fb30f9854733e2ca8a8e0928d51fca67d332c78b';
 
-/// Computes credit card payment information for all credit card accounts
-/// in a budget, based on the selected month's transactions.
+/// Each card's month spending and balance.
+///
+/// Spending comes from `transaction.list` filtered by account and the
+/// selected month's dates; payment envelopes are deferred (Q3).
 
 final class CreditCardPaymentsFamily extends $Family
     with
@@ -94,11 +102,13 @@ final class CreditCardPaymentsFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Computes credit card payment information for all credit card accounts
-  /// in a budget, based on the selected month's transactions.
+  /// Each card's month spending and balance.
+  ///
+  /// Spending comes from `transaction.list` filtered by account and the
+  /// selected month's dates; payment envelopes are deferred (Q3).
 
-  CreditCardPaymentsProvider call(String budgetId) =>
-      CreditCardPaymentsProvider._(argument: budgetId, from: this);
+  CreditCardPaymentsProvider call(String entityId) =>
+      CreditCardPaymentsProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'creditCardPaymentsProvider';

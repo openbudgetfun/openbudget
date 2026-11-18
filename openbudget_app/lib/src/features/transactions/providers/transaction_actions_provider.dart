@@ -1,342 +1,260 @@
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
+import 'package:openbudget_app/src/features/transactions/providers/transaction_pages_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'transaction_actions_provider.g.dart';
 
+/// Every transaction write goes through `transaction.*` and relies on
+/// `EntityChangedEvent` for refreshes; the local invalidations keep tests
+/// and offline flows correct too. The server computes base amounts, FX
+/// sources and balances; the app never converts.
 @Riverpod(keepAlive: true)
 class TransactionActions extends _$TransactionActions {
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
-  Future<Transaction> addIncome({
-    required String description,
-    required int amountCents,
-    required String currencyCode,
-    required String budgetId,
+  /// Creates a transaction from one input. `input.lines` may be empty for a
+  /// single-line transaction; the server builds the line.
+  Future<TransactionView> create({
+    required TransactionInput input,
+    required String entityId,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final view = await client.transaction.create(input);
+      if (ref.mounted) {
+        ref.invalidate(transactionPagesProvider(entityId));
+        state = const AsyncValue.data(null);
+      }
+      return view;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
+  /// Replaces a transaction and its lines. A reconciled transaction rejects
+  /// money edits; the server enforces this.
+  Future<TransactionView> update({
+    required String transactionId,
+    required TransactionInput input,
+    required String entityId,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final view = await client.transaction.update(
+        UuidValue.fromString(transactionId),
+        input,
+      );
+      if (ref.mounted) {
+        ref.invalidate(transactionPagesProvider(entityId));
+        state = const AsyncValue.data(null);
+      }
+      return view;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
+  /// Deletes a transaction, or both legs when it is part of a transfer.
+  Future<void> delete({
+    required String transactionId,
+    required String entityId,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      await client.transaction.delete(UuidValue.fromString(transactionId));
+      if (ref.mounted) {
+        ref.invalidate(transactionPagesProvider(entityId));
+        state = const AsyncValue.data(null);
+      }
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
+  /// Bulk status change. `reconciled` cannot be set here; clearing a
+  /// reconciled transaction unlocks it.
+  Future<int> setStatus({
+    required List<String> transactionIds,
+    required TransactionStatus status,
+    required String entityId,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    final count = await client.transaction.setStatus(
+      transactionIds.map(UuidValue.fromString).toList(),
+      status,
+    );
+    if (ref.mounted) ref.invalidate(transactionPagesProvider(entityId));
+    return count;
+  }
+
+  Future<int> setFlag({
+    required List<String> transactionIds,
+    required String entityId,
+    TransactionFlag? flag,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    final count = await client.transaction.setFlag(
+      transactionIds.map(UuidValue.fromString).toList(),
+      flag,
+    );
+    if (ref.mounted) ref.invalidate(transactionPagesProvider(entityId));
+    return count;
+  }
+
+  Future<void> bulkDelete({
+    required List<String> transactionIds,
+    required String entityId,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      for (final id in transactionIds) {
+        await client.transaction.delete(UuidValue.fromString(id));
+      }
+      if (ref.mounted) {
+        ref.invalidate(transactionPagesProvider(entityId));
+        state = const AsyncValue.data(null);
+      }
+    } on Exception catch (e, st) {
+      if (ref.mounted) state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+
+  /// Creates both legs of a transfer and their link.
+  Future<List<TransactionView>> createTransfer({
+    required TransferInput input,
+    required String entityId,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final legs = await client.transaction.createTransfer(input);
+      if (ref.mounted) {
+        ref.invalidate(transactionPagesProvider(entityId));
+        state = const AsyncValue.data(null);
+      }
+      return legs;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
+  /// Replaces both legs of an existing transfer.
+  Future<List<TransactionView>> updateTransfer({
+    required String transferId,
+    required TransferInput input,
+    required String entityId,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final legs = await client.transaction.updateTransfer(
+        UuidValue.fromString(transferId),
+        input,
+      );
+      if (ref.mounted) {
+        ref.invalidate(transactionPagesProvider(entityId));
+        state = const AsyncValue.data(null);
+      }
+      return legs;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
+  /// Reconciles an account against a statement balance. With
+  /// [createAdjustment] the difference becomes a cleared adjustment
+  /// transaction dated [statementDate].
+  Future<ReconcileResult> reconcile({
+    required String accountId,
+    required DateTime statementDate,
+    required int statementBalanceMinor,
+    required bool createAdjustment,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    return client.transaction.reconcile(
+      UuidValue.fromString(accountId),
+      statementDate,
+      statementBalanceMinor,
+      createAdjustment,
+    );
+  }
+
+  /// Imports rows into one account idempotently.
+  Future<ImportResult> importRows({
+    required String accountId,
+    required List<ImportRow> rows,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    return client.transaction.importRows(
+      UuidValue.fromString(accountId),
+      rows,
+    );
+  }
+
+  /// Same account, same amount, date within ±3 days.
+  Future<List<TransactionView>> findDuplicates({
+    required String accountId,
     required DateTime date,
-    String? memo,
-  }) async {
-    state = const AsyncValue.loading();
-    final client = ref.read(serverpodClientProvider);
-    try {
-      final transaction = await client.transaction.create(
-        description,
-        amountCents.abs(),
-        currencyCode,
-        UuidValue.fromString(budgetId),
-        date,
-        memo: memo,
-      );
-      if (ref.mounted) {
-        ref
-          ..invalidate(transactionListProvider(budgetId))
-          ..invalidate(budgetSummaryProvider(budgetId));
-        state = const AsyncValue.data(null);
-      }
-      return transaction;
-    } on Exception catch (e, st) {
-      if (ref.mounted) {
-        state = AsyncValue.error(e, st);
-      }
-      rethrow;
-    }
-  }
-
-  Future<Transaction> updateTransaction({
-    required String transactionId,
-    required String budgetId,
-    String? description,
-    int? amountCents,
-    String? envelopeId,
-    String? payeeId,
-    DateTime? transactionDate,
-    String? memo,
-  }) async {
-    state = const AsyncValue.loading();
-    final client = ref.read(serverpodClientProvider);
-    try {
-      final transaction = await client.transaction.update(
-        UuidValue.fromString(transactionId),
-        description: description,
-        amountCents: amountCents,
-        envelopeId: envelopeId != null
-            ? UuidValue.fromString(envelopeId)
-            : null,
-        payeeId: payeeId != null ? UuidValue.fromString(payeeId) : null,
-        transactionDate: transactionDate,
-        memo: memo,
-      );
-      if (ref.mounted) {
-        ref
-          ..invalidate(transactionListProvider(budgetId))
-          ..invalidate(budgetSummaryProvider(budgetId));
-        state = const AsyncValue.data(null);
-      }
-      return transaction;
-    } on Exception catch (e, st) {
-      if (ref.mounted) {
-        state = AsyncValue.error(e, st);
-      }
-      rethrow;
-    }
-  }
-
-  Future<Transaction> deleteTransaction({
-    required String transactionId,
-    required String budgetId,
-  }) async {
-    state = const AsyncValue.loading();
-    final client = ref.read(serverpodClientProvider);
-    try {
-      final deleted = await client.transaction.delete(
-        UuidValue.fromString(transactionId),
-      );
-      if (ref.mounted) {
-        ref
-          ..invalidate(transactionListProvider(budgetId))
-          ..invalidate(budgetSummaryProvider(budgetId));
-        state = const AsyncValue.data(null);
-      }
-      return deleted;
-    } on Exception catch (e, st) {
-      if (ref.mounted) {
-        state = AsyncValue.error(e, st);
-      }
-      rethrow;
-    }
-  }
-
-  /// Recreates a previously deleted transaction for undo support.
-  Future<Transaction> undoDeleteTransaction({
-    required Transaction deletedTransaction,
-    required String budgetId,
-  }) async {
-    state = const AsyncValue.loading();
-    final client = ref.read(serverpodClientProvider);
-    try {
-      final restored = await client.transaction.create(
-        deletedTransaction.description,
-        deletedTransaction.amountCents,
-        deletedTransaction.currencyCode,
-        UuidValue.fromString(budgetId),
-        deletedTransaction.transactionDate,
-        envelopeId: deletedTransaction.envelopeId,
-        payeeId: deletedTransaction.payeeId,
-        memo: deletedTransaction.memo,
-      );
-      if (ref.mounted) {
-        ref
-          ..invalidate(transactionListProvider(budgetId))
-          ..invalidate(budgetSummaryProvider(budgetId));
-        state = const AsyncValue.data(null);
-      }
-      return restored;
-    } on Exception catch (e, st) {
-      if (ref.mounted) {
-        state = AsyncValue.error(e, st);
-      }
-      rethrow;
-    }
-  }
-
-  Future<Transaction> toggleCleared({
-    required String transactionId,
-    required String budgetId,
+    required int amountMinor,
   }) async {
     final client = ref.read(serverpodClientProvider);
-    try {
-      final transaction = await client.transaction.toggleCleared(
-        UuidValue.fromString(transactionId),
-      );
-      if (ref.mounted) {
-        ref.invalidate(transactionListProvider(budgetId));
-      }
-      return transaction;
-    } on Exception catch (e, st) {
-      if (ref.mounted) {
-        state = AsyncValue.error(e, st);
-      }
-      rethrow;
-    }
+    return client.transaction.findDuplicates(
+      UuidValue.fromString(accountId),
+      date,
+      amountMinor,
+    );
   }
+}
 
-  Future<Transaction> setFlag({
-    required String transactionId,
-    required String budgetId,
-    String? flagColor,
-  }) async {
-    final client = ref.read(serverpodClientProvider);
-    try {
-      final transaction = await client.transaction.setFlag(
-        UuidValue.fromString(transactionId),
-        flagColor: flagColor,
-      );
-      if (ref.mounted) {
-        ref.invalidate(transactionListProvider(budgetId));
-      }
-      return transaction;
-    } on Exception catch (e, st) {
-      if (ref.mounted) {
-        state = AsyncValue.error(e, st);
-      }
-      rethrow;
-    }
-  }
-
-  /// Assigns an envelope to multiple transactions at once.
-  Future<int> bulkAssignEnvelope({
-    required List<String> transactionIds,
-    required String envelopeId,
-    required String budgetId,
-  }) async {
-    final client = ref.read(serverpodClientProvider);
-    var count = 0;
-    for (final txId in transactionIds) {
-      try {
-        await client.transaction.update(
-          UuidValue.fromString(txId),
-          envelopeId: UuidValue.fromString(envelopeId),
-        );
-        count++;
-      } on Exception catch (_) {
-        // Continue with other transactions on individual failure.
-      }
-    }
-    if (ref.mounted) {
-      ref
-        ..invalidate(transactionListProvider(budgetId))
-        ..invalidate(budgetSummaryProvider(budgetId));
-    }
-    return count;
-  }
-
-  /// Sets or clears flag on multiple transactions at once.
-  Future<int> bulkSetFlag({
-    required List<String> transactionIds,
-    required String budgetId,
-    String? flagColor,
-  }) async {
-    final client = ref.read(serverpodClientProvider);
-    var count = 0;
-    for (final txId in transactionIds) {
-      try {
-        await client.transaction.setFlag(
-          UuidValue.fromString(txId),
-          flagColor: flagColor,
-        );
-        count++;
-      } on Exception catch (_) {
-        // Continue with other transactions on individual failure.
-      }
-    }
-    if (ref.mounted) {
-      ref.invalidate(transactionListProvider(budgetId));
-    }
-    return count;
-  }
-
-  /// Deletes multiple transactions at once.
-  Future<int> bulkDelete({
-    required List<String> transactionIds,
-    required String budgetId,
-  }) async {
-    final client = ref.read(serverpodClientProvider);
-    var count = 0;
-    for (final txId in transactionIds) {
-      try {
-        await client.transaction.delete(
-          UuidValue.fromString(txId),
-        );
-        count++;
-      } on Exception catch (_) {
-        // Continue with other transactions on individual failure.
-      }
-    }
-    if (ref.mounted) {
-      ref
-        ..invalidate(transactionListProvider(budgetId))
-        ..invalidate(budgetSummaryProvider(budgetId));
-    }
-    return count;
-  }
-
-  /// Toggles cleared status on multiple transactions at once.
-  Future<int> bulkToggleCleared({
-    required List<String> transactionIds,
-    required String budgetId,
-  }) async {
-    final client = ref.read(serverpodClientProvider);
-    var count = 0;
-    for (final txId in transactionIds) {
-      try {
-        await client.transaction.toggleCleared(
-          UuidValue.fromString(txId),
-        );
-        count++;
-      } on Exception catch (_) {
-        // Continue with other transactions on individual failure.
-      }
-    }
-    if (ref.mounted) {
-      ref.invalidate(transactionListProvider(budgetId));
-    }
-    return count;
-  }
-
-  Future<Transaction> addExpense({
-    required String description,
-    required int amountCents,
-    required String currencyCode,
-    required String budgetId,
-    required DateTime date,
-    String? envelopeId,
-    String? categoryId,
-    String? payeeId,
-    String? memo,
-  }) async {
-    state = const AsyncValue.loading();
-    final client = ref.read(serverpodClientProvider);
-    try {
-      final transaction = await client.transaction.create(
-        description,
-        -amountCents.abs(),
-        currencyCode,
-        UuidValue.fromString(budgetId),
-        date,
-        envelopeId: envelopeId != null
-            ? UuidValue.fromString(envelopeId)
-            : null,
-        payeeId: payeeId != null ? UuidValue.fromString(payeeId) : null,
-        memo: memo,
-      );
-
-      if (envelopeId != null && categoryId != null && ref.mounted) {
-        await ref
-            .read(envelopeActionsProvider.notifier)
-            .updateEnvelope(
-              envelopeId: envelopeId,
-              categoryId: categoryId,
-              budgetId: budgetId,
-              spentAmountCents: amountCents.abs(),
-            );
-      }
-
-      if (ref.mounted) {
-        ref
-          ..invalidate(transactionListProvider(budgetId))
-          ..invalidate(budgetSummaryProvider(budgetId));
-        state = const AsyncValue.data(null);
-      }
-      return transaction;
-    } on Exception catch (e, st) {
-      if (ref.mounted) {
-        state = AsyncValue.error(e, st);
-      }
-      rethrow;
-    }
-  }
+/// Rebuilds a transaction's input with the chosen envelope on every line,
+/// keeping each line's amount, tax code and memo. Used by bulk assignment.
+TransactionInput transactionInputWithEnvelope(
+  TransactionView view,
+  String envelopeId,
+) {
+  final transaction = view.transaction;
+  final envelopeUuid = UuidValue.fromString(envelopeId);
+  return TransactionInput(
+    accountId: transaction.accountId,
+    date: transaction.date,
+    amountMinor: transaction.amountMinor,
+    fxRate: transaction.fxRate,
+    payeeId: transaction.payeeId,
+    description: transaction.description,
+    memo: transaction.memo,
+    status: transaction.status,
+    flag: transaction.flag,
+    lines: view.lines
+        .map(
+          (line) => TransactionLineInput(
+            amountMinor: line.amountMinor,
+            envelopeId: envelopeUuid,
+            taxCategoryCode: line.taxCategoryCode,
+            memo: line.memo,
+          ),
+        )
+        .toList(),
+  );
 }

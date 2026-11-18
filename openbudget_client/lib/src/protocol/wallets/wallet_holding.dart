@@ -10,37 +10,75 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// Native-asset holding for a wallet connection.
+import '../common/confidence.dart' as _itaosqa4;
+import '../wallets/holding_position.dart' as _i33owk26;
+import '../wallets/price_quality.dart' as _iy1clnxb;
+import '../wallets/price_source.dart' as _ip9y7dom;
+import '../wallets/spam_verdict.dart' as _ioka4inn;
+
+/// The current quantity and valuation of one asset in a wallet, on one
+/// network and in one position.
 abstract class WalletHolding
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   WalletHolding._({
     this.id,
-    required this.walletConnectionId,
-    required this.chain,
+    required this.walletId,
+    required this.network,
     required this.assetId,
-    required this.symbol,
+    _i33owk26.HoldingPosition? position,
+    this.symbol,
+    this.name,
+    this.tokenProgram,
     required this.decimals,
-    required this.quantityBaseUnits,
-    required this.quantityDisplay,
-    this.usdPrice,
-    this.usdValue,
-    DateTime? lastSyncedAt,
-  }) : lastSyncedAt = lastSyncedAt ?? DateTime.now();
+    required this.quantityRaw,
+    bool? isNft,
+    _ioka4inn.SpamVerdict? spamVerdict,
+    this.priceCurrencyCode,
+    this.unitPrice,
+    this.valueMinor,
+    this.priceSource,
+    _iy1clnxb.PriceQuality? priceQuality,
+    this.priceConfidence,
+    this.priceAsOf,
+    this.costBasisMinor,
+    this.realizedPnlMinor,
+    this.pnlAsOf,
+    this.metadataJson,
+    DateTime? updatedAt,
+  }) : position = position ?? _i33owk26.HoldingPosition.available,
+       isNft = isNft ?? false,
+       spamVerdict = spamVerdict ?? _ioka4inn.SpamVerdict.clean,
+       priceQuality = priceQuality ?? _iy1clnxb.PriceQuality.unpriced,
+       updatedAt = updatedAt ?? DateTime.now();
 
   factory WalletHolding({
     _isc.UuidValue? id,
-    required _isc.UuidValue walletConnectionId,
-    required String chain,
+    required _isc.UuidValue walletId,
+    required _ifz8weqz.WalletNetwork network,
     required String assetId,
-    required String symbol,
+    _i33owk26.HoldingPosition? position,
+    String? symbol,
+    String? name,
+    String? tokenProgram,
     required int decimals,
-    required String quantityBaseUnits,
-    required double quantityDisplay,
-    double? usdPrice,
-    double? usdValue,
-    DateTime? lastSyncedAt,
+    required BigInt quantityRaw,
+    bool? isNft,
+    _ioka4inn.SpamVerdict? spamVerdict,
+    String? priceCurrencyCode,
+    String? unitPrice,
+    int? valueMinor,
+    _ip9y7dom.PriceSource? priceSource,
+    _iy1clnxb.PriceQuality? priceQuality,
+    _itaosqa4.Confidence? priceConfidence,
+    DateTime? priceAsOf,
+    int? costBasisMinor,
+    int? realizedPnlMinor,
+    DateTime? pnlAsOf,
+    String? metadataJson,
+    DateTime? updatedAt,
   }) = _WalletHoldingImpl;
 
   factory WalletHolding.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -48,22 +86,63 @@ abstract class WalletHolding
       id: jsonSerialization['id'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      walletConnectionId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['walletConnectionId'],
+      walletId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['walletId'],
       ),
-      chain: jsonSerialization['chain'] as String,
+      network: _ifz8weqz.WalletNetwork.fromJson(
+        (jsonSerialization['network'] as String),
+      ),
       assetId: jsonSerialization['assetId'] as String,
-      symbol: jsonSerialization['symbol'] as String,
-      decimals: jsonSerialization['decimals'] as int,
-      quantityBaseUnits: jsonSerialization['quantityBaseUnits'] as String,
-      quantityDisplay: (jsonSerialization['quantityDisplay'] as num).toDouble(),
-      usdPrice: (jsonSerialization['usdPrice'] as num?)?.toDouble(),
-      usdValue: (jsonSerialization['usdValue'] as num?)?.toDouble(),
-      lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
+      position: jsonSerialization['position'] == null
           ? null
-          : _isc.DateTimeJsonExtension.fromJson(
-              jsonSerialization['lastSyncedAt'],
+          : _i33owk26.HoldingPosition.fromJson(
+              (jsonSerialization['position'] as String),
             ),
+      symbol: jsonSerialization['symbol'] as String?,
+      name: jsonSerialization['name'] as String?,
+      tokenProgram: jsonSerialization['tokenProgram'] as String?,
+      decimals: jsonSerialization['decimals'] as int,
+      quantityRaw: _isc.BigIntJsonExtension.fromJson(
+        jsonSerialization['quantityRaw'],
+      ),
+      isNft: jsonSerialization['isNft'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['isNft']),
+      spamVerdict: jsonSerialization['spamVerdict'] == null
+          ? null
+          : _ioka4inn.SpamVerdict.fromJson(
+              (jsonSerialization['spamVerdict'] as String),
+            ),
+      priceCurrencyCode: jsonSerialization['priceCurrencyCode'] as String?,
+      unitPrice: jsonSerialization['unitPrice'] as String?,
+      valueMinor: jsonSerialization['valueMinor'] as int?,
+      priceSource: jsonSerialization['priceSource'] == null
+          ? null
+          : _ip9y7dom.PriceSource.fromJson(
+              (jsonSerialization['priceSource'] as String),
+            ),
+      priceQuality: jsonSerialization['priceQuality'] == null
+          ? null
+          : _iy1clnxb.PriceQuality.fromJson(
+              (jsonSerialization['priceQuality'] as String),
+            ),
+      priceConfidence: jsonSerialization['priceConfidence'] == null
+          ? null
+          : _itaosqa4.Confidence.fromJson(
+              (jsonSerialization['priceConfidence'] as String),
+            ),
+      priceAsOf: jsonSerialization['priceAsOf'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['priceAsOf']),
+      costBasisMinor: jsonSerialization['costBasisMinor'] as int?,
+      realizedPnlMinor: jsonSerialization['realizedPnlMinor'] as int?,
+      pnlAsOf: jsonSerialization['pnlAsOf'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['pnlAsOf']),
+      metadataJson: jsonSerialization['metadataJson'] as String?,
+      updatedAt: jsonSerialization['updatedAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
@@ -72,57 +151,127 @@ abstract class WalletHolding
   /// the id will be null.
   _isc.UuidValue? id;
 
-  _isc.UuidValue walletConnectionId;
+  _isc.UuidValue walletId;
 
-  String chain;
+  /// The network the asset is on. A single-network wallet's holdings use the
+  /// wallet's network.
+  _ifz8weqz.WalletNetwork network;
 
+  /// The asset on that network: `native`, or the contract, mint, coin type,
+  /// jetton master or policy-and-name unit (multichain-wallets.md 7.2).
   String assetId;
 
-  String symbol;
+  /// Spendable, staked or unclaimed. Each position of an asset is its own
+  /// holding.
+  _i33owk26.HoldingPosition position;
+
+  String? symbol;
+
+  String? name;
+
+  /// The token standard or program: a Solana token program id, or erc20,
+  /// trc20, trc10, xrplIou, jetton, cardanoNative, suiCoin or aptosFa.
+  String? tokenProgram;
 
   int decimals;
 
-  String quantityBaseUnits;
+  /// Quantity in the asset's base units (lamports, wei, satoshis, sun,
+  /// drops).
+  BigInt quantityRaw;
 
-  double quantityDisplay;
+  bool isNft;
 
-  double? usdPrice;
+  /// Whether the holding counts toward net worth. The classifier sets clean
+  /// or suspected; a user choice overrides it and survives syncs.
+  _ioka4inn.SpamVerdict spamVerdict;
 
-  double? usdValue;
+  /// ISO 4217 code that unitPrice and every *Minor field here are in.
+  String? priceCurrencyCode;
 
-  DateTime lastSyncedAt;
+  /// Price of one whole token, exact decimal string.
+  String? unitPrice;
+
+  /// Quantity times unitPrice, in priceCurrencyCode minor units, half up.
+  int? valueMinor;
+
+  _ip9y7dom.PriceSource? priceSource;
+
+  _iy1clnxb.PriceQuality priceQuality;
+
+  _itaosqa4.Confidence? priceConfidence;
+
+  DateTime? priceAsOf;
+
+  /// Estimated acquisition cost of the current quantity.
+  int? costBasisMinor;
+
+  /// Estimated realised gain or loss accumulated for this asset.
+  int? realizedPnlMinor;
+
+  DateTime? pnlAsOf;
+
+  /// JSON subset of the asset's metadata.
+  String? metadataJson;
+
+  DateTime updatedAt;
 
   /// Returns a shallow copy of this [WalletHolding]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
   WalletHolding copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? walletConnectionId,
-    String? chain,
+    _isc.UuidValue? walletId,
+    _ifz8weqz.WalletNetwork? network,
     String? assetId,
+    _i33owk26.HoldingPosition? position,
     String? symbol,
+    String? name,
+    String? tokenProgram,
     int? decimals,
-    String? quantityBaseUnits,
-    double? quantityDisplay,
-    double? usdPrice,
-    double? usdValue,
-    DateTime? lastSyncedAt,
+    BigInt? quantityRaw,
+    bool? isNft,
+    _ioka4inn.SpamVerdict? spamVerdict,
+    String? priceCurrencyCode,
+    String? unitPrice,
+    int? valueMinor,
+    _ip9y7dom.PriceSource? priceSource,
+    _iy1clnxb.PriceQuality? priceQuality,
+    _itaosqa4.Confidence? priceConfidence,
+    DateTime? priceAsOf = const _isc.$UndefinedDateTime(),
+    int? costBasisMinor,
+    int? realizedPnlMinor,
+    DateTime? pnlAsOf = const _isc.$UndefinedDateTime(),
+    String? metadataJson,
+    DateTime? updatedAt,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'WalletHolding',
       if (id != null) 'id': id?.toJson(),
-      'walletConnectionId': walletConnectionId.toJson(),
-      'chain': chain,
+      'walletId': walletId.toJson(),
+      'network': network.toJson(),
       'assetId': assetId,
-      'symbol': symbol,
+      'position': position.toJson(),
+      if (symbol != null) 'symbol': symbol,
+      if (name != null) 'name': name,
+      if (tokenProgram != null) 'tokenProgram': tokenProgram,
       'decimals': decimals,
-      'quantityBaseUnits': quantityBaseUnits,
-      'quantityDisplay': quantityDisplay,
-      if (usdPrice != null) 'usdPrice': usdPrice,
-      if (usdValue != null) 'usdValue': usdValue,
-      'lastSyncedAt': lastSyncedAt.toJson(),
+      'quantityRaw': quantityRaw.toJson(),
+      'isNft': isNft,
+      'spamVerdict': spamVerdict.toJson(),
+      if (priceCurrencyCode != null) 'priceCurrencyCode': priceCurrencyCode,
+      if (unitPrice != null) 'unitPrice': unitPrice,
+      if (valueMinor != null) 'valueMinor': valueMinor,
+      if (priceSource != null) 'priceSource': priceSource?.toJson(),
+      'priceQuality': priceQuality.toJson(),
+      if (priceConfidence != null) 'priceConfidence': priceConfidence?.toJson(),
+      if (priceAsOf != null) 'priceAsOf': priceAsOf?.toJson(),
+      if (costBasisMinor != null) 'costBasisMinor': costBasisMinor,
+      if (realizedPnlMinor != null) 'realizedPnlMinor': realizedPnlMinor,
+      if (pnlAsOf != null) 'pnlAsOf': pnlAsOf?.toJson(),
+      if (metadataJson != null) 'metadataJson': metadataJson,
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -131,16 +280,29 @@ abstract class WalletHolding
     return {
       '__className__': 'WalletHolding',
       if (id != null) 'id': id?.toJson(),
-      'walletConnectionId': walletConnectionId.toJson(),
-      'chain': chain,
+      'walletId': walletId.toJson(),
+      'network': network.toJson(),
       'assetId': assetId,
-      'symbol': symbol,
+      'position': position.toJson(),
+      if (symbol != null) 'symbol': symbol,
+      if (name != null) 'name': name,
+      if (tokenProgram != null) 'tokenProgram': tokenProgram,
       'decimals': decimals,
-      'quantityBaseUnits': quantityBaseUnits,
-      'quantityDisplay': quantityDisplay,
-      if (usdPrice != null) 'usdPrice': usdPrice,
-      if (usdValue != null) 'usdValue': usdValue,
-      'lastSyncedAt': lastSyncedAt.toJson(),
+      'quantityRaw': quantityRaw.toJson(),
+      'isNft': isNft,
+      'spamVerdict': spamVerdict.toJson(),
+      if (priceCurrencyCode != null) 'priceCurrencyCode': priceCurrencyCode,
+      if (unitPrice != null) 'unitPrice': unitPrice,
+      if (valueMinor != null) 'valueMinor': valueMinor,
+      if (priceSource != null) 'priceSource': priceSource?.toJson(),
+      'priceQuality': priceQuality.toJson(),
+      if (priceConfidence != null) 'priceConfidence': priceConfidence?.toJson(),
+      if (priceAsOf != null) 'priceAsOf': priceAsOf?.toJson(),
+      if (costBasisMinor != null) 'costBasisMinor': costBasisMinor,
+      if (realizedPnlMinor != null) 'realizedPnlMinor': realizedPnlMinor,
+      if (pnlAsOf != null) 'pnlAsOf': pnlAsOf?.toJson(),
+      if (metadataJson != null) 'metadataJson': metadataJson,
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -155,28 +317,54 @@ class _Undefined {}
 class _WalletHoldingImpl extends WalletHolding {
   _WalletHoldingImpl({
     _isc.UuidValue? id,
-    required _isc.UuidValue walletConnectionId,
-    required String chain,
+    required _isc.UuidValue walletId,
+    required _ifz8weqz.WalletNetwork network,
     required String assetId,
-    required String symbol,
+    _i33owk26.HoldingPosition? position,
+    String? symbol,
+    String? name,
+    String? tokenProgram,
     required int decimals,
-    required String quantityBaseUnits,
-    required double quantityDisplay,
-    double? usdPrice,
-    double? usdValue,
-    DateTime? lastSyncedAt,
+    required BigInt quantityRaw,
+    bool? isNft,
+    _ioka4inn.SpamVerdict? spamVerdict,
+    String? priceCurrencyCode,
+    String? unitPrice,
+    int? valueMinor,
+    _ip9y7dom.PriceSource? priceSource,
+    _iy1clnxb.PriceQuality? priceQuality,
+    _itaosqa4.Confidence? priceConfidence,
+    DateTime? priceAsOf,
+    int? costBasisMinor,
+    int? realizedPnlMinor,
+    DateTime? pnlAsOf,
+    String? metadataJson,
+    DateTime? updatedAt,
   }) : super._(
          id: id,
-         walletConnectionId: walletConnectionId,
-         chain: chain,
+         walletId: walletId,
+         network: network,
          assetId: assetId,
+         position: position,
          symbol: symbol,
+         name: name,
+         tokenProgram: tokenProgram,
          decimals: decimals,
-         quantityBaseUnits: quantityBaseUnits,
-         quantityDisplay: quantityDisplay,
-         usdPrice: usdPrice,
-         usdValue: usdValue,
-         lastSyncedAt: lastSyncedAt,
+         quantityRaw: quantityRaw,
+         isNft: isNft,
+         spamVerdict: spamVerdict,
+         priceCurrencyCode: priceCurrencyCode,
+         unitPrice: unitPrice,
+         valueMinor: valueMinor,
+         priceSource: priceSource,
+         priceQuality: priceQuality,
+         priceConfidence: priceConfidence,
+         priceAsOf: priceAsOf,
+         costBasisMinor: costBasisMinor,
+         realizedPnlMinor: realizedPnlMinor,
+         pnlAsOf: pnlAsOf,
+         metadataJson: metadataJson,
+         updatedAt: updatedAt,
        );
 
   /// Returns a shallow copy of this [WalletHolding]
@@ -185,29 +373,67 @@ class _WalletHoldingImpl extends WalletHolding {
   @override
   WalletHolding copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? walletConnectionId,
-    String? chain,
+    _isc.UuidValue? walletId,
+    _ifz8weqz.WalletNetwork? network,
     String? assetId,
-    String? symbol,
+    _i33owk26.HoldingPosition? position,
+    Object? symbol = _Undefined,
+    Object? name = _Undefined,
+    Object? tokenProgram = _Undefined,
     int? decimals,
-    String? quantityBaseUnits,
-    double? quantityDisplay,
-    Object? usdPrice = _Undefined,
-    Object? usdValue = _Undefined,
-    DateTime? lastSyncedAt,
+    BigInt? quantityRaw,
+    bool? isNft,
+    _ioka4inn.SpamVerdict? spamVerdict,
+    Object? priceCurrencyCode = _Undefined,
+    Object? unitPrice = _Undefined,
+    Object? valueMinor = _Undefined,
+    Object? priceSource = _Undefined,
+    _iy1clnxb.PriceQuality? priceQuality,
+    Object? priceConfidence = _Undefined,
+    DateTime? priceAsOf = const _isc.$UndefinedDateTime(),
+    Object? costBasisMinor = _Undefined,
+    Object? realizedPnlMinor = _Undefined,
+    DateTime? pnlAsOf = const _isc.$UndefinedDateTime(),
+    Object? metadataJson = _Undefined,
+    DateTime? updatedAt,
   }) {
     return WalletHolding(
       id: id is _isc.UndefinedSentinel ? this.id : id,
-      walletConnectionId: walletConnectionId ?? this.walletConnectionId,
-      chain: chain ?? this.chain,
+      walletId: walletId ?? this.walletId,
+      network: network ?? this.network,
       assetId: assetId ?? this.assetId,
-      symbol: symbol ?? this.symbol,
+      position: position ?? this.position,
+      symbol: symbol is String? ? symbol : this.symbol,
+      name: name is String? ? name : this.name,
+      tokenProgram: tokenProgram is String? ? tokenProgram : this.tokenProgram,
       decimals: decimals ?? this.decimals,
-      quantityBaseUnits: quantityBaseUnits ?? this.quantityBaseUnits,
-      quantityDisplay: quantityDisplay ?? this.quantityDisplay,
-      usdPrice: usdPrice is double? ? usdPrice : this.usdPrice,
-      usdValue: usdValue is double? ? usdValue : this.usdValue,
-      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      quantityRaw: quantityRaw ?? this.quantityRaw,
+      isNft: isNft ?? this.isNft,
+      spamVerdict: spamVerdict ?? this.spamVerdict,
+      priceCurrencyCode: priceCurrencyCode is String?
+          ? priceCurrencyCode
+          : this.priceCurrencyCode,
+      unitPrice: unitPrice is String? ? unitPrice : this.unitPrice,
+      valueMinor: valueMinor is int? ? valueMinor : this.valueMinor,
+      priceSource: priceSource is _ip9y7dom.PriceSource?
+          ? priceSource
+          : this.priceSource,
+      priceQuality: priceQuality ?? this.priceQuality,
+      priceConfidence: priceConfidence is _itaosqa4.Confidence?
+          ? priceConfidence
+          : this.priceConfidence,
+      priceAsOf: priceAsOf is _isc.UndefinedSentinel
+          ? this.priceAsOf
+          : priceAsOf,
+      costBasisMinor: costBasisMinor is int?
+          ? costBasisMinor
+          : this.costBasisMinor,
+      realizedPnlMinor: realizedPnlMinor is int?
+          ? realizedPnlMinor
+          : this.realizedPnlMinor,
+      pnlAsOf: pnlAsOf is _isc.UndefinedSentinel ? this.pnlAsOf : pnlAsOf,
+      metadataJson: metadataJson is String? ? metadataJson : this.metadataJson,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

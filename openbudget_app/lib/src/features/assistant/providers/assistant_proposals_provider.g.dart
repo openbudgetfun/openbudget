@@ -55,7 +55,7 @@ final class AssistantProposalsProvider
 }
 
 String _$assistantProposalsHash() =>
-    r'4687c54ab6ce3e36eaa681025a4ffc30daf3b12e';
+    r'853db2d5795ffb11c8952186f2ebc16f20ed0aa9';
 
 /// The proposals for one budget, newest first in both groups.
 
@@ -79,8 +79,8 @@ final class AssistantProposalsFamily extends $Family
 
   /// The proposals for one budget, newest first in both groups.
 
-  AssistantProposalsProvider call(String budgetId) =>
-      AssistantProposalsProvider._(argument: budgetId, from: this);
+  AssistantProposalsProvider call(String entityId) =>
+      AssistantProposalsProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'assistantProposalsProvider';
@@ -91,9 +91,9 @@ final class AssistantProposalsFamily extends $Family
 abstract class _$AssistantProposals
     extends $AsyncNotifier<AssistantProposalsState> {
   late final _$args = ref.$arg as String;
-  String get budgetId => _$args;
+  String get entityId => _$args;
 
-  FutureOr<AssistantProposalsState> build(String budgetId);
+  FutureOr<AssistantProposalsState> build(String entityId);
   @$mustCallSuper
   @override
   WhenComplete runBuild() {

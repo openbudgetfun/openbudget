@@ -6,22 +6,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_realtime_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/entity_events_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_shell_screen.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/ui_preferences_store.dart';
 import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
 import 'package:openbudget_app/src/features/whats_new/providers/whats_new_providers.dart';
 import 'package:openbudget_app/src/features/whats_new/screens/whats_new_sheet.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
-const _budgetId = 'test-budget-id';
-final _ownerUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000501',
-);
+import 'common/test_data.dart';
+
+const String _entityId = TestData.gbpEntityId;
 
 const _notesJson = r'''
 {
@@ -58,12 +56,6 @@ class _FakeAssetBundle extends AssetBundle {
   }
 }
 
-Budget _makeBudget() => Budget(
-  name: 'OpenBudget',
-  currencyCode: 'USD',
-  ownerId: _ownerUuid,
-);
-
 Widget _buildApp({
   required ProviderContainer container,
   required GoRouter router,
@@ -84,7 +76,7 @@ GoRouter _buildRouter() => GoRouter(
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) => BudgetShellScreen(
         navigationShell: navigationShell,
-        budgetId: _budgetId,
+        entityId: _entityId,
       ),
       branches: [
         StatefulShellBranch(
@@ -121,7 +113,7 @@ GoRouter _buildRouter() => GoRouter(
                 GoRoute(
                   name: settingsRoute,
                   path: 'settings',
-                  builder: (_, _) => const SettingsScreen(budgetId: _budgetId),
+                  builder: (_, _) => const SettingsScreen(entityId: _entityId),
                 ),
               ],
             ),
@@ -138,8 +130,10 @@ ProviderContainer _buildContainer({
 }) {
   final container = ProviderContainer(
     overrides: [
-      budgetRealtimeProvider.overrideWith((ref, budgetId) {}),
-      budgetDetailProvider.overrideWith((ref, budgetId) async => _makeBudget()),
+      entityEventsProvider.overrideWith((ref, entityId) async* {}),
+      entityDetailProvider.overrideWith(
+        (ref, entityId) async => TestData.gbpEntity(),
+      ),
       uiPreferencesStoreProvider.overrideWithValue(store),
       appVersionProvider.overrideWith((ref) async => '2.4.0'),
       whatsNewAssetBundleProvider.overrideWithValue(bundle),

@@ -1,4 +1,5 @@
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_group_names.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -8,89 +9,62 @@ part 'spending_by_payee_provider.g.dart';
 class PayeeSpendingEntry {
   const PayeeSpendingEntry({
     required this.payeeName,
-    required this.totalCents,
+    required this.totalMinor,
     required this.transactionCount,
   });
 
   final String payeeName;
-  final int totalCents;
+  final int totalMinor;
   final int transactionCount;
 }
 
 class PayeeSpendingReport {
   const PayeeSpendingReport({
     required this.entries,
-    required this.totalSpentCents,
+    required this.totalSpentMinor,
     required this.currencyCode,
   });
 
   final List<PayeeSpendingEntry> entries;
-  final int totalSpentCents;
+  final int totalSpentMinor;
   final String currencyCode;
 }
 
+/// Spending grouped by payee for one month, in base minor units, from one
+/// `report.spending` call with [ReportGrouping.payee].
 @riverpod
 Future<PayeeSpendingReport> spendingByPayee(
   Ref ref,
-  String budgetId,
-  int year,
+  String entityId,
   int month,
 ) async {
   final client = ref.read(serverpodClientProvider);
-  final transactions = await client.transaction.listByMonth(
-    UuidValue.fromString(budgetId),
-    year,
+  final entity = await ref.watch(entityDetailProvider(entityId).future);
+  final rows = await client.report.spending(
+    UuidValue.fromString(entityId),
     month,
+    month,
+    ReportGrouping.payee,
+    false,
   );
 
-  final budget = await ref.watch(budgetDetailProvider(budgetId).future);
-
-  // Aggregate spending by payee description (expenses only).
-  final payeeMap = <String, _PayeeAccumulator>{};
-
-  for (final tx in transactions) {
-    if (tx.amountCents >= 0) continue; // Skip income.
-
-    final payeeName = tx.description;
-    if (payeeName.isEmpty) continue;
-
-    final existing = payeeMap[payeeName];
-    if (existing != null) {
-      existing
-        ..totalCents += tx.amountCents.abs()
-        ..count += 1;
-    } else {
-      payeeMap[payeeName] = _PayeeAccumulator(
-        totalCents: tx.amountCents.abs(),
-        count: 1,
-      );
-    }
-  }
-
-  final entries =
-      payeeMap.entries
-          .map(
-            (e) => PayeeSpendingEntry(
-              payeeName: e.key,
-              totalCents: e.value.totalCents,
-              transactionCount: e.value.count,
-            ),
-          )
-          .toList()
-        ..sort((a, b) => b.totalCents.compareTo(a.totalCents));
-
-  final totalSpent = entries.fold<int>(0, (sum, e) => sum + e.totalCents);
+  final entries = <PayeeSpendingEntry>[
+    for (final row in rows)
+      if (row.outflowMinor < 0)
+        PayeeSpendingEntry(
+          // A row with no payee is spending the entity never attributed.
+          payeeName: row.groupId == null ? reportUnknownPayeeGroup : row.name,
+          totalMinor: row.outflowMinor.abs(),
+          transactionCount: row.transactionCount,
+        ),
+  ]..sort((first, second) => second.totalMinor.compareTo(first.totalMinor));
 
   return PayeeSpendingReport(
     entries: entries,
-    totalSpentCents: totalSpent,
-    currencyCode: budget.currencyCode,
+    totalSpentMinor: entries.fold<int>(
+      0,
+      (sum, entry) => sum + entry.totalMinor,
+    ),
+    currencyCode: entity.baseCurrencyCode,
   );
-}
-
-class _PayeeAccumulator {
-  _PayeeAccumulator({required this.totalCents, required this.count});
-
-  int totalCents;
-  int count;
 }

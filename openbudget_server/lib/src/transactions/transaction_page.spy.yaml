@@ -1,0 +1,6 @@
+### One page of transactions.
+class: TransactionPage
+fields:
+  items: List<TransactionView>
+  ### Opaque cursor for the next page; null on the last page.
+  nextCursor: String?

@@ -12,13 +12,13 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 /// unblock it.
 class AssistantFailurePanel extends HookWidget {
   const AssistantFailurePanel({
-    required this.budgetId,
+    required this.entityId,
     required this.failure,
     required this.onRetry,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final AssistantFailure failure;
   final VoidCallback onRetry;
 
@@ -61,7 +61,7 @@ class AssistantFailurePanel extends HookWidget {
     unawaited(
       context.pushNamed(
         assistantProviderRoute,
-        pathParameters: {'id': budgetId},
+        pathParameters: {'entityId': entityId},
       ),
     );
   }
@@ -71,7 +71,7 @@ class AssistantFailurePanel extends HookWidget {
     AppLocalizations l10n,
     ObStateAction providerAction,
   ) {
-    final plusLocation = _plusLocation(context, budgetId);
+    final plusLocation = _plusLocation(context, entityId);
     if (plusLocation == null) {
       return (providerAction, null);
     }
@@ -117,12 +117,12 @@ class AssistantFailurePanel extends HookWidget {
 /// Returns the location of the optional "plus" route, when this build has
 /// one. Billing ships separately, so the assistant invites an upgrade only
 /// when the route is actually reachable.
-String? _plusLocation(BuildContext context, String budgetId) {
+String? _plusLocation(BuildContext context, String entityId) {
   final router = GoRouter.maybeOf(context);
   if (router == null) return null;
 
   for (final pathParameters in <Map<String, String>>[
-    {'id': budgetId},
+    {'entityId': entityId},
     const {},
   ]) {
     try {

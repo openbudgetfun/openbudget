@@ -1,6 +1,6 @@
 ---
 name: tax-planning-guardrails
-description: Legal tax-planning levers (UK, US, Nigeria, Germany), the computation behind each saving, cross-border residence and treaty basics, anti-avoidance rules, a never-suggest list, and the regulatory boundary for the in-app AI assistant. MUST be loaded by anyone touching `openbudget_server/lib/src/agent/` (agent prompt, tool registry, MCP handler, proposals), any `*_opportunities.dart`, `opportunities()` in a rule pack, `TaxOpportunity` or `TaxOpportunityView`, or any user-facing wording that suggests a tax or investment action.
+description: Legal tax-planning levers (UK, US, Nigeria, Germany), the computation behind each saving, cross-border residence and treaty basics, anti-avoidance rules, a never-suggest list, and the regulatory boundary for the in-app AI assistant. MUST be loaded by anyone touching `openbudget_server/lib/src/agent/` or `money_guide/` (Money guide prompt, tool registry, MCP handler, proposals), any `*_opportunities.dart`, `opportunities()` in a rule pack, `TaxOpportunity` or `TaxOpportunityView`, or any user-facing wording that suggests a tax or investment action.
 ---
 
 # Tax planning guardrails
@@ -13,7 +13,7 @@ Research date: 5 November 2026. Tax years: UK 2025/26 and 2026/27; US, DE, NG ca
 
 Load this before you:
 
-- edit `openbudget_server/lib/src/agent/` (`agent_prompt.dart`, `agent_tool_registry.dart`, `agent_tax_reports.dart`, `agent_proposal_service.dart`, `mcp/agent_mcp_handler.dart`);
+- edit `openbudget_server/lib/src/agent/` and `openbudget_server/lib/src/money_guide/` (`money_guide_prompt.dart`, `agent_tool_registry.dart`, `agent_tax_reports.dart`, `agent_proposal_service.dart`, `mcp/agent_mcp_handler.dart`);
 - add or change an opportunity in `openbudget_core/lib/src/tax/{gb,us,ng,de}/` (`gb_tax_rules.dart` `_individualOpportunities` and `_directorSplitOpportunity`, `us_tax_rules.dart`, `ng/ng_opportunities.dart`, `de/de_opportunities.dart`);
 - change `TaxOpportunity`, `TaxOpportunityView`, or how reports reach the assistant or an MCP client;
 - write copy, disclaimers, empty states or notifications that say "you could save".
@@ -41,7 +41,7 @@ Also load the matching country skill for the underlying rules (`uk-company-tax` 
 6. **Disclaimer is necessary and never sufficient.** A disclaimer does not cure behaviour that is advice. Include it where an action is suggested and also make the behaviour conform.
 7. **Signpost a professional** (triggers in `references/product-rules.md`) for non-doms or recent arrivals, US persons abroad, owner-managed company structures, holdings, anything over a stated size, anything touching an investigation or penalty, residence disputes, and any "should I" question about a specific investment.
 8. **User approval, always.** The assistant has read tools and propose tools only. A proposal is a pending row the user applies or dismisses. It never files, pays, moves real money, sets elections, or executes an opportunity. Never claim a change was made before the user applies it. Proposals record the rule version, tax year and `rulesVerifiedOn` that justified them.
-9. **Guardrails must travel with the data.** The MCP surface and any third-party client bypass `AgentPrompt.system`. Disclaimers, assumptions, rule year, grade and `announced` flags belong in the tool result payload, not only in the system prompt.
+9. **Guardrails must travel with the data.** The MCP surface and any third-party client bypass `MoneyGuidePrompt`. Disclaimers, assumptions, rule year, grade and `announced` flags belong in the tool result payload, not only in the system prompt.
 10. **Residence and citizenship first.** Ask where the user is tax resident and whether they are a US person before showing country-specific levers. A US citizen or green-card holder living abroad needs US analysis everywhere. Wrong-country levers are worse than none.
 11. **Documentation prompts.** For any relief that needs evidence (Nigerian rent relief, German home office days, charitable receipts, pension statements) ask for the evidence, not only the number.
 12. **Privacy.** Send the model only what a tool result needs. Nothing in the prompt identifies the user. Do not add personal data to provider requests (the current prompt comment states this; keep it true).
@@ -50,7 +50,7 @@ Also load the matching country skill for the underlying rules (`uk-company-tax` 
 
 - Contract: `openbudget_core/lib/src/tax/tax_model.dart` (`TaxOpportunity`: id, title, explanation, source, `estimatedSavingMinor`, `deadline`) and `tax_rule_pack.dart` (`opportunities(input, report)`).
 - Packs: `gb/gb_tax_rules.dart`, `us/us_tax_rules.dart`, `ng/ng_opportunities.dart`, `de/de_opportunities.dart`. Rates in `*_rates.dart` or `*_tables.dart`.
-- Assistant: `openbudget_server/lib/src/agent/agent_prompt.dart` (system prompt), `agent_tool_registry.dart` (tools, propose tools), `agent_tax_reports.dart` (maps opportunities into `TaxOpportunityView`), `agent_proposal_service.dart` (apply and dismiss), `mcp/agent_mcp_handler.dart` (`instructions`), `agent_proposal*.spy.yaml` (proposal model).
+- Assistant: `openbudget_server/lib/src/money_guide/money_guide_prompt.dart` (static rules and entity brief), `agent_tool_registry.dart` (tools, propose tools), `agent_tax_reports.dart` (maps opportunities into `TaxOpportunityView`), `agent_proposal_service.dart` (apply and dismiss), `mcp/agent_mcp_handler.dart` (`instructions`), `agent_proposal*.spy.yaml` (proposal model).
 - New guardrail code goes in `openbudget_core` as pure data and functions (opportunity grade, `announced` flag, perimeter class, disclaimer keys) so the server, app and MCP surface share one source. User-visible disclaimer strings go through `AppLocalizations`, with German text reviewed by a German speaker.
 
 ## Testing

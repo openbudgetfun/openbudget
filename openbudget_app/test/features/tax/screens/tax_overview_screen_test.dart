@@ -5,7 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_list_provider.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_repository.dart';
 import 'package:openbudget_app/src/features/tax/screens/tax_overview_screen.dart';
@@ -17,16 +18,16 @@ import '../tax_test_data.dart';
 
 Widget _buildApp(
   FakeTaxRepository repository, {
-  Future<TaxProfileRecord?> Function(Ref ref, String budgetId)? profileBuilder,
+  Future<TaxProfileRecord?> Function(Ref ref, String entityId)? profileBuilder,
 }) {
   final router = GoRouter(
-    initialLocation: '/budgets/$testBudgetId/tax',
+    initialLocation: '/budgets/$testEntityId/tax',
     routes: [
       GoRoute(
         name: taxOverviewRoute,
-        path: '/budgets/:id/tax',
+        path: '/budgets/:entityId/tax',
         builder: (context, state) =>
-            TaxOverviewScreen(budgetId: state.pathParameters['id']!),
+            TaxOverviewScreen(entityId: state.pathParameters['entityId']!),
         routes: [
           GoRoute(
             name: taxProfileRoute,
@@ -37,7 +38,7 @@ Widget _buildApp(
       ),
       GoRoute(
         name: transactionListRoute,
-        path: '/budgets/:id/transactions',
+        path: '/budgets/:entityId/transactions',
         builder: (_, _) => const Scaffold(body: Text('Transactions stub')),
       ),
     ],
@@ -46,7 +47,8 @@ Widget _buildApp(
   return ProviderScope(
     overrides: [
       taxRepositoryProvider.overrideWithValue(repository),
-      budgetListProvider.overrideWith((ref) async => [testBudget()]),
+      entityDetailProvider.overrideWith((ref, entityId) async => testEntity()),
+      entityListProvider.overrideWith((ref) async => [testEntity()]),
       if (profileBuilder != null)
         taxProfileProvider.overrideWith(profileBuilder),
     ],
@@ -68,7 +70,7 @@ void main() {
       await tester.pumpWidget(
         _buildApp(
           FakeTaxRepository(),
-          profileBuilder: (ref, budgetId) => completer.future,
+          profileBuilder: (ref, entityId) => completer.future,
         ),
       );
       await tester.pump();
@@ -116,9 +118,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Tax year 2026/27'), findsOneWidget);
+      expect(find.text('Tax year 2026'), findsOneWidget);
       expect(find.text('Balance due'), findsOneWidget);
       expect(find.text('£7,480.00'), findsWidgets);
+      await tester.scrollUntilVisible(find.text('£42,000.00'), 120);
       expect(find.text('£42,000.00'), findsOneWidget);
       expect(find.text('SA100 box 1'), findsOneWidget);
       expect(find.text('Uncategorized: 3'), findsOneWidget);
@@ -131,14 +134,102 @@ void main() {
       );
 
       await tester.scrollUntilVisible(
-        find.text('Use your pension annual allowance'),
+        find.text('Pension annual allowance'),
         300,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Use your pension annual allowance'), findsOneWidget);
+      expect(find.text('Pension annual allowance'), findsOneWidget);
       expect(find.text('Estimated saving £1,200.00'), findsOneWidget);
+    });
+
+    testWidgets('lists the upcoming filing and payment dates', (tester) async {
+      final repository = FakeTaxRepository(
+        profile: taxProfileRecord(),
+        deadlines: testDeadlines(),
+      );
+      await tester.pumpWidget(_buildApp(repository));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Upcoming'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Upcoming'), findsOneWidget);
+      expect(
+        find.text('Self Assessment online return for tax-code collection'),
+        findsOneWidget,
+      );
+      expect(find.text('In 49 days'), findsOneWidget);
+      expect(repository.deadlineCalls, [testEntityId]);
+    });
+
+    testWidgets('keeps the report when the upcoming dates fail to load', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildApp(
+          FakeTaxRepository(
+            profile: taxProfileRecord(),
+            deadlinesError: Exception('server down'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Balance due'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text("We couldn't load your upcoming dates."),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(
+        find.text("We couldn't load your upcoming dates."),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('warns that preview figures are not professionally checked', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildApp(
+          FakeTaxRepository(
+            profile: taxProfileRecord(),
+            defaultReport: taxReportView(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('tax-preview-banner')), findsOneWidget);
+      expect(
+        find.text(
+          'Preview: these figures have not yet been checked by a tax '
+          'professional.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('hides the preview banner once a pack is reviewed', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildApp(
+          FakeTaxRepository(
+            profile: taxProfileRecord(),
+            defaultReport: taxReportView(maturity: 'reviewed'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('tax-preview-banner')), findsNothing);
     });
 
     testWidgets('uses refund wording when the year is in credit', (
@@ -195,7 +286,7 @@ void main() {
       await tester.tap(find.byKey(const Key('tax-year-previous')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Tax year 2025/26'), findsOneWidget);
+      expect(find.text('Tax year 2025'), findsOneWidget);
       expect(find.text('Nothing to pay'), findsOneWidget);
       expect(
         fake.reportCalls.map((call) => call.startYear),
@@ -260,6 +351,111 @@ void main() {
 
       expect(find.text('No other income outside OpenBudget.'), findsOneWidget);
       expect(find.text('https://www.gov.uk/income-tax-rates'), findsOneWidget);
+    });
+
+    testWidgets('lists the caveats the report touched', (tester) async {
+      await tester.pumpWidget(
+        _buildApp(
+          FakeTaxRepository(
+            profile: taxProfileRecord(),
+            defaultReport: taxReportView(
+              caveats: [
+                taxCaveat(),
+                taxCaveat(
+                  id: 'gb.announced-2027-changes',
+                  text:
+                      'Savings and property rates of 24, 44 and 49 per cent '
+                      'from April 2027 are announced but not yet law.',
+                  announced: true,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('What we could not verify'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('What we could not verify'), findsOneWidget);
+      expect(
+        find.byKey(const Key('tax-caveat-gb.hmrc-rounding-inferences')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('per-slice rounding'), findsOneWidget);
+      expect(find.byKey(const Key('tax-announced-badge')), findsOneWidget);
+      expect(find.text('Announced, not yet law'), findsOneWidget);
+    });
+
+    testWidgets('hides the unverified section when nothing is caveated', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildApp(FakeTaxRepository(profile: taxProfileRecord())),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('What we could not verify'), findsNothing);
+    });
+
+    testWidgets('badges lines computed from a secondary-source figure', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildApp(
+          FakeTaxRepository(
+            profile: taxProfileRecord(),
+            defaultReport: taxReportView(
+              lines: [
+                taxLine(
+                  label: 'Consolidated relief allowance',
+                  code: null,
+                  reportReference: null,
+                  entryCount: 0,
+                  figureId: 'consolidatedReliefAllowanceFloor',
+                ),
+                taxLine(
+                  label: 'Total income',
+                  code: null,
+                  reportReference: null,
+                  entryCount: 0,
+                  figureId: 'personalAllowance',
+                ),
+              ],
+              figures: [
+                taxFigure(
+                  id: 'consolidatedReliefAllowanceFloor',
+                  value: 20000000,
+                  grade: 'secondary',
+                  source:
+                      'https://taxsummaries.pwc.com/nigeria/individual/'
+                      'significant-developments',
+                ),
+                taxFigure(),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Only the secondary-grade line carries the badge.
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('tax-secondary-source-badge')),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('tax-secondary-source-badge')),
+        findsOneWidget,
+      );
+      expect(find.text('From a secondary source'), findsOneWidget);
     });
   });
 }

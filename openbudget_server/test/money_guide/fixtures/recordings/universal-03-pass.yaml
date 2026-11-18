@@ -1,0 +1,15 @@
+# A recorded turn that meets every gate of universal-03.
+id: universal-03-pass
+question: universal-03
+expect:
+  verdict: pass
+steps:
+  - tool: search_knowledge
+    arguments:
+      entityId: "{{entityId}}"
+      ids: [universal-money-emergency-fund]
+  - say: >-
+      MoneyHelper's rule of thumb is three to six months of essential
+      outgoings. For £1,400 a month that is between £4,200 and £8,400
+      [^universal-money-emergency-fund]. Expensive debts are generally cleared
+      before the fund is filled.

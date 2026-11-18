@@ -17,6 +17,16 @@ let
   # then stops recognising the Flutter SDK ("openbudget_test_utils requires
   # the Flutter SDK"). Hooks that run Dart or Flutter unset these first.
   flutterHookEnv = "unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_PREFIX";
+
+  # CI's analyze job runs the `lint:analyze` script (`dart analyze
+  # --fatal-infos $DEVENV_ROOT`). Hooks resolve the repository toplevel at
+  # runtime instead of relying on DEVENV_ROOT, which is not exported at
+  # commit time, and pass it to the same analyzer command so the local gate
+  # agrees with CI in every worktree.
+  analyzeHookScript = ''
+    ROOT="$(git rev-parse --show-toplevel)"
+    ${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos "$ROOT"
+  '';
 in
 {
   packages =
@@ -47,6 +57,11 @@ in
   # Ensure redis-cli health probes authenticate against local development redis.
   env.REDISCLI_AUTH = "PTpOute8-systr4hDRsD6biK5x06B7Vv";
 
+  # The server's database tests start throwaway clusters with `initdb` and
+  # `pg_ctl` (test/support/pg_test_server.dart). Point them at the same
+  # PostgreSQL the dev service uses, including in CI where that service is off.
+  env.OPENBUDGET_TEST_POSTGRES_BIN = "${pkgs.postgresql_16}/bin";
+
   git-hooks = {
     package = pkgs.prek;
 
@@ -73,12 +88,12 @@ in
       "lint:commit" = {
         enable = true;
         name = "lint:commit";
-        description = "Run dart analyze (fatal-infos) on the workspace.";
+        description = "Run dart analyze (fatal-infos) on the workspace, as CI's analyze job does.";
         entry = builtins.toString (
           pkgs.writeShellScript "lint-commit" ''
             set -e
             ${flutterHookEnv}
-            ${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos
+            ${analyzeHookScript}
           ''
         );
         pass_filenames = false;
@@ -106,7 +121,7 @@ in
             ${flutterHookEnv}
             export PATH="${config.env.DEVENV_PROFILE}/bin:$PATH"
             ${pkgs.dprint}/bin/dprint check
-            ${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos
+            ${analyzeHookScript}
           ''
         );
         pass_filenames = false;
@@ -145,6 +160,66 @@ in
       };
     };
   };
+
+  # Worktree-safe hook installation.
+  #
+  # Linked worktrees share one hooks directory (the main checkout's
+  # `.git/hooks`; `core.hooksPath` points there). The stock devenv v2.4.0
+  # install task runs `prek install -c "$DEVENV_ROOT/.pre-commit-config.yaml"`,
+  # which bakes the absolute path of whichever worktree entered devenv last
+  # into that shared hook shim. Commits in worktree B then run worktree A's
+  # config, and deleting A breaks every remaining worktree's hooks.
+  #
+  # Installing instead with a config path relative to the repository toplevel
+  # fixes this: git runs hooks from the toplevel of the worktree the commit
+  # happens in, so the shim resolves `.pre-commit-config.yaml` in that
+  # worktree and references no other worktree's paths. This mirrors the fix
+  # upstream devenv ships as "git-hooks use each worktree's own
+  # configuration" — drop this override once the pinned devenv includes it.
+  tasks."devenv:git-hooks:install".exec =
+    let
+      git = lib.getExe config.git-hooks.gitPackage;
+      prek = lib.getExe config.git-hooks.package;
+      stageHook =
+        stage:
+        if stage == "manual" then
+          null
+        else if
+          builtins.elem stage [
+            "commit"
+            "merge-commit"
+            "push"
+          ]
+        then
+          "pre-${stage}"
+        else
+          stage;
+      hookTypes = lib.unique (
+        if config.git-hooks.installStages == [ ] then
+          [ "pre-commit" ]
+        else
+          builtins.filter (hook: hook != null) (map stageHook config.git-hooks.installStages)
+      );
+    in
+    lib.mkForce ''
+      set -euo pipefail
+      if ! ${git} rev-parse --git-dir &> /dev/null; then
+        echo 1>&2 "WARNING: skipping hook installation: .git not found."
+        exit 0
+      fi
+      # Git runs hooks from the repository toplevel, so a config path
+      # relative to it makes the shared shim use each worktree's own config.
+      # The prefix is empty when devenv lives at the repository root.
+      toplevel="$(${git} -C "$DEVENV_ROOT" rev-parse --show-toplevel)"
+      prefix="$(${git} -C "$DEVENV_ROOT" rev-parse --show-prefix)"
+      hook_config="''${prefix}${config.git-hooks.configPath}"
+      # prek resolves -c against its working directory; install from the same
+      # toplevel git uses when running hooks.
+      cd "$toplevel"
+      ${lib.concatMapStringsSep "\n" (
+        hook: ''${prek} install -c "$hook_config" -t ${lib.escapeShellArg hook}''
+      ) hookTypes}
+    '';
 
   # Rely on the global sdk for now as the nix apple sdk is not working for me.
   apple.sdk = null;
@@ -186,6 +261,19 @@ in
     "flutter:up" = {
       exec = ''
         set -eo pipefail
+
+        seeker_flag="$DEVENV_ROOT/.tmp/dev-seeker.active"
+        if [[ -f "$seeker_flag" ]]; then
+          seeker_pid="$(cat "$seeker_flag" 2>/dev/null || true)"
+          if [[ "$seeker_pid" =~ ^[0-9]+$ ]] && kill -0 "$seeker_pid" 2>/dev/null; then
+            seeker_command="$(ps -p "$seeker_pid" -o command= 2>/dev/null || true)"
+            if [[ "$seeker_command" == *"dev_seeker"* || "$seeker_command" == *"main_dev.dart"* ]]; then
+              echo "dev:seeker is launching Flutter on the attached device."
+              exit 0
+            fi
+          fi
+          rm -f "$seeker_flag"
+        fi
 
         GENERATED_ENV_FILE="$DEVENV_ROOT/.tmp/flutter.env"
         if [[ -f "$GENERATED_ENV_FILE" ]]; then
@@ -410,11 +498,80 @@ in
           fi
         fi
 
-        openbudget:url:update development
+        if [[ -z "''${OPENBUDGET_API_URL:-}" ]]; then
+          openbudget:url:update development
+        fi
+
+        if [[ "''${OPENBUDGET_DEVENV_UP_DETACH:-}" == "1" ]]; then
+          exec devenv up -d
+        fi
 
         exec devenv up "$@"
       '';
       description = "Start devenv after cleaning stale local postgres/redis state.";
+      binary = "bash";
+    };
+    "dev:seeker" = {
+      exec = ''
+        set -euo pipefail
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:dev_seeker start
+      '';
+      description = "Start Postgres, Redis, Serverpod, and Flutter on the attached Android device. Tries Tailscale, then LAN, then USB.";
+      binary = "bash";
+    };
+    "dev:seeker:status" = {
+      exec = ''
+        set -euo pipefail
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:dev_seeker status
+      '';
+      description = "Show the Seeker runner, API URL, shared services, and Android devices.";
+      binary = "bash";
+    };
+    "dev:seeker:reload" = {
+      exec = ''
+        set -euo pipefail
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:dev_seeker reload
+      '';
+      description = "Trigger hot reload for the background Seeker Flutter runner.";
+      binary = "bash";
+    };
+    "dev:seeker:hot-restart" = {
+      exec = ''
+        set -euo pipefail
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:dev_seeker hot-restart
+      '';
+      description = "Trigger hot restart for the background Seeker Flutter runner.";
+      binary = "bash";
+    };
+    "dev:seeker:signal" = {
+      exec = ''
+        set -euo pipefail
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:dev_seeker signal "$@"
+      '';
+      description = "Send one Flutter resident-runner key to the Seeker session.";
+      binary = "bash";
+    };
+    "dev:seeker:stop" = {
+      exec = ''
+        set -euo pipefail
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:dev_seeker stop
+      '';
+      description = "Stop the owned Seeker Flutter runner and remove only the USB forwards it created on the recorded device. Leaves shared services running.";
+      binary = "bash";
+    };
+    "dev:seeker:restart" = {
+      exec = ''
+        set -euo pipefail
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:dev_seeker restart
+      '';
+      description = "Restart the Seeker Flutter runner against the attached device.";
       binary = "bash";
     };
     "install:all" = {

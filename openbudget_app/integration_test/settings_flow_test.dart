@@ -1,12 +1,11 @@
-// UuidValue is needed for constructing test model data.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/reporting_currency_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/ui_preferences_store.dart';
 import 'package:openbudget_app/src/features/settings/screens/account_settings_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/app_icon_screen.dart';
@@ -20,13 +19,9 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
 
-const _budgetId = 'test-budget-id';
-final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000311');
+import 'common/test_data.dart';
 
-Budget _makeBudget({
-  String name = "Alex's Plan",
-  String currencyCode = 'USD',
-}) => Budget(name: name, currencyCode: currencyCode, ownerId: _ownerUuid);
+const String _entityId = TestData.gbpEntityId;
 
 void main() {
   patrolWidgetTest(
@@ -36,14 +31,22 @@ void main() {
       final store = InMemoryUiPreferencesStore();
       final container = ProviderContainer(
         overrides: [
-          budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
+          entityDetailProvider.overrideWith(
+            (ref, id) async => TestData.gbpEntity(name: "Alex's Plan"),
+          ),
+          userSettingsProvider.overrideWith(
+            (ref) async => UserSettings(
+              userId: UuidValue.fromString(TestData.ownerId),
+              reportingCurrencyCode: 'GBP',
+            ),
+          ),
           uiPreferencesStoreProvider.overrideWithValue(store),
         ],
       );
       addTearDown(container.dispose);
 
       final router = GoRouter(
-        initialLocation: '/budgets/$_budgetId/more/settings',
+        initialLocation: '/budgets/$_entityId/more/settings',
         routes: [
           GoRoute(
             name: moreRoute,
@@ -54,19 +57,20 @@ void main() {
             name: settingsRoute,
             path: settingsPath,
             builder: (context, state) =>
-                SettingsScreen(budgetId: state.pathParameters['id']!),
+                SettingsScreen(entityId: state.pathParameters['entityId']!),
             routes: [
               GoRoute(
                 name: planSettingsRoute,
                 path: 'plan',
-                builder: (context, state) =>
-                    PlanSettingsScreen(budgetId: state.pathParameters['id']!),
+                builder: (context, state) => PlanSettingsScreen(
+                  entityId: state.pathParameters['entityId']!,
+                ),
                 routes: [
                   GoRoute(
                     name: currencySettingsRoute,
                     path: 'currency',
                     builder: (context, state) => CurrencySettingsScreen(
-                      budgetId: state.pathParameters['id']!,
+                      entityId: state.pathParameters['entityId']!,
                     ),
                   ),
                 ],
@@ -75,20 +79,20 @@ void main() {
                 name: appIconRoute,
                 path: 'app-icon',
                 builder: (context, state) =>
-                    AppIconScreen(budgetId: state.pathParameters['id']!),
+                    AppIconScreen(entityId: state.pathParameters['entityId']!),
               ),
               GoRoute(
                 name: accountSettingsRoute,
                 path: 'account-settings',
                 builder: (context, state) => AccountSettingsScreen(
-                  budgetId: state.pathParameters['id']!,
+                  entityId: state.pathParameters['entityId']!,
                 ),
                 routes: [
                   GoRoute(
                     name: deleteAccountRoute,
                     path: 'delete',
                     builder: (context, state) => DeleteAccountScreen(
-                      budgetId: state.pathParameters['id']!,
+                      entityId: state.pathParameters['entityId']!,
                     ),
                   ),
                 ],
@@ -96,8 +100,9 @@ void main() {
               GoRoute(
                 name: displayOptionsRoute,
                 path: 'display',
-                builder: (context, state) =>
-                    DisplayOptionsScreen(budgetId: state.pathParameters['id']!),
+                builder: (context, state) => DisplayOptionsScreen(
+                  entityId: state.pathParameters['entityId']!,
+                ),
               ),
             ],
           ),
@@ -149,6 +154,9 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.drag(find.byType(ListView).first, const Offset(0, 500));
+      await tester.pumpAndSettle();
+      // The row can stop half under the app bar; bring all of it into view.
+      await tester.ensureVisible(find.text('Plan Settings'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Plan Settings'));
       await tester.pumpAndSettle();

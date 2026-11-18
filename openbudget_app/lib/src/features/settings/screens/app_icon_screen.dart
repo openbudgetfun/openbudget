@@ -8,9 +8,9 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AppIconScreen extends HookConsumerWidget {
-  const AppIconScreen({required this.budgetId, super.key});
+  const AppIconScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,7 +25,7 @@ class AppIconScreen extends HookConsumerWidget {
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           onPressed: () => context.goNamed(
             settingsRoute,
-            pathParameters: {'id': budgetId},
+            pathParameters: {'entityId': entityId},
           ),
           icon: const SkribbleIcon(data: OpenBudgetIcons.back),
         ),
@@ -34,7 +34,7 @@ class AppIconScreen extends HookConsumerWidget {
           TextButton(
             onPressed: () => context.goNamed(
               settingsRoute,
-              pathParameters: {'id': budgetId},
+              pathParameters: {'entityId': entityId},
             ),
             child: Text(l10n.dialogDone),
           ),

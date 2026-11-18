@@ -73,7 +73,7 @@ final class RecurringCalendarProvider
   }
 }
 
-String _$recurringCalendarHash() => r'57abfd79783b81fa0927d1748a9f398b3055201f';
+String _$recurringCalendarHash() => r'b2baa6d8ef2ea7b001a57af188139b65c75c5918';
 
 /// Generates future occurrences for all active recurring transactions
 /// within a given month.
@@ -96,9 +96,9 @@ final class RecurringCalendarFamily extends $Family
   /// Generates future occurrences for all active recurring transactions
   /// within a given month.
 
-  RecurringCalendarProvider call(String budgetId, int year, int month) =>
+  RecurringCalendarProvider call(String entityId, int year, int month) =>
       RecurringCalendarProvider._(
-        argument: (budgetId, year, month),
+        argument: (entityId, year, month),
         from: this,
       );
 

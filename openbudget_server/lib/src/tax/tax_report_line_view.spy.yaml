@@ -7,3 +7,7 @@ fields:
   code: String?
   reportReference: String?
   entryCount: int
+  ### The named TaxFigure this line presents, when it presents one. Lines
+  ### whose figure is secondary-grade show a "from a secondary source"
+  ### badge.
+  figureId: String?

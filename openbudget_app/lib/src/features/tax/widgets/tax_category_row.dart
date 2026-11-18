@@ -11,13 +11,13 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 /// asks the server for tax data it does not show.
 class EnvelopeTaxCategoryRow extends HookWidget {
   const EnvelopeTaxCategoryRow({
-    required this.budgetId,
+    required this.entityId,
     required this.envelope,
     this.onChanged,
     super.key,
   });
 
-  final String budgetId;
+  final String entityId;
   final Envelope envelope;
   final VoidCallback? onChanged;
 
@@ -54,7 +54,7 @@ class EnvelopeTaxCategoryRow extends HookWidget {
       onTap: () async {
         final selection = await showEnvelopeTaxCategorySheet(
           context,
-          budgetId: budgetId,
+          entityId: entityId,
           envelopeId: envelope.id?.toString() ?? '',
           subject: envelope.name,
           currentCode: selectedCode.value,
@@ -70,16 +70,24 @@ class EnvelopeTaxCategoryRow extends HookWidget {
 /// The tax treatment control on a transaction's edit screen.
 class TransactionTaxCategoryRow extends HookWidget {
   const TransactionTaxCategoryRow({
-    required this.budgetId,
-    required this.transaction,
+    required this.entityId,
+    required this.transactionLineId,
     required this.currencyCode,
+    this.subject = '',
+    this.currentCode,
+    this.businessUsePercent,
+    this.salesTaxMinor,
     this.onChanged,
     super.key,
   });
 
-  final String budgetId;
-  final Transaction transaction;
+  final String entityId;
+  final String transactionLineId;
   final String currencyCode;
+  final String subject;
+  final String? currentCode;
+  final int? businessUsePercent;
+  final int? salesTaxMinor;
   final VoidCallback? onChanged;
 
   @override
@@ -87,7 +95,7 @@ class TransactionTaxCategoryRow extends HookWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final selectedCode = useState<String?>(transaction.taxCategoryCode);
+    final selectedCode = useState<String?>(currentCode);
     final subtitle = selectedCode.value == null
         ? l10n.taxCategoryNotSet
         : l10n.taxCategoryTagged;
@@ -113,13 +121,13 @@ class TransactionTaxCategoryRow extends HookWidget {
       onTap: () async {
         final selection = await showTransactionTaxCategorySheet(
           context,
-          budgetId: budgetId,
-          transactionId: transaction.id?.toString() ?? '',
-          subject: transaction.description,
+          entityId: entityId,
+          transactionLineId: transactionLineId,
+          subject: subject,
           currencyCode: currencyCode,
           currentCode: selectedCode.value,
-          businessUsePercent: transaction.businessUsePercent,
-          salesTaxCents: transaction.salesTaxCents,
+          businessUsePercent: businessUsePercent,
+          salesTaxMinor: salesTaxMinor,
         );
         if (selection == null) return;
         selectedCode.value = selection.code;

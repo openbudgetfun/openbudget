@@ -1,0 +1,9 @@
+### How far a transaction has been checked against the bank.
+enum: TransactionStatus
+serialized: byName
+values:
+  - uncleared
+  ### Seen on the bank statement or feed.
+  - cleared
+  ### Locked by a completed reconciliation.
+  - reconciled

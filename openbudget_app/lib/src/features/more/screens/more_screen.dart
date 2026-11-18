@@ -7,9 +7,9 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class MoreScreen extends HookWidget {
-  const MoreScreen({required this.budgetId, super.key});
+  const MoreScreen({required this.entityId, super.key});
 
-  final String budgetId;
+  final String entityId;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class MoreScreen extends HookWidget {
                   label: l10n.assistantTitle,
                   onTap: () => context.pushNamed(
                     assistantRoute,
-                    pathParameters: {'id': budgetId},
+                    pathParameters: {'entityId': entityId},
                   ),
                 ),
                 const Divider(height: 1),
@@ -43,7 +43,7 @@ class MoreScreen extends HookWidget {
                   label: l10n.moreRecurring,
                   onTap: () => context.goNamed(
                     recurringListRoute,
-                    pathParameters: {'id': budgetId},
+                    pathParameters: {'entityId': entityId},
                   ),
                 ),
                 const Divider(height: 1),
@@ -52,7 +52,7 @@ class MoreScreen extends HookWidget {
                   label: l10n.morePayees,
                   onTap: () => context.goNamed(
                     payeeListRoute,
-                    pathParameters: {'id': budgetId},
+                    pathParameters: {'entityId': entityId},
                   ),
                 ),
                 const Divider(height: 1),
@@ -61,7 +61,7 @@ class MoreScreen extends HookWidget {
                   label: l10n.moreRules,
                   onTap: () => context.goNamed(
                     transactionRulesRoute,
-                    pathParameters: {'id': budgetId},
+                    pathParameters: {'entityId': entityId},
                   ),
                 ),
                 const Divider(height: 1),
@@ -70,7 +70,7 @@ class MoreScreen extends HookWidget {
                   label: l10n.moreImport,
                   onTap: () => context.goNamed(
                     importTransactionsRoute,
-                    pathParameters: {'id': budgetId},
+                    pathParameters: {'entityId': entityId},
                   ),
                 ),
                 const Divider(height: 1),
@@ -79,17 +79,17 @@ class MoreScreen extends HookWidget {
                   label: l10n.moreTaxes,
                   onTap: () => context.pushNamed(
                     taxOverviewRoute,
-                    pathParameters: {'id': budgetId},
+                    pathParameters: {'entityId': entityId},
                   ),
                 ),
-                BooksEntryTile(budgetId: budgetId),
+                BooksEntryTile(entityId: entityId),
                 const Divider(height: 1),
                 _MoreTile(
                   icon: OpenBudgetIcons.settings,
                   label: l10n.moreSettings,
                   onTap: () => context.goNamed(
                     settingsRoute,
-                    pathParameters: {'id': budgetId},
+                    pathParameters: {'entityId': entityId},
                   ),
                 ),
               ],

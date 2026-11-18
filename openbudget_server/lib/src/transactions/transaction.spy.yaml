@@ -1,49 +1,50 @@
-### A financial transaction within a budget, optionally assigned to an envelope.
+### Money moving into or out of one account on one calendar date.
+###
+### The header is the movement; its lines allocate it to envelopes, ledger
+### accounts and tax treatments. Written only through TransactionWriter.
 class: Transaction
 table: transaction
 fields:
   id: UuidValue?, defaultPersist=random_v7
-  description: String
-  ### Amount in integer cents. Positive = inflow, negative = outflow.
-  amountCents: int
-  ### ISO 4217 currency code.
-  currencyCode: String
-  envelopeId: UuidValue?, relation(parent=envelope)
-  budgetId: UuidValue, relation(parent=budget)
-  ### The account this transaction belongs to (optional for backwards compat).
-  accountId: UuidValue?, relation(parent=account)
-  ### The payee associated with this transaction.
-  payeeId: UuidValue?, relation(parent=payee)
-  transactionDate: DateTime
-  ### If this transaction is part of a transfer, this links to the paired transaction.
-  transferPairId: UuidValue?
-  ### If this is a split sub-transaction, links to the parent transaction.
-  parentTransactionId: UuidValue?
-  ### Optional user memo or note for additional context.
+  ### Always the account's entity; never changes.
+  entityId: UuidValue, relation(parent=entity, onDelete=Cascade)
+  accountId: UuidValue, relation(parent=account, onDelete=Cascade)
+  ### Calendar date in the entity's time zone, at UTC midnight.
+  date: DateTime
+  ### Signed amount in account-currency minor units: positive in, negative out.
+  amountMinor: int
+  ### The same movement in the entity's base-currency minor units.
+  baseAmountMinor: int
+  ### Base currency per one unit of the account currency, exact decimal.
+  fxRate: String, default='1'
+  ### Calendar date of the rate actually used.
+  fxRateDate: DateTime
+  fxRateSource: FxRateSource, default=identity
+  kind: TransactionKind, default=standard
+  status: TransactionStatus, default=uncleared
+  flag: TransactionFlag?
+  payeeId: UuidValue?, relation(parent=payee, onDelete=SetNull)
+  ### Statement text or a short title.
+  description: String, default=''
   memo: String?
-  ### Whether this transaction has been cleared by the user.
-  cleared: bool, default=false
-  ### Whether this transaction has been reconciled.
-  reconciled: bool, default=false
-  ### Optional flag color for marking transactions (red, orange, yellow, green, blue, purple).
-  flagColor: String?
-  ### Tax category overriding the envelope's default, when set.
-  taxCategoryCode: String?
-  ### Percentage of the transaction used for business, from 0 to 100.
-  businessUsePercent: int?
-  ### Sales tax included in amountCents, when the receipt shows it.
-  salesTaxCents: int?
+  ### Provider id for imported rows (Plaid transaction_id, `csv:<sha256>`),
+  ### unique per account, so imports are idempotent.
+  externalId: String?
+  recurringTransactionId: UuidValue?, relation(parent=recurring_transaction, onDelete=SetNull)
+  ### Increments whenever date, amount, account or lines change; ledger-mode
+  ### books post one journal per revision.
+  revision: int, default=0
   createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
 indexes:
-  transaction_envelope_idx:
-    fields: envelopeId
-  transaction_budget_idx:
-    fields: budgetId
-  transaction_account_idx:
-    fields: accountId
+  transaction_entity_date_idx:
+    fields: entityId, date
+  transaction_account_date_idx:
+    fields: accountId, date
   transaction_payee_idx:
     fields: payeeId
-  transaction_date_idx:
-    fields: transactionDate
-  transaction_parent_idx:
-    fields: parentTransactionId
+  transaction_recurring_idx:
+    fields: recurringTransactionId
+  transaction_account_external_unique_idx:
+    fields: accountId, externalId
+    unique: true

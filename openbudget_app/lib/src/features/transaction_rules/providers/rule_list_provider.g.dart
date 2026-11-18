@@ -70,7 +70,7 @@ final class RuleListProvider
   }
 }
 
-String _$ruleListHash() => r'6c353a3f33abddfe5717c7c24f6f869aa0f4f51b';
+String _$ruleListHash() => r'f004d0c3df4504f08fd0080910d67c76abcb0ae4';
 
 /// Fetches all transaction rules for a budget.
 
@@ -87,8 +87,8 @@ final class RuleListFamily extends $Family
 
   /// Fetches all transaction rules for a budget.
 
-  RuleListProvider call(String budgetId) =>
-      RuleListProvider._(argument: budgetId, from: this);
+  RuleListProvider call(String entityId) =>
+      RuleListProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'ruleListProvider';

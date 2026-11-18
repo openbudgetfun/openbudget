@@ -14,7 +14,7 @@ abstract final class OpenBudgetPalette {
   /// The page behind full-screen scaffolds.
   static Color bgPrimaryFor(ThemeData theme) => theme.ob.canvas;
 
-  /// Cards, tiles, and content blocks: the same paper, outlined in pen.
+  /// Cards, tiles, and content blocks: white sheets inked in pen.
   static Color bgSecondaryFor(ThemeData theme) => theme.ob.surface;
 
   /// Muted containers: the quiet highlight wash.
@@ -35,7 +35,7 @@ abstract final class OpenBudgetPalette {
   /// Text and icons on the action fill.
   static Color fgOnBrandFor(ThemeData theme) => theme.ob.onAction;
 
-  /// The one deliberate next step: ink fill.
+  /// The one deliberate next step: the hot-pink sticker fill.
   static Color bgBrandFor(ThemeData theme) => theme.ob.action;
 
   /// Selected and highlighted states: the brand wash.
@@ -132,16 +132,7 @@ abstract final class OpenBudgetPalette {
   /// Custom flag.
   static Color bgFlagAccentFor(ThemeData theme) => theme.ob.review;
 
-  /// Ordered chart series. Charts also label each series in words.
-  static List<Color> chartSeriesFor(ThemeData theme) {
-    final palette = theme.ob;
-    return [
-      palette.brand,
-      palette.funded,
-      palette.underfunded,
-      palette.overspent,
-      palette.review,
-      palette.mutedInk,
-    ];
-  }
+  /// Ordered chart series: the six spot inks, printed flat. Charts also
+  /// label each series in words, and every spot carries the action label.
+  static List<Color> chartSeriesFor(ThemeData theme) => theme.ob.spots;
 }

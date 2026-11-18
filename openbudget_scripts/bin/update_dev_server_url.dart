@@ -3,6 +3,7 @@
 import 'dart:io'
     show Directory, File, InternetAddressType, NetworkInterface, exit, stderr;
 
+import 'package:openbudget_scripts/dev_server_host.dart';
 import 'package:yaml/yaml.dart';
 
 Never _exitWithError(String message) {
@@ -10,19 +11,22 @@ Never _exitWithError(String message) {
   exit(1);
 }
 
-/// Finds the first non-loopback IPv4 address associated with the machine.
+/// Finds the address a phone should use for the local development server.
+///
+/// Prefers this machine's Tailscale IPv4 address, then any other
+/// non-loopback IPv4 address.
 Future<String?> getLocalIpAddress() async {
   try {
     final interfaces = await NetworkInterface.list(
       type: InternetAddressType.IPv4,
     );
-    for (final interface in interfaces) {
-      for (final address in interface.addresses) {
-        if (address.type == InternetAddressType.IPv4 && !address.isLoopback) {
-          return address.address;
-        }
-      }
-    }
+    final addresses = <String>[
+      for (final interface in interfaces)
+        for (final address in interface.addresses)
+          if (address.type == InternetAddressType.IPv4) address.address,
+    ];
+
+    return selectDevServerHost(addresses);
   } on Object catch (error) {
     stderr.writeln('Warning: Could not get local IP address: $error');
   }

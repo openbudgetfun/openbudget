@@ -12,32 +12,37 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// Plaid item connection persisted for syncing linked bank accounts.
+import '../common/sync_status.dart' as _ijl385hj;
+
+/// A Plaid item linked to an entity, for syncing its bank accounts.
 abstract class PlaidConnection
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   PlaidConnection._({
     this.id,
-    required this.budgetId,
+    required this.entityId,
     required this.plaidItemId,
-    required this.accessToken,
+    this.plaidInstitutionId,
     this.institutionName,
-    this.institutionId,
+    _ijl385hj.SyncStatus? syncStatus,
+    this.lastSyncedAt,
+    this.lastSyncError,
     DateTime? createdAt,
     DateTime? updatedAt,
-    this.lastSyncedAt,
-  }) : createdAt = createdAt ?? DateTime.now(),
+  }) : syncStatus = syncStatus ?? _ijl385hj.SyncStatus.pending,
+       createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
   factory PlaidConnection({
     _isc.UuidValue? id,
-    required _isc.UuidValue budgetId,
+    required _isc.UuidValue entityId,
     required String plaidItemId,
-    required String accessToken,
+    String? plaidInstitutionId,
     String? institutionName,
-    String? institutionId,
+    _ijl385hj.SyncStatus? syncStatus,
+    DateTime? lastSyncedAt,
+    String? lastSyncError,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? lastSyncedAt,
   }) = _PlaidConnectionImpl;
 
   factory PlaidConnection.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -45,24 +50,29 @@ abstract class PlaidConnection
       id: jsonSerialization['id'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
       plaidItemId: jsonSerialization['plaidItemId'] as String,
-      accessToken: jsonSerialization['accessToken'] as String,
+      plaidInstitutionId: jsonSerialization['plaidInstitutionId'] as String?,
       institutionName: jsonSerialization['institutionName'] as String?,
-      institutionId: jsonSerialization['institutionId'] as String?,
+      syncStatus: jsonSerialization['syncStatus'] == null
+          ? null
+          : _ijl385hj.SyncStatus.fromJson(
+              (jsonSerialization['syncStatus'] as String),
+            ),
+      lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(
+              jsonSerialization['lastSyncedAt'],
+            ),
+      lastSyncError: jsonSerialization['lastSyncError'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
-      lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
-          ? null
-          : _isc.DateTimeJsonExtension.fromJson(
-              jsonSerialization['lastSyncedAt'],
-            ),
     );
   }
 
@@ -71,49 +81,53 @@ abstract class PlaidConnection
   /// the id will be null.
   _isc.UuidValue? id;
 
-  _isc.UuidValue budgetId;
+  _isc.UuidValue entityId;
 
   String plaidItemId;
 
-  String accessToken;
+  String? plaidInstitutionId;
 
   String? institutionName;
 
-  String? institutionId;
+  _ijl385hj.SyncStatus syncStatus;
+
+  DateTime? lastSyncedAt;
+
+  String? lastSyncError;
 
   DateTime createdAt;
 
   DateTime updatedAt;
-
-  DateTime? lastSyncedAt;
 
   /// Returns a shallow copy of this [PlaidConnection]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
   PlaidConnection copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? budgetId,
+    _isc.UuidValue? entityId,
     String? plaidItemId,
-    String? accessToken,
+    String? plaidInstitutionId,
     String? institutionName,
-    String? institutionId,
+    _ijl385hj.SyncStatus? syncStatus,
+    DateTime? lastSyncedAt = const _isc.$UndefinedDateTime(),
+    String? lastSyncError,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? lastSyncedAt = const _isc.$UndefinedDateTime(),
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'PlaidConnection',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'plaidItemId': plaidItemId,
-      'accessToken': accessToken,
+      if (plaidInstitutionId != null) 'plaidInstitutionId': plaidInstitutionId,
       if (institutionName != null) 'institutionName': institutionName,
-      if (institutionId != null) 'institutionId': institutionId,
+      'syncStatus': syncStatus.toJson(),
+      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
+      if (lastSyncError != null) 'lastSyncError': lastSyncError,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
-      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
     };
   }
 
@@ -122,14 +136,15 @@ abstract class PlaidConnection
     return {
       '__className__': 'PlaidConnection',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'plaidItemId': plaidItemId,
-      'accessToken': accessToken,
+      if (plaidInstitutionId != null) 'plaidInstitutionId': plaidInstitutionId,
       if (institutionName != null) 'institutionName': institutionName,
-      if (institutionId != null) 'institutionId': institutionId,
+      'syncStatus': syncStatus.toJson(),
+      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
+      if (lastSyncError != null) 'lastSyncError': lastSyncError,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
-      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
     };
   }
 
@@ -144,24 +159,26 @@ class _Undefined {}
 class _PlaidConnectionImpl extends PlaidConnection {
   _PlaidConnectionImpl({
     _isc.UuidValue? id,
-    required _isc.UuidValue budgetId,
+    required _isc.UuidValue entityId,
     required String plaidItemId,
-    required String accessToken,
+    String? plaidInstitutionId,
     String? institutionName,
-    String? institutionId,
+    _ijl385hj.SyncStatus? syncStatus,
+    DateTime? lastSyncedAt,
+    String? lastSyncError,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? lastSyncedAt,
   }) : super._(
          id: id,
-         budgetId: budgetId,
+         entityId: entityId,
          plaidItemId: plaidItemId,
-         accessToken: accessToken,
+         plaidInstitutionId: plaidInstitutionId,
          institutionName: institutionName,
-         institutionId: institutionId,
+         syncStatus: syncStatus,
+         lastSyncedAt: lastSyncedAt,
+         lastSyncError: lastSyncError,
          createdAt: createdAt,
          updatedAt: updatedAt,
-         lastSyncedAt: lastSyncedAt,
        );
 
   /// Returns a shallow copy of this [PlaidConnection]
@@ -170,31 +187,35 @@ class _PlaidConnectionImpl extends PlaidConnection {
   @override
   PlaidConnection copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? budgetId,
+    _isc.UuidValue? entityId,
     String? plaidItemId,
-    String? accessToken,
+    Object? plaidInstitutionId = _Undefined,
     Object? institutionName = _Undefined,
-    Object? institutionId = _Undefined,
+    _ijl385hj.SyncStatus? syncStatus,
+    DateTime? lastSyncedAt = const _isc.$UndefinedDateTime(),
+    Object? lastSyncError = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? lastSyncedAt = const _isc.$UndefinedDateTime(),
   }) {
     return PlaidConnection(
       id: id is _isc.UndefinedSentinel ? this.id : id,
-      budgetId: budgetId ?? this.budgetId,
+      entityId: entityId ?? this.entityId,
       plaidItemId: plaidItemId ?? this.plaidItemId,
-      accessToken: accessToken ?? this.accessToken,
+      plaidInstitutionId: plaidInstitutionId is String?
+          ? plaidInstitutionId
+          : this.plaidInstitutionId,
       institutionName: institutionName is String?
           ? institutionName
           : this.institutionName,
-      institutionId: institutionId is String?
-          ? institutionId
-          : this.institutionId,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      syncStatus: syncStatus ?? this.syncStatus,
       lastSyncedAt: lastSyncedAt is _isc.UndefinedSentinel
           ? this.lastSyncedAt
           : lastSyncedAt,
+      lastSyncError: lastSyncError is String?
+          ? lastSyncError
+          : this.lastSyncError,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

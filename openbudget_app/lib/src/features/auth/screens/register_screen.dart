@@ -181,7 +181,7 @@ class RegisterScreen extends HookConsumerWidget {
                             controller: emailController,
                             decoration: InputDecoration(
                               labelText: l10n.loginEmailLabel,
-                              prefixIcon: SkribbleIcon(
+                              prefixIcon: ObFieldIcon(
                                 data: OpenBudgetIcons.email,
                                 size: 20,
                                 color: palette.mutedInk,
@@ -208,7 +208,7 @@ class RegisterScreen extends HookConsumerWidget {
                             controller: codeController,
                             decoration: InputDecoration(
                               labelText: l10n.registerCodeLabel,
-                              prefixIcon: SkribbleIcon(
+                              prefixIcon: ObFieldIcon(
                                 data: OpenBudgetIcons.keypad,
                                 size: 20,
                                 color: palette.mutedInk,
@@ -235,7 +235,7 @@ class RegisterScreen extends HookConsumerWidget {
                             controller: passwordController,
                             decoration: InputDecoration(
                               labelText: l10n.loginPasswordLabel,
-                              prefixIcon: SkribbleIcon(
+                              prefixIcon: ObFieldIcon(
                                 data: OpenBudgetIcons.lock,
                                 size: 20,
                                 color: palette.mutedInk,
@@ -249,7 +249,7 @@ class RegisterScreen extends HookConsumerWidget {
                             controller: confirmPasswordController,
                             decoration: InputDecoration(
                               labelText: l10n.registerConfirmPassword,
-                              prefixIcon: SkribbleIcon(
+                              prefixIcon: ObFieldIcon(
                                 data: OpenBudgetIcons.lock,
                                 size: 20,
                                 color: palette.mutedInk,

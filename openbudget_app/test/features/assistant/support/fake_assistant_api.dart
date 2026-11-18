@@ -20,6 +20,8 @@ AgentEvent agentEvent(
   String? toolName,
   AgentProposal? proposal,
   int? costMicroUsd,
+  List<AgentCitation>? citations,
+  bool? touchesTaxOrInvestment,
 }) => AgentEvent(
   kind: kind,
   conversationId: testConversationUuid,
@@ -27,16 +29,39 @@ AgentEvent agentEvent(
   toolName: toolName,
   proposal: proposal,
   costMicroUsd: costMicroUsd,
+  citations: citations,
+  touchesTaxOrInvestment: touchesTaxOrInvestment,
+);
+
+/// One source behind a citation key.
+AgentCitation testCitation(
+  String key, {
+  String title = 'Capital gains tax: allowances',
+  String url = 'https://www.gov.uk/capital-gains-tax/allowances',
+  String authority = 'gov.uk',
+  String grade = 'primary',
+  bool announced = false,
+  DateTime? verifiedOn,
+}) => AgentCitation(
+  key: key,
+  title: title,
+  url: url,
+  authority: authority,
+  verifiedOn: verifiedOn ?? DateTime.utc(2026, 11, 2),
+  grade: grade,
+  announced: announced,
 );
 
 AgentUsageView testUsage({
   AgentProvider provider = AgentProvider.zen,
-  int allowanceMicroUsd = 1000000,
+  int allowanceMicroUsd = 5000000,
   int usedMicroUsd = 420000,
+  int? conversationsLeft,
 }) => AgentUsageView(
   provider: provider,
   allowanceMicroUsd: allowanceMicroUsd,
   usedMicroUsd: usedMicroUsd,
+  conversationsLeft: conversationsLeft,
 );
 
 AgentConversation testConversation({
@@ -45,7 +70,7 @@ AgentConversation testConversation({
 }) => AgentConversation(
   id: testConversationUuid,
   userId: testUserUuid,
-  budgetId: testBudgetUuid,
+  entityId: testBudgetUuid,
   title: title,
   updatedAt: updatedAt ?? DateTime(2026, 1, 2),
 );
@@ -54,6 +79,8 @@ AgentMessage testMessage(
   AgentMessageRole role,
   String content, {
   DateTime? createdAt,
+  String? citationsJson,
+  bool touchesTaxOrInvestment = false,
 }) => AgentMessage(
   id: UuidValue.fromString(
     role == AgentMessageRole.user
@@ -64,6 +91,8 @@ AgentMessage testMessage(
   role: role,
   content: content,
   createdAt: createdAt,
+  citationsJson: citationsJson,
+  touchesTaxOrInvestment: touchesTaxOrInvestment,
 );
 
 AgentProposal testProposal({
@@ -74,7 +103,7 @@ AgentProposal testProposal({
 }) => AgentProposal(
   id: testProposalUuid,
   userId: testUserUuid,
-  budgetId: testBudgetUuid,
+  entityId: testBudgetUuid,
   conversationId: testConversationUuid,
   kind: kind,
   payloadJson: '{}',
@@ -119,7 +148,7 @@ class FakeAssistantApi implements AssistantApi {
 
   /// Replaces the default event list, for tests that hold the stream open.
   final Stream<AgentEvent> Function(
-    String budgetId,
+    String entityId,
     String? conversationId,
     String message,
   )?
@@ -136,7 +165,7 @@ class FakeAssistantApi implements AssistantApi {
   final Exception? proposalActionError;
   final Exception? deleteError;
 
-  final List<({String budgetId, String? conversationId, String message})>
+  final List<({String entityId, String? conversationId, String message})>
   chatRequests = [];
   final List<({String baseUrl, String model, String apiKey})> saveRequests = [];
   final List<String> applyCalls = [];
@@ -146,12 +175,12 @@ class FakeAssistantApi implements AssistantApi {
 
   @override
   Stream<AgentEvent> chat({
-    required String budgetId,
+    required String entityId,
     required String message,
     String? conversationId,
   }) {
     chatRequests.add((
-      budgetId: budgetId,
+      entityId: entityId,
       conversationId: conversationId,
       message: message,
     ));
@@ -159,13 +188,13 @@ class FakeAssistantApi implements AssistantApi {
       return Stream.error(error);
     }
     if (chatStream case final stream?) {
-      return stream(budgetId, conversationId, message);
+      return stream(entityId, conversationId, message);
     }
     return Stream.fromIterable(chatEvents);
   }
 
   @override
-  Future<List<AgentConversation>> listConversations(String budgetId) async {
+  Future<List<AgentConversation>> listConversations(String entityId) async {
     if (conversationsError case final error?) throw error;
     return List.of(conversations);
   }
@@ -228,7 +257,7 @@ class FakeAssistantApi implements AssistantApi {
 
   @override
   Future<List<AgentProposal>> listProposals(
-    String budgetId, {
+    String entityId, {
     bool pendingOnly = true,
   }) async {
     if (proposalsError case final error?) throw error;

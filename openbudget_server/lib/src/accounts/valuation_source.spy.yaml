@@ -1,0 +1,8 @@
+### Who supplied an account valuation.
+enum: ValuationSource
+serialized: byName
+values:
+  - manual
+  - plaid
+  - wallet
+  - imported

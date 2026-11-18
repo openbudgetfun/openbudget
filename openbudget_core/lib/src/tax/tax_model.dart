@@ -1,4 +1,7 @@
 import 'package:meta/meta.dart';
+import 'package:openbudget_core/src/generated/entity_kind.dart';
+
+export 'package:openbudget_core/src/generated/entity_kind.dart';
 
 /// A country whose tax rules OpenBudget can apply.
 enum TaxJurisdiction {
@@ -32,18 +35,233 @@ enum TaxJurisdiction {
   }
 }
 
-/// Who a set of books belongs to, for tax purposes.
-enum TaxEntityKind {
-  /// A person: employment, savings, investments, property, and the profit of
-  /// any sole-trade businesses linked to them.
-  individual,
+/// One part of a country's tax system a rule pack may compute.
+enum TaxSection {
+  personalReturn,
+  selfEmployment,
+  companyReturn,
+  indirectTax,
+  capitalGains,
+  digitalAssets,
+  filingCalendar,
+  payroll,
+}
 
-  /// A self-employed business. Its profit is taxed on its owner's personal
-  /// return, so its report feeds the owner's [individual] report.
-  soleTrader,
+/// How completely a pack covers one [TaxSection].
+enum TaxSectionCoverage {
+  /// The section computes everything the pack contract requires.
+  full,
 
-  /// A company taxed in its own right (Ltd, LLC electing C-corp, GmbH).
-  company,
+  /// The section computes, but leaves named parts out.
+  partial,
+
+  /// The pack explains the section and points to a professional, and
+  /// computes nothing.
+  signpostOnly,
+
+  /// The tax does not exist for the entity kind in this country.
+  notApplicable,
+
+  /// The pack does not cover the section yet.
+  notBuilt,
+}
+
+/// Whether a pack's figures have been checked by a tax professional.
+enum TaxPackMaturity {
+  /// New packs ship here: the figures are sourced but not yet reviewed.
+  preview,
+
+  /// A qualified professional has checked one year of output for each entity
+  /// kind the pack covers.
+  reviewed,
+}
+
+/// What a rule pack covers, per section, and how mature it is.
+@immutable
+final class TaxPackManifest {
+  const TaxPackManifest({required this.maturity, required this.sections});
+
+  final TaxPackMaturity maturity;
+
+  /// Every [TaxSection] the pack knows about, with its coverage.
+  final Map<TaxSection, TaxSectionCoverage> sections;
+
+  /// The coverage of [section], or [TaxSectionCoverage.notBuilt] when the
+  /// manifest does not name it.
+  TaxSectionCoverage coverageOf(TaxSection section) =>
+      sections[section] ?? TaxSectionCoverage.notBuilt;
+}
+
+/// How well sourced a figure or rule is (docs/tax-jurisdictions.md,
+/// section 5.1).
+enum TaxEvidenceGrade {
+  /// Statute, official gazette, the authority's own page, form or
+  /// instructions, or the authority's published calculator.
+  primary,
+
+  /// A Big Four or law-firm summary, a reputable tax publisher, or an
+  /// intergovernmental compilation for figures it does not itself enact.
+  secondary,
+
+  /// Derived by the researcher from primary or secondary material, or a
+  /// design inference.
+  inferred,
+}
+
+/// The unit a [TaxFigure]'s value is counted in.
+enum TaxFigureUnit {
+  /// Minor units of the jurisdiction's currency, such as pence.
+  currencyMinor,
+
+  /// Basis points: 2000 is 20%.
+  rateBasisPoints,
+
+  /// A plain percentage, such as a share of income.
+  percent,
+
+  /// A counted number, such as a kilometre allowance step.
+  count,
+}
+
+/// One named figure of a rule set, such as the personal allowance.
+///
+/// Knowledge cards quote named figures by id
+/// (docs/money-guide.md, section 4.1), so a report and an answer can never
+/// disagree on a headline number. The value is whatever the pack's tables
+/// already carried; naming it adds the source, grade and verified-on date.
+@immutable
+final class TaxFigure {
+  const TaxFigure({
+    required this.id,
+    required this.value,
+    required this.unit,
+    required this.source,
+    required this.grade,
+    required this.verifiedOn,
+  });
+
+  /// Stable identifier, unique in its rule set: `personalAllowance`.
+  final String id;
+
+  /// The figure in [unit]; a secondary-grade figure computes a liability
+  /// only with a visible caveat.
+  final int value;
+
+  final TaxFigureUnit unit;
+
+  /// The authority page the figure came from.
+  final Uri source;
+
+  final TaxEvidenceGrade grade;
+
+  /// When the figure was last checked against [source].
+  final DateTime verifiedOn;
+}
+
+/// One thing a rule pack could not verify, in plain language
+/// (docs/tax-jurisdictions.md, section 5.4).
+///
+/// Caveats are data ported from the country skills' "Unverified and
+/// changing" lists. A report carries only the caveats that touch the
+/// sections and rule keys it used.
+@immutable
+final class TaxRuleCaveat {
+  const TaxRuleCaveat({
+    required this.id,
+    required this.text,
+    required this.grade,
+    required this.recheckBy,
+    this.sections = const {},
+    this.keys = const {},
+    this.announced = false,
+  });
+
+  /// Stable identifier, unique in its pack and prefixed by country:
+  /// `gb.student-loan-unearned-threshold`.
+  final String id;
+
+  /// One plain sentence saying what could not be verified.
+  final String text;
+
+  /// How well sourced the statement behind the caveat is.
+  final TaxEvidenceGrade grade;
+
+  /// The last day the caveat is trusted without a re-check.
+  final DateTime recheckBy;
+
+  /// The report sections the caveat touches.
+  final Set<TaxSection> sections;
+
+  /// The rule keys and figure ids the caveat touches, such as
+  /// `studentLoans` or `personalAllowance`.
+  final Set<String> keys;
+
+  /// True when the caveat describes a change that is announced but not
+  /// yet law.
+  final bool announced;
+
+  /// Whether this caveat touches any of the used [sections] or [keys].
+  bool touches({
+    Set<TaxSection> sections = const {},
+    Set<String> keys = const {},
+  }) {
+    for (final section in this.sections) {
+      if (sections.contains(section)) {
+        return true;
+      }
+    }
+    for (final key in this.keys) {
+      if (keys.contains(key)) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+/// The version, sources and verification date of one year's figures.
+@immutable
+final class TaxRuleSet {
+  const TaxRuleSet({
+    required this.startYear,
+    required this.revision,
+    required this.verifiedOn,
+    required this.sources,
+    this.caveats = const [],
+    this.figures = const {},
+  });
+
+  final int startYear;
+
+  /// Bumped whenever any figure in the year changes.
+  final int revision;
+
+  /// When the figures were last checked against [sources].
+  final DateTime verifiedOn;
+
+  /// The authority pages the figures came from.
+  final List<Uri> sources;
+
+  /// What could not be verified, ported from the country skill's
+  /// "Unverified and changing" list.
+  final List<TaxRuleCaveat> caveats;
+
+  /// The named figures knowledge cards quote, keyed by id.
+  final Map<String, TaxFigure> figures;
+
+  /// The caveats that touch any of the used [sections] or [keys]; a report
+  /// carries only these.
+  List<TaxRuleCaveat> caveatsTouching({
+    Set<TaxSection> sections = const {},
+    Set<String> keys = const {},
+  }) => [
+    for (final caveat in caveats)
+      if (caveat.touches(sections: sections, keys: keys)) caveat,
+  ];
+
+  /// The version recorded on reports, exports and proposals: `gb-2026-r1`.
+  String versionFor(TaxJurisdiction jurisdiction) =>
+      '${jurisdiction.countryCode.toLowerCase()}-$startYear-r$revision';
 }
 
 /// What a tax category does in a computation.
@@ -86,6 +304,7 @@ class TaxCategory {
     required this.label,
     required this.kind,
     required this.entityKinds,
+    this.labelKey,
     this.reportReference,
     this.description,
   });
@@ -99,7 +318,12 @@ class TaxCategory {
   final TaxCategoryKind kind;
 
   /// The kinds of books this category may appear in.
-  final Set<TaxEntityKind> entityKinds;
+  final Set<EntityKind> entityKinds;
+
+  /// The ARB key that localises this category in the app, when the
+  /// catalogue is not written in the authority's own wording. Universal
+  /// categories carry one; country packs label themselves.
+  final String? labelKey;
 
   /// Where the total lands on the official return, such as
   /// `SA103F box 20` or `Schedule C line 18`.
@@ -216,6 +440,7 @@ class TaxReportLine {
     this.code,
     this.reportReference,
     this.entryCount = 0,
+    this.figureId,
   });
 
   final String label;
@@ -226,6 +451,11 @@ class TaxReportLine {
 
   final String? reportReference;
   final int entryCount;
+
+  /// The [TaxFigure.id] this line presents, when it presents one. Lines
+  /// whose figure is secondary-grade show a "from a secondary source"
+  /// badge.
+  final String? figureId;
 }
 
 /// One tax a report computes, such as income tax or Class 4 NICs.
@@ -267,6 +497,13 @@ class TaxBandSlice {
 ///
 /// OpenBudget shows opportunities as guidance, never as regulated advice;
 /// each one says what it assumes and links to the authority's guidance.
+/// An opportunity built on a secondary or inferred figure carries that
+/// [grade] and no [estimatedSavingMinor], an announced rule never feeds a
+/// saving, and a [signpostOnly] row explains the rule and points to a
+/// professional instead of quantifying one (tax-planning-guardrails).
+///
+/// The title is a neutral noun phrase, never an imperative addressed to
+/// the user; the wording lint test enforces it.
 @immutable
 class TaxOpportunity {
   const TaxOpportunity({
@@ -274,9 +511,26 @@ class TaxOpportunity {
     required this.title,
     required this.explanation,
     required this.source,
+    required this.ruleYear,
     this.estimatedSavingMinor,
     this.deadline,
-  });
+    this.grade = TaxEvidenceGrade.primary,
+    this.announced = false,
+    this.signpostOnly = false,
+    this.needsEvidence = false,
+    this.assumptions = const [],
+  }) : assert(
+         estimatedSavingMinor == null || grade == TaxEvidenceGrade.primary,
+         'a saving may only be computed on primary-grade figures',
+       ),
+       assert(
+         !announced || estimatedSavingMinor == null,
+         'an announced rule is not law yet and never feeds a saving',
+       ),
+       assert(
+         !signpostOnly || estimatedSavingMinor == null,
+         'a signpost-only row computes no saving',
+       );
 
   /// Stable identifier, such as `gb.pension_annual_allowance`.
   final String id;
@@ -284,7 +538,10 @@ class TaxOpportunity {
   final String title;
   final String explanation;
 
-  /// The estimated tax saved if acted on, when it can be computed.
+  /// The estimated tax saved if acted on, when it can be computed. Null
+  /// whenever [grade] is not primary, [announced] is true,
+  /// [signpostOnly] is true, or the saving depends on a fact the books do
+  /// not hold.
   final int? estimatedSavingMinor;
 
   /// The last day acting on it counts for the year.
@@ -292,6 +549,126 @@ class TaxOpportunity {
 
   /// The authority's guidance for it.
   final Uri source;
+
+  /// The tax year whose rules the figures come from, as the authority
+  /// writes it: `2026/27` or `2026`.
+  final String ruleYear;
+
+  /// How well sourced the key figure behind this opportunity is. A
+  /// secondary or inferred grade shows with the row and carries no saving.
+  final TaxEvidenceGrade grade;
+
+  /// True when the rule is announced but not yet law. Labelled "announced,
+  /// not yet law" and never used in arithmetic.
+  final bool announced;
+
+  /// True when the topic is reserved to a professional in this country (a
+  /// `GuidancePerimeter` signpost-only topic): the row explains the
+  /// general rule, computes nothing and signposts.
+  final bool signpostOnly;
+
+  /// True when acting on the relief needs evidence the books do not hold
+  /// (receipts, day logs, statements); the guide asks for the evidence,
+  /// not only the number.
+  final bool needsEvidence;
+
+  /// What the explanation assumes, in plain sentences.
+  final List<String> assumptions;
+}
+
+/// What a [TaxDeadline] asks the taxpayer to do.
+enum TaxDeadlineKind {
+  /// Send a return, declaration or information return.
+  filing,
+
+  /// Pay tax, an instalment or a contribution, with nothing to send.
+  payment,
+
+  /// The return and the payment fall due on the same day.
+  filingAndPayment,
+}
+
+/// One filing or payment date a rule pack derives for a tax year and a
+/// profile (docs/tax-jurisdictions.md, task C5).
+///
+/// A deadline is data: a neutral title, the date, the period it covers and
+/// the authority page it came from. It never tells anyone what to do, so
+/// the title is a noun phrase and the wording lint of
+/// `openbudget_core/lib/src/guidance/wording.dart` applies to it.
+@immutable
+final class TaxDeadline {
+  const TaxDeadline({
+    required this.id,
+    required this.title,
+    required this.kind,
+    required this.dueDate,
+    required this.periodStart,
+    required this.periodEnd,
+    required this.periodLabel,
+    required this.source,
+    required this.citation,
+    required this.grade,
+    this.dependsOnProfile = false,
+    this.note,
+    this.rolledFrom,
+  });
+
+  /// Stable identifier of the rule that produced the deadline, prefixed by
+  /// country: `gb.sa.online-return`. Every instance of a recurring rule
+  /// shares it, and the period tells the instances apart.
+  final String id;
+
+  /// A neutral noun phrase in the authority's own language, such as
+  /// `Self Assessment online return`.
+  final String title;
+
+  /// Whether the date is for sending, paying or both.
+  final TaxDeadlineKind kind;
+
+  /// The day the deadline falls, as a date-only UTC value, after any
+  /// weekend or holiday roll-forward the pack's skill specifies.
+  final DateTime dueDate;
+
+  /// First day of the period the deadline covers, as a date-only UTC value.
+  final DateTime periodStart;
+
+  /// First day after the period the deadline covers, so the period is the
+  /// half-open range `[periodStart, periodEnd)` as in [TaxYear].
+  final DateTime periodEnd;
+
+  /// How the authority names the period: `2025/26`, `Q3 2026` or
+  /// `year to 31 March 2027`.
+  final String periodLabel;
+
+  /// The authority page the rule came from.
+  final Uri source;
+
+  /// The provision or page section behind the date: `§ 149 Abs. 2 AO`.
+  final String citation;
+
+  /// How well sourced the date is.
+  final TaxEvidenceGrade grade;
+
+  /// True when the profile's answers decide whether the deadline applies
+  /// or when it falls: VAT registration, a company's year end, the foreign
+  /// earned income exclusion. A deadline that only the kind of books
+  /// decides is not profile-dependent.
+  final bool dependsOnProfile;
+
+  /// One plain sentence saying when the deadline applies or what the date
+  /// assumes, when that is not obvious.
+  final String? note;
+
+  /// The date before a weekend or holiday moved it, or null when nothing
+  /// moved it.
+  final DateTime? rolledFrom;
+
+  /// The whole days from [today] to [dueDate]; negative once it has
+  /// passed.
+  int daysLeft(DateTime today) {
+    final day = DateTime.utc(today.year, today.month, today.day);
+    return dueDate.difference(day).inDays;
+  }
 }
 
 /// The computed position for one entity and tax year.
@@ -306,11 +683,15 @@ class TaxReport {
     required this.assumptions,
     required this.sources,
     required this.rulesVerifiedOn,
+    required this.rulesVersion,
+    required this.maturity,
+    required this.coverage,
+    this.caveats = const [],
     this.uncategorizedCount = 0,
   });
 
   final TaxYear year;
-  final TaxEntityKind entityKind;
+  final EntityKind entityKind;
 
   /// Category totals and computed figures, in return order.
   final List<TaxReportLine> lines;
@@ -329,6 +710,20 @@ class TaxReport {
 
   /// When the rule figures were last checked against [sources].
   final DateTime rulesVerifiedOn;
+
+  /// The rule pack version that produced this report: `gb-2026-r1`.
+  final String rulesVersion;
+
+  /// Whether the pack's figures have been checked by a tax professional.
+  final TaxPackMaturity maturity;
+
+  /// How completely the pack covers each section.
+  final Map<TaxSection, TaxSectionCoverage> coverage;
+
+  /// The rule-set caveats that touch the sections and rule keys this
+  /// report used: "what we could not verify" (docs/tax-jurisdictions.md,
+  /// section 5.4).
+  final List<TaxRuleCaveat> caveats;
 
   /// Entries whose category this rule pack does not know.
   final int uncategorizedCount;

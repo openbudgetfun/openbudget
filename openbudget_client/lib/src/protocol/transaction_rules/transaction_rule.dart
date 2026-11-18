@@ -12,14 +12,14 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// A rule that auto-assigns an envelope when a specific payee is used.
+/// Assigns an envelope automatically when a transaction uses a payee.
 abstract class TransactionRule
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   TransactionRule._({
     this.id,
-    required this.budgetId,
+    required this.entityId,
     required this.payeeId,
-    required this.targetEnvelopeId,
+    required this.envelopeId,
     bool? enabled,
     DateTime? createdAt,
   }) : enabled = enabled ?? true,
@@ -27,9 +27,9 @@ abstract class TransactionRule
 
   factory TransactionRule({
     _isc.UuidValue? id,
-    required _isc.UuidValue budgetId,
+    required _isc.UuidValue entityId,
     required _isc.UuidValue payeeId,
-    required _isc.UuidValue targetEnvelopeId,
+    required _isc.UuidValue envelopeId,
     bool? enabled,
     DateTime? createdAt,
   }) = _TransactionRuleImpl;
@@ -39,14 +39,14 @@ abstract class TransactionRule
       id: jsonSerialization['id'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
       payeeId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['payeeId'],
       ),
-      targetEnvelopeId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['targetEnvelopeId'],
+      envelopeId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['envelopeId'],
       ),
       enabled: jsonSerialization['enabled'] == null
           ? null
@@ -62,15 +62,12 @@ abstract class TransactionRule
   /// the id will be null.
   _isc.UuidValue? id;
 
-  _isc.UuidValue budgetId;
+  _isc.UuidValue entityId;
 
-  /// The payee this rule matches against.
   _isc.UuidValue payeeId;
 
-  /// The envelope to auto-assign when this rule matches.
-  _isc.UuidValue targetEnvelopeId;
+  _isc.UuidValue envelopeId;
 
-  /// Whether this rule is active.
   bool enabled;
 
   DateTime createdAt;
@@ -80,9 +77,9 @@ abstract class TransactionRule
   @_isc.useResult
   TransactionRule copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? budgetId,
+    _isc.UuidValue? entityId,
     _isc.UuidValue? payeeId,
-    _isc.UuidValue? targetEnvelopeId,
+    _isc.UuidValue? envelopeId,
     bool? enabled,
     DateTime? createdAt,
   });
@@ -91,9 +88,9 @@ abstract class TransactionRule
     return {
       '__className__': 'TransactionRule',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'payeeId': payeeId.toJson(),
-      'targetEnvelopeId': targetEnvelopeId.toJson(),
+      'envelopeId': envelopeId.toJson(),
       'enabled': enabled,
       'createdAt': createdAt.toJson(),
     };
@@ -104,9 +101,9 @@ abstract class TransactionRule
     return {
       '__className__': 'TransactionRule',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'payeeId': payeeId.toJson(),
-      'targetEnvelopeId': targetEnvelopeId.toJson(),
+      'envelopeId': envelopeId.toJson(),
       'enabled': enabled,
       'createdAt': createdAt.toJson(),
     };
@@ -121,16 +118,16 @@ abstract class TransactionRule
 class _TransactionRuleImpl extends TransactionRule {
   _TransactionRuleImpl({
     _isc.UuidValue? id,
-    required _isc.UuidValue budgetId,
+    required _isc.UuidValue entityId,
     required _isc.UuidValue payeeId,
-    required _isc.UuidValue targetEnvelopeId,
+    required _isc.UuidValue envelopeId,
     bool? enabled,
     DateTime? createdAt,
   }) : super._(
          id: id,
-         budgetId: budgetId,
+         entityId: entityId,
          payeeId: payeeId,
-         targetEnvelopeId: targetEnvelopeId,
+         envelopeId: envelopeId,
          enabled: enabled,
          createdAt: createdAt,
        );
@@ -141,17 +138,17 @@ class _TransactionRuleImpl extends TransactionRule {
   @override
   TransactionRule copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? budgetId,
+    _isc.UuidValue? entityId,
     _isc.UuidValue? payeeId,
-    _isc.UuidValue? targetEnvelopeId,
+    _isc.UuidValue? envelopeId,
     bool? enabled,
     DateTime? createdAt,
   }) {
     return TransactionRule(
       id: id is _isc.UndefinedSentinel ? this.id : id,
-      budgetId: budgetId ?? this.budgetId,
+      entityId: entityId ?? this.entityId,
       payeeId: payeeId ?? this.payeeId,
-      targetEnvelopeId: targetEnvelopeId ?? this.targetEnvelopeId,
+      envelopeId: envelopeId ?? this.envelopeId,
       enabled: enabled ?? this.enabled,
       createdAt: createdAt ?? this.createdAt,
     );

@@ -3,11 +3,28 @@ class: TaxOpportunityView
 fields:
   ### Stable identifier, such as `gb.pension_annual_allowance`.
   id: String
+  ### A neutral noun phrase, never an imperative addressed to the user.
   title: String
   explanation: String
-  ### The estimated tax saved if acted on, when it can be computed.
+  ### The estimated tax saved if acted on. Null when the key figure is not
+  ### primary-grade, the rule is announced, the row is signpost-only, or the
+  ### saving depends on a fact the books do not hold.
   estimatedSavingMinor: int?
   ### The last day acting on it counts for the year.
   deadline: DateTime?
   ### The authority's guidance for it.
   source: String
+  ### The tax year whose rules the figures come from: `2026/27` or `2026`.
+  ruleYear: String
+  ### `primary`, `secondary` or `inferred`; secondary and inferred rows
+  ### carry no saving.
+  grade: String
+  ### True when the rule is announced but not yet law.
+  announced: bool
+  ### True when the topic is reserved to a professional in this country:
+  ### the row explains the rule, computes nothing and signposts.
+  signpostOnly: bool
+  ### True when acting on the relief needs evidence the books do not hold.
+  needsEvidence: bool
+  ### What the explanation assumes, in plain sentences.
+  assumptions: List<String>

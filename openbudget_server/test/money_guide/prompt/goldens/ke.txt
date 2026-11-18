@@ -1,0 +1,17 @@
+Entity: individual in KE, base currency KES, time zone Africa/Nairobi.
+Tax year now: 2026, 2026-01-01 to 2026-12-31.
+Jurisdiction: universal, no rule pack for KE.
+Sections: every section universal.
+Profile: tax resident of KE not recorded; US person not recorded.
+Perimeter: general guidance only. No tax rules for KE beyond this brief.
+Signpost to: a qualified local tax professional.
+Disclaimer key: none.
+Tax authority: Kenya Revenue Authority (KRA).
+Indirect tax now: VAT standard 16% (grade secondary).
+Cards for KE: none.
+Universal cards (id: title):
+- universal-budgeting-sinking-funds: Sinking funds spread the cost of known one-off expenses
+- universal-budgeting-zero-based-envelopes: Zero-based envelopes give every unit of income a job
+- universal-crypto-crypto-tax-reporting: Tax offices exchange crypto-asset reports automatically from 2027
+- universal-money-emergency-fund: An emergency fund holds three to six months of essential costs
+- universal-money-what-aer-means: AER is the yearly savings rate with compounding included

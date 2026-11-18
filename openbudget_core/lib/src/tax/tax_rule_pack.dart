@@ -33,6 +33,9 @@ class TaxInput {
 abstract interface class TaxRulePack {
   TaxJurisdiction get jurisdiction;
 
+  /// What this pack covers, per section, and how mature it is.
+  TaxPackManifest get manifest;
+
   /// Tax years whose rates this pack knows, by [TaxYear.startYear].
   Set<int> get supportedStartYears;
 
@@ -42,11 +45,38 @@ abstract interface class TaxRulePack {
   /// The tax year that starts in [startYear].
   TaxYear taxYear(int startYear);
 
+  /// Version, sources and verified-on date for [startYear].
+  ///
+  /// Throws [UnsupportedTaxYearException] when the year's rates are not in
+  /// this pack.
+  TaxRuleSet ruleSet(int startYear);
+
+  /// Decodes this pack's profile from its stored JSON shape.
+  /// [TaxProfile.fromJson] delegates here, so this is the single
+  /// definition of which fields the pack stores.
+  ///
+  /// Throws [FormatException] naming the field for a wrong type, an
+  /// unknown enum value, a negative count or a missing required one.
+  TaxProfile profileFromJson(Map<String, Object?> json);
+
+  /// The questions the app asks to build the profile for books of [kind]:
+  /// [commonTaxProfileQuestions] first, then the pack's own, keeping only
+  /// the questions that kind answers, in form order. Each answer is stored
+  /// under the question's [TaxProfileQuestion.key].
+  List<TaxProfileQuestion> profileQuestions(EntityKind kind);
+
   /// Categories that may appear in books of [kind], in return order.
-  List<TaxCategory> categoriesFor(TaxEntityKind kind);
+  List<TaxCategory> categoriesFor(EntityKind kind);
 
   /// The category with [code], or null when this pack does not know it.
   TaxCategory? category(String code);
+
+  /// Maps a universal category code onto this pack's own code for books
+  /// of [kind], or returns null when the pack has no home for it. A
+  /// universal entry whose code maps lands in the report under the pack's
+  /// code; one that does not map counts as uncategorised. Codes outside
+  /// the universal catalogue return null.
+  String? mapUniversalCategory(String universalCode, EntityKind kind);
 
   /// Computes the position for [input].
   ///
@@ -56,6 +86,44 @@ abstract interface class TaxRulePack {
 
   /// Legal ways to owe less, given [input] and its [report].
   List<TaxOpportunity> opportunities(TaxInput input, TaxReport report);
+
+  /// The filing and payment dates [period] creates for [profile], sorted by
+  /// due date.
+  ///
+  /// A year's dates fall inside it and after it: the return for the year
+  /// is due after it ends, and its instalments fall inside it. The dates
+  /// come from the country's skill, with any weekend or holiday
+  /// roll-forward the skill specifies. A deadline the profile's answers
+  /// decide says so.
+  ///
+  /// Throws [UnsupportedTaxYearException] when [period] is not a year this
+  /// pack knows, and [ArgumentError] for another country's year or profile.
+  List<TaxDeadline> deadlines(TaxYear period, TaxProfile profile);
+}
+
+/// Checks the arguments of [TaxRulePack.deadlines] for [pack].
+void requireTaxDeadlineInput(
+  TaxRulePack pack,
+  TaxYear period,
+  TaxProfile profile,
+) {
+  if (period.jurisdiction != pack.jurisdiction) {
+    throw ArgumentError.value(
+      period,
+      'period',
+      'is not a ${pack.jurisdiction.countryCode} tax year',
+    );
+  }
+  if (profile.jurisdiction != pack.jurisdiction) {
+    throw ArgumentError.value(
+      profile,
+      'profile',
+      'is not a ${pack.jurisdiction.countryCode} tax profile',
+    );
+  }
+  if (!pack.supportedStartYears.contains(period.startYear)) {
+    throw UnsupportedTaxYearException(pack.jurisdiction, period.startYear);
+  }
 }
 
 /// Thrown when a pack has no rates for the requested year.

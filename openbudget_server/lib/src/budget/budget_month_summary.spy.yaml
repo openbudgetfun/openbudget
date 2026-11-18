@@ -1,0 +1,25 @@
+### The Ready to Assign breakdown for one month, in base minor units. Also
+### one row of the month-range reports.
+class: BudgetMonthSummary
+fields:
+  ### yyyymm.
+  month: int
+  ### Inflows this month with no envelope, positive.
+  incomeMinor: int
+  ### Outflows this month with no envelope, negative or 0.
+  uncategorizedMinor: int
+  ### FX revaluations this month, signed.
+  fxDifferenceMinor: int
+  ### Assigned this month.
+  allocatedMinor: int
+  ### Sum of envelope activity this month; negative is spending.
+  activityMinor: int
+  ### Overspending at the end of last month, positive. It comes out of this
+  ### month's Ready to Assign.
+  overspentLastMonthMinor: int
+  ### Assigned in months after this one.
+  assignedInFutureMinor: int
+  ### Money not yet given a job. Negative means more was assigned than exists.
+  readyToAssignMinor: int
+  ### Sum of envelope availableMinor.
+  availableMinor: int

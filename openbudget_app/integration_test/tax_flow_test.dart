@@ -3,32 +3,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/more/screens/more_screen.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_repository.dart';
 import 'package:openbudget_app/src/features/tax/screens/tax_overview_screen.dart';
 import 'package:openbudget_app/src/features/tax/screens/tax_profile_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
 import 'common/patrol_helpers.dart';
 import 'common/test_data.dart';
 
-const _budgetId = '00000000-0000-0000-0000-000000000701';
-final _budgetUuid = UuidValue.fromString(_budgetId);
-final _ownerUuid = UuidValue.fromString(
-  '00000000-0000-0000-0000-000000000702',
-);
+const String _entityId = TestData.gbpEntityId;
 
-Budget _makeBudget() => Budget(
-  id: _budgetUuid,
-  name: TestData.budgetName,
-  currencyCode: 'GBP',
-  ownerId: _ownerUuid,
-  createdAt: DateTime.utc(2026),
-);
+/// The entity drives the jurisdiction and kind; the profile screen reads
+/// both from it.
+Entity _gbEntity() => TestData.gbpEntity();
 
 TaxReportView _makeReport(int startYear) => TaxReportView(
   jurisdiction: 'GB',
@@ -36,7 +29,7 @@ TaxReportView _makeReport(int startYear) => TaxReportView(
   yearLabel: '$startYear/${(startYear + 1) % 100}',
   yearStart: DateTime.utc(startYear, 4, 6),
   yearEnd: DateTime.utc(startYear + 1, 4, 6),
-  entityKind: 'individual',
+  entityKind: EntityKind.individual,
   currencyCode: 'GBP',
   lines: [
     TaxReportLineView(
@@ -67,6 +60,23 @@ TaxReportView _makeReport(int startYear) => TaxReportView(
   assumptions: const ['No other income outside OpenBudget.'],
   sources: const ['https://www.gov.uk/income-tax-rates'],
   rulesVerifiedOn: DateTime.utc(2026, 4),
+  rulesVersion: 'gb-$startYear-r1',
+  maturity: 'preview',
+  coverage: const {'personalReturn': 'full'},
+  caveats: [
+    TaxRuleCaveatView(
+      id: 'gb.hmrc-rounding-inferences',
+      text:
+          'HMRC does not publish its per-slice rounding, so the pack infers '
+          'it from guidance.',
+      grade: 'inferred',
+      sections: const ['personalReturn'],
+      keys: const [],
+      recheckBy: DateTime.utc(2027, 1, 30),
+      announced: false,
+    ),
+  ],
+  figures: const [],
   uncategorizedCount: 0,
   convertedEntryCount: 0,
   opportunities: const [],
@@ -76,38 +86,33 @@ class _FakeTaxRepository implements TaxRepository {
   TaxProfileRecord? profile;
   final List<
     ({
-      String budgetId,
+      String entityId,
       String jurisdiction,
       String entityKind,
       String profileJson,
-      String? linkedBudgetId,
     })
   >
   savedProfiles = [];
 
   @override
-  Future<TaxProfileRecord?> getProfile(String budgetId) async => profile;
+  Future<TaxProfileRecord?> getProfile(String entityId) async => profile;
 
   @override
   Future<TaxProfileRecord> saveProfile({
-    required String budgetId,
+    required String entityId,
     required String jurisdiction,
     required String entityKind,
     required String profileJson,
-    String? linkedBudgetId,
   }) async {
     savedProfiles.add((
-      budgetId: budgetId,
+      entityId: entityId,
       jurisdiction: jurisdiction,
       entityKind: entityKind,
       profileJson: profileJson,
-      linkedBudgetId: linkedBudgetId,
     ));
     final record = TaxProfileRecord(
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000703'),
-      budgetId: _budgetUuid,
-      jurisdiction: jurisdiction,
-      entityKind: entityKind,
+      entityId: UuidValue.fromString(entityId),
       profileJson: profileJson,
       createdAt: DateTime.utc(2026),
       updatedAt: DateTime.utc(2026, 7),
@@ -117,7 +122,7 @@ class _FakeTaxRepository implements TaxRepository {
   }
 
   @override
-  Future<List<TaxCategoryView>> listCategories(String budgetId) async => [];
+  Future<List<TaxCategoryView>> listCategories(String entityId) async => [];
 
   @override
   Future<Envelope> setEnvelopeTaxCategory({
@@ -126,41 +131,53 @@ class _FakeTaxRepository implements TaxRepository {
   }) => throw UnimplementedError();
 
   @override
-  Future<Transaction> setTransactionTax({
-    required String transactionId,
+  Future<TransactionView> setLineTax({
+    required String transactionLineId,
     String? code,
     int? businessUsePercent,
-    int? salesTaxCents,
+    int? salesTaxMinor,
   }) => throw UnimplementedError();
 
   @override
-  Future<TaxReportView> getReport(String budgetId, int startYear) async =>
+  Future<TaxReportView> getReport(String entityId, int startYear) async =>
       _makeReport(startYear);
+
+  @override
+  Future<List<TaxDeadlineView>> listDeadlines(String entityId) async =>
+      TestData.taxDeadlines();
+
+  @override
+  Future<TaxSummaryView> getSummary(String entityId, {int? startYear}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<String> createExportLink(String entityId, {int? startYear}) =>
+      throw UnimplementedError();
 }
 
 Widget _buildApp(_FakeTaxRepository repository) {
   final router = GoRouter(
-    initialLocation: morePath.replaceFirst(':id', _budgetId),
+    initialLocation: morePath.replaceFirst(':entityId', _entityId),
     routes: [
       GoRoute(
         name: moreRoute,
         path: morePath,
         builder: (context, state) => MoreScreen(
-          budgetId: state.pathParameters['id']!,
+          entityId: state.pathParameters['entityId']!,
         ),
       ),
       GoRoute(
         name: taxOverviewRoute,
         path: taxOverviewPath,
         builder: (context, state) => TaxOverviewScreen(
-          budgetId: state.pathParameters['id']!,
+          entityId: state.pathParameters['entityId']!,
         ),
         routes: [
           GoRoute(
             name: taxProfileRoute,
             path: 'profile',
             builder: (context, state) => TaxProfileScreen(
-              budgetId: state.pathParameters['id']!,
+              entityId: state.pathParameters['entityId']!,
             ),
           ),
         ],
@@ -171,7 +188,7 @@ Widget _buildApp(_FakeTaxRepository repository) {
   return ProviderScope(
     overrides: [
       taxRepositoryProvider.overrideWithValue(repository),
-      budgetListProvider.overrideWith((ref) async => [_makeBudget()]),
+      entityDetailProvider.overrideWith((ref, id) async => _gbEntity()),
     ],
     child: MaterialApp.router(
       theme: OpenBudgetTheme.light,
@@ -208,16 +225,22 @@ void main() {
       expect(find.text('United Kingdom'), findsWidgets);
       expect(find.text('Individual'), findsOneWidget);
 
-      await tester.tap(profile.scottishTaxpayerToggle);
-      await tester.pumpAndSettle();
+      await profile.tapQuestion(profile.scottishTaxpayerToggle);
+      await profile.tapQuestion(profile.taxResidentToggle);
       await profile.save();
 
       expect(repository.savedProfiles, hasLength(1));
+      expect(repository.savedProfiles.single.entityId, _entityId);
       expect(repository.savedProfiles.single.jurisdiction, 'GB');
       expect(repository.savedProfiles.single.entityKind, 'individual');
       expect(
         repository.savedProfiles.single.profileJson,
         contains('"scottishTaxpayer":true'),
+      );
+      // The residence guardrail question is asked in every country.
+      expect(
+        repository.savedProfiles.single.profileJson,
+        contains('"taxResident":true'),
       );
 
       expect(overview.yearLabel, findsOneWidget);
@@ -225,6 +248,38 @@ void main() {
       expect(find.text(TestData.taxBalanceDue), findsOneWidget);
       expect(find.text('Income tax'), findsOneWidget);
       expect(find.text(TestData.taxDisclaimer), findsOneWidget);
+
+      // The Upcoming list shows the next dates, four at first.
+      await overview.showUpcoming();
+      expect(find.text(TestData.taxUpcomingTitle), findsOneWidget);
+      await scrollIntoView(tester, overview.upcomingToggle);
+      expect(overview.deadlines, findsNWidgets(4));
+      expect(find.text(TestData.taxUpcomingFirstTitle), findsOneWidget);
+      expect(find.text(TestData.taxUpcomingFirstDate), findsOneWidget);
+      expect(find.text(TestData.taxUpcomingFirstDaysLeft), findsOneWidget);
+      expect(
+        overview.deadline('gb.sa.online-return', '20270131'),
+        findsOneWidget,
+      );
+      expect(find.text(TestData.taxUpcomingReturnTitle), findsOneWidget);
+      expect(find.text(TestData.taxUpcomingReturnSource), findsWidgets);
+      expect(find.text(TestData.taxUpcomingShowAll), findsOneWidget);
+      expect(find.text(TestData.taxUpcomingFifthTitle), findsNothing);
+
+      await tester.tap(overview.upcomingToggle);
+      await tester.pumpAndSettle();
+      await scrollIntoView(tester, find.text(TestData.taxUpcomingFifthTitle));
+      expect(find.text(TestData.taxUpcomingFifthTitle), findsOneWidget);
+      expect(find.text('Show fewer dates'), findsOneWidget);
+
+      // The unverified list shows the caveat the fake report carries.
+      await tester.scrollUntilVisible(
+        find.text('What we could not verify'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('What we could not verify'), findsOneWidget);
+      expect(find.textContaining('per-slice rounding'), findsOneWidget);
     },
   );
 }

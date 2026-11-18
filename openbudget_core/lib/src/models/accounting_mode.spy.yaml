@@ -1,0 +1,9 @@
+### How an entity keeps its records.
+enum: AccountingMode
+serialized: byName
+values:
+  ### Single-entry transactions with envelope budgeting. Every entity starts here.
+  - envelope
+  ### Each transaction revision also posts a double-entry journal. Sole
+  ### traders and companies only; switching back is not supported.
+  - ledger

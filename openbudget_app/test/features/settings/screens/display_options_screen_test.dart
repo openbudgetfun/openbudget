@@ -2,53 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
-import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/features/settings/screens/display_options_screen.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
-import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  final ownerId = UuidValue.fromString('00000000-0000-0000-0000-000000000441');
-
-  Budget makeBudget({
-    String currencyCode = 'USD',
-    String? displayCurrencyCode,
-  }) => Budget(
-    name: "Alex's Plan",
-    currencyCode: currencyCode,
-    displayCurrencyCode: displayCurrencyCode,
-    ownerId: ownerId,
-  );
-
   group('DisplayOptionsScreen', () {
     testWidgets('renders theme and balance style choices', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith(
-              (ref, budgetId) async => makeBudget(),
-            ),
-          ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const DisplayOptionsScreen(budgetId: 'test-budget-id'),
+            home: const DisplayOptionsScreen(entityId: 'test-budget-id'),
           ),
         ),
       );
       await tester.pumpAndSettle();
 
       expect(find.text('Display Options'), findsOneWidget);
-      expect(find.text('Appearance'), findsNWidgets(2));
       expect(find.text('Light'), findsOneWidget);
       expect(find.text('Balance Style'), findsOneWidget);
       expect(find.text('Default'), findsOneWidget);
       expect(find.text('Differentiate Without Color'), findsOneWidget);
-      expect(find.text('Display Currency'), findsWidgets);
       expect(find.text('Privacy'), findsOneWidget);
       await tester.scrollUntilVisible(
         find.text('Hide Amounts'),
@@ -61,13 +39,7 @@ void main() {
     });
 
     testWidgets('updates providers when selections change', (tester) async {
-      final container = ProviderContainer(
-        overrides: [
-          budgetDetailProvider.overrideWith(
-            (ref, budgetId) async => makeBudget(),
-          ),
-        ],
-      );
+      final container = ProviderContainer();
       addTearDown(container.dispose);
 
       await tester.pumpWidget(
@@ -77,14 +49,15 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const DisplayOptionsScreen(budgetId: 'test-budget-id'),
+            home: const DisplayOptionsScreen(entityId: 'test-budget-id'),
           ),
         ),
       );
       await tester.pumpAndSettle();
 
+      // The theme toggle flips dark mode straight from the tile.
       final themeSwitch = tester.widget<SwitchListTile>(
-        find.widgetWithText(SwitchListTile, 'Appearance'),
+        find.widgetWithText(SwitchListTile, 'Appearance').first,
       );
       themeSwitch.onChanged?.call(true);
       await tester.pumpAndSettle();
@@ -119,95 +92,8 @@ void main() {
       expect(container.read(hideProgressBarsProvider), isTrue);
     });
 
-    testWidgets('selecting explicit display currency updates budget', (
-      tester,
-    ) async {
-      String? capturedBudgetId;
-      String? capturedDisplayCurrencyCode;
-      bool? capturedClearFlag;
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith(
-              (ref, budgetId) async => makeBudget(),
-            ),
-            updateDisplayCurrencyProvider.overrideWith(
-              (ref) =>
-                  ({
-                    required budgetId,
-                    required clearDisplayCurrencyCode,
-                    displayCurrencyCode,
-                  }) async {
-                    capturedBudgetId = budgetId;
-                    capturedDisplayCurrencyCode = displayCurrencyCode;
-                    capturedClearFlag = clearDisplayCurrencyCode;
-                  },
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const DisplayOptionsScreen(budgetId: 'test-budget-id'),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.widgetWithText(ListTile, 'Display Currency'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('British Pound (GBP)'));
-      await tester.pumpAndSettle();
-
-      expect(capturedBudgetId, 'test-budget-id');
-      expect(capturedDisplayCurrencyCode, 'GBP');
-      expect(capturedClearFlag, isFalse);
-    });
-
-    testWidgets('selecting default display currency clears override', (
-      tester,
-    ) async {
-      String? capturedDisplayCurrencyCode;
-      bool? capturedClearFlag;
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            budgetDetailProvider.overrideWith(
-              (ref, budgetId) async => makeBudget(displayCurrencyCode: 'GBP'),
-            ),
-            updateDisplayCurrencyProvider.overrideWith(
-              (ref) =>
-                  ({
-                    required budgetId,
-                    required clearDisplayCurrencyCode,
-                    displayCurrencyCode,
-                  }) async {
-                    capturedDisplayCurrencyCode = displayCurrencyCode;
-                    capturedClearFlag = clearDisplayCurrencyCode;
-                  },
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const DisplayOptionsScreen(budgetId: 'test-budget-id'),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.widgetWithText(ListTile, 'Display Currency'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Match Plan Currency (Default)'));
-      await tester.pumpAndSettle();
-
-      expect(capturedDisplayCurrencyCode, isNull);
-      expect(capturedClearFlag, isTrue);
-    });
+    // Display currency was a per-plan override; the reporting currency is
+    // a user setting now (see reporting_currency_provider_test), so this
+    // screen only carries appearance and privacy preferences.
   });
 }

@@ -1,29 +1,15 @@
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'envelope_goal_provider.g.dart';
 
+/// Every goal of the entity; the month view carries per-envelope goals for
+/// display.
 @riverpod
-Future<EnvelopeGoal?> envelopeGoal(Ref ref, String envelopeId) async {
+Future<List<EnvelopeGoal>> envelopeGoals(Ref ref, String entityId) async {
   final client = ref.read(serverpodClientProvider);
-  return client.envelopeGoal.getForEnvelope(UuidValue.fromString(envelopeId));
-}
-
-@riverpod
-Future<List<EnvelopeGoal>> envelopeGoals(
-  Ref ref,
-  List<String> envelopeIds,
-) async {
-  if (envelopeIds.isEmpty) return [];
-  final client = ref.read(serverpodClientProvider);
-  final uuids = envelopeIds
-      .map(
-        UuidValue.fromString,
-      )
-      .toList();
-  return client.envelopeGoal.listForEnvelopes(uuids);
+  return client.envelopeGoal.list(UuidValue.fromString(entityId));
 }
 
 @Riverpod(keepAlive: true)
@@ -31,28 +17,24 @@ class EnvelopeGoalActions extends _$EnvelopeGoalActions {
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
+  /// Creates or replaces one envelope's goal: one kind and one amount.
   Future<EnvelopeGoal> upsertGoal({
     required String envelopeId,
-    required String goalType,
-    required int targetAmountCents,
-    required String budgetId,
+    required EnvelopeGoalKind kind,
+    required int amountMinor,
     DateTime? targetDate,
-    int? monthlyFundingCents,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
       final goal = await client.envelopeGoal.upsert(
         UuidValue.fromString(envelopeId),
-        goalType,
-        targetAmountCents,
+        kind,
+        amountMinor,
         targetDate: targetDate,
-        monthlyFundingCents: monthlyFundingCents,
       );
       if (ref.mounted) {
-        ref
-          ..invalidate(envelopeGoalProvider(envelopeId))
-          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        ref.invalidate(envelopeGoalsProvider);
         state = const AsyncValue.data(null);
       }
       return goal;
@@ -64,19 +46,13 @@ class EnvelopeGoalActions extends _$EnvelopeGoalActions {
     }
   }
 
-  Future<void> deleteGoal({
-    required String goalId,
-    required String envelopeId,
-    required String budgetId,
-  }) async {
+  Future<void> deleteGoal({required String goalId}) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
       await client.envelopeGoal.delete(UuidValue.fromString(goalId));
       if (ref.mounted) {
-        ref
-          ..invalidate(envelopeGoalProvider(envelopeId))
-          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        ref.invalidate(envelopeGoalsProvider);
         state = const AsyncValue.data(null);
       }
     } on Exception catch (e, st) {

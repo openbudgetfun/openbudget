@@ -132,18 +132,7 @@ abstract class AgentAccessToken
 
   @override
   Map<String, dynamic> toJsonForProtocol() {
-    return {
-      '__className__': 'AgentAccessToken',
-      if (id != null) 'id': id?.toJson(),
-      'userId': userId.toJson(),
-      'name': name,
-      'tokenHash': tokenHash,
-      'tokenPrefix': tokenPrefix,
-      'canPropose': canPropose,
-      'createdAt': createdAt.toJson(),
-      if (lastUsedAt != null) 'lastUsedAt': lastUsedAt?.toJson(),
-      if (revokedAt != null) 'revokedAt': revokedAt?.toJson(),
-    };
+    return {};
   }
 
   static AgentAccessTokenInclude include() {

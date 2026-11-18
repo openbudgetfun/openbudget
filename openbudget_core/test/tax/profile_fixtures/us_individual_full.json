@@ -1,0 +1,14 @@
+{
+  "jurisdiction": "US",
+  "entityKind": "individual",
+  "salesTaxRegistered": true,
+  "filingStatus": "marriedFilingJointly",
+  "homeOfficeMethod": "regular",
+  "specifiedServiceTrade": true,
+  "foreignEarnedIncomeExclusionMinor": 12000000,
+  "taxpayer65OrOlder": true,
+  "spouse65OrOlder": true,
+  "taxpayerHasSsn": false,
+  "spouseHasSsn": false,
+  "dependents": [{ "underSeventeen": true, "hasValidSsn": true }, { "underSeventeen": false, "hasValidSsn": false }]
+}

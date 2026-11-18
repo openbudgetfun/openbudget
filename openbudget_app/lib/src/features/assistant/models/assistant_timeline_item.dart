@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:openbudget_app/src/features/assistant/models/assistant_source.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 
 part 'assistant_timeline_item.freezed.dart';
@@ -15,10 +16,17 @@ sealed class AssistantTimelineItem with _$AssistantTimelineItem {
     required DateTime createdAt,
   }) = AssistantUserMessage;
 
-  /// Something the assistant answered.
+  /// Something the Money guide answered.
   const factory AssistantTimelineItem.assistant({
     required String text,
     required DateTime createdAt,
+
+    /// The sources the reply's `[^key]` markers resolved to.
+    @Default([]) List<AssistantSource> sources,
+
+    /// Whether the reply touches tax or investments, so it carries the
+    /// disclaimer.
+    @Default(false) bool touchesTaxOrInvestment,
   }) = AssistantAssistantMessage;
 
   /// A tool the assistant used while answering. These only exist while the

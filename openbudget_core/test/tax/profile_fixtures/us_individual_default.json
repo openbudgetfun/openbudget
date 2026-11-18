@@ -1,0 +1,14 @@
+{
+  "jurisdiction": "US",
+  "entityKind": "individual",
+  "salesTaxRegistered": false,
+  "filingStatus": "single",
+  "homeOfficeMethod": "simplified",
+  "specifiedServiceTrade": false,
+  "foreignEarnedIncomeExclusionMinor": 0,
+  "taxpayer65OrOlder": false,
+  "spouse65OrOlder": false,
+  "taxpayerHasSsn": true,
+  "spouseHasSsn": true,
+  "dependents": []
+}

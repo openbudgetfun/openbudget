@@ -43,7 +43,7 @@ final class _IndividualPosition {
 
 /// Computes the income, reliefs and credits on an individual's return.
 _IndividualPosition _individualPosition(TaxInput input, _NgTaxTable table) {
-  final totals = _totals(input.entries, TaxEntityKind.individual);
+  final totals = _totals(input.entries, EntityKind.individual);
   final amounts = totals.amounts;
   final counts = totals.counts;
 
@@ -151,17 +151,17 @@ List<TaxReportLine> _linkedLines(TaxInput input) {
 /// The sole trades linked to [input], ignoring every other kind of book.
 List<_BusinessPosition> _linkedSoleTrades(TaxInput input) => [
   for (final link in input.linked)
-    if (link.profile.entityKind == TaxEntityKind.soleTrader)
+    if (link.profile.entityKind == EntityKind.soleTrader)
       _businessPosition(
         entries: link.entries,
-        kind: TaxEntityKind.soleTrader,
+        kind: EntityKind.soleTrader,
         reclaimVat: link.profile.salesTaxRegistered,
       ),
 ];
 
 /// How many linked inputs were not sole trades and were left out.
 int _skippedLinkedInputs(TaxInput input) => input.linked
-    .where((link) => link.profile.entityKind != TaxEntityKind.soleTrader)
+    .where((link) => link.profile.entityKind != EntityKind.soleTrader)
     .length;
 
 /// Builds an individual's report.
@@ -196,6 +196,7 @@ TaxReport _individualReport(TaxInput input, _NgTaxTable table) {
       label: 'Rent relief (20% of annual rent, capped at N500,000)',
       amountMinor: position.statutoryRelief,
       reportReference: 'NTA 2025 s.30(2)(a)(vi)',
+      figureId: 'rentReliefCap',
     ),
     // PITA consolidated relief allowance (secondary source; the section
     // number is unverified).
@@ -203,6 +204,7 @@ TaxReport _individualReport(TaxInput input, _NgTaxTable table) {
       label: 'Consolidated relief allowance',
       amountMinor: position.statutoryRelief,
       reportReference: 'PITA (secondary source; section unverified)',
+      figureId: 'consolidatedReliefAllowanceFloor',
     ),
     _ => null,
   };
@@ -266,6 +268,7 @@ TaxReport _individualReport(TaxInput input, _NgTaxTable table) {
             'progressive tax)',
         amountMinor: minimumTax,
         reportReference: 'PITA (secondary source; section unverified)',
+        figureId: 'minimumTaxRate',
       ),
     TaxReportLine(
       label: 'Chargeable income',
@@ -320,7 +323,7 @@ TaxReport _individualReport(TaxInput input, _NgTaxTable table) {
 
   return TaxReport(
     year: input.year,
-    entityKind: TaxEntityKind.individual,
+    entityKind: EntityKind.individual,
     lines: lines,
     liabilities: [
       TaxLiability(
@@ -333,6 +336,18 @@ TaxReport _individualReport(TaxInput input, _NgTaxTable table) {
     assumptions: assumptions,
     sources: [for (final url in table.sourceUrls) Uri.parse(url)],
     rulesVerifiedOn: _ngRulesVerifiedOn,
+    rulesVersion: _ngRuleSetFor(
+      input.year.startYear,
+    ).versionFor(TaxJurisdiction.ng),
+    maturity: ngTaxManifest.maturity,
+    coverage: ngTaxManifest.sections,
+    caveats: _ngRuleSetFor(input.year.startYear).caveatsTouching(
+      sections: {
+        TaxSection.personalReturn,
+        if (position.linkedLines.isNotEmpty) TaxSection.selfEmployment,
+        if (position.gains > 0) TaxSection.capitalGains,
+      },
+    ),
     uncategorizedCount: position.uncategorized,
   );
 }

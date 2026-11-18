@@ -8,26 +8,23 @@ part of 'age_of_money_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Fetches the "Age of Money" metric for a budget.
-///
-/// Returns the average number of days between income receipt and spending,
-/// or null if there is insufficient data.
+/// The mean age in days of the entity's last ten outflows' money, straight
+/// from `report.ageOfMoney`. Null means the entity has too little history
+/// for a meaningful figure.
 
 @ProviderFor(ageOfMoney)
 final ageOfMoneyProvider = AgeOfMoneyFamily._();
 
-/// Fetches the "Age of Money" metric for a budget.
-///
-/// Returns the average number of days between income receipt and spending,
-/// or null if there is insufficient data.
+/// The mean age in days of the entity's last ten outflows' money, straight
+/// from `report.ageOfMoney`. Null means the entity has too little history
+/// for a meaningful figure.
 
 final class AgeOfMoneyProvider
     extends $FunctionalProvider<AsyncValue<int?>, int?, FutureOr<int?>>
     with $FutureModifier<int?>, $FutureProvider<int?> {
-  /// Fetches the "Age of Money" metric for a budget.
-  ///
-  /// Returns the average number of days between income receipt and spending,
-  /// or null if there is insufficient data.
+  /// The mean age in days of the entity's last ten outflows' money, straight
+  /// from `report.ageOfMoney`. Null means the entity has too little history
+  /// for a meaningful figure.
   AgeOfMoneyProvider._({
     required AgeOfMoneyFamily super.from,
     required String super.argument,
@@ -71,12 +68,11 @@ final class AgeOfMoneyProvider
   }
 }
 
-String _$ageOfMoneyHash() => r'39cb7fa90a0efd88133affeaffe2f60b44555dc8';
+String _$ageOfMoneyHash() => r'24a89977f81f6b10dc96f7de6697ac1da651fcee';
 
-/// Fetches the "Age of Money" metric for a budget.
-///
-/// Returns the average number of days between income receipt and spending,
-/// or null if there is insufficient data.
+/// The mean age in days of the entity's last ten outflows' money, straight
+/// from `report.ageOfMoney`. Null means the entity has too little history
+/// for a meaningful figure.
 
 final class AgeOfMoneyFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<int?>, String> {
@@ -89,13 +85,12 @@ final class AgeOfMoneyFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Fetches the "Age of Money" metric for a budget.
-  ///
-  /// Returns the average number of days between income receipt and spending,
-  /// or null if there is insufficient data.
+  /// The mean age in days of the entity's last ten outflows' money, straight
+  /// from `report.ageOfMoney`. Null means the entity has too little history
+  /// for a meaningful figure.
 
-  AgeOfMoneyProvider call(String budgetId) =>
-      AgeOfMoneyProvider._(argument: budgetId, from: this);
+  AgeOfMoneyProvider call(String entityId) =>
+      AgeOfMoneyProvider._(argument: entityId, from: this);
 
   @override
   String toString() => r'ageOfMoneyProvider';

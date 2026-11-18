@@ -1,21 +1,53 @@
-### Native-asset holding for a wallet connection.
+### The current quantity and valuation of one asset in a wallet, on one
+### network and in one position.
 class: WalletHolding
 table: wallet_holding
 fields:
   id: UuidValue?, defaultPersist=random_v7
-  walletConnectionId: UuidValue, relation(parent=wallet_connection)
-  chain: String
+  walletId: UuidValue, relation(parent=wallet, onDelete=Cascade)
+  ### The network the asset is on. A single-network wallet's holdings use the
+  ### wallet's network.
+  network: WalletNetwork
+  ### The asset on that network: `native`, or the contract, mint, coin type,
+  ### jetton master or policy-and-name unit (multichain-wallets.md 7.2).
   assetId: String
-  symbol: String
+  ### Spendable, staked or unclaimed. Each position of an asset is its own
+  ### holding.
+  position: HoldingPosition, default=available
+  symbol: String?
+  name: String?
+  ### The token standard or program: a Solana token program id, or erc20,
+  ### trc20, trc10, xrplIou, jetton, cardanoNative, suiCoin or aptosFa.
+  tokenProgram: String?
   decimals: int
-  quantityBaseUnits: String
-  quantityDisplay: double
-  usdPrice: double?
-  usdValue: double?
-  lastSyncedAt: DateTime, default=now
+  ### Quantity in the asset's base units (lamports, wei, satoshis, sun,
+  ### drops).
+  quantityRaw: BigInt
+  isNft: bool, default=false
+  ### Whether the holding counts toward net worth. The classifier sets clean
+  ### or suspected; a user choice overrides it and survives syncs.
+  spamVerdict: SpamVerdict, default=clean
+  ### ISO 4217 code that unitPrice and every *Minor field here are in.
+  priceCurrencyCode: String?
+  ### Price of one whole token, exact decimal string.
+  unitPrice: String?
+  ### Quantity times unitPrice, in priceCurrencyCode minor units, half up.
+  valueMinor: int?
+  priceSource: PriceSource?
+  priceQuality: PriceQuality, default=unpriced
+  priceConfidence: Confidence?
+  priceAsOf: DateTime?
+  ### Estimated acquisition cost of the current quantity.
+  costBasisMinor: int?
+  ### Estimated realised gain or loss accumulated for this asset.
+  realizedPnlMinor: int?
+  pnlAsOf: DateTime?
+  ### JSON subset of the asset's metadata.
+  metadataJson: String?
+  updatedAt: DateTime, default=now
 indexes:
-  wallet_holding_connection_asset_idx:
-    fields: walletConnectionId, assetId
+  wallet_holding_wallet_asset_unique_idx:
+    fields: walletId, network, assetId, position
     unique: true
-  wallet_holding_connection_idx:
-    fields: walletConnectionId
+  wallet_holding_asset_idx:
+    fields: network, assetId

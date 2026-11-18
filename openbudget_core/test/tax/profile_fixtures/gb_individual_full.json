@@ -1,0 +1,11 @@
+{
+  "jurisdiction": "GB",
+  "entityKind": "individual",
+  "salesTaxRegistered": true,
+  "scottishTaxpayer": true,
+  "studentLoanPlan": "plan2",
+  "postgraduateLoan": true,
+  "accountingPeriodEndMonth": 7,
+  "accountingPeriodEndDay": 15,
+  "associatedCompanies": 2
+}
