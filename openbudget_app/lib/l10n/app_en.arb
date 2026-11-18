@@ -743,14 +743,6 @@
   "settingsBudgetName": "Budget Name",
   "settingsBudgetSection": "Budget",
   "settingsCaliforniaPrivacyPolicy": "California Privacy Policy",
-  "settingsComingSoon": "{featureName} is coming soon.",
-  "@settingsComingSoon": {
-    "placeholders": {
-      "featureName": {
-        "type": "String"
-      }
-    }
-  },
   "settingsCurrencyPlacement": "Currency Placement",
   "settingsCurrencyPlacementAfter": "After Amount (123,456.78$)",
   "settingsCurrencyPlacementBefore": "Before Amount ($123,456.78)",
@@ -816,7 +808,6 @@
   "settingsRenameError": "Could not rename budget. Please try again.",
   "settingsRenameSuccess": "Budget renamed",
   "settingsPrivacyPolicy": "Privacy Policy",
-  "settingsSendDiagnostics": "Send in Diagnostics",
   "settingsTermsOfService": "Terms of Service",
   "settingsTogether": "OpenBudget Together",
   "settingsTitle": "Settings",
@@ -828,7 +819,6 @@
       }
     }
   },
-  "settingsWriteAReview": "Write a Review",
   "settingsYourPrivacyChoices": "Your Privacy Choices",
   "spendingByPayeeBreakdown": "Spending Breakdown",
   "spendingByPayeeEmptySubtitle": "Add expense transactions to see spending by payee",
@@ -983,14 +973,24 @@
   "accountSettingsTwoStepVerification": "Two-Step Verification",
   "accountSettingsTwoStepHint": "Increase your OpenBudget login security by adding a second method of login.",
   "accountSettingsSetUp": "Set Up",
-  "accountSettingsDeleteSectionHint": "Account deletion is currently unavailable in this build. Open this page to review status and availability.",
-  "accountSettingsDeleteUnavailableHint": "No account data can be removed from this app yet.",
+  "accountSettingsDeleteSectionHint": "Permanently delete your OpenBudget account and everything in it.",
+  "accountSettingsDeleteHint": "You will be asked to confirm on the next page.",
   "settingsAccountsOverviewHint": "View and organize every account in your budget.",
   "settingsAddAccountHint": "Add manual accounts, bank links, or wallets.",
   "settingsManageBankConnectionsHint": "Connect Plaid banks or add Solana wallets.",
-  "deleteAccountUnavailableNotice": "Account deletion is currently unavailable in this build. No account or plan data can be removed from this screen.",
-  "deleteAccountUnavailableHint": "Delete requests are disabled until backend account deletion is available.",
-  "deleteAccountUnavailableButton": "Delete Account (Unavailable)",
+  "deleteAccountNotice": "Deleting your account is permanent. It cannot be undone and your data cannot be recovered.",
+  "deleteAccountWhatIsDeletedTitle": "What gets deleted",
+  "deleteAccountWhatIsDeletedPlans": "Every plan, household and business you own, with their accounts, transactions, envelopes, books and tax profiles.",
+  "deleteAccountWhatIsDeletedLinks": "Your bank and wallet connections. Linked banks are disconnected.",
+  "deleteAccountWhatIsDeletedProfile": "Your sign-in, settings and Money guide conversations.",
+  "deleteAccountSubscriptionHint": "If you have OpenBudget Plus, cancel it first so you are not charged again. Subscriptions bought in the App Store or Google Play are cancelled in the store.",
+  "deleteAccountButton": "Delete My Account",
+  "deleteAccountConfirmTitle": "Delete your account?",
+  "deleteAccountConfirmBody": "Your account and all of its data will be deleted now. This cannot be undone.",
+  "deleteAccountConfirmButton": "Delete Forever",
+  "deleteAccountSubscriptionActive": "Cancel your OpenBudget Plus subscription before deleting your account.",
+  "deleteAccountFailed": "Could not delete your account. Please try again.",
+  "settingsCouldNotOpenLink": "Could not open the link.",
   "transactionCategoryLabel": "Category",
   "transactionAccountLabel": "Account",
   "transactionDateLabel": "Date",

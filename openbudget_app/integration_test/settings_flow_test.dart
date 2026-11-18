@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
+import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/reporting_currency_provider.dart';
@@ -14,6 +16,7 @@ import 'package:openbudget_app/src/features/settings/screens/delete_account_scre
 import 'package:openbudget_app/src/features/settings/screens/display_options_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/plan_settings_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
+import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -23,12 +26,45 @@ import 'common/test_data.dart';
 
 const String _entityId = TestData.gbpEntityId;
 
+/// Answers `settings.deleteAccount` and fails any other endpoint call.
+class _FakeSettingsServer extends Client {
+  _FakeSettingsServer() : super('http://localhost/');
+
+  int deleteAccountCalls = 0;
+
+  @override
+  Future<T> callServerEndpoint<T>(
+    String endpoint,
+    String method,
+    Map<String, dynamic> args, {
+    bool authenticated = true,
+  }) async {
+    if (endpoint == 'settings' && method == 'deleteAccount') {
+      deleteAccountCalls++;
+      return null as T;
+    }
+    throw StateError('Unexpected endpoint call $endpoint.$method');
+  }
+}
+
+/// Starts signed in and signs out locally when the account is deleted.
+class _SignedInAuthNotifier extends AuthNotifier {
+  @override
+  AuthState build() => const Authenticated(userId: TestData.ownerId);
+
+  @override
+  Future<void> forgetDeletedAccount() async {
+    state = const Unauthenticated();
+  }
+}
+
 void main() {
   patrolWidgetTest(
     'navigates settings -> plan settings -> currency -> display options',
     ($) async {
       final tester = $.tester;
       final store = InMemoryUiPreferencesStore();
+      final server = _FakeSettingsServer();
       final container = ProviderContainer(
         overrides: [
           entityDetailProvider.overrideWith(
@@ -41,6 +77,8 @@ void main() {
             ),
           ),
           uiPreferencesStoreProvider.overrideWithValue(store),
+          serverpodClientProvider.overrideWithValue(server),
+          authProvider.overrideWith(_SignedInAuthNotifier.new),
         ],
       );
       addTearDown(container.dispose);
@@ -253,24 +291,23 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Delete Account'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Delete Account'), findsWidgets);
       expect(
-        find.textContaining(
-          'Account deletion is currently unavailable in this build',
-        ),
+        find.textContaining('Deleting your account is permanent'),
         findsOneWidget,
       );
-      final deleteActionButton = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Delete Account (Unavailable)'),
+      await tester.ensureVisible(
+        find.byKey(DeleteAccountScreen.deleteButtonKey),
       );
-      expect(deleteActionButton.onPressed, isNull);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(DeleteAccountScreen.deleteButtonKey));
+      await tester.pumpAndSettle();
 
-      expect(
-        find.text(
-          'Delete requests are disabled until backend account deletion is available.',
-        ),
-        findsOneWidget,
-      );
+      expect(find.text('Delete your account?'), findsOneWidget);
+      await tester.tap(find.byKey(DeleteAccountScreen.confirmButtonKey));
+      await tester.pumpAndSettle();
+
+      expect(server.deleteAccountCalls, 1);
+      expect(container.read(authProvider), isA<Unauthenticated>());
     },
   );
 }

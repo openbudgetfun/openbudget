@@ -181,7 +181,7 @@ class AccountSettingsScreen extends HookWidget {
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
-            l10n.accountSettingsDeleteUnavailableHint,
+            l10n.accountSettingsDeleteHint,
             style: theme.textTheme.bodySmall?.copyWith(
               color: palette.mutedInk,
             ),
