@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/legal_links_provider.dart';
 import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -21,6 +22,19 @@ Widget _materialShell() => MaterialApp(
   supportedLocales: AppLocalizations.supportedLocales,
   home: const SettingsScreen(entityId: _entityId),
 );
+
+class _RecordingLauncher implements LegalLinkLauncher {
+  _RecordingLauncher({this.result = true});
+
+  final bool result;
+  final List<Uri> opened = [];
+
+  @override
+  Future<bool> open(Uri url) async {
+    opened.add(url);
+    return result;
+  }
+}
 
 void main() {
   group('SettingsScreen', () {
@@ -125,10 +139,74 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Misc'), findsOneWidget);
-      expect(find.text('Write a Review'), findsOneWidget);
-      expect(find.text('Send in Diagnostics'), findsOneWidget);
       expect(find.text('Privacy Policy'), findsOneWidget);
       expect(find.text('Terms of Service'), findsOneWidget);
+      // Nothing in Settings is a "coming soon" stub.
+      expect(find.text('Write a Review'), findsNothing);
+      expect(find.text('Send in Diagnostics'), findsNothing);
+    });
+
+    testWidgets('opens the privacy policy and terms on the public site', (
+      tester,
+    ) async {
+      final launcher = _RecordingLauncher();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            entityDetailProvider.overrideWith(
+              (ref, entityId) async => _makeBudget(),
+            ),
+            legalLinkLauncherProvider.overrideWithValue(launcher),
+          ],
+          child: _materialShell(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Terms of Service'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Privacy Policy'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Terms of Service'));
+      await tester.pumpAndSettle();
+
+      expect(launcher.opened, [
+        Uri.parse('https://openbudget.app/privacy'),
+        Uri.parse('https://openbudget.app/terms'),
+      ]);
+      expect(find.text('Could not open the link.'), findsNothing);
+    });
+
+    testWidgets('says so when a link cannot be opened', (tester) async {
+      final launcher = _RecordingLauncher(result: false);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            entityDetailProvider.overrideWith(
+              (ref, entityId) async => _makeBudget(),
+            ),
+            legalLinkLauncherProvider.overrideWithValue(launcher),
+          ],
+          child: _materialShell(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Terms of Service'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Privacy Policy'));
+      await tester.pump();
+
+      expect(find.text('Could not open the link.'), findsOneWidget);
+      await tester.pumpAndSettle(const Duration(seconds: 10));
     });
   });
 }

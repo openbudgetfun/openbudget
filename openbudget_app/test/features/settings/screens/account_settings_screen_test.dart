@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/settings/screens/account_settings_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/delete_account_screen.dart';
@@ -84,8 +85,8 @@ void main() {
       expect(twoStepButton.onPressed, isNull);
     });
 
-    testWidgets('navigates to delete account status page', (tester) async {
-      await tester.pumpWidget(buildSubject());
+    testWidgets('navigates to the delete account page', (tester) async {
+      await tester.pumpWidget(ProviderScope(child: buildSubject()));
       await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(
@@ -97,13 +98,14 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Delete Account'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Delete Account'), findsWidgets);
       expect(
-        find.textContaining(
-          'Account deletion is currently unavailable in this build',
-        ),
+        find.textContaining('Deleting your account is permanent'),
         findsOneWidget,
       );
+      final button = tester.widget<FilledButton>(
+        find.byKey(DeleteAccountScreen.deleteButtonKey),
+      );
+      expect(button.onPressed, isNotNull);
     });
   });
 }

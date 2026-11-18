@@ -153,6 +153,26 @@ class AuthNotifier extends _$AuthNotifier {
     state = const Unauthenticated();
   }
 
+  /// Clears this device's sign-in after the server deleted the account.
+  ///
+  /// The server has already revoked every session, so there is nothing to
+  /// sign out of: only the stored credentials are dropped.
+  Future<void> forgetDeletedAccount() async {
+    final client = ref.read(serverpodClientProvider);
+    try {
+      await client.auth.updateSignedInUser(null);
+    } on Exception catch (error, stackTrace) {
+      _log.warning(
+        'accountDeleted.clear.failed error=${error.runtimeType}: $error',
+        error,
+        stackTrace,
+      );
+    }
+    _log.info('accountDeleted.success');
+    if (!ref.mounted) return;
+    state = const Unauthenticated();
+  }
+
   /// Syncs auth state after a successful external OAuth flow.
   Future<void> syncExternalAuthState() async {
     final client = ref.read(serverpodClientProvider);

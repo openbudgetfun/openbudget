@@ -3616,6 +3616,16 @@ class Endpoints extends _is.EndpointDispatch {
                     params['currencyCode'],
                   ),
         ),
+        'deleteAccount': _is.MethodConnector(
+          name: 'deleteAccount',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['settings'] as _iy0sqmtu.SettingsEndpoint)
+                  .deleteAccount(session),
+        ),
       },
     );
     connectors['tax'] = _is.EndpointConnector(

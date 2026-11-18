@@ -9,6 +9,7 @@ import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
 import 'package:openbudget_app/src/features/home/providers/entity_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/entity_export_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/legal_links_provider.dart';
 import 'package:openbudget_app/src/features/whats_new/providers/whats_new_providers.dart';
 import 'package:openbudget_app/src/features/whats_new/screens/whats_new_sheet.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
@@ -322,33 +323,17 @@ class SettingsScreen extends HookConsumerWidget {
                 child: Column(
                   children: [
                     _SettingsTile(
-                      icon: OpenBudgetIcons.favorite,
-                      label: l10n.settingsWriteAReview,
-                      onTap: () =>
-                          _showComingSoon(context, l10n.settingsWriteAReview),
-                    ),
-                    const Divider(height: 1),
-                    _SettingsTile(
-                      icon: OpenBudgetIcons.send,
-                      label: l10n.settingsSendDiagnostics,
-                      onTap: () => _showComingSoon(
-                        context,
-                        l10n.settingsSendDiagnostics,
-                      ),
-                    ),
-                    const Divider(height: 1),
-                    _SettingsTile(
                       icon: OpenBudgetIcons.document,
                       label: l10n.settingsPrivacyPolicy,
                       onTap: () =>
-                          _showComingSoon(context, l10n.settingsPrivacyPolicy),
+                          _openLink(context, ref, LegalLinks.privacyPolicy),
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
                       icon: OpenBudgetIcons.document,
                       label: l10n.settingsTermsOfService,
                       onTap: () =>
-                          _showComingSoon(context, l10n.settingsTermsOfService),
+                          _openLink(context, ref, LegalLinks.termsOfService),
                     ),
                   ],
                 ),
@@ -549,9 +534,16 @@ class SettingsScreen extends HookConsumerWidget {
     context.goNamed(createEntityRoute);
   }
 
-  void _showComingSoon(BuildContext context, String featureName) {
+  Future<void> _openLink(BuildContext context, WidgetRef ref, Uri url) async {
     final l10n = AppLocalizations.of(context);
-    showAppToast(context, message: l10n.settingsComingSoon(featureName));
+    var opened = false;
+    try {
+      opened = await ref.read(legalLinkLauncherProvider).open(url);
+    } on Exception {
+      opened = false;
+    }
+    if (opened || !context.mounted) return;
+    showAppToast(context, message: l10n.settingsCouldNotOpenLink);
   }
 }
 
