@@ -15,6 +15,7 @@ import 'package:openbudget_app/src/features/transactions/providers/transaction_p
 import 'package:openbudget_app/src/features/transactions/screens/edit_transaction_dialog.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -194,7 +195,7 @@ class TransactionListScreen extends HookConsumerWidget {
             padding: const EdgeInsets.all(SpacingTokens.md),
             child: ObStatePanel.problem(
               title: l10n.transactionLoadError,
-              message: error.toString(),
+              message: loadProblemMessage(l10n, error),
               action: ObStateAction(
                 label: l10n.homeRetry,
                 onPressed: () =>
@@ -1377,165 +1378,168 @@ class _TransactionTile extends HookConsumerWidget {
         baseCurrencyCode!.isNotEmpty &&
         baseCurrencyCode != view.accountCurrencyCode;
 
-    final card = GestureDetector(
-      onLongPress: selectionMode
-          ? null
-          : () => _showFlagMenu(context, ref, l10n),
-      child: ObCard(
-        margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
-        tone: isSelected ? ObTone.brand : null,
-        onTap: selectionMode
-            ? onToggleSelection
-            : () => _showEditDialog(context),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            SpacingTokens.xs,
-            SpacingTokens.sm,
-            SpacingTokens.md,
-            SpacingTokens.sm,
-          ),
-          child: Row(
-            children: [
-              if (selectionMode)
-                Checkbox(
-                  value: isSelected,
-                  onChanged: (_) => onToggleSelection?.call(),
-                )
-              else
-                Tooltip(
-                  message: statusLabel,
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: transaction.status == TransactionStatus.reconciled
-                        ? null
-                        : () => _toggleStatus(context, ref, l10n),
-                    child: SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: Center(
-                        child: SkribbleIcon(
-                          data: statusIcon,
-                          size: 22,
-                          color: statusColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              const SizedBox(width: SpacingTokens.xs),
-              Container(
-                width: 36,
-                height: 36,
-                decoration: ObRoughDecoration(
-                  color: palette.wash(tone),
-                  outline: palette.quietPen,
-                  radius: 18,
-                  strokeWidth: 1.6,
-                  seed: 11,
-                ),
-                child: Center(
-                  child: SkribbleIcon(
-                    data: isIncome
-                        ? OpenBudgetIcons.inflow
-                        : OpenBudgetIcons.outflow,
-                    size: 20,
-                    color: palette.hue(tone),
-                    semanticLabel: isIncome
-                        ? l10n.transactionAddIncome
-                        : l10n.transactionAddExpense,
-                  ),
-                ),
-              ),
-              const SizedBox(width: SpacingTokens.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      view.payeeName ?? transaction.description,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: palette.ink,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    _buildMeta(theme, palette),
-                    Padding(
-                      padding: const EdgeInsets.only(top: SpacingTokens.xs),
-                      child: Wrap(
-                        spacing: SpacingTokens.xs,
-                        runSpacing: SpacingTokens.xs,
-                        children: [
-                          if (!isIncome && (envelopeName?.isEmpty ?? true))
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                maxWidth: 180,
-                              ),
-                              child: ObToneChip(
-                                label: l10n.transactionUnassigned,
-                                tone: ObTone.review,
-                                icon: const SkribbleIcon(
-                                  data: OpenBudgetIcons.envelope,
-                                  size: 14,
-                                ),
-                              ),
-                            ),
-                          if (flagTone != null && flagLabel != null)
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                maxWidth: 180,
-                              ),
-                              child: ObToneChip(
-                                label: flagLabel,
-                                tone: flagTone,
-                                icon: const SkribbleIcon(
-                                  data: OpenBudgetIcons.flag,
-                                  size: 14,
-                                ),
-                              ),
-                            ),
-                          ObToneChip(label: statusLabel, tone: statusTone),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: SpacingTokens.sm),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 132),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ObAmount(
-                      formatMinorForCode(
-                        transaction.amountMinor,
-                        view.accountCurrencyCode,
-                      ),
-                      tone: tone,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    if (showConverted)
-                      Text(
-                        l10n.transactionBaseEquivalent(
-                          formatMinorForCode(
-                            transaction.baseAmountMinor,
-                            baseCurrencyCode!,
+    final card = Semantics(
+      onLongPressHint: selectionMode ? null : l10n.transactionFlagLongPressHint,
+      child: GestureDetector(
+        onLongPress: selectionMode
+            ? null
+            : () => _showFlagMenu(context, ref, l10n),
+        child: ObCard(
+          margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
+          tone: isSelected ? ObTone.brand : null,
+          onTap: selectionMode
+              ? onToggleSelection
+              : () => _showEditDialog(context),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.xs,
+              SpacingTokens.sm,
+              SpacingTokens.md,
+              SpacingTokens.sm,
+            ),
+            child: Row(
+              children: [
+                if (selectionMode)
+                  Checkbox(
+                    value: isSelected,
+                    onChanged: (_) => onToggleSelection?.call(),
+                  )
+                else
+                  Tooltip(
+                    message: statusLabel,
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: transaction.status == TransactionStatus.reconciled
+                          ? null
+                          : () => _toggleStatus(context, ref, l10n),
+                      child: SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Center(
+                          child: SkribbleIcon(
+                            data: statusIcon,
+                            size: 22,
+                            color: statusColor,
                           ),
                         ),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: palette.mutedInk,
+                      ),
+                    ),
+                  ),
+                const SizedBox(width: SpacingTokens.xs),
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: ObRoughDecoration(
+                    color: palette.wash(tone),
+                    outline: palette.quietPen,
+                    radius: 18,
+                    strokeWidth: 1.6,
+                    seed: 11,
+                  ),
+                  child: Center(
+                    child: SkribbleIcon(
+                      data: isIncome
+                          ? OpenBudgetIcons.inflow
+                          : OpenBudgetIcons.outflow,
+                      size: 20,
+                      color: palette.hue(tone),
+                      semanticLabel: isIncome
+                          ? l10n.transactionAddIncome
+                          : l10n.transactionAddExpense,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: SpacingTokens.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        view.payeeName ?? transaction.description,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: palette.ink,
+                          fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                  ],
+                      _buildMeta(theme, palette),
+                      Padding(
+                        padding: const EdgeInsets.only(top: SpacingTokens.xs),
+                        child: Wrap(
+                          spacing: SpacingTokens.xs,
+                          runSpacing: SpacingTokens.xs,
+                          children: [
+                            if (!isIncome && (envelopeName?.isEmpty ?? true))
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 180,
+                                ),
+                                child: ObToneChip(
+                                  label: l10n.transactionUnassigned,
+                                  tone: ObTone.review,
+                                  icon: const SkribbleIcon(
+                                    data: OpenBudgetIcons.envelope,
+                                    size: 14,
+                                  ),
+                                ),
+                              ),
+                            if (flagTone != null && flagLabel != null)
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 180,
+                                ),
+                                child: ObToneChip(
+                                  label: flagLabel,
+                                  tone: flagTone,
+                                  icon: const SkribbleIcon(
+                                    data: OpenBudgetIcons.flag,
+                                    size: 14,
+                                  ),
+                                ),
+                              ),
+                            ObToneChip(label: statusLabel, tone: statusTone),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: SpacingTokens.sm),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 132),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ObAmount(
+                        formatMinorForCode(
+                          transaction.amountMinor,
+                          view.accountCurrencyCode,
+                        ),
+                        tone: tone,
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      if (showConverted)
+                        Text(
+                          l10n.transactionBaseEquivalent(
+                            formatMinorForCode(
+                              transaction.baseAmountMinor,
+                              baseCurrencyCode!,
+                            ),
+                          ),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: palette.mutedInk,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

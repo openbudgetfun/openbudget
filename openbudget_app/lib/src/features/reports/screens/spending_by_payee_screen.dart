@@ -7,6 +7,7 @@ import 'package:openbudget_app/src/features/reports/utils/report_group_names.dar
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -73,7 +74,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
           children: [
             ObStatePanel.problem(
               title: l10n.reportsLoadError,
-              message: error.toString(),
+              message: loadProblemMessage(l10n, error),
             ),
           ],
         ),

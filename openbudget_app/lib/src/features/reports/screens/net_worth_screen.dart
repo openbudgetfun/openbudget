@@ -13,6 +13,7 @@ import 'package:openbudget_app/src/features/reports/widgets/crypto_breakdown_sec
 import 'package:openbudget_app/src/features/settings/providers/reporting_currency_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/utils/date_labels.dart';
+import 'package:openbudget_app/src/utils/load_problem_message.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -50,7 +51,7 @@ class NetWorthScreen extends HookConsumerWidget {
           children: [
             ObStatePanel.problem(
               title: l10n.netWorthLoadError,
-              message: error.toString(),
+              message: loadProblemMessage(l10n, error),
               action: ObStateAction(
                 label: l10n.homeRetry,
                 onPressed: () => ref.invalidate(netWorthProvider),
@@ -525,7 +526,7 @@ class _HistoryCard extends HookConsumerWidget {
             ),
             error: (error, _) => ObStatePanel.problem(
               title: l10n.netWorthLoadError,
-              message: error.toString(),
+              message: loadProblemMessage(l10n, error),
             ),
             data: (history) {
               final points = history.points;

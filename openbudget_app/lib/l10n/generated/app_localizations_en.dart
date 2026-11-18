@@ -1563,7 +1563,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportsSpendingByCategory => 'Spending by Category';
 
   @override
-  String get reportsUncategorised => 'Uncategorised';
+  String get reportsUncategorised => 'Uncategorized';
 
   @override
   String get reportsTitle => 'Reports';
@@ -3182,7 +3182,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get editPlanLoadError => 'Failed to load plan setup.';
+  String get editPlanLoadError => 'Could not load your plan';
 
   @override
   String get budgetDetailCoverOverspendingError =>
@@ -5741,7 +5741,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String homeBudgetUncategorised(int count) {
-    return '$count uncategorised';
+    return '$count uncategorized';
   }
 
   @override
@@ -6204,7 +6204,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetBreakdownAvailable => 'Available in envelopes';
 
   @override
-  String get budgetBreakdownUncategorised => 'Uncategorised transactions';
+  String get budgetBreakdownUncategorised => 'Uncategorized transactions';
 
   @override
   String reviewTransactionsSelectedCount(int count) {
@@ -6681,7 +6681,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get walletAddInvalidKey =>
-      'That extended key isn\'t one OpenBudget recognises.';
+      'That extended key isn\'t one OpenBudget recognizes.';
 
   @override
   String get walletAddRefusedPrivateKeyTitle => 'That\'s a private key';
@@ -7013,4 +7013,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get walletSettingsAllRead =>
       'OpenBudget already reads every chain this address can use.';
+
+  @override
+  String get loadProblemOffline =>
+      'OpenBudget couldn\'t reach the server. Check your connection and try again.';
+
+  @override
+  String get loadProblemSignedOut =>
+      'Your session has ended. Sign in again to continue.';
+
+  @override
+  String get loadProblemNotFound =>
+      'This may have been deleted, or you no longer have access to it.';
+
+  @override
+  String get loadProblemGeneric =>
+      'Something went wrong on our side. Try again in a moment.';
+
+  @override
+  String get budgetMonthLongPressHint => 'choose a month';
+
+  @override
+  String get transactionFlagLongPressHint => 'set a flag';
 }

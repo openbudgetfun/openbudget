@@ -140,7 +140,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Uncategorised'), findsOneWidget);
+      expect(find.text('Uncategorized'), findsOneWidget);
       expect(find.text(reportUncategorisedGroup), findsNothing);
       expect(find.text(r'$1,450.00'), findsWidgets);
       expect(find.text(r'$450.00'), findsOneWidget);

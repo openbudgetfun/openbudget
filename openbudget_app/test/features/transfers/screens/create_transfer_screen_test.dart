@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -77,10 +79,15 @@ Future<_Harness> _pumpTransfer(
   WidgetTester tester, {
   List<Account>? accounts,
   FxQuoteView? quote,
+  FutureOr<Object?> Function(Map<String, dynamic> args)? listAll,
 }) async {
   final transfers = <TransferInput>[];
   final client = FakeEndpointClient()
-    ..handle('account', 'listAll', (_) => accounts ?? _accounts())
+    ..handle(
+      'account',
+      'listAll',
+      listAll ?? (_) => accounts ?? _accounts(),
+    )
     ..handle('budget', 'getMonth', (_) => testMonthView())
     ..handle(
       'fxRate',
@@ -130,6 +137,38 @@ Future<void> _tapTransfer(WidgetTester tester) async {
 
 void main() {
   group('CreateTransferScreen', () {
+    testWidgets('explains a failed account load and retries it', (
+      tester,
+    ) async {
+      var calls = 0;
+      await _pumpTransfer(
+        tester,
+        listAll: (_) {
+          calls++;
+          if (calls == 1) {
+            throw const ServerpodClientNetworkException('Failed host lookup');
+          }
+          return _accounts();
+        },
+      );
+
+      expect(find.text('Could not load accounts'), findsOneWidget);
+      expect(
+        find.text(
+          "OpenBudget couldn't reach the server. "
+          'Check your connection and try again.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Failed host lookup'), findsNothing);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Retry'));
+      await tester.pumpAndSettle();
+
+      expect(calls, 2);
+      expect(find.text('From account'), findsOneWidget);
+    });
+
     testWidgets('opens with the two account pickers and no amount field', (
       tester,
     ) async {
