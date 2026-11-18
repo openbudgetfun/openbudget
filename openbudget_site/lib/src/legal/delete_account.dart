@@ -36,9 +36,13 @@ LegalDocument deleteAccount(SiteConfig config) {
           'Tap Delete account and confirm.',
         ]),
         const LegalParagraph(
-          'If you subscribe to OpenBudget Plus through the App Store or '
-          'Google Play, cancel it in your store account too. Deleting your '
-          'account does not stop store billing on its own.',
+          'If you have OpenBudget Plus, cancel it first: in your App Store '
+          'or Google Play account, with Manage on the OpenBudget Plus '
+          'screen for card payments, or from your Solana wallet for USDC. '
+          'OpenBudget will not delete an account while its subscription is '
+          'still set to renew, so that you are never billed for an account '
+          'that no longer exists. A cancelled plan that is running to the '
+          'end of its period does not stop you.',
         ),
       ]),
       LegalSection('By email', [
@@ -55,7 +59,8 @@ LegalDocument deleteAccount(SiteConfig config) {
               'goals, recurring transactions, rules, journals and change '
               'history.',
           'Linked bank connections and crypto wallets, including the '
-              'encrypted tokens and keys behind them.',
+              'encrypted tokens and keys behind them. We also ask Plaid to '
+              'revoke access to your linked banks.',
           'Tax profiles and categories.',
           'Money guide conversations and suggestions, your AI provider '
               'settings, and every agent access token.',
