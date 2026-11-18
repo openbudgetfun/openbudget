@@ -16,7 +16,7 @@ void main() {
     test('translates the uncategorised bucket and leaves real names', () async {
       final l10n = await AppLocalizations.delegate.load(const Locale('en'));
 
-      expect(reportGroupLabel(l10n, reportUncategorisedGroup), 'Uncategorised');
+      expect(reportGroupLabel(l10n, reportUncategorisedGroup), 'Uncategorized');
       expect(reportGroupLabel(l10n, reportUnknownPayeeGroup), 'Unknown payee');
       expect(reportGroupLabel(l10n, 'Groceries'), 'Groceries');
     });
@@ -67,7 +67,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Uncategorised'), findsOneWidget);
+      expect(find.text('Uncategorized'), findsOneWidget);
       expect(find.text(reportUncategorisedGroup), findsNothing);
       // The row shows its own amount for each month.
       expect(find.text('£1,000.00'), findsOneWidget);

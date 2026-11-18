@@ -18,10 +18,14 @@ import '../../../fixtures/budget_month.dart';
 
 /// Pumps the plan screen with every server-backed provider overridden, so
 /// it renders the fixture month view without a client.
-Widget _buildSubject({Future<BudgetMonthView>? monthView}) => ProviderScope(
+Widget _buildSubject({
+  Future<BudgetMonthView>? monthView,
+  Future<BudgetMonthView> Function()? loadMonth,
+}) => ProviderScope(
+  retry: (_, _) => null,
   overrides: [
     budgetMonthProvider(fixtureEntityId).overrideWith(
-      (ref) => monthView ?? Future.value(testMonthView()),
+      (ref) => loadMonth?.call() ?? monthView ?? Future.value(testMonthView()),
     ),
     entityDetailProvider(fixtureEntityId).overrideWith(
       (ref) async => testEntity(name: 'My Budget'),
@@ -53,6 +57,32 @@ void main() {
       await tester.pump();
 
       expect(find.byType(ObLoadingPanel), findsOneWidget);
+    });
+
+    testWidgets('explains a failed load and retries it', (tester) async {
+      var calls = 0;
+      await tester.pumpWidget(
+        _buildSubject(
+          loadMonth: () async {
+            calls++;
+            if (calls == 1) throw ServerpodClientInternalServerError();
+            return testMonthView();
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Could not load budget details'), findsOneWidget);
+      expect(
+        find.text('Something went wrong on our side. Try again in a moment.'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Retry'));
+      await tester.pumpAndSettle();
+
+      expect(calls, 2);
+      expect(find.text('Could not load budget details'), findsNothing);
     });
 
     testWidgets('shows budget name in app bar when data loads', (tester) async {
