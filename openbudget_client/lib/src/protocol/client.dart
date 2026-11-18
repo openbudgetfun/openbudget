@@ -2039,6 +2039,15 @@ class EndpointSettings extends _isc.EndpointRef {
     'setReportingCurrency',
     {'currencyCode': currencyCode},
   );
+
+  /// Permanently deletes the caller's account and every entity they own.
+  ///
+  /// Throws [ValidationException] while a subscription still renews.
+  _ida.Future<void> deleteAccount() => caller.callServerEndpoint<void>(
+    'settings',
+    'deleteAccount',
+    {},
+  );
 }
 
 /// API surface for tax profiles, line coding, envelope defaults, reports,

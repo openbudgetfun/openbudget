@@ -148,6 +148,7 @@ report:
 settings:
   - get:
   - setReportingCurrency:
+  - deleteAccount:
 tax:
   - getProfile:
   - saveProfile:
