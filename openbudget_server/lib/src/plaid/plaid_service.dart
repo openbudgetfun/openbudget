@@ -271,6 +271,40 @@ class PlaidService {
     );
   }
 
+  /// Asks Plaid to revoke each connection's item, without deleting any rows.
+  ///
+  /// Account deletion calls this before the cascade removes the rows, so the
+  /// bank link stops working at Plaid as well. It is best effort: missing
+  /// credentials or a failed call are logged and never block the deletion.
+  static Future<void> revokeItems(
+    Session session,
+    List<PlaidConnection> connections,
+  ) async {
+    if (connections.isEmpty) return;
+    final _PlaidCredentials credentials;
+    try {
+      credentials = _resolveCredentials(session);
+    } on Exception catch (error) {
+      _log.warning('Plaid item revoke skipped: $error');
+      return;
+    }
+    for (final connection in connections) {
+      try {
+        final accessToken = await _openToken(session, connection);
+        await _postJson(
+          uri: credentials.baseUri.replace(path: '/item/remove'),
+          payload: {
+            'client_id': credentials.clientId,
+            'secret': credentials.secret,
+            'access_token': accessToken,
+          },
+        );
+      } on Exception catch (error) {
+        _log.warning('Plaid item remove failed: $error');
+      }
+    }
+  }
+
   /// Creates a Plaid sandbox item and links it without client-side Link.
   static Future<PlaidConnection> importSandboxAccounts(
     Session session, {
