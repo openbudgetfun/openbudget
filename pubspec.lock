@@ -1852,14 +1852,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.1"
-  skribble_font_recursive:
-    dependency: transitive
-    description:
-      name: skribble_font_recursive
-      sha256: f7ebd2069614af51bf46c466a011463d5de7bccab64c8c261f02012b60e0db36
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.1"
   skribble_icons_lucide:
     dependency: transitive
     description:

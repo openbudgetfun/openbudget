@@ -29,7 +29,9 @@ abstract final class ObSkribbleTheme {
       markerColor: palette.highlight,
       strokeWidth: 2.5,
       roughnessLevel: roughnessLevel,
-      fontFamily: obTextTypeface,
+      // The resolved family, because the faces ship in openbudget_ui rather
+      // than in the skribble_font_recursive package Skribble would assume.
+      fontFamily: obTextFontFamily,
       motionEnabled: !MediaQuery.disableAnimationsOf(context),
     );
   }

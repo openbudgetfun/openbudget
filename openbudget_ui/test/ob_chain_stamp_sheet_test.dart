@@ -117,7 +117,7 @@ class _Run extends HookWidget {
 /// Tests draw in a block font unless told otherwise, so load the faces the
 /// stamps are lettered in, to see the sheet as a person will.
 Future<void> _loadSkribbleFaces() async {
-  const package = 'packages/skribble_font_recursive';
+  const package = 'packages/openbudget_ui';
   for (final (family, file) in const [
     (obStampFontFamily, 'SkribbleMonoPlayful-ExtraBold'),
     (obNumeralFontFamily, 'SkribbleLinearPlayful-Bold'),
