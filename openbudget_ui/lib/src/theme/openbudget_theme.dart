@@ -22,7 +22,8 @@ const String obNumeralTypeface = obTextTypeface;
 /// The monospaced, rubber-stamped face for postmarks and seals.
 const obStampTypeface = 'SkribbleMonoPlayful';
 
-const _fontPackage = 'packages/skribble_font_recursive';
+// The faces ship in this package's assets (see `tool/subset_fonts.sh`).
+const _fontPackage = 'packages/openbudget_ui';
 
 /// [obDisplayTypeface] in Flutter's resolved `packages/<package>/<family>`
 /// form, ready for [TextStyle.fontFamily].

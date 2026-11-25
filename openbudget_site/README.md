@@ -96,6 +96,7 @@ It needs `resvg` and `oxipng`, which the devenv shell provides. A test checks th
 The fonts are the Skribble faces from `skribble_font_recursive`, a version of [Recursive](https://github.com/arrowtype/recursive) under the SIL Open Font License (`web/fonts/OFL.txt`). They are subset to Basic Latin plus the punctuation, currency signs and arrows the page uses. To subset them again, then rename the `.woff2` files to match `web/fonts/`:
 
 ```sh
+dart pub cache add skribble_font_recursive --version 0.3.1
 fonts="$(find ~/.pub-cache/hosted/pub.dev -maxdepth 1 -name 'skribble_font_recursive-*' | sort | tail -1)/assets/fonts"
 nix shell nixpkgs#python3Packages.fonttools nixpkgs#woff2 -c sh -c '
   for face in SkribbleGentle-ExtraBold SkribbleLinearGentle-Regular \

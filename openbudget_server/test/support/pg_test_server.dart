@@ -42,7 +42,10 @@ class PgTestServer {
   ///
   /// Set `OPENBUDGET_TEST_POSTGRES_BIN` to a PostgreSQL `bin` directory when
   /// `initdb`, `pg_ctl` and `postgres` are not the right ones on `PATH`.
-  static Future<PgTestServer> start() async {
+  ///
+  /// [trackStatements] loads `pg_stat_statements`, so a benchmark can count
+  /// the statements a call runs.
+  static Future<PgTestServer> start({bool trackStatements = false}) async {
     final postgresBin =
         Platform.environment['OPENBUDGET_TEST_POSTGRES_BIN']?.trim() ?? '';
     final initdb = _postgresExecutable(postgresBin, 'initdb');
@@ -71,13 +74,19 @@ class PgTestServer {
     // System V shared-memory pool, which a full `dart test` run exhausts.
     const shmSettings =
         '-c shared_memory_type=mmap -c dynamic_shared_memory_type=posix';
+    final statementSettings = trackStatements
+        ? ' -c shared_preload_libraries=pg_stat_statements'
+        : '';
+    final serverOptions =
+        '-p $port -k ${socketDirectory.path} -h 127.0.0.1 $shmSettings'
+        '$statementSettings';
     await _run(pgCtl, [
       '-D',
       dataPath,
       '-l',
       logPath,
       '-o',
-      '-p $port -k ${socketDirectory.path} -h 127.0.0.1 $shmSettings',
+      serverOptions,
       '-w',
       'start',
     ]);

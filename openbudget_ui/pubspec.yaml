@@ -11,6 +11,47 @@ resolution: workspace
 
 flutter:
   uses-material-design: true
+  # The Skribble faces the app letters with, trimmed from
+  # `skribble_font_recursive` by `tool/subset_fonts.sh`. Depending on that
+  # package instead would ship all 129 of its faces (60 MB) in every build,
+  # and Flutter web downloads every registered face before its first frame.
+  fonts:
+    - family: Skribble
+      fonts:
+        - asset: assets/fonts/Skribble-Black.ttf
+          weight: 900
+        - asset: assets/fonts/Skribble-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Skribble-ExtraBold.ttf
+          weight: 800
+    - family: SkribbleLinearPlayful
+      fonts:
+        - asset: assets/fonts/SkribbleLinearPlayful-Black.ttf
+          weight: 900
+        - asset: assets/fonts/SkribbleLinearPlayful-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/SkribbleLinearPlayful-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/SkribbleLinearPlayful-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/SkribbleLinearPlayful-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/SkribbleLinearPlayful-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/SkribbleLinearPlayful-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/SkribbleLinearPlayful-SemiBold.ttf
+          weight: 600
+    - family: SkribbleMonoPlayful
+      fonts:
+        - asset: assets/fonts/SkribbleMonoPlayful-Black.ttf
+          weight: 900
+        - asset: assets/fonts/SkribbleMonoPlayful-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/SkribbleMonoPlayful-ExtraBold.ttf
+          weight: 800
 
 dependencies:
   flutter:
@@ -21,7 +62,6 @@ dependencies:
   # Parses the mark's SVG path data (`ObMark`).
   path_parsing: ^1.1.0
   skribble: 0.3.1
-  skribble_font_recursive: 0.3.1
 
 dev_dependencies:
   flutter_test:

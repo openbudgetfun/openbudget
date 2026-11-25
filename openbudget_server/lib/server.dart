@@ -12,6 +12,7 @@ import 'package:openbudget_server/src/logging/server_logging.dart';
 import 'package:openbudget_server/src/recurring_transactions/recurring_post_future_call.dart';
 import 'package:openbudget_server/src/tax/export/tax_export_route.dart';
 import 'package:openbudget_server/src/wallets/wallet_refresh_future_call.dart';
+import 'package:openbudget_server/src/web/compression_middleware.dart';
 import 'package:openbudget_server/src/web/routes/app_config_route.dart';
 import 'package:openbudget_server/src/web/routes/billing_webhook_routes.dart';
 import 'package:openbudget_server/src/web/routes/root.dart';
@@ -96,6 +97,10 @@ Future<void> run(List<String> args) async {
       if (appleIdpEnabled) AppleIdpConfigFromPasswords(),
     ],
   );
+
+  // Gzip endpoint results and served files. JSON shrinks to about a tenth.
+  pod.server.addMiddleware(CompressionMiddleware().call);
+  pod.webServer.addMiddleware(CompressionMiddleware().call, '/');
 
   // Setup a default page at the web root.
   // These are used by the default page.

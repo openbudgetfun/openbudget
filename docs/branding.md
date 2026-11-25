@@ -52,7 +52,7 @@ The six spot inks (pink, teal, sunflower, sky or cobalt, tangerine, lilac) are t
 
 ## Type
 
-All lettering is Skribble (`skribble_font_recursive`):
+All lettering is Skribble, from `skribble_font_recursive`. `openbudget_ui` ships only the faces below, trimmed by `openbudget_ui/tool/subset_fonts.sh`; add a weight there before a screen uses it (see `docs/performance.md`):
 
 - **Skribble**, Black and ExtraBold, for display, page titles and hero figures.
 - **Skribble Linear Playful** for row titles, body and labels, never below 12.5 pt.

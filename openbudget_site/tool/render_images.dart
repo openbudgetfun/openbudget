@@ -14,7 +14,6 @@
 library;
 
 import 'dart:io';
-import 'dart:isolate';
 
 const _brand = '../brand';
 // ObSwatch values from openbudget_ui/lib/src/theme/ob_palette.dart.
@@ -114,15 +113,37 @@ String _nest(
   );
 }
 
-/// The directory holding the Skribble font files the app ships with.
+/// The Skribble release whose Gentle faces letter the social card.
+///
+/// The app ships only the trimmed faces it uses (see
+/// `openbudget_ui/tool/subset_fonts.sh`), so the card reads the full upstream
+/// package from the pub cache, fetching it once when it is missing.
+const _skribbleFontVersion = '0.3.1';
+
+/// The directory holding the upstream Skribble font files.
 Future<String> _skribbleFonts() async {
-  final library = await Isolate.resolvePackageUri(
-    Uri.parse('package:skribble_font_recursive/'),
-  );
-  if (library == null) {
-    _fail('Cannot find skribble_font_recursive. Run `dart pub get` first.');
+  final pubCache =
+      Platform.environment['PUB_CACHE'] ??
+      '${Platform.environment['HOME']}/.pub-cache';
+  final directory =
+      '$pubCache/hosted/pub.dev/skribble_font_recursive-$_skribbleFontVersion';
+  if (!Directory(directory).existsSync()) {
+    final result = await Process.run('dart', [
+      'pub',
+      'cache',
+      'add',
+      'skribble_font_recursive',
+      '--version',
+      _skribbleFontVersion,
+    ]);
+    if (result.exitCode != 0 || !Directory(directory).existsSync()) {
+      _fail(
+        'Cannot fetch skribble_font_recursive $_skribbleFontVersion: '
+        '${result.stderr}',
+      );
+    }
   }
-  return library.resolve('../assets/fonts/').toFilePath();
+  return '$directory/assets/fonts/';
 }
 
 Future<void> _render(

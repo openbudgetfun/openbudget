@@ -11,3 +11,12 @@ tags:
       Calls the real model and costs money. Run it on purpose with
       `msr --reason "Money guide eval" dart test --run-skipped -t live_eval
       test/money_guide/live_eval_test.dart`.
+
+  # Timing runs against a seeded book. They take a minute and print numbers
+  # rather than checking them, so they run only when asked for:
+  #
+  #   dart test --run-skipped -t benchmark test/benchmark/
+  benchmark:
+    skip: >-
+      Prints timings rather than checking behaviour. Run it on purpose with
+      `dart test --run-skipped -t benchmark test/benchmark/`.
