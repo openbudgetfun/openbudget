@@ -8,6 +8,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/entity_events_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/add_transaction_sheet.dart';
 import 'package:openbudget_app/src/features/whats_new/hooks/use_whats_new_auto_prompt.dart';
+import 'package:openbudget_app/src/routing/app_router.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -28,6 +29,15 @@ class BudgetShellScreen extends HookConsumerWidget {
 
     final l10n = AppLocalizations.of(context);
     final tabHistory = useState<List<int>>(<int>[navigationShell.currentIndex]);
+
+    // The plan is on screen: fetch the other tabs' code in the background
+    // so switching to them never waits on the network.
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => unawaited(preloadDeferredScreens()),
+      );
+      return null;
+    }, const []);
 
     useEffect(() {
       _recordTabVisit(tabHistory, navigationShell.currentIndex);

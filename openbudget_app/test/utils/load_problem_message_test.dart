@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations_en.dart';
 import 'package:openbudget_app/src/utils/load_problem_message.dart';
@@ -13,6 +15,13 @@ void main() {
           l10n,
           const ServerpodClientNetworkException('Failed host lookup'),
         ),
+        l10n.loadProblemOffline,
+      );
+    });
+
+    test('asks to check the connection when a screen fails to download', () {
+      expect(
+        loadProblemMessage(l10n, DeferredLoadException('main.dart.js_3')),
         l10n.loadProblemOffline,
       );
     });

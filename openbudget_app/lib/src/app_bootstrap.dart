@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show DefaultCupertinoLocalizations;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -13,6 +14,21 @@ import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/app_router.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+/// The app's strings plus Material, Cupertino and widgets strings in English.
+///
+/// The app ships one language. `AppLocalizations.localizationsDelegates`
+/// would install `flutter_localizations`' global delegates, which carry every
+/// language Flutter supports plus every locale's date data (about 300 KB of
+/// the web app's startup JavaScript) only to serve English. The default
+/// delegates are Flutter's built-in English. Switch back to the global ones
+/// when a second language arrives.
+const List<LocalizationsDelegate<dynamic>> appLocalizationsDelegates = [
+  AppLocalizations.delegate,
+  DefaultMaterialLocalizations.delegate,
+  DefaultCupertinoLocalizations.delegate,
+  DefaultWidgetsLocalizations.delegate,
+];
 
 Future<void> runOpenBudgetApp(AppFlavor flavor) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,7 +76,7 @@ class OpenBudgetApp extends HookConsumerWidget {
         theme: OpenBudgetTheme.light,
         darkTheme: OpenBudgetTheme.dark,
         themeMode: themeMode,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) =>
             ObWiredScope(child: _DismissKeyboardOnTap(child: child)),
@@ -75,7 +91,7 @@ class OpenBudgetApp extends HookConsumerWidget {
       theme: OpenBudgetTheme.light,
       darkTheme: OpenBudgetTheme.dark,
       themeMode: themeMode,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: appLocalizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) =>
           ObWiredScope(child: _DismissKeyboardOnTap(child: child)),
