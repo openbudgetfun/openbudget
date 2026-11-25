@@ -18,16 +18,20 @@ flutter:
   fonts:
     - family: Skribble
       fonts:
+        - asset: assets/fonts/Skribble-Black.ttf
+          weight: 900
         - asset: assets/fonts/Skribble-Bold.ttf
           weight: 700
         - asset: assets/fonts/Skribble-ExtraBold.ttf
           weight: 800
-        - asset: assets/fonts/Skribble-Black.ttf
-          weight: 900
     - family: SkribbleLinearPlayful
       fonts:
-        - asset: assets/fonts/SkribbleLinearPlayful-Regular.ttf
-          weight: 400
+        - asset: assets/fonts/SkribbleLinearPlayful-Black.ttf
+          weight: 900
+        - asset: assets/fonts/SkribbleLinearPlayful-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/SkribbleLinearPlayful-ExtraBold.ttf
+          weight: 800
         - asset: assets/fonts/SkribbleLinearPlayful-Italic.ttf
           weight: 400
           style: italic
@@ -36,22 +40,18 @@ flutter:
         - asset: assets/fonts/SkribbleLinearPlayful-MediumItalic.ttf
           weight: 500
           style: italic
+        - asset: assets/fonts/SkribbleLinearPlayful-Regular.ttf
+          weight: 400
         - asset: assets/fonts/SkribbleLinearPlayful-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/SkribbleLinearPlayful-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/SkribbleLinearPlayful-ExtraBold.ttf
-          weight: 800
-        - asset: assets/fonts/SkribbleLinearPlayful-Black.ttf
-          weight: 900
     - family: SkribbleMonoPlayful
       fonts:
+        - asset: assets/fonts/SkribbleMonoPlayful-Black.ttf
+          weight: 900
         - asset: assets/fonts/SkribbleMonoPlayful-Bold.ttf
           weight: 700
         - asset: assets/fonts/SkribbleMonoPlayful-ExtraBold.ttf
           weight: 800
-        - asset: assets/fonts/SkribbleMonoPlayful-Black.ttf
-          weight: 900
 
 dependencies:
   flutter:
