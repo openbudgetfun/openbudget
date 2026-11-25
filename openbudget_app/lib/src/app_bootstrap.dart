@@ -29,11 +29,14 @@ Future<void> runOpenBudgetApp(AppFlavor flavor) async {
 
   initAppLogging();
 
-  // Native Apple sign-in does not need the web-only Apple defines.
-  await prepareNativeAppleSignIn();
-
-  // Initialize PostHog analytics (no-ops in debug mode).
-  await container.read(analyticsProvider).init();
+  // Neither depends on the other, so they start together and the first
+  // frame waits for the slower one, not for both in turn. Native Apple
+  // sign-in does not need the web-only Apple defines; PostHog no-ops in
+  // debug mode.
+  await Future.wait([
+    prepareNativeAppleSignIn(),
+    container.read(analyticsProvider).init(),
+  ]);
 
   runApp(
     UncontrolledProviderScope(
