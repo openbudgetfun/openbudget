@@ -5478,6 +5478,12 @@ abstract class AppLocalizations {
   /// **'Set aside another {amount}'**
   String setGoalSetAsideAnother(String amount);
 
+  /// No description provided for @routerScreenLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t open this screen.'**
+  String get routerScreenLoadError;
+
   /// No description provided for @routerPageNotFound.
   ///
   /// In en, this message translates to:
