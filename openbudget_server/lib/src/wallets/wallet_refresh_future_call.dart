@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:meta/meta.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/billing/entitlement_service.dart';
@@ -122,8 +124,14 @@ abstract final class WalletRefreshRunner {
       for (final holding in sweepHoldings) (holding.network, holding.assetId),
     };
     final prices = sweepKeys.isEmpty
-        ? const <(WalletNetwork, String), AssetPrice?>{}
-        : await PriceService.resolve(session, sweepKeys, now: now);
+        ? const <(WalletNetwork, String), ResolvedPrice?>{}
+        : await PriceService.resolveDetailed(
+            session,
+            sweepKeys,
+            passwords: session.passwords,
+            environment: Platform.environment,
+            now: now,
+          );
 
     var reads = 0;
     var revaluations = 0;

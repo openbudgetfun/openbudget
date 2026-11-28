@@ -6,6 +6,18 @@ import 'package:openbudget_server/src/wallets/prices/coingecko_price_client.dart
 import 'package:openbudget_server/src/wallets/prices/defillama_price_client.dart';
 import 'package:serverpod/serverpod.dart';
 
+/// A resolved price and where it came from.
+class ResolvedPrice {
+  const ResolvedPrice({required this.price, required this.isCached});
+
+  final AssetPrice price;
+
+  /// Whether the row was already in the `AssetPrice` cache rather than
+  /// fetched during this call. Cached prices are older evidence, so callers
+  /// record them with a lower quality.
+  final bool isCached;
+}
+
 class PriceService {
   static Map<String, String> _passwords = const {};
   static Map<String, String> _environment = const {};
@@ -43,8 +55,37 @@ class PriceService {
     HttpClient? httpClient,
     DateTime? now,
   }) async {
-    final effectivePasswords = passwords ?? _passwords;
-    final effectiveEnvironment = environment ?? _environment;
+    final detailed = await resolveDetailed(
+      session,
+      keys,
+      passwords: passwords,
+      environment: environment,
+      httpClient: httpClient,
+      now: now,
+    );
+    return {
+      for (final entry in detailed.entries) entry.key: entry.value?.price,
+    };
+  }
+
+  /// Resolves prices like [resolve], keeping whether each one was cached.
+  static Future<Map<(WalletNetwork, String), ResolvedPrice?>> resolveDetailed(
+    Session session,
+    Iterable<Object> keys, {
+    Map<String, String>? passwords,
+    Map<String, String>? environment,
+    HttpClient? httpClient,
+    DateTime? now,
+  }) async {
+    // An explicit value wins, then a test override from [configure], then the
+    // session's own secrets and the process environment. Without the last
+    // step the hourly future call runs with no CoinGecko key and silently
+    // falls back to the free demo host.
+    final effectivePasswords =
+        passwords ?? (_passwords.isNotEmpty ? _passwords : session.passwords);
+    final effectiveEnvironment =
+        environment ??
+        (_environment.isNotEmpty ? _environment : Platform.environment);
     final effectiveClient = httpClient ?? _httpClient;
     final effectiveNow = (now ?? _clock()).toUtc();
 
@@ -79,12 +120,12 @@ class PriceService {
       for (final row in cacheRows) (row.network, row.assetId): row,
     };
 
-    final result = <(WalletNetwork, String), AssetPrice?>{};
+    final result = <(WalletNetwork, String), ResolvedPrice?>{};
     final misses = <(WalletNetwork, String)>[];
     for (final key in normalized) {
       final cached = cacheByKey[key];
       if (cached != null && !cached.expiresAt.toUtc().isBefore(effectiveNow)) {
-        result[key] = cached;
+        result[key] = ResolvedPrice(price: cached, isCached: true);
       } else {
         result[key] = null;
         misses.add(key);
@@ -156,7 +197,7 @@ class PriceService {
           fetchedAt: effectiveNow,
           expiresAt: effectiveNow.add(cacheLifetime),
         );
-        result[key] = row;
+        result[key] = ResolvedPrice(price: row, isCached: false);
         toWrite.add(row);
       } else {
         stillMissing.add(key);
@@ -205,7 +246,7 @@ class PriceService {
           fetchedAt: effectiveNow,
           expiresAt: effectiveNow.add(cacheLifetime),
         );
-        result[original] = row;
+        result[original] = ResolvedPrice(price: row, isCached: false);
         toWrite.add(row);
       }
     }
