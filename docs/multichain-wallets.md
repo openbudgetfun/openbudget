@@ -155,7 +155,7 @@ Wallet addresses are pseudonymous, but in OpenBudget's database they sit next to
 - **One EVM address read across chains is linkable by design.** It is one address.
 - **Stored keys are sealed.** Descriptors are sealed with AES-256-GCM (`SecretBox`, the helper Plaid tokens use) in `scope=serverOnly` fields, and the client never receives them.
 - **Logs and errors are clean.** Logs carry wallet ids, never full addresses or keys. Alchemy's key travels in the URL path, so provider clients never log a request URL or put one in an exception message. `lastSyncError` is shown to the user and holds plain words only.
-- **Previews are rate limited.** The preview endpoint reads any address, so a signed-in user gets 20 previews an hour. That keeps OpenBudget from becoming a free portfolio API.
+- **Previews are rate limited.** The preview endpoint reads any address, so a signed-in user gets 20 previews an hour. That keeps OpenBudget from becoming a free portfolio API. The one-hour window is a row in PostgreSQL per user, spent by one atomic upsert, so restarts, deploys and concurrent requests cannot hand out a fresh 20.
 - **The privacy notice lists every vendor** that receives addresses (W7.2). Deleting a wallet deletes our rows, but vendors keep their own request logs under their retention rules.
 
 ### 4.4.1 Vendors we send data to

@@ -1,0 +1,19 @@
+### One user's fixed one-hour window of wallet preview reads.
+###
+### The window opens at the first preview after the previous one elapsed, so a
+### user reads at most 20 previews in any hour. PostgreSQL owns the row, so a
+### server restart or a second server process cannot hand out a fresh window.
+class: WalletPreviewRateWindow
+serverOnly: true
+table: wallet_preview_rate_window
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  userId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  ### When the current window opened. Null never; the row is created with it.
+  windowStart: DateTime
+  ### Previews counted in the window, including refused ones.
+  requestCount: int
+indexes:
+  wallet_preview_rate_window_user_unique_idx:
+    fields: userId
+    unique: true

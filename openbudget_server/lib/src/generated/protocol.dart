@@ -223,6 +223,7 @@ import 'wallets/wallet_holding.dart' as _iqqppnaa;
 import 'wallets/wallet_network_state.dart' as _i73xhbar;
 import 'wallets/wallet_preview.dart' as _iuw2colh;
 import 'wallets/wallet_preview_network.dart' as _icbqx9y3;
+import 'wallets/wallet_preview_rate_window.dart' as _iq3dotek;
 import 'wallets/wallet_sync_result.dart' as _ipdq2p58;
 import 'wallets/wallet_tax_year_summary.dart' as _ivsmsmw6;
 import 'wallets/wallet_transaction.dart' as _i6m1jx15;
@@ -359,6 +360,7 @@ export 'wallets/wallet_holding.dart';
 export 'wallets/wallet_network_state.dart';
 export 'wallets/wallet_preview.dart';
 export 'wallets/wallet_preview_network.dart';
+export 'wallets/wallet_preview_rate_window.dart';
 export 'wallets/wallet_sync_result.dart';
 export 'wallets/wallet_tax_year_summary.dart';
 export 'wallets/wallet_transaction.dart';
@@ -510,6 +512,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i73xhbar.WalletNetworkState>,
           _is.getType<_iuw2colh.WalletPreview>,
           _is.getType<_icbqx9y3.WalletPreviewNetwork>,
+          _is.getType<_iq3dotek.WalletPreviewRateWindow>,
           _is.getType<_ipdq2p58.WalletSyncResult>,
           _is.getType<_ivsmsmw6.WalletTaxYearSummary>,
           _is.getType<_i6m1jx15.WalletTransaction>,
@@ -647,6 +650,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i73xhbar.WalletNetworkState?>,
           _is.getType<_iuw2colh.WalletPreview?>,
           _is.getType<_icbqx9y3.WalletPreviewNetwork?>,
+          _is.getType<_iq3dotek.WalletPreviewRateWindow?>,
           _is.getType<_ipdq2p58.WalletSyncResult?>,
           _is.getType<_ivsmsmw6.WalletTaxYearSummary?>,
           _is.getType<_i6m1jx15.WalletTransaction?>,
@@ -864,6 +868,7 @@ class Protocol extends _is.DatabaseSerializationManager
           'WalletNetworkState',
           'WalletPreview',
           'WalletPreviewNetwork',
+          'WalletPreviewRateWindow',
           'WalletSyncResult',
           'WalletTaxYearSummary',
           'WalletTransaction',
@@ -5451,6 +5456,67 @@ class Protocol extends _is.DatabaseSerializationManager
       managed: true,
     ),
     _isp.TableDefinition(
+      name: 'wallet_preview_rate_window',
+      dartName: 'WalletPreviewRateWindow',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'userId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'windowStart',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'requestCount',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'wallet_preview_rate_window_fk_0',
+          columns: ['userId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'wallet_preview_rate_window_user_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
       name: 'wallet_transaction',
       dartName: 'WalletTransaction',
       schema: 'public',
@@ -6087,6 +6153,9 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _icbqx9y3.WalletPreviewNetwork) {
       return _icbqx9y3.WalletPreviewNetwork.fromJson(data) as T;
     }
+    if (t == _iq3dotek.WalletPreviewRateWindow) {
+      return _iq3dotek.WalletPreviewRateWindow.fromJson(data) as T;
+    }
     if (t == _ipdq2p58.WalletSyncResult) {
       return _ipdq2p58.WalletSyncResult.fromJson(data) as T;
     }
@@ -6663,6 +6732,12 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _is.getType<_icbqx9y3.WalletPreviewNetwork?>()) {
       return (data != null
               ? _icbqx9y3.WalletPreviewNetwork.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_iq3dotek.WalletPreviewRateWindow?>()) {
+      return (data != null
+              ? _iq3dotek.WalletPreviewRateWindow.fromJson(data)
               : null)
           as T;
     }
@@ -7267,6 +7342,7 @@ class Protocol extends _is.DatabaseSerializationManager
       _i73xhbar.WalletNetworkState => 'WalletNetworkState',
       _iuw2colh.WalletPreview => 'WalletPreview',
       _icbqx9y3.WalletPreviewNetwork => 'WalletPreviewNetwork',
+      _iq3dotek.WalletPreviewRateWindow => 'WalletPreviewRateWindow',
       _ipdq2p58.WalletSyncResult => 'WalletSyncResult',
       _ivsmsmw6.WalletTaxYearSummary => 'WalletTaxYearSummary',
       _i6m1jx15.WalletTransaction => 'WalletTransaction',
@@ -7552,6 +7628,8 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'WalletPreview';
       case _icbqx9y3.WalletPreviewNetwork():
         return 'WalletPreviewNetwork';
+      case _iq3dotek.WalletPreviewRateWindow():
+        return 'WalletPreviewRateWindow';
       case _ipdq2p58.WalletSyncResult():
         return 'WalletSyncResult';
       case _ivsmsmw6.WalletTaxYearSummary():
@@ -8002,6 +8080,9 @@ class Protocol extends _is.DatabaseSerializationManager
     if (dataClassName == 'WalletPreviewNetwork') {
       return deserialize<_icbqx9y3.WalletPreviewNetwork>(data['data']);
     }
+    if (dataClassName == 'WalletPreviewRateWindow') {
+      return deserialize<_iq3dotek.WalletPreviewRateWindow>(data['data']);
+    }
     if (dataClassName == 'WalletSyncResult') {
       return deserialize<_ipdq2p58.WalletSyncResult>(data['data']);
     }
@@ -8152,6 +8233,8 @@ class Protocol extends _is.DatabaseSerializationManager
         return _iqqppnaa.WalletHolding.t;
       case _i73xhbar.WalletNetworkState:
         return _i73xhbar.WalletNetworkState.t;
+      case _iq3dotek.WalletPreviewRateWindow:
+        return _iq3dotek.WalletPreviewRateWindow.t;
       case _i6m1jx15.WalletTransaction:
         return _i6m1jx15.WalletTransaction.t;
     }
