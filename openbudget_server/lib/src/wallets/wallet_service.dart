@@ -404,7 +404,7 @@ abstract final class WalletService {
     Session session,
     UuidValue walletId, {
     SystemEntityOwner? systemOwner,
-    Map<(WalletNetwork, String), AssetPrice?>? prices,
+    Map<(WalletNetwork, String), ResolvedPrice?>? prices,
   }) async {
     final wallet = await _ownedWallet(
       session,
@@ -454,23 +454,26 @@ abstract final class WalletService {
       };
       final resolvedPrices =
           prices ??
-          await PriceService.resolve(
+          await PriceService.resolveDetailed(
             session,
             priceKeys,
+            passwords: session.passwords,
+            environment: Platform.environment,
             now: clock(),
           );
 
       var total = BigInt.zero;
       final now = clock();
       for (final holding in holdings) {
-        final price = resolvedPrices[(holding.network, holding.assetId)];
+        final resolved = resolvedPrices[(holding.network, holding.assetId)];
+        final price = resolved?.price;
         var newValue = holding.valueMinor;
         var newUnitPrice = holding.unitPrice;
         var newSource = holding.priceSource;
         var newCurrency = holding.priceCurrencyCode;
         var newAsOf = holding.priceAsOf;
         var newQuality = holding.priceQuality;
-        final newConfidence = holding.priceConfidence;
+        var newConfidence = holding.priceConfidence;
         if (price != null) {
           final unit = ExactDecimal.tryParse(price.unitPrice);
           if (unit != null) {
@@ -484,8 +487,25 @@ abstract final class WalletService {
             newSource = price.source;
             newCurrency = price.currencyCode;
             newAsOf = price.fetchedAt;
-            newQuality = PriceQuality.live;
+            newQuality = resolved!.isCached
+                ? PriceQuality.cached
+                : PriceQuality.live;
+            newConfidence = resolved.isCached
+                ? Confidence.low
+                : Confidence.high;
           }
+        } else if (newAsOf != null &&
+            now.difference(newAsOf) > const Duration(days: 7)) {
+          // No source quoted this asset and the stored price is over a week
+          // old, so the holding stands unpriced rather than carrying a stale
+          // value into net worth (multichain-wallets.md 8.3).
+          newValue = null;
+          newUnitPrice = null;
+          newSource = null;
+          newCurrency = null;
+          newQuality = PriceQuality.unpriced;
+          newConfidence = null;
+          newAsOf = null;
         }
         await WalletHolding.db.updateRow(
           session,

@@ -111,6 +111,51 @@ void main() {
     expect(secondBytes, firstBytes);
   });
 
+  test('given a HEAD when a client accepts gzip then no body is sent and the '
+      'following GET still gets the whole file', () async {
+    final source = File('${directory.path}/main.dart.js').readAsStringSync();
+    final head = await client.openUrl(
+      'HEAD',
+      Uri.parse('http://127.0.0.1:${server.port}/files/main.dart.js'),
+    );
+    head.headers.set(HttpHeaders.acceptEncodingHeader, 'gzip');
+    final headResponse = await head.close();
+    final headBytes = await bodyOf(headResponse);
+
+    expect(headBytes, isEmpty);
+    expect(headResponse.headers.value('content-encoding'), isNull);
+
+    final getResponse = await get(
+      '/files/main.dart.js',
+      acceptEncoding: 'gzip',
+    );
+    expect(getResponse.headers.value('content-encoding'), 'gzip');
+    expect(utf8.decode(gzip.decode(await bodyOf(getResponse))), source);
+  });
+
+  test('given a gzipped static file then its strong ETag is weakened and the '
+      'Vary header names Accept-Encoding once', () async {
+    final compressed = await get(
+      '/files/main.dart.js',
+      acceptEncoding: 'gzip',
+    );
+    final identity = await get('/files/main.dart.js');
+    await bodyOf(compressed);
+    await bodyOf(identity);
+
+    final compressedEtag = compressed.headers.value('etag');
+    final identityEtag = identity.headers.value('etag');
+    expect(compressedEtag, 'W/$identityEtag');
+    expect(identityEtag, startsWith('"'));
+
+    final vary = compressed.headers[HttpHeaders.varyHeader] ?? const <String>[];
+    final codings = [
+      for (final value in vary)
+        for (final part in value.split(',')) part.trim().toLowerCase(),
+    ];
+    expect(codings.where((value) => value == 'accept-encoding'), hasLength(1));
+  });
+
   test('given an image when fetched then it is not compressed again', () async {
     final response = await get('/files/mark.png', acceptEncoding: 'gzip');
     expect(response.headers.value('content-encoding'), isNull);

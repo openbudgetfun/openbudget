@@ -47,6 +47,9 @@ class CompressionMiddleware {
   Handler call(Handler next) => (request) async {
     final result = await next(request);
     if (result is! Response || !_acceptsGzip(request)) return result;
+    // A HEAD response carries the GET headers but no body. Compressing it
+    // would read and consume the body that the response does not send.
+    if (request.method == Method.head) return result;
     if (result.statusCode != HttpStatus.ok) return result;
     if (result.headers['content-encoding'] != null) return result;
     if (result.headers['content-range'] != null) return result;
@@ -87,10 +90,28 @@ class CompressionMiddleware {
       headers: result.headers.transform((headers) {
         headers['content-encoding'] = ['gzip'];
         headers['content-length'] = null;
-        headers['vary'] = [
-          ...?result.headers['vary'],
-          'Accept-Encoding',
+        // The bytes on the wire are a different representation, so a strong
+        // validator would be reused against the uncompressed body. Mark it
+        // weak; the compressed bytes stay keyed by the strong one in the
+        // cache, which never leaves this process.
+        final etags = headers['etag'];
+        if (etags != null) {
+          headers['etag'] = [
+            for (final etag in etags)
+              if (etag.startsWith('"')) 'W/$etag' else etag,
+          ];
+        }
+        final vary = <String>[
+          for (final value in result.headers['vary'] ?? const <String>[])
+            for (final part in value.split(','))
+              if (part.trim().isNotEmpty) part.trim(),
         ];
+        if (!vary.any(
+          (value) => value.toLowerCase() == 'accept-encoding',
+        )) {
+          vary.add('Accept-Encoding');
+        }
+        headers['vary'] = vary;
       }),
     );
   };

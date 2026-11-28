@@ -150,17 +150,21 @@ class ChatCompletionsClient {
 
     final http.Response response;
     try {
-      response = await _httpClient
-          .post(
-            endpoint,
-            headers: {
-              'Authorization': 'Bearer $apiKey',
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: body,
-          )
-          .timeout(requestTimeout);
+      // A provider that redirects is not the endpoint it was checked as, so
+      // the request never follows one. `_httpClient.post` would, and an
+      // open-redirect or a DNS rebind could carry the API key to an internal
+      // address. A 3xx therefore fails the status guard below.
+      final request = http.Request('POST', endpoint)
+        ..followRedirects = false
+        ..maxRedirects = 0
+        ..headers.addAll({
+          'Authorization': 'Bearer $apiKey',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        })
+        ..body = body;
+      final streamed = await _httpClient.send(request).timeout(requestTimeout);
+      response = await http.Response.fromStream(streamed);
     } on TimeoutException {
       throw AgentProviderException(
         message: 'The provider did not answer in time.',
