@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 
@@ -8,7 +10,10 @@ import 'package:openbudget_client/openbudget_client.dart';
 /// localized sentence, so every load error reads the same way.
 String loadProblemMessage(AppLocalizations l10n, Object error) =>
     switch (error) {
-      ServerpodClientNetworkException() => l10n.loadProblemOffline,
+      // A screen's code that could not be fetched is almost always the
+      // connection.
+      ServerpodClientNetworkException() ||
+      DeferredLoadException() => l10n.loadProblemOffline,
       AuthenticationRequiredException() ||
       ServerpodClientUnauthorized() => l10n.loadProblemSignedOut,
       NotFoundException() ||

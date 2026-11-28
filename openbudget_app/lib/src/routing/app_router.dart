@@ -2,58 +2,106 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
-import 'package:openbudget_app/src/features/accounts/screens/account_list_screen.dart';
-import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
-import 'package:openbudget_app/src/features/agent_access/screens/agent_access_screen.dart';
-import 'package:openbudget_app/src/features/assistant/screens/assistant_proposals_screen.dart';
-import 'package:openbudget_app/src/features/assistant/screens/assistant_provider_screen.dart';
-import 'package:openbudget_app/src/features/assistant/screens/assistant_screen.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
 import 'package:openbudget_app/src/features/auth/screens/login_screen.dart';
 import 'package:openbudget_app/src/features/auth/screens/register_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_shell_screen.dart';
-import 'package:openbudget_app/src/features/budget/screens/category_detail_screen.dart';
-import 'package:openbudget_app/src/features/budget/screens/edit_plan_screen.dart';
-import 'package:openbudget_app/src/features/budget/screens/recent_moves_screen.dart';
-import 'package:openbudget_app/src/features/home/screens/create_entity_screen.dart';
 import 'package:openbudget_app/src/features/home/screens/home_screen.dart';
-import 'package:openbudget_app/src/features/ledger/screens/books_screen.dart';
-import 'package:openbudget_app/src/features/ledger/screens/journal_detail_screen.dart';
-import 'package:openbudget_app/src/features/ledger/screens/journal_editor_screen.dart';
-import 'package:openbudget_app/src/features/more/screens/more_screen.dart';
-import 'package:openbudget_app/src/features/payees/screens/payee_list_screen.dart';
-import 'package:openbudget_app/src/features/plus/screens/plus_screen.dart';
-import 'package:openbudget_app/src/features/recurring/screens/recurring_calendar_screen.dart';
-import 'package:openbudget_app/src/features/recurring/screens/recurring_list_screen.dart';
-import 'package:openbudget_app/src/features/reports/screens/category_trends_screen.dart';
-import 'package:openbudget_app/src/features/reports/screens/multi_month_comparison_screen.dart';
-import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dart';
-import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
-import 'package:openbudget_app/src/features/reports/screens/spending_by_payee_screen.dart';
-import 'package:openbudget_app/src/features/reports/screens/spending_trends_screen.dart';
-import 'package:openbudget_app/src/features/settings/screens/account_settings_screen.dart';
-import 'package:openbudget_app/src/features/settings/screens/app_icon_screen.dart';
-import 'package:openbudget_app/src/features/settings/screens/currency_settings_screen.dart';
-import 'package:openbudget_app/src/features/settings/screens/delete_account_screen.dart';
-import 'package:openbudget_app/src/features/settings/screens/display_options_screen.dart';
-import 'package:openbudget_app/src/features/settings/screens/plan_settings_screen.dart';
-import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
-import 'package:openbudget_app/src/features/tax/screens/tax_overview_screen.dart';
-import 'package:openbudget_app/src/features/tax/screens/tax_profile_screen.dart';
-import 'package:openbudget_app/src/features/transaction_rules/screens/rule_list_screen.dart';
-import 'package:openbudget_app/src/features/transactions/screens/add_expense_screen.dart';
-import 'package:openbudget_app/src/features/transactions/screens/add_income_screen.dart';
-import 'package:openbudget_app/src/features/transactions/screens/import_transactions_screen.dart';
-import 'package:openbudget_app/src/features/transactions/screens/transaction_list_screen.dart';
-import 'package:openbudget_app/src/features/transfers/screens/create_transfer_screen.dart';
 import 'package:openbudget_app/src/logging/navigation_observer.dart';
+import 'package:openbudget_app/src/routing/deferred/accounts_screens.dart'
+    deferred as accounts;
+import 'package:openbudget_app/src/routing/deferred/assistant_screens.dart'
+    deferred as assistant;
+import 'package:openbudget_app/src/routing/deferred/books_screens.dart'
+    deferred as books;
+import 'package:openbudget_app/src/routing/deferred/entry_screens.dart'
+    deferred as entry;
+import 'package:openbudget_app/src/routing/deferred/more_screens.dart'
+    deferred as more;
+import 'package:openbudget_app/src/routing/deferred/plan_screens.dart'
+    deferred as plan;
+import 'package:openbudget_app/src/routing/deferred/plus_screens.dart'
+    deferred as plus;
+import 'package:openbudget_app/src/routing/deferred/reports_screens.dart'
+    deferred as reports;
+import 'package:openbudget_app/src/routing/deferred/tax_screens.dart'
+    deferred as tax;
+import 'package:openbudget_app/src/routing/deferred_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_router.g.dart';
+
+/// A deferred library of screens: its name and its `loadLibrary`.
+typedef _DeferredScreens = ({String name, Future<void> Function() load});
+
+final _DeferredScreens _planScreens = (
+  name: 'plan',
+  load: () => plan.loadLibrary(),
+);
+final _DeferredScreens _entryScreens = (
+  name: 'entry',
+  load: () => entry.loadLibrary(),
+);
+final _DeferredScreens _accountsScreens = (
+  name: 'accounts',
+  load: () => accounts.loadLibrary(),
+);
+final _DeferredScreens _reportsScreens = (
+  name: 'reports',
+  load: () => reports.loadLibrary(),
+);
+final _DeferredScreens _moreScreens = (
+  name: 'more',
+  load: () => more.loadLibrary(),
+);
+final _DeferredScreens _taxScreens = (
+  name: 'tax',
+  load: () => tax.loadLibrary(),
+);
+final _DeferredScreens _booksScreens = (
+  name: 'books',
+  load: () => books.loadLibrary(),
+);
+final _DeferredScreens _assistantScreens = (
+  name: 'assistant',
+  load: () => assistant.loadLibrary(),
+);
+final _DeferredScreens _plusScreens = (
+  name: 'plus',
+  load: () => plus.loadLibrary(),
+);
+
+/// Every deferred library, most likely to be opened first.
+final List<_DeferredScreens> _deferredLibraries = [
+  _planScreens,
+  _entryScreens,
+  _accountsScreens,
+  _reportsScreens,
+  _moreScreens,
+  _taxScreens,
+  _booksScreens,
+  _assistantScreens,
+  _plusScreens,
+];
+
+/// Fetches every deferred screen library in the background, in the order a
+/// person is likely to open them, so taps after the first screen do not wait
+/// on the network. Cheap to call again: each library loads once.
+Future<void> preloadDeferredScreens() async {
+  for (final library in _deferredLibraries) {
+    try {
+      await DeferredScreen.preload(library.name, library.load);
+    } on Exception {
+      // Offline or replaced by a release: the screen retries when opened.
+    }
+  }
+}
+
+Widget _deferred(_DeferredScreens library, WidgetBuilder builder) =>
+    DeferredScreen(library: library.name, load: library.load, builder: builder);
 
 final _shellNavigatorKeys = <GlobalKey<NavigatorState>>[
   GlobalKey<NavigatorState>(debugLabel: 'plan'),
@@ -97,13 +145,16 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         name: plusRoute,
         path: plusPath,
-        builder: (context, state) =>
-            PlusScreen(status: state.uri.queryParameters['status']),
+        builder: (context, state) => _deferred(
+          _plusScreens,
+          (_) => plus.PlusScreen(status: state.uri.queryParameters['status']),
+        ),
       ),
       GoRoute(
         name: agentAccessRoute,
         path: agentAccessPath,
-        builder: (context, state) => const AgentAccessScreen(),
+        builder: (context, state) =>
+            _deferred(_plusScreens, (_) => plus.AgentAccessScreen()),
       ),
       GoRoute(
         name: createEntityRoute,
@@ -112,7 +163,7 @@ GoRouter appRouter(Ref ref) {
           key: state.pageKey,
           transitionDuration: const Duration(milliseconds: 280),
           reverseTransitionDuration: const Duration(milliseconds: 220),
-          child: const CreateEntityScreen(),
+          child: _deferred(_entryScreens, (_) => entry.CreateEntityScreen()),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             final curvedAnimation = CurvedAnimation(
               parent: animation,
@@ -148,7 +199,10 @@ GoRouter appRouter(Ref ref) {
             path: 'tax',
             builder: (context, state) {
               final id = state.pathParameters['entityId']!;
-              return TaxOverviewScreen(entityId: id);
+              return _deferred(
+                _taxScreens,
+                (_) => tax.TaxOverviewScreen(entityId: id),
+              );
             },
             routes: [
               GoRoute(
@@ -156,7 +210,10 @@ GoRouter appRouter(Ref ref) {
                 path: 'profile',
                 builder: (context, state) {
                   final id = state.pathParameters['entityId']!;
-                  return TaxProfileScreen(entityId: id);
+                  return _deferred(
+                    _taxScreens,
+                    (_) => tax.TaxProfileScreen(entityId: id),
+                  );
                 },
               ),
             ],
@@ -166,7 +223,10 @@ GoRouter appRouter(Ref ref) {
             path: 'books',
             builder: (context, state) {
               final id = state.pathParameters['entityId']!;
-              return BooksScreen(entityId: id);
+              return _deferred(
+                _booksScreens,
+                (_) => books.BooksScreen(entityId: id),
+              );
             },
             routes: [
               GoRoute(
@@ -174,7 +234,10 @@ GoRouter appRouter(Ref ref) {
                 path: 'journals/new',
                 builder: (context, state) {
                   final id = state.pathParameters['entityId']!;
-                  return JournalEditorScreen(entityId: id);
+                  return _deferred(
+                    _booksScreens,
+                    (_) => books.JournalEditorScreen(entityId: id),
+                  );
                 },
               ),
               GoRoute(
@@ -183,9 +246,12 @@ GoRouter appRouter(Ref ref) {
                 builder: (context, state) {
                   final id = state.pathParameters['entityId']!;
                   final journalId = state.pathParameters['journalId']!;
-                  return JournalEditorScreen(
-                    entityId: id,
-                    journalId: journalId,
+                  return _deferred(
+                    _booksScreens,
+                    (_) => books.JournalEditorScreen(
+                      entityId: id,
+                      journalId: journalId,
+                    ),
                   );
                 },
               ),
@@ -195,9 +261,12 @@ GoRouter appRouter(Ref ref) {
                 builder: (context, state) {
                   final id = state.pathParameters['entityId']!;
                   final journalId = state.pathParameters['journalId']!;
-                  return JournalDetailScreen(
-                    entityId: id,
-                    journalId: journalId,
+                  return _deferred(
+                    _booksScreens,
+                    (_) => books.JournalDetailScreen(
+                      entityId: id,
+                      journalId: journalId,
+                    ),
                   );
                 },
               ),
@@ -208,7 +277,10 @@ GoRouter appRouter(Ref ref) {
             path: 'plan/edit',
             builder: (context, state) {
               final id = state.pathParameters['entityId']!;
-              return EditPlanScreen(entityId: id);
+              return _deferred(
+                _planScreens,
+                (_) => plan.EditPlanScreen(entityId: id),
+              );
             },
           ),
           // Budget shell with bottom tab navigation.
@@ -238,7 +310,10 @@ GoRouter appRouter(Ref ref) {
                         path: 'recent-moves',
                         builder: (context, state) {
                           final id = state.pathParameters['entityId']!;
-                          return RecentMovesScreen(entityId: id);
+                          return _deferred(
+                            _planScreens,
+                            (_) => plan.RecentMovesScreen(entityId: id),
+                          );
                         },
                         routes: [
                           GoRoute(
@@ -248,9 +323,12 @@ GoRouter appRouter(Ref ref) {
                               final id = state.pathParameters['entityId']!;
                               final envelopeId =
                                   state.pathParameters['envelopeId']!;
-                              return EnvelopeMovesScreen(
-                                entityId: id,
-                                envelopeId: envelopeId,
+                              return _deferred(
+                                _planScreens,
+                                (_) => plan.EnvelopeMovesScreen(
+                                  entityId: id,
+                                  envelopeId: envelopeId,
+                                ),
                               );
                             },
                           ),
@@ -265,10 +343,13 @@ GoRouter appRouter(Ref ref) {
                               state.pathParameters['categoryId']!;
                           final envelopeId =
                               state.pathParameters['envelopeId']!;
-                          return CategoryDetailScreen(
-                            entityId: id,
-                            categoryId: categoryId,
-                            envelopeId: envelopeId,
+                          return _deferred(
+                            _planScreens,
+                            (_) => plan.CategoryDetailScreen(
+                              entityId: id,
+                              categoryId: categoryId,
+                              envelopeId: envelopeId,
+                            ),
                           );
                         },
                       ),
@@ -285,7 +366,10 @@ GoRouter appRouter(Ref ref) {
                     path: 'accounts',
                     builder: (context, state) {
                       final id = state.pathParameters['entityId']!;
-                      return AccountListScreen(entityId: id);
+                      return _deferred(
+                        _accountsScreens,
+                        (_) => accounts.AccountListScreen(entityId: id),
+                      );
                     },
                     routes: [
                       GoRoute(
@@ -293,7 +377,10 @@ GoRouter appRouter(Ref ref) {
                         path: 'add',
                         builder: (context, state) {
                           final id = state.pathParameters['entityId']!;
-                          return AddAccountScreen(entityId: id);
+                          return _deferred(
+                            _accountsScreens,
+                            (_) => accounts.AddAccountScreen(entityId: id),
+                          );
                         },
                       ),
                       GoRoute(
@@ -302,9 +389,12 @@ GoRouter appRouter(Ref ref) {
                         builder: (context, state) {
                           final id = state.pathParameters['entityId']!;
                           final accountId = state.pathParameters['accountId']!;
-                          return AccountDetailScreen(
-                            entityId: id,
-                            accountId: accountId,
+                          return _deferred(
+                            _accountsScreens,
+                            (_) => accounts.AccountDetailScreen(
+                              entityId: id,
+                              accountId: accountId,
+                            ),
                           );
                         },
                       ),
@@ -321,7 +411,10 @@ GoRouter appRouter(Ref ref) {
                     path: 'reflect',
                     builder: (context, state) {
                       final id = state.pathParameters['entityId']!;
-                      return ReportsScreen(entityId: id);
+                      return _deferred(
+                        _reportsScreens,
+                        (_) => reports.ReportsScreen(entityId: id),
+                      );
                     },
                     routes: [
                       GoRoute(
@@ -329,7 +422,10 @@ GoRouter appRouter(Ref ref) {
                         path: 'trends',
                         builder: (context, state) {
                           final id = state.pathParameters['entityId']!;
-                          return SpendingTrendsScreen(entityId: id);
+                          return _deferred(
+                            _reportsScreens,
+                            (_) => reports.SpendingTrendsScreen(entityId: id),
+                          );
                         },
                       ),
                       GoRoute(
@@ -337,7 +433,10 @@ GoRouter appRouter(Ref ref) {
                         path: 'payees',
                         builder: (context, state) {
                           final id = state.pathParameters['entityId']!;
-                          return SpendingByPayeeScreen(entityId: id);
+                          return _deferred(
+                            _reportsScreens,
+                            (_) => reports.SpendingByPayeeScreen(entityId: id),
+                          );
                         },
                       ),
                       GoRoute(
@@ -345,7 +444,10 @@ GoRouter appRouter(Ref ref) {
                         path: 'category-trends',
                         builder: (context, state) {
                           final id = state.pathParameters['entityId']!;
-                          return CategoryTrendsScreen(entityId: id);
+                          return _deferred(
+                            _reportsScreens,
+                            (_) => reports.CategoryTrendsScreen(entityId: id),
+                          );
                         },
                       ),
                       GoRoute(
@@ -353,7 +455,12 @@ GoRouter appRouter(Ref ref) {
                         path: 'comparison',
                         builder: (context, state) {
                           final id = state.pathParameters['entityId']!;
-                          return MultiMonthComparisonScreen(entityId: id);
+                          return _deferred(
+                            _reportsScreens,
+                            (_) => reports.MultiMonthComparisonScreen(
+                              entityId: id,
+                            ),
+                          );
                         },
                       ),
                       GoRoute(
@@ -361,7 +468,10 @@ GoRouter appRouter(Ref ref) {
                         path: 'net-worth',
                         builder: (context, state) {
                           final id = state.pathParameters['entityId']!;
-                          return NetWorthScreen(entityId: id);
+                          return _deferred(
+                            _reportsScreens,
+                            (_) => reports.NetWorthScreen(entityId: id),
+                          );
                         },
                       ),
                     ],
@@ -377,7 +487,10 @@ GoRouter appRouter(Ref ref) {
                     path: 'more',
                     builder: (context, state) {
                       final id = state.pathParameters['entityId']!;
-                      return MoreScreen(entityId: id);
+                      return _deferred(
+                        _moreScreens,
+                        (_) => more.MoreScreen(entityId: id),
+                      );
                     },
                     routes: [
                       GoRoute(
@@ -385,7 +498,10 @@ GoRouter appRouter(Ref ref) {
                         path: 'recurring',
                         builder: (context, state) {
                           final id = state.pathParameters['entityId']!;
-                          return RecurringListScreen(entityId: id);
+                          return _deferred(
+                            _moreScreens,
+                            (_) => more.RecurringListScreen(entityId: id),
+                          );
                         },
                         routes: [
                           GoRoute(
@@ -393,7 +509,11 @@ GoRouter appRouter(Ref ref) {
                             path: 'calendar',
                             builder: (context, state) {
                               final id = state.pathParameters['entityId']!;
-                              return RecurringCalendarScreen(entityId: id);
+                              return _deferred(
+                                _moreScreens,
+                                (_) =>
+                                    more.RecurringCalendarScreen(entityId: id),
+                              );
                             },
                           ),
                         ],
@@ -403,7 +523,10 @@ GoRouter appRouter(Ref ref) {
                         path: 'payees',
                         builder: (context, state) {
                           final id = state.pathParameters['entityId']!;
-                          return PayeeListScreen(entityId: id);
+                          return _deferred(
+                            _moreScreens,
+                            (_) => more.PayeeListScreen(entityId: id),
+                          );
                         },
                       ),
                       GoRoute(
@@ -411,7 +534,10 @@ GoRouter appRouter(Ref ref) {
                         path: 'rules',
                         builder: (context, state) {
                           final id = state.pathParameters['entityId']!;
-                          return RuleListScreen(entityId: id);
+                          return _deferred(
+                            _moreScreens,
+                            (_) => more.RuleListScreen(entityId: id),
+                          );
                         },
                       ),
                       GoRoute(
@@ -419,7 +545,10 @@ GoRouter appRouter(Ref ref) {
                         path: 'import',
                         builder: (context, state) {
                           final id = state.pathParameters['entityId']!;
-                          return ImportTransactionsScreen(entityId: id);
+                          return _deferred(
+                            _moreScreens,
+                            (_) => more.ImportTransactionsScreen(entityId: id),
+                          );
                         },
                       ),
                       GoRoute(
@@ -427,7 +556,10 @@ GoRouter appRouter(Ref ref) {
                         path: 'settings',
                         builder: (context, state) {
                           final id = state.pathParameters['entityId']!;
-                          return SettingsScreen(entityId: id);
+                          return _deferred(
+                            _moreScreens,
+                            (_) => more.SettingsScreen(entityId: id),
+                          );
                         },
                         routes: [
                           GoRoute(
@@ -435,7 +567,10 @@ GoRouter appRouter(Ref ref) {
                             path: 'plan',
                             builder: (context, state) {
                               final id = state.pathParameters['entityId']!;
-                              return PlanSettingsScreen(entityId: id);
+                              return _deferred(
+                                _moreScreens,
+                                (_) => more.PlanSettingsScreen(entityId: id),
+                              );
                             },
                             routes: [
                               GoRoute(
@@ -443,7 +578,12 @@ GoRouter appRouter(Ref ref) {
                                 path: 'currency',
                                 builder: (context, state) {
                                   final id = state.pathParameters['entityId']!;
-                                  return CurrencySettingsScreen(entityId: id);
+                                  return _deferred(
+                                    _moreScreens,
+                                    (_) => more.CurrencySettingsScreen(
+                                      entityId: id,
+                                    ),
+                                  );
                                 },
                               ),
                             ],
@@ -453,7 +593,10 @@ GoRouter appRouter(Ref ref) {
                             path: 'app-icon',
                             builder: (context, state) {
                               final id = state.pathParameters['entityId']!;
-                              return AppIconScreen(entityId: id);
+                              return _deferred(
+                                _moreScreens,
+                                (_) => more.AppIconScreen(entityId: id),
+                              );
                             },
                           ),
                           GoRoute(
@@ -461,7 +604,10 @@ GoRouter appRouter(Ref ref) {
                             path: 'account-settings',
                             builder: (context, state) {
                               final id = state.pathParameters['entityId']!;
-                              return AccountSettingsScreen(entityId: id);
+                              return _deferred(
+                                _moreScreens,
+                                (_) => more.AccountSettingsScreen(entityId: id),
+                              );
                             },
                             routes: [
                               GoRoute(
@@ -469,7 +615,11 @@ GoRouter appRouter(Ref ref) {
                                 path: 'delete',
                                 builder: (context, state) {
                                   final id = state.pathParameters['entityId']!;
-                                  return DeleteAccountScreen(entityId: id);
+                                  return _deferred(
+                                    _moreScreens,
+                                    (_) =>
+                                        more.DeleteAccountScreen(entityId: id),
+                                  );
                                 },
                               ),
                             ],
@@ -479,14 +629,19 @@ GoRouter appRouter(Ref ref) {
                             path: 'display',
                             builder: (context, state) {
                               final id = state.pathParameters['entityId']!;
-                              return DisplayOptionsScreen(entityId: id);
+                              return _deferred(
+                                _moreScreens,
+                                (_) => more.DisplayOptionsScreen(entityId: id),
+                              );
                             },
                           ),
                           GoRoute(
                             name: assistantProviderRoute,
                             path: 'assistant-provider',
-                            builder: (context, state) =>
-                                const AssistantProviderScreen(),
+                            builder: (context, state) => _deferred(
+                              _moreScreens,
+                              (_) => more.AssistantProviderScreen(),
+                            ),
                           ),
                         ],
                       ),
@@ -502,7 +657,10 @@ GoRouter appRouter(Ref ref) {
             path: 'assistant',
             builder: (context, state) {
               final id = state.pathParameters['entityId']!;
-              return AssistantScreen(entityId: id);
+              return _deferred(
+                _assistantScreens,
+                (_) => assistant.AssistantScreen(entityId: id),
+              );
             },
             routes: [
               GoRoute(
@@ -510,7 +668,10 @@ GoRouter appRouter(Ref ref) {
                 path: 'proposals',
                 builder: (context, state) {
                   final id = state.pathParameters['entityId']!;
-                  return AssistantProposalsScreen(entityId: id);
+                  return _deferred(
+                    _assistantScreens,
+                    (_) => assistant.AssistantProposalsScreen(entityId: id),
+                  );
                 },
               ),
             ],
@@ -520,7 +681,10 @@ GoRouter appRouter(Ref ref) {
             path: 'income/add',
             builder: (context, state) {
               final id = state.pathParameters['entityId']!;
-              return AddIncomeScreen(entityId: id);
+              return _deferred(
+                _entryScreens,
+                (_) => entry.AddIncomeScreen(entityId: id),
+              );
             },
           ),
           GoRoute(
@@ -528,7 +692,10 @@ GoRouter appRouter(Ref ref) {
             path: 'expenses/add',
             builder: (context, state) {
               final id = state.pathParameters['entityId']!;
-              return AddExpenseScreen(entityId: id);
+              return _deferred(
+                _entryScreens,
+                (_) => entry.AddExpenseScreen(entityId: id),
+              );
             },
           ),
           GoRoute(
@@ -536,7 +703,10 @@ GoRouter appRouter(Ref ref) {
             path: 'transactions',
             builder: (context, state) {
               final id = state.pathParameters['entityId']!;
-              return TransactionListScreen(entityId: id);
+              return _deferred(
+                _entryScreens,
+                (_) => entry.TransactionListScreen(entityId: id),
+              );
             },
           ),
           GoRoute(
@@ -544,7 +714,10 @@ GoRouter appRouter(Ref ref) {
             path: 'transfer',
             builder: (context, state) {
               final id = state.pathParameters['entityId']!;
-              return CreateTransferScreen(entityId: id);
+              return _deferred(
+                _entryScreens,
+                (_) => entry.CreateTransferScreen(entityId: id),
+              );
             },
           ),
         ],

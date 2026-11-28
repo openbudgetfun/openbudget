@@ -1456,6 +1456,7 @@
       }
     }
   },
+  "routerScreenLoadError": "We couldn't open this screen.",
   "routerPageNotFound": "Page not found: {error}",
   "@routerPageNotFound": {
     "placeholders": {

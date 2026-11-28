@@ -12,14 +12,16 @@ First load of `/` with an empty cache, until Flutter's `flutter-first-frame` eve
 
 | Metric                         | Value                          |
 | ------------------------------ | ------------------------------ |
-| Bytes on the wire (brotli)     | 5.38 MB                        |
-| Bytes after decoding           | 16.5 MB                        |
+| Bytes on the wire (brotli)     | 4.75 MB                        |
+| Bytes after decoding           | 14.0 MB                        |
 | Requests                       | 25                             |
+| JavaScript on the wire         | 1.38 MB                        |
 | Fonts downloaded               | 17 faces, 1.51 MB on the wire  |
-| `main.dart.js`                 | 6.81 MB, 1.94 MB gzipped       |
+| `main.dart.js`                 | 4.33 MB, 1.25 MB gzipped       |
+| Deferred parts (after sign-in) | 69 files, 2.01 MB, 645 KB gzip |
 | CanvasKit (`chromium` variant) | 5.43 MB, 1.85 MB on the wire   |
-| First frame, unthrottled       | 852 ms (median of 3)           |
-| First frame, slow 4G           | 25.5 s (median of 3)           |
+| First frame, unthrottled       | 702 ms (median of 3)           |
+| First frame, slow 4G           | 22.5 s (median of 3)           |
 | Splash painted, slow 4G        | 352 ms                         |
 | Font assets in the bundle      | 17 files, 3.16 MB (all builds) |
 
@@ -69,6 +71,13 @@ node tools/perf/web_load.mjs openbudget_app/build/web --flutter --network 4g --r
 node tools/perf/web_load.mjs openbudget_site/build/jaspr --network 4g --runs 3
 ```
 
+To see what fills `main.dart.js`, build with `--source-maps` and attribute its bytes to packages (add `--files` for single files, or `--bundle main.dart.js_1.part.js` for a deferred part):
+
+```sh
+flutter build web --release -t lib/main_prod.dart --no-web-resources-cdn --source-maps
+node tools/perf/js_size_by_package.mjs openbudget_app/build/web --top 30
+```
+
 Playwright and Chromium come preinstalled in cloud sessions; elsewhere install Playwright first (`npm i -g playwright && npx playwright install chromium`).
 
 ### API reads
@@ -81,6 +90,24 @@ dart test --run-skipped -t benchmark test/benchmark/
 The benchmark starts its own PostgreSQL cluster with `pg_stat_statements` loaded (set `OPENBUDGET_TEST_POSTGRES_BIN` when `initdb` is not on the `PATH`), seeds the household book and prints the table above as JSON. Set `OPENBUDGET_BENCH_OUT=results.json` to also write it to a file. It is tagged `benchmark` and skipped in normal runs.
 
 ## History
+
+### 2026-11-25: load screens after sign-in on demand, English-only built-in localizations
+
+| Metric                                | Before  | After   | Change |
+| ------------------------------------- | ------- | ------- | ------ |
+| `main.dart.js`                        | 6.81 MB | 4.33 MB | −36%   |
+| `main.dart.js` gzipped                | 1.94 MB | 1.25 MB | −36%   |
+| JavaScript on the wire, first load    | 2.02 MB | 1.38 MB | −31%   |
+| Web app bytes on the wire, first load | 5.38 MB | 4.75 MB | −12%   |
+| Web app bytes after decoding          | 16.5 MB | 14.0 MB | −15%   |
+| Web app first frame, slow 4G          | 25.5 s  | 22.5 s  | −12%   |
+| Web app first frame, unthrottled      | 852 ms  | 702 ms  | −18%   |
+
+What changed:
+
+- **Deferred screens.** 42 screens reached after sign-in (accounts, reports, settings and the rest of More, tax, books, the assistant, Plus, entry forms and the plan editors) now sit behind nine deferred libraries in `lib/src/routing/deferred/`. The router builds them through `DeferredScreen`, which shows a loading panel on a first visit and a problem panel with Retry if the download fails. dart2js puts each library in its own `main.dart.js_N.part.js`, so the login screen no longer waits for Solana, PointyCastle, the charts or the tax engine. Once the budget shell has drawn its first frame it preloads all nine in the background, so screens open at once in practice. Native builds load deferred libraries straight away and behave as before.
+- **Localizations.** The app shipped `GlobalMaterialLocalizations` and friends, which carry strings and date formats for every language Flutter supports, while the app is English-only. It now uses Flutter's built-in English delegates. Adding a language means adding its ARB file and switching back to the global delegates.
+- **Tooling.** `tools/perf/js_size_by_package.mjs` attributes a dart2js bundle to packages from its source map, which is how the split was chosen.
 
 ### 2026-11-25: ship only the fonts in use, gzip responses, defer the Apple script
 
@@ -106,8 +133,8 @@ What changed:
 
 The biggest remaining costs, largest first, are the candidates for the next pull requests:
 
-1. **`main.dart.js` is 6.8 MB (1.94 MB gzipped).** Every feature, Solana wallets, Plaid and RevenueCat included, loads before the first frame. Deferred imports for the features a person reaches after sign-in would cut what the login screen waits for.
-2. **CanvasKit is 1.85 MB on the wire.** A WebAssembly build (`--wasm`, skwasm) renders faster in browsers that support it. `FlutterRoute` already sends the cross-origin isolation headers it needs, but they also block the Apple and Google sign-in scripts, so that needs care.
-3. **17 font faces still load before the first frame.** Dropping weights the screens barely use, or a Latin-only subset, would save up to another megabyte.
+1. **CanvasKit is 1.85 MB on the wire.** A WebAssembly build (`--wasm`, skwasm) renders faster in browsers that support it. `FlutterRoute` already sends the cross-origin isolation headers it needs, but they also block the Apple and Google sign-in scripts, so that needs care.
+2. **17 font faces still load before the first frame (1.51 MB).** Dropping weights the screens barely use, or a Latin-only subset, would save up to another megabyte.
+3. **`main.dart.js` is still 4.33 MB.** Flutter itself and the web engine are 1.46 MB of it; the login flow's SVG stack (`flutter_svg`, `vector_graphics_compiler`, `xml`) is about 80 KB.
 4. **`entity.listSummaries` takes 31 ms and 10 statements** for one book. **`budget.getMonth` has a slow tail** (p95 136 ms).
 5. **The website** spends two round trips before first paint on `styles.css` and the font preloads; inlining the critical CSS would bring first paint forward.
