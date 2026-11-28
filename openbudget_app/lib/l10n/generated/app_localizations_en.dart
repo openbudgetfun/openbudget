@@ -3202,6 +3202,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get routerScreenLoadError => 'We couldn\'t open this screen.';
+
+  @override
   String routerPageNotFound(String error) {
     return 'Page not found: $error';
   }
