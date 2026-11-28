@@ -6966,6 +6966,24 @@ abstract class AppLocalizations {
   /// **'Enter the amount as a number, such as 4800.'**
   String get taxProfileAmountError;
 
+  /// No description provided for @taxProfileAnswerUnanswered.
+  ///
+  /// In en, this message translates to:
+  /// **'Not answered'**
+  String get taxProfileAnswerUnanswered;
+
+  /// No description provided for @taxProfileAnswerYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get taxProfileAnswerYes;
+
+  /// No description provided for @taxProfileAnswerNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get taxProfileAnswerNo;
+
   /// No description provided for @taxQCommonEntityKind.
   ///
   /// In en, this message translates to:
@@ -8399,12 +8417,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Looked at your tax summary'**
   String get assistantToolGetTaxSummary;
-
-  /// No description provided for @assistantToolListBudgets.
-  ///
-  /// In en, this message translates to:
-  /// **'Looked at your plan'**
-  String get assistantToolListBudgets;
 
   /// No description provided for @assistantToolListEntities.
   ///
