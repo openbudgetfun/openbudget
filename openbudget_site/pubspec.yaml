@@ -1,6 +1,6 @@
 name: openbudget_site
 description: The OpenBudget landing page, a static site built with Jaspr.
-version: 0.0.0
+version: 1.0.0
 publish_to: none
 
 environment:

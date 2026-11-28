@@ -1,6 +1,6 @@
 name: openbudget_core
 description: Shared Dart-only models and utilities for OpenBudget.
-version: 0.0.0
+version: 1.0.0
 publish_to: none
 
 environment:
