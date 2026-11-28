@@ -105,14 +105,15 @@ Style
   /// (docs/money-guide.md, sections 5.4 and 7.1).
   ///
   /// [taxResident] and [usPerson] are the answers recorded on the entity's
-  /// tax profile; a profile stores nothing for a false answer, so false
-  /// reads "not recorded" and the model asks. [index] defaults to the
-  /// shipped cards. Pass the time as [now] so a test can pin it.
+  /// tax profile. A stored profile keeps an explicit no and leaves an
+  /// unanswered question out, so `false` reads "no" and null reads "not
+  /// recorded" and the model asks. [index] defaults to the shipped cards.
+  /// Pass the time as [now] so a test can pin it.
   static String brief({
     required Entity entity,
     required DateTime now,
-    bool taxResident = false,
-    bool usPerson = false,
+    bool? taxResident,
+    bool? usPerson,
     KnowledgeIndex? index,
   }) {
     final country = entity.countryCode.toUpperCase();
@@ -179,8 +180,8 @@ String _taxYearLine(
 
 String _profileLine(
   String country, {
-  required bool taxResident,
-  required bool usPerson,
+  required bool? taxResident,
+  required bool? usPerson,
 }) =>
     'Profile: tax resident of $country ${_recorded(taxResident)}; '
     'US person ${_recorded(usPerson)}.';
@@ -203,7 +204,11 @@ String _kindLabel(EntityKind kind) => switch (kind) {
   EntityKind.company => 'company',
 };
 
-String _recorded(bool answer) => answer ? 'yes' : 'not recorded';
+String _recorded(bool? answer) => switch (answer) {
+  true => 'yes',
+  false => 'no',
+  null => 'not recorded',
+};
 
 String _isoDate(DateTime date) => date.toIso8601String().split('T').first;
 

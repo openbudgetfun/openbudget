@@ -3906,19 +3906,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String taxRegistrationThresholdPeriod(String period) {
-    String _temp0 = intl.Intl.selectLogic(
-      period,
-      {
-        'annualTurnover': 'a year in turnover',
-        'rolling12Months': 'in turnover over any 12 months',
-        'calendarYear': 'in turnover in a calendar year',
-        'fourConsecutiveQuarters': 'in turnover over four quarters in a row',
-        'annualTurnoverGoodsOnly': 'a year in turnover from goods',
-        'annualTurnoverSmallBusinessExclusion':
-            'a year in turnover, with a small-business exclusion',
-        'other': 'in turnover',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(period, {
+      'annualTurnover': 'a year in turnover',
+      'rolling12Months': 'in turnover over any 12 months',
+      'calendarYear': 'in turnover in a calendar year',
+      'fourConsecutiveQuarters': 'in turnover over four quarters in a row',
+      'annualTurnoverGoodsOnly': 'a year in turnover from goods',
+      'annualTurnoverSmallBusinessExclusion':
+          'a year in turnover, with a small-business exclusion',
+      'other': 'in turnover',
+    });
     return '$_temp0';
   }
 
@@ -4154,6 +4151,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get taxProfileAmountError =>
       'Enter the amount as a number, such as 4800.';
+
+  @override
+  String get taxProfileAnswerUnanswered => 'Not answered';
+
+  @override
+  String get taxProfileAnswerYes => 'Yes';
+
+  @override
+  String get taxProfileAnswerNo => 'No';
 
   @override
   String get taxQCommonEntityKind => 'Entity kind';
@@ -4975,9 +4981,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assistantToolGetTaxSummary => 'Looked at your tax summary';
-
-  @override
-  String get assistantToolListBudgets => 'Looked at your plan';
 
   @override
   String get assistantToolListEntities => 'Looked at your budgets';

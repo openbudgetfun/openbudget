@@ -65,6 +65,40 @@ void main() {
 
       expect(values['entityKind'], 'individual');
     });
+
+    test('keeps an unanswered guardrail null and a no as false', () {
+      final values = valuesFor(
+        const DeTaxProfile(
+          entityKind: EntityKind.individual,
+          taxResident: false,
+          usPerson: true,
+        ),
+      );
+
+      expect(values['taxResident'], isFalse);
+      expect(values['usPerson'], isTrue);
+    });
+
+    test('an unanswered guardrail stays null', () {
+      final values = valuesFor(
+        const DeTaxProfile(entityKind: EntityKind.individual),
+      );
+
+      expect(values['taxResident'], isNull);
+      expect(values['usPerson'], isNull);
+    });
+
+    test('lets an edit leave a guardrail unanswered', () {
+      final values = valuesFor(
+        const DeTaxProfile(
+          entityKind: EntityKind.individual,
+          taxResident: true,
+        ),
+        edits: {'taxResident': null},
+      );
+
+      expect(values['taxResident'], isNull);
+    });
   });
 
   group('taxQuestionVisible', () {
@@ -153,6 +187,22 @@ void main() {
 
       expect(hidden.errors, isEmpty);
       expect(hidden.answers, isNot(contains('children')));
+    });
+
+    test('keeps a guardrail no and unanswered apart', () {
+      final result = taxFormAnswers(
+        questions: questions,
+        values: {
+          ...blank(),
+          'taxResident': false,
+          'usPerson': null,
+        },
+        decimals: 2,
+      );
+
+      expect(result.errors, isEmpty);
+      expect(result.answers['taxResident'], isFalse);
+      expect(result.answers['usPerson'], isNull);
     });
   });
 

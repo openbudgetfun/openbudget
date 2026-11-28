@@ -61,20 +61,40 @@ void main() {
     });
   }
 
-  test('old fixtures carry no guardrail answers and default them false', () {
-    final json = jsonDecode(
-      File(
-        'test/tax/profile_fixtures/gb_individual_default.json',
-      ).readAsStringSync(),
-    ) as Map<String, Object?>;
-    expect(json.containsKey('taxResident'), isFalse);
-    expect(json.containsKey('usPerson'), isFalse);
+  test(
+    'old fixtures carry no guardrail answers and default them unanswered',
+    () {
+      final json = jsonDecode(
+        File(
+          'test/tax/profile_fixtures/gb_individual_default.json',
+        ).readAsStringSync(),
+      ) as Map<String, Object?>;
+      expect(json.containsKey('taxResident'), isFalse);
+      expect(json.containsKey('usPerson'), isFalse);
 
-    final profile = TaxProfile.fromJson(json) as GbTaxProfile;
-    expect(profile.taxResident, isFalse);
-    expect(profile.usPerson, isFalse);
-    // Re-serialising adds nothing, so the stored bytes never move.
-    expect(jsonEncode(profile.toJson()), jsonEncode(json));
+      final profile = TaxProfile.fromJson(json) as GbTaxProfile;
+      expect(profile.taxResident, isNull);
+      expect(profile.usPerson, isNull);
+      // Re-serialising adds nothing, so the stored bytes never move.
+      expect(jsonEncode(profile.toJson()), jsonEncode(json));
+    },
+  );
+
+  test('an explicit no is stored and reads back as an answer', () {
+    const profile = GbTaxProfile(
+      entityKind: EntityKind.individual,
+      taxResident: false,
+      usPerson: false,
+    );
+
+    final json = profile.toJson();
+    expect(json['taxResident'], isFalse);
+    expect(json['usPerson'], isFalse);
+
+    final restored = TaxProfile.fromJson(json) as GbTaxProfile;
+    expect(restored.taxResident, isFalse);
+    expect(restored.usPerson, isFalse);
+    expect(jsonEncode(restored.toJson()), jsonEncode(json));
   });
 
   test('guardrail answers are stored after the shared fields', () {

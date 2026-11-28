@@ -226,7 +226,7 @@ void main() {
       expect(find.text('Individual'), findsOneWidget);
 
       await profile.tapQuestion(profile.scottishTaxpayerToggle);
-      await profile.tapQuestion(profile.taxResidentToggle);
+      await profile.chooseAnswer(profile.taxResidentSelector, 'Yes');
       await profile.save();
 
       expect(repository.savedProfiles, hasLength(1));

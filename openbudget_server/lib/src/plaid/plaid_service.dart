@@ -271,16 +271,38 @@ class PlaidService {
     );
   }
 
-  /// Asks Plaid to revoke each connection's item, without deleting any rows.
+  /// Decrypts each connection's access token before the rows are deleted.
   ///
-  /// Account deletion calls this before the cascade removes the rows, so the
-  /// bank link stops working at Plaid as well. It is best effort: missing
-  /// credentials or a failed call are logged and never block the deletion.
-  static Future<void> revokeItems(
+  /// Account deletion collects the tokens inside its transaction, while the
+  /// rows are still readable, and asks Plaid to remove the items only after
+  /// that transaction commits. It is best effort: a missing key or a bad
+  /// ciphertext is logged and that item is skipped, so a broken connection
+  /// never blocks the deletion.
+  static Future<List<String>> collectAccessTokens(
     Session session,
     List<PlaidConnection> connections,
   ) async {
-    if (connections.isEmpty) return;
+    final tokens = <String>[];
+    for (final connection in connections) {
+      try {
+        tokens.add(await _openToken(session, connection));
+      } on Exception catch (error) {
+        _log.warning('Plaid item token skipped: $error');
+      }
+    }
+    return tokens;
+  }
+
+  /// Asks Plaid to revoke items whose tokens were collected earlier.
+  ///
+  /// Called after the deletion commits, so a rolled-back delete never breaks
+  /// a bank link. It is best effort: missing credentials or a failed call
+  /// are logged and never block the deletion.
+  static Future<void> removeItems(
+    Session session,
+    List<String> accessTokens,
+  ) async {
+    if (accessTokens.isEmpty) return;
     final _PlaidCredentials credentials;
     try {
       credentials = _resolveCredentials(session);
@@ -288,9 +310,8 @@ class PlaidService {
       _log.warning('Plaid item revoke skipped: $error');
       return;
     }
-    for (final connection in connections) {
+    for (final accessToken in accessTokens) {
       try {
-        final accessToken = await _openToken(session, connection);
         await _postJson(
           uri: credentials.baseUri.replace(path: '/item/remove'),
           payload: {

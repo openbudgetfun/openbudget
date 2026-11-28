@@ -265,6 +265,14 @@ void main() {
         }
       });
 
+      test('only the two guardrail questions may be unanswered', () {
+        final nullable = [
+          for (final question in commonTaxProfileQuestions)
+            if (question is TaxBoolQuestion && question.nullable) question.key,
+        ];
+        expect(nullable, ['taxResident', 'usPerson']);
+      });
+
       test('${jurisdiction.countryCode} starts with the shared questions', () {
         for (final kind in EntityKind.values) {
           final questions = pack.profileQuestions(kind);

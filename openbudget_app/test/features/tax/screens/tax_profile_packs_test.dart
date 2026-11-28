@@ -24,6 +24,8 @@ Future<void> answerQuestion(
   Object? answer,
 ) async {
   switch (question) {
+    case final TaxBoolQuestion boolQuestion when boolQuestion.nullable:
+      await setTaxTriAnswer(tester, question.key, value: answer as bool?);
     case TaxBoolQuestion():
       await setTaxSwitch(tester, question.key, value: answer! as bool);
     case final TaxChoiceQuestion choice:
@@ -123,7 +125,7 @@ void main() {
       kind: EntityKind.individual,
       answers: {
         'salesTaxRegistered': true,
-        'taxResident': true,
+        'taxResident': false,
         'usPerson': true,
         'scottishTaxpayer': true,
         'studentLoanPlan': 'plan5',
@@ -132,7 +134,7 @@ void main() {
       expected: const GbTaxProfile(
         entityKind: EntityKind.individual,
         salesTaxRegistered: true,
-        taxResident: true,
+        taxResident: false,
         usPerson: true,
         scottishTaxpayer: true,
         studentLoanPlan: GbStudentLoanPlan.plan5,
@@ -369,7 +371,7 @@ void main() {
       answers: {
         'salesTaxRegistered': true,
         'taxResident': true,
-        'usPerson': true,
+        'usPerson': null,
         'jointAssessment': true,
         'churchTax': true,
         'churchTaxState': 'hessen',
@@ -380,7 +382,6 @@ void main() {
         entityKind: EntityKind.company,
         salesTaxRegistered: true,
         taxResident: true,
-        usPerson: true,
         jointAssessment: true,
         churchTax: true,
         churchTaxState: DeBundesland.hessen,

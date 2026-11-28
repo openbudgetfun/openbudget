@@ -250,8 +250,8 @@ abstract final class AgentService {
     return MoneyGuidePrompt.brief(
       entity: entity,
       now: TaxSummaryService.now(),
-      taxResident: answers['taxResident'] == true,
-      usPerson: answers['usPerson'] == true,
+      taxResident: answers['taxResident'] as bool?,
+      usPerson: answers['usPerson'] as bool?,
     );
   }
 

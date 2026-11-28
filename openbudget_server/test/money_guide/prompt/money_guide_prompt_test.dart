@@ -90,8 +90,8 @@ final Map<String, Entity> _entities = {
 
 String _brief(
   Entity entity, {
-  bool taxResident = false,
-  bool usPerson = false,
+  bool? taxResident,
+  bool? usPerson,
 }) => MoneyGuidePrompt.brief(
   entity: entity,
   now: _now,
@@ -359,7 +359,7 @@ void main() {
       );
     });
 
-    test('the profile answers show as recorded or not recorded', () {
+    test('the profile answers show as yes, no or not recorded', () {
       expect(
         _brief(_gb),
         contains(
@@ -369,6 +369,14 @@ void main() {
       expect(
         _brief(_gb, taxResident: true, usPerson: true),
         contains('Profile: tax resident of GB yes; US person yes.'),
+      );
+      expect(
+        _brief(_gb, taxResident: false, usPerson: false),
+        contains('Profile: tax resident of GB no; US person no.'),
+      );
+      expect(
+        _brief(_gb, taxResident: false, usPerson: true),
+        contains('Profile: tax resident of GB no; US person yes.'),
       );
     });
   });

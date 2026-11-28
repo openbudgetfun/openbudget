@@ -11,9 +11,10 @@ enum TaxFieldError {
 
 /// A form's current answers, keyed by [TaxProfileQuestion.key].
 ///
-/// A yes-or-no question holds a `bool`, a pick-one question its chosen
-/// value as a `String` (null for "none"), a count or amount question the
-/// text as typed, and a month-and-day question two `int`s under
+/// A yes-or-no question holds a `bool`, or a `bool?` when the question is
+/// nullable and the user has not answered it; a pick-one question its
+/// chosen value as a `String` (null for "none"), a count or amount question
+/// the text as typed, and a month-and-day question two `int`s under
 /// `<key>Month` and `<key>Day`.
 typedef TaxFormValues = Map<String, Object?>;
 
@@ -40,7 +41,12 @@ TaxFormValues taxFormValues({
     final key = question.key;
     switch (question) {
       case TaxBoolQuestion():
-        values[key] = pick(key) == true;
+        final answer = pick(key);
+        // An unanswered nullable question stays null; a switch question is
+        // only ever on or off.
+        values[key] = question.nullable
+            ? (answer is bool ? answer : null)
+            : answer == true;
       case TaxChoiceQuestion():
         final chosen = pick(key);
         final known = question.options.any((option) => option.value == chosen);
@@ -87,7 +93,12 @@ taxFormAnswers({
   for (final question in questions) {
     final key = question.key;
     switch (question) {
-      case TaxBoolQuestion() || TaxChoiceQuestion():
+      case TaxBoolQuestion():
+        final answer = values[key];
+        answers[key] = question.nullable
+            ? (answer is bool ? answer : null)
+            : answer == true;
+      case TaxChoiceQuestion():
         answers[key] = values[key];
       case TaxMonthDayQuestion():
         answers['${key}Month'] = values['${key}Month'];

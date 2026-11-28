@@ -141,4 +141,42 @@ void main() {
     expect(updated.children, 2);
     expect(updated.taxResident, isTrue);
   });
+
+  group('guardrail answers', () {
+    test('an explicit no is stored, not dropped as unanswered', () {
+      const profile = GbTaxProfile(entityKind: EntityKind.individual);
+
+      final answered = profile.withAnswers({
+        'taxResident': false,
+        'usPerson': false,
+      });
+
+      expect(answered.taxResident, isFalse);
+      expect(answered.usPerson, isFalse);
+      expect(answered.toJson(), containsPair('taxResident', false));
+      expect(answered.toJson(), containsPair('usPerson', false));
+      expect(
+        jsonEncode(answered.toJson()),
+        isNot(equals(jsonEncode(profile.toJson()))),
+      );
+    });
+
+    test('answering nothing clears a previous answer', () {
+      const profile = GbTaxProfile(
+        entityKind: EntityKind.individual,
+        taxResident: true,
+        usPerson: false,
+      );
+
+      final cleared = profile.withAnswers({
+        'taxResident': null,
+        'usPerson': null,
+      });
+
+      expect(cleared.taxResident, isNull);
+      expect(cleared.usPerson, isNull);
+      expect(cleared.toJson(), isNot(contains('taxResident')));
+      expect(cleared.toJson(), isNot(contains('usPerson')));
+    });
+  });
 }

@@ -6,7 +6,6 @@ import 'package:openbudget_core/openbudget_core.dart';
 /// The words for one tool the assistant used while answering.
 String assistantToolLabel(AppLocalizations l10n, String toolName) =>
     switch (toolName) {
-      'list_budgets' => l10n.assistantToolListBudgets,
       'list_envelopes' => l10n.assistantToolListEnvelopes,
       'search_transactions' => l10n.assistantToolSearchTransactions,
       'get_tax_report' => l10n.assistantToolGetTaxReport,
