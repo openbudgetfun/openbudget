@@ -8,3 +8,4 @@
 20261113100308076-multichain-wallet-schema
 20261113132502011-journal-line-order
 20261114062237394-money-guide-citations
+20261128024858928-wallet-preview-rate-window
