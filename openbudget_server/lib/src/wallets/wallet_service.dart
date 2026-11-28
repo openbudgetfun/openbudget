@@ -41,6 +41,9 @@ abstract final class WalletService {
   static const _maxTags = 20;
   static const _maxTagLength = 50;
 
+  /// Wallet previews one user may read in each one-hour fixed window.
+  static const _previewLimit = 20;
+
   static WalletProviderFactory _providerFactory = _registryProvider;
   static WalletProviderRegistry _registry =
       WalletProviderRegistry.defaultRegistry;
@@ -53,9 +56,6 @@ abstract final class WalletService {
   static Duration manualSyncThrottle = const Duration(minutes: 5);
 
   static WalletChangePublisher _publisher = EntityRealtimeNotifier.notify;
-  static final _previewRateLimiter = _PreviewRateLimiter(
-    clock: () => clock(),
-  );
 
   /// The chain provider used by [connect], [sync] and [preview].
   @visibleForTesting
@@ -88,14 +88,15 @@ abstract final class WalletService {
     _publisher = publisher;
   }
 
-  /// Restores the production registry, provider and message bus, and forgets
-  /// the in-memory preview rate windows.
+  /// Restores the production registry, provider and message bus.
+  ///
+  /// The preview window is not part of this state: it lives in PostgreSQL, so
+  /// a restarted server keeps each user's hour exactly where it was.
   @visibleForTesting
   static void resetForTests() {
     _providerFactory = _registryProvider;
     _registry = WalletProviderRegistry.defaultRegistry;
     _publisher = EntityRealtimeNotifier.notify;
-    _previewRateLimiter.reset();
     clock = () => DateTime.now().toUtc();
   }
 
@@ -613,9 +614,7 @@ abstract final class WalletService {
       );
     }
 
-    if (!_previewRateLimiter.allow(EntityAccess.userId(session))) {
-      throw WalletPreviewRateLimitedException();
-    }
+    await _requirePreviewAllowance(session, EntityAccess.userId(session));
 
     final home = supported.first;
     final provider = _providerFactory(session, home);
@@ -646,6 +645,48 @@ abstract final class WalletService {
       networks: rows,
       warnings: warnings,
     );
+  }
+
+  /// Counts one preview against [userId]'s fixed hour and refuses the 21st.
+  ///
+  /// One statement opens the window and counts the read, so two concurrent
+  /// previews, or two server processes, cannot both spend the last slot: the
+  /// row's unique `userId` key makes PostgreSQL serialise them. A row whose
+  /// window opened an hour or more ago restarts instead of growing, so an
+  /// idle hour is never carried over.
+  static Future<void> _requirePreviewAllowance(
+    Session session,
+    UuidValue userId,
+  ) async {
+    final rows = await session.db.unsafeQuery(
+      '''
+INSERT INTO wallet_preview_rate_window
+  ("userId", "windowStart", "requestCount")
+VALUES (@userId::uuid, @now::timestamp, 1)
+ON CONFLICT ("userId") DO UPDATE SET
+  "windowStart" = CASE
+    WHEN @now::timestamp - wallet_preview_rate_window."windowStart"
+      >= interval '1 hour'
+    THEN @now::timestamp
+    ELSE wallet_preview_rate_window."windowStart"
+  END,
+  "requestCount" = CASE
+    WHEN @now::timestamp - wallet_preview_rate_window."windowStart"
+      >= interval '1 hour'
+    THEN 1
+    ELSE wallet_preview_rate_window."requestCount" + 1
+  END
+RETURNING "requestCount"''',
+      parameters: QueryParameters.named({
+        'userId': userId.toString(),
+        'now': clock().toUtc().toIso8601String(),
+      }),
+    );
+    // The upsert always returns its row; a refusal is still counted so the
+    // hour cannot be probed for free.
+    if ((rows.single.first! as int) > _previewLimit) {
+      throw WalletPreviewRateLimitedException();
+    }
   }
 
   /// The networks that can be read now: each one's family has a registered
@@ -2452,38 +2493,6 @@ final class _TaxBucket {
   BigInt realized = BigInt.zero;
   BigInt proceeds = BigInt.zero;
   BigInt costBasis = BigInt.zero;
-}
-
-/// A fixed-window, in-memory limit on wallet previews: 20 per hour per user.
-///
-/// Each user gets their own window, so one busy client cannot lock out
-/// another. The window resets after it opens; a server restart forgets it,
-/// matching the MCP rate limiter's trade-off.
-final class _PreviewRateLimiter {
-  _PreviewRateLimiter({DateTime Function()? clock})
-    : _clock = clock ?? DateTime.now;
-
-  static const _limit = 20;
-  static const _window = Duration(hours: 1);
-
-  final DateTime Function() _clock;
-  final Map<UuidValue, ({DateTime openedAt, int count})> _windows = {};
-
-  /// Returns true when [userId] may read another preview now.
-  bool allow(UuidValue userId) {
-    final now = _clock();
-    final current = _windows[userId];
-    if (current == null || now.difference(current.openedAt) >= _window) {
-      _windows[userId] = (openedAt: now, count: 1);
-      return true;
-    }
-    if (current.count >= _limit) return false;
-    _windows[userId] = (openedAt: current.openedAt, count: current.count + 1);
-    return true;
-  }
-
-  /// Forgets every window.
-  void reset() => _windows.clear();
 }
 
 final class _SyncConflict implements Exception {

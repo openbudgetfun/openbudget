@@ -22,14 +22,15 @@ void main() {
   String tableSql(String name) => tables.singleWhere((m) => m[1] == name)[2]!;
 
   test(
-    'the schema reset, multichain, journal order and citations migrations, '
-    'in order',
+    'the schema reset, multichain, journal order, citations and preview '
+    'window migrations, in order',
     () {
-      expect(migrations, hasLength(4));
+      expect(migrations, hasLength(5));
       expect(migrations[0].path, endsWith('schema-reset'));
       expect(migrations[1].path, endsWith('multichain-wallet-schema'));
       expect(migrations[2].path, endsWith('journal-line-order'));
       expect(migrations[3].path, endsWith('money-guide-citations'));
+      expect(migrations[4].path, endsWith('wallet-preview-rate-window'));
     },
   );
 
@@ -195,6 +196,25 @@ void main() {
           'lineNumber) index',
     );
     expect(migrationSql, isNot(contains('DROP TABLE')));
+  });
+
+  test('the preview window table is in the newest definition', () {
+    expect(
+      tableSql('wallet_preview_rate_window'),
+      contains('"requestCount" bigint NOT NULL'),
+    );
+    expect(
+      tableSql('wallet_preview_rate_window'),
+      contains('"windowStart" timestamp without time zone NOT NULL'),
+    );
+    expect(
+      sql,
+      contains(
+        'CREATE UNIQUE INDEX "wallet_preview_rate_window_user_unique_idx" ON '
+        '"wallet_preview_rate_window" USING btree ("userId");',
+      ),
+      reason: 'the unique userId row is what ON CONFLICT serialises on',
+    );
   });
 
   test('all OpenBudget primary keys are UUIDs', () {
