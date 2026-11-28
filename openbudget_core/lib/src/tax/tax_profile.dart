@@ -13,8 +13,8 @@ abstract base class TaxProfile {
   const TaxProfile({
     required this.entityKind,
     this.salesTaxRegistered = false,
-    this.taxResident = false,
-    this.usPerson = false,
+    this.taxResident,
+    this.usPerson,
   });
 
   final EntityKind entityKind;
@@ -22,15 +22,16 @@ abstract base class TaxProfile {
   /// Whether the books are registered for VAT or sales tax.
   final bool salesTaxRegistered;
 
-  /// Whether the taxpayer is a tax resident of [jurisdiction]. The
-  /// tax-planning guardrails require the answer before any lever is
-  /// suggested.
-  final bool taxResident;
+  /// Whether the taxpayer is a tax resident of [jurisdiction], or null while
+  /// the question is unanswered. The tax-planning guardrails require an
+  /// answer before any lever is suggested, and a stored `false` is an answer
+  /// while null is not.
+  final bool? taxResident;
 
   /// Whether the taxpayer is a US person for the information rules that
-  /// follow from it. Asked in every country, because US persons owe US
-  /// filings wherever they live.
-  final bool usPerson;
+  /// follow from it, or null while the question is unanswered. Asked in
+  /// every country, because US persons owe US filings wherever they live.
+  final bool? usPerson;
 
   TaxJurisdiction get jurisdiction;
 
@@ -74,15 +75,16 @@ abstract base class TaxProfile {
   /// the jurisdiction, the kind of books, sales-tax registration and the
   /// two guardrail answers. Each profile spreads this first in its
   /// [toJson], so this order is the stored order. The guardrail answers
-  /// joined the stored shape after the first profiles were saved, so they
-  /// are omitted while false and old profiles keep their exact bytes.
+  /// joined the stored shape after the first profiles were saved, so an
+  /// unanswered one is omitted and old profiles keep their exact bytes;
+  /// an explicit no is stored as `false` and reads back as answered.
   @protected
   Map<String, Object?> baseJson() => {
     'jurisdiction': jurisdiction.countryCode,
     'entityKind': entityKind.name,
     'salesTaxRegistered': salesTaxRegistered,
-    'taxResident': ?(taxResident ? true : null),
-    'usPerson': ?(usPerson ? true : null),
+    'taxResident': ?taxResident,
+    'usPerson': ?usPerson,
   };
 }
 
@@ -92,8 +94,8 @@ abstract base class TaxProfile {
 typedef TaxProfileCommonFields = ({
   EntityKind entityKind,
   bool salesTaxRegistered,
-  bool taxResident,
-  bool usPerson,
+  bool? taxResident,
+  bool? usPerson,
 });
 
 /// Reads [TaxProfileCommonFields] from a stored profile map. Each pack's
@@ -102,8 +104,8 @@ TaxProfileCommonFields taxProfileCommonJson(Map<String, Object?> json) => (
   entityKind: taxProfileRequiredEnum(json, 'entityKind', EntityKind.values),
   salesTaxRegistered:
       taxProfileField<bool>(json, 'salesTaxRegistered') ?? false,
-  taxResident: taxProfileField<bool>(json, 'taxResident') ?? false,
-  usPerson: taxProfileField<bool>(json, 'usPerson') ?? false,
+  taxResident: taxProfileField<bool>(json, 'taxResident'),
+  usPerson: taxProfileField<bool>(json, 'usPerson'),
 );
 
 // Strict readers for stored and client-supplied profile maps. Each one
@@ -197,6 +199,10 @@ sealed class TaxProfileQuestion {
 }
 
 /// A yes-or-no question, stored as a JSON boolean.
+///
+/// A [nullable] question can also be left unanswered, stored as nothing;
+/// the form then offers "not answered" alongside yes and no, and a stored
+/// `false` stays distinct from silence.
 final class TaxBoolQuestion extends TaxProfileQuestion {
   const TaxBoolQuestion({
     required super.key,
@@ -204,7 +210,11 @@ final class TaxBoolQuestion extends TaxProfileQuestion {
     super.helpKey,
     super.appliesTo,
     super.visibleWhen,
+    this.nullable = false,
   });
+
+  /// Whether the question may be left unanswered, stored as a JSON null.
+  final bool nullable;
 }
 
 /// One option of a [TaxChoiceQuestion].
@@ -339,11 +349,13 @@ const commonTaxProfileQuestions = <TaxProfileQuestion>[
     key: 'taxResident',
     labelKey: 'taxQCommonTaxResident',
     helpKey: 'taxQCommonTaxResidentHelp',
+    nullable: true,
   ),
   TaxBoolQuestion(
     key: 'usPerson',
     labelKey: 'taxQCommonUsPerson',
     helpKey: 'taxQCommonUsPersonHelp',
+    nullable: true,
   ),
 ];
 

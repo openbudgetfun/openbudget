@@ -12,10 +12,26 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 Key taxQuestionFieldKey(String questionKey) =>
     ValueKey('tax-question-$questionKey');
 
+/// The key of one option of a nullable yes-or-no question, so tests and page
+/// objects can choose it without its wording. [option] is one of
+/// [taxQuestionNotAnswered], [taxQuestionYes] or [taxQuestionNo].
+Key taxQuestionOptionKey(String questionKey, String option) =>
+    ValueKey('tax-question-$questionKey-$option');
+
+/// The value of a nullable question that has not been answered.
+const taxQuestionNotAnswered = '';
+
+/// The value of a nullable question answered yes.
+const taxQuestionYes = 'yes';
+
+/// The value of a nullable question answered no.
+const taxQuestionNo = 'no';
+
 /// The control for one tax profile question: a switch for yes or no, a
-/// dropdown for a choice, a text field for a count or an amount, and a pair
-/// of dropdowns for a day of the year. Wording comes from the question's
-/// `AppLocalizations` keys through [taxQuestionLabel].
+/// three-way selector for a yes-or-no question that may be left unanswered,
+/// a dropdown for a choice, a text field for a count or an amount, and a
+/// pair of dropdowns for a day of the year. Wording comes from the
+/// question's `AppLocalizations` keys through [taxQuestionLabel].
 class TaxQuestionField extends HookWidget {
   const TaxQuestionField({
     required this.question,
@@ -54,11 +70,28 @@ class TaxQuestionField extends HookWidget {
         ? null
         : taxQuestionLabel(l10n, question.helpKey!);
     final fieldKey = taxQuestionFieldKey(question.key);
+    final boolAnswer = switch (values[question.key]) {
+      final bool answer => answer,
+      _ => null,
+    };
 
     return switch (question) {
+      final TaxBoolQuestion boolQuestion when boolQuestion.nullable => _Padded(
+        enabled: padded,
+        child: _Described(
+          help: help,
+          child: _NullableBoolQuestion(
+            fieldKey: fieldKey,
+            questionKey: question.key,
+            label: label,
+            value: boolAnswer,
+            onChanged: (value) => onChanged(question.key, value),
+          ),
+        ),
+      ),
       TaxBoolQuestion() => SwitchListTile(
         key: fieldKey,
-        value: values[question.key] == true,
+        value: boolAnswer == true,
         onChanged: (value) => onChanged(question.key, value),
         title: Text(label),
         subtitle: help == null ? null : Text(help),
@@ -149,6 +182,92 @@ class TaxQuestionField extends HookWidget {
 }
 
 const _noneValue = '';
+
+/// A yes-or-no question that may be left unanswered: "Not answered", "Yes"
+/// and "No" as one selector, so a stored no stays an answer.
+class _NullableBoolQuestion extends HookWidget {
+  const _NullableBoolQuestion({
+    required this.fieldKey,
+    required this.questionKey,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final Key fieldKey;
+  final String questionKey;
+  final String label;
+  final bool? value;
+  final ValueChanged<bool?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    // Three labelled segments stop fitting side by side once the text is
+    // about one and a half times larger.
+    final stacked = _stackedControls(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.ob.mutedInk,
+          ),
+        ),
+        const SizedBox(height: SpacingTokens.xs),
+        SegmentedButton<String>(
+          key: fieldKey,
+          direction: stacked ? Axis.vertical : Axis.horizontal,
+          showSelectedIcon: false,
+          segments: [
+            ButtonSegment(
+              value: taxQuestionNotAnswered,
+              label: Text(
+                l10n.taxProfileAnswerUnanswered,
+                key: taxQuestionOptionKey(questionKey, taxQuestionNotAnswered),
+              ),
+            ),
+            ButtonSegment(
+              value: taxQuestionYes,
+              label: Text(
+                l10n.taxProfileAnswerYes,
+                key: taxQuestionOptionKey(questionKey, taxQuestionYes),
+              ),
+            ),
+            ButtonSegment(
+              value: taxQuestionNo,
+              label: Text(
+                l10n.taxProfileAnswerNo,
+                key: taxQuestionOptionKey(questionKey, taxQuestionNo),
+              ),
+            ),
+          ],
+          selected: {
+            switch (value) {
+              true => taxQuestionYes,
+              false => taxQuestionNo,
+              null => taxQuestionNotAnswered,
+            },
+          },
+          onSelectionChanged: (selection) =>
+              onChanged(switch (selection.first) {
+                taxQuestionYes => true,
+                taxQuestionNo => false,
+                _ => null,
+              }),
+        ),
+      ],
+    );
+  }
+}
+
+/// Whether controls with side-by-side labels no longer fit at the current
+/// text scale.
+bool _stackedControls(BuildContext context) =>
+    MediaQuery.textScalerOf(context).scale(16) > 24;
 
 /// The padding every control but a switch sits in, matching a switch row's.
 class _Padded extends HookWidget {
@@ -279,7 +398,7 @@ class _MonthDayQuestion extends HookWidget {
     );
     // Two dropdowns stop fitting side by side once the text is about
     // one and a half times larger.
-    final stacked = MediaQuery.textScalerOf(context).scale(16) > 24;
+    final stacked = _stackedControls(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

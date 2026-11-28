@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_question_field.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 
@@ -481,6 +482,53 @@ void main() {
       expect(saved['taxResident'], isTrue);
       expect(saved['usPerson'], isTrue);
       expect(saved['scottishTaxpayer'], isTrue);
+    });
+
+    testWidgets('shows a stored no as No and leaves an unanswered question '
+        'alone', (tester) async {
+      final fake = FakeTaxRepository(
+        profile: taxProfileRecord(
+          profile: const GbTaxProfile(
+            entityKind: EntityKind.individual,
+            taxResident: false,
+          ),
+        ),
+      );
+      await tester.pumpWidget(buildTaxProfileApp(fake));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<SegmentedButton<String>>(taxField('taxResident'))
+            .selected,
+        {taxQuestionNo},
+      );
+      expect(
+        tester.widget<SegmentedButton<String>>(taxField('usPerson')).selected,
+        {taxQuestionNotAnswered},
+      );
+
+      await saveTaxProfile(tester);
+
+      final saved = lastSavedTaxProfile(fake);
+      expect(saved['taxResident'], isFalse);
+      expect(saved, isNot(contains('usPerson')));
+    });
+
+    testWidgets('answers guardrail questions from the tri-state selector', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(buildTaxProfileApp(fake));
+      await tester.pumpAndSettle();
+
+      await setTaxTriAnswer(tester, 'taxResident', value: false);
+      await setTaxTriAnswer(tester, 'usPerson', value: true);
+      await saveTaxProfile(tester);
+
+      final saved = lastSavedTaxProfile(fake);
+      expect(saved['taxResident'], isFalse);
+      expect(saved['usPerson'], isTrue);
     });
 
     testWidgets('asks the residence and US-person questions in every country', (

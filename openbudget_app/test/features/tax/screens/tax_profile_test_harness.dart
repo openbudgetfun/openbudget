@@ -65,6 +65,12 @@ String taxText(String key) =>
 Finder taxField(String questionKey) =>
     find.byKey(taxQuestionFieldKey(questionKey));
 
+/// The tri-state option of a nullable yes-or-no question stored under
+/// [questionKey]: [taxQuestionNotAnswered], [taxQuestionYes] or
+/// [taxQuestionNo].
+Finder taxTriOption(String questionKey, String option) =>
+    find.byKey(taxQuestionOptionKey(questionKey, option));
+
 /// Scrolls the form so [finder] is on screen, from the top, because the
 /// list builds only the rows near the window.
 Future<void> revealTaxField(WidgetTester tester, Finder finder) async {
@@ -85,6 +91,27 @@ Future<void> setTaxSwitch(
   final tile = tester.widget<SwitchListTile>(taxField(questionKey));
   if (tile.value == value) return;
   await tester.tap(taxField(questionKey));
+  await tester.pumpAndSettle();
+}
+
+/// Selects [value] on a nullable yes-or-no question, where null is
+/// "Not answered".
+Future<void> setTaxTriAnswer(
+  WidgetTester tester,
+  String questionKey, {
+  required bool? value,
+}) async {
+  await revealTaxField(tester, taxField(questionKey));
+  final option = switch (value) {
+    true => taxQuestionYes,
+    false => taxQuestionNo,
+    null => taxQuestionNotAnswered,
+  };
+  final button = tester.widget<SegmentedButton<String>>(
+    taxField(questionKey),
+  );
+  if (button.selected.contains(option)) return;
+  await tester.tap(taxTriOption(questionKey, option));
   await tester.pumpAndSettle();
 }
 

@@ -1092,7 +1092,9 @@ class TaxProfilePage {
   /// only entity-level control left on the form.
   Finder get entityField => question('entityKind');
   Finder get scottishTaxpayerToggle => question('scottishTaxpayer');
-  Finder get taxResidentToggle => question('taxResident');
+
+  /// The tri-state selector for the residence guardrail.
+  Finder get taxResidentSelector => question('taxResident');
   Finder get studentLoanField => question('studentLoanPlan');
   Finder get annualRentField => question('annualRentMinor');
   Finder get saveButton => find.text('Save profile');
@@ -1106,6 +1108,18 @@ class TaxProfilePage {
     );
     await tester.pumpAndSettle();
     await tester.tap(field);
+    await tester.pumpAndSettle();
+  }
+
+  /// Scrolls a tri-state question into view and chooses [option].
+  Future<void> chooseAnswer(Finder field, String option) async {
+    await tester.scrollUntilVisible(
+      field,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.descendant(of: field, matching: find.text(option)));
     await tester.pumpAndSettle();
   }
 

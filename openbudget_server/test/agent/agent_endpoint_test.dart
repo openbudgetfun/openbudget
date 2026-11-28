@@ -311,6 +311,40 @@ void main() {
         expect(messages[2]['role'], 'user');
       });
 
+      test('then a stored no reaches the brief as an answer', () async {
+        await subscribe(rawSession, userId);
+        final entity = await createEntity();
+        await endpoints.tax.saveProfile(
+          authedSession,
+          entity.id!,
+          'GB',
+          EntityKind.individual.name,
+          jsonEncode(
+            const GbTaxProfile(
+              entityKind: EntityKind.individual,
+              taxResident: false,
+              usPerson: true,
+            ).toJson(),
+          ),
+        );
+        useMock([_textResponse('Fine.')]);
+        final previousClock = TaxSummaryService.clock;
+        TaxSummaryService.clock = () => DateTime.utc(2026, 11, 14);
+        addTearDown(() => TaxSummaryService.clock = previousClock);
+
+        await endpoints.agent
+            .chat(authedSession, entity.id!, null, 'Hi')
+            .toList();
+
+        final body = jsonDecode(requests.single.body) as Map<String, Object?>;
+        final messages = (body['messages']! as List<Object?>)
+            .cast<Map<String, Object?>>();
+        expect(
+          messages[1]['content'],
+          contains('Profile: tax resident of GB no; US person yes.'),
+        );
+      });
+
       test(
         'then a tool call is persisted and answered before the reply',
         () async {

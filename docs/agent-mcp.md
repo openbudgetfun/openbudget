@@ -87,7 +87,7 @@ sees only the five read tools; calling a propose tool returns a tool error.
 
 | Tool                               | Access  | What it does                                                                     |
 | ---------------------------------- | ------- | -------------------------------------------------------------------------------- |
-| `list_budgets`                     | read    | Lists the budgets you own, with their currencies.                                |
+| `list_entities`                    | read    | Lists the budgets you own, with their currencies.                                |
 | `list_envelopes`                   | read    | Lists one budget's envelopes with this month's assigned, activity and available. |
 | `search_transactions`              | read    | Searches one budget's transactions by text, date range or both.                  |
 | `get_tax_report`                   | read    | Computes a budget's tax report for a tax year, with sources and assumptions.     |
